@@ -104,25 +104,25 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 			outputTypes["fasta"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", false);
+			fastafile = validParameter.valid(parameters, "fasta");
 			if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { fastaFileNames.push_back(fastafile); m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else { 
-				m->splitAtDash(fastafile, fastaFileNames);
+				util.splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = m->getFastaFile(); 
+						fastaFileNames[i] = current->getFastaFile(); 
 						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -132,63 +132,23 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						if (inputDir != "") {
-							string path = m->hasPath(fastaFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-						}
-		
-						ifstream in;
-						bool ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}else { m->setFastaFile(fastaFileNames[i]); }
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
+                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 				
 				//make sure there is at least one valid file left
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
             
-            string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-            m->setProcessors(temp);
-            m->mothurConvert(temp, processors);
+            string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+            processors = current->setProcessors(temp);
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 		}
@@ -209,26 +169,26 @@ int DegapSeqsCommand::execute(){
 			m->mothurOut("Degapping sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			string tempOutputDir = outputDir;
-			if (outputDir == "") { tempOutputDir = m->hasPath(fastaFileNames[s]); }
+			if (outputDir == "") { tempOutputDir = util.hasPath(fastaFileNames[s]); }
             map<string, string> variables; 
-            variables["[filename]"] = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+            variables["[filename]"] = tempOutputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
 			string degapFile = getOutputFileName("fasta", variables);
             outputNames.push_back(degapFile); outputTypes["fasta"].push_back(degapFile);
             
-            int start = time(NULL);
+            long start = time(NULL);
 			
             int numSeqs = createProcesses(fastaFileNames[s], degapFile);
 			
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to degap " + toString(numSeqs) + " sequences.\n\n");
             
-			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
 		}
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -250,12 +210,11 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
     try{
         long long numSeqs = 0;
         vector<int> processIDS; processIDS.resize(0);
-        bool recalc = false;
         vector<linePair> lines;
         vector<unsigned long long> positions;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(filename, processors);
+        positions = util.divideFile(filename, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
         int process = 1;
         
@@ -267,12 +226,12 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
                 processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                 process++;
             }else if (pid == 0){
-                numSeqs = driver(lines[process], filename, outputFileName + toString(m->mothurGetpid(process)) + ".temp");
+                numSeqs = driver(lines[process], filename, outputFileName + toString(toString(process)) + ".temp");
                 
                 //pass numSeqs to parent
                 ofstream out;
-                string tempFile = outputFileName + toString(m->mothurGetpid(process)) + ".num.temp";
-                m->openOutputFile(tempFile, out);
+                string tempFile = outputFileName + toString(toString(process)) + ".num.temp";
+                util.openOutputFile(tempFile, out);
                 out << numSeqs << endl;
                 out.close();
                 
@@ -293,12 +252,12 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
         for (int i = 0; i < processIDS.size(); i++) {
             ifstream in;
             string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
-            m->openInputFile(tempFile, in);
+            util.openInputFile(tempFile, in);
             if (!in.eof()) { int tempNum = 0; in >> tempNum; numSeqs += tempNum; }
-            in.close(); m->mothurRemove(tempFile);
+            in.close(); util.mothurRemove(tempFile);
             
-            m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-            m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
+            util.appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
+            util.mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
         }
     #else
         //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -360,8 +319,8 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
         
         
         for (int i = 1; i < processors; i++) {
-            m->appendFiles((outputFileName + toString(i) + ".temp"), outputFileName);
-            m->mothurRemove((outputFileName + toString(i) + ".temp"));
+            util.appendFiles((outputFileName + toString(i) + ".temp"), outputFileName);
+            util.mothurRemove((outputFileName + toString(i) + ".temp"));
         }
     #endif
        
@@ -378,19 +337,19 @@ int DegapSeqsCommand::driver(linePair filePos, string filename, string outputFil
         int numSeqs = 0;
         
         ifstream inFASTA;
-        m->openInputFile(filename, inFASTA);
+        util.openInputFile(filename, inFASTA);
         
         inFASTA.seekg(filePos.start);
         
-        if (filePos.start == 0) {  m->zapGremlins(inFASTA); m->gobble(inFASTA); }
+        if (filePos.start == 0) {  util.zapGremlins(inFASTA); util.gobble(inFASTA); }
         
         ofstream outFASTA;
-        m->openOutputFile(outputFileName, outFASTA);
+        util.openOutputFile(outputFileName, outFASTA);
         
         while(!inFASTA.eof()){
             if (m->getControl_pressed()) {  break; }
             
-            Sequence currSeq(inFASTA);  m->gobble(inFASTA);
+            Sequence currSeq(inFASTA);  util.gobble(inFASTA);
             if (currSeq.getName() != "") {
                 outFASTA << ">" << currSeq.getName() << endl;
                 outFASTA << currSeq.getUnaligned() << endl;

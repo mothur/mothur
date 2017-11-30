@@ -69,6 +69,7 @@ struct filterData {
     char trump;
     float soft;
     bool vertical;
+    Utils util;
 	
 	filterData(){}
 	filterData(string fn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength, char tr, bool vert, float so, string ha, int tid) {
@@ -96,6 +97,7 @@ struct filterRunData {
     MothurOut* m;
     string filename;
     string filter, outputFilename;
+    Utils util;
 	
 	filterRunData(){}
 	filterRunData(string f, string fn, string ofn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength) {

@@ -18,10 +18,9 @@ class ListVector : public DataVector {
 public:
 	ListVector();
 	ListVector(int);
-//	ListVector(const ListVector&);
-	ListVector(string, vector<string>);
-	ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels) {};
-	ListVector(ifstream&);
+	ListVector(string, vector<string>, string&);
+	ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), currentLabels(lv.currentLabels), otuTag(lv.otuTag) {};
+	ListVector(ifstream&, string&, string&);
 	~ListVector(){};
 	
 	int getNumBins()							{	return numBins;		}
@@ -52,6 +51,7 @@ private:
 	int numBins;
 	int numSeqs;
     vector<string> binLabels;
+    string otuTag;
 
 };
 

@@ -24,7 +24,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size,
         for (int i = 0; i < namesSeqs.size(); i++) {  doNotIncludeTotals[namesSeqs[i]] = 0; }
     
         for (int i = 0; i < Groups.size(); i++) {
-            if (m->inUsersGroups(Groups[i], mGroups)) {
+            if (util.inUsersGroups(Groups[i], mGroups)) {
                 if (m->getControl_pressed()) { break; }
         
                 int thisSize = ct->getGroupCount(Groups[i]);
@@ -57,7 +57,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size,
         } 
         
        
-        newTree = new Tree(newCt);
+        newTree = new Tree(newCt, mGroups);
         newTree->getCopy(T, true);
         
         return newTree;

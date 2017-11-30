@@ -126,14 +126,14 @@ RenameFileCommand::RenameFileCommand(string option)  {
             outputTypes["summary"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.validFile(parameters, "inputdir", false);
+            string inputDir = validParameter.valid(parameters, "inputdir");
             if (inputDir == "not found"){	inputDir = "";		}
             else {
                 string path;
                 it = parameters.find("phylip");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
                 }
@@ -141,7 +141,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("column");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["column"] = inputDir + it->second;		}
                 }
@@ -149,7 +149,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("fasta");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
                 }
@@ -157,7 +157,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("list");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["list"] = inputDir + it->second;		}
                 }
@@ -165,7 +165,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("rabund");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
                 }
@@ -173,7 +173,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("sabund");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
                 }
@@ -181,7 +181,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("name");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["name"] = inputDir + it->second;		}
                 }
@@ -189,7 +189,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("group");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["group"] = inputDir + it->second;		}
                 }
@@ -197,7 +197,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("design");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["design"] = inputDir + it->second;		}
                 }
@@ -206,7 +206,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("tree");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["tree"] = inputDir + it->second;		}
                 }
@@ -214,7 +214,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("shared");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["shared"] = inputDir + it->second;		}
                 }
@@ -222,7 +222,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("input");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["input"] = inputDir + it->second;		}
                 }
@@ -230,7 +230,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("count");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["count"] = inputDir + it->second;		}
                 }
@@ -238,7 +238,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("relabund");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
                 }
@@ -246,7 +246,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("fasta");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
                 }
@@ -254,7 +254,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("qfile");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
                 }
@@ -262,7 +262,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("sff");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["sff"] = inputDir + it->second;		}
                 }
@@ -270,7 +270,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("oligos");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
                 }
@@ -278,7 +278,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("accnos");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
                 }
@@ -286,7 +286,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("taxonomy");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
                 }
@@ -294,7 +294,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("flow");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["flow"] = inputDir + it->second;		}
                 }
@@ -302,7 +302,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("biom");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["biom"] = inputDir + it->second;		}
                 }
@@ -310,7 +310,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("summary");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["summary"] = inputDir + it->second;		}
                 }
@@ -318,7 +318,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("file");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["file"] = inputDir + it->second;		}
                 }
@@ -326,150 +326,150 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 it = parameters.find("constaxonomy");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
                 }
             }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){  outputDir = ""; }
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){  outputDir = ""; }
             
             int numFiles = 0;
             //check for parameters
-            phylipfile = validParameter.validFile(parameters, "phylip", true);
+            phylipfile = validParameter.validFile(parameters, "phylip");
             if (phylipfile == "not open") { m->mothurOut("Ignoring: " + parameters["phylip"]); m->mothurOutEndLine(); phylipfile = ""; }
             else if (phylipfile == "not found") {  phylipfile = "";  }
             if (phylipfile != "") { numFiles++; }
             
-            columnfile = validParameter.validFile(parameters, "column", true);
+            columnfile = validParameter.validFile(parameters, "column");
             if (columnfile == "not open") { m->mothurOut("Ignoring: " + parameters["column"]); m->mothurOutEndLine(); columnfile = ""; }
             else if (columnfile == "not found") {  columnfile = "";  }
             if (columnfile != "") { numFiles++; }
             
-            listfile = validParameter.validFile(parameters, "list", true);
+            listfile = validParameter.validFile(parameters, "list");
             if (listfile == "not open") { m->mothurOut("Ignoring: " + parameters["list"]); m->mothurOutEndLine(); listfile = ""; }
             else if (listfile == "not found") {  listfile = "";  }
             if (listfile != "") { numFiles++; }
             
-            rabundfile = validParameter.validFile(parameters, "rabund", true);
+            rabundfile = validParameter.validFile(parameters, "rabund");
             if (rabundfile == "not open") { m->mothurOut("Ignoring: " + parameters["rabund"]); m->mothurOutEndLine(); rabundfile = ""; }
             else if (rabundfile == "not found") {  rabundfile = "";  }
             if (rabundfile != "") { numFiles++; }
             
-            sabundfile = validParameter.validFile(parameters, "sabund", true);
+            sabundfile = validParameter.validFile(parameters, "sabund");
             if (sabundfile == "not open") { m->mothurOut("Ignoring: " + parameters["sabund"]); m->mothurOutEndLine(); sabundfile = ""; }
             else if (sabundfile == "not found") {  sabundfile = "";  }
             if (sabundfile != "") { numFiles++; }
             
-            namefile = validParameter.validFile(parameters, "name", true);
+            namefile = validParameter.validFile(parameters, "name");
             if (namefile == "not open") { m->mothurOut("Ignoring: " + parameters["name"]); m->mothurOutEndLine(); namefile = ""; }
             else if (namefile == "not found") {  namefile = "";  }
             if (namefile != "") { numFiles++; }
             
-            groupfile = validParameter.validFile(parameters, "group", true);
+            groupfile = validParameter.validFile(parameters, "group");
             if (groupfile == "not open") { m->mothurOut("Ignoring: " + parameters["group"]); m->mothurOutEndLine(); groupfile = ""; }
             else if (groupfile == "not found") {  groupfile = "";  }
             if (groupfile != "") { numFiles++; }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
             if (countfile == "not open") { m->mothurOut("Ignoring: " + parameters["count"]); m->mothurOutEndLine(); countfile = ""; }
             else if (countfile == "not found") {  countfile = "";  }
             if (countfile != "") { numFiles++; }
             
-            designfile = validParameter.validFile(parameters, "design", true);
+            designfile = validParameter.validFile(parameters, "design");
             if (designfile == "not open") { m->mothurOut("Ignoring: " + parameters["design"]); m->mothurOutEndLine(); designfile = ""; }
             else if (designfile == "not found") {  designfile = "";  }
             if (designfile != "") { numFiles++; }
             
-            inputfile = validParameter.validFile(parameters, "input", true);
+            inputfile = validParameter.validFile(parameters, "input");
             if (inputfile == "not open") { m->mothurOut("Ignoring: " + parameters["input"]); m->mothurOutEndLine(); inputfile = ""; }
             else if (inputfile == "not found") {  inputfile = "";  }
             if (inputfile != "") { numFiles++; }
             
-            treefile = validParameter.validFile(parameters, "tree", true);
+            treefile = validParameter.validFile(parameters, "tree");
             if (treefile == "not open") { m->mothurOut("Ignoring: " + parameters["tree"]); m->mothurOutEndLine(); treefile = ""; }
             else if (treefile == "not found") {  treefile = "";  }
             if (treefile != "") { numFiles++; }
             
-            sharedfile = validParameter.validFile(parameters, "shared", true);
+            sharedfile = validParameter.validFile(parameters, "shared");
             if (sharedfile == "not open") { m->mothurOut("Ignoring: " + parameters["shared"]); m->mothurOutEndLine(); sharedfile = ""; }
             else if (sharedfile == "not found") {  sharedfile = "";  }
             if (sharedfile != "") { numFiles++; }
             
-            relabundfile = validParameter.validFile(parameters, "relabund", true);
+            relabundfile = validParameter.validFile(parameters, "relabund");
             if (relabundfile == "not open") { m->mothurOut("Ignoring: " + parameters["relabund"]); m->mothurOutEndLine(); relabundfile = ""; }
             else if (relabundfile == "not found") {  relabundfile = "";  }
             if (relabundfile != "") { numFiles++; }
             
-            fastafile = validParameter.validFile(parameters, "fasta", true);
+            fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not open") { m->mothurOut("Ignoring: " + parameters["fasta"]); m->mothurOutEndLine(); fastafile = ""; }
             else if (fastafile == "not found") {  fastafile = "";  }
             if (fastafile != "") { numFiles++; }
             
-            qualfile = validParameter.validFile(parameters, "qfile", true);
+            qualfile = validParameter.validFile(parameters, "qfile");
             if (qualfile == "not open") { m->mothurOut("Ignoring: " + parameters["qfile"]); m->mothurOutEndLine(); qualfile = ""; }
             else if (qualfile == "not found") {  qualfile = "";  }
             if (qualfile != "") { numFiles++; }
             
-            sfffile = validParameter.validFile(parameters, "sff", true);
+            sfffile = validParameter.validFile(parameters, "sff");
             if (sfffile == "not open") { m->mothurOut("Ignoring: " + parameters["sff"]); m->mothurOutEndLine(); sfffile = ""; }
             else if (sfffile == "not found") {  sfffile = "";  }
             if (sfffile != "") { numFiles++; }
             
-            oligosfile = validParameter.validFile(parameters, "oligos", true);
+            oligosfile = validParameter.validFile(parameters, "oligos");
             if (oligosfile == "not open") { m->mothurOut("Ignoring: " + parameters["oligos"]); m->mothurOutEndLine(); oligosfile = ""; }
             else if (oligosfile == "not found") {  oligosfile = "";  }
             if (oligosfile != "") { numFiles++; }
             
-            accnosfile = validParameter.validFile(parameters, "accnos", true);
+            accnosfile = validParameter.validFile(parameters, "accnos");
             if (accnosfile == "not open") { m->mothurOut("Ignoring: " + parameters["accnos"]); m->mothurOutEndLine(); accnosfile = ""; }
             else if (accnosfile == "not found") {  accnosfile = "";  }
             if (accnosfile != "") { numFiles++; }
             
-            taxonomyfile = validParameter.validFile(parameters, "taxonomy", true);
+            taxonomyfile = validParameter.validFile(parameters, "taxonomy");
             if (taxonomyfile == "not open") { m->mothurOut("Ignoring: " + parameters["taxonomy"]); m->mothurOutEndLine(); taxonomyfile = ""; }
             else if (taxonomyfile == "not found") {  taxonomyfile = "";  }
             if (taxonomyfile != "") { numFiles++; }
             
-            constaxonomyfile = validParameter.validFile(parameters, "constaxonomy", true);
+            constaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
             if (constaxonomyfile == "not open") { m->mothurOut("Ignoring: " + parameters["constaxonomy"]); m->mothurOutEndLine(); constaxonomyfile = ""; }
             else if (constaxonomyfile == "not found") {  constaxonomyfile = "";  }
             if (constaxonomyfile != "") { numFiles++; }
             
-            flowfile = validParameter.validFile(parameters, "flow", true);
+            flowfile = validParameter.validFile(parameters, "flow");
             if (flowfile == "not open") { m->mothurOut("Ignoring: " + parameters["flow"]); m->mothurOutEndLine(); flowfile = ""; }
             else if (flowfile == "not found") {  flowfile = "";  }
             if (flowfile != "") { numFiles++; }
             
-            biomfile = validParameter.validFile(parameters, "biom", true);
+            biomfile = validParameter.validFile(parameters, "biom");
             if (biomfile == "not open") { m->mothurOut("Ignoring: " + parameters["biom"]); m->mothurOutEndLine(); biomfile = ""; }
             else if (biomfile == "not found") {  biomfile = "";  }
             if (biomfile != "") { numFiles++; }
             
-            summaryfile = validParameter.validFile(parameters, "summary", true);
+            summaryfile = validParameter.validFile(parameters, "summary");
             if (summaryfile == "not open") { m->mothurOut("Ignoring: " + parameters["summary"]); m->mothurOutEndLine(); summaryfile = ""; }
             else if (summaryfile == "not found") {  summaryfile = "";  }
             if (summaryfile != "") { numFiles++; }
             
-            filefile = validParameter.validFile(parameters, "file", true);
+            filefile = validParameter.validFile(parameters, "file");
             if (filefile == "not open") { m->mothurOut("Ignoring: " + parameters["file"]); m->mothurOutEndLine(); filefile = ""; }
             else if (filefile == "not found") {  filefile = "";  }
             if (filefile != "") { numFiles++; }
             
-            string temp = validParameter.validFile(parameters, "shorten", false);		if (temp == "not found") { temp = "T"; }
-            mothurGenerated = m->isTrue(temp);
+            string temp = validParameter.valid(parameters, "shorten");		if (temp == "not found") { temp = "T"; }
+            mothurGenerated = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "deleteold", false);		if (temp == "not found") { temp = "T"; }
-            deleteOld = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "deleteold");		if (temp == "not found") { temp = "T"; }
+            deleteOld = util.isTrue(temp);
             
-            prefix = validParameter.validFile(parameters, "prefix", false);		if (prefix == "not found") { prefix = ""; }
+            prefix = validParameter.valid(parameters, "prefix");		if (prefix == "not found") { prefix = ""; }
             
-            outputfile = validParameter.validFile(parameters, "new", false);
+            outputfile = validParameter.valid(parameters, "new");
             if (outputfile == "not found") {
                 if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name"); m->mothurOutEndLine();  abort=true; }
                 outputfile = "";
-            }else { mothurGenerated=false; if (outputDir != "") { outputfile = outputDir + m->getSimpleName(outputfile);  } }
+            }else { mothurGenerated=false; if (outputDir != "") { outputfile = outputDir + util.getSimpleName(outputfile);  } }
             
             
             if ((!mothurGenerated) && (numFiles > 1)) {
@@ -480,7 +480,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 m->mothurOut("[ERROR]: You must allow mothur to generate the filenames or input one file at a time with a new name, not both.\n"); abort= true;
             }
             
-            if (outputDir != "") { outputfile = outputDir + m->getSimpleName(outputfile);  }
+            if (outputDir != "") { outputfile = outputDir + util.getSimpleName(outputfile);  }
         }
         
     }
@@ -502,117 +502,117 @@ int RenameFileCommand::execute(){
         if (fastafile != "") {
             newName = getNewName(fastafile, "fasta");
             renameOrCopy(fastafile, newName);
-            m->setFastaFile(newName);
+            current->setFastaFile(newName);
         }
         if (qualfile != "") {
             newName = getNewName(qualfile, "qfile");
             renameOrCopy(qualfile, newName);
-            m->setQualFile(newName);
+            current->setQualFile(newName);
         }
         if (phylipfile != "") {
             newName = getNewName(phylipfile, "phylip");
             renameOrCopy(phylipfile, newName);
-            m->setPhylipFile(newName);
+            current->setPhylipFile(newName);
         }
         if (columnfile != "") {
             newName = getNewName(columnfile, "column");
             renameOrCopy(columnfile, newName);
-            m->setColumnFile(newName);
+            current->setColumnFile(newName);
         }
         if (listfile != "") {
             newName = getNewName(listfile, "list");
             renameOrCopy(listfile, newName);
-            m->setListFile(newName);
+            current->setListFile(newName);
         }
         if (rabundfile != "") {
             newName = getNewName(rabundfile, "rabund");
             renameOrCopy(rabundfile, newName);
-            m->setRabundFile(newName);
+            current->setRabundFile(newName);
         }
         if (sabundfile != "") {
             newName = getNewName(sabundfile, "sabund");
             renameOrCopy(sabundfile, newName);
-            m->setSabundFile(newName);
+            current->setSabundFile(newName);
         }
         if (namefile != "") {
             newName = getNewName(namefile, "name");
             renameOrCopy(namefile, newName);
-            m->setNameFile(newName);
+            current->setNameFile(newName);
         }
         if (groupfile != "") {
             newName = getNewName(groupfile, "group");
             renameOrCopy(groupfile, newName);
-            m->setGroupFile(newName);
+            current->setGroupFile(newName);
         }
         if (treefile != "") {
             newName = getNewName(treefile, "tree");
             renameOrCopy(treefile, newName);
-            m->setTreeFile(newName);
+            current->setTreeFile(newName);
         }
         if (sharedfile != "") {
             newName = getNewName(sharedfile, "shared");
             renameOrCopy(sharedfile, newName);
-            m->setSharedFile(newName);
+            current->setSharedFile(newName);
         }
         if (relabundfile != "") {
             newName = getNewName(relabundfile, "relabund");
             renameOrCopy(relabundfile, newName);
-            m->setRelAbundFile(newName);
+            current->setRelAbundFile(newName);
         }
         if (designfile != "") {
             newName = getNewName(designfile, "design");
             renameOrCopy(designfile, newName);
-            m->setDesignFile(newName);
+            current->setDesignFile(newName);
         }
         if (sfffile != "") {
             newName = getNewName(sfffile, "sff");
             renameOrCopy(sfffile, newName);
-            m->setSFFFile(newName);
+            current->setSFFFile(newName);
         }
         if (oligosfile != "") {
             newName = getNewName(oligosfile, "oligos");
             renameOrCopy(oligosfile, newName);
-            m->setOligosFile(newName);
+            current->setOligosFile(newName);
         }
         if (accnosfile != "") {
             newName = getNewName(accnosfile, "accnos");
             renameOrCopy(accnosfile, newName);
-            m->setAccnosFile(newName);
+            current->setAccnosFile(newName);
         }
         if (taxonomyfile != "") {
             newName = getNewName(taxonomyfile, "taxonomy");
             renameOrCopy(taxonomyfile, newName);
-            m->setTaxonomyFile(newName);
+            current->setTaxonomyFile(newName);
         }
         if (constaxonomyfile != "") {
             newName = getNewName(constaxonomyfile, "constaxonomy");
             renameOrCopy(constaxonomyfile, newName);
-            m->setConsTaxonomyFile(newName);
+            current->setConsTaxonomyFile(newName);
         }
         if (flowfile != "") {
             newName = getNewName(flowfile, "flow");
             renameOrCopy(flowfile, newName);
-            m->setFlowFile(newName);
+            current->setFlowFile(newName);
         }
         if (biomfile != "") {
             newName = getNewName(biomfile, "biom");
             renameOrCopy(biomfile, newName);
-            m->setBiomFile(newName);
+            current->setBiomFile(newName);
         }
         if (countfile != "") {
             newName = getNewName(countfile, "count");
             renameOrCopy(countfile, newName);
-            m->setCountTableFile(newName);
+            current->setCountFile(newName);
         }
         if (summaryfile != "") {
             newName = getNewName(summaryfile, "summary");
             renameOrCopy(summaryfile, newName);
-            m->setSummaryFile(newName);
+            current->setSummaryFile(newName);
         }
         if (filefile != "") {
             newName = getNewName(filefile, "file");
             renameOrCopy(filefile, newName);
-            m->setFileFile(newName);
+            current->setFileFile(newName);
         }
         if (inputfile != "") {
             newName = getNewName(inputfile, "input");
@@ -620,7 +620,7 @@ int RenameFileCommand::execute(){
         }
         
         m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
-        if (m->hasCurrentFiles()) {  m->printCurrentFiles(""); }
+        if (current->hasCurrentFiles()) {  current->printCurrentFiles(""); }
         
         return 0;	
     }
@@ -635,10 +635,10 @@ int RenameFileCommand::execute(){
 string RenameFileCommand::getNewName(string name, string type){
     try {
         string newName = outputfile;
-        name = m->getFullPathName(name);
+        name = util.getFullPathName(name);
         
         if (mothurGenerated) {
-            string extension = m->getExtension(name);
+            string extension = util.getExtension(name);
             string basicName = "final";
             string tag = "";
             
@@ -679,7 +679,7 @@ string RenameFileCommand::getNewName(string name, string type){
 
 string RenameFileCommand::renameOrCopy(string oldName, string newName){
     try {
-        if (deleteOld) {  m->renameFile(oldName, newName); }
+        if (deleteOld) {  util.renameFile(oldName, newName); }
         else {
             string command = "copy ";
             

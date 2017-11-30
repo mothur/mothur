@@ -130,14 +130,14 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			outputTypes["sharedr_nseqs"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -145,7 +145,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
                 it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
@@ -153,83 +153,83 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			}
 			
 			//get shared file
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
             
-            designfile = validParameter.validFile(parameters, "design", true);
+            designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { abort = true; designfile = ""; }
 			else if (designfile == "not found") {  	designfile = "";	}
-			else { m->setDesignFile(designfile); }
+			else { current->setDesignFile(designfile); }
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
 			
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
 				
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "sharedobserved";  }
 			else { 
 				 if (calc == "default")  {  calc = "sharedobserved";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
             
-            string sets = validParameter.validFile(parameters, "sets", false);			
+            string sets = validParameter.valid(parameters, "sets");			
 			if (sets == "not found") { sets = ""; }
 			else { 
-				m->splitAtDash(sets, Sets);
+				util.splitAtDash(sets, Sets);
                 if (Sets.size() != 0) { if (Sets[0] != "all") { Sets.clear(); } }
 			}
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, freq); 
+			temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, freq); 
 			
-			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, nIters); 
+			temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, nIters); 
 			
-			temp = validParameter.validFile(parameters, "jumble", false);			if (temp == "not found") { temp = "T"; }
-			if (m->isTrue(temp)) { jumble = true; }
+			temp = validParameter.valid(parameters, "jumble");			if (temp == "not found") { temp = "T"; }
+			if (util.isTrue(temp)) { jumble = true; }
 			else { jumble = false; }
 			m->setJumble(jumble);
             
-            temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
-			groupMode = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "groupmode");		if (temp == "not found") { temp = "T"; }
+			groupMode = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "subsampleiters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+            temp = validParameter.valid(parameters, "subsampleiters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters); 
             
-            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
-			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
+			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
             else {  
-                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
                 else { subsample = false; }
             }
             
@@ -263,7 +263,7 @@ int RareFactSharedCommand::execute(){
             if (groupMode) { outputNames = createGroupFile(outputNames); }
         }
                     
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -292,7 +292,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             return 0;
         }
         
-        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         
         vector<string> newGroups = lookup->getNamesGroups();
         if (thisSet != "") {  //make groups only filled with groups from this set so that's all inputdata will read
@@ -304,7 +304,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         SharedRAbundVectors* subset = new SharedRAbundVectors();
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         if (thisSet != "") {//remove unwanted groups
-            for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
+            for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
             subset->eliminateZeroOTUS();
         }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
         
@@ -351,7 +351,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		
 		if (m->getControl_pressed()) { 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
+			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}
 			delete lookup; delete subset;
 			return 0;
 		}
@@ -366,7 +366,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		while((subset != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->getControl_pressed()) { 
 				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
+				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}
                 delete lookup; delete subset;
 				return 0;
 			}
@@ -385,7 +385,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 				userLabels.erase(subset->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(subset->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(subset->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = subset->getLabel();
                 
                 delete subset;
@@ -394,7 +394,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
                 subset = new SharedRAbundVectors();
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
+                    for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
                 }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
                 
@@ -423,7 +423,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             
             if (lookup != NULL) {
                 if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
+                    for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
                 }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
             }else {  subset = NULL; }
@@ -432,7 +432,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		
 		if (m->getControl_pressed()) { 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
+			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}
 			return 0;
 		}
 		
@@ -451,7 +451,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		
 		if (m->getControl_pressed()) { 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
+			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}
 			return 0;
 		}
 		
@@ -462,7 +462,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             
             if (lookup != NULL) {
                 if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < data.size(); i++) { if (m->inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
+                    for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
                 }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
             }else {  subset = NULL; }
@@ -542,10 +542,10 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
             vector<string> columnHeaders;
             for (int i = 0; i < thisTypesFiles.size(); i++) {
                 ifstream in;
-                m->openInputFile(thisTypesFiles[i], in);
+                util.openInputFile(thisTypesFiles[i], in);
                 
-                string headers = m->getline(in); m->gobble(in);
-                columnHeaders = m->splitWhiteSpace(headers);
+                string headers = util.getline(in); util.gobble(in);
+                columnHeaders = util.splitWhiteSpace(headers);
                 int numCols = columnHeaders.size();
                 
                 vector<vector<double> > thisFilesLines;
@@ -553,12 +553,12 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
                     if (m->getControl_pressed()) { break; }
                     vector<double> data; data.resize(numCols, 0);
                     //read numSampled line
-                    for (int j = 0; j < numCols; j++) { in >> data[j]; m->gobble(in); }
+                    for (int j = 0; j < numCols; j++) { in >> data[j]; util.gobble(in); }
                     thisFilesLines.push_back(data);
                 }
                 in.close();
                 results.push_back(thisFilesLines);
-                m->mothurRemove(thisTypesFiles[i]);
+                util.mothurRemove(thisTypesFiles[i]);
             }
             
             if (!m->getControl_pressed()) {
@@ -567,7 +567,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
 
                 string outputFile = getOutputFileName(it->first,variables);
                 ofstream out;
-                m->openOutputFile(outputFile, out);
+                util.openOutputFile(outputFile, out);
                 outputNames.push_back(outputFile); outputTypes[it->first].push_back(outputFile);
                 
                 out << columnHeaders[0] << '\t' << "method";
@@ -641,18 +641,18 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
         vector<string> groupNames;
 		for (int i = 0; i < outputNames.size(); i++) {
             
-			string extension = m->getExtension(outputNames[i]);
-            string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
-			m->mothurRemove(combineFileName); //remove old file
+			string extension = util.getExtension(outputNames[i]);
+            string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
+			util.mothurRemove(combineFileName); //remove old file
             
 			ifstream in;
-			m->openInputFile(outputNames[i], in);
+			util.openInputFile(outputNames[i], in);
 			
-			string labels = m->getline(in);
+			string labels = util.getline(in);
             
 			istringstream iss (labels,istringstream::in);
             string newLabel = ""; vector<string> theseLabels;
-            while(!iss.eof()) {  iss >> newLabel; m->gobble(iss); theseLabels.push_back(newLabel); }
+            while(!iss.eof()) {  iss >> newLabel; util.gobble(iss); theseLabels.push_back(newLabel); }
             vector< vector<string> > allLabels;
             vector<string> thisSet; thisSet.push_back(theseLabels[0]); allLabels.push_back(thisSet); thisSet.clear(); //makes "numSampled" its own grouping
             for (int j = 1; j < theseLabels.size()-1; j++) {
@@ -677,7 +677,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
                 temp[outputNames[i]] = file2Group[i];
                 typesFiles[extension] = temp;
             }
-            if (!(m->inUsersGroups(file2Group[i], groupNames))) {  groupNames.push_back(file2Group[i]); }
+            if (!(util.inUsersGroups(file2Group[i], groupNames))) {  groupNames.push_back(file2Group[i]); }
 		}
 		
 		//for each type create a combo file
@@ -685,8 +685,8 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 		for (map<string, map<string, string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
 			
 			ofstream out;
-			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + it->first;
-			m->openOutputFileAppend(combineFileName, out);
+			string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + it->first;
+			util.openOutputFileAppend(combineFileName, out);
 			newFileNames.push_back(combineFileName);
 			map<string, string> thisTypesFiles = it->second; //it->second maps filename to group
             set<int> numSampledSet;
@@ -700,15 +700,15 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
                 string group = itFileNameGroup->second;
                 
 				ifstream temp;
-				m->openInputFile(thisfilename, temp);
+				util.openInputFile(thisfilename, temp);
 				
 				//read through first line - labels
-				m->getline(temp);	m->gobble(temp);
+				util.getline(temp);	util.gobble(temp);
 				
 				map<int, vector< vector<string> > > thisFilesLines;
 				while (!temp.eof()){
                     int numSampled = 0;
-                    temp >> numSampled; m->gobble(temp);
+                    temp >> numSampled; util.gobble(temp);
                     
                     vector< vector<string> > theseReads;
                     vector<string> thisSet; thisSet.push_back(toString(numSampled)); theseReads.push_back(thisSet); thisSet.clear();
@@ -716,13 +716,13 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
                         vector<string> reads;
                         string next = "";
                         for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
-                            temp >> next; m->gobble(temp);
+                            temp >> next; util.gobble(temp);
                             reads.push_back(next);
                         }
                         theseReads.push_back(reads);
                     }
                     thisFilesLines[numSampled] = theseReads;
-                    m->gobble(temp);
+                    util.gobble(temp);
                     
                     numSampledSet.insert(numSampled);
 				}
@@ -733,7 +733,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 				if (maxLines < thisFilesLines.size()) { maxLines = thisFilesLines.size(); }
 				
 				temp.close();
-				m->mothurRemove(thisfilename);
+				util.mothurRemove(thisfilename);
 			}
 			
             //output new labels line

@@ -124,14 +124,14 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			outputTypes["coverage"] = tempOutNames;
 			outputTypes["libshuffsummary"] = tempOutNames;
 			
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -139,66 +139,66 @@ LibShuffCommand::LibShuffCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { 
-				phylipfile = m->getPhylipFile(); 
+				phylipfile = current->getPhylipFile(); 
 				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("You must provide a phylip file."); m->mothurOutEndLine(); 
 					abort = true;
 				} 
-			}else { m->setPhylipFile(phylipfile); }	
+			}else { current->setPhylipFile(phylipfile); }	
 			
 			//check for required parameters
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { 
-				groupfile = m->getGroupFile(); 
+				groupfile = current->getGroupFile(); 
 				if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("You must provide a group file."); m->mothurOutEndLine(); 
 					abort = true;
 				} 
-			}else { m->setGroupFile(groupfile); }	
+			}else { current->setGroupFile(groupfile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(phylipfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(phylipfile); //if user entered a file with a path then preserve it	
 			}
 						
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; savegroups = groups; }
 			else { 
 				savegroups = groups;
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 				
 			string temp;
-			temp = validParameter.validFile(parameters, "iters", false);				if (temp == "not found") { temp = "10000"; }
-			m->mothurConvert(temp, iters); 
+			temp = validParameter.valid(parameters, "iters");				if (temp == "not found") { temp = "10000"; }
+			util.mothurConvert(temp, iters); 
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "1.0"; }
-			m->mothurConvert(temp, cutOff); 
+			temp = validParameter.valid(parameters, "cutoff");				if (temp == "not found") { temp = "1.0"; }
+			util.mothurConvert(temp, cutOff); 
 			
-			temp = validParameter.validFile(parameters, "step", false);				if (temp == "not found") { temp = "0.01"; }
-			m->mothurConvert(temp, step); 
+			temp = validParameter.valid(parameters, "step");				if (temp == "not found") { temp = "0.01"; }
+			util.mothurConvert(temp, step); 
 			
-			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
-			sim = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "sim");				if (temp == "not found") { temp = "F"; }
+			sim = util.isTrue(temp); 
 			
-			userform = validParameter.validFile(parameters, "form", false);			if (userform == "not found") { userform = "integral"; }
+			userform = validParameter.valid(parameters, "form");			if (userform == "not found") { userform = "integral"; }
 			
 		}
 		
@@ -221,7 +221,7 @@ int LibShuffCommand::execute(){
 		if (error == 1) { delete groupMap; return 0; }
 		
 		ifstream in;
-		m->openInputFile(phylipfile, in);
+		util.openInputFile(phylipfile, in);
 		matrix = new FullMatrix(in, groupMap, sim); //reads the matrix file
 		in.close();
 		
@@ -231,15 +231,15 @@ int LibShuffCommand::execute(){
 		if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
 			m->mothurOut("Your distance file contains " + toString(matrix->getNumSeqs()) + " sequences, and your group file contains " + toString(groupMap->getNumSeqs()) + " sequences.");  m->mothurOutEndLine();				
 			//create new group file
-			if(outputDir == "") { outputDir += m->hasPath(groupfile); }
+			if(outputDir == "") { outputDir += util.hasPath(groupfile); }
 			
-			string newGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "editted.groups";
+			string newGroupFile = outputDir + util.getRootName(util.getSimpleName(groupfile)) + "editted.groups";
 			outputNames.push_back(newGroupFile);
 			ofstream outGroups;
-			m->openOutputFile(newGroupFile, outGroups);
+			util.openOutputFile(newGroupFile, outGroups);
 			
 			for (int i = 0; i < matrix->getNumSeqs(); i++) {
-				if (m->getControl_pressed()) { delete groupMap; delete matrix; outGroups.close(); m->mothurRemove(newGroupFile); return 0; }
+				if (m->getControl_pressed()) { delete groupMap; delete matrix; outGroups.close(); util.mothurRemove(newGroupFile); return 0; }
 				
 				Names temp = matrix->getRowInfo(i);
 				outGroups << temp.seqName << '\t' << temp.groupName << endl;
@@ -255,7 +255,7 @@ int LibShuffCommand::execute(){
 			groupMap = new GroupMap(groupfile);
 			groupMap->readMap();
 			
-			if (m->getControl_pressed()) { delete groupMap; delete matrix; m->mothurRemove(newGroupFile); return 0; }
+			if (m->getControl_pressed()) { delete groupMap; delete matrix; util.mothurRemove(newGroupFile); return 0; }
 		}
 		
 			
@@ -337,7 +337,7 @@ int LibShuffCommand::execute(){
 		
 		delete matrix; delete groupMap;
 		
-		if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -359,9 +359,9 @@ int LibShuffCommand::printCoverageFile() {
 
 		ofstream outCov;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipfile));
 		summaryFile = getOutputFileName("coverage", variables);
-		m->openOutputFile(summaryFile, outCov);
+		util.openOutputFile(summaryFile, outCov);
 		outputNames.push_back(summaryFile); outputTypes["coverage"].push_back(summaryFile);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
 		//cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
@@ -457,9 +457,9 @@ int LibShuffCommand::printSummaryFile() {
 
 		ofstream outSum;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipfile));
 		summaryFile = getOutputFileName("libshuffsummary",variables);
-		m->openOutputFile(summaryFile, outSum);
+		util.openOutputFile(summaryFile, outSum);
 		outputNames.push_back(summaryFile); outputTypes["libshuffsummary"].push_back(summaryFile);
 
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);

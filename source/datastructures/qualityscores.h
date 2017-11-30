@@ -16,6 +16,7 @@
 #include "mothur.h"
 #include "mothurout.h"
 #include "sequence.hpp"
+#include "utils.hpp"
 
 /**************************************************************************************************/
 
@@ -52,6 +53,7 @@ private:
 	double calculateAverage(bool);
 	MothurOut* m;
 	vector<int> qScores;
+    Utils util;
 	
 	string seqName;
 	int seqLength;

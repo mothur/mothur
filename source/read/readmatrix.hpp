@@ -15,6 +15,7 @@
 #include "nameassignment.hpp"
 #include "counttable.h"
 #include "sparsedistancematrix.h"
+#include "utils.hpp"
 
 
 class ReadMatrix {
@@ -37,6 +38,7 @@ protected:
 	float cutoff;
 	MothurOut* m;
 	bool sim;
+    Utils util;
 };
 
 

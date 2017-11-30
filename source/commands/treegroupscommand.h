@@ -111,6 +111,7 @@ private:
 	int numGroups, subsampleSize, iters, processors;
 	ofstream out;
 	float precision, cutoff;
+    vector<string> Treenames;
 
 	bool abort, allLines, subsample;
 	set<string> labels; //holds labels to be used

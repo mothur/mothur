@@ -15,7 +15,7 @@ ThreeColumnFile::~ThreeColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	m->mothurRemove(outName);
+	util.mothurRemove(outName);
 }
 
 /***********************************************************************/
@@ -23,16 +23,16 @@ ThreeColumnFile::~ThreeColumnFile(){
 void ThreeColumnFile::initFile(string label){
 	try {
 		if(counter != 0){
-			m->openOutputFile(outName, outFile);
-			m->openInputFile(inName, inFile);
+			util.openOutputFile(outName, outFile);
+			util.openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t' << label << "\tlci\thci" << endl;
 		}
 		else{
-			m->openOutputFile(outName, outFile);
+			util.openOutputFile(outName, outFile);
 			outFile << "numsampled\t" << label << "\tlci\thci" << endl;
 		}
 
@@ -51,7 +51,7 @@ void ThreeColumnFile::output(int nSeqs, vector<double> data){
 	try {
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 		}
@@ -78,7 +78,7 @@ void ThreeColumnFile::resetFile(){
 		}
 		counter = 1;
 		
-		m->mothurRemove(inName);
+		util.mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);
@@ -102,7 +102,7 @@ ColumnFile::~ColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	m->mothurRemove(outName);
+	util.mothurRemove(outName);
 }
 
 /***********************************************************************/
@@ -110,11 +110,11 @@ ColumnFile::~ColumnFile(){
 void ColumnFile::initFile(string label, vector<string> tags){
 	try {
 		if(counter != 0){
-			m->openOutputFile(outName, outFile);
-			m->openInputFile(inName, inFile);
+			util.openOutputFile(outName, outFile);
+			util.openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t'; 
 			for(int i = 0; i < tags.size(); i++) {
@@ -123,7 +123,7 @@ void ColumnFile::initFile(string label, vector<string> tags){
 			outFile << endl;
 		}
 		else{
-			m->openOutputFile(outName, outFile);
+			util.openOutputFile(outName, outFile);
 			for(int i = 0; i < tags.size(); i++) {
 				outFile << label + tags[i] << '\t';
 			}
@@ -146,7 +146,7 @@ void ColumnFile::output(vector<double> data){
 	
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 
 			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(iters.length());
 			for (int i = 1; i< data.size(); i++) {
@@ -182,7 +182,7 @@ void ColumnFile::resetFile(){
 		}
 		counter = 1;
 		
-		m->mothurRemove(inName);
+		util.mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);
@@ -206,7 +206,7 @@ SharedThreeColumnFile::~SharedThreeColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	m->mothurRemove(outName);
+	util.mothurRemove(outName);
 }
 
 /***********************************************************************/
@@ -214,16 +214,16 @@ SharedThreeColumnFile::~SharedThreeColumnFile(){
 void SharedThreeColumnFile::initFile(string label){
 	try {
 		if(counter != 0){
-			m->openOutputFile(outName, outFile);
-			m->openInputFile(inName, inFile);
+			util.openOutputFile(outName, outFile);
+			util.openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t' << label << "\tlci\thci" << endl;
 		}
 		else{
-			m->openOutputFile(outName, outFile);
+			util.openOutputFile(outName, outFile);
 			outFile << "numsampled\t" << groupLabel << '\t' << label << "\tlci\thci" << endl;
 		}
 
@@ -242,7 +242,7 @@ void SharedThreeColumnFile::output(int nSeqs, vector<double> data){
 	try {
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 		}
@@ -270,7 +270,7 @@ void SharedThreeColumnFile::resetFile(){
 		}
 		counter = 1;
 		
-		m->mothurRemove(inName);
+		util.mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);
@@ -295,7 +295,7 @@ OneColumnFile::~OneColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	m->mothurRemove(outName);	
+	util.mothurRemove(outName);	
 }
 
 /***********************************************************************/
@@ -303,16 +303,16 @@ OneColumnFile::~OneColumnFile(){
 void OneColumnFile::initFile(string label){
 	try {
 		if(counter != 0){
-			m->openOutputFile(outName, outFile);
-			m->openInputFile(inName, inFile);
+			util.openOutputFile(outName, outFile);
+			util.openInputFile(inName, inFile);
 		
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t' << label << endl;
 		}
 		else{
-			m->openOutputFile(outName, outFile);
+			util.openOutputFile(outName, outFile);
 			outFile << "numsampled\t" << label << endl;
 		}
 	
@@ -331,7 +331,7 @@ void OneColumnFile::output(int nSeqs, vector<double> data){
 	try {	
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t'  << data[0] << endl;
 		}
@@ -357,7 +357,7 @@ void OneColumnFile::resetFile(){
 		}	
 		counter = 1;
 		
-		m->mothurRemove(inName);
+		util.mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);
@@ -382,7 +382,7 @@ SharedOneColumnFile::~SharedOneColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	m->mothurRemove(outName);	
+	util.mothurRemove(outName);	
 }
 
 /***********************************************************************/
@@ -390,17 +390,17 @@ SharedOneColumnFile::~SharedOneColumnFile(){
 void SharedOneColumnFile::initFile(string label){
 	try {
 		if(counter != 0){
-			m->openOutputFile(outName, outFile);
-			m->openInputFile(inName, inFile);
+			util.openOutputFile(outName, outFile);
+			util.openInputFile(inName, inFile);
 		
 			string inputBuffer;
-			inputBuffer = m->getline(inFile);
+			inputBuffer = util.getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t' << label  << endl;
 
 		}
 		else{
-			m->openOutputFile(outName, outFile);
+			util.openOutputFile(outName, outFile);
 			outFile << "sampled\t" << label << endl;
 		
 		}
@@ -427,7 +427,7 @@ void SharedOneColumnFile::output(int nSeqs, vector<double> data){
 			}
 			if(counter != 0){		
 				string inputBuffer;
-				inputBuffer = m->getline(inFile);
+				inputBuffer = util.getline(inFile);
 
 				outFile	<<  inputBuffer << setprecision(2) << '\t' << dataOutput << endl;
 			}
@@ -454,7 +454,7 @@ void SharedOneColumnFile::resetFile(){
 		}	
 		counter = 1;
 
-		m->mothurRemove(inName);
+		util.mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);

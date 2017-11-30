@@ -125,14 +125,14 @@ CatchAllCommand::CatchAllCommand(string option)  {
 
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("sabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
 				}
@@ -140,27 +140,27 @@ CatchAllCommand::CatchAllCommand(string option)  {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			sabundfile = validParameter.validFile(parameters, "sabund");
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }
 			else if (sabundfile == "not found") { sabundfile = "";  }
-			else { m->setSabundFile(sabundfile); }
+			else { current->setSabundFile(sabundfile); }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") { sharedfile = "";   }
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
 			
-			string label = validParameter.validFile(parameters, "label", false);			
+			string label = validParameter.valid(parameters, "label");
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 		
@@ -168,10 +168,10 @@ CatchAllCommand::CatchAllCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to shared, then sabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					sabundfile = m->getSabundFile(); 
+					sabundfile = current->getSabundFile(); 
 					if (sabundfile != "") {  m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a sabund or shared file before you can use the catchall command."); m->mothurOutEndLine(); 
@@ -181,15 +181,15 @@ CatchAllCommand::CatchAllCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		
+			outputDir = validParameter.valid(parameters, "outputdir");
 			if (outputDir == "not found"){	
-				if (sabundfile != "") {  outputDir = m->hasPath(sabundfile); }
-				else { outputDir = m->hasPath(sharedfile); }
+				if (sabundfile != "") {  outputDir = util.hasPath(sabundfile); }
+				else { outputDir = util.hasPath(sharedfile); }
 			}
             
-            string groups = validParameter.validFile(parameters, "groups", false);
+            string groups = validParameter.valid(parameters, "groups");
             if (groups == "not found") { groups = ""; }
-            else { m->splitAtDash(groups, Groups);
+            else { util.splitAtDash(groups, Groups);
                     if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }  }
 
 		}
@@ -207,7 +207,7 @@ int CatchAllCommand::execute() {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get location of catchall
-		path = m->getProgramPath();
+		path = current->getProgramPath();
 		
         if (m->getDebug()) { m->mothurOut("[DEBUG]: mothur's path = " + path + "\n"); }
        
@@ -225,8 +225,8 @@ int CatchAllCommand::execute() {
 		
         //test to make sure formatdb exists
 		ifstream in;
-		catchAllTest = m->getFullPathName(catchAllTest);
-		bool ableToOpen = m->openInputFile(catchAllTest, in, "no error"); in.close();
+		catchAllTest = util.getFullPathName(catchAllTest);
+		bool ableToOpen = util.openInputFile(catchAllTest, in, "no error"); in.close();
 		if(!ableToOpen) {	
             m->mothurOut(catchAllTest + " file does not exist. Checking path... \n");
             
@@ -234,24 +234,25 @@ int CatchAllCommand::execute() {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             programName = "CatchAllcmdL.exe";
 #endif
-            string cLocation = m->findProgramPath(programName);
+            Utils util;
+            string cLocation = util.findProgramPath(programName);
             
             ifstream in2;
-            ableToOpen = m->openInputFile(cLocation, in2, "no error"); in2.close();
+            ableToOpen = util.openInputFile(cLocation, in2, "no error"); in2.close();
 
             if(!ableToOpen) {
                 programName = "catchall";
                 
-                string cLocation = m->findProgramPath(programName);
+                string cLocation = util.findProgramPath(programName);
                 
                 ifstream in3;
-                ableToOpen = m->openInputFile(cLocation, in3, "no error"); in3.close();
+                ableToOpen = util.openInputFile(cLocation, in3, "no error"); in3.close();
                 
                 if(!ableToOpen) { m->mothurOut("[ERROR]: " + cLocation + " file does not exist. mothur requires the catchall executable."); m->mothurOutEndLine();  return 0; }else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
             }
             else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
         }
-        catchAllTest = m->getFullPathName(catchAllTest);
+        catchAllTest = util.getFullPathName(catchAllTest);
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         if (programName == "catchall") { catchAllCommandExe += "catchall "; }
@@ -261,7 +262,7 @@ int CatchAllCommand::execute() {
 #endif
         
 		//prepare full output directory
-		outputDir = m->getFullPathName(outputDir);
+		outputDir = util.getFullPathName(outputDir);
 		
         if (m->getDebug()) { m->mothurOut("[DEBUG]: catchall location = " + catchAllCommandExe + "\n[DEBUG]: outputDir = " + outputDir + "\n"); }
         
@@ -282,14 +283,14 @@ int CatchAllCommand::execute() {
 			set<string> userLabels = labels;
 			
             map<string, string> variables;
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
 			string summaryfilename = getOutputFileName("summary", variables);
-			summaryfilename = m->getFullPathName(summaryfilename);
+			summaryfilename = util.getFullPathName(summaryfilename);
 			
             if (m->getDebug()) { m->mothurOut("[DEBUG]: Input File = " + inputFileNames[p] + ".\n[DEBUG]: inputdata address = " + toString(&input) + ".\n[DEBUG]: sabund address = " + toString(&sabund) + ".\n"); } 
             
 			ofstream out;
-			m->openOutputFile(summaryfilename, out);	
+			util.openOutputFile(summaryfilename, out);	
 			
 			out << "label\tmodel\testimate\tlci\tuci" << endl;
             
@@ -304,7 +305,7 @@ int CatchAllCommand::execute() {
 						
 						//create catchall input file from mothur's inputfile
 						string filename = process(sabund, inputFileNames[p]);
-						string outputPath = m->getPathName(filename);
+						string outputPath = util.getPathName(filename);
 											
 						//create system command
 						string catchAllCommand = "";
@@ -314,11 +315,11 @@ int CatchAllCommand::execute() {
                             //removes extra '\\' catchall doesnt like that
                             vector<string> tempNames;
                             string tempFilename = filename;
-                            m->splitAtDash(tempFilename, tempNames);
+                            util.splitAtDash(tempFilename, tempNames);
                             tempFilename = tempNames[0];
                             tempNames.clear();
                             string tempOutputPath = outputPath;
-                            m->splitAtDash(tempOutputPath, tempNames);
+                            util.splitAtDash(tempOutputPath, tempNames);
                             tempOutputPath = tempNames[0];
                             if (tempOutputPath.length() > 0) { tempOutputPath = tempOutputPath.substr(0, tempOutputPath.length()-1); }
                             catchAllCommand += catchAllCommandExe + "\"" + tempFilename + "\" \""  + tempOutputPath + "\" 1";
@@ -332,11 +333,11 @@ int CatchAllCommand::execute() {
                     
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
                     
-                        if (!m->getDebug()) { m->mothurRemove(filename); }
+                        if (!m->getDebug()) { util.mothurRemove(filename); }
 
 					
-						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
-						if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
+						filename = util.getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+						if (savedOutputDir == "") { filename = util.getSimpleName(filename); }
 					
                         variables["[filename]"] = filename;
 						outputNames.push_back(getOutputFileName("analysis", variables)); outputTypes["analysis"].push_back(getOutputFileName("analysis", variables));
@@ -350,13 +351,13 @@ int CatchAllCommand::execute() {
                     
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: Done creating summary file.\n"); }
 											
-						if (m->getControl_pressed()) { out.close(); for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	}  delete sabund;  return 0; }
+						if (m->getControl_pressed()) { out.close(); for (int i = 0; i < outputNames.size(); i++) {util.mothurRemove(outputNames[i]);	}  delete sabund;  return 0; }
 
 						processedLabels.insert(sabund->getLabel());
 						userLabels.erase(sabund->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 						string saveLabel = sabund->getLabel();
 						
 						delete sabund;		
@@ -367,7 +368,7 @@ int CatchAllCommand::execute() {
 
 						//create catchall input file from mothur's inputfile
 						string filename = process(sabund, inputFileNames[p]);
-						string outputPath = m->getPathName(filename);
+						string outputPath = util.getPathName(filename);
 											
 						//create system command
 						string catchAllCommand = "";
@@ -377,11 +378,11 @@ int CatchAllCommand::execute() {
                             //removes extra '\\' catchall doesnt like that
                             vector<string> tempNames;
                             string tempFilename = filename;
-                            m->splitAtDash(tempFilename, tempNames);
+                            util.splitAtDash(tempFilename, tempNames);
                             tempFilename = tempNames[0];
                             tempNames.clear();
                             string tempOutputPath = outputPath;
-                            m->splitAtDash(tempOutputPath, tempNames);
+                            util.splitAtDash(tempOutputPath, tempNames);
                             tempOutputPath = tempNames[0];
 							if (tempOutputPath.length() > 0) { tempOutputPath = tempOutputPath.substr(0, tempOutputPath.length()-1); }
 							catchAllCommand += catchAllCommandExe + "\"" + tempFilename + "\" \""  + tempOutputPath + "\" 1";
@@ -395,11 +396,11 @@ int CatchAllCommand::execute() {
                     
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
                     
-                        if (!m->getDebug()) { m->mothurRemove(filename); }
+                        if (!m->getDebug()) { util.mothurRemove(filename); }
 
 					
-						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
-						if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
+						filename = util.getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+						if (savedOutputDir == "") { filename = util.getSimpleName(filename); }
 					
                         variables["[filename]"] = filename;
                         outputNames.push_back(getOutputFileName("analysis", variables)); outputTypes["analysis"].push_back(getOutputFileName("analysis", variables));
@@ -414,7 +415,7 @@ int CatchAllCommand::execute() {
                     
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: Done creating summary file.\n"); }
 					
-						if (m->getControl_pressed()) { out.close(); for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	}   delete sabund;  return 0; }
+						if (m->getControl_pressed()) { out.close(); for (int i = 0; i < outputNames.size(); i++) {util.mothurRemove(outputNames[i]);	}   delete sabund;  return 0; }
 
 						processedLabels.insert(sabund->getLabel());
 						userLabels.erase(sabund->getLabel());
@@ -452,7 +453,7 @@ int CatchAllCommand::execute() {
 				
 				//create catchall input file from mothur's inputfile
 				string filename = process(sabund, inputFileNames[p]);
-				string outputPath = m->getPathName(filename);
+				string outputPath = util.getPathName(filename);
 				
 				//create system command
 				string catchAllCommand = "";
@@ -462,11 +463,11 @@ int CatchAllCommand::execute() {
                     //removes extra '\\' catchall doesnt like that
                     vector<string> tempNames;
                     string tempFilename = filename;
-                    m->splitAtDash(tempFilename, tempNames);
+                    util.splitAtDash(tempFilename, tempNames);
                     tempFilename = tempNames[0];
                     tempNames.clear();
                     string tempOutputPath = outputPath;
-                    m->splitAtDash(tempOutputPath, tempNames);
+                    util.splitAtDash(tempOutputPath, tempNames);
                     tempOutputPath = tempNames[0];
                     if (tempOutputPath.length() > 0) { tempOutputPath = tempOutputPath.substr(0, tempOutputPath.length()-1); }
                     catchAllCommand += catchAllCommandExe + "\"" + tempFilename + "\" \""  + tempOutputPath + "\" 1";
@@ -480,10 +481,10 @@ int CatchAllCommand::execute() {
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: back from system call. Keeping file: " + filename + ".\n"); }
 				
-				if (!m->getDebug()) { m->mothurRemove(filename); }
+				if (!m->getDebug()) { util.mothurRemove(filename); }
 				
-				filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
-				if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
+				filename = util.getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+				if (savedOutputDir == "") { filename = util.getSimpleName(filename); }
 				
 				variables["[filename]"] = filename;
                 outputNames.push_back(getOutputFileName("analysis", variables)); outputTypes["analysis"].push_back(getOutputFileName("analysis", variables));
@@ -501,18 +502,18 @@ int CatchAllCommand::execute() {
 			
 			out.close();
 			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	} return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {util.mothurRemove(outputNames[i]);	} return 0; }
 				
 		}
 		
 		if (sharedfile == "") {  
-			string summaryfilename = savedOutputDir + m->getRootName(m->getSimpleName(inputFileNames[0])) + "catchall.summary";
-			summaryfilename = m->getFullPathName(summaryfilename);
+			string summaryfilename = savedOutputDir + util.getRootName(util.getSimpleName(inputFileNames[0])) + "catchall.summary";
+			summaryfilename = util.getFullPathName(summaryfilename);
 			outputNames.push_back(summaryfilename); outputTypes["summary"].push_back(summaryfilename);
 		}else { //combine summaries
 			vector<string> sumNames;
 			for (int i = 0; i < inputFileNames.size(); i++) {
-				sumNames.push_back(m->getFullPathName(outputDir + m->getRootName(m->getSimpleName(inputFileNames[i])) + "catchall.summary"));
+				sumNames.push_back(util.getFullPathName(outputDir + util.getRootName(util.getSimpleName(inputFileNames[i])) + "catchall.summary"));
 			}
 			string summaryfilename = combineSummmary(sumNames);
 			outputNames.push_back(summaryfilename); outputTypes["summary"].push_back(summaryfilename);
@@ -535,13 +536,13 @@ int CatchAllCommand::execute() {
 string CatchAllCommand::process(SAbundVector* sabund, string file1) {
 	try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(file1));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(file1));
         variables["[distance]"] = sabund->getLabel();
         string filename = getOutputFileName("sabund", variables);
-		filename = m->getFullPathName(filename);
+		filename = util.getFullPathName(filename);
 	
 		ofstream out;
-		m->openOutputFile(filename, out);
+		util.openOutputFile(filename, out);
 		
         if (m->getDebug()) { m->mothurOut("[DEBUG]: Creating " + filename + " file for catchall, shown below.\n\n"); }
         
@@ -571,11 +572,11 @@ string CatchAllCommand::combineSummmary(vector<string>& outputNames) {
 		
 		ofstream out;
         map<string, string> variables;
-        variables["[filename]"] = savedOutputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = savedOutputDir + util.getRootName(util.getSimpleName(sharedfile));
         string combineFileName = getOutputFileName("summary", variables);
 		
 		//open combined file
-		m->openOutputFile(combineFileName, out);
+		util.openOutputFile(combineFileName, out);
 		
 		out << "label\tgroup\tmodel\testimate\tlci\tuci" << endl;
 		
@@ -587,11 +588,11 @@ string CatchAllCommand::combineSummmary(vector<string>& outputNames) {
 			vector<string> thisFilesLines;
 			
 			ifstream temp;
-			m->openInputFile(outputNames[i], temp);
+			util.openInputFile(outputNames[i], temp);
 			
 			//read through first line - labels
-			m->getline(temp);			
-			m->gobble(temp);
+			util.getline(temp);			
+			util.gobble(temp);
 			
 			//for each label
 			while (!temp.eof()) {
@@ -611,7 +612,7 @@ string CatchAllCommand::combineSummmary(vector<string>& outputNames) {
 				
 				thisFilesLines.push_back(thisLine);
 				
-				m->gobble(temp);
+				util.gobble(temp);
 			}
 			
 			files[outputNames[i]] = thisFilesLines;
@@ -619,7 +620,7 @@ string CatchAllCommand::combineSummmary(vector<string>& outputNames) {
 			numLines = thisFilesLines.size();
 			
 			temp.close();
-			m->mothurRemove(outputNames[i]);
+			util.mothurRemove(outputNames[i]);
 		}
 		
 		//for each label
@@ -648,13 +649,13 @@ int CatchAllCommand::createSummaryFile(string file1, string label, ofstream& out
 	try {
 		
 		ifstream in;
-		bool able = m->openInputFile(file1, in, "noerror");
+		bool able = util.openInputFile(file1, in, "noerror");
 		
 		if (!able) {  m->mothurOut("[ERROR]: the catchall program did not run properly. Please check to make sure it is located in the same folder as your mothur executable.");m->mothurOutEndLine();  m->setControl_pressed(true);  return 0; }
 			
 		if (!in.eof()) {
 			
-			string header = m->getline(in); m->gobble(in);
+			string header = util.getline(in); util.gobble(in);
 			
 			int pos = header.find("Total Number of Observed Species =");
 			string numString = "";
@@ -677,16 +678,16 @@ int CatchAllCommand::createSummaryFile(string file1, string label, ofstream& out
 				}
 			}
 															  
-			string firstline = m->getline(in); m->gobble(in);
+			string firstline = util.getline(in); util.gobble(in);
 			vector<string> values;
-			m->splitAtComma(firstline, values);
+			util.splitAtComma(firstline, values);
 			
 			values.pop_back(); //last value is always a blank string since the last character in the line is always a ','
 			
 			if (values.size() == 1) { //grab next line if firstline didn't have what you wanted
-				string secondline = m->getline(in); m->gobble(in);
+				string secondline = util.getline(in); util.gobble(in);
 				values.clear();
-				m->splitAtComma(secondline, values);
+				util.splitAtComma(secondline, values);
 				
 				values.pop_back(); //last value is always a blank string since the last character in the line is always a ','
 			}
@@ -723,11 +724,11 @@ vector<string> CatchAllCommand::parseSharedFile(string filename) {
 		InputData input(filename, "sharedfile", Groups);
 		SharedRAbundVectors* shared = input.getSharedRAbundVectors();
         Groups = shared->getNamesGroups();
-		string sharedFileRoot = outputDir + m->getRootName(m->getSimpleName(filename));
+		string sharedFileRoot = outputDir + util.getRootName(util.getSimpleName(filename));
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<Groups.size(); i++) {
-			m->mothurRemove((sharedFileRoot + Groups[i] + ".sabund"));
+			util.mothurRemove((sharedFileRoot + Groups[i] + ".sabund"));
 			filenames.push_back((sharedFileRoot + Groups[i] + ".sabund"));
 		}
     
@@ -736,7 +737,7 @@ vector<string> CatchAllCommand::parseSharedFile(string filename) {
 			for (int i = 0; i < lookup.size(); i++) {
 				SAbundVector sav = lookup[i]->getSAbundVector();
 				ofstream out;
-				m->openOutputFileAppend(sharedFileRoot + Groups[i] + ".sabund", out);
+				util.openOutputFileAppend(sharedFileRoot + Groups[i] + ".sabund", out);
 				sav.print(out);
 				out.close();
 			}

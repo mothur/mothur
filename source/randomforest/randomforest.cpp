@@ -7,6 +7,7 @@
 //
 
 #include "randomforest.hpp" 
+#include "utils.hpp"
 
 /***********************************************************************/
 
@@ -109,7 +110,7 @@ int RandomForest::printConfusionMatrix(map<int, string> intToTreatmentMap) {
 int RandomForest::getMissclassifications(string filename, map<int, string> intToTreatmentMap, vector<string> names) {
     try {
         ofstream out;
-        m->openOutputFile(filename, out);
+        Utils util; util.openOutputFile(filename, out);
         out <<"Sample\tRF classification\tActual classification\n";
         for (map<int, vector<int> >::iterator it = globalOutOfBagEstimates.begin(); it != globalOutOfBagEstimates.end(); it++) {
             
@@ -168,7 +169,7 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
         
         ofstream out;
-        m->openOutputFile(filename, out);
+        Utils util; util.openOutputFile(filename, out);
         out <<"OTU\tMean decrease accuracy\n";
         //vector<string> currentLabels = m->getCurrentSharedBinLabels();
         //for (int i = 0; i < globalVariableRanks.size(); i++) {

@@ -286,16 +286,17 @@ float DeCalculator::calcDE(vector<float> obs, vector<float> exp) {
 
 //***************************************************************************************************************
 
-vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
+vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename, string version) {
 	try {
 
 		vector<float> prob;
-		string freqfile = m->getRootName(filename) + "freq";
+        Utils util;
+		string freqfile = util.getRootName(filename) + "freq";
 		ofstream outFreq;
 		
-		m->openOutputFile(freqfile, outFreq);
+		util.openOutputFile(freqfile, outFreq);
 		
-		outFreq << "#" << m->getVersion() << endl;
+		outFreq << "#" << version << endl;
 		
 		string length = toString(seqs.size());  //if there are 5000 seqs in the template then set precision to 3
 		int precision = length.length() - 1;

@@ -16,7 +16,7 @@ vector<string> TestFastqDataSet::getSubsetFRFastq(int numSeqs) {
     fillForwardFastq();
     fillReverseFastq();
     ofstream out, out2;
-    m->openOutputFile("tempForward.txt", out); m->openOutputFile("tempReverse.txt", out2);
+    util.openOutputFile("tempForward.txt", out); util.openOutputFile("tempReverse.txt", out2);
     for (int i = 0; i < numSeqs; i++) {
         ffastqReads[i].printFastq(out);
         rfastqReads[i].printFastq(out2);
@@ -34,14 +34,14 @@ void TestFastqDataSet::fillForwardFastq() {
     string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/F8D0_S345_L001_R1_001.fastq";
     
     ifstream in;
-    m->openInputFile(testfile, in);
+    util.openInputFile(testfile, in);
     
     int count = 0; bool ignore = false; string format = "illumina1.8+";
     while (!in.eof()) {
         if (m->getControl_pressed()) { break; }
         
         if (count < 2000) {
-            FastqRead read(in, ignore, format); m->gobble(in);
+            FastqRead read(in, ignore, format); util.gobble(in);
             if (!ignore) { ffastqReads.push_back(read);  count++; }
         }else { break; }
         
@@ -56,14 +56,14 @@ void TestFastqDataSet::fillReverseFastq() {
     string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/F8D0_S345_L001_R2_001.fastq";
     
     ifstream in;
-    m->openInputFile(testfile, in);
+    util.openInputFile(testfile, in);
     
     int count = 0; bool ignore = false; string format = "illumina1.8+";
     while (!in.eof()) {
         if (m->getControl_pressed()) { break; }
         
         if (count < 2000) {
-            FastqRead read(in, ignore, format); m->gobble(in);
+            FastqRead read(in, ignore, format); util.gobble(in);
             if (!ignore) { ffastqReads.push_back(read);  count++; }
         }else { break; }
         

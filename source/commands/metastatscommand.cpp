@@ -122,14 +122,14 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
@@ -137,7 +137,7 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -145,64 +145,63 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			}
 			
 			//check for required parameters
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") {  				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
 			
 			//check for required parameters
-			designfile = validParameter.validFile(parameters, "design", true);
+			designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { abort = true; }
 			else if (designfile == "not found") {  				
 				//if there is a current design file, use it
-				designfile = m->getDesignFile(); 
+				designfile = current->getDesignFile(); 
 				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setDesignFile(designfile); }
+			}else { current->setDesignFile(designfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(sharedfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(sharedfile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
             }
 			
-			sets = validParameter.validFile(parameters, "sets", false);			
+			sets = validParameter.valid(parameters, "sets");
 			if (sets == "not found") { sets = ""; }
 			else { 
-				m->splitAtDash(sets, Sets);
+				util.splitAtDash(sets, Sets);
                 if (Sets.size() != 0) { if (Sets[0] != "all") { Groups.clear(); } }
 			}
 
 			
-			string temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+			string temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters); 
 			
-			temp = validParameter.validFile(parameters, "threshold", false);			if (temp == "not found") { temp = "0.05"; }
-			m->mothurConvert(temp, threshold); 
+			temp = validParameter.valid(parameters, "threshold");			if (temp == "not found") { temp = "0.05"; }
+			util.mothurConvert(temp, threshold); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 		}
 
 	}
@@ -265,7 +264,7 @@ int MetaStatsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->getControl_pressed()) {  outputTypes.clear(); delete lookup;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear(); delete lookup;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
@@ -276,7 +275,7 @@ int MetaStatsCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
@@ -296,13 +295,13 @@ int MetaStatsCommand::execute(){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->getControl_pressed()) {  outputTypes.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -333,7 +332,7 @@ int MetaStatsCommand::execute(){
 		
 		delete designMap;
 		
-        if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
+        if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -506,7 +505,7 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, S
 		
 			//get filename
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
             variables["[distance]"] = thisLookUp->getLabel();
             variables["[group]"] = setA + "-" + setB;
 			string outputFileName = getOutputFileName("metastats",variables);
@@ -590,11 +589,11 @@ int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, S
 int MetaStatsCommand::convertToShared(string filename) {
 	try {
         ifstream in;
-        m->openInputFile(filename, in);
+        util.openInputFile(filename, in);
         
-        string header = m->getline(in); m->gobble(in);
+        string header = util.getline(in); util.gobble(in);
         
-        vector<string> groups = m->splitWhiteSpace(header);
+        vector<string> groups = util.splitWhiteSpace(header);
         vector<RAbundFloatVector*> newLookup;
         cout << groups.size() << endl;
         for (int i = 0; i < groups.size(); i++) {
@@ -609,20 +608,20 @@ int MetaStatsCommand::convertToShared(string filename) {
             if (m->getControl_pressed()) { break; }
             
             string otuname;
-            in >> otuname; m->gobble(in);
+            in >> otuname; util.gobble(in);
             otuCount++;
             cout << otuname << endl;
             for (int i = 0; i < groups.size(); i++) {
                 double temp;
-                in >> temp; m->gobble(in);
+                in >> temp; util.gobble(in);
                 newLookup[i]->push_back(temp);
             }
-            m->gobble(in);
+            util.gobble(in);
         }
         in.close();
     
         ofstream out;
-        m->openOutputFile(filename+".shared", out);
+        util.openOutputFile(filename+".shared", out);
         
         out << "label\tgroup\tnumOTUs";
         
@@ -659,7 +658,7 @@ int MetaStatsCommand::convertToShared(string filename) {
 int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, vector<string> subsetGroups, string thisfilename) {
 	try {
         ofstream out;
-        m->openOutputFile(thisfilename+".matrix", out);
+        util.openOutputFile(thisfilename+".matrix", out);
         
         for (int i = 0; i < subset.size(); i++) {
             out << '\t' << subsetGroups[i];

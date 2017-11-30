@@ -256,8 +256,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             
             ifstream inForward, inReverse;
 
-            pDataArray->m->openInputFile(ffastqfile, inForward);
-            pDataArray->m->openInputFile(rfastqfile, inReverse);
+            pDataArray->util.openInputFile(ffastqfile, inForward);
+            pDataArray->util.openInputFile(rfastqfile, inReverse);
             
             FastqRead fread(inForward, error, pDataArray->format);
             forward = fread.getName();
@@ -302,7 +302,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                         
                         if (tempForwardEnd != tempReverseEnd) {
-                            if ((pDataArray->m->isAllAlphaNumerics(tempForwardEnd)) && (pDataArray->m->isAllAlphaNumerics(tempReverseEnd))) {
+                            if ((pDataArray->util.isAllAlphaNumerics(tempForwardEnd)) && (pDataArray->util.isAllAlphaNumerics(tempReverseEnd))) {
                                 //check for off by one on rest of name
                                 if (tempForward.length() == tempReverse.length()) {
                                     int numDiffs = 0;
@@ -341,17 +341,17 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             
             string inputFile = ffastqfile;
             if (pDataArray->outputDir == "") {  thisOutputDir = pDataArray->m->hasPath(inputFile); }
-            pDataArray->outputQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.qfile";
-            pDataArray->outputScrapQual = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.qfile";
+            pDataArray->outputQual = thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile)) + ".trim.qfile";
+            pDataArray->outputScrapQual = thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile)) + ".scrap.qfile";
             pDataArray->inputFiles.push_back(ffastqfile); pDataArray->inputFiles.push_back(rfastqfile);
             if ((findexfile != "") || (rindexfile != "")){
                 pDataArray->qualOrIndexFiles.push_back("NONE"); pDataArray->qualOrIndexFiles.push_back("NONE");
                 if (findexfile != "") { pDataArray->qualOrIndexFiles[0] = findexfile; }
                 if (rindexfile != "") { pDataArray->qualOrIndexFiles[1] = rindexfile; }
             }
-            pDataArray->outputFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".trim.fasta";
-            pDataArray->outputScrapFasta = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".scrap.fasta";
-            pDataArray->outputMisMatches= thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)) + ".report";
+            pDataArray->outputFasta = thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile)) + ".trim.fasta";
+            pDataArray->outputScrapFasta = thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile)) + ".scrap.fasta";
+            pDataArray->outputMisMatches= thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile)) + ".report";
             pDataArray->linesInput_start = 0; pDataArray->linesInput_end = 1000; pDataArray->linesInputReverse_start = 1; pDataArray->qlinesInput_start = 0; pDataArray->qlinesInputReverse_start =0; pDataArray->linesInputReverse_end =1000; pDataArray->qlinesInput_end =1000; pDataArray->qlinesInputReverse_end=1000;
             
             map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
@@ -360,9 +360,9 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             
             if(pDataArray->oligosfile != "") {
                 Oligos oligos;
-                //createOligosGroup = getOligos(pDataArray->fastaFileNames, pDataArray->qualFileNames, pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile)), uniqueFastaNames);
+                //createOligosGroup = getOligos(pDataArray->fastaFileNames, pDataArray->qualFileNames, pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile)), uniqueFastaNames);
                 ///////////////////////////////////////////////////////////////////////////////////////
-                string rootname = pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile));
+                string rootname = pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile));
                 bool allBlank = false;
                 int numFPrimers, numBarcodes, numLinkers, numSpacers, numRPrimers;
                 numRPrimers = 0; numSpacers = 0; numLinkers = 0; numBarcodes = 0; numFPrimers = 0;
@@ -437,11 +437,11 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }
                                 
                                 pDataArray->fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
-                                pDataArray->m->openOutputFile(fastaFileName, temp);		temp.close();
+                                pDataArray->util.openOutputFile(fastaFileName, temp);		temp.close();
                                 //cout << fastaFileName << endl;
                                 
                                 pDataArray->qualFileNames[itBar->first][itPrimer->first] = qualFileName;
-                                pDataArray->m->openOutputFile(qualFileName, temp2);		temp2.close();
+                                pDataArray->util.openOutputFile(qualFileName, temp2);		temp2.close();
                             }
                         }
                     }
@@ -459,16 +459,16 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             }
             
             string outputGroupFileName = "";
-            if (pDataArray->createOligosGroup || pDataArray->createFileGroup)   {       outputGroupFileName += thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(inputFile))   + ".contigs.group";                                 }
+            if (pDataArray->createOligosGroup || pDataArray->createFileGroup)   {       outputGroupFileName += thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile))   + ".contigs.group";                                 }
             
             //give group in file file precedence
             if (pDataArray->createFileGroup) {  pDataArray->createOligosGroup = false; }
             
             ofstream temp, temp1, temp2, temp3;
-            pDataArray->m->openOutputFile(pDataArray->outputFasta, temp); temp.close();
-            pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, temp1); temp1.close();
-            pDataArray->m->openOutputFile(pDataArray->outputQual, temp2); temp2.close();
-            pDataArray->m->openOutputFile(pDataArray->outputScrapQual, temp3); temp3.close();
+            pDataArray->util.openOutputFile(pDataArray->outputFasta, temp); temp.close();
+            pDataArray->util.openOutputFile(pDataArray->outputScrapFasta, temp1); temp1.close();
+            pDataArray->util.openOutputFile(pDataArray->outputQual, temp2); temp2.close();
+            pDataArray->util.openOutputFile(pDataArray->outputScrapQual, temp3); temp3.close();
             
             pDataArray->m->mothurOut("Making contigs...\n");
             unsigned long long thisNumReads = 0;
@@ -607,12 +607,12 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             boost::iostreams::filtering_istream inFF, inRF, inFQ, inRQ;
 #endif
             if (!pDataArray->gz) { //plain text files
-                pDataArray->m->openInputFile(thisffastafile, inFFasta);
-                pDataArray->m->openInputFile(thisrfastafile, inRFasta);
+                pDataArray->util.openInputFile(thisffastafile, inFFasta);
+                pDataArray->util.openInputFile(thisrfastafile, inRFasta);
             }else { //compressed files - no need to seekg because compressed files divide workload differently
 #ifdef USE_BOOST
-                pDataArray->m->openInputFileBinary(thisffastafile, inFFasta, inFF);
-                pDataArray->m->openInputFileBinary(thisrfastafile, inRFasta, inRF);
+                pDataArray->util.openInputFileBinary(thisffastafile, inFFasta, inFF);
+                pDataArray->util.openInputFileBinary(thisrfastafile, inRFasta, inRF);
 #endif
             }
             
@@ -620,34 +620,34 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             if (thisfqualindexfile != "") {
                 if (thisfqualindexfile != "NONE") {
                     if (!pDataArray->gz) { //plain text files
-                        pDataArray->m->openInputFile(thisfqualindexfile, inFQualIndex);
+                        pDataArray->util.openInputFile(thisfqualindexfile, inFQualIndex);
                     }else {
 #ifdef USE_BOOST
-                        pDataArray->m->openInputFileBinary(thisfqualindexfile, inFQualIndex, inFQ);
+                        pDataArray->util.openInputFileBinary(thisfqualindexfile, inFQualIndex, inFQ);
 #endif
                     } //compressed files - no need to seekg because compressed files divide workload differently
                 }
                 else {  thisfqualindexfile = ""; }
                 if (thisrqualindexfile != "NONE") {
                     if (!pDataArray->gz) { //plain text files
-                        pDataArray->m->openInputFile(thisrqualindexfile, inRQualIndex);
+                        pDataArray->util.openInputFile(thisrqualindexfile, inRQualIndex);
                     }else {
 #ifdef USE_BOOST
-                        pDataArray->m->openInputFileBinary(thisrqualindexfile, inRQualIndex, inRQ);
+                        pDataArray->util.openInputFileBinary(thisrqualindexfile, inRQualIndex, inRQ);
 #endif
                     } //compressed files - no need to seekg because compressed files divide workload differently
                 }
                 else { thisrqualindexfile = ""; }
             }
-            pDataArray->m->openOutputFile(pDataArray->outputFasta, outFasta);
-            pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
-            pDataArray->m->openOutputFile(pDataArray->outputMisMatches, outMisMatch);
+            pDataArray->util.openOutputFile(pDataArray->outputFasta, outFasta);
+            pDataArray->util.openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
+            pDataArray->util.openOutputFile(pDataArray->outputMisMatches, outMisMatch);
             bool hasQuality = false;
             bool hasIndex = false;
             outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";
             if (pDataArray->delim == '@') { //fastq files so make an output quality
-                pDataArray->m->openOutputFile(pDataArray->outputQual, outQual);
-                pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
+                pDataArray->util.openOutputFile(pDataArray->outputQual, outQual);
+                pDataArray->util.openOutputFile(pDataArray->outputScrapQual, outScrapQual);
                 if (thisfqualindexfile != "") {
                     if (thisfqualindexfile != "NONE") {  hasIndex = true; }
                 }
@@ -656,8 +656,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 }
                 hasQuality = true;
             }else if ((pDataArray->delim == '>') && (pDataArray->qualOrIndexFiles.size() != 0)) { //fasta and qual files
-                pDataArray->m->openOutputFile(pDataArray->outputQual, outQual);
-                pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
+                pDataArray->util.openOutputFile(pDataArray->outputQual, outQual);
+                pDataArray->util.openOutputFile(pDataArray->outputScrapQual, outScrapQual);
                 hasQuality = true;
             }
             
@@ -666,8 +666,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     for (int j = 0; j < pDataArray->fastaFileNames[i].size(); j++) { //clears old file
                         if (pDataArray->fastaFileNames[i][j] != "") {
                             ofstream temp, temp2;
-                            pDataArray->m->openOutputFile(pDataArray->fastaFileNames[i][j], temp);			temp.close();
-                            pDataArray->m->openOutputFile(pDataArray->qualFileNames[i][j], temp2);			temp2.close();
+                            pDataArray->util.openOutputFile(pDataArray->fastaFileNames[i][j], temp);			temp.close();
+                            pDataArray->util.openOutputFile(pDataArray->qualFileNames[i][j], temp2);			temp2.close();
                         }
                     }
                 }
@@ -704,8 +704,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                 if (!pDataArray->gz) {
                     if (pDataArray->delim == '@') { //fastq files
                         bool tignore;
-                        FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
-                        FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
+                        FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->util.gobble(inFFasta);
+                        FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->util.gobble(inRFasta);
                         
                         string forwardName = fread.getName();
                         string reverseName = rread.getName();
@@ -747,7 +747,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
 
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
-                            FastqRead f2read(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
+                            FastqRead f2read(inFFasta, tignore, pDataArray->format); pDataArray->util.gobble(inFFasta);
                             string forwardName = f2read.getName();
                             string reverseName = rread.getName();
                             ///bool fixed = checkName(f2read, rread);
@@ -784,7 +784,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }
                             }
                             if (!fixed) {
-                                FastqRead r2read(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
+                                FastqRead r2read(inRFasta, ignore, pDataArray->format); pDataArray->util.gobble(inRFasta);
                                 
                                 string forwardName = fread.getName();
                                 string reverseName = r2read.getName();
@@ -837,7 +837,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                         savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                         if (thisfqualindexfile != "") { //forward index file
-                            FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
+                            FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->util.gobble(inFQualIndex);
                             if (tignore) { ignore=true; }
                             findexBarcode.setAligned(firead.getSeq());
                             
@@ -880,7 +880,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
-                                FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
+                                FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->util.gobble(inFQualIndex);
                                 string forwardName = fread.getName();
                                 string reverseName = f2iread.getName();
                                 
@@ -923,7 +923,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                         }
                         if (thisrqualindexfile != "") { //reverse index file
-                            FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
+                            FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->util.gobble(inRQualIndex);
                             
                             string forwardName = fread.getName();
                             string reverseName = riread.getName();
@@ -966,7 +966,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             }
                             /////////////////////////////////////////////////////////////
                             if (!fixed) {
-                                FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
+                                FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->util.gobble(inRQualIndex);
                                 
                                 string forwardName = fread.getName();
                                 string reverseName = r2iread.getName();
@@ -1009,8 +1009,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                         
                     }else { //reading fasta and maybe qual
-                        Sequence fread(inFFasta); pDataArray->m->gobble(inFFasta);
-                        Sequence rread(inRFasta); pDataArray->m->gobble(inRFasta);
+                        Sequence fread(inFFasta); pDataArray->util.gobble(inFFasta);
+                        Sequence rread(inRFasta); pDataArray->util.gobble(inRFasta);
                         string forwardName = fread.getName();
                         string reverseName = rread.getName();
                         ///bool fixed = checkName(fread, rread);
@@ -1048,7 +1048,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         }
                         /////////////////////////////////////////////////////////////
                         if (!fixed) {
-                            Sequence f2read(inFFasta); pDataArray->m->gobble(inFFasta);
+                            Sequence f2read(inFFasta); pDataArray->util.gobble(inFFasta);
                             string forwardName = f2read.getName();
                             string reverseName = rread.getName();
                             ///bool fixed = checkName(f2read, rread);
@@ -1085,7 +1085,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                                 }
                             }
                             if (!fixed) {
-                                Sequence r2read(inRFasta); pDataArray->m->gobble(inRFasta);
+                                Sequence r2read(inRFasta); pDataArray->util.gobble(inRFasta);
                                 string forwardName = fread.getName();
                                 string reverseName = r2read.getName();
                                 ///bool fixed = checkName(fread, r2read);
@@ -1133,8 +1133,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                         fSeq.setName(fread.getName()); fSeq.setAligned(fread.getAligned());
                         rSeq.setName(rread.getName()); rSeq.setAligned(rread.getAligned());
                         if (thisfqualindexfile != "") {
-                            fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
-                            rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
+                            fQual = new QualityScores(inFQualIndex); pDataArray->util.gobble(inFQualIndex);
+                            rQual = new QualityScores(inRQualIndex); pDataArray->util.gobble(inRQualIndex);
                             
                             string forwardName = fread.getName();
                             string reverseName = rread.getName();
@@ -1984,13 +1984,13 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                             
                             if (pDataArray->allFiles) {
                                 ofstream output;
-                                pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
+                                pDataArray->util.openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
                                 output << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
                                 output.close();
                                 
                                 if (hasQuality) {
                                     ofstream output2;
-                                    pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output2);
+                                    pDataArray->util.openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output2);
                                     output2 << ">" << fSeq.getName() << '\t' << commentString << endl;
                                     for (int i = 0; i < contigScores.size(); i++) { output2 << contigScores[i] << " "; }  output2 << endl;
                                     output2.close();
@@ -2072,8 +2072,8 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             if (pDataArray->reorient) { delete rtrimOligos; }
             
             pDataArray->done = true;
-            if (pDataArray->m->getControl_pressed()) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
-                if (hasQuality) { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); }
+            if (pDataArray->m->getControl_pressed()) {  pDataArray->util.mothurRemove(pDataArray->outputFasta);  pDataArray->util.mothurRemove(pDataArray->outputMisMatches);  pDataArray->util.mothurRemove(pDataArray->outputScrapFasta);
+                if (hasQuality) { pDataArray->util.mothurRemove(pDataArray->outputQual); pDataArray->util.mothurRemove(pDataArray->outputScrapQual); }
             }
             }
             
@@ -2083,7 +2083,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             
             pDataArray->m->mothurOut("Done.\n");
             
-            if (pDataArray->m->getControl_pressed()) { for (int i = 0; i < pDataArray->outputNames.size(); i++) {	pDataArray->m->mothurRemove(pDataArray->outputNames[i]); }   return 0; }
+            if (pDataArray->m->getControl_pressed()) { for (int i = 0; i < pDataArray->outputNames.size(); i++) {	pDataArray->util.mothurRemove(pDataArray->outputNames[i]); }   return 0; }
             
             
             if(pDataArray->allFiles){
@@ -2094,12 +2094,12 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     for(int j=0;j<pDataArray->fastaFileNames[0].size();j++){
                         if (pDataArray->fastaFileNames[i][j] != "") {
                             if (namesToRemove.count(pDataArray->fastaFileNames[i][j]) == 0) {
-                                if(pDataArray->m->isBlank(pDataArray->fastaFileNames[i][j])){
-                                    pDataArray->m->mothurRemove(pDataArray->fastaFileNames[i][j]);
+                                if(pDataArray->util.isBlank(pDataArray->fastaFileNames[i][j])){
+                                    pDataArray->util.mothurRemove(pDataArray->fastaFileNames[i][j]);
                                     namesToRemove.insert(pDataArray->fastaFileNames[i][j]);
                                     uniqueFastaNames.erase(pDataArray->fastaFileNames[i][j]); //remove from list for group file print
                                     
-                                    pDataArray->m->mothurRemove(pDataArray->qualFileNames[i][j]);
+                                    pDataArray->util.mothurRemove(pDataArray->qualFileNames[i][j]);
                                     namesToRemove.insert(pDataArray->qualFileNames[i][j]);
                                 }
                             }
@@ -2117,17 +2117,17 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     if (pDataArray->renameSeqs) { pDataArray->theseAllFileNames[it->first] = it->second; }
                     
                     ifstream in;
-                    pDataArray->m->openInputFile(it->first, in);
+                    pDataArray->util.openInputFile(it->first, in);
                     
                     ofstream out;
-                    string thisroot = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(it->first));
+                    string thisroot = thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(it->first));
                     string thisGroupName = thisroot + ".group"; pDataArray->outputNames.push_back(thisGroupName);
-                    pDataArray->m->openOutputFile(thisGroupName, out);
+                    pDataArray->util.openOutputFile(thisGroupName, out);
                     
                     while (!in.eof()){
                         if (pDataArray->m->getControl_pressed()) { break; }
                         
-                        Sequence currSeq(in); pDataArray->m->gobble(in);
+                        Sequence currSeq(in); pDataArray->util.gobble(in);
                         out << currSeq.getName() << '\t' << it->second << endl;
                     }
                     out.close();
@@ -2138,14 +2138,14 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             //append to combo files
             if (pDataArray->createFileGroup || pDataArray->createOligosGroup) {
                 ofstream outCGroup;
-                if (l == 0) {   pDataArray->m->openOutputFile(pDataArray->compositeGroupFile, outCGroup);  pDataArray->outputNames.push_back(pDataArray->compositeGroupFile);          }
-                else {          pDataArray->m->openOutputFileAppend(pDataArray->compositeGroupFile, outCGroup);     }
+                if (l == 0) {   pDataArray->util.openOutputFile(pDataArray->compositeGroupFile, outCGroup);  pDataArray->outputNames.push_back(pDataArray->compositeGroupFile);          }
+                else {          pDataArray->util.openOutputFileAppend(pDataArray->compositeGroupFile, outCGroup);     }
                 
                 if (!pDataArray->allFiles) {
-                    pDataArray->m->mothurRemove(outputGroupFileName);
+                    pDataArray->util.mothurRemove(outputGroupFileName);
                 }else {
                     ofstream outGroup;
-                    pDataArray->m->openOutputFile(outputGroupFileName, outGroup);
+                    pDataArray->util.openOutputFile(outputGroupFileName, outGroup);
                     
                     for (map<string, string>::iterator itGroup = pDataArray->groupMap.begin(); itGroup != pDataArray->groupMap.end(); itGroup++) {
                         outCGroup << itGroup->first << '\t' << itGroup->second << endl;
@@ -2161,18 +2161,18 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
                     else { itTemp->second += itGroups->second; } //existing group, update total
                 }
             }
-            if (l == 0) {  pDataArray->m->appendFiles(pDataArray->outputMisMatches, pDataArray->compositeMisMatchFile);  }
-            else {  pDataArray->m->appendFilesWithoutHeaders(pDataArray->outputMisMatches, pDataArray->compositeMisMatchFile);  }
-            pDataArray->m->appendFiles(pDataArray->outputFasta, pDataArray->compositeFastaFile);
-            pDataArray->m->appendFiles(pDataArray->outputScrapFasta, pDataArray->compositeScrapFastaFile);
-            pDataArray->m->appendFiles(pDataArray->outputQual, pDataArray->compositeQualFile);
-            pDataArray->m->appendFiles(pDataArray->outputScrapQual, pDataArray->compositeScrapQualFile);
+            if (l == 0) {  pDataArray->util.appendFiles(pDataArray->outputMisMatches, pDataArray->compositeMisMatchFile);  }
+            else {  pDataArray->util.appendFilesWithoutHeaders(pDataArray->outputMisMatches, pDataArray->compositeMisMatchFile);  }
+            pDataArray->util.appendFiles(pDataArray->outputFasta, pDataArray->compositeFastaFile);
+            pDataArray->util.appendFiles(pDataArray->outputScrapFasta, pDataArray->compositeScrapFastaFile);
+            pDataArray->util.appendFiles(pDataArray->outputQual, pDataArray->compositeQualFile);
+            pDataArray->util.appendFiles(pDataArray->outputScrapQual, pDataArray->compositeScrapQualFile);
             if (!pDataArray->allFiles) {
-                pDataArray->m->mothurRemove(pDataArray->outputMisMatches);
-                pDataArray->m->mothurRemove(pDataArray->outputFasta);
-                pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
-                pDataArray->m->mothurRemove(pDataArray->outputQual);
-                pDataArray->m->mothurRemove(pDataArray->outputScrapQual);
+                pDataArray->util.mothurRemove(pDataArray->outputMisMatches);
+                pDataArray->util.mothurRemove(pDataArray->outputFasta);
+                pDataArray->util.mothurRemove(pDataArray->outputScrapFasta);
+                pDataArray->util.mothurRemove(pDataArray->outputQual);
+                pDataArray->util.mothurRemove(pDataArray->outputScrapQual);
             }else {
                 pDataArray->outputNames.push_back(pDataArray->outputFasta);
                 pDataArray->outputNames.push_back(pDataArray->outputScrapFasta);
@@ -2433,48 +2433,48 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         
         ifstream inFFasta, inRFasta, inFQualIndex, inRQualIndex;
         ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
-        pDataArray->m->openInputFile(thisffastafile, inFFasta);
-        pDataArray->m->openInputFile(thisrfastafile, inRFasta);
+        pDataArray->util.openInputFile(thisffastafile, inFFasta);
+        pDataArray->util.openInputFile(thisrfastafile, inRFasta);
         
         bool begin = false;
         //print header if you are process 0
         if ((pDataArray->linesInput_start == 0) || (pDataArray->linesInput_start == 1)) {
             begin = true;
             inFFasta.seekg(0); inRFasta.seekg(0);
-            pDataArray->m->zapGremlins(inFFasta); pDataArray->m->zapGremlins(inRFasta);
+            pDataArray->util.zapGremlins(inFFasta); pDataArray->util.zapGremlins(inRFasta);
         }else { //this accounts for the difference in line endings.
-            inFFasta.seekg(pDataArray->linesInput_start-1); pDataArray->m->gobble(inFFasta);
-            inRFasta.seekg(pDataArray->linesInputReverse_start-1); pDataArray->m->gobble(inRFasta);
+            inFFasta.seekg(pDataArray->linesInput_start-1); pDataArray->util.gobble(inFFasta);
+            inRFasta.seekg(pDataArray->linesInputReverse_start-1); pDataArray->util.gobble(inRFasta);
         }
         
         bool hasIndex = false;
         if (thisfqualindexfile != "") {
             if (thisfqualindexfile != "NONE") {
-                pDataArray->m->openInputFile(thisfqualindexfile, inFQualIndex);
-                if (begin) { inFQualIndex.seekg(0);  pDataArray->m->zapGremlins(inFQualIndex); }
-                else { inFQualIndex.seekg(pDataArray->qlinesInput_start-1); pDataArray->m->gobble(inFQualIndex); }
+                pDataArray->util.openInputFile(thisfqualindexfile, inFQualIndex);
+                if (begin) { inFQualIndex.seekg(0);  pDataArray->util.zapGremlins(inFQualIndex); }
+                else { inFQualIndex.seekg(pDataArray->qlinesInput_start-1); pDataArray->util.gobble(inFQualIndex); }
                 hasIndex = true;
             }else {  thisfqualindexfile = ""; }
             if (thisrqualindexfile != "NONE") {
-                pDataArray->m->openInputFile(thisrqualindexfile, inRQualIndex);
-                if (begin) { inRQualIndex.seekg(0);  pDataArray->m->zapGremlins(inRQualIndex); }
-                else { inRQualIndex.seekg(pDataArray->qlinesInputReverse_start-1); pDataArray->m->gobble(inRQualIndex); }
+                pDataArray->util.openInputFile(thisrqualindexfile, inRQualIndex);
+                if (begin) { inRQualIndex.seekg(0);  pDataArray->util.zapGremlins(inRQualIndex); }
+                else { inRQualIndex.seekg(pDataArray->qlinesInputReverse_start-1); pDataArray->util.gobble(inRQualIndex); }
                 hasIndex = true;
             }else { thisrqualindexfile = ""; }
         }
         
-        pDataArray->m->openOutputFile(pDataArray->outputFasta, outFasta);
-        pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
-        pDataArray->m->openOutputFile(pDataArray->outputMisMatches, outMisMatch);
+        pDataArray->util.openOutputFile(pDataArray->outputFasta, outFasta);
+        pDataArray->util.openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
+        pDataArray->util.openOutputFile(pDataArray->outputMisMatches, outMisMatch);
         bool hasQuality = false;
         outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";
         if (pDataArray->delim == '@') { //fastq files so make an output quality
-            pDataArray->m->openOutputFile(pDataArray->outputQual, outQual);
-            pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
+            pDataArray->util.openOutputFile(pDataArray->outputQual, outQual);
+            pDataArray->util.openOutputFile(pDataArray->outputScrapQual, outScrapQual);
             hasQuality = true;
         }else if ((pDataArray->delim == '>') && (pDataArray->qualOrIndexFiles.size() != 0)) { //fasta and qual files
-            pDataArray->m->openOutputFile(pDataArray->outputQual, outQual);
-            pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
+            pDataArray->util.openOutputFile(pDataArray->outputQual, outQual);
+            pDataArray->util.openOutputFile(pDataArray->outputScrapQual, outScrapQual);
             hasQuality = true;
         }
         
@@ -2483,8 +2483,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 for (int j = 0; j < pDataArray->fastaFileNames[i].size(); j++) { //clears old file
                     if (pDataArray->fastaFileNames[i][j] != "") {
                         ofstream temp, temp2;
-                        pDataArray->m->openOutputFile(pDataArray->fastaFileNames[i][j], temp);			temp.close();
-                        pDataArray->m->openOutputFile(pDataArray->qualFileNames[i][j], temp2);			temp2.close();
+                        pDataArray->util.openOutputFile(pDataArray->fastaFileNames[i][j], temp);			temp.close();
+                        pDataArray->util.openOutputFile(pDataArray->qualFileNames[i][j], temp2);			temp2.close();
                     }
                 }
             }
@@ -2519,8 +2519,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
             if (pDataArray->delim == '@') { //fastq files
                 bool tignore;
-                FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
-                FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
+                FastqRead fread(inFFasta, tignore, pDataArray->format); pDataArray->util.gobble(inFFasta);
+                FastqRead rread(inRFasta, ignore, pDataArray->format); pDataArray->util.gobble(inRFasta);
                 
                 string forwardName = fread.getName();
                 string reverseName = rread.getName();
@@ -2559,7 +2559,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }
                 /////////////////////////////////////////////////////////////
                 if (!fixed) {
-                    FastqRead f2read(inFFasta, tignore, pDataArray->format); pDataArray->m->gobble(inFFasta);
+                    FastqRead f2read(inFFasta, tignore, pDataArray->format); pDataArray->util.gobble(inFFasta);
                     
                     string forwardName = f2read.getName();
                     string reverseName = rread.getName();
@@ -2597,7 +2597,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         }
                     }
                     if (!fixed) {
-                        FastqRead r2read(inRFasta, ignore, pDataArray->format); pDataArray->m->gobble(inRFasta);
+                        FastqRead r2read(inRFasta, ignore, pDataArray->format); pDataArray->util.gobble(inRFasta);
                         
                         string forwardName = fread.getName();
                         string reverseName = r2read.getName();
@@ -2650,7 +2650,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
                 savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                 if (thisfqualindexfile != "") { //forward index file
-                    FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
+                    FastqRead firead(inFQualIndex, tignore, pDataArray->format); pDataArray->util.gobble(inFQualIndex);
                     if (tignore) { ignore=true; }
                     findexBarcode.setAligned(firead.getSeq());
 
@@ -2693,7 +2693,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     }
                     /////////////////////////////////////////////////////////////
                     if (!fixed) {
-                        FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inFQualIndex);
+                        FastqRead f2iread(inFQualIndex, tignore, pDataArray->format); pDataArray->util.gobble(inFQualIndex);
                         
                         string forwardName = fread.getName();
                         string reverseName = f2iread.getName();
@@ -2740,7 +2740,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     hasIndex = true;
                 }
                 if (thisrqualindexfile != "") { //reverse index file
-                    FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
+                    FastqRead riread(inRQualIndex, tignore, pDataArray->format); pDataArray->util.gobble(inRQualIndex);
                     if (tignore) { ignore=true; }
                     rindexBarcode.setAligned(riread.getSeq());
                     
@@ -2782,7 +2782,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     }
                     /////////////////////////////////////////////////////////////
                     if (!fixed) {
-                        FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->m->gobble(inRQualIndex);
+                        FastqRead r2iread(inRQualIndex, tignore, pDataArray->format); pDataArray->util.gobble(inRQualIndex);
                         
                         string forwardName = fread.getName();
                         string reverseName = r2iread.getName();
@@ -2830,8 +2830,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }
                 
             }else { //reading fasta and maybe qual
-                Sequence fread(inFFasta); pDataArray->m->gobble(inFFasta);
-                Sequence rread(inRFasta); pDataArray->m->gobble(inRFasta);
+                Sequence fread(inFFasta); pDataArray->util.gobble(inFFasta);
+                Sequence rread(inRFasta); pDataArray->util.gobble(inRFasta);
                 string forwardName = fread.getName();
                 string reverseName = rread.getName();
                 
@@ -2871,7 +2871,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 }
                 /////////////////////////////////////////////////////////////
                 if (!fixed) {
-                    Sequence f2read(inFFasta); pDataArray->m->gobble(inFFasta);
+                    Sequence f2read(inFFasta); pDataArray->util.gobble(inFFasta);
                     
                     string forwardName = f2read.getName();
                     string reverseName = rread.getName();
@@ -2911,7 +2911,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         }
                     }
                     if (!fixed) {
-                        Sequence r2read(inRFasta); pDataArray->m->gobble(inRFasta);
+                        Sequence r2read(inRFasta); pDataArray->util.gobble(inRFasta);
                         
                         string forwardName = fread.getName();
                         string reverseName = r2read.getName();
@@ -2961,8 +2961,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 fSeq.setName(fread.getName()); fSeq.setAligned(fread.getAligned());
                 rSeq.setName(rread.getName()); rSeq.setAligned(rread.getAligned());
                 if (thisfqualindexfile != "") {
-                    fQual = new QualityScores(inFQualIndex); pDataArray->m->gobble(inFQualIndex);
-                    rQual = new QualityScores(inRQualIndex); pDataArray->m->gobble(inRQualIndex);
+                    fQual = new QualityScores(inFQualIndex); pDataArray->util.gobble(inFQualIndex);
+                    rQual = new QualityScores(inRQualIndex); pDataArray->util.gobble(inRQualIndex);
                     
                     string forwardName = fread.getName();
                     string reverseName = rread.getName();
@@ -3328,13 +3328,13 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         
                         if (pDataArray->allFiles) {
                             ofstream output;
-                            pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
+                            pDataArray->util.openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
                             output << ">" << fSeq.getName() << '\t' << commentString << endl << contig << endl;
                             output.close();
                             
                             if (hasQuality) {
                                 ofstream output2;
-                                pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output2);
+                                pDataArray->util.openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output2);
                                 output2 << ">" << fSeq.getName() << '\t' << commentString << endl;
                                 for (int i = 0; i < contigScores.size(); i++) { output2 << contigScores[i] << " "; }  output2 << endl;
                                 output2.close();
@@ -3382,8 +3382,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         if (pDataArray->reorient) { delete rtrimOligos; }
         
         pDataArray->done = true;
-        if (pDataArray->m->getControl_pressed()) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);
-            if (hasQuality) { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); }
+        if (pDataArray->m->getControl_pressed()) {  pDataArray->util.mothurRemove(pDataArray->outputFasta);  pDataArray->util.mothurRemove(pDataArray->outputMisMatches);  pDataArray->util.mothurRemove(pDataArray->outputScrapFasta);
+            if (hasQuality) { pDataArray->util.mothurRemove(pDataArray->outputQual); pDataArray->util.mothurRemove(pDataArray->outputScrapQual); }
         }
         
         return 0;

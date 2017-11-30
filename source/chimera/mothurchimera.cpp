@@ -105,14 +105,14 @@ vector<Sequence*> MothurChimera::readSeqs(string file) {
         
         
         ifstream in;
-        m->openInputFile(file, in);
+        Utils util; util.openInputFile(file, in);
         
         //read in seqs and store in vector
         while(!in.eof()){
             
             if (m->getControl_pressed()) { return container; }
             
-            Sequence* current = new Sequence(in);  m->gobble(in);
+            Sequence* current = new Sequence(in);  util.gobble(in);
             
             if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
             else if (length != current->getAligned().length()) {   unaligned = true;	}
@@ -145,7 +145,7 @@ void MothurChimera::setMask(string filename) {
 		}else{
 		
             ifstream infile;
-            m->openInputFile(filename, infile);
+            Utils util; util.openInputFile(filename, infile);
             
             if (!infile.eof()) {
                 Sequence temp(infile);
@@ -155,8 +155,6 @@ void MothurChimera::setMask(string filename) {
                 seqMask = "";
             }
             infile.close();
-	
-	
 		}
 	}
 	catch(exception& e) {

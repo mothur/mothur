@@ -184,14 +184,14 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -199,7 +199,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -207,7 +207,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -215,7 +215,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("alignreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
@@ -223,7 +223,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
                 it = parameters.find("contigsreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["contigsreport"] = inputDir + it->second;		}
 				}
@@ -231,7 +231,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
                 it = parameters.find("summary");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["summary"] = inputDir + it->second;		}
 				}
@@ -239,7 +239,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("qfile");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
@@ -247,7 +247,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -255,7 +255,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -263,43 +263,43 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 
             fileType = "name file";
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 			
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 	
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
-			qualfile = validParameter.validFile(parameters, "qfile", true);
+			qualfile = validParameter.validFile(parameters, "qfile");
 			if (qualfile == "not open") { abort = true; }	
 			else if (qualfile == "not found") { qualfile = ""; }
-			else { m->setQualFile(qualfile); }
+			else { current->setQualFile(qualfile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); fileType = "count file"; }
+			else { current->setCountFile(countfile); fileType = "count file"; }
             
-            contigsreport = validParameter.validFile(parameters, "contigsreport", true);
+            contigsreport = validParameter.validFile(parameters, "contigsreport");
 			if (contigsreport == "not open") { contigsreport = ""; abort = true; }
 			else if (contigsreport == "not found") { contigsreport = "";  }	
             
-            summaryfile = validParameter.validFile(parameters, "summary", true);
+            summaryfile = validParameter.validFile(parameters, "summary");
 			if (summaryfile == "not open") { summaryfile = ""; abort = true; }
 			else if (summaryfile == "not found") { summaryfile = "";  }
-            else { m->setSummaryFile(summaryfile); }
+            else { current->setSummaryFile(summaryfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -309,72 +309,71 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
             }
             
-			alignreport = validParameter.validFile(parameters, "alignreport", true);
+			alignreport = validParameter.validFile(parameters, "alignreport");
 			if (alignreport == "not open") { abort = true; }
 			else if (alignreport == "not found") { alignreport = ""; }
 			
-			taxonomy = validParameter.validFile(parameters, "taxonomy", true);
+			taxonomy = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomy == "not open") { abort = true; }
 			else if (taxonomy == "not found") { taxonomy = ""; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "start", false);		if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, startPos); 
+			temp = validParameter.valid(parameters, "start");		if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, startPos); 
 		
-			temp = validParameter.validFile(parameters, "end", false);			if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, endPos);  
+			temp = validParameter.valid(parameters, "end");			if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, endPos);  
 
-			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, maxAmbig);  
+			temp = validParameter.valid(parameters, "maxambig");		if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, maxAmbig);  
 
-			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, maxHomoP);  
+			temp = validParameter.valid(parameters, "maxhomop");		if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, maxHomoP);  
 
-			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "10"; }
-			m->mothurConvert(temp, minLength); 
+			temp = validParameter.valid(parameters, "minlength");	if (temp == "not found") { temp = "10"; }
+			util.mothurConvert(temp, minLength); 
 			
-			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, maxLength); 
+			temp = validParameter.valid(parameters, "maxlength");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, maxLength); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
-            temp = validParameter.validFile(parameters, "minoverlap", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, minOverlap); 
+            temp = validParameter.valid(parameters, "minoverlap");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, minOverlap); 
             
-            temp = validParameter.validFile(parameters, "ostart", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, oStart); 
+            temp = validParameter.valid(parameters, "ostart");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, oStart); 
             
-            temp = validParameter.validFile(parameters, "oend", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, oEnd); 
+            temp = validParameter.valid(parameters, "oend");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, oEnd); 
             
-            temp = validParameter.validFile(parameters, "mismatches", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, mismatches); 
+            temp = validParameter.valid(parameters, "mismatches");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, mismatches); 
             
-            temp = validParameter.validFile(parameters, "maxn", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, maxN); 
+            temp = validParameter.valid(parameters, "maxn");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, maxN); 
             
-            temp = validParameter.validFile(parameters, "minscore", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, minScore); 
+            temp = validParameter.valid(parameters, "minscore");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, minScore); 
             
-            temp = validParameter.validFile(parameters, "maxinsert", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, maxInsert); 
+            temp = validParameter.valid(parameters, "maxinsert");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, maxInsert); 
             
-            temp = validParameter.validFile(parameters, "minsim", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, minSim); 
+            temp = validParameter.valid(parameters, "minsim");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, minSim); 
             
-			temp = validParameter.validFile(parameters, "optimize", false);	//optimizing trumps the optimized values original value
+			temp = validParameter.valid(parameters, "optimize");	//optimizing trumps the optimized values original value
 			if (temp == "not found"){	temp = "none";		}
-			m->splitAtDash(temp, optimize);		
+			util.splitAtDash(temp, optimize);		
             
             if ((contigsreport != "") && ((summaryfile != "") || ( alignreport != ""))) {
                 m->mothurOut("[ERROR]: You may only provide one of the following: contigsreport, alignreport or summary, aborting.\n"); abort=true;
@@ -420,8 +419,8 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			
 			if (optimize.size() == 1) { if (optimize[0] == "none") { optimize.clear(); } }
 			
-			temp = validParameter.validFile(parameters, "criteria", false);	if (temp == "not found"){	temp = "90";				}
-			m->mothurConvert(temp, criteria); 
+			temp = validParameter.valid(parameters, "criteria");	if (temp == "not found"){	temp = "90";				}
+			util.mothurConvert(temp, criteria); 
 			
 			if (countfile == "") { 
                 if (namefile == "") {
@@ -445,11 +444,11 @@ int ScreenSeqsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> badSeqNames;
-        int start = time(NULL);
+        long start = time(NULL);
         long long numFastaSeqs = 0;
         
         //use the namefile to optimize correctly
-        if (namefile != "") { nameMap = m->readNames(namefile); }
+        if (namefile != "") { nameMap = util.readNames(namefile); }
         else if (countfile != "") {
             CountTable ct;
             ct.readTable(countfile, true, false);
@@ -457,14 +456,14 @@ int ScreenSeqsCommand::execute(){
         }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
         badAccnosFile =  getOutputFileName("accnos",variables);
         outputNames.push_back(badAccnosFile); outputTypes["accnos"].push_back(badAccnosFile);
 
         if ((contigsreport == "") && (summaryfile == "") && (alignreport == "")) {   numFastaSeqs = screenFasta(badSeqNames);  }
         else {   numFastaSeqs = screenReports(badSeqNames);   }
 		
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
         //use remove.seqs to create new name, group and count file
         if ((countfile != "") || (namefile != "") || (groupfile != "") || (qualfile != "") || (taxonomy != "")) {
@@ -493,56 +492,56 @@ int ScreenSeqsCommand::execute(){
             
             if (groupfile != "") {
                 string thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-                variables["[extension]"] = m->getExtension(groupfile);
+                if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+                variables["[extension]"] = util.getExtension(groupfile);
                 string outGroup = getOutputFileName("group", variables);
-                m->renameFile(filenames["group"][0], outGroup);
+                util.renameFile(filenames["group"][0], outGroup);
                 outputNames.push_back(outGroup); outputTypes["group"].push_back(outGroup);
             }
             
             if (namefile != "") {
                 string thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
-                variables["[extension]"] = m->getExtension(namefile);
+                if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+                variables["[extension]"] = util.getExtension(namefile);
                 string outName = getOutputFileName("name", variables);
-                m->renameFile(filenames["name"][0], outName);
+                util.renameFile(filenames["name"][0], outName);
                 outputNames.push_back(outName); outputTypes["name"].push_back(outName);
             }
             
             if (countfile != "") {
                 string thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
-                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
-                variables["[extension]"] = m->getExtension(countfile);
+                if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+                variables["[extension]"] = util.getExtension(countfile);
                 string outCount = getOutputFileName("count", variables);
-                m->renameFile(filenames["count"][0], outCount);
+                util.renameFile(filenames["count"][0], outCount);
                 outputNames.push_back(outCount); outputTypes["count"].push_back(outCount);
             }
             
             if (qualfile != "") {
                 string thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
-                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
-                variables["[extension]"] = m->getExtension(qualfile);
+                if (outputDir == "") {  thisOutputDir += util.hasPath(qualfile);  }
+                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
+                variables["[extension]"] = util.getExtension(qualfile);
                 string outQual = getOutputFileName("qfile", variables);
-                m->renameFile(filenames["qfile"][0], outQual);
+                util.renameFile(filenames["qfile"][0], outQual);
                 outputNames.push_back(outQual); outputTypes["name"].push_back(outQual);
             }
             
             if (taxonomy != "") {
                 string thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += m->hasPath(taxonomy);  }
-                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxonomy));
-                variables["[extension]"] = m->getExtension(taxonomy);
+                if (outputDir == "") {  thisOutputDir += util.hasPath(taxonomy);  }
+                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxonomy));
+                variables["[extension]"] = util.getExtension(taxonomy);
                 string outTax = getOutputFileName("taxonomy", variables);
-                m->renameFile(filenames["taxonomy"][0], outTax);
+                util.renameFile(filenames["taxonomy"][0], outTax);
                 outputNames.push_back(outTax); outputTypes["count"].push_back(outTax);
             }
         }
 		
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]);  } return 0; }
 
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -551,40 +550,40 @@ int ScreenSeqsCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("qfile");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setQualFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("taxonomy");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 		}
         
         itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
         
         itTypes = outputTypes.find("accnos");
         if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
         }
 
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
@@ -601,14 +600,14 @@ int ScreenSeqsCommand::execute(){
 int ScreenSeqsCommand::runFastaScreening(map<string, string>& badSeqNames){
 	try{
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
-        variables["[extension]"] = m->getExtension(fastafile);
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[extension]"] = util.getExtension(fastafile);
 		string goodSeqFile = getOutputFileName("fasta", variables);
 		outputNames.push_back(goodSeqFile); outputTypes["fasta"].push_back(goodSeqFile);
 		
         int numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames);
         
-        if (m->getControl_pressed()) { m->mothurRemove(goodSeqFile); return numFastaSeqs; }
+        if (m->getControl_pressed()) { util.mothurRemove(goodSeqFile); return numFastaSeqs; }
 		
 		return numFastaSeqs;
 	}
@@ -624,15 +623,15 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
         
         //did not provide a summary file, but set a parameter that requires summarizing the fasta file
         //or did provide a summary file, but set maxn parameter so we must summarize the fasta file
-        if (((summaryfile == "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize)))) || ((summaryfile != "") && m->inUsersGroups("maxn", optimize))) {  
+        if (((summaryfile == "") && ((util.inUsersGroups("maxambig", optimize)) ||(util.inUsersGroups("maxhomop", optimize)) ||(util.inUsersGroups("maxlength", optimize)) || (util.inUsersGroups("minlength", optimize)) || (util.inUsersGroups("start", optimize)) || (util.inUsersGroups("end", optimize)))) || ((summaryfile != "") && util.inUsersGroups("maxn", optimize))) {  
             getSummary();
         }
         
-        if ((summaryfile != "") && ((m->inUsersGroups("maxambig", optimize)) ||(m->inUsersGroups("maxhomop", optimize)) ||(m->inUsersGroups("maxlength", optimize)) || (m->inUsersGroups("minlength", optimize)) || (m->inUsersGroups("start", optimize)) || (m->inUsersGroups("end", optimize)))) { //summarize based on summaryfile
+        if ((summaryfile != "") && ((util.inUsersGroups("maxambig", optimize)) ||(util.inUsersGroups("maxhomop", optimize)) ||(util.inUsersGroups("maxlength", optimize)) || (util.inUsersGroups("minlength", optimize)) || (util.inUsersGroups("start", optimize)) || (util.inUsersGroups("end", optimize)))) { //summarize based on summaryfile
             getSummaryReport();
-        }else if ((contigsreport != "") && ((m->inUsersGroups("minoverlap", optimize)) || (m->inUsersGroups("ostart", optimize)) || (m->inUsersGroups("oend", optimize)) || (m->inUsersGroups("mismatches", optimize)))) { //optimize settings based on contigs file
+        }else if ((contigsreport != "") && ((util.inUsersGroups("minoverlap", optimize)) || (util.inUsersGroups("ostart", optimize)) || (util.inUsersGroups("oend", optimize)) || (util.inUsersGroups("mismatches", optimize)))) { //optimize settings based on contigs file
             optimizeContigs();
-        }else if ((alignreport != "") && ((m->inUsersGroups("minsim", optimize)) || (m->inUsersGroups("minscore", optimize)) || (m->inUsersGroups("maxinsert", optimize)))) { //optimize settings based on contigs file
+        }else if ((alignreport != "") && ((util.inUsersGroups("minsim", optimize)) || (util.inUsersGroups("minscore", optimize)) || (util.inUsersGroups("maxinsert", optimize)))) { //optimize settings based on contigs file
             optimizeAlign();
         }
         
@@ -655,7 +654,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
     try {
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(alignreport));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(alignreport));
         string outSummary =  getOutputFileName("alignreport",variables);
         outputNames.push_back(outSummary); outputTypes["alignreport"].push_back(outSummary);
         
@@ -666,12 +665,12 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         float SearchScore, SimBtwnQueryTemplate;
         
         ofstream out;
-        m->openOutputFile(outSummary, out);
+        util.openOutputFile(outSummary, out);
         
         //read summary file
         ifstream in;
-        m->openInputFile(alignreport, in);
-        out << (m->getline(in)) << endl;   //skip headers
+        util.openInputFile(alignreport, in);
+        out << (util.getline(in)) << endl;   //skip headers
         
         int count = 0;
         
@@ -680,7 +679,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; m->gobble(in);
+            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; util.gobble(in);
             
             bool goodSeq = 1;		//	innocent until proven guilty
             string trashCode = "";
@@ -702,22 +701,22 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         int numFastaSeqs = runFastaScreening(badSeqNames);
         
         if (oldBadSeqsCount != badSeqNames.size()) { //more seqs were removed by maxns
-            m->renameFile(outSummary, outSummary+".temp");
+            util.renameFile(outSummary, outSummary+".temp");
             
             ofstream out2;
-            m->openOutputFile(outSummary, out2);
+            util.openOutputFile(outSummary, out2);
             
             //read summary file
             ifstream in2;
-            m->openInputFile(outSummary+".temp", in2);
-            out2 << (m->getline(in2)) << endl;   //skip headers
+            util.openInputFile(outSummary+".temp", in2);
+            out2 << (util.getline(in2)) << endl;   //skip headers
             
             while (!in2.eof()) {
                 
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in2 >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; m->gobble(in2);
+                in2 >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; util.gobble(in2);
                 
                 if (badSeqNames.count(name) == 0) { //are you good?
                     out2 << name << '\t' << length << '\t' << TemplateName  << '\t' << TemplateLength  << '\t' << SearchMethod  << '\t' << SearchScore  << '\t' << AlignmentMethod  << '\t' << QueryStart  << '\t' << QueryEnd  << '\t' << TemplateStart  << '\t' << TemplateEnd  << '\t' << PairwiseAlignmentLength  << '\t' << GapsInQuery  << '\t' << GapsInTemplate  << '\t' << LongestInsert  << '\t' << SimBtwnQueryTemplate << endl;
@@ -725,7 +724,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             }
             in2.close();
             out2.close();
-            m->mothurRemove(outSummary+".temp");
+            util.mothurRemove(outSummary+".temp");
         }
         
         if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your align report file, quitting.\n"); m->setControl_pressed(true); }
@@ -746,7 +745,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
 int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
     try{
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(contigsreport));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(contigsreport));
         string outSummary =  getOutputFileName("contigsreport",variables);
         outputNames.push_back(outSummary); outputTypes["contigsreport"].push_back(outSummary);
         
@@ -755,12 +754,12 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         int length, OLength, thisOStart, thisOEnd, numMisMatches, numNs;
         
         ofstream out;
-        m->openOutputFile(outSummary, out);
+        util.openOutputFile(outSummary, out);
         
         //read summary file
         ifstream in;
-        m->openInputFile(contigsreport, in);
-        out << (m->getline(in)) << endl;   //skip headers
+        util.openInputFile(contigsreport, in);
+        out << (util.getline(in)) << endl;   //skip headers
         
         int count = 0;
         
@@ -769,7 +768,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; m->gobble(in);
+            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; util.gobble(in);
             
             bool goodSeq = 1;		//	innocent until proven guilty
             string trashCode = "";
@@ -793,22 +792,22 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         int numFastaSeqs = runFastaScreening(badSeqNames);
         
         if (oldBadSeqsCount != badSeqNames.size()) { //more seqs were removed by maxns
-            m->renameFile(outSummary, outSummary+".temp");
+            util.renameFile(outSummary, outSummary+".temp");
             
             ofstream out2;
-            m->openOutputFile(outSummary, out2);
+            util.openOutputFile(outSummary, out2);
             
             //read summary file
             ifstream in2;
-            m->openInputFile(outSummary+".temp", in2);
-            out2 << (m->getline(in2)) << endl;   //skip headers
+            util.openInputFile(outSummary+".temp", in2);
+            out2 << (util.getline(in2)) << endl;   //skip headers
             
             while (!in2.eof()) {
                 
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; m->gobble(in2);
+                in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; util.gobble(in2);
                 
                 if (badSeqNames.count(name) == 0) { //are you good?
                     out2 << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;
@@ -816,7 +815,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             }
             in2.close();
             out2.close();
-            m->mothurRemove(outSummary+".temp");
+            util.mothurRemove(outSummary+".temp");
         }
         
         if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your contigs report file, quitting.\n"); m->setControl_pressed(true); }
@@ -834,7 +833,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
 int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
 	try{
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(summaryfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(summaryfile));
         string outSummary =  getOutputFileName("summary",variables);
 		outputNames.push_back(outSummary); outputTypes["summary"].push_back(outSummary);
         
@@ -842,12 +841,12 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
         int start, end, length, ambigs, polymer, numReps;
         
         ofstream out;
-        m->openOutputFile(outSummary, out);
+        util.openOutputFile(outSummary, out);
                 
         //read summary file
         ifstream in;
-        m->openInputFile(summaryfile, in);
-        out << (m->getline(in)) << endl;   //skip headers
+        util.openInputFile(summaryfile, in);
+        out << (util.getline(in)) << endl;   //skip headers
          
 		int count = 0;
         
@@ -856,7 +855,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in);
+            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; util.gobble(in);
             
             bool goodSeq = 1;		//	innocent until proven guilty
             string trashCode = "";
@@ -881,22 +880,22 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
         int numFastaSeqs = runFastaScreening(badSeqNames);
         
         if (oldBadSeqsCount != badSeqNames.size()) { //more seqs were removed by maxns
-            m->renameFile(outSummary, outSummary+".temp");
+            util.renameFile(outSummary, outSummary+".temp");
             
             ofstream out2;
-            m->openOutputFile(outSummary, out2);
+            util.openOutputFile(outSummary, out2);
             
             //read summary file
             ifstream in2;
-            m->openInputFile(outSummary+".temp", in2);
-            out2 << (m->getline(in2)) << endl;   //skip headers
+            util.openInputFile(outSummary+".temp", in2);
+            out2 << (util.getline(in2)) << endl;   //skip headers
             
             while (!in2.eof()) {
                 
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in2 >> name >> start >> end >> length >> ambigs >> polymer >> numReps; m->gobble(in2);
+                in2 >> name >> start >> end >> length >> ambigs >> polymer >> numReps; util.gobble(in2);
                 
                 if (badSeqNames.count(name) == 0) { //are you good?
                     out2 << name << '\t' << start  << '\t' << end  << '\t' << length  << '\t' << ambigs  << '\t' << polymer  << '\t' << numReps << endl;	
@@ -904,7 +903,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             }
             in2.close();
             out2.close();
-            m->mothurRemove(outSummary+".temp");
+            util.mothurRemove(outSummary+".temp");
         }
         
         if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your summary file, quitting.\n"); m->setControl_pressed(true); }
@@ -937,7 +936,7 @@ int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
 //***************************************************************************************************************
 int ScreenSeqsCommand::getSummaryReport(){
 	try {
-        Summary sum;
+        Summary sum(processors);
         sum.summarizeFastaSummary(summaryfile);
         
         double criteriaPercentile = criteria;
@@ -963,7 +962,7 @@ int ScreenSeqsCommand::getSummaryReport(){
 //***************************************************************************************************************
 int ScreenSeqsCommand::optimizeContigs(){
 	try{
-        Summary sum;
+        Summary sum(processors);
         sum.summarizeContigsSummary(contigsreport);
         
         double criteriaPercentile = criteria;
@@ -988,7 +987,7 @@ int ScreenSeqsCommand::optimizeContigs(){
 int ScreenSeqsCommand::optimizeAlign(){
 	try {
         
-        Summary sum;
+        Summary sum(processors);
         sum.summarizeAlignSummary(alignreport);
        
         double mincriteriaPercentile = (100 - criteria);
@@ -1009,7 +1008,7 @@ int ScreenSeqsCommand::optimizeAlign(){
 //***************************************************************************************************************
 int ScreenSeqsCommand::getSummary(){
 	try {
-        Summary sum;
+        Summary sum(processors);
         sum.summarizeFasta(fastafile, "");
         
 		//numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
@@ -1038,18 +1037,18 @@ int ScreenSeqsCommand::getSummary(){
 void driverScreen(sumScreenData* params){
 	try {
 		ofstream goodFile;
-		params->m->openOutputFile(params->goodFName, goodFile);
+		params->util.openOutputFile(params->goodFName, goodFile);
 		
 		ofstream badAccnosFile;
-		params->m->openOutputFile(params->badAccnosFName, badAccnosFile);
+		params->util.openOutputFile(params->badAccnosFName, badAccnosFile);
 		
 		ifstream inFASTA;
-		params->m->openInputFile(params->filename, inFASTA);
+		params->util.openInputFile(params->filename, inFASTA);
 
         inFASTA.seekg(params->start);
 
         //print header if you are process 0
-        if (params->start == 0) { params->m->zapGremlins(inFASTA); params->m->gobble(inFASTA); }
+        if (params->start == 0) { params->util.zapGremlins(inFASTA); params->util.gobble(inFASTA); }
 
 		bool done = false;
 		params->count = 0;
@@ -1058,7 +1057,7 @@ void driverScreen(sumScreenData* params){
 		
 			if (params->m->getControl_pressed()) {  break; }
 			
-			Sequence currSeq(inFASTA); params->m->gobble(inFASTA);
+			Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
 			if (currSeq.getName() != "") {
 				bool goodSeq = 1;		//	innocent until proven guilty
                 string trashCode = "";
@@ -1121,7 +1120,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         vector<linePair> lines;
         vector<unsigned long long> positions;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(fastafile, processors);
+        positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else
         
@@ -1178,11 +1177,11 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         
         for (int i = 0; i < processors-1; i++) {
             string extension = toString(i+1) + ".temp";
-            m->appendFiles((goodFileName + extension), goodFileName);
-            m->mothurRemove((goodFileName + extension));
+            util.appendFiles((goodFileName + extension), goodFileName);
+            util.mothurRemove((goodFileName + extension));
             
-            m->appendFiles(badAccnos + extension, badAccnos);
-            m->mothurRemove(badAccnos + extension);
+            util.appendFiles(badAccnos + extension, badAccnos);
+            util.mothurRemove(badAccnos + extension);
         }
         
         return num;

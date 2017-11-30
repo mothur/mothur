@@ -181,7 +181,8 @@ int RAbundVector::remove(int bin){
         numBins--;
         
         if(abund == maxRank){
-            maxRank = m->max(data);
+            vector<int>::iterator it = max_element(data.begin(), data.end());
+            maxRank = *it;
         }
         
         numSeqs -= abund;
@@ -222,7 +223,8 @@ void RAbundVector::quicksort(){
 /***********************************************************************/
 
 int RAbundVector::sum(){
-	return m->sum(data);
+    Utils util;
+	return util.sum(data);
 }
 
 /***********************************************************************/

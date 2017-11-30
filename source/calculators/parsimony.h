@@ -30,8 +30,10 @@ class Parsimony : public TreeCalculator  {
 		EstOutput data;
 		int processors;
 		string outputDir;
+        Utils util;
+        vector<string> Treenames;
 	
-		EstOutput driver(Tree*, vector< vector<string> >, int, int, CountTable*); 
+		EstOutput driver(Tree*, vector< vector<string> >, int, int, CountTable*);
 		EstOutput createProcesses(Tree*, vector< vector<string> >, CountTable*);
 };
 /***********************************************************************/

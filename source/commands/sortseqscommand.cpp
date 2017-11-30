@@ -127,17 +127,17 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -145,7 +145,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -153,7 +153,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -161,7 +161,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -169,7 +169,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 				it = parameters.find("qfile");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
@@ -177,7 +177,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
                 it = parameters.find("accnos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
@@ -185,7 +185,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
                 it = parameters.find("flow");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
 				}
@@ -193,7 +193,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -201,45 +201,45 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
             
 			
 			//check for parameters
-            accnosfile = validParameter.validFile(parameters, "accnos", true);
+            accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { accnosfile = ""; abort = true; }
 			else if (accnosfile == "not found") {  accnosfile = "";  }	
-			else { m->setAccnosFile(accnosfile); }
+			else { current->setAccnosFile(accnosfile); }
             
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
             
-            flowfile = validParameter.validFile(parameters, "flow", true);
+            flowfile = validParameter.validFile(parameters, "flow");
 			if (flowfile == "not open") { flowfile = ""; abort = true; }
 			else if (flowfile == "not found") {  flowfile = "";  }	
-			else { m->setFlowFile(flowfile); }
+			else { current->setFlowFile(flowfile); }
             
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
-			else { m->setNameFile(namefile); } 
+			else { current->setNameFile(namefile); } 
             
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
-			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
-			else { m->setTaxonomyFile(taxfile); }
+			else { current->setTaxonomyFile(taxfile); }
 			
-			qualfile = validParameter.validFile(parameters, "qfile", true);
+			qualfile = validParameter.validFile(parameters, "qfile");
 			if (qualfile == "not open") { abort = true; }
 			else if (qualfile == "not found") {  qualfile = "";  }			
-			else { m->setQualFile(qualfile); }
+			else { current->setQualFile(qualfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -249,8 +249,8 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
             }
 			
-            string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") { temp = "f"; }
-			large = m->isTrue(temp);
+            string temp = validParameter.valid(parameters, "large");		if (temp == "not found") { temp = "f"; }
+			large = util.isTrue(temp);
             
 			if ((fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "") && (taxfile == "") && (flowfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, count, taxonomy, flow or quality."); m->mothurOutEndLine(); abort = true; }
 			
@@ -278,7 +278,7 @@ int SortSeqsCommand::execute(){
 		//read through the correct file and output lines you want to keep
         if (accnosfile != "")		{		
             vector<string> temp;
-            m->readAccnos(accnosfile, temp);
+            util.readAccnos(accnosfile, temp);
             for (int i = 0; i < temp.size(); i++) {  names[temp[i]] = i;  }
             m->mothurOut("\nUsing " + accnosfile + " to determine the order. It contains " + toString(temp.size()) + " representative sequences.\n");	
         }
@@ -291,7 +291,7 @@ int SortSeqsCommand::execute(){
         if (countfile != "")		{		readCount();	}
         if (taxfile != "")			{		readTax();		}
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -300,41 +300,41 @@ int SortSeqsCommand::execute(){
 			m->mothurOutEndLine();
 			
 			//set fasta file as new current fastafile
-			string current = "";
+			string currentName = "";
 			itTypes = outputTypes.find("fasta");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("name");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("group");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 			}
 			
 			
 			itTypes = outputTypes.find("taxonomy");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("qfile");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setQualFile(currentName); }
 			}	
             
             itTypes = outputTypes.find("flow");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFlowFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFlowFile(currentName); }
 			}
             
             itTypes = outputTypes.find("count");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 			}
 		}
 		
@@ -351,18 +351,18 @@ int SortSeqsCommand::execute(){
 int SortSeqsCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
 		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
-        variables["[extension]"] = m->getExtension(fastafile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);
 		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		string name;
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -376,7 +376,7 @@ int SortSeqsCommand::readFasta(){
                 
                 //to make sure we dont miss any seqs, add any seqs that are not in names but in the file to the end of names
                 while(!in.eof()){
-                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     Sequence currSeq(in);
                     name = currSeq.getName();
@@ -389,7 +389,7 @@ int SortSeqsCommand::readFasta(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    m->gobble(in);
+                    util.gobble(in);
                 }
                 in.close();
                 out.close();
@@ -407,16 +407,16 @@ int SortSeqsCommand::readFasta(){
                 while (numLeft > 0) {
                     
                     ifstream in2;
-                    m->openInputFile(fastafile, in2);
+                    util.openInputFile(fastafile, in2);
                     
-                    if (m->getControl_pressed()) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in2.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     int found = 0;
                     int needToFind = size;
                     if (numLeft < size) { needToFind = numLeft; }
                     
                     while(!in2.eof()){
-                        if (m->getControl_pressed()) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
+                        if (m->getControl_pressed()) { in2.close();   util.mothurRemove(outputFileName);  return 0; }
                         
                         //stop reading if we already found the seqs we are looking for
                         if (found >= needToFind) { break; }
@@ -436,12 +436,12 @@ int SortSeqsCommand::readFasta(){
                                 }
                             }else { m->mothurOut("[ERROR]: in logic of readFasta function.\n"); m->setControl_pressed(true); }
                         }
-                        m->gobble(in2);
+                        util.gobble(in2);
                     }
                     in2.close();	
 
                     ofstream out2;
-                    m->openOutputFileAppend(outputFileName, out2);
+                    util.openOutputFileAppend(outputFileName, out2);
                     
                     int output = seqs.size();
                     if (numLeft < seqs.size()) { output = numLeft; }
@@ -462,7 +462,7 @@ int SortSeqsCommand::readFasta(){
                 for (int i = 0; i < seqs.size(); i++) { seqs[i].setName(""); } //this is so if some of the seqs are missing we dont print out garbage
                 
                 while(!in.eof()){
-                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     Sequence currSeq(in);
                     name = currSeq.getName();
@@ -477,7 +477,7 @@ int SortSeqsCommand::readFasta(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    m->gobble(in);
+                    util.gobble(in);
                 }
                 in.close();	
                 
@@ -496,7 +496,7 @@ int SortSeqsCommand::readFasta(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
                 Sequence currSeq(in);
                 name = currSeq.getName();
@@ -507,7 +507,7 @@ int SortSeqsCommand::readFasta(){
                     count++;
                     currSeq.printSequence(out);
                 }
-                m->gobble(in);
+                util.gobble(in);
             }
             in.close();	
             out.close();
@@ -527,22 +527,22 @@ int SortSeqsCommand::readFasta(){
 int SortSeqsCommand::readFlow(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(flowfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(flowfile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(flowfile));
-        variables["[extension]"] = m->getExtension(flowfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(flowfile));
+        variables["[extension]"] = util.getExtension(flowfile);
 		string outputFileName = getOutputFileName("flow", variables);
 		outputTypes["flow"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(flowfile, in);
+		util.openInputFile(flowfile, in);
         int numFlows;
 		string name;
         
-        in >> numFlows; m->gobble(in);
+        in >> numFlows; util.gobble(in);
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
             
@@ -555,10 +555,10 @@ int SortSeqsCommand::readFlow(){
                 
                 //to make sure we dont miss any seqs, add any seqs that are not in names but in the file to the end of names
                 while(!in.eof()){
-                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     in >> name;	
-                    string rest = m->getline(in);
+                    string rest = util.getline(in);
                     
                     if (name != "") {
                         numNamesInFile++;
@@ -568,7 +568,7 @@ int SortSeqsCommand::readFlow(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    m->gobble(in);
+                    util.gobble(in);
                 }
                 in.close();
                 out.close();
@@ -585,22 +585,22 @@ int SortSeqsCommand::readFlow(){
                 while (numLeft > 0) {
                     
                     ifstream in2;
-                    m->openInputFile(flowfile, in2); in2 >> numFlows; m->gobble(in2);
+                    util.openInputFile(flowfile, in2); in2 >> numFlows; util.gobble(in2);
                     
-                    if (m->getControl_pressed()) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in2.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     int found = 0;
                     int needToFind = size;
                     if (numLeft < size) { needToFind = numLeft; }
                     
                     while(!in2.eof()){
-                        if (m->getControl_pressed()) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
+                        if (m->getControl_pressed()) { in2.close();   util.mothurRemove(outputFileName);  return 0; }
                         
                         //stop reading if we already found the seqs we are looking for
                         if (found >= needToFind) { break; }
                         
                         in2 >> name;	
-                        string rest = m->getline(in2);
+                        string rest = util.getline(in2);
                         
                         if (name != "") {
                             map<string, int>::iterator it = names.find(name);
@@ -614,12 +614,12 @@ int SortSeqsCommand::readFlow(){
                                 }
                             }else { m->mothurOut("[ERROR]: in logic of readFlow function.\n"); m->setControl_pressed(true); }
                         }
-                        m->gobble(in2);
+                        util.gobble(in2);
                     }
                     in2.close();	
                     
                     ofstream out2;
-                    m->openOutputFileAppend(outputFileName, out2);
+                    util.openOutputFileAppend(outputFileName, out2);
                     
                     int output = seqs.size();
                     if (numLeft < seqs.size()) { output = numLeft; }
@@ -641,10 +641,10 @@ int SortSeqsCommand::readFlow(){
                 vector<string> seqs; seqs.resize(names.size(), "");
                 
                 while(!in.eof()){
-                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     in >> name;	
-                    string rest = m->getline(in);
+                    string rest = util.getline(in);
                     
                     if (name != "") {
                         map<string, int>::iterator it = names.find(name);
@@ -656,7 +656,7 @@ int SortSeqsCommand::readFlow(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    m->gobble(in);
+                    util.gobble(in);
                 }
                 in.close();	
                 
@@ -676,10 +676,10 @@ int SortSeqsCommand::readFlow(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
                 in >> name;	
-                string rest = m->getline(in);
+                string rest = util.getline(in);
                 
                 if (name != "") {
                     //if this name is in the accnos file
@@ -687,7 +687,7 @@ int SortSeqsCommand::readFlow(){
                     count++;
                     out << name << '\t' << rest << endl;
                 }
-                m->gobble(in);
+                util.gobble(in);
             }
             in.close();	
             out.close();
@@ -708,18 +708,18 @@ int SortSeqsCommand::readFlow(){
 int SortSeqsCommand::readQual(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(qualfile);  }
 		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
-        variables["[extension]"] = m->getExtension(qualfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
+        variables["[extension]"] = util.getExtension(qualfile);
 		string outputFileName = getOutputFileName("qfile", variables);
         outputTypes["qfile"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(qualfile, in);
+		util.openInputFile(qualfile, in);
 		string name;
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -733,7 +733,7 @@ int SortSeqsCommand::readQual(){
                 
                 //to make sure we dont miss any seqs, add any seqs that are not in names but in the file to the end of names
                 while(!in.eof()){
-                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     QualityScores currQual;
                     currQual = QualityScores(in); 
@@ -747,7 +747,7 @@ int SortSeqsCommand::readQual(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    m->gobble(in);
+                    util.gobble(in);
                 }
                 in.close();
                 out.close();
@@ -766,16 +766,16 @@ int SortSeqsCommand::readQual(){
                 while (numLeft > 0) {
                     
                     ifstream in2;
-                    m->openInputFile(qualfile, in2);
+                    util.openInputFile(qualfile, in2);
                     
-                    if (m->getControl_pressed()) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in2.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     int found = 0;
                     int needToFind = size;
                     if (numLeft < size) { needToFind = numLeft; }
                     
                     while(!in2.eof()){
-                        if (m->getControl_pressed()) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
+                        if (m->getControl_pressed()) { in2.close();   util.mothurRemove(outputFileName);  return 0; }
                         
                         //stop reading if we already found the seqs we are looking for
                         if (found >= needToFind) { break; }
@@ -796,12 +796,12 @@ int SortSeqsCommand::readQual(){
                                 }
                             }else { m->mothurOut("[ERROR]: in logic of readQual function.\n"); m->setControl_pressed(true); }
                         }
-                        m->gobble(in2);
+                        util.gobble(in2);
                     }
                     in2.close();	
                     
                     ofstream out2;
-                    m->openOutputFileAppend(outputFileName, out2);
+                    util.openOutputFileAppend(outputFileName, out2);
                     
                     int output = seqs.size();
                     if (numLeft < seqs.size()) { output = numLeft; }
@@ -825,7 +825,7 @@ int SortSeqsCommand::readQual(){
                 for (int i = 0; i < seqs.size(); i++) { seqs[i].setName(""); } //this is so if some of the seqs are missing we dont print out garbage
                 
                 while(!in.eof()){
-                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                     
                     QualityScores currQual;
                     currQual = QualityScores(in); 
@@ -841,7 +841,7 @@ int SortSeqsCommand::readQual(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    m->gobble(in);
+                    util.gobble(in);
                 }
                 in.close();	
                 
@@ -858,12 +858,12 @@ int SortSeqsCommand::readQual(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
                 QualityScores currQual;
                 currQual = QualityScores(in);  
                                
-                m->gobble(in);
+                util.gobble(in);
                 
                 if (currQual.getName() != "") {
                     //if this name is in the accnos file
@@ -871,7 +871,7 @@ int SortSeqsCommand::readQual(){
                     count++;
                     currQual.printQScores(out);
                 }
-                m->gobble(in);
+                util.gobble(in);
             }
             in.close();	
             out.close();
@@ -891,18 +891,18 @@ int SortSeqsCommand::readQual(){
 int SortSeqsCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
-        variables["[extension]"] = m->getExtension(namefile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+        variables["[extension]"] = util.getExtension(namefile);
 		string outputFileName = getOutputFileName("name", variables);
         outputTypes["name"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		ifstream in;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -910,10 +910,10 @@ int SortSeqsCommand::readName(){
                 vector<string> seqs; seqs.resize(names.size(), "");
                 
                 while(!in.eof()){
-                    if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                     
-                    in >> firstCol;		m->gobble(in);		
-                    in >> secondCol;    m->gobble(in);
+                    in >> firstCol;		util.gobble(in);		
+                    in >> secondCol;    util.gobble(in);
                     
                     if (firstCol != "") {
                         map<string, int>::iterator it = names.find(firstCol);
@@ -940,10 +940,10 @@ int SortSeqsCommand::readName(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> firstCol;		m->gobble(in);		
-                in >> secondCol;    m->gobble(in);
+                in >> firstCol;		util.gobble(in);		
+                in >> secondCol;    util.gobble(in);
                 
                 if (firstCol != "") {
                     //if this name is in the accnos file
@@ -951,7 +951,7 @@ int SortSeqsCommand::readName(){
                     count++;
                     out << firstCol << '\t' << secondCol << endl;
                 }
-                m->gobble(in);
+                util.gobble(in);
             }
             in.close();	
             out.close();
@@ -970,31 +970,31 @@ int SortSeqsCommand::readName(){
 int SortSeqsCommand::readCount(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
-        variables["[extension]"] = m->getExtension(countfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
         outputTypes["count"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		ifstream in;
-		m->openInputFile(countfile, in);
+		util.openInputFile(countfile, in);
 		string firstCol, rest;
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
             
             vector<string> seqs; seqs.resize(names.size(), "");
             
-            string headers = m->getline(in); m->gobble(in);
+            string headers = util.getline(in); util.gobble(in);
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> firstCol;		m->gobble(in);		
-                rest = m->getline(in);    m->gobble(in);
+                in >> firstCol;		util.gobble(in);		
+                rest = util.getline(in);    util.gobble(in);
                 
                 if (firstCol != "") {
                     map<string, int>::iterator it = names.find(firstCol);
@@ -1021,14 +1021,14 @@ int SortSeqsCommand::readCount(){
         }else { //read in file to fill names
             int count = 0;
             
-            string headers = m->getline(in); m->gobble(in);
+            string headers = util.getline(in); util.gobble(in);
             out << headers << endl;
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> firstCol;		m->gobble(in);		
-                rest = m->getline(in);  m->gobble(in);
+                in >> firstCol;		util.gobble(in);		
+                rest = util.getline(in);  util.gobble(in);
                 
                 if (firstCol != "") {
                     //if this name is in the accnos file
@@ -1036,7 +1036,7 @@ int SortSeqsCommand::readCount(){
                     count++;
                     out << firstCol << '\t' << rest << endl;
                 }
-                m->gobble(in);
+                util.gobble(in);
             }
             in.close();	
             out.close();
@@ -1055,18 +1055,18 @@ int SortSeqsCommand::readCount(){
 int SortSeqsCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-        variables["[extension]"] = m->getExtension(groupfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+        variables["[extension]"] = util.getExtension(groupfile);
 		string outputFileName = getOutputFileName("group", variables);
         outputTypes["group"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		ifstream in;
-		m->openInputFile(groupfile, in);
+		util.openInputFile(groupfile, in);
 		string name, group;
 		
 		if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -1074,10 +1074,10 @@ int SortSeqsCommand::readGroup(){
             vector<string> seqs; seqs.resize(names.size(), "");
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> name;		m->gobble(in);		
-                in >> group;    m->gobble(in);
+                in >> name;		util.gobble(in);		
+                in >> group;    util.gobble(in);
                 
                 if (name != "") {
                     map<string, int>::iterator it = names.find(name);
@@ -1104,10 +1104,10 @@ int SortSeqsCommand::readGroup(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> name;		m->gobble(in);		
-                in >> group;    m->gobble(in);
+                in >> name;		util.gobble(in);		
+                in >> group;    util.gobble(in);
                 
                 if (name != "") {
                     //if this name is in the accnos file
@@ -1115,7 +1115,7 @@ int SortSeqsCommand::readGroup(){
                     count++;
                     out << name << '\t' << group << endl;
                 }
-                m->gobble(in);
+                util.gobble(in);
             }
             in.close();	
             out.close();
@@ -1134,19 +1134,19 @@ int SortSeqsCommand::readGroup(){
 int SortSeqsCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxfile));
-        variables["[extension]"] = m->getExtension(taxfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
+        variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
 
         outputTypes["taxonomy"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		ifstream in;
-		m->openInputFile(taxfile, in);
+		util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -1154,10 +1154,10 @@ int SortSeqsCommand::readTax(){
             vector<string> seqs; seqs.resize(names.size(), "");
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> name; m->gobble(in);
-                tax = m->getline(in); m->gobble(in);
+                in >> name; util.gobble(in);
+                tax = util.getline(in); util.gobble(in);
                 
                 if (name != "") {
                     map<string, int>::iterator it = names.find(name);
@@ -1184,10 +1184,10 @@ int SortSeqsCommand::readTax(){
             int count = 0;
             
             while(!in.eof()){
-                if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> name; m->gobble(in);
-                tax = m->getline(in); m->gobble(in);
+                in >> name; util.gobble(in);
+                tax = util.getline(in); util.gobble(in);
                 
                 if (name != "") {
                     //if this name is in the accnos file
@@ -1195,7 +1195,7 @@ int SortSeqsCommand::readTax(){
                     count++;
                     out << name << '\t' << tax << endl;
                 }
-                m->gobble(in);
+                util.gobble(in);
             }
             in.close();	
             out.close();

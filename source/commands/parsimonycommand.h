@@ -63,6 +63,7 @@ private:
 	string groups, itersString;
 	vector<string> Groups, outputNames; //holds groups to be used
 	map<string, string> nameMap;
+    vector<string> Treenames; 
 	
 	void printParsimonyFile();  
 	int printUSummaryFile();

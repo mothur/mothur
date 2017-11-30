@@ -106,14 +106,14 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -121,7 +121,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
                 it = parameters.find("summary");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["summary"] = inputDir + it->second;		}
                 }
@@ -129,7 +129,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
                 it = parameters.find("contigsreport");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["contigsreport"] = inputDir + it->second;		}
                 }
@@ -137,7 +137,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
                 it = parameters.find("alignreport");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
                 }
@@ -145,7 +145,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -153,7 +153,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -164,33 +164,33 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			outputTypes["summary"] = tempOutNames;
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }
             else if (fastafile == "not found") {  fastafile = "";  }
-            else { m->setFastaFile(fastafile); }
+            else { current->setFastaFile(fastafile); }
 			
-            summaryfile = validParameter.validFile(parameters, "summary", true);
+            summaryfile = validParameter.validFile(parameters, "summary");
             if (summaryfile == "not open") { abort = true; }
             else if (summaryfile == "not found") {  summaryfile = "";  }
-            else { m->setSummaryFile(summaryfile); }
+            else { current->setSummaryFile(summaryfile); }
             
-            contigsfile = validParameter.validFile(parameters, "contigsreport", true);
+            contigsfile = validParameter.validFile(parameters, "contigsreport");
             if (contigsfile == "not open") { abort = true; }
             else if (contigsfile == "not found") {  contigsfile = "";  }
-            else { m->setContigsReportFile(contigsfile); }
+            else { current->setContigsReportFile(contigsfile); }
             
-            alignfile = validParameter.validFile(parameters, "alignreport", true);
+            alignfile = validParameter.validFile(parameters, "alignreport");
             if (alignfile == "not open") { abort = true; }
             else if (alignfile == "not found") {  alignfile = "";  }
 
             if ((summaryfile == "") && (fastafile == "") && (contigsfile == "") && (alignfile == "")) {
-                fastafile = m->getFastaFile();
+                fastafile = current->getFastaFile();
                 if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
                 else {
-                    summaryfile = m->getSummaryFile();
+                    summaryfile = current->getSummaryFile();
                     if (summaryfile != "") { m->mothurOut("Using " + summaryfile + " as input file for the summary parameter."); m->mothurOutEndLine(); }
                     else {
-                        contigsfile = m->getContigsReportFile();
+                        contigsfile = current->getContigsReportFile();
                         if (contigsfile != "") { m->mothurOut("Using " + contigsfile + " as input file for the contigsreport parameter."); m->mothurOutEndLine(); }
                         else { 	m->mothurOut("You have no current fasta, summary, contigsreport or alignreport file, one is required."); m->mothurOutEndLine(); abort = true; }
                     }
@@ -204,27 +204,26 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: fasta, summary, contigsreport or alignreport."); m->mothurOutEndLine(); abort = true;
             }
             
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = "";  }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 			
-			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
             if (countfile == "") {
                 if (namefile == "") {
@@ -246,23 +245,23 @@ int SeqSummaryCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        int start = time(NULL);
+        long start = time(NULL);
         
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFile = getOutputFileName("summary",variables);
         
         string nameOrCount = countfile;
         if (namefile != "") { nameOrCount = namefile; }
         
-        Summary sum;
+        Summary sum(processors);
         if (fastafile != "") {  sum.summarizeFasta(fastafile, nameOrCount, outputFile);  }
         else if (summaryfile != "") {  sum.summarizeFastaSummary(summaryfile, nameOrCount);  }
         else if (contigsfile != "") {  sum.summarizeContigsSummary(contigsfile, nameOrCount);  }
         else if (alignfile != "") {  sum.summarizeAlignSummary(alignfile, nameOrCount);  }
         else { m->mothurOut("[ERROR]: Unknown type: you may only use one of the following: fasta, summary, contigsreport or alignreport."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 
-        if (m->getControl_pressed()) {  m->mothurRemove(outputFile); return 0; }
+        if (m->getControl_pressed()) {  util.mothurRemove(outputFile); return 0; }
         
         long long size = sum.getTotalSeqs();
         long long numUniques = sum.getUniqueSeqs();
@@ -322,7 +321,7 @@ int SeqSummaryCommand::execute(){
             m->mothurOut("Mean:\t" + toString(length[7]) + "\t" + toString(sims[7]) + "\t" + toString(inserts[7]) + "\t" + toString(scores[7])); m->mothurOutEndLine();
         }
         
-        if (m->getControl_pressed()) {  m->mothurRemove(outputFile); return 0; }
+        if (m->getControl_pressed()) {  util.mothurRemove(outputFile); return 0; }
         
         if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
         else { m->mothurOut("# of unique seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
@@ -334,10 +333,10 @@ int SeqSummaryCommand::execute(){
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
         if ((summaryfile == "") && (contigsfile == "") && (alignfile == "")) { m->mothurOut(outputFile); m->mothurOutEndLine();	outputNames.push_back(outputFile); outputTypes["summary"].push_back(outputFile);
             //set fasta file as new current fastafile
-            string current = "";
+            string currentName = "";
             itTypes = outputTypes.find("summary");
             if (itTypes != outputTypes.end()) {
-                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSummaryFile(current); }
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSummaryFile(currentName); }
             }
         }
         m->mothurOutEndLine();

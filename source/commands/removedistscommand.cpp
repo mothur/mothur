@@ -102,17 +102,17 @@ RemoveDistsCommand::RemoveDistsCommand(string option)  {
 			outputTypes["phylip"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -120,7 +120,7 @@ RemoveDistsCommand::RemoveDistsCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -128,7 +128,7 @@ RemoveDistsCommand::RemoveDistsCommand(string option)  {
                 it = parameters.find("accnos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
@@ -136,34 +136,34 @@ RemoveDistsCommand::RemoveDistsCommand(string option)  {
 			
 			
 			//check for required parameters
-			accnosfile = validParameter.validFile(parameters, "accnos", true);
+			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
-				accnosfile = m->getAccnosFile(); 
+				accnosfile = current->getAccnosFile(); 
 				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
 					abort = true;
 				} 
-			}else { m->setAccnosFile(accnosfile); }	
+			}else { current->setAccnosFile(accnosfile); }	
 			
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else { 	m->setPhylipFile(phylipfile); }
+			else { 	current->setPhylipFile(phylipfile); }
 			
-			columnfile = validParameter.validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not open") { columnfile = ""; abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  m->setColumnFile(columnfile);	}
+			else {  current->setColumnFile(columnfile);	}
 			
 			if ((phylipfile == "") && (columnfile == "")) { 
 				//is there are current file available for either of these?
 				//give priority to column, then phylip
-				columnfile = m->getColumnFile(); 
+				columnfile = current->getColumnFile(); 
 				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
 				else { 
-					phylipfile = m->getPhylipFile(); 
+					phylipfile = current->getPhylipFile(); 
 					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a phylip or column file."); m->mothurOutEndLine(); 
@@ -187,7 +187,7 @@ int RemoveDistsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get names you want to keep
-		names = m->readAccnos(accnosfile);
+		names = util.readAccnos(accnosfile);
 		
 		if (m->getControl_pressed()) { return 0; }
 		
@@ -195,7 +195,7 @@ int RemoveDistsCommand::execute(){
 		if (phylipfile != "")		{		readPhylip();		}
 		if (columnfile != "")		{		readColumn();       }
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 		
 		
 		if (outputNames.size() != 0) {
@@ -205,15 +205,15 @@ int RemoveDistsCommand::execute(){
 			m->mothurOutEndLine();
 			
 			//set fasta file as new current fastafile
-			string current = "";
+			string currentName = "";
 			itTypes = outputTypes.find("phylip");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("column");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setColumnFile(currentName); }
 			}
         }
 		
@@ -230,14 +230,14 @@ int RemoveDistsCommand::execute(){
 int RemoveDistsCommand::readPhylip(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(phylipfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(phylipfile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(phylipfile));
-        variables["[extension]"] = m->getExtension(phylipfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(phylipfile));
+        variables["[extension]"] = util.getExtension(phylipfile);
 		string outputFileName = getOutputFileName("phylip", variables);
 		
         ifstream in;
-        m->openInputFile(phylipfile, in);
+        util.openInputFile(phylipfile, in);
         
         float distance;
         int square, nseqs; 
@@ -249,7 +249,7 @@ int RemoveDistsCommand::readPhylip(){
         string numTest;
         in >> numTest >> name;
         
-        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
         
         //not one we want to remove
@@ -304,12 +304,12 @@ int RemoveDistsCommand::readPhylip(){
         
         //read through file only printing rows and columns of seqs in names
         ifstream inPhylip;
-        m->openInputFile(phylipfile, inPhylip);
+        util.openInputFile(phylipfile, inPhylip);
         
         inPhylip >> numTest;
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         outputTypes["phylip"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         out << (nseqs-names.size()) << endl;
             
@@ -361,14 +361,14 @@ int RemoveDistsCommand::readPhylip(){
         else if (count != names.size()) {
             m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(count) + " of them in the phylip file."); m->mothurOutEndLine();
             //rewrite with new number
-            m->renameFile(outputFileName, outputFileName+".temp");
+            util.renameFile(outputFileName, outputFileName+".temp");
             ofstream out2;
-            m->openOutputFile(outputFileName, out2);
+            util.openOutputFile(outputFileName, out2);
             out2 << keptCount << endl;
             
             ifstream in3;
-            m->openInputFile(outputFileName+".temp", in3);
-            in3 >> nseqs; m->gobble(in3);
+            util.openInputFile(outputFileName+".temp", in3);
+            in3 >> nseqs; util.gobble(in3);
             char buffer[4096];        
             while (!in3.eof()) {
                 in3.read(buffer, 4096);
@@ -376,7 +376,7 @@ int RemoveDistsCommand::readPhylip(){
             }
             in3.close();
             out2.close();
-            m->mothurRemove(outputFileName+".temp");
+            util.mothurRemove(outputFileName+".temp");
         }
 		
 		m->mothurOut("Removed " + toString(count) + " groups or sequences from your phylip file."); m->mothurOutEndLine();
@@ -393,18 +393,18 @@ int RemoveDistsCommand::readPhylip(){
 int RemoveDistsCommand::readColumn(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(columnfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(columnfile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(columnfile));
-        variables["[extension]"] = m->getExtension(columnfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(columnfile));
+        variables["[extension]"] = util.getExtension(columnfile);
 		string outputFileName = getOutputFileName("column", variables);
         outputTypes["column"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
         ifstream in;
-        m->openInputFile(columnfile, in);
+        util.openInputFile(columnfile, in);
         
         set<string> removeNames;
         string firstName, secondName;
@@ -414,7 +414,7 @@ int RemoveDistsCommand::readColumn(){
             
             if (m->getControl_pressed()) { out.close(); in.close(); return 0; }
             
-            in >> firstName >> secondName >> distance; m->gobble(in);
+            in >> firstName >> secondName >> distance; util.gobble(in);
             
             //is either names in the accnos file
             if (names.count(firstName) != 0)       { 

@@ -60,7 +60,7 @@ GetCommandInfoCommand::GetCommandInfoCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			output = validParameter.validFile(parameters, "output", false);			
+			output = validParameter.valid(parameters, "output");
 			if (output == "not found") {  output = ""; m->mothurOut("You must provide an output filename."); m->mothurOutEndLine(); abort=true; } 
 			
 		}
@@ -80,12 +80,12 @@ int GetCommandInfoCommand::execute(){
 		commandFactory = CommandFactory::getInstance();
 		
 		ofstream out;
-		m->openOutputFile(output+".temp", out);
+		util.openOutputFile(output+".temp", out);
 		
 		int numNonHidden = 0;
 		
-		out << "mothurLocation=" << m->getProgramPath() << endl;
-		out << "mothurVersion=" << m->getVersion() << endl;
+		out << "mothurLocation=" << current->getProgramPath() << endl;
+		out << "mothurVersion=" << current->getVersion() << endl;
 		
 		map<string, string> commands = commandFactory->getListCommands();
 		map<string, string>::iterator it;
@@ -93,7 +93,7 @@ int GetCommandInfoCommand::execute(){
 		//loop through each command outputting info
 		for (it = commands.begin(); it != commands.end(); it++) {
 			
-			if (m->getControl_pressed()) { m->mothurOut("[ERROR]: did not complete making the file."); m->mothurOutEndLine(); out.close(); m->mothurRemove((output+".temp")); }
+			if (m->getControl_pressed()) { m->mothurOut("[ERROR]: did not complete making the file."); m->mothurOutEndLine(); out.close(); util.mothurRemove((output+".temp")); }
 			
 			Command* thisCommand = commandFactory->getCommand(it->first);
 			
@@ -186,12 +186,12 @@ int GetCommandInfoCommand::execute(){
 		out.close();
 		
 		ofstream out2;
-		m->openOutputFile(output, out2);
+		util.openOutputFile(output, out2);
 		out2 << numNonHidden << endl; 
 		out2.close();
 		
-		m->appendFiles(output+".temp", output);
-		m->mothurRemove((output+".temp"));
+		util.appendFiles(output+".temp", output);
+		util.mothurRemove((output+".temp"));
 	
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -245,14 +245,14 @@ int GetCommandInfoCommand::getInfo(vector<CommandParameter> para, vector<string>
 					
 					//add choose only one groups
                     vector<string> tempGroups;
-                    m->splitAtDash(para[i].chooseOnlyOneGroup, tempGroups);
+                    util.splitAtDash(para[i].chooseOnlyOneGroup, tempGroups);
                     for (int l = 0; l < tempGroups.size(); l++) {
                         groups[tempGroups[l]].insert(para[i].name);
                     }
 					tempGroups.clear();
                     
 					//add at least one group names
-                    m->splitAtDash(para[i].chooseAtLeastOneGroup, tempGroups);
+                    util.splitAtDash(para[i].chooseAtLeastOneGroup, tempGroups);
                     for (int l = 0; l < tempGroups.size(); l++) {
                         groups[tempGroups[l]].insert(para[i].name);
                     }
@@ -260,7 +260,7 @@ int GetCommandInfoCommand::getInfo(vector<CommandParameter> para, vector<string>
 					
 					
 					//add at linked group names
-                    m->splitAtDash(para[i].linkedGroup, tempGroups);
+                    util.splitAtDash(para[i].linkedGroup, tempGroups);
                     for (int l = 0; l < tempGroups.size(); l++) {
                         groups[tempGroups[l]].insert(para[i].name);
                     }

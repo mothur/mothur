@@ -43,6 +43,7 @@ ifeq  ($(strip $(USEBOOST)),yes)
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
 
     LIBS += ${BOOST_LIBRARY_DIR}/libboost_iostreams.a
+    LIBS += ${BOOST_LIBRARY_DIR}/libboost_filesystem.a
 
     #if mac
     LIBS += -lz

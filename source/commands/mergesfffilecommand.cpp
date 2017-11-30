@@ -106,30 +106,30 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
             outputTypes["sff"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);	  if (inputDir == "not found"){	inputDir = "";		}
+			string inputDir = validParameter.valid(parameters, "inputdir");	  if (inputDir == "not found"){	inputDir = "";		}
             else {
                 it = parameters.find("file");
 				//user has given a template file
 				if(it != parameters.end()){
-					string path = m->hasPath(it->second);
+					string path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["file"] = inputDir + it->second;		}
 				}
             }
             
-			sffFilename = validParameter.validFile(parameters, "sff", false);
+			sffFilename = validParameter.valid(parameters, "sff");
 			if (sffFilename == "not found") { sffFilename = "";  }
 			else {
-				m->splitAtDash(sffFilename, filenames);
+				util.splitAtDash(sffFilename, filenames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < filenames.size(); i++) {
 					bool ignore = false;
 					if (filenames[i] == "current") {
-						filenames[i] = m->getSFFFile();
+						filenames[i] = current->getSFFFile();
 						if (filenames[i] != "") {  m->mothurOut("Using " + filenames[i] + " as input file for the sff parameter where you had given current."); m->mothurOutEndLine(); }
 						else {
 							m->mothurOut("You have no current sfffile, ignoring current."); m->mothurOutEndLine(); ignore=true;
@@ -141,21 +141,21 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 					
 					if (!ignore) {
 						if (inputDir != "") {
-							string path = m->hasPath(filenames[i]);
+							string path = util.hasPath(filenames[i]);
 							//if the user has not given a path then, add inputdir. else leave path alone.
 							if (path == "") {	filenames[i] = inputDir + filenames[i];		}
 						}
                         
 						ifstream in;
-						bool ableToOpen = m->openInputFile(filenames[i], in, "noerror");
+						bool ableToOpen = util.openInputFile(filenames[i], in, "noerror");
                         
 						//if you can't open it, try default location
 						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(filenames[i]);
+							if (current->getDefaultPath() != "") { //default path is set
+								string tryPath = current->getDefaultPath() + util.getSimpleName(filenames[i]);
 								m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
 								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 								in2.close();
 								filenames[i] = tryPath;
 							}
@@ -163,11 +163,11 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 						
 						//if you can't open it, try default location
 						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(filenames[i]);
+							if (current->getOutputDir() != "") { //default path is set
+								string tryPath = current->getOutputDir() + util.getSimpleName(filenames[i]);
 								m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
 								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 								in2.close();
 								filenames[i] = tryPath;
 							}
@@ -180,12 +180,12 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 							//erase from file list
 							filenames.erase(filenames.begin()+i);
 							i--;
-						}else { m->setSFFFile(filenames[i]); }
+						}else { current->setSFFFile(filenames[i]); }
 					}
 				}
 			}
 			
-			file = validParameter.validFile(parameters, "file", true);
+			file = validParameter.validFile(parameters, "file");
 			if (file == "not open") {  abort = true; }
 			else if (file == "not found") { file = "";  }
             
@@ -197,12 +197,12 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
                 m->mothurOut("[ERROR]: cannot use file option and sff option at the same time, choose one."); m->mothurOutEndLine(); abort = true;
             }
             
-            outputFile = validParameter.validFile(parameters, "output", false);
+            outputFile = validParameter.valid(parameters, "output");
 			if (outputFile == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
-			if (outputDir != "") { outputFile = outputDir + m->getSimpleName(outputFile);  }
+			if (outputDir != "") { outputFile = outputDir + util.getSimpleName(outputFile);  }
             
-            string temp = validParameter.validFile(parameters, "keytrim", false);				if (temp == "not found") { temp = "F"; }
-            keyTrim = m->isTrue(temp);
+            string temp = validParameter.valid(parameters, "keytrim");				if (temp == "not found") { temp = "F"; }
+            keyTrim = util.isTrue(temp);
             
 		}
 	}
@@ -218,26 +218,26 @@ int MergeSfffilesCommand::execute(){
         
         if (file != "") {
             readFile();
-            if (outputDir == "") { outputDir = m->hasPath(file); }
+            if (outputDir == "") { outputDir = util.hasPath(file); }
         }
         ofstream out;
         map<string, string> variables;
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(outputFile);  }
-        variables["[filename]"] = thisOutputDir + m->getSimpleName(outputFile);
+		if (outputDir == "") {  thisOutputDir += util.hasPath(outputFile);  }
+        variables["[filename]"] = thisOutputDir + util.getSimpleName(outputFile);
 		outputFile = getOutputFileName("sff",variables);
-        m->openOutputFileBinary(outputFile, out);
+        util.openOutputFileBinary(outputFile, out);
         outputNames.push_back(outputFile); outputTypes["sff"].push_back(outputFile);
         outputFileHeader = outputFile + ".headers";
         numTotalReads = 0;
         
 		for (int s = 0; s < filenames.size(); s++) {
 			
-			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 			
-			int start = time(NULL);
+			long start = time(NULL);
 			
-            filenames[s] = m->getFullPathName(filenames[s]);
+            filenames[s] = util.getFullPathName(filenames[s]);
 			m->mothurOut("\nMerging info from " + filenames[s] + " ..." ); m->mothurOutEndLine();
             
 			int numReads = mergeSffInfo(filenames[s], out);
@@ -249,13 +249,13 @@ int MergeSfffilesCommand::execute(){
         //create new common header and add to merged file
         adjustCommonHeader();
 
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 		
 		//set sff file as new current sff file
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("sff");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSFFFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSFFFile(currentName); }
 		}
 		
 		//report output filenames
@@ -277,7 +277,7 @@ int MergeSfffilesCommand::mergeSffInfo(string input, ofstream& out){
 		currentFileName = input;
         
 		ifstream in;
-		m->openInputFileBinary(input, in);
+		util.openInputFileBinary(input, in);
 		
 		CommonHeader header;
 		readCommonHeader(in, header);
@@ -464,16 +464,16 @@ int MergeSfffilesCommand::adjustCommonHeader(){
             }
         }
         
-        string endian = m->findEdianness();
+        string endian = util.findEdianness();
         
         char* mybuffer = new char[4];
         ifstream in;
-        m->openInputFileBinary(currentFileName, in);
+        util.openInputFileBinary(currentFileName, in);
         
         //magic number
         in.read(mybuffer,4);
         ofstream out;
-        m->openOutputFileBinaryAppend(outputFileHeader, out);
+        util.openOutputFileBinaryAppend(outputFileHeader, out);
         out.write(mybuffer, in.gcount());
         delete[] mybuffer;
         
@@ -588,9 +588,9 @@ int MergeSfffilesCommand::adjustCommonHeader(){
         in.close();
         out.close();
         
-        m->appendSFFFiles(outputFile, outputFileHeader);
-        m->renameFile(outputFileHeader, outputFile);
-        m->mothurRemove(outputFileHeader);
+        util.appendSFFFiles(outputFile, outputFileHeader);
+        util.renameFile(outputFileHeader, outputFile);
+        util.mothurRemove(outputFileHeader);
         
 		return 0;
         
@@ -706,7 +706,7 @@ bool MergeSfffilesCommand::readSeqData(ifstream& in, seqRead& read, int numFlowR
             mybuffer = new char [spot-startSpotInFile];
             
             ifstream in2;
-            m->openInputFileBinary(currentFileName, in2);
+            util.openInputFileBinary(currentFileName, in2);
             in2.seekg(startSpotInFile);
             in2.read(mybuffer,spot-startSpotInFile);
             
@@ -766,27 +766,27 @@ int MergeSfffilesCommand::readFile(){
         string filename;
         
         ifstream in;
-        m->openInputFile(file, in);
+        util.openInputFile(file, in);
         
         while(!in.eof()) {
             
             if (m->getControl_pressed()) { return 0; }
             
-            in >> filename; m->gobble(in);
+            in >> filename; util.gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + ".\n"); }
             
             //check to make sure both are able to be opened
             ifstream in2;
-            bool openForward = m->openInputFile(filename, in2, "noerror");
+            bool openForward = util.openInputFile(filename, in2, "noerror");
             
             //if you can't open it, try default location
             if (!openForward) {
-                if (m->getDefaultPath() != "") { //default path is set
-                    string tryPath = m->getDefaultPath() + m->getSimpleName(filename);
+                if (current->getDefaultPath() != "") { //default path is set
+                    string tryPath = current->getDefaultPath() + util.getSimpleName(filename);
                     m->mothurOut("Unable to open " + filename + ". Trying default " + tryPath); m->mothurOutEndLine();
                     ifstream in3;
-                    openForward = m->openInputFile(tryPath, in3, "noerror");
+                    openForward = util.openInputFile(tryPath, in3, "noerror");
                     in3.close();
                     filename = tryPath;
                 }
@@ -794,11 +794,11 @@ int MergeSfffilesCommand::readFile(){
             
             //if you can't open it, try output location
             if (!openForward) {
-                if (m->getOutputDir() != "") { //default path is set
-                    string tryPath = m->getOutputDir() + m->getSimpleName(filename);
+                if (current->getOutputDir() != "") { //default path is set
+                    string tryPath = current->getOutputDir() + util.getSimpleName(filename);
                     m->mothurOut("Unable to open " + filename + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                     ifstream in4;
-                    openForward = m->openInputFile(tryPath, in4, "noerror");
+                    openForward = util.openInputFile(tryPath, in4, "noerror");
                     filename = tryPath;
                     in4.close();
                 }
@@ -822,10 +822,10 @@ int MergeSfffilesCommand::readFile(){
 
 int MergeSfffilesCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& out, int numReads){
     try {
-        string endian = m->findEdianness();
+        string endian = util.findEdianness();
         
         ifstream in;
-        m->openInputFileBinary(currentFileName, in);
+        util.openInputFileBinary(currentFileName, in);
         
         //magic number
         char* mybuffer = new char[4];

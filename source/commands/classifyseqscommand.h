@@ -89,6 +89,7 @@ struct classifyData {
 	float match, misMatch, gapOpen, gapExtend;
 	int count, kmerSize, threadID, cutoff, iters, numWanted;
 	bool probs, flip, writeShortcuts;
+    Utils util;
 	 
 	classifyData(){}
     classifyData(string acc, bool p, string a, string r, string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool fli, Classify* c) {

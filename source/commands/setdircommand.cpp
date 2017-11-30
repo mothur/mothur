@@ -84,38 +84,38 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 		
-			output = validParameter.validFile(parameters, "output", false);			
+			output = validParameter.valid(parameters, "output");
 			if (output == "not found") {  output = "";  } 
 			
-			input = validParameter.validFile(parameters, "input", false);			
+			input = validParameter.valid(parameters, "input");
 			if (input == "not found") {  input = "";  }
 			
-			tempdefault = validParameter.validFile(parameters, "tempdefault", false);			
+			tempdefault = validParameter.valid(parameters, "tempdefault");
 			if (tempdefault == "not found") {  tempdefault = "";  }
             
-            blastLocation = validParameter.validFile(parameters, "blastdir", false);
+            blastLocation = validParameter.valid(parameters, "blastdir");
             if (blastLocation == "not found") {  blastLocation = "";  }
             
             bool debug = false;
             bool nodebug = false;
             debugorSeedOnly = false;
-            string temp = validParameter.validFile(parameters, "debug", false);			
+            string temp = validParameter.valid(parameters, "debug");
 			if (temp == "not found") {  debug = false;  nodebug=true; }
-            else {  debug = m->isTrue(temp); }
+            else {  debug = util.isTrue(temp); }
             m->setDebug(debug);
             
             bool nomod = false;
-            temp = validParameter.validFile(parameters, "modifynames", false);
+            temp = validParameter.valid(parameters, "modifynames");
 			if (temp == "not found") {  modifyNames = true;  nomod=true; }
-            else {  modifyNames = m->isTrue(temp); }
+            else {  modifyNames = util.isTrue(temp); }
             m->setModifyNames(modifyNames);
             
             bool seed = false;
-            temp = validParameter.validFile(parameters, "seed", false);
+            temp = validParameter.valid(parameters, "seed");
             if (temp == "not found") { random = 0; }
             else {
-                if (m->isInteger(temp)) { m->mothurConvert(temp, random); seed = true; }
-                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.dir command."); m->mothurOutEndLine(); abort = true; }
+                if (util.isInteger(temp)) { util.mothurConvert(temp, random); seed = true; }
+                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.dir command.\n"); abort = true; }
             }
             
             if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
@@ -142,37 +142,35 @@ int SetDirectoryCommand::execute(){
 		
         if (debugorSeedOnly) {  }
         else {
-            commandFactory = CommandFactory::getInstance();
-            
             m->mothurOut("Mothur's directories:"); m->mothurOutEndLine();
             
             //redirect output
-            if ((output == "clear") || (output == "")) {  output = "";  commandFactory->setOutputDirectory(output);  }
+            if ((output == "clear") || (output == "")) {  output = "";  current->setOutputDir(output);  }
             else if (output == "default") {
-                string output = m->getProgramPath();
+                string output = current->getProgramPath();
                 //output = exepath.substr(0, (exepath.find_last_of('m')));
                 
                 m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
-                commandFactory->setOutputDirectory(output);
+                current->setOutputDir(output);
             }else {
-                if (m->mkDir(output)) {
+                if (util.mkDir(output)) {
                     m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
-                    commandFactory->setOutputDirectory(output);
+                    current->setOutputDir(output);
                 }
             }
             
             //redirect input
-            if ((input == "clear") || (input == "")) {  input = "";  commandFactory->setInputDirectory(input);  }
+            if ((input == "clear") || (input == "")) {  input = "";  current->setInputDir(input);  }
             else if (input == "default") {
-                string input = m->getProgramPath();
+                string input = current->getProgramPath();
                 //input = exepath.substr(0, (exepath.find_last_of('m')));
                 
                 m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
-                commandFactory->setInputDirectory(input);
+                current->setInputDir(input);
             }else {
-                if (m->dirCheck(input)) {
+                if (util.dirCheck(input)) {
                     m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
-                    commandFactory->setInputDirectory(input);
+                    current->setInputDir(input);
                 }
             }
             
@@ -181,37 +179,37 @@ int SetDirectoryCommand::execute(){
 #ifdef MOTHUR_FILES
 				string temp = MOTHUR_FILES;
 				m->mothurOut("tempDefault=" + temp); m->mothurOutEndLine();
-				m->setDefaultPath(temp);
+				current->setDefaultPath(temp);
 #else
 				string temp = "";
-				m->mothurOut("No default directory defined at compile time."); m->mothurOutEndLine();
-				m->setDefaultPath(temp);
+				m->mothurOut("No default directory defined at compile time.\n"); 
+				current->setDefaultPath(temp);
 #endif
             }else if (tempdefault == "") {  //do nothing
             }else if (tempdefault == "default") {
-                string tempdefault = m->getProgramPath();
+                string tempdefault = current->getProgramPath();
                 //tempdefault = exepath.substr(0, (exepath.find_last_of('m')));
                 
                 m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
-                m->setDefaultPath(tempdefault);
+                current->setDefaultPath(tempdefault);
             }else {
-                if (m->mkDir(tempdefault)) {
+                if (util.mkDir(tempdefault)) {
                     m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
-                    m->setDefaultPath(tempdefault); 
+                    current->setDefaultPath(tempdefault);
                 }
             }
             
             //set default
             if (blastLocation == "") {  //do nothing   }
             }else if ((blastLocation == "default") || (blastLocation == "clear")){
-                string blastLocation = m->getProgramPath();
+                string blastLocation = current->getProgramPath();
                                 
                 m->mothurOut("Blast Location=" + blastLocation); m->mothurOutEndLine();
-                m->setBlastPath(blastLocation);
+                current->setBlastPath(blastLocation);
             }else {
-                if (m->dirCheck(blastLocation)) {
+                if (util.dirCheck(blastLocation)) {
                     m->mothurOut("Blast Location=" + blastLocation); m->mothurOutEndLine();
-                    m->setBlastPath(blastLocation);
+                    current->setBlastPath(blastLocation);
                 }
             }
 

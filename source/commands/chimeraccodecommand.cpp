@@ -120,34 +120,34 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
             
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("reference");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", false);
+			fastafile = validParameter.valid(parameters, "fasta");
 			if (fastafile == "not found") { 				//if there is a current fasta file, use it
-				string filename = m->getFastaFile(); 
+				string filename = current->getFastaFile(); 
 				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { 
-				m->splitAtDash(fastafile, fastaFileNames);
+				util.splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = m->getFastaFile(); 
+						fastaFileNames[i] = current->getFastaFile(); 
 						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -157,90 +157,46 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-					
-						if (inputDir != "") {
-							string path = m->hasPath(fastaFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-						}
-		
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}else {
-							m->setFastaFile(fastaFileNames[i]);
-						}
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
+                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 				
 				//make sure there is at least one valid file left
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
-			maskfile = validParameter.validFile(parameters, "mask", false);
+			maskfile = validParameter.valid(parameters, "mask");
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  { 
 				if (inputDir != "") {
-					string path = m->hasPath(maskfile);
+					string path = util.hasPath(maskfile);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	maskfile = inputDir + maskfile;		}
 				}
 
 				ifstream in;
-				bool ableToOpen = m->openInputFile(maskfile, in);
+				bool ableToOpen = util.openInputFile(maskfile, in);
 				if (!ableToOpen) { abort = true; }
 				in.close();
 			}
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
-			filter = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "filter");			if (temp == "not found") { temp = "F"; }
+			filter = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, window);
+			temp = validParameter.valid(parameters, "window");			if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, window);
 			
-			temp = validParameter.validFile(parameters, "numwanted", false);		if (temp == "not found") { temp = "20"; }
-			m->mothurConvert(temp, numwanted);
+			temp = validParameter.valid(parameters, "numwanted");		if (temp == "not found") { temp = "20"; }
+			util.mothurConvert(temp, numwanted);
 			
 			//this has to go after save so that if the user sets save=t and provides no reference we abort
-			templatefile = validParameter.validFile(parameters, "reference", true);
+			templatefile = validParameter.validFile(parameters, "reference");
 			if (templatefile == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required, aborting.\n"); abort = true;
 			}else if (templatefile == "not open") { abort = true; }
 
@@ -261,7 +217,7 @@ int ChimeraCcodeCommand::execute(){
 				
 			m->mothurOut("Checking sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 		
-			int start = time(NULL);	
+			long start = time(NULL);	
 			
 			//set user options
 			if (maskfile == "default") { m->mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); m->mothurOutEndLine();  }
@@ -272,30 +228,30 @@ int ChimeraCcodeCommand::execute(){
 			if (chimera->getUnaligned()) { m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); delete chimera; return 0; }
 			templateSeqsLength = chimera->getLength();
 			
-			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
+			if (outputDir == "") { outputDir = util.hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
 			string outputFileName, accnosFileName;
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
             string mapInfo = getOutputFileName("mapinfo", variables);
 			if (maskfile != "") { variables["[tag]"] = maskfile; }
             outputFileName = getOutputFileName("chimera", variables);
             accnosFileName = getOutputFileName("accnos", variables);
 						
-			if (m->getControl_pressed()) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); return 0;	}
+			if (m->getControl_pressed()) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} outputTypes.clear(); return 0;	}
 			
 			ofstream outHeader;
-			string tempHeader = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + "ccode.chimeras.tempHeader";
-			m->openOutputFile(tempHeader, outHeader);
+			string tempHeader = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s])) + maskfile + "ccode.chimeras.tempHeader";
+			util.openOutputFile(tempHeader, outHeader);
 			
 			outHeader << "For full window mapping info refer to " << mapInfo << endl << endl; outHeader.close();
 							
             numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName);
 					
-            if (m->getControl_pressed()) { m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  outputTypes.clear();  delete chimera; return 0; }
+            if (m->getControl_pressed()) { util.mothurRemove(outputFileName); util.mothurRemove(tempHeader); util.mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  outputTypes.clear();  delete chimera; return 0; }
 
-            m->appendFiles(outputFileName, tempHeader);
+            util.appendFiles(outputFileName, tempHeader);
 		
-			m->mothurRemove(outputFileName);
+			util.mothurRemove(outputFileName);
 			rename(tempHeader.c_str(), outputFileName.c_str());
 		
 			delete chimera;
@@ -310,10 +266,10 @@ int ChimeraCcodeCommand::execute(){
 		
 		
 		//set accnos file as new current accnosfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("accnos");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -334,13 +290,13 @@ int ChimeraCcodeCommand::execute(){
 int ChimeraCcodeCommand::driver(string outputFName, string filename, string accnos){
 	try {
 		ofstream out;
-		m->openOutputFile(outputFName, out);
+		util.openOutputFile(outputFName, out);
 		
 		ofstream out2;
-		m->openOutputFile(accnos, out2);
+		util.openOutputFile(accnos, out2);
 		
 		ifstream inFASTA;
-		m->openInputFile(filename, inFASTA);
+		util.openInputFile(filename, inFASTA);
 
 		int count = 0;
 	
@@ -348,7 +304,7 @@ int ChimeraCcodeCommand::driver(string outputFName, string filename, string accn
 		
 			if (m->getControl_pressed()) {	return 1;	}
 		
-			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  util.gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				

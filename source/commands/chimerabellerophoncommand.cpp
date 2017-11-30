@@ -112,24 +112,24 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			outputTypes["accnos"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			
-			fastafile = validParameter.validFile(parameters, "fasta", false);
+			fastafile = validParameter.valid(parameters, "fasta");
 			if (fastafile == "not found") { 				
 				//if there is a current fasta file, use it
-				string filename = m->getFastaFile(); 
+				string filename = current->getFastaFile(); 
 				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { 
-				m->splitAtDash(fastafile, fastaFileNames);
+				util.splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = m->getFastaFile(); 
+						fastaFileNames[i] = current->getFastaFile(); 
 						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -140,52 +140,8 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 					}
 					
 					if (!ignore) {
-					
-						if (inputDir != "") {
-							string path = m->hasPath(fastaFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-						}
-		
-						bool ableToOpen;
-						ifstream in;
-
-						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}else {
-							m->setFastaFile(fastaFileNames[i]);
-						}
+                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
+                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
 					}
 				}
 				
@@ -194,20 +150,20 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 
 			string temp;
-			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
-			filter = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "filter");			if (temp == "not found") { temp = "F"; }
+			filter = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "correction", false);		if (temp == "not found") { temp = "T"; }
-			correction = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "correction");		if (temp == "not found") { temp = "T"; }
+			correction = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, window);
+			temp = validParameter.valid(parameters, "window");			if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, window);
 			
-			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "25"; }
-			m->mothurConvert(temp, increment);
+			temp = validParameter.valid(parameters, "increment");		if (temp == "not found") { temp = "25"; }
+			util.mothurConvert(temp, increment);
 		}
 	}
 	catch(exception& e) {
@@ -225,31 +181,31 @@ int ChimeraBellerophonCommand::execute(){
 			
 			m->mothurOut("Checking sequences from " + fastaFileNames[i] + " ..." ); m->mothurOutEndLine();
 			
-			int start = time(NULL);	
+			long start = time(NULL);	
 			
 			chimera = new Bellerophon(fastaFileNames[i], filter, correction, window, increment, outputDir);	
 			
-			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it	
+			if (outputDir == "") { outputDir = util.hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it	
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i]));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[i]));
 			string outputFileName = getOutputFileName("chimera", variables);
 			string accnosFileName = getOutputFileName("accnos", variables);
 			
 			chimera->getChimeras();
 			
-			if (m->getControl_pressed()) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;	}
+			if (m->getControl_pressed()) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;	}
 					
 			ofstream out;
-			m->openOutputFile(outputFileName, out);
+			util.openOutputFile(outputFileName, out);
 			
 			ofstream out2;
-			m->openOutputFile(accnosFileName, out2);
+			util.openOutputFile(accnosFileName, out2);
 			
 			numSeqs = chimera->print(out, out2, "");
 			out.close();
 			out2.close(); 
 						
-			if (m->getControl_pressed()) { m->mothurRemove(accnosFileName); m->mothurRemove(outputFileName); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); delete chimera;	return 0;	}
+			if (m->getControl_pressed()) { util.mothurRemove(accnosFileName); util.mothurRemove(outputFileName); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); delete chimera;	return 0;	}
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine(); m->mothurOutEndLine();
 			
@@ -260,10 +216,10 @@ int ChimeraBellerophonCommand::execute(){
 		}
 		
 		//set accnos file as new current accnosfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("accnos");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();

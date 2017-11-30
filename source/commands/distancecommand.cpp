@@ -119,14 +119,14 @@ DistanceCommand::DistanceCommand(string option) {
 			outputTypes["column"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it2 = parameters.find("fasta");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = m->hasPath(it2->second);
+					path = util.hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it2->second;		}
 				}
@@ -134,7 +134,7 @@ DistanceCommand::DistanceCommand(string option) {
 				it2 = parameters.find("oldfasta");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = m->hasPath(it2->second);
+					path = util.hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oldfasta"] = inputDir + it2->second;		}
 				}
@@ -142,70 +142,69 @@ DistanceCommand::DistanceCommand(string option) {
 				it2 = parameters.find("column");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = m->hasPath(it2->second);
+					path = util.hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it2->second;		}
 				}
 			}
 
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); 
 					ifstream inFASTA;
-					m->openInputFile(fastafile, inFASTA);
+					util.openInputFile(fastafile, inFASTA);
 					alignDB = SequenceDB(inFASTA); 
 					inFASTA.close();
 				}else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else if (fastafile == "not open") { abort = true; }	
 			else{
 				ifstream inFASTA;
-				m->openInputFile(fastafile, inFASTA);
+				util.openInputFile(fastafile, inFASTA);
 				alignDB = SequenceDB(inFASTA); 
 				inFASTA.close();
-				m->setFastaFile(fastafile);
+				current->setFastaFile(fastafile);
 			}
 			
-			oldfastafile = validParameter.validFile(parameters, "oldfasta", true);
+			oldfastafile = validParameter.validFile(parameters, "oldfasta");
 			if (oldfastafile == "not found") { oldfastafile = ""; }
 			else if (oldfastafile == "not open") { abort = true; }	
 			
-			column = validParameter.validFile(parameters, "column", true);
+			column = validParameter.validFile(parameters, "column");
 			if (column == "not found") { column = ""; }
 			else if (column == "not open") { abort = true; }	
-			else { m->setColumnFile(column); }
+			else { current->setColumnFile(column); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "onegap";  }
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
 			}
-			m->splitAtDash(calc, Estimators);
+			util.splitAtDash(calc, Estimators);
 
 			string temp;
-			temp = validParameter.validFile(parameters, "countends", false);	if(temp == "not found"){	temp = "T";	}
-            countends = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "countends");	if(temp == "not found"){	temp = "T";	}
+            countends = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
-			m->mothurConvert(temp, cutoff); 
+			temp = validParameter.valid(parameters, "cutoff");		if(temp == "not found"){	temp = "1.0"; }
+			util.mothurConvert(temp, cutoff); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
-			temp = validParameter.validFile(parameters, "compress", false);		if(temp == "not found"){  temp = "F"; }
+			temp = validParameter.valid(parameters, "compress");		if(temp == "not found"){  temp = "F"; }
 			convert(temp, compress);
 
-			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output == "phylip") { output = "lt";  }
 			
 			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both."); m->mothurOutEndLine(); abort=true; }
@@ -246,11 +245,11 @@ int DistanceCommand::execute(){
 		string outputFile;
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
             variables["[outputtag]"] = "phylip";
 			outputFile = getOutputFileName("phylip", variables);
-			m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
+			util.mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
@@ -263,11 +262,11 @@ int DistanceCommand::execute(){
 				rename(column.c_str(), tempcolumn.c_str());
 			}
 			
-			m->mothurRemove(outputFile);
+			util.mothurRemove(outputFile);
 		}else { //assume square
 			variables["[outputtag]"] = "square";
 			outputFile = getOutputFileName("phylip", variables);
-			m->mothurRemove(outputFile);
+			util.mothurRemove(outputFile);
 			outputTypes["phylip"].push_back(outputFile);
 		}
         
@@ -275,12 +274,12 @@ int DistanceCommand::execute(){
 
         createProcesses(outputFile);
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  util.mothurRemove(outputFile); return 0; }
 		
 		ifstream fileHandle;
 		fileHandle.open(outputFile.c_str());
 		if(fileHandle) {
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 			if (fileHandle.eof()) { m->mothurOut(outputFile + " is blank. This can result if there are no distances below your cutoff.");  m->mothurOutEndLine(); }
 		}
 		
@@ -289,35 +288,35 @@ int DistanceCommand::execute(){
 			//we had to rename the column file so we didnt overwrite above, but we want to keep old name
 			if (outputFile == column) { 
 				string tempcolumn = column + ".old";
-				m->appendFiles(tempcolumn, outputFile);
-				m->mothurRemove(tempcolumn);
+				util.appendFiles(tempcolumn, outputFile);
+				util.mothurRemove(tempcolumn);
 			}else{
-				m->appendFiles(outputFile, column);
-				m->mothurRemove(outputFile);
+				util.appendFiles(outputFile, column);
+				util.mothurRemove(outputFile);
 				outputFile = column;
 			}
 			
 			if (outputDir != "") { 
-				string newOutputName = outputDir + m->getSimpleName(outputFile);
+				string newOutputName = outputDir + util.getSimpleName(outputFile);
 				rename(outputFile.c_str(), newOutputName.c_str());
-				m->mothurRemove(outputFile);
+				util.mothurRemove(outputFile);
 				outputFile = newOutputName;
 			}
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  util.mothurRemove(outputFile); return 0; }
 		
 		//set phylip file as new current phylipfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("phylip");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName); }
 		}
 		
 		//set column file as new current columnfile
 		itTypes = outputTypes.find("column");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setColumnFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -327,7 +326,7 @@ int DistanceCommand::execute(){
 		m->mothurOut("It took " + toString(time(NULL) - startTime) + " seconds to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 
 
-		if (m->isTrue(compress)) {
+		if (util.isTrue(compress)) {
 			m->mothurOut("Compressing..."); m->mothurOutEndLine();
 			m->mothurOut("(Replacing " + outputFile + " with " + outputFile + ".gz)"); m->mothurOutEndLine();
 			system(("gzip -v " + outputFile).c_str());
@@ -371,7 +370,7 @@ void driverColumn(distanceData* params){
         
         //column file
         ofstream outFile;
-        params->m->openOutputFile(params->dFileName, outFile);
+        params->util.openOutputFile(params->dFileName, outFile);
         outFile.setf(ios::fixed, ios::showpoint);
         outFile << setprecision(4);
         
@@ -450,7 +449,7 @@ void driverPhylip(distanceData* params){
         
         //column file
         ofstream outFile;
-        params->m->openOutputFile(params->dFileName, outFile);
+        params->util.openOutputFile(params->dFileName, outFile);
         outFile.setf(ios::fixed, ios::showpoint);
         outFile << setprecision(4);
         
@@ -567,8 +566,8 @@ void DistanceCommand::createProcesses(string filename) {
 
 		//append and remove temp files
 		for (int i=0;i<processors-1;i++) {
-			m->appendFiles((filename + toString(i+1) + ".temp"), filename);
-			m->mothurRemove((filename + toString(i+1) + ".temp"));
+			util.appendFiles((filename + toString(i+1) + ".temp"), filename);
+			util.mothurRemove((filename + toString(i+1) + ".temp"));
 		}
 		
 	}
@@ -587,7 +586,7 @@ bool DistanceCommand::sanityCheck() {
 		
 		//make sure the 2 fasta files have the same alignment length
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		int fastaAlignLength = 0;
 		if (in) { 
 			Sequence tempIn(in);
@@ -596,7 +595,7 @@ bool DistanceCommand::sanityCheck() {
 		in.close();
 		
 		ifstream in2;
-		m->openInputFile(oldfastafile, in2);
+		util.openInputFile(oldfastafile, in2);
 		int oldfastaAlignLength = 0;
 		if (in2) { 
 			Sequence tempIn2(in2);
@@ -610,7 +609,7 @@ bool DistanceCommand::sanityCheck() {
 		set<string> namesOldFasta;
 		
 		ifstream inFasta;
-		m->openInputFile(oldfastafile, inFasta);
+		util.openInputFile(oldfastafile, inFasta);
 		
 		while (!inFasta.eof()) {
 			if (m->getControl_pressed()) {  inFasta.close(); return good;  }
@@ -622,25 +621,25 @@ bool DistanceCommand::sanityCheck() {
 				alignDB.push_back(temp);  //add to DB
 			}
 			
-			m->gobble(inFasta);
+			util.gobble(inFasta);
 		}
 		
 		inFasta.close();
 		
 		//read through the column file checking names and removing distances above the cutoff
 		ifstream inDist;
-		m->openInputFile(column, inDist);
+		util.openInputFile(column, inDist);
 		
 		ofstream outDist;
 		string outputFile = column + ".temp";
-		m->openOutputFile(outputFile, outDist);
+		util.openOutputFile(outputFile, outDist);
 		
 		string name1, name2;
 		float dist;
 		while (!inDist.eof()) {
-			if (m->getControl_pressed()) {  inDist.close(); outDist.close(); m->mothurRemove(outputFile); return good;  }
+			if (m->getControl_pressed()) {  inDist.close(); outDist.close(); util.mothurRemove(outputFile); return good;  }
 		
-			inDist >> name1 >> name2 >> dist; m->gobble(inDist);
+			inDist >> name1 >> name2 >> dist; util.gobble(inDist);
 			
 			//both names are in fasta file and distance is below cutoff
 			if ((namesOldFasta.count(name1) == 0) || (namesOldFasta.count(name2) == 0)) {  good = false; break;  }
@@ -655,10 +654,10 @@ bool DistanceCommand::sanityCheck() {
 		outDist.close();
 		
 		if (good) {
-			m->mothurRemove(column);
+			util.mothurRemove(column);
 			rename(outputFile.c_str(), column.c_str());
 		}else{
-			m->mothurRemove(outputFile); //temp file is bad because file mismatch above
+			util.mothurRemove(outputFile); //temp file is bad because file mismatch above
 		}
 		
 		return good;

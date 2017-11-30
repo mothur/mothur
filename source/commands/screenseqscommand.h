@@ -69,6 +69,7 @@ struct sumScreenData {
 	string goodFName, badAccnosFName, filename;
     map<string, string> badSeqNames;
     string summaryfile, contigsreport;
+    Utils util;
 	
 	
 	sumScreenData(){}

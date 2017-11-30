@@ -19,6 +19,7 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 
 /**************************************************************************************************/
@@ -101,6 +102,7 @@ private:
 	int longHomoPolymer;
 	int ambigBases;
 	int startPos, endPos;
+    Utils util;
 };
 
 /**************************************************************************************************/

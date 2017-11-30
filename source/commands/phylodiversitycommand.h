@@ -158,7 +158,7 @@ static DWORD WINAPI MyPhyloDivThreadFunction(LPVOID lpParam){
                 
                 for (int j = 0; j < groups.size(); j++) {
                     
-                    if (pDataArray->m->inUsersGroups(groups[j], mGroups)) {
+                    if (pDataArray->util.inUsersGroups(groups[j], mGroups)) {
                         int numSeqsInGroupJ = 0;
                         map<string, int>::iterator it;
                         it = pDataArray->t->tree[pDataArray->randomLeaf[k]].pcount.find(groups[j]);

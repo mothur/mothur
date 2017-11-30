@@ -106,14 +106,14 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			outputTypes["sensspec"] = tempOutNames;
 
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -121,7 +121,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -129,7 +129,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -137,7 +137,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -145,49 +145,49 @@ SensSpecCommand::SensSpecCommand(string option)  {
                 it = parameters.find("count");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["count"] = inputDir + it->second;		}
                 }
 
 			}
 			//check for required parameters
-			listFile = validParameter.validFile(parameters, "list", true);
+			listFile = validParameter.validFile(parameters, "list");
 			if (listFile == "not found") {
-				listFile = m->getListFile();
+				listFile = current->getListFile();
 				if (listFile != "") { m->mothurOut("Using " + listFile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listFile == "not open") { abort = true; }
-			else { m->setListFile(listFile); }
+			else { current->setListFile(listFile); }
 
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not found") { phylipfile = "";  }
 			else if (phylipfile == "not open") { abort = true; }
-			else { distFile = phylipfile; format = "phylip"; m->setPhylipFile(phylipfile);  }
+			else { distFile = phylipfile; format = "phylip"; current->setPhylipFile(phylipfile);  }
 
-			columnfile = validParameter.validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not found") { columnfile = ""; }
 			else if (columnfile == "not open") { abort = true; }
-			else { distFile = columnfile; format = "column";   m->setColumnFile(columnfile); }
+			else { distFile = columnfile; format = "column";   current->setColumnFile(columnfile); }
 
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { namefile = ""; abort = true; }
-			else {  m->setNameFile(namefile); }
+			else {  current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
             if (countfile == "not found") { countfile =  "";  }
             else if (countfile == "not open") { countfile = ""; abort = true; }
-            else {  m->setCountTableFile(countfile); }
+            else {  current->setCountFile(countfile); }
 
 
 			if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
 				//give priority to column, then phylip
-				columnfile = m->getColumnFile();
+				columnfile = current->getColumnFile();
 				if (columnfile != "") {  distFile = columnfile; format = "column";  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
 				else {
-					phylipfile = m->getPhylipFile();
+					phylipfile = current->getPhylipFile();
 					if (phylipfile != "") {  distFile = phylipfile; format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 					else {
 						m->mothurOut("No valid current files. You must provide a phylip or column file."); m->mothurOutEndLine();
@@ -198,10 +198,10 @@ SensSpecCommand::SensSpecCommand(string option)  {
 
             if (columnfile != "") {
                 if ((namefile == "") && (countfile == "")){
-                    namefile = m->getNameFile();
+                    namefile = current->getNameFile();
                     if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
                     else {
-                        countfile = m->getCountTableFile();
+                        countfile = current->getCountFile();
                         if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                         else {
                             m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine();
@@ -216,27 +216,27 @@ SensSpecCommand::SensSpecCommand(string option)  {
             }
 
 			//if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);
+			outputDir = validParameter.valid(parameters, "outputdir");
 			if (outputDir == "not found"){
 				outputDir = "";
-				outputDir += m->hasPath(listFile); //if user entered a file with a path then preserve it
+				outputDir += util.hasPath(listFile); //if user entered a file with a path then preserve it
 			}
 
-			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found") { temp = "-1.00"; }
-			m->mothurConvert(temp, cutoff);
+			temp = validParameter.valid(parameters, "cutoff");		if (temp == "not found") { temp = "-1.00"; }
+			util.mothurConvert(temp, cutoff);
 
-			temp = validParameter.validFile(parameters, "precision", false);	if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, precision);
+			temp = validParameter.valid(parameters, "precision");	if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, precision);
 
-			string label = validParameter.validFile(parameters, "label", false);
+			string label = validParameter.valid(parameters, "label");
 			if (label == "not found") { label = ""; }
 			else {
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 
             map<string, string> variables;
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listFile));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listFile));
 			sensSpecFileName = getOutputFileName("sensspec",variables);
 		}
 
@@ -268,9 +268,9 @@ int SensSpecCommand::execute(){
 		processListFile();
 
         //remove temp file if created
-        if (newListFile != "") { m->mothurRemove(newListFile); }
+        if (newListFile != "") { util.mothurRemove(newListFile); }
 
-		if (m->getControl_pressed()) { m->mothurRemove(sensSpecFileName); return 0; }
+		if (m->getControl_pressed()) { util.mothurRemove(sensSpecFileName); return 0; }
 
         m->mothurOut("It took " + toString(time(NULL) - startTime) + " to run sens.spec."); m->mothurOutEndLine();
 
@@ -302,8 +302,8 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 			if(label != "unique"){
 				origCutoff = label;
 				convert(label, cutoff);
-        cutoff = m->ceilDist(cutoff, precision);
-        origCutoff = toString(m->ceilDist(cutoff, precision));
+        cutoff = util.ceilDist(cutoff, precision);
+        origCutoff = toString(util.ceilDist(cutoff, precision));
 			}
 			else{
 				origCutoff = "unique";
@@ -323,7 +323,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 		if(format == "phylip"){
 
 			ifstream phylipFile;
-			m->openInputFile(distFile, phylipFile);
+			util.openInputFile(distFile, phylipFile);
 			int pNumSeqs;
 			phylipFile >> pNumSeqs;
 
@@ -354,22 +354,22 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 					}
 				}
 
-	            m->getline(phylipFile); //get rest of line if square
-	            m->gobble(phylipFile);
+	            util.getline(phylipFile); //get rest of line if square
+	            util.gobble(phylipFile);
 			}
 			phylipFile.close();
 		}
 		else if(format == "column"){
 
 			ifstream columnFile;
-			m->openInputFile(distFile, columnFile);
+			util.openInputFile(distFile, columnFile);
 
 			string seqNameA, seqNameB;
 			float distance;
 
 			while(columnFile){
 				columnFile >> seqNameA >> seqNameB >> distance;
-				m->gobble(columnFile);
+				util.gobble(columnFile);
 
 				if(distance < cutoff){
 					string seqNamePair;
@@ -393,7 +393,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 
 			//count number of sequences in the bin
             vector<string> otuVector;
-			m->splitAtComma(seqList, otuVector);
+			util.splitAtComma(seqList, otuVector);
 
 			// indicate that a pair of sequences are in the same OTU; will
 			// assume that if they don't show up in the map that they're in
@@ -443,7 +443,7 @@ int SensSpecCommand::processListFile(){
 		bool getCutoff = 0;
 
 		if(cutoff == -1.00)	{	getCutoff = 1;                                          }
-		else 				{	origCutoff = toString(m->ceilDist(cutoff, precision));	}
+		else 				{	origCutoff = toString(util.ceilDist(cutoff, precision));	}
 
 		InputData input(listFile, "list", nullVector);
 		ListVector* list = input.getListVector();
@@ -455,7 +455,7 @@ int SensSpecCommand::processListFile(){
 
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  delete list;  return 0;  }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }  delete list;  return 0;  }
 
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 				processedLabels.insert(list->getLabel());
@@ -466,7 +466,7 @@ int SensSpecCommand::processListFile(){
 				process(list, getCutoff, origCutoff);
 			}
 
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 
 				string saveLabel = list->getLabel();
 
@@ -527,7 +527,7 @@ int SensSpecCommand::processListFile(){
 void SensSpecCommand::setUpOutput(){
 	try{
 		ofstream sensSpecFile;
-		m->openOutputFile(sensSpecFileName, sensSpecFile);
+		util.openOutputFile(sensSpecFileName, sensSpecFile);
 
 		sensSpecFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
 
@@ -572,7 +572,7 @@ void SensSpecCommand::outputStatistics(string label, string cutoff){
 		if(nPrime == 0)		{	negativePredictiveValue = 0;	matthewsCorrCoef = 0;							}
 
 		ofstream sensSpecFile;
-		m->openOutputFileAppend(sensSpecFileName, sensSpecFile);
+		util.openOutputFileAppend(sensSpecFileName, sensSpecFile);
 
 		sensSpecFile << label << '\t' << cutoff << '\t';
 		sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
@@ -596,34 +596,34 @@ string SensSpecCommand::preProcessList(){
         if (format == "phylip") {
 
             ifstream phylipFile;
-            m->openInputFile(distFile, phylipFile);
+            util.openInputFile(distFile, phylipFile);
             string numTest;
             int pNumSeqs;
-			phylipFile >> numTest; m->gobble(phylipFile);
+			phylipFile >> numTest; util.gobble(phylipFile);
 
-			if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+			if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
             else {
-                m->mothurConvert(numTest, pNumSeqs);
+                util.mothurConvert(numTest, pNumSeqs);
             }
 
             string seqName;
             for(int i=0;i<pNumSeqs;i++){
                 if (m->getControl_pressed()) { return ""; }
-                phylipFile >> seqName;  m->getline(phylipFile);  m->gobble(phylipFile);
+                phylipFile >> seqName;  util.getline(phylipFile);  util.gobble(phylipFile);
                 uniqueNames.insert(seqName);
             }
             phylipFile.close();
         }else {
             if (namefile != "") {
                 ifstream nameFileHandle;
-                m->openInputFile(namefile, nameFileHandle);
+                util.openInputFile(namefile, nameFileHandle);
                 string uniqueSeqName, redundantSeqNames;
                 
                 while(nameFileHandle){
                     if (m->getControl_pressed()) { return ""; }
                     nameFileHandle >> uniqueSeqName >> redundantSeqNames;
                     uniqueNames.insert(uniqueSeqName);
-                    m->gobble(nameFileHandle);
+                    util.gobble(nameFileHandle);
                 }
                 nameFileHandle.close();
             }else if (countfile != "") {
@@ -637,35 +637,32 @@ string SensSpecCommand::preProcessList(){
         //read list file, if numSeqs > unique names then remove redundant names
         string newListFile = listFile + ".temp";
         ofstream out;
-        m->openOutputFile(newListFile, out);
-        ifstream in;
-		m->openInputFile(listFile, in);
+        util.openOutputFile(newListFile, out);
+        InputData input(listFile, "list", nullVector);
+        ListVector* list = input.getListVector();
 
 		bool wroteSomething = false;
 
-		while(!in.eof()){
+		 while(list != NULL) {
 
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(newListFile);  return ""; }
+			if (m->getControl_pressed()) {  out.close(); util.mothurRemove(newListFile);  return ""; }
 
-			//read in list vector
-			ListVector list(in);
-            
             //listfile is already unique
-            if (list.getNumSeqs() == uniqueNames.size()) { in.close(); out.close(); m->mothurRemove(newListFile);  return ""; }
+            if (list->getNumSeqs() == uniqueNames.size()) { out.close(); util.mothurRemove(newListFile);  return ""; }
 
 			//make a new list vector
 			ListVector newList;
-			newList.setLabel(list.getLabel());
-            vector<string> binLabels = list.getLabels();
+			newList.setLabel(list->getLabel());
+            vector<string> binLabels = list->getLabels();
             vector<string> newLabels;
 
 			//for each bin
-			for (int i = 0; i < list.getNumBins(); i++) {
+			for (int i = 0; i < list->getNumBins(); i++) {
 
 				//parse out names that are in accnos file
-				string binnames = list.get(i);
+				string binnames = list->get(i);
                 vector<string> bnames;
-                m->splitAtComma(binnames, bnames);
+                util.splitAtComma(binnames, bnames);
 
 				string newNames = "";
                 for (int j = 0; j < bnames.size(); j++) {
@@ -690,13 +687,13 @@ string SensSpecCommand::preProcessList(){
 				newList.print(out);
 			}
 
-			m->gobble(in);
+             delete list;
+             list = input.getListVector();
 		}
-		in.close();
 		out.close();
 
         if (wroteSomething) { return newListFile; }
-        else { m->mothurRemove(newListFile); }
+        else { util.mothurRemove(newListFile); }
 
         return "";
     }

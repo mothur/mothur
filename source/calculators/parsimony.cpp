@@ -16,6 +16,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 		processors = p;
 		outputDir = o;
         CountTable* ct = t->getCountTable();
+        Treenames = t->getTreeNames();
 		
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = Groups.size();
@@ -102,8 +103,8 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + m->mothurGetpid(process) + ".pars.results.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = outputDir + toString(process) + ".pars.results.temp";
+				util.openOutputFile(tempFile, out);
 				out << myresults.size() << endl;
 				for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
 				out.close();
@@ -120,7 +121,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
                 m->setControl_pressed(false);
 				
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(outputDir + (toString(processIDS[i]) + ".pars.results.temp"));
+                    util.mothurRemove(outputDir + (toString(processIDS[i]) + ".pars.results.temp"));
                 }
                 recalc = true;
                 break;
@@ -130,7 +131,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
         if (recalc) {
             //test line, also set recalc to true.
             //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".pars.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+					  for (int i=0;i<processIDS.size();i++) {util.mothurRemove(outputDir + (toString(processIDS[i]) + ".pars.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             lines.clear();
             int remainingPairs = namesOfGroupCombos.size();
@@ -161,8 +162,8 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
                     
                     //pass numSeqs to parent
                     ofstream out;
-                    string tempFile = outputDir + m->mothurGetpid(process) + ".pars.results.temp";
-                    m->openOutputFile(tempFile, out);
+                    string tempFile = outputDir + toString(process) + ".pars.results.temp";
+                    util.openOutputFile(tempFile, out);
                     out << myresults.size() << endl;
                     for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
                     out.close();
@@ -191,12 +192,12 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 		for (int i=0;i<processIDS.size();i++) { 
 			ifstream in;
 			string s = outputDir + toString(processIDS[i]) + ".pars.results.temp";
-			m->openInputFile(s, in);
+			util.openInputFile(s, in);
 			
 			//get scores
 			if (!in.eof()) {
 				int num;
-				in >> num; m->gobble(in);
+				in >> num; util.gobble(in);
 				
 				if (m->getControl_pressed()) { break; }
 				
@@ -205,10 +206,10 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 					in >> w;
 					results.push_back(w);
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
 			in.close();
-			m->mothurRemove(s);
+			util.mothurRemove(s);
 		}
 #else
         //fill in functions
@@ -263,7 +264,7 @@ EstOutput Parsimony::driver(Tree* t, vector< vector<string> > namesOfGroupCombos
 		
 		EstOutput results; results.resize(num);
 		
-		Tree* copyTree = new Tree(ct);
+		Tree* copyTree = new Tree(ct, Treenames);
 		int count = 0;
 		
 		for (int h = start; h < (start+num); h++) {

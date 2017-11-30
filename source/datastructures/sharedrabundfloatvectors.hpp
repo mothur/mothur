@@ -24,9 +24,9 @@ inline bool compareRAbundFloats(SharedRAbundFloatVector* left, SharedRAbundFloat
 class SharedRAbundFloatVectors : public DataVector {
     
 public:
-    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0; }
-    SharedRAbundFloatVectors(ifstream&, vector<string>&);
-    SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins) {
+    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu"; }
+    SharedRAbundFloatVectors(ifstream&, vector<string>&, string&, string&);
+    SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
         vector<SharedRAbundFloatVector*> data = bv.getSharedRAbundFloatVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         eliminateZeroOTUS();
@@ -74,6 +74,7 @@ private:
     vector<string> currentLabels;
     map<string, int> groupNames;
     int numBins;
+    string otuTag;
 
 };
 

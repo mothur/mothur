@@ -38,17 +38,17 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
         
         map<string, string>::iterator it;
         map<string, string> nameMap;
-        m->readNames(nameFile, nameMap);
+        util.readNames(nameFile, nameMap);
         
 		//read fasta file making sure each sequence is in the group file
 		ifstream in;
-		m->openInputFile(fastaFile, in);
+		util.openInputFile(fastaFile, in);
         
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(in); m->gobble(in);
+            Sequence seq(in); util.gobble(in);
             
             if (seq.getName() != "") {
                 
@@ -58,7 +58,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
                     
                     vector<string> names;
                     string secondCol = it->second;
-                    m->splitAtChar(secondCol, names, ',');
+                    util.splitAtChar(secondCol, names, ',');
                     
                     map<string, string> splitMap; //group -> name1,name2,...
                     map<string, string>::iterator itSplit;
@@ -134,13 +134,13 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string
 		
 		//read fasta file making sure each sequence is in the group file
 		ifstream in;
-		m->openInputFile(fastaFile, in);
+		util.openInputFile(fastaFile, in);
 		
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence seq(in); m->gobble(in);
+			Sequence seq(in); util.gobble(in);
 			
 			if (seq.getName() != "") {
                 
@@ -225,7 +225,7 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
 		}else {
 
 			ofstream out;
-			m->openOutputFile(filename, out);
+			util.openOutputFile(filename, out);
 			
 			seqForThisGroup = it->second;
             
@@ -248,14 +248,14 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
 						error = 1;
 						m->mothurOut("[ERROR]: " + seqForThisGroup[i].getName() + " is in your fastafile, but is not in your namesfile, please correct."); m->mothurOutEndLine();
 					}else {
-						int num = m->getNumNames(itNameMap->second);
+						int num = util.getNumNames(itNameMap->second);
 						
 						seqPriorityNode temp(num, seqForThisGroup[i].getUnaligned(), seqForThisGroup[i].getName());
 						nameVector.push_back(temp);
 					}
 				}
 				
-				if (error == 1) { out.close(); m->mothurRemove(filename); return 1; }
+				if (error == 1) { out.close(); util.mothurRemove(filename); return 1; }
 				
 				//sort by num represented
 				sort(nameVector.begin(), nameVector.end(), compareSeqPriorityNodes);
@@ -263,7 +263,7 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
 				//print new file in order of
 				for (int i = 0; i < nameVector.size(); i++) {
 					
-					if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
+					if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
 					
 					out << ">" <<  nameVector[i].name << tag << nameVector[i].numIdentical << tag2 << endl << nameVector[i].seq << endl; //
 				}
@@ -272,7 +272,7 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
                 //m->mothurOut("Group " + g +  " contains " + toString(seqForThisGroup.size()) + " unique seqs.\n");
 				for (int i = 0; i < seqForThisGroup.size(); i++) {
 					
-					if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
+					if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
 					
 					seqForThisGroup[i].printSequence(out);	
 				}
@@ -322,11 +322,11 @@ int SequenceParser::getNameMap(string g, string filename){
 			nameMapForThisGroup = it->second;
 			
 			ofstream out;
-			m->openOutputFile(filename, out);
+			util.openOutputFile(filename, out);
 			
 			for (map<string, string>::iterator itFile = nameMapForThisGroup.begin(); itFile != nameMapForThisGroup.end(); itFile++) {
 				
-				if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
+				if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
 				
 				out << itFile->first << '\t' << itFile->second << endl;
 			}

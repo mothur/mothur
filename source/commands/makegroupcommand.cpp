@@ -107,29 +107,29 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			outputTypes["group"] = tempOutNames;
 		
             //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 
-			fastaFileName = validParameter.validFile(parameters, "fasta", false);
+			fastaFileName = validParameter.valid(parameters, "fasta");
 			if (fastaFileName == "not found") { 				//if there is a current fasta file, use it
-				string filename = m->getFastaFile(); 
+				string filename = current->getFastaFile(); 
 				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { 
-				m->splitAtDash(fastaFileName, fastaFileNames);
+				util.splitAtDash(fastaFileName, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = m->getFastaFile(); 
+						fastaFileNames[i] = current->getFastaFile(); 
 						if (fastaFileNames[i] != "") {  
 							m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); 
-							filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));
+							filename += util.getRootName(util.getSimpleName(fastaFileNames[i]));
 						}
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -139,48 +139,10 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						if (inputDir != "") {
-							string path = m->hasPath(fastaFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-						}
-		
-						ifstream in;
-						bool ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}else{  filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));  m->setFastaFile(fastaFileNames[i]); }
-					}
+                    if (!ignore) {
+                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
+                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 				
 				//prevent giantic file name
@@ -193,13 +155,13 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
 			
-			output = validParameter.validFile(parameters, "output", false);			
+			output = validParameter.valid(parameters, "output");			
 			if (output == "not found") { output = "";  }
 			else{ filename = output; }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { m->mothurOut("groups is a required parameter for the make.group command."); m->mothurOutEndLine(); abort = true;  }
-			else { m->splitAtDash(groups, groupsNames);	}
+			else { util.splitAtDash(groups, groupsNames);	}
 
 			if (groupsNames.size() != fastaFileNames.size()) { m->mothurOut("You do not have the same number of valid fastfile files as groups.  This could be because we could not open a fastafile."); m->mothurOutEndLine(); abort = true;  }
 		}
@@ -215,25 +177,25 @@ int MakeGroupCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[0]); }
+		if (outputDir == "") { outputDir = util.hasPath(fastaFileNames[0]); }
 			
 		filename = outputDir + filename;
 		
 		ofstream out;
-		m->openOutputFile(filename, out);
+		util.openOutputFile(filename, out);
 		
 		for (int i = 0; i < fastaFileNames.size(); i++) {
 		
-			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); m->mothurRemove(filename); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); util.mothurRemove(filename); return 0; }
 			
 			ifstream in;
-			m->openInputFile(fastaFileNames[i], in);
+			util.openInputFile(fastaFileNames[i], in);
 			
 			while (!in.eof()) {
 				
-				Sequence seq(in, "no align"); m->gobble(in);
+				Sequence seq(in, "no align"); util.gobble(in);
 				
-				if (m->getControl_pressed()) { outputTypes.clear();  in.close(); out.close(); m->mothurRemove(filename); return 0; }
+				if (m->getControl_pressed()) { outputTypes.clear();  in.close(); out.close(); util.mothurRemove(filename); return 0; }
 				
 				if (seq.getName() != "") {	out << seq.getName() << '\t' << groupsNames[i] << endl;		}
 			}
@@ -247,10 +209,10 @@ int MakeGroupCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set group file as new current groupfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 		}
 		
 		return 0;

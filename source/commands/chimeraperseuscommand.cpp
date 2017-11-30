@@ -128,25 +128,25 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", false);
+			fastafile = validParameter.valid(parameters, "fasta");
 			if (fastafile == "not found") { 				
 				//if there is a current fasta file, use it
-				string filename = m->getFastaFile(); 
+				string filename = current->getFastaFile(); 
 				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { 
-				m->splitAtDash(fastafile, fastaFileNames);
+				util.splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = m->getFastaFile(); 
+						fastaFileNames[i] = current->getFastaFile(); 
 						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -156,54 +156,11 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						
-						if (inputDir != "") {
-							string path = m->hasPath(fastaFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-						}
-						
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}else {
-							m->setFastaFile(fastaFileNames[i]);
-						}
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
+                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 				
 				//make sure there is at least one valid file left
 				if (fastaFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid files."); m->mothurOutEndLine(); abort = true; }
@@ -211,17 +168,17 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			
 			
 			//check for required parameters
-			namefile = validParameter.validFile(parameters, "name", false);
+			namefile = validParameter.valid(parameters, "name");
 			if (namefile == "not found") { namefile = "";  	}
 			else { 
-				m->splitAtDash(namefile, nameFileNames);
+				util.splitAtDash(namefile, nameFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < nameFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (nameFileNames[i] == "current") { 
-						nameFileNames[i] = m->getNameFile(); 
+						nameFileNames[i] = current->getNameFile();
 						if (nameFileNames[i] != "") {  m->mothurOut("Using " + nameFileNames[i] + " as input file for the name parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current namefile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -231,72 +188,29 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						
-						if (inputDir != "") {
-							string path = m->hasPath(nameFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
-						}
-						
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = m->openInputFile(nameFileNames[i], in, "noerror");
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(nameFileNames[i]);
-								m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								nameFileNames[i] = tryPath;
-							}
-						}
-						
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(nameFileNames[i]);
-								m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								nameFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							nameFileNames.erase(nameFileNames.begin()+i);
-							i--;
-						}else {
-							m->setNameFile(nameFileNames[i]);
-						}
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(nameFileNames[i], current->getLocations())) { current->setNameFile(nameFileNames[i]); }
+                        else { nameFileNames.erase(nameFileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 			}
             
             if (nameFileNames.size() != 0) { hasName = true; }
             
             //check for required parameters
             vector<string> countfileNames;
-			countfile = validParameter.validFile(parameters, "count", false);
+			countfile = validParameter.valid(parameters, "count");
 			if (countfile == "not found") { 
                 countfile = "";  
 			}else { 
-				m->splitAtDash(countfile, countfileNames);
+				util.splitAtDash(countfile, countfileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < countfileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (countfileNames[i] == "current") { 
-						countfileNames[i] = m->getCountTableFile(); 
+						countfileNames[i] = current->getCountFile();
 						if (countfileNames[i] != "") {  m->mothurOut("Using " + countfileNames[i] + " as input file for the count parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current count file, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -306,53 +220,10 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						
-						if (inputDir != "") {
-							string path = m->hasPath(countfileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	countfileNames[i] = inputDir + countfileNames[i];		}
-						}
-						
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = m->openInputFile(countfileNames[i], in, "noerror");
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(countfileNames[i]);
-								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								countfileNames[i] = tryPath;
-							}
-						}
-						
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(countfileNames[i]);
-								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								countfileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + countfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							countfileNames.erase(countfileNames.begin()+i);
-							i--;
-						}else {
-							m->setCountTableFile(countfileNames[i]);
-						}
-					}
+                    if (!ignore) {
+                        if (util.checkLocations(countfileNames[i], current->getLocations())) { current->setCountFile(countfileNames[i]); }
+                        else { countfileNames.erase(countfileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 			}
             
@@ -363,10 +234,10 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
             
             if (!hasName && !hasCount) { 
                 //if there is a current name file, use it, else look for current count file
-				string filename = m->getNameFile(); 
+				string filename = current->getNameFile();
 				if (filename != "") { hasName = true; nameFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the name parameter."); m->mothurOutEndLine(); }
 				else { 
-                    filename = m->getCountTableFile();
+                    filename = current->getCountFile();
                     if (filename != "") { hasCount = true; countfileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the count parameter."); m->mothurOutEndLine(); }
                     else { m->mothurOut("[ERROR]: You must provide a count or name file."); m->mothurOutEndLine(); abort = true;  }
                 }
@@ -376,17 +247,17 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			if (nameFileNames.size() != fastaFileNames.size()) { m->mothurOut("[ERROR]: The number of name or count files does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
 			
 			bool hasGroup = true;
-			groupfile = validParameter.validFile(parameters, "group", false);
+			groupfile = validParameter.valid(parameters, "group");
 			if (groupfile == "not found") { groupfile = "";  hasGroup = false; }
 			else { 
-				m->splitAtDash(groupfile, groupFileNames);
+				util.splitAtDash(groupfile, groupFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < groupFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (groupFileNames[i] == "current") { 
-						groupFileNames[i] = m->getGroupFile(); 
+						groupFileNames[i] = current->getGroupFile();
 						if (groupFileNames[i] != "") {  m->mothurOut("Using " + groupFileNames[i] + " as input file for the group parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current namefile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -396,54 +267,11 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						
-						if (inputDir != "") {
-							string path = m->hasPath(groupFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	groupFileNames[i] = inputDir + groupFileNames[i];		}
-						}
-						
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = m->openInputFile(groupFileNames[i], in, "noerror");
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(groupFileNames[i]);
-								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								groupFileNames[i] = tryPath;
-							}
-						}
-						
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(groupFileNames[i]);
-								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								groupFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							groupFileNames.erase(groupFileNames.begin()+i);
-							i--;
-						}else {
-							m->setGroupFile(groupFileNames[i]);
-						}
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(groupFileNames[i], current->getLocations())) { current->setGroupFile(groupFileNames[i]); }
+                        else { groupFileNames.erase(groupFileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 				
 				//make sure there is at least one valid file left
 				if (groupFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid group files."); m->mothurOutEndLine(); abort = true; }
@@ -454,24 +282,23 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
             if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
-			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.50";	}
-			m->mothurConvert(temp, cutoff);
+			temp = validParameter.valid(parameters, "cutoff");	if (temp == "not found"){	temp = "0.50";	}
+			util.mothurConvert(temp, cutoff);
 			
-			temp = validParameter.validFile(parameters, "alpha", false);	if (temp == "not found"){	temp = "-5.54";	}
-			m->mothurConvert(temp, alpha);
+			temp = validParameter.valid(parameters, "alpha");	if (temp == "not found"){	temp = "-5.54";	}
+			util.mothurConvert(temp, alpha);
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.33";	}
-			m->mothurConvert(temp, beta);
+			temp = validParameter.valid(parameters, "cutoff");	if (temp == "not found"){	temp = "0.33";	}
+			util.mothurConvert(temp, beta);
             
-			temp = validParameter.validFile(parameters, "dereplicate", false);	
+			temp = validParameter.validFile(parameters, "dereplicate");	
 			if (temp == "not found") { temp = "false";			}
-			dups = m->isTrue(temp);
+			dups = util.isTrue(temp);
 		}
 	}
 	catch(exception& e) {
@@ -491,15 +318,15 @@ int ChimeraPerseusCommand::execute(){
 			
 			m->mothurOut("Checking sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
-			int start = time(NULL);	
-			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it	
+			long start = time(NULL);	
+			if (outputDir == "") { outputDir = util.hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it	
 			map<string, string> variables;
-			variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+			variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
 			string outputFileName = getOutputFileName("chimera", variables);
 			string accnosFileName = getOutputFileName("accnos", variables);
             string newCountFile = "";
 
-			//string newFasta = m->getRootName(fastaFileNames[s]) + "temp";
+			//string newFasta = util.getRootName(fastaFileNames[s]) + "temp";
 			
 			//you provided a groupfile
 			string groupFile = "";
@@ -510,7 +337,7 @@ int ChimeraPerseusCommand::execute(){
 				nameFile = nameFileNames[s];
 			}else { nameFile = getNamesFile(fastaFileNames[s]); }
 			
-			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0;	}				
+			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0;	}				
 			
 			int numSeqs = 0;
 			int numChimeras = 0;
@@ -522,40 +349,40 @@ int ChimeraPerseusCommand::execute(){
                 if (ct->hasGroupInfo()) {
                     vector<string> temp;
                     cparser = new SequenceCountParser(fastaFileNames[s], *ct, temp);
-                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
+                    variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(nameFile));
                     newCountFile = getOutputFileName("count", variables);
                     
                     vector<string> groups = cparser->getNamesOfGroups();
                     
-                    if (m->getControl_pressed()) { delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                    if (m->getControl_pressed()) { delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
                     
                     //clears files
                     ofstream out, out1, out2;
-                    m->openOutputFile(outputFileName, out); out.close(); 
-                    m->openOutputFile(accnosFileName, out1); out1.close();
+                    util.openOutputFile(outputFileName, out); out.close(); 
+                    util.openOutputFile(accnosFileName, out1); out1.close();
                     
                     if(processors == 1)	{	numSeqs = driverGroups(outputFileName, accnosFileName, newCountFile, 0, groups.size(), groups);
                         if (dups) {
                             CountTable c; c.readTable(nameFile, true, false);
-                            if (!m->isBlank(newCountFile)) {
+                            if (!util.isBlank(newCountFile)) {
                                 ifstream in2;
-                                m->openInputFile(newCountFile, in2);
+                                util.openInputFile(newCountFile, in2);
                                 
                                 string name, group;
                                 while (!in2.eof()) {
-                                    in2 >> name >> group; m->gobble(in2);
+                                    in2 >> name >> group; util.gobble(in2);
                                     c.setAbund(name, group, 0);
                                 }
                                 in2.close();
                             }
-                            m->mothurRemove(newCountFile);
+                            util.mothurRemove(newCountFile);
                             c.printTable(newCountFile);
                         }
 
                     }
                     else				{	numSeqs = createProcessesGroups(outputFileName, accnosFileName, newCountFile, groups, groupFile, fastaFileNames[s], nameFile);			}
                     
-                    if (m->getControl_pressed()) {  delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
+                    if (m->getControl_pressed()) {  delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}				
                     map<string, string> uniqueNames = cparser->getAllSeqsMap();
                     if (!dups) { 
                         numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
@@ -569,9 +396,9 @@ int ChimeraPerseusCommand::execute(){
                             else { doNotRemove.insert((namesInTable[i])); }
                         }
                         //remove names we want to keep from accnos file.
-                        set<string> accnosNames = m->readAccnos(accnosFileName);
+                        set<string> accnosNames = util.readAccnos(accnosFileName);
                         ofstream out2;
-                        m->openOutputFile(accnosFileName, out2);
+                        util.openOutputFile(accnosFileName, out2);
                         for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
                             if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
                         }
@@ -584,7 +411,7 @@ int ChimeraPerseusCommand::execute(){
 
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
                     
-                    if (m->getControl_pressed()) {  delete ct; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;  }	
+                    if (m->getControl_pressed()) {  delete ct; for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;  }	
                     
                 }else {
                     if (processors != 1) { m->mothurOut("Your count file does not contain group information, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
@@ -592,7 +419,7 @@ int ChimeraPerseusCommand::execute(){
                     //read sequences and store sorted by frequency
                     vector<seqData> sequences = readFiles(fastaFileNames[s], ct);
                     
-                    if (m->getControl_pressed()) { delete ct; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+                    if (m->getControl_pressed()) { delete ct; for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
                     
                     numSeqs = driver(outputFileName, sequences, accnosFileName, numChimeras);   
                 }
@@ -604,17 +431,17 @@ int ChimeraPerseusCommand::execute(){
                     parser = new SequenceParser(groupFile, fastaFileNames[s], nameFile, temp);
                     vector<string> groups = parser->getNamesOfGroups();
                     
-                    if (m->getControl_pressed()) { delete parser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                    if (m->getControl_pressed()) { delete parser; for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
                     
                     //clears files
                     ofstream out, out1, out2;
-                    m->openOutputFile(outputFileName, out); out.close(); 
-                    m->openOutputFile(accnosFileName, out1); out1.close();
+                    util.openOutputFile(outputFileName, out); out.close(); 
+                    util.openOutputFile(accnosFileName, out1); out1.close();
                     
                     if(processors == 1)	{	numSeqs = driverGroups(outputFileName, accnosFileName, "", 0, groups.size(), groups);	}
                     else				{	numSeqs = createProcessesGroups(outputFileName, accnosFileName, "", groups, groupFile, fastaFileNames[s], nameFile);			}
                     
-                    if (m->getControl_pressed()) {  delete parser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
+                    if (m->getControl_pressed()) {  delete parser; for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}				
                     map<string, string> uniqueNames = parser->getAllSeqsMap();
                     if (!dups) { 
                         numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
@@ -623,20 +450,20 @@ int ChimeraPerseusCommand::execute(){
                     
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
                     
-                    if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;  }		
+                    if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;  }		
                 }else{
                     if (processors != 1) { m->mothurOut("Without a groupfile, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
                     
                     //read sequences and store sorted by frequency
                     vector<seqData> sequences = readFiles(fastaFileNames[s], nameFile);
                     
-                    if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+                    if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
                     
                     numSeqs = driver(outputFileName, sequences, accnosFileName, numChimeras); 
                 }
 			}
             
-			if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+			if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.");	m->mothurOutEndLine();
 			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
@@ -644,15 +471,15 @@ int ChimeraPerseusCommand::execute(){
 		}
 		
 		//set accnos file as new current accnosfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("accnos");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 		}
         
         itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -708,13 +535,13 @@ int ChimeraPerseusCommand::driverGroups(string outputFName, string accnos, strin
 		int numChimeras = 0;
         
         ofstream outCountList;
-        if (hasCount && dups) { m->openOutputFile(countlist, outCountList); }
+        if (hasCount && dups) { util.openOutputFile(countlist, outCountList); }
 		
 		for (int i = start; i < end; i++) {
 			
 			m->mothurOutEndLine(); m->mothurOut("Checking sequences from group " + groups[i] + "...");	m->mothurOutEndLine();					
 			
-			int start = time(NULL);	 if (m->getControl_pressed()) {  return 0; }
+			long start = time(NULL);	 if (m->getControl_pressed()) {  return 0; }
 			
 			vector<seqData> sequences = loadSequences(groups[i]);
 			
@@ -726,13 +553,13 @@ int ChimeraPerseusCommand::driverGroups(string outputFName, string accnos, strin
 			if (m->getControl_pressed()) { return 0; }
             
             if (dups) {
-                if (!m->isBlank(accnos+groups[i])) {
+                if (!util.isBlank(accnos+groups[i])) {
                     ifstream in;
-                    m->openInputFile(accnos+groups[i], in);
+                    util.openInputFile(accnos+groups[i], in);
                     string name;
                     if (hasCount) {
                         while (!in.eof()) {
-                            in >> name; m->gobble(in);
+                            in >> name; util.gobble(in);
                             outCountList << name << '\t' << groups[i] << endl;
                         }
                         in.close();
@@ -740,27 +567,27 @@ int ChimeraPerseusCommand::driverGroups(string outputFName, string accnos, strin
                         map<string, string> thisnamemap = parser->getNameMap(groups[i]);
                         map<string, string>::iterator itN;
                         ofstream out;
-                        m->openOutputFile(accnos+groups[i]+".temp", out);
+                        util.openOutputFile(accnos+groups[i]+".temp", out);
                         while (!in.eof()) {
-                            in >> name; m->gobble(in);
+                            in >> name; util.gobble(in);
                             itN = thisnamemap.find(name);
                             if (itN != thisnamemap.end()) {
-                                vector<string> tempNames; m->splitAtComma(itN->second, tempNames);
+                                vector<string> tempNames; util.splitAtComma(itN->second, tempNames);
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                 
                             }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->setControl_pressed(true); }
                         }
                         out.close();
                         in.close();
-                        m->renameFile(accnos+groups[i]+".temp", accnos+groups[i]);
+                        util.renameFile(accnos+groups[i]+".temp", accnos+groups[i]);
                     }
                     
                 }
             }
 			
 			//append files
-			m->appendFiles((outputFName+groups[i]), outputFName); m->mothurRemove((outputFName+groups[i]));
-			m->appendFiles((accnos+groups[i]), accnos); m->mothurRemove((accnos+groups[i]));
+			util.appendFiles((outputFName+groups[i]), outputFName); util.mothurRemove((outputFName+groups[i]));
+			util.appendFiles((accnos+groups[i]), accnos); util.mothurRemove((accnos+groups[i]));
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + groups[i] + ".");	m->mothurOutEndLine();					
 		}	
@@ -810,7 +637,7 @@ vector<seqData> ChimeraPerseusCommand::loadSequences(string group){
                 it = nameMap.find(thisGroupsSeqs[i].getName());
                 if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your namefile, please correct."); m->mothurOutEndLine(); }
                 else {
-                    int num = m->getNumNames(it->second);
+                    int num = util.getNumNames(it->second);
                     thisGroupsSeqs[i].setAligned(removeNs(thisGroupsSeqs[i].getUnaligned()));
                     sequences.push_back(seqData(thisGroupsSeqs[i].getName(), thisGroupsSeqs[i].getUnaligned(), num));
                     if (thisGroupsSeqs[i].getUnaligned().length() > alignLength) { alignLength = thisGroupsSeqs[i].getUnaligned().length(); }
@@ -835,20 +662,20 @@ vector<seqData> ChimeraPerseusCommand::loadSequences(string group){
 vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, string name){
 	try {
 		map<string, int>::iterator it;
-		map<string, int> nameMap = m->readNames(name);
+		map<string, int> nameMap = util.readNames(name);
 		
 		//read fasta file and create sequenceData structure - checking for file mismatches
 		vector<seqData> sequences;
 		bool error = false;
 		ifstream in;
-		m->openInputFile(inputFile, in);
+		util.openInputFile(inputFile, in);
 		alignLength = 0;
         
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { in.close(); return sequences; }
 			
-			Sequence temp(in); m->gobble(in);
+			Sequence temp(in); util.gobble(in);
 			
 			it = nameMap.find(temp.getName());
 			if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + temp.getName() + " is in your fasta file and not in your namefile, please correct."); m->mothurOutEndLine(); }
@@ -892,11 +719,11 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, CountTable* c
 		//read fasta file and create sequenceData structure - checking for file mismatches
 		vector<seqData> sequences;
 		ifstream in;
-		m->openInputFile(inputFile, in);
+		util.openInputFile(inputFile, in);
 		alignLength = 0;
         
 		while (!in.eof()) {
-            Sequence temp(in); m->gobble(in);
+            Sequence temp(in); util.gobble(in);
 			
 			int count = ct->getNumSeqs(temp.getName());
 			if (m->getControl_pressed()) { break; }
@@ -950,8 +777,8 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 		
 		ofstream chimeraFile;
 		ofstream accnosFile;
-		m->openOutputFile(chimeraFileName, chimeraFile); 
-		m->openOutputFile(accnosFileName, accnosFile); 
+		util.openOutputFile(chimeraFileName, chimeraFile); 
+		util.openOutputFile(accnosFileName, accnosFile); 
 		
 		Perseus myPerseus;
 		vector<vector<double> > binMatrix = myPerseus.binomial(alignLength);
@@ -961,7 +788,7 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 		vector<bool> chimeras(numSeqs, 0);
 		
 		for(int i=0;i<numSeqs;i++){	
-			if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+			if (m->getControl_pressed()) { chimeraFile.close(); util.mothurRemove(chimeraFileName); accnosFile.close(); util.mothurRemove(accnosFileName); return 0; }
     
 			vector<bool> restricted = chimeras;
 			
@@ -977,7 +804,7 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 			vector<pwAlign> alignments(numSeqs);
 			
 			int comparisons = myPerseus.getAlignments(i, sequences, alignments, leftDiffs, leftMaps, rightDiffs, rightMaps, bestSingleIndex, bestSingleDiff, restricted);
-			if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+			if (m->getControl_pressed()) { chimeraFile.close(); util.mothurRemove(chimeraFileName); accnosFile.close(); util.mothurRemove(accnosFileName); return 0; }
 
 			int minMismatchToChimera, leftParentBi, rightParentBi, breakPointBi;
 			
@@ -987,19 +814,19 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
                 chimeraFile << i << '\t' << sequences[i].seqName << "\t0\t0\tNull\t0\t0\t0\tNull\tNull\t0.0\t0.0\t0.0\t0\t0\t0\t0.0\t0.0\tgood" << endl;
             }else if(comparisons >= 2){	
 				minMismatchToChimera = myPerseus.getChimera(sequences, leftDiffs, rightDiffs, leftParentBi, rightParentBi, breakPointBi, singleLeft, bestLeft, singleRight, bestRight, restricted);
-				if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+				if (m->getControl_pressed()) { chimeraFile.close(); util.mothurRemove(chimeraFileName); accnosFile.close(); util.mothurRemove(accnosFileName); return 0; }
 
 				int minMismatchToTrimera = numeric_limits<int>::max();
 				int leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB;
 				
 				if(minMismatchToChimera >= 3 && comparisons >= 3){
 					minMismatchToTrimera = myPerseus.getTrimera(sequences, leftDiffs, leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB, singleLeft, bestLeft, singleRight, bestRight, restricted);
-					if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+					if (m->getControl_pressed()) { chimeraFile.close(); util.mothurRemove(chimeraFileName); accnosFile.close(); util.mothurRemove(accnosFileName); return 0; }
 				}
 				
 				double singleDist = myPerseus.modeledPairwiseAlignSeqs(sequences[i].sequence, sequences[bestSingleIndex].sequence, dummyA, dummyB, correctModel);
 				
-				if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+				if (m->getControl_pressed()) { chimeraFile.close(); util.mothurRemove(chimeraFileName); accnosFile.close(); util.mothurRemove(accnosFileName); return 0; }
 
 				string type;
 				string chimeraRefSeq;
@@ -1013,16 +840,16 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 					chimeraRefSeq = myPerseus.stitchBimera(alignments, leftParentBi, rightParentBi, breakPointBi, leftMaps, rightMaps);
 				}
 
-                if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+                if (m->getControl_pressed()) { chimeraFile.close(); util.mothurRemove(chimeraFileName); accnosFile.close(); util.mothurRemove(accnosFileName); return 0; }
 				
 				double chimeraDist = myPerseus.modeledPairwiseAlignSeqs(sequences[i].sequence, chimeraRefSeq, dummyA, dummyB, correctModel);
 				
-				if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+				if (m->getControl_pressed()) { chimeraFile.close(); util.mothurRemove(chimeraFileName); accnosFile.close(); util.mothurRemove(accnosFileName); return 0; }
 
 				double cIndex = chimeraDist;//modeledPairwiseAlignSeqs(sequences[i].sequence, chimeraRefSeq);
 				double loonIndex = myPerseus.calcLoonIndex(sequences[i].sequence, sequences[leftParentBi].sequence, sequences[rightParentBi].sequence, breakPointBi, binMatrix);		
 				
-				if (m->getControl_pressed()) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+				if (m->getControl_pressed()) { chimeraFile.close(); util.mothurRemove(chimeraFileName); accnosFile.close(); util.mothurRemove(accnosFileName); return 0; }
 
 				chimeraFile << i << '\t' << sequences[i].seqName << '\t' << bestSingleDiff << '\t' << bestSingleIndex << '\t' << sequences[bestSingleIndex].seqName << '\t';
 				chimeraFile << minMismatchToChimera << '\t' << leftParentBi << '\t' << rightParentBi << '\t' << sequences[leftParentBi].seqName << '\t' << sequences[rightParentBi].seqName << '\t';
@@ -1102,12 +929,12 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", accnos + toString(m->mothurGetpid(process)) + ".temp", accnos + ".byCount." + toString(m->mothurGetpid(process)) + ".temp", lines[process].start, lines[process].end, groups);
+				num = driverGroups(outputFName + toString(toString(process)) + ".temp", accnos + toString(toString(process)) + ".temp", accnos + ".byCount." + toString(toString(process)) + ".temp", lines[process].start, lines[process].end, groups);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = outputFName + toString(toString(process)) + ".num.temp";
+				util.openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
 				
@@ -1150,12 +977,12 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
                     processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                     process++;
                 }else if (pid == 0){
-                    num = driverGroups(outputFName + toString(m->mothurGetpid(process)) + ".temp", accnos + toString(m->mothurGetpid(process)) + ".temp", accnos + ".byCount." + toString(m->mothurGetpid(process)) + ".temp", lines[process].start, lines[process].end, groups);
+                    num = driverGroups(outputFName + toString(toString(process)) + ".temp", accnos + toString(toString(process)) + ".temp", accnos + ".byCount." + toString(toString(process)) + ".temp", lines[process].start, lines[process].end, groups);
                     
                     //pass numSeqs to parent
                     ofstream out;
-                    string tempFile = outputFName + toString(m->mothurGetpid(process)) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
+                    string tempFile = outputFName + toString(toString(process)) + ".num.temp";
+                    util.openOutputFile(tempFile, out);
                     out << num << endl;
                     out.close();
                     
@@ -1181,9 +1008,9 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  outputFName + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
+			util.openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); m->mothurRemove(tempFile);
+			in.close(); util.mothurRemove(tempFile);
 		}
 		
 #else
@@ -1227,41 +1054,41 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
 #endif		
 		//read my own
         if (hasCount && dups) {
-            if (!m->isBlank(accnos + ".byCount")) {
+            if (!util.isBlank(accnos + ".byCount")) {
                 ifstream in2;
-                m->openInputFile(accnos + ".byCount", in2);
+                util.openInputFile(accnos + ".byCount", in2);
                 
                 string name, group;
                 while (!in2.eof()) {
-                    in2 >> name >> group; m->gobble(in2);
+                    in2 >> name >> group; util.gobble(in2);
                     newCount.setAbund(name, group, 0);
                 }
                 in2.close();
             }
-            m->mothurRemove(accnos + ".byCount");
+            util.mothurRemove(accnos + ".byCount");
         }
 		
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
-			m->appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
-			m->mothurRemove((outputFName + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
+			util.mothurRemove((outputFName + toString(processIDS[i]) + ".temp"));
 			
-			m->appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
-			m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
+			util.mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
             
             if (hasCount && dups) {
-                if (!m->isBlank(accnos + ".byCount." + toString(processIDS[i]) + ".temp")) {
+                if (!util.isBlank(accnos + ".byCount." + toString(processIDS[i]) + ".temp")) {
                     ifstream in2;
-                    m->openInputFile(accnos + ".byCount." + toString(processIDS[i]) + ".temp", in2);
+                    util.openInputFile(accnos + ".byCount." + toString(processIDS[i]) + ".temp", in2);
                     
                     string name, group;
                     while (!in2.eof()) {
-                        in2 >> name >> group; m->gobble(in2);
+                        in2 >> name >> group; util.gobble(in2);
                         newCount.setAbund(name, group, 0);
                     }
                     in2.close();
                 }
-                m->mothurRemove(accnos + ".byCount." + toString(processIDS[i]) + ".temp");
+                util.mothurRemove(accnos + ".byCount." + toString(processIDS[i]) + ".temp");
             }
 
 		}
@@ -1285,10 +1112,10 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 		
 		//edit accnos file
 		ifstream in2; 
-		m->openInputFile(accnosFileName, in2);
+		util.openInputFile(accnosFileName, in2);
 		
 		ofstream out2;
-		m->openOutputFile(accnosFileName+".temp", out2);
+		util.openOutputFile(accnosFileName+".temp", out2);
 		
 		string name;
 		set<string> namesInFile; //this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
@@ -1298,9 +1125,9 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 		
 		
 		while (!in2.eof()) {
-			if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
+			if (m->getControl_pressed()) { in2.close(); out2.close(); util.mothurRemove(outputFileName); util.mothurRemove((accnosFileName+".temp")); return 0; }
 			
-			in2 >> name; m->gobble(in2);
+			in2 >> name; util.gobble(in2);
 			
 			//find unique name
 			itUnique = uniqueNames.find(name);
@@ -1319,15 +1146,15 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 		in2.close();
 		out2.close();
 		
-		m->mothurRemove(accnosFileName);
+		util.mothurRemove(accnosFileName);
 		rename((accnosFileName+".temp").c_str(), accnosFileName.c_str());
 		
 		//edit chimera file
 		ifstream in; 
-		m->openInputFile(outputFileName, in);
+		util.openInputFile(outputFileName, in);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		int DiffsToBestMatch, BestMatchIndex, DiffstToChimera, IndexofLeftParent, IndexOfRightParent;
 		float temp1,temp2, temp3, temp4, temp5, temp6, temp7, temp8;
@@ -1344,27 +1171,27 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 		 */
 		
 		//get and print headers
-		BestMatchName = m->getline(in); m->gobble(in);
+		BestMatchName = util.getline(in); util.gobble(in);
 		out << BestMatchName << endl;
 		
 		while (!in.eof()) {
 			
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove((outputFileName+".temp")); return 0; }
 			
 			bool print = false;
-			in >> index;	m->gobble(in);
+			in >> index;	util.gobble(in);
 			
 			if (index != "SequenceIndex") { //if you are not a header line, there will be a header line for each group if group file is given
-				in >> name;		m->gobble(in);
-				in >> DiffsToBestMatch; m->gobble(in);
-				in >> BestMatchIndex; m->gobble(in);
-				in >> BestMatchName; m->gobble(in);
-				in >> DiffstToChimera; m->gobble(in);
-				in >> IndexofLeftParent; m->gobble(in);
-				in >> IndexOfRightParent; m->gobble(in);
-				in >> parent1;	m->gobble(in);
-				in >> parent2;	m->gobble(in);
-				in >> temp1 >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> flag; m->gobble(in);
+				in >> name;		util.gobble(in);
+				in >> DiffsToBestMatch; util.gobble(in);
+				in >> BestMatchIndex; util.gobble(in);
+				in >> BestMatchName; util.gobble(in);
+				in >> DiffstToChimera; util.gobble(in);
+				in >> IndexofLeftParent; util.gobble(in);
+				in >> IndexOfRightParent; util.gobble(in);
+				in >> parent1;	util.gobble(in);
+				in >> parent2;	util.gobble(in);
+				in >> temp1 >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> flag; util.gobble(in);
 				
 				//find unique name
 				itUnique = uniqueNames.find(name);
@@ -1412,12 +1239,12 @@ int ChimeraPerseusCommand::deconvoluteResults(map<string, string>& uniqueNames, 
 					
 					out << temp1 << '\t' << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << flag << endl;	
 				}
-			}else { index = m->getline(in); m->gobble(in); }
+			}else { index = util.getline(in); util.gobble(in); }
 		}
 		in.close();
 		out.close();
 		
-		m->mothurRemove(outputFileName);
+		util.mothurRemove(outputFileName);
 		rename((outputFileName+".temp").c_str(), outputFileName.c_str());
 		
 		return total;

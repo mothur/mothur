@@ -11,7 +11,7 @@
  */
 
 
-#include "mothur.h"
+#include "utils.hpp"
 #include "mothurout.h"
 #include "sequence.hpp"
 #include "groupmap.h"
@@ -49,6 +49,7 @@ class SequenceParser {
 	
 		GroupMap* groupMap;
 		MothurOut* m;
+        Utils util;
 	
 		int numSeqs;
 		map<string, string> allSeqsMap;

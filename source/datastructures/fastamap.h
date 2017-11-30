@@ -9,9 +9,9 @@
  *  Copyright 2009 Schloss Lab UMASS AMherst. All rights reserved.
  *
  */
- 
-#include "mothur.h"
+
 #include "mothurout.h"
+#include "utils.hpp"
 
 
 /* This class represents the fasta file.  It reads a fasta file a populates the internal data structure "data".
@@ -44,6 +44,7 @@ private:
 	map<string, group>  data;  //sequence, groupinfo	- condensed representation of file
 	map<string, string>  seqmap;  //name, sequence  -  uncondensed representation of file
 	MothurOut* m;
+    Utils util;
 };
 
 #endif

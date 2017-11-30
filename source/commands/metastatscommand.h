@@ -107,7 +107,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 			string setB = pDataArray->namesOfGroupCombos[c][1];
             
 			//get filename
-			string outputFileName = pDataArray->outputDir +  pDataArray->m->getRootName(pDataArray->m->getSimpleName(pDataArray->sharedfile)) + pDataArray->thisLookUp->getLabel() + "." + setA + "-" + setB + ".metastats";
+			string outputFileName = pDataArray->outputDir +  pDataArray->util.getRootName(pDataArray->util.getSimpleName(pDataArray->sharedfile)) + pDataArray->thisLookUp->getLabel() + "." + setA + "-" + setB + ".metastats";
 			pDataArray->outputNames.push_back(outputFileName); 
 			
 			vector< vector<double> > data2; data2.resize(pDataArray->thisLookUp->getNumBins());

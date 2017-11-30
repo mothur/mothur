@@ -30,6 +30,8 @@ private:
 	map<int, vector<double> > results; //maps seqCount to results for that number of sequences
 	int nIters;
     vector<string> Groups;
+    Utils util;
+    
 };
 
 #endif

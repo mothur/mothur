@@ -31,6 +31,7 @@ class Unweighted : public TreeCalculator  {
 			linePair(int i, int j) : start(i), num(j) {}
 		};
 		vector<linePair> lines;
+        Utils util;
 		
         vector<string> Groups;
 		EstOutput data;

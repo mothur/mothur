@@ -20,6 +20,7 @@
 
 
 #include "mothurout.h"
+#include "utils.hpp"
 /**************************************************************************************************/
 
 struct freqData {
@@ -58,6 +59,7 @@ public:
 
 private:
 	MothurOut* m;
+    Utils util;
 	
 	int getLastMatch(char, vector<vector<char> >&, int, int, vector<int>&, vector<int>&);
 	int countDiffs(vector<int>, vector<int>);

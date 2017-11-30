@@ -101,14 +101,14 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("qfile");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
@@ -116,7 +116,7 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -124,7 +124,7 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -135,36 +135,34 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			outputTypes["summary"] = tempOutNames;
 			
 			//check for required parameters
-			qualfile = validParameter.validFile(parameters, "qfile", true);
+			qualfile = validParameter.validFile(parameters, "qfile");
 			if (qualfile == "not open") { qualfile = ""; abort = true; }
 			else if (qualfile == "not found") { 				
-				qualfile = m->getQualFile(); 
+				qualfile = current->getQualFile(); 
 				if (qualfile != "") { m->mothurOut("Using " + qualfile + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current quality file and the qfile parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setQualFile(qualfile); }	
+			}else { current->setQualFile(qualfile); }	
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = "";  }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(qualfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(qualfile); //if user entered a file with a path then preserve it	
 			}
 			
-			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);	
-			
+			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
             
 			if (countfile == "") {
                 if (namefile == "") {
@@ -185,7 +183,7 @@ int SummaryQualCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		int start = time(NULL);
+		long start = time(NULL);
 		long long numSeqs = 0;
 		
 		vector<int> position;
@@ -194,7 +192,7 @@ int SummaryQualCommand::execute(){
 				
 		if (m->getControl_pressed()) { return 0; }
 		
-		if (namefile != "") { nameMap = m->readNames(namefile); }
+		if (namefile != "") { nameMap = util.readNames(namefile); }
 		else if (countfile != "") {
             CountTable ct;
             ct.readTable(countfile, false, false);
@@ -203,7 +201,7 @@ int SummaryQualCommand::execute(){
         
 		vector<unsigned long long> positions; 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		positions = m->divideFile(qualfile, processors);
+		positions = util.divideFile(qualfile, processors);
 		for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else	
 		if (processors == 1) {
@@ -230,11 +228,11 @@ int SummaryQualCommand::execute(){
 		
 		//print summary file
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qualfile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(qualfile));
 		string summaryFile = getOutputFileName("summary",variables);
 		printQual(summaryFile, position, averageQ, scores);
 		
-		if (m->getControl_pressed()) {  m->mothurRemove(summaryFile); return 0; }
+		if (m->getControl_pressed()) {  util.mothurRemove(summaryFile); return 0; }
 		
 		//output results to screen
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
@@ -264,12 +262,12 @@ int SummaryQualCommand::execute(){
 int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& averageQ, vector< vector<int> >& scores, string filename, linePair filePos) {	
 	try {
 		ifstream in;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		
 		in.seekg(filePos.start);
         
         //adjust start if null strings
-        if (filePos.start == 0) {  m->zapGremlins(in); m->gobble(in);  }
+        if (filePos.start == 0) {  util.zapGremlins(in); util.gobble(in);  }
 		
 		bool done = false;
 		int count = 0;
@@ -278,7 +276,7 @@ int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& 
 			
 			if (m->getControl_pressed()) { in.close(); return 1; }
 			
-			QualityScores current(in); m->gobble(in);
+			QualityScores current(in); util.gobble(in);
 			
 			if (current.getName() != "") {
 				
@@ -352,8 +350,8 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = qualfile + m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = qualfile + toString(process) + ".num.temp";
+				util.openOutputFile(tempFile, out);
 				
 				out << numSeqs << endl;
 				out << position.size() << endl;
@@ -380,7 +378,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));
+                    util.mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));
                 }
                 recalc = true;
                 break;
@@ -389,11 +387,11 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {util.mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
-            vector<unsigned long long> positions = m->divideFile(qualfile, processors);
+            vector<unsigned long long> positions = util.divideFile(qualfile, processors);
             for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
             
             numSeqs = 0;
@@ -415,8 +413,8 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
                     
                     //pass numSeqs to parent
                     ofstream out;
-                    string tempFile = qualfile + m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
+                    string tempFile = qualfile + toString(process) + ".num.temp";
+                    util.openOutputFile(tempFile, out);
                     
                     out << numSeqs << endl;
                     out << position.size() << endl;
@@ -454,11 +452,11 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		for (int i = 0; i < processIDS.size(); i++) {
 			string tempFilename = qualfile + toString(processIDS[i]) + ".num.temp";
 			ifstream in;
-			m->openInputFile(tempFilename, in);
+			util.openInputFile(tempFilename, in);
 			
 			int temp, tempNum;
-			in >> tempNum; m->gobble(in); numSeqs += tempNum;
-			in >> tempNum; m->gobble(in);
+			in >> tempNum; util.gobble(in); numSeqs += tempNum;
+			in >> tempNum; util.gobble(in);
 			
 			if (position.size() < tempNum) { position.resize(tempNum, 0); }
 			if (averageQ.size() < tempNum) { averageQ.resize(tempNum, 0); }
@@ -467,17 +465,17 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 				for (int i = 0; i < scores.size(); i++) { scores[i].resize(41, 0); }
 			}
 			
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; position[k]	+= temp;			}		m->gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; averageQ[k] += temp; 		}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; position[k]	+= temp;			}		util.gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; averageQ[k] += temp; 		}		util.gobble(in);
 			for (int k = 0; k < tempNum; k++)			{	
 				for (int j = 0; j < 41; j++) {
 					in >> temp; scores[k][j] += temp;
-					m->gobble(in);
+					util.gobble(in);
 				}	
 			}
 			
 			in.close();
-			m->mothurRemove(tempFilename);
+			util.mothurRemove(tempFilename);
 		}
 		
 #else
@@ -541,7 +539,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 int SummaryQualCommand::printQual(string sumFile, vector<int>& position, vector<int>& averageQ, vector< vector<int> >& scores) {
 	try {
 		ofstream out;
-		m->openOutputFile(sumFile, out);
+		util.openOutputFile(sumFile, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		outputNames.push_back(sumFile); outputTypes["summary"].push_back(sumFile);
 		

@@ -133,7 +133,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 			
 				//pass numSeqs to parent
 				for(int i=0;i<displays.size();i++){
-					string tempFile = m->mothurGetpid(process) + toString(i) + ".rarefact.temp";
+					string tempFile = toString(process) + toString(i) + ".rarefact.temp";
 					displays[i]->outputTempFiles(tempFile);
 				}
 				exit(0);
@@ -148,7 +148,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
                     for(int j=0;j<displays.size();j++){
-                        m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");
+                        util.mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");
                     }
                 }
                 recalc = true;
@@ -159,7 +159,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
         if (recalc) {
             //test line, also set recalc to true.
             //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					 for (int i=0;i<processIDS.size();i++) {for(int j=0;j<displays.size();j++){m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");}}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+					 for (int i=0;i<processIDS.size();i++) {for(int j=0;j<displays.size();j++){util.mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");}}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             vector<int> procIters;
             int numItersPerProcessor = nIters / processors;
@@ -186,7 +186,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
                     
                     //pass numSeqs to parent
                     for(int i=0;i<displays.size();i++){
-                        string tempFile = m->mothurGetpid(process) + toString(i) + ".rarefact.temp";
+                        string tempFile = toString(process) + toString(i) + ".rarefact.temp";
                         displays[i]->outputTempFiles(tempFile);
                     }
                     exit(0);
@@ -211,7 +211,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 			for(int j=0;j<displays.size();j++){
 				string s = toString(processIDS[i]) + toString(j) + ".rarefact.temp";
 				displays[j]->inputTempFiles(s);
-				m->mothurRemove(s);
+				util.mothurRemove(s);
 			}
 		}
 		

@@ -206,9 +206,7 @@ float RAbundFloatVector::remove(int bin){
         data.erase(data.begin()+bin);
         numBins--;
         
-        if(abund == maxRank){
-            maxRank = m->max(data);
-        }
+        if(abund == maxRank){ maxRank = util.max(data); }
         
         numSeqs -= abund;
         

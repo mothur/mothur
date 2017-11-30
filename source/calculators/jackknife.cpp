@@ -8,11 +8,13 @@
  */
 
 #include "jackknife.h"
+#include "utils.hpp"
 
 /***********************************************************************/
 void Jackknife::getAMatrix(void){
 	try {
-		vector<vector<double> > B = m->binomial(maxOrder);
+        Utils util;
+		vector<vector<double> > B = util.binomial(maxOrder);
 
 		aMat.resize(maxOrder+1);
 

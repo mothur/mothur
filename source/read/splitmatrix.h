@@ -12,6 +12,7 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 /******************************************************/
 
@@ -30,6 +31,7 @@ class SplitMatrix  {
 	
 	private:
 		MothurOut* m;
+        Utils util;
 
 		string distFile, namefile, singleton, method, taxFile, fastafile, outputDir, countfile, outputType;
 		vector< map< string, string> > dists;

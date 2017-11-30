@@ -148,17 +148,17 @@ SubSampleCommand::SubSampleCommand(string option) {
             outputTypes["taxonomy"] = tempOutNames;
 					
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -166,7 +166,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -174,7 +174,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -182,7 +182,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -190,7 +190,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 				it = parameters.find("sabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
 				}
@@ -198,7 +198,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 				it = parameters.find("rabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
 				}
@@ -206,7 +206,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -214,7 +214,7 @@ SubSampleCommand::SubSampleCommand(string option) {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -222,58 +222,58 @@ SubSampleCommand::SubSampleCommand(string option) {
                 it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
-			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			sabundfile = validParameter.validFile(parameters, "sabund");
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
-			else { m->setSabundFile(sabundfile); }
+			else { current->setSabundFile(sabundfile); }
 			
-			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			rabundfile = validParameter.validFile(parameters, "rabund");
 			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
 			else if (rabundfile == "not found") { rabundfile = ""; }
-			else { m->setRabundFile(rabundfile); }
+			else { current->setRabundFile(rabundfile); }
 			
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }	
 			else if (fastafile == "not found") { fastafile = ""; }
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
             
-            taxonomyfile = validParameter.validFile(parameters, "taxonomy", true);
+            taxonomyfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomyfile == "not open") { taxonomyfile = ""; abort = true; }
 			else if (taxonomyfile == "not found") { taxonomyfile = ""; }
-			else { m->setTaxonomyFile(taxonomyfile); }
+			else { current->setTaxonomyFile(taxonomyfile); }
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
 			else {
-                m->setCountTableFile(countfile); 
+                current->setCountFile(countfile); 
                 ct.readTable(countfile, true, false);
             }
             
@@ -287,26 +287,26 @@ SubSampleCommand::SubSampleCommand(string option) {
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			string temp = validParameter.validFile(parameters, "size", false);		if (temp == "not found"){	temp = "0";		}
-			m->mothurConvert(temp, size);  
+			string temp = validParameter.valid(parameters, "size");		if (temp == "not found"){	temp = "0";		}
+			util.mothurConvert(temp, size);  
 			
-			temp = validParameter.validFile(parameters, "persample", false);		if (temp == "not found"){	temp = "f";		}
-			persample = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "persample");		if (temp == "not found"){	temp = "f";		}
+			persample = util.isTrue(temp);
 			
 			if ((groupfile == "") && (countfile == "")) { persample = false; }
             if (countfile != "") {
@@ -355,65 +355,65 @@ int SubSampleCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (sharedfile != "")	{   getSubSampleShared();	}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;}
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;}
 		
 		if (listfile != "")		{   getSubSampleList();		}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (rabundfile != "")	{   getSubSampleRabund();	}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (sabundfile != "")	{   getSubSampleSabund();	}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (fastafile != "")	{   getSubSampleFasta();	}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 			
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("list");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("shared");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSharedFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("rabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setRabundFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("sabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSabundFile(currentName); }
 		}
         
         itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 		
         itTypes = outputTypes.find("taxonomy");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -556,10 +556,10 @@ int SubSampleCommand::getSubSampleFasta() {
                 for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
                 
                 string countOutputDir = outputDir;
-                if (outputDir == "") {  countOutputDir += m->hasPath(countfile);  }
+                if (outputDir == "") {  countOutputDir += util.hasPath(countfile);  }
                 map<string, string> variables; 
-                variables["[filename]"] = countOutputDir + m->getRootName(m->getSimpleName(countfile));
-                variables["[extension]"] = m->getExtension(countfile);
+                variables["[filename]"] = countOutputDir + util.getRootName(util.getSimpleName(countfile));
+                variables["[extension]"] = util.getExtension(countfile);
                 string countOutputFileName = getOutputFileName("count", variables);
                 outputTypes["count"].push_back(countOutputFileName);  outputNames.push_back(countOutputFileName);
                 sampledCt.printTable(countOutputFileName);
@@ -577,7 +577,7 @@ int SubSampleCommand::getSubSampleFasta() {
                         if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
                         
                         if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
-                            if (m->inUsersGroups(group, Groups)) {  subset.insert(names[j]); }
+                            if (util.inUsersGroups(group, Groups)) {  subset.insert(names[j]); }
                         }else{  subset.insert(names[j]); }
                     }else{ //save everyone, group
                         subset.insert(names[j]); 
@@ -593,10 +593,10 @@ int SubSampleCommand::getSubSampleFasta() {
                 for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
                 
                 string countOutputDir = outputDir;
-                if (outputDir == "") {  countOutputDir += m->hasPath(countfile);  }
+                if (outputDir == "") {  countOutputDir += util.hasPath(countfile);  }
                 map<string, string> variables; 
-                variables["[filename]"] = countOutputDir + m->getRootName(m->getSimpleName(countfile));
-                variables["[extension]"] = m->getExtension(countfile);
+                variables["[filename]"] = countOutputDir + util.getRootName(util.getSimpleName(countfile));
+                variables["[extension]"] = util.getExtension(countfile);
                 string countOutputFileName = getOutputFileName("count", variables);
                 outputTypes["count"].push_back(countOutputFileName);  outputNames.push_back(countOutputFileName);
                 sampledCt.printTable(countOutputFileName);
@@ -606,17 +606,17 @@ int SubSampleCommand::getSubSampleFasta() {
 		if (subset.size() == 0) {  m->mothurOut("The size you selected is too large, skipping fasta file."); m->mothurOutEndLine();  return 0; }
 		
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
-        variables["[extension]"] = m->getExtension(fastafile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		//read through fasta file outputting only the names on the subsample list
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		
 		string thisname;
 		int count = 0;
@@ -646,7 +646,7 @@ int SubSampleCommand::getSubSampleFasta() {
 					m->mothurOut("[ERROR]: " + thisname + " is not in your namefile, please correct."); m->mothurOutEndLine();
 				}
 			}
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -659,8 +659,8 @@ int SubSampleCommand::getSubSampleFasta() {
 		if (namefile != "") {
 			m->mothurOut("Deconvoluting subsampled fasta file... "); m->mothurOutEndLine();
 			map<string, string> variables; 
-            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
-            variables["[extension]"] = m->getExtension(namefile);
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+            variables["[extension]"] = util.getExtension(namefile);
             string outputNameFileName = getOutputFileName("name", variables);
 			//use unique.seqs to create new name and fastafile
 			string inputString = "fasta=" + outputFileName;
@@ -676,8 +676,8 @@ int SubSampleCommand::getSubSampleFasta() {
 			delete uniqueCommand;
 			m->setMothurCalling(false);
             
-            m->renameFile(filenames["name"][0], outputNameFileName); 
-            m->renameFile(filenames["fasta"][0], outputFileName);  
+            util.renameFile(filenames["name"][0], outputNameFileName); 
+            util.renameFile(filenames["fasta"][0], outputFileName);  
             
 			outputTypes["name"].push_back(outputNameFileName);  outputNames.push_back(outputNameFileName);
 
@@ -690,10 +690,10 @@ int SubSampleCommand::getSubSampleFasta() {
                 //get new unique names from fasta file
                 //read through fasta file outputting only the names on the subsample list after deconvolute
                 ifstream in2;
-                m->openInputFile(outputFileName, in2);
+                util.openInputFile(outputFileName, in2);
                 
                 while (!in2.eof()) {
-                    Sequence seq(in2); m->gobble(in2);
+                    Sequence seq(in2); util.gobble(in2);
                     if (seq.getName() != "") {
                         tempSubset.insert(seq.getName());
                     }
@@ -718,25 +718,25 @@ int SubSampleCommand::getSubSampleFasta() {
 		if (groupfile != "") {
 			
 			string groupOutputDir = outputDir;
-			if (outputDir == "") {  groupOutputDir += m->hasPath(groupfile);  }
+			if (outputDir == "") {  groupOutputDir += util.hasPath(groupfile);  }
             map<string, string> variables; 
-            variables["[filename]"] = groupOutputDir + m->getRootName(m->getSimpleName(groupfile));
-            variables["[extension]"] = m->getExtension(groupfile);
+            variables["[filename]"] = groupOutputDir + util.getRootName(util.getSimpleName(groupfile));
+            variables["[extension]"] = util.getExtension(groupfile);
 			string groupOutputFileName = getOutputFileName("group", variables);
 			
 			ofstream outGroup;
-			m->openOutputFile(groupOutputFileName, outGroup);
+			util.openOutputFile(groupOutputFileName, outGroup);
 			outputTypes["group"].push_back(groupOutputFileName);  outputNames.push_back(groupOutputFileName);
 			
 			ifstream inGroup;
-			m->openInputFile(groupfile, inGroup);
+			util.openInputFile(groupfile, inGroup);
 			string name, group;
 			
 			while(!inGroup.eof()){
 				
 				if (m->getControl_pressed()) { inGroup.close(); outGroup.close(); return 0; }
 				
-				inGroup >> name;	m->gobble(inGroup);			//read from first column
+				inGroup >> name;	util.gobble(inGroup);			//read from first column
 				inGroup >> group;			//read from second column
 				
 				//if this name is in the accnos file
@@ -745,7 +745,7 @@ int SubSampleCommand::getSubSampleFasta() {
 					subset.erase(name);
 				}
 				
-				m->gobble(inGroup);
+				util.gobble(inGroup);
 			}
 			inGroup.close();
 			outGroup.close();	
@@ -772,7 +772,7 @@ int SubSampleCommand::getNames() {
 	try {
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		
 		string thisname;
 		while(!in.eof()){
@@ -787,7 +787,7 @@ int SubSampleCommand::getNames() {
 				nameMap[thisname] = temp;
 				names.push_back(thisname);
 			}
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();	
 		
@@ -804,7 +804,7 @@ int SubSampleCommand::readNames() {
 	try {
 		
         nameMap.clear();
-        m->readNames(namefile, nameMap);
+        util.readNames(namefile, nameMap);
         
         //save names of all sequences
         map<string, vector<string> >::iterator it;
@@ -854,7 +854,7 @@ int SubSampleCommand::getSubSampleShared() {
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				if (lookup != NULL) { delete lookup; lookup = NULL; }
@@ -919,10 +919,10 @@ int SubSampleCommand::getSubSampleShared() {
 int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
 	try {
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[extension]"] = m->getExtension(sharedfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[extension]"] = util.getExtension(sharedfile);
         variables["[distance]"] = thislookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        
         SubSample sample;
@@ -932,7 +932,7 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
         if (m->getControl_pressed()) {  return 0; }
         
         ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 
 		thislookup->printHeaders(out);
@@ -951,7 +951,7 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
 int SubSampleCommand::getSubSampleList() {
 	try {
         
-		if (namefile != "") { m->readNames(namefile, nameMap); }
+		if (namefile != "") { util.readNames(namefile, nameMap); }
         
 		InputData* input = new InputData(listfile, "list", nullVector);
 		ListVector* list = input->getListVector();
@@ -971,9 +971,9 @@ int SubSampleCommand::getSubSampleList() {
 			
 			//create outputfiles
 			string groupOutputDir = outputDir;
-			if (outputDir == "") {  groupOutputDir += m->hasPath(groupfile);  }
-			string groupOutputFileName = groupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "subsample" + m->getExtension(groupfile);
-			m->openOutputFile(groupOutputFileName, outGroup);
+			if (outputDir == "") {  groupOutputDir += util.hasPath(groupfile);  }
+			string groupOutputFileName = groupOutputDir + util.getRootName(util.getSimpleName(groupfile)) + "subsample" + util.getExtension(groupfile);
+			util.openOutputFile(groupOutputFileName, outGroup);
 			outputTypes["group"].push_back(groupOutputFileName);  outputNames.push_back(groupOutputFileName);
 			
 			//file mismatch quit
@@ -1064,7 +1064,7 @@ int SubSampleCommand::getSubSampleList() {
             for (int i = 0; i < list->getNumBins(); i++) {
                 string binnames = list->get(i);
                 vector<string> thisBin;
-                m->splitAtComma(binnames, thisBin);
+                util.splitAtComma(binnames, thisBin);
                 
                 for(int j=0;j<thisBin.size();j++){
                     if (groupfile != "") { //if there is a groupfile given fill in group info
@@ -1072,7 +1072,7 @@ int SubSampleCommand::getSubSampleList() {
                         if (group == "not found") { m->mothurOut("[ERROR]: " + thisBin[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
                         
 						//if hte user picked groups, we only want to keep the names of sequences from those groups
-						if (pickedGroups) { if (m->inUsersGroups(group, Groups)) { names.push_back(thisBin[j]); }  }
+						if (pickedGroups) { if (util.inUsersGroups(group, Groups)) { names.push_back(thisBin[j]); }  }
 						else{ names.push_back(thisBin[j]); } 
                     }//save everyone, group
                     else{ names.push_back(thisBin[j]); }
@@ -1127,10 +1127,10 @@ int SubSampleCommand::getSubSampleList() {
             for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
         
             string countOutputDir = outputDir;
-            if (outputDir == "") {  countOutputDir += m->hasPath(countfile);  }
+            if (outputDir == "") {  countOutputDir += util.hasPath(countfile);  }
             map<string, string> variables; 
-            variables["[filename]"] = countOutputDir + m->getRootName(m->getSimpleName(countfile));
-            variables["[extension]"] = m->getExtension(countfile);
+            variables["[filename]"] = countOutputDir + util.getRootName(util.getSimpleName(countfile));
+            variables["[extension]"] = util.getExtension(countfile);
             string countOutputFileName = getOutputFileName("count", variables);
             outputTypes["count"].push_back(countOutputFileName);  outputNames.push_back(countOutputFileName);
             sampledCt.printTable(countOutputFileName);
@@ -1151,7 +1151,7 @@ int SubSampleCommand::getSubSampleList() {
 				userLabels.erase(list->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list; 
@@ -1217,7 +1217,7 @@ int SubSampleCommand::getSubSampleList() {
                 for (int i = 0; i < list->getNumBins(); i++) {
                     vector<string> temp;
                     string bin = list->get(i);
-                    m->splitAtComma(bin, temp);
+                    util.splitAtComma(bin, temp);
                     for (int j = 0; j < temp.size(); j++) { vector<string> tempFakeOut; tempFakeOut.push_back(temp[j]); nameMap[temp[j]] = tempFakeOut; }
                 }
                 delete list;
@@ -1227,22 +1227,22 @@ int SubSampleCommand::getSubSampleList() {
             }else {
                 string tempAccnos = "temp.accnos";
                 ofstream outAccnos;
-                m->openOutputFile(tempAccnos, outAccnos);
+                util.openOutputFile(tempAccnos, outAccnos);
                 for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) { outAccnos << *it << endl; }
                 outAccnos.close();
                 
                 m->mothurOut("Sampling taxonomy and name file... "); m->mothurOutEndLine();
                 string thisNameOutputDir = outputDir;
-                if (outputDir == "") {  thisNameOutputDir += m->hasPath(namefile);  }
+                if (outputDir == "") {  thisNameOutputDir += util.hasPath(namefile);  }
                 map<string, string> variables;
-                variables["[filename]"] = thisNameOutputDir + m->getRootName(m->getSimpleName(namefile));
-                variables["[extension]"] = m->getExtension(namefile);
+                variables["[filename]"] = thisNameOutputDir + util.getRootName(util.getSimpleName(namefile));
+                variables["[extension]"] = util.getExtension(namefile);
                 string outputNameFileName = getOutputFileName("name", variables);
                 
                 string thisTaxOutputDir = outputDir;
-                if (outputDir == "") {  thisTaxOutputDir += m->hasPath(taxonomyfile);  }
-                variables["[filename]"] = thisTaxOutputDir + m->getRootName(m->getSimpleName(taxonomyfile));
-                variables["[extension]"] = m->getExtension(taxonomyfile);
+                if (outputDir == "") {  thisTaxOutputDir += util.hasPath(taxonomyfile);  }
+                variables["[filename]"] = thisTaxOutputDir + util.getRootName(util.getSimpleName(taxonomyfile));
+                variables["[extension]"] = util.getExtension(taxonomyfile);
                 string outputTaxFileName = getOutputFileName("taxonomy", variables);
                 
                 
@@ -1260,8 +1260,8 @@ int SubSampleCommand::getSubSampleList() {
                 delete getCommand;
                 m->setMothurCalling(false);
                 
-                m->renameFile(filenames["name"][0], outputNameFileName);
-                m->renameFile(filenames["taxonomy"][0], outputTaxFileName);
+                util.renameFile(filenames["name"][0], outputNameFileName);
+                util.renameFile(filenames["taxonomy"][0], outputTaxFileName);
                 
                 outputTypes["name"].push_back(outputNameFileName);  outputNames.push_back(outputNameFileName);
                 outputNames.push_back(outputTaxFileName); outputTypes["taxonomy"].push_back(outputTaxFileName);
@@ -1284,14 +1284,14 @@ int SubSampleCommand::getSubSampleList() {
 int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
 		map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[extension]"] = m->getExtension(listfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[extension]"] = util.getExtension(listfile);
         variables["[distance]"] = list->getLabel();
 		string outputFileName = getOutputFileName("list", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		int numBins = list->getNumBins();
@@ -1307,7 +1307,7 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 			
 			string bin = list->get(i);
             vector<string> binnames;
-            m->splitAtComma(bin, binnames);
+            util.splitAtComma(bin, binnames);
 			
             string newNames = "";
 			for(int j=0;j<binnames.size();j++){ if (subset.count(binnames[j]) != 0) {  newNames += binnames[j] + ",";  } }
@@ -1356,13 +1356,13 @@ int SubSampleCommand::getSubSampleRabund() {
 		m->mothurOut("Sampling " + toString(size) + " from " + toString(rabund->getNumSeqs()) + "."); m->mothurOutEndLine();
 		
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(rabundfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile));
-        variables["[extension]"] = m->getExtension(rabundfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(rabundfile));
+        variables["[extension]"] = util.getExtension(rabundfile);
 		string outputFileName = getOutputFileName("rabund", variables);		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		//as long as you are not at the end of the file or done wih the lines you want
@@ -1379,7 +1379,7 @@ int SubSampleCommand::getSubSampleRabund() {
 				userLabels.erase(rabund->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = rabund->getLabel();
 				
 				delete rabund; 
@@ -1511,13 +1511,13 @@ int SubSampleCommand::getSubSampleSabund() {
 		m->mothurOut("Sampling " + toString(size) + " from " + toString(sabund->getNumSeqs()) + "."); m->mothurOutEndLine();
 		
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sabundfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile));
-        variables["[extension]"] = m->getExtension(sabundfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sabundfile));
+        variables["[extension]"] = util.getExtension(sabundfile);
 		string outputFileName = getOutputFileName("sabund", variables);		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		
@@ -1535,7 +1535,7 @@ int SubSampleCommand::getSubSampleSabund() {
 				userLabels.erase(sabund->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = sabund->getLabel();
 				
 				delete sabund; 
@@ -1661,18 +1661,18 @@ int SubSampleCommand::getTax(set<string>& subset) {
 	try {
 
         string thisTaxOutputDir = outputDir;
-        if (outputDir == "") {  thisTaxOutputDir += m->hasPath(taxonomyfile);  }
+        if (outputDir == "") {  thisTaxOutputDir += util.hasPath(taxonomyfile);  }
         map<string, string> variables;
-        variables["[filename]"] = thisTaxOutputDir + m->getRootName(m->getSimpleName(taxonomyfile));
-        variables["[extension]"] = m->getExtension(taxonomyfile);
+        variables["[filename]"] = thisTaxOutputDir + util.getRootName(util.getSimpleName(taxonomyfile));
+        variables["[extension]"] = util.getExtension(taxonomyfile);
         string outputTaxFileName = getOutputFileName("taxonomy", variables);
         ofstream outTax;
-        m->openOutputFile(outputTaxFileName, outTax);
+        util.openOutputFile(outputTaxFileName, outTax);
         outputNames.push_back(outputTaxFileName); outputTypes["taxonomy"].push_back(outputTaxFileName);
         
         //read through fasta file outputting only the names on the subsample list
         ifstream inTax;
-        m->openInputFile(taxonomyfile, inTax);
+        util.openInputFile(taxonomyfile, inTax);
         
         string tname, tax;
         int tcount = 0;
@@ -1682,8 +1682,8 @@ int SubSampleCommand::getTax(set<string>& subset) {
             
             if (m->getControl_pressed()) { inTax.close(); outTax.close();  return 0; }
             
-            inTax >> tname; m->gobble(inTax);
-            tax = m->getline(inTax); m->gobble(inTax);
+            inTax >> tname; util.gobble(inTax);
+            tax = util.getline(inTax); util.gobble(inTax);
             
             //does the subset contain a sequence that this sequence represents
             itNameMap = nameMap.find(tname);

@@ -129,10 +129,10 @@ void KmerDB::generateDB(){
 	try {
 		
 		ofstream kmerFile;										//	once we have the kmerLocations folder print it out
-		m->openOutputFile(kmerDBName, kmerFile);					//	to a file
+		util.openOutputFile(kmerDBName, kmerFile);					//	to a file
 		
 		//output version
-		kmerFile << "#" << m->getVersion() << endl;
+		kmerFile << "#" << current->getVersion() << endl;
 		
 		for(int i=0;i<maxKmer;i++){								//	step through all of the possible kmer numbers
 			kmerFile << i << ' ' << kmerLocations[i].size();	//	print the kmer number and the number of sequences with
@@ -182,7 +182,7 @@ void KmerDB::readKmerDB(ifstream& kmerDBFile){
 		kmerDBFile.seekg(0);									//	start at the beginning of the file
 		
 		//read version
-		string line = m->getline(kmerDBFile); m->gobble(kmerDBFile);
+		string line = util.getline(kmerDBFile); util.gobble(kmerDBFile);
 		
 		string seqName;
 		int seqNumber;

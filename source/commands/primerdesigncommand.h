@@ -110,7 +110,7 @@ static DWORD WINAPI MyPrimerThreadFunction(LPVOID lpParam){
 	
 	try {
 		ofstream outSum;
-        pDataArray->m->openOutputFileAppend(pDataArray->summaryFileName, outSum);
+        pDataArray->util.openOutputFileAppend(pDataArray->summaryFileName, outSum);
         
         for (int i = pDataArray->start; i < pDataArray->end; i++) {
             

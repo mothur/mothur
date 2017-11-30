@@ -86,14 +86,14 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
 	
 	try {
 		ifstream in;
-		pDataArray->m->openInputFile(pDataArray->filename, in);
+		pDataArray->util.openInputFile(pDataArray->filename, in);
 		
 		//print header if you are process 0
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			in.seekg(0);
-            pDataArray->m->zapGremlins(in);
+            pDataArray->util.zapGremlins(in);
 		}else { //this accounts for the difference in line endings. 
-			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
+			in.seekg(pDataArray->start-1); pDataArray->util.gobble(in); 
 		}
 		
 		pDataArray->count = 0;
@@ -102,7 +102,7 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
 				
 			if (pDataArray->m->getControl_pressed()) { in.close(); pDataArray->count = 1; return 1; }
 			
-			QualityScores current(in); pDataArray->m->gobble(in);
+			QualityScores current(in); pDataArray->util.gobble(in);
 			
 			if (current.getName() != "") {
 			

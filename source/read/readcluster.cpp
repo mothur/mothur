@@ -30,7 +30,7 @@ int ReadCluster::read(NameAssignment*& nameMap){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		if (sortWanted) {  OutPutFile = m->sortFile(distFile, outputDir);  }
+		if (sortWanted) {  OutPutFile = util.sortFile(distFile, outputDir);  }
 		else {  OutPutFile = distFile;   } //for use by clusters splitMatrix to convert a phylip matrix to column
 		
 		return 0;
@@ -50,7 +50,7 @@ int ReadCluster::read(CountTable*& ct){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		if (sortWanted) {  OutPutFile = m->sortFile(distFile, outputDir);  }
+		if (sortWanted) {  OutPutFile = util.sortFile(distFile, outputDir);  }
 		else {  OutPutFile = distFile;   } //for use by clusters splitMatrix to convert a phylip matrix to column
 		
 		return 0;
@@ -73,8 +73,8 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		ofstream out;
 		string tempFile = distFile + ".column.temp";
 		
-		m->openInputFile(distFile, in);  m->gobble(in);
-		m->openOutputFile(tempFile, out);
+		util.openInputFile(distFile, in);  util.gobble(in);
+		util.openOutputFile(tempFile, out);
 		
 		float distance;
 		int square, nseqs;
@@ -84,7 +84,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		string numTest;
 		in >> numTest >> name;
 		
-		if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
 		else { convert(numTest, nseqs); }
 		
 		rowToName[0] = name;
@@ -129,7 +129,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					
 					for(int j=0;j<i;j++){
 					
-						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 						
@@ -146,7 +146,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					
 					for(int j=0;j<i;j++){
 						
-						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 						
@@ -168,7 +168,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 				if(nameMap == NULL){
 					list->set(i, name);
 					for(int j=0;j<nseqs;j++){
-						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 					
@@ -183,7 +183,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
 					
 					for(int j=0;j<nseqs;j++){
-						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
                         
@@ -213,27 +213,27 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		ifstream in2;
 		ofstream out2;
 		
-		string outputFile = m->getRootName(distFile) + "column.dist";
-		m->openInputFile(tempFile, in2);
-		m->openOutputFile(outputFile, out2);
+		string outputFile = util.getRootName(distFile) + "column.dist";
+		util.openInputFile(tempFile, in2);
+		util.openOutputFile(outputFile, out2);
 		
 		int first, second;
 		float dist;
 		
 		while (in2) {
-			if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(tempFile); m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { in2.close(); out2.close(); util.mothurRemove(tempFile); util.mothurRemove(outputFile); return 0; }
 			
 			in2 >> first >> second >> dist;
 			out2 << rowToName[first] << '\t' << rowToName[second] << '\t' << dist << endl;
-			m->gobble(in2);
+			util.gobble(in2);
 		}
 		in2.close();
 		out2.close();
 		
-		m->mothurRemove(tempFile);
+		util.mothurRemove(tempFile);
 		distFile = outputFile;
 	
-		if (m->getControl_pressed()) {  m->mothurRemove(outputFile);  }
+		if (m->getControl_pressed()) {  util.mothurRemove(outputFile);  }
 
 		return 0;
 	}
@@ -254,8 +254,8 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 		ofstream out;
 		string tempFile = distFile + ".column.temp";
 		
-		m->openInputFile(distFile, in);  m->gobble(in);
-		m->openOutputFile(tempFile, out);
+		util.openInputFile(distFile, in);  util.gobble(in);
+		util.openOutputFile(tempFile, out);
 		
 		float distance;
 		int square, nseqs;
@@ -265,7 +265,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 		string numTest;
 		in >> numTest >> name;
 		
-		if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
 		else { convert(numTest, nseqs); }
 		
 		rowToName[0] = name;
@@ -307,7 +307,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 					
 					for(int j=0;j<i;j++){
                         
-						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 						
@@ -323,7 +323,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 					
 					for(int j=0;j<i;j++){
 						
-						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
 						
@@ -345,7 +345,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 				if(ct == NULL){
 					list->set(i, name);
 					for(int j=0;j<nseqs;j++){
-						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
                         
@@ -358,7 +358,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 				}
 				else{
 					for(int j=0;j<nseqs;j++){
-						if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); return 0; }
+						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
 						
 						in >> distance;
                         
@@ -388,27 +388,27 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 		ifstream in2;
 		ofstream out2;
 		
-		string outputFile = m->getRootName(distFile) + "column.dist";
-		m->openInputFile(tempFile, in2);
-		m->openOutputFile(outputFile, out2);
+		string outputFile = util.getRootName(distFile) + "column.dist";
+		util.openInputFile(tempFile, in2);
+		util.openOutputFile(outputFile, out2);
 		
 		int first, second;
 		float dist;
 		
 		while (in2) {
-			if (m->getControl_pressed()) { in2.close(); out2.close(); m->mothurRemove(tempFile); m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { in2.close(); out2.close(); util.mothurRemove(tempFile); util.mothurRemove(outputFile); return 0; }
 			
 			in2 >> first >> second >> dist;
 			out2 << rowToName[first] << '\t' << rowToName[second] << '\t' << dist << endl;
-			m->gobble(in2);
+			util.gobble(in2);
 		}
 		in2.close();
 		out2.close();
 		
-		m->mothurRemove(tempFile);
+		util.mothurRemove(tempFile);
 		distFile = outputFile;
         
-		if (m->getControl_pressed()) {  m->mothurRemove(outputFile);  }
+		if (m->getControl_pressed()) {  util.mothurRemove(outputFile);  }
         
 		return 0;
 	}

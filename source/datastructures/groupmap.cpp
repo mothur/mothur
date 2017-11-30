@@ -14,7 +14,7 @@
  GroupMap::GroupMap(string filename) {
 	m = MothurOut::getInstance();
 	groupFileName = filename;
-	m->openInputFile(filename, fileHandle);
+	util.openInputFile(filename, fileHandle);
 	index = 0;
 }
 
@@ -25,11 +25,11 @@ int GroupMap::addSeq(string name, string group) {
     try {
         int error = 0;
         
-        m->checkGroupName(group);
+        util.checkGroupName(group);
         setNamesOfGroups(group);
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + name + "', group = '" + group + "'\n"); }
-        m->checkName(name);
+        util.checkName(name);
         it = groupmap.find(name);
         
         if (it != groupmap.end()) { error = 1; m->mothurOut("Your groupfile contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -60,18 +60,18 @@ int GroupMap::readMap() {
             if (m->getControl_pressed()) { fileHandle.close();  return 1; }
         
             fileHandle.read(buffer, 4096);
-            vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
+            vector<string> pieces = util.splitWhiteSpace(rest, buffer, fileHandle.gcount());
         
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
             
                 if (pairDone) {
-                    m->checkGroupName(seqGroup);
+                    util.checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
-                    m->checkName(seqName);
+                    util.checkName(seqName);
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -86,18 +86,18 @@ int GroupMap::readMap() {
 		fileHandle.close();
         
         if (rest != "") {
-            vector<string> pieces = m->splitWhiteSpace(rest);
+            vector<string> pieces = util.splitWhiteSpace(rest);
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) {
-                    m->checkGroupName(seqGroup);
+                    util.checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
-                    m->checkName(seqName);
+                    util.checkName(seqName);
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -131,18 +131,18 @@ int GroupMap::readDesignMap() {
             if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
-            vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
+            vector<string> pieces = util.splitWhiteSpace(rest, buffer, fileHandle.gcount());
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) {
-                    m->checkGroupName(seqGroup);
+                    util.checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
-                    m->checkName(seqName);
+                    util.checkName(seqName);
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -157,18 +157,18 @@ int GroupMap::readDesignMap() {
 		fileHandle.close();
         
         if (rest != "") {
-            vector<string> pieces = m->splitWhiteSpace(rest);
+            vector<string> pieces = util.splitWhiteSpace(rest);
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) {
-                    m->checkGroupName(seqGroup);
+                    util.checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
-                    m->checkName(seqName);
+                    util.checkName(seqName);
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -193,7 +193,7 @@ int GroupMap::readDesignMap() {
 int GroupMap::readMap(string filename) {
     try {
         groupFileName = filename;
-        m->openInputFile(filename, fileHandle);
+        util.openInputFile(filename, fileHandle);
         index = 0;
         string seqName, seqGroup;
 		int error = 0;
@@ -206,18 +206,18 @@ int GroupMap::readMap(string filename) {
             if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
-            vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
+            vector<string> pieces = util.splitWhiteSpace(rest, buffer, fileHandle.gcount());
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) {
-                    m->checkGroupName(seqGroup);
+                    util.checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
-                    m->checkName(seqName);
+                    util.checkName(seqName);
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your group file contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -232,18 +232,18 @@ int GroupMap::readMap(string filename) {
 		fileHandle.close();
         
         if (rest != "") {
-            vector<string> pieces = m->splitWhiteSpace(rest);
+            vector<string> pieces = util.splitWhiteSpace(rest);
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) {
-                    m->checkGroupName(seqGroup);
+                    util.checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
-                    m->checkName(seqName);
+                    util.checkName(seqName);
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your group file contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -267,7 +267,7 @@ int GroupMap::readMap(string filename) {
 int GroupMap::readDesignMap(string filename) {
     try {
         groupFileName = filename;
-        m->openInputFile(filename, fileHandle);
+        util.openInputFile(filename, fileHandle);
         index = 0;
         string seqName, seqGroup;
 		int error = 0;
@@ -280,18 +280,18 @@ int GroupMap::readDesignMap(string filename) {
             if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
-            vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
+            vector<string> pieces = util.splitWhiteSpace(rest, buffer, fileHandle.gcount());
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) {
-                    m->checkGroupName(seqGroup);
+                    util.checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
-                    m->checkName(seqName);
+                    util.checkName(seqName);
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -306,18 +306,18 @@ int GroupMap::readDesignMap(string filename) {
 		fileHandle.close();
         
         if (rest != "") {
-            vector<string> pieces = m->splitWhiteSpace(rest);
+            vector<string> pieces = util.splitWhiteSpace(rest);
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
                 else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) {
-                    m->checkGroupName(seqGroup);
+                    util.checkGroupName(seqGroup);
                     setNamesOfGroups(seqGroup);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
-                    m->checkName(seqName);
+                    util.checkName(seqName);
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -348,7 +348,7 @@ string GroupMap::getGroup(string sequenceName) {
 		return it->second;	
 	}else {
         //look for it in names of groups to see if the user accidently used the wrong file
-        if (m->inUsersGroups(sequenceName, namesOfGroups)) {
+        if (util.inUsersGroups(sequenceName, namesOfGroups)) {
             m->mothurOut("[WARNING]: Your group or design file contains a group named " + sequenceName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine(); 
         }
 		return "not found";
@@ -358,9 +358,9 @@ string GroupMap::getGroup(string sequenceName) {
 /************************************************************/
 
 void GroupMap::setGroup(string sequenceName, string groupN) {
-    m->checkGroupName(groupN);
+    util.checkGroupName(groupN);
 	setNamesOfGroups(groupN);
-	m->checkName(sequenceName);
+	util.checkName(sequenceName);
 	it = groupmap.find(sequenceName);
 	
 	if (it != groupmap.end()) {  m->mothurOut("Your groupfile contains more than 1 sequence named " + sequenceName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -483,7 +483,7 @@ int GroupMap::print(ofstream& out, vector<string> userGroups) {
 	try {
 		
 		for (map<string, string>::iterator itName = groupmap.begin(); itName != groupmap.end(); itName++) {
-            if (m->inUsersGroups(itName->second, userGroups)) {
+            if (util.inUsersGroups(itName->second, userGroups)) {
                 out << itName->first << '\t' << itName->second << endl;
             }
         }
@@ -521,7 +521,7 @@ vector<string> GroupMap::getNamesSeqs(vector<string> picked){
 		
 		for (it = groupmap.begin(); it != groupmap.end(); it++) {
 			//if you are belong to one the the groups in the picked vector add you
-			if (m->inUsersGroups(it->second, picked)) {
+			if (util.inUsersGroups(it->second, picked)) {
 				names.push_back(it->first);
 			}
 		}

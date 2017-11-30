@@ -15,6 +15,7 @@
 #include "counttable.h"
 #include "sharedrabundvectors.hpp"
 #include "sharedrabundfloatvectors.hpp"
+#include "currentfile.h"
 
 /* This class is a child to datavector.  It represents OTU information at a certain distance. 
 	A sharedlistvector can be converted into a sharedordervector, sharedrabundvector or sharedsabundvectorand 
@@ -30,10 +31,8 @@
 class SharedListVector : public DataVector {
 	
 public:
-	//SharedListVector();
-	//SharedListVector(int);
-	SharedListVector(ifstream&, vector<string>&);
-	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels) { groupmap = NULL; countTable = NULL; };
+	SharedListVector(ifstream&, vector<string>&, string&, string&);
+	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), groups(lv.groups), fillGroups(lv.fillGroups), groupMode(lv.groupMode), otuTag(lv.otuTag) { groupmap = NULL; countTable = NULL; };
 	~SharedListVector(){ if (groupmap != NULL) { delete groupmap; } if (countTable != NULL) { delete countTable; } };
 	
 	int getNumBins()							{	return numBins;		}
@@ -67,6 +66,7 @@ private:
 	int numBins;
 	int numSeqs;
     vector<string> binLabels;
+    string groupMode, otuTag;
 
 };
 

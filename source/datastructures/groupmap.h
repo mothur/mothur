@@ -11,6 +11,7 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 /* This class is a representation of the groupfile.  It is used by all the shared commands to determine what group a 
 	certain sequence belongs to. */
@@ -57,6 +58,7 @@ private:
 	void setNamesOfGroups(string); 
 	map<string, string> groupmap; //sequence name and groupname
 	map<string, int> seqsPerGroup;  //maps groupname to number of seqs in that group
+    Utils util;
 };
 
 #endif

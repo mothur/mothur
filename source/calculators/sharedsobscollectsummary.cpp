@@ -49,7 +49,7 @@ EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared, vector<str
 		int numGroups = shared.size();
         labels.clear();
         
-        vector<string> currentLabels = shared->getOTUNames();
+        vector<string> currentLabels = shared->getOTUNames(current->getSharedHeaderMode());
         
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//get bin values and set sharedByAll 

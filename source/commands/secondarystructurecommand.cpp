@@ -106,14 +106,14 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			outputTypes["aligncheck"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -121,7 +121,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 				it = parameters.find("map");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["map"] = inputDir + it->second;		}
 				}
@@ -129,7 +129,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -137,41 +137,41 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			mapfile = validParameter.validFile(parameters, "map", true);
+			mapfile = validParameter.validFile(parameters, "map");
 			if (mapfile == "not open") { abort = true; }
 			else if (mapfile == "not found") {  mapfile = "";  m->mothurOut("You must provide an map file."); m->mothurOutEndLine(); abort = true; }	
 			
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  				
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setFastaFile(fastafile); }	
+			}else { current->setFastaFile(fastafile); }	
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = "";  }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 			
             if (countfile == "") {
@@ -198,7 +198,7 @@ int AlignCheckCommand::execute(){
 		//get secondary structure info.
 		readMap();
 		
-		if (namefile != "") { nameMap = m->readNames(namefile); }
+		if (namefile != "") { nameMap = util.readNames(namefile); }
         else if (countfile != "") {
             CountTable ct;
             ct.readTable(countfile, false, false);
@@ -208,13 +208,13 @@ int AlignCheckCommand::execute(){
 		if (m->getControl_pressed()) { return 0; }
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		
 		ofstream out;
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		string outfile = getOutputFileName("aligncheck",variables);
-		m->openOutputFile(outfile, out);
+		util.openOutputFile(outfile, out);
 		
 				
 		out << "name" << '\t' << "pound" << '\t' << "dash" << '\t' << "plus" << '\t' << "equal" << '\t';
@@ -230,9 +230,9 @@ int AlignCheckCommand::execute(){
 		
 		int count = 0;
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outfile); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outfile); return 0; }
 			
-			Sequence seq(in);  m->gobble(in);
+			Sequence seq(in);  util.gobble(in);
 			if (seq.getName() != "") {
 				statData data = getStats(seq.getAligned());
 				
@@ -267,7 +267,7 @@ int AlignCheckCommand::execute(){
 		in.close();
 		out.close();
 		
-		if (m->getControl_pressed()) {  m->mothurRemove(outfile); return 0; }
+		if (m->getControl_pressed()) {  util.mothurRemove(outfile); return 0; }
 		
 		sort(pound.begin(), pound.end());
 		sort(dash.begin(), dash.end());
@@ -285,7 +285,7 @@ int AlignCheckCommand::execute(){
 		int ptile97_5	= int(size * 0.975);
 		int ptile100	= size - 1;
 		
-		if (m->getControl_pressed()) {  m->mothurRemove(outfile); return 0; }
+		if (m->getControl_pressed()) {  util.mothurRemove(outfile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("\t\tPound\tDash\tPlus\tEqual\tLoop\tTilde\tTotal"); m->mothurOutEndLine();
@@ -320,13 +320,13 @@ void AlignCheckCommand::readMap(){
 		structMap.resize(1, 0);
 		ifstream in;
 		
-		m->openInputFile(mapfile, in);
+		util.openInputFile(mapfile, in);
 		
 		while(!in.eof()){
 			int position;
 			in >> position;
 			structMap.push_back(position);	
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 

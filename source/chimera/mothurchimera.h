@@ -13,6 +13,8 @@
 
 #include "mothur.h"
 #include "sequence.hpp"
+#include "currentfile.h"
+#include "utils.hpp"
 /***********************************************************************/
 struct data_struct { 
 	float divr_qla_qrb;
@@ -137,7 +139,7 @@ class MothurChimera {
 
 	public:
 	
-		MothurChimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false;  byGroup = false; }
+    MothurChimera(){ m = MothurOut::getInstance(); current = CurrentFile::getInstance(); length = 0; unaligned = false;  byGroup = false; }
 		virtual ~MothurChimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } for (int i = 0; i < filteredTemplateSeqs.size(); i++) { delete filteredTemplateSeqs[i];  } };
 		virtual bool getUnaligned()				{	return unaligned;			}
 		virtual int getLength()					{   return length;	}
@@ -163,6 +165,8 @@ class MothurChimera {
 		string seqMask, filterString, outputDir, templateFileName; 
 		Sequence* getSequence(string);  //find sequence from name	
 		MothurOut* m;
+        CurrentFile* current;
+        Utils util;
 };
 
 /***********************************************************************/

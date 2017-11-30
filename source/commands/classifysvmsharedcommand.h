@@ -77,7 +77,7 @@ private:
             target = defaultvalue;
         }
         else {
-            m->mothurConvert(pstring, target);
+            util.mothurConvert(pstring, target);
         }
     }
 

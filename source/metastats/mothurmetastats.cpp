@@ -9,6 +9,7 @@
 
 #include "mothurmetastats.h"
 #include "mothurfisher.h"
+#include "utils.hpp"
 
 /***********************************************************/
 MothurMetastats::MothurMetastats(double t, int n) {
@@ -210,7 +211,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 		local = localtime(&t);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+        Utils util; util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
         
 		out << "Local time and date of test: " << asctime(local) << endl;

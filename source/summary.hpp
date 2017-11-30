@@ -21,7 +21,7 @@ public:
     friend class TestSummary;
 #endif
     
-    Summary() { m = MothurOut::getInstance(); total = 0; numUniques = 0; hasNameOrCount = false; nameCountNumUniques = 0; type = "count"; }
+    Summary(int p) { processors = p; m = MothurOut::getInstance(); total = 0; numUniques = 0; hasNameOrCount = false; nameCountNumUniques = 0; type = "count"; }
     ~Summary() {}
     
     long long summarizeFasta(string f, string n, string o); //provide fasta file to summarize (paralellized) and optional nameorCountfile and optional outputfile for individual seqs info. To skip nameCount or output file, n="" and / or o=""
@@ -71,6 +71,8 @@ public:
 private:
     
     MothurOut* m;
+    Utils util;
+    int processors;
     long long total, numUniques, nameCountNumUniques;
     bool hasNameOrCount;
     string type;
@@ -97,6 +99,7 @@ private:
     long long getValue(map<int, long long>& positions, double);
     vector<long long> getValues(map<float, long long>& positions);
     long long getValue(map<float, long long>& positions, double);
+    bool isCountFile(string);
 
 
     
@@ -126,6 +129,7 @@ struct seqSumData {
     MothurOut* m;
     bool hasNameMap;
     map<string, int> nameMap;
+    Utils util;
     
     
     seqSumData(){}

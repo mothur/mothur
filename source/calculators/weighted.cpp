@@ -79,8 +79,8 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + m->mothurGetpid(process) + ".weighted.results.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = outputDir + toString(process) + ".weighted.results.temp";
+				util.openOutputFile(tempFile, out);
 	
 				out << Myresults.size() << endl;
 				for (int i = 0; i < Myresults.size(); i++) {  out << Myresults[i] << '\t';  } out << endl;
@@ -97,7 +97,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));
+                    util.mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));
                 }
                 recalc = true;
                 break;
@@ -118,12 +118,12 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 		for (int i=0;i<(processors-1);i++) { 
 			ifstream in;
 			string s = outputDir + toString(processIDS[i]) + ".weighted.results.temp";
-			m->openInputFile(s, in);
+			util.openInputFile(s, in);
 			
 			//get quantiles
 			while (!in.eof()) {
 				int num;
-				in >> num; m->gobble(in);
+				in >> num; util.gobble(in);
 				
 				if (m->getControl_pressed()) { break; }
 
@@ -132,10 +132,10 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 					in >> w;
 					results.push_back(w);
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
 			in.close();
-			m->mothurRemove(s);
+			util.mothurRemove(s);
 		}
 #else
         

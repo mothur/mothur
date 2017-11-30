@@ -24,7 +24,7 @@
 class Pintail : public MothurChimera {
 	
 	public:
-		Pintail(string, string, bool, string, string, string, int, int, string); //fastafile, templatefile, filter, processors, mask, conservation, quantile, window, increment, outputDir)
+		Pintail(string, string, bool, string, string, string, int, int, string, string); //fastafile, templatefile, filter, processors, mask, conservation, quantile, window, increment, outputDir, version)
 		~Pintail();
 		
 		int getChimeras(Sequence*);
@@ -69,7 +69,7 @@ class Pintail : public MothurChimera {
 		vector<float> readFreq();
 		Sequence* findPairs(Sequence*);
 			
-		int doPrep();
+		int doPrep(string);
 		void printQuanFile(string, string);
 };
 

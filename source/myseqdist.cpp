@@ -97,13 +97,13 @@ int correctDist::execute(string distanceFileName){
 int correctDist::getSequences(string sequenceFileName){
 	try {
 		ifstream sequenceFile;
-		m->openInputFile(sequenceFileName, sequenceFile);
+        Utils util; util.openInputFile(sequenceFileName, sequenceFile);
 		string seqName, seqSeq;
 		
 		while(!sequenceFile.eof()){
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence temp(sequenceFile); m->gobble(sequenceFile);
+			Sequence temp(sequenceFile); util.gobble(sequenceFile);
 			
 			if (temp.getName() != "") {
 				names.push_back(temp.getName());
@@ -160,7 +160,7 @@ int correctDist::createProcess(string distanceFileName){
 				process++;
 			}
 			else if(pid == 0){
-				driver(start[process], end[process], distanceFileName + m->mothurGetpid(process) + ".temp");
+				driver(start[process], end[process], distanceFileName + toString(process) + ".temp");
 				exit(0);
 			}
 			else{
@@ -196,7 +196,7 @@ int correctDist::createProcess(string distanceFileName){
                     process++;
                 }
                 else if(pid == 0){
-                    driver(start[process], end[process], distanceFileName + m->mothurGetpid(process) + ".temp");
+                    driver(start[process], end[process], distanceFileName + toString(process) + ".temp");
                     exit(0);
                 }
                 else{
@@ -213,9 +213,9 @@ int correctDist::createProcess(string distanceFileName){
 			int temp = processIDs[i];
 			wait(&temp);
 		}
-		
+        Utils util;
 		for(int i=0;i<processIDs.size();i++){
-			m->appendFiles((distanceFileName + toString(processIDs[i]) + ".temp"), distanceFileName);
+			util.appendFiles((distanceFileName + toString(processIDs[i]) + ".temp"), distanceFileName);
 			remove((distanceFileName + toString(processIDs[i]) + ".temp").c_str());
 		}
 #endif
@@ -232,7 +232,7 @@ int correctDist::createProcess(string distanceFileName){
 int correctDist::driver(int start, int end, string distFileName){
 	try {
 		ofstream distFile;
-		m->openOutputFile(distFileName, distFile);
+		Utils util; util.openOutputFile(distFileName, distFile);
 		distFile << setprecision(9);
 		
 		if(start == 0){

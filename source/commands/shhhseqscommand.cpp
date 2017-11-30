@@ -120,14 +120,14 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 			outputTypes["map"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -135,7 +135,7 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -143,49 +143,48 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { 			
-				namefile = m->getNameFile(); 
+				namefile = current->getNameFile(); 
 				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current namefile and the name parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (namefile == "not open") { namefile =  ""; abort = true; }	
-			else {  m->setNameFile(namefile); }
+			else {  current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not found") { groupfile =  "";   }
 			else if (groupfile == "not open") { abort = true; groupfile =  ""; }	
-			else {   m->setGroupFile(groupfile);  }
+			else {   current->setGroupFile(groupfile);  }
 			
-			string temp	= validParameter.validFile(parameters, "sigma", false);		if(temp == "not found"){	temp = "0.01"; }
-			m->mothurConvert(temp, sigma); 
+			string temp	= validParameter.valid(parameters, "sigma");		if(temp == "not found"){	temp = "0.01"; }
+			util.mothurConvert(temp, sigma); 
 			sigma = 1/sigma;
             
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
-			
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
+                    
 			if (namefile == "") {
 				vector<string> files; files.push_back(fastafile);
 				parser.getNameFile(files);
@@ -203,10 +202,10 @@ int ShhhSeqsCommand::execute() {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (outputDir == "") { outputDir = m->hasPath(fastafile);  }//if user entered a file with a path then preserve it		
+		if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it		
 		
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFileName = getOutputFileName("fasta",variables);
 		string nameFileName = getOutputFileName("name",variables);
 		string mapFileName = getOutputFileName("map",variables);
@@ -221,9 +220,9 @@ int ShhhSeqsCommand::execute() {
 			
 			//clears files
 			ofstream out, out1, out2;
-			m->openOutputFile(outputFileName, out); out.close(); 
-			m->openOutputFile(nameFileName, out1); out1.close();
-			mapFileName = outputDir + m->getRootName(m->getSimpleName(fastafile))  + "shhh.";
+			util.openOutputFile(outputFileName, out); out.close(); 
+			util.openOutputFile(nameFileName, out1); out1.close();
+			mapFileName = outputDir + util.getRootName(util.getSimpleName(fastafile))  + "shhh.";
 			
 			vector<string> mapFileNames;
 			if(processors == 1)	{	mapFileNames = driverGroups(parser, outputFileName, nameFileName, mapFileName, 0, groups.size(), groups);	}
@@ -252,17 +251,17 @@ int ShhhSeqsCommand::execute() {
 			if (m->getControl_pressed()) { return 0; }
 			
 			//calc distances for cluster
-			string distFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "shhh.dist";
+			string distFileName = outputDir + util.getRootName(util.getSimpleName(fastafile)) + "shhh.dist";
 			correct->execute(distFileName);
 			delete correct;
 			
-			if (m->getControl_pressed()) { m->mothurRemove(distFileName); return 0; }
+			if (m->getControl_pressed()) { util.mothurRemove(distFileName); return 0; }
 			
 			driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, outputFileName, nameFileName, mapFileName); 
 			outputNames.push_back(mapFileName); outputTypes["map"].push_back(mapFileName);
 		}
 		
-		if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+		if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
 		
 		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
 		outputNames.push_back(nameFileName); outputTypes["name"].push_back(nameFileName);
@@ -273,15 +272,15 @@ int ShhhSeqsCommand::execute() {
 		m->mothurOutEndLine();
 		
 		//set accnos file as new current accnosfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 		}
 		
 		
@@ -297,17 +296,17 @@ int ShhhSeqsCommand::readData(correctDist* correct, seqNoise& noise, vector<stri
 	try {
 		map<string, string> nameMap; 
 		map<string, string>::iterator it;
-		m->readNames(namefile, nameMap);
+		util.readNames(namefile, nameMap);
 		bool error = false;
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-			Sequence seq(in); m->gobble(in);
+			Sequence seq(in); util.gobble(in);
 			
 			if (seq.getName() != "") {
 				correct->addSeq(seq.getName(), seq.getAligned());
@@ -401,12 +400,12 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				mapfileNames = driverGroups(parser, newFName + m->mothurGetpid(process) + ".temp", newNName + m->mothurGetpid(process) + ".temp", newMName, lines[process].start, lines[process].end, groups);
+				mapfileNames = driverGroups(parser, newFName + toString(process) + ".temp", newNName + toString(process) + ".temp", newMName, lines[process].start, lines[process].end, groups);
 				
 				//pass filenames to parent
 				ofstream out;
-				string tempFile = newMName + m->mothurGetpid(process) + ".temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = newMName + toString(process) + ".temp";
+				util.openOutputFile(tempFile, out);
 				out << mapfileNames.size() << endl;
 				for (int i = 0; i < mapfileNames.size(); i++) {
 					out << mapfileNames[i] << endl;
@@ -424,9 +423,9 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(newFName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(newNName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(newMName + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(newFName + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(newNName + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(newMName + (toString(processIDS[i]) + ".temp"));
                 }
                 recalc = true;
                 break;
@@ -460,12 +459,12 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
                     processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                     process++;
                 }else if (pid == 0){
-                    mapfileNames = driverGroups(parser, newFName + m->mothurGetpid(process) + ".temp", newNName + m->mothurGetpid(process) + ".temp", newMName, lines[process].start, lines[process].end, groups);
+                    mapfileNames = driverGroups(parser, newFName + toString(process) + ".temp", newNName + toString(process) + ".temp", newMName, lines[process].start, lines[process].end, groups);
                     
                     //pass filenames to parent
                     ofstream out;
-                    string tempFile = newMName + m->mothurGetpid(process) + ".temp";
-                    m->openOutputFile(tempFile, out);
+                    string tempFile = newMName + toString(process) + ".temp";
+                    util.openOutputFile(tempFile, out);
                     out << mapfileNames.size() << endl;
                     for (int i = 0; i < mapfileNames.size(); i++) {
                         out << mapfileNames[i] << endl;
@@ -495,16 +494,16 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 		for(int i=0;i<processIDS.size();i++){
 			ifstream in;
 			string tempFile =  newMName + toString(processIDS[i]) + ".temp";
-			m->openInputFile(tempFile, in);
+			util.openInputFile(tempFile, in);
 			if (!in.eof()) { 
-				int tempNum = 0; in >> tempNum;  m->gobble(in);
+				int tempNum = 0; in >> tempNum;  util.gobble(in);
 				for (int j = 0; j < tempNum; j++) {
 					string filename;
-					in >> filename; m->gobble(in);
+					in >> filename; util.gobble(in);
 					mapfileNames.push_back(filename);
 				}
 			}
-			in.close(); m->mothurRemove(tempFile);
+			in.close(); util.mothurRemove(tempFile);
 			
 		}
 #else
@@ -555,11 +554,11 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 		
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
-			m->appendFiles((newFName + toString(processIDS[i]) + ".temp"), newFName);
-			m->mothurRemove((newFName + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((newFName + toString(processIDS[i]) + ".temp"), newFName);
+			util.mothurRemove((newFName + toString(processIDS[i]) + ".temp"));
 			
-			m->appendFiles((newNName + toString(processIDS[i]) + ".temp"), newNName);
-			m->mothurRemove((newNName + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((newNName + toString(processIDS[i]) + ".temp"), newNName);
+			util.mothurRemove((newNName + toString(processIDS[i]) + ".temp"));
 		}
 		
 		return mapfileNames;	
@@ -607,18 +606,18 @@ vector<string> ShhhSeqsCommand::driverGroups(SequenceParser& parser, string newF
                 if (m->getControl_pressed()) { return mapFileNames; }
                 
                 //calc distances for cluster
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + groups[i] + ".shhh.dist";
+                string distFileName = outputDir + util.getRootName(util.getSimpleName(fastafile)) + groups[i] + ".shhh.dist";
                 correct->execute(distFileName);
                 delete correct;
                 
-                if (m->getControl_pressed()) { m->mothurRemove(distFileName); return mapFileNames; }
+                if (m->getControl_pressed()) { util.mothurRemove(distFileName); return mapFileNames; }
                 
                 driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, newFFile+groups[i], newNFile+groups[i], newMFile+groups[i]+".map");
                 
                 if (m->getControl_pressed()) { return mapFileNames; }
                 
-                m->appendFiles(newFFile+groups[i], newFFile); m->mothurRemove(newFFile+groups[i]);
-                m->appendFiles(newNFile+groups[i], newNFile); m->mothurRemove(newNFile+groups[i]);
+                util.appendFiles(newFFile+groups[i], newFFile); util.mothurRemove(newFFile+groups[i]);
+                util.appendFiles(newNFile+groups[i], newNFile); util.mothurRemove(newNFile+groups[i]);
                 mapFileNames.push_back(newMFile+groups[i]+".map");
                 
                 m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + groups[i] + "."); m->mothurOutEndLine();
@@ -658,24 +657,24 @@ int ShhhSeqsCommand::driver(seqNoise& noise,
 		
 		map<string, vector<string> > filenames = clusterCommand->getOutputFiles();
 		string listFileName = filenames["list"][0];
-		string rabundFileName = filenames["rabund"][0]; m->mothurRemove(rabundFileName);
-		string sabundFileName = filenames["sabund"][0]; m->mothurRemove(sabundFileName);
+		string rabundFileName = filenames["rabund"][0]; util.mothurRemove(rabundFileName);
+		string sabundFileName = filenames["sabund"][0]; util.mothurRemove(sabundFileName);
 	
 		delete clusterCommand;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
-		if (m->getControl_pressed()) { m->mothurRemove(distFileName); m->mothurRemove(listFileName); return 0; }
+		if (m->getControl_pressed()) { util.mothurRemove(distFileName); util.mothurRemove(listFileName); return 0; }
 		
 		vector<double> distances(numSeqs * numSeqs);
 		noise.getDistanceData(distFileName, distances);
-		m->mothurRemove(distFileName); 
-		if (m->getControl_pressed()) { m->mothurRemove(listFileName); return 0; }
+		util.mothurRemove(distFileName); 
+		if (m->getControl_pressed()) { util.mothurRemove(listFileName); return 0; }
 		
 		vector<int> otuData(numSeqs);
 		vector<int> otuFreq;
 		vector<vector<int> > otuBySeqLookUp;
 		noise.getListData(listFileName, cutOff, otuData, otuFreq, otuBySeqLookUp);
-		m->mothurRemove(listFileName);
+		util.mothurRemove(listFileName);
 		if (m->getControl_pressed()) { return 0; }
 		
 		int numOTUs = otuFreq.size();
@@ -807,8 +806,8 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		string newnameFile = filenames["name"][0];
 		string newfastaFile = filenames["fasta"][0];
 		
-		m->mothurRemove(fastaFile); rename(newfastaFile.c_str(), fastaFile.c_str()); 
-		if (nameFile != newnameFile) { m->mothurRemove(nameFile); rename(newnameFile.c_str(), nameFile.c_str()); }
+		util.mothurRemove(fastaFile); rename(newfastaFile.c_str(), fastaFile.c_str()); 
+		if (nameFile != newnameFile) { util.mothurRemove(nameFile); rename(newnameFile.c_str(), nameFile.c_str()); }
 		
 		return 0;
 	}

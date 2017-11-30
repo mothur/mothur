@@ -119,79 +119,78 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			outputTypes["phylip"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
 			}
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not found") { 			
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else if (sharedfile == "not open") { sharedfile = ""; abort = true; }
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(sharedfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(sharedfile); //if user entered a file with a path then preserve it	
 			}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "lt"; }
+			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "lt"; }
 			if ((output != "lt") && (output != "square") && (output != "column")) { m->mothurOut(output + " is not a valid output form. Options are lt, column and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
             
-            mode = validParameter.validFile(parameters, "mode", false);		if(mode == "not found"){	mode = "average"; }
+            mode = validParameter.valid(parameters, "mode");		if(mode == "not found"){	mode = "average"; }
 			if ((mode != "average") && (mode != "median")) { m->mothurOut(mode + " is not a valid mode. Options are average and medina. I will use average."); m->mothurOutEndLine(); output = "average"; }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
             }
 			
-			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 				
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "jclass-thetayc";  }
 			else { 
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
             
-            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+            temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters); 
             
-            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
-			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
+			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
             else {  
-                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
                 else { subsample = false; }
             }
             
@@ -244,7 +243,7 @@ int MatrixOutputCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-			if (m->getControl_pressed()) { outputTypes.clear(); delete lookup;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0;  }
+			if (m->getControl_pressed()) { outputTypes.clear(); delete lookup;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
@@ -254,7 +253,7 @@ int MatrixOutputCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				delete lookup;
@@ -277,7 +276,7 @@ int MatrixOutputCommand::execute(){
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -292,7 +291,7 @@ int MatrixOutputCommand::execute(){
 			}
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 
 		//run last label if you need to
 		if (needToRun )  {
@@ -304,16 +303,16 @@ int MatrixOutputCommand::execute(){
 			delete lookup;
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 		
 		//reset groups parameter
 		  
 		
 		//set phylip file as new current phylipfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("phylip");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; if (!subsample) { m->setPhylipFile(current); } }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; if (!subsample) { current->setPhylipFile(currentName); } }
 		}
 		
 		m->mothurOutEndLine();
@@ -615,7 +614,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         Estimators.clear(); Estimators = dataBundle->Estimators;
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = thisLookup->getLabel();
         variables["[tag2]"] = "";
         variables["[outputtag]"] = output;
@@ -626,7 +625,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
             string distFileName = getOutputFileName("phylip",variables);
             outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
             
-            ofstream outDist; m->openOutputFile(distFileName, outDist);
+            ofstream outDist; util.openOutputFile(distFileName, outDist);
             outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
             
             printSims(outDist, dataBundle->matrices[i], groupNames); outDist.close();
@@ -649,10 +648,10 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         //main thread finds averages
         if (iters != 0) {
             //we need to find the average distance and standard deviation for each groups distance
-            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals, mode);
+            vector< vector<seqDist>  > calcAverages = util.getAverages(calcDistsTotals, mode);
             
             //find standard deviation
-            vector< vector<seqDist>  > stdDev = m->getStandardDeviation(calcDistsTotals, calcAverages);
+            vector< vector<seqDist>  > stdDev = util.getStandardDeviation(calcDistsTotals, calcAverages);
             
             //print results
             for (int i = 0; i < Estimators.size(); i++) {
@@ -678,7 +677,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
                 }
                 
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[outputtag]"] = output;
                 variables["[tag2]"] = "ave";
@@ -686,9 +685,9 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
                 string distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 //set current phylip file to average distance matrix
-                m->setPhylipFile(distFileName);
+                current->setPhylipFile(distFileName);
                 ofstream outAve;
-                m->openOutputFile(distFileName, outAve);
+                util.openOutputFile(distFileName, outAve);
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
                 
                 printSims(outAve, matrix, groupNames);
@@ -699,7 +698,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
                 distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
-                m->openOutputFile(distFileName, outSTD);
+                util.openOutputFile(distFileName, outSTD);
                 outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
                 
                 printSims(outSTD, stdmatrix, thisLookup->getNamesGroups());

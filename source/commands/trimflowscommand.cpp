@@ -134,14 +134,14 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
             outputTypes["file"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("flow");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
 				}
@@ -149,7 +149,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 				it = parameters.find("oligos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
 				}
@@ -158,9 +158,9 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			
 			
 			//check for required parameters
-			flowFileName = validParameter.validFile(parameters, "flow", true);
+			flowFileName = validParameter.validFile(parameters, "flow");
 			if (flowFileName == "not found") { 
-				flowFileName = m->getFlowFile(); 
+				flowFileName = current->getFlowFile(); 
 				if (flowFileName != "") {  m->mothurOut("Using " + flowFileName + " as input file for the flow parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("No valid current flow file. You must provide a flow file."); m->mothurOutEndLine(); 
@@ -169,9 +169,9 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			}else if (flowFileName == "not open") { flowFileName = ""; abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(flowFileName); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(flowFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			
@@ -179,53 +179,52 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "minflows", false);	if (temp == "not found") { temp = "450"; }
-			m->mothurConvert(temp, minFlows);  
+			temp = validParameter.valid(parameters, "minflows");	if (temp == "not found") { temp = "450"; }
+			util.mothurConvert(temp, minFlows);  
 
-			temp = validParameter.validFile(parameters, "maxflows", false);	if (temp == "not found") { temp = "450"; }
-			m->mothurConvert(temp, maxFlows);  
+			temp = validParameter.valid(parameters, "maxflows");	if (temp == "not found") { temp = "450"; }
+			util.mothurConvert(temp, maxFlows);  
 			
 			
-			temp = validParameter.validFile(parameters, "oligos", true);
+			temp = validParameter.validFile(parameters, "oligos");
 			if (temp == "not found")	{	oligoFileName = "";		}
 			else if(temp == "not open")	{	abort = true;			} 
-			else						{	oligoFileName = temp;	m->setOligosFile(oligoFileName); }
+			else						{	oligoFileName = temp;	current->setOligosFile(oligoFileName); }
 			
-			temp = validParameter.validFile(parameters, "fasta", false);		if (temp == "not found"){	fasta = 0;		}
-			else if(m->isTrue(temp))	{	fasta = 1;	}
+			temp = validParameter.valid(parameters, "fasta");		if (temp == "not found"){	fasta = 0;		}
+			else if(util.isTrue(temp))	{	fasta = 1;	}
 			
-			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found"){	temp = "9";		}
-			m->mothurConvert(temp, maxHomoP);  
+			temp = validParameter.valid(parameters, "maxhomop");		if (temp == "not found"){	temp = "9";		}
+			util.mothurConvert(temp, maxHomoP);  
 
-			temp = validParameter.validFile(parameters, "signal", false);		if (temp == "not found"){	temp = "0.50";	}
-			m->mothurConvert(temp, signal);  
+			temp = validParameter.valid(parameters, "signal");		if (temp == "not found"){	temp = "0.50";	}
+			util.mothurConvert(temp, signal);  
 
-			temp = validParameter.validFile(parameters, "noise", false);		if (temp == "not found"){	temp = "0.70";	}
-			m->mothurConvert(temp, noise);  
+			temp = validParameter.valid(parameters, "noise");		if (temp == "not found"){	temp = "0.70";	}
+			util.mothurConvert(temp, noise);  
 	
-			temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found"){	temp = "0";		}
-			m->mothurConvert(temp, bdiffs);
+			temp = validParameter.valid(parameters, "bdiffs");		if (temp == "not found"){	temp = "0";		}
+			util.mothurConvert(temp, bdiffs);
 			
-			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found"){	temp = "0";		}
-			m->mothurConvert(temp, pdiffs);
+			temp = validParameter.valid(parameters, "pdiffs");		if (temp == "not found"){	temp = "0";		}
+			util.mothurConvert(temp, pdiffs);
 			
-            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, ldiffs);
+            temp = validParameter.valid(parameters, "ldiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, ldiffs);
             
-            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, sdiffs);
+            temp = validParameter.valid(parameters, "sdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, sdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
-			m->mothurConvert(temp, tdiffs);
+			temp = validParameter.valid(parameters, "tdiffs");		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
+			util.mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 	
-			temp = validParameter.validFile(parameters, "order", false);  if (temp == "not found"){ 	temp = "A";	}
+			temp = validParameter.valid(parameters, "order");  if (temp == "not found"){ 	temp = "A";	}
             if (temp.length() > 1) {  m->mothurOut("[ERROR]: " + temp + " is not a valid option for order. order options are A, B, or I. A = TACG, B = TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC, and I = TACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGC.\n");  abort=true;
             }
             else {
@@ -242,8 +241,8 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			if(oligoFileName == "")	{	allFiles = 0;		}
 			else					{	allFiles = 1;		}
             
-            temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
-			reorient = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "F"; }
+			reorient = util.isTrue(temp);
             
             numBarcodes = 0;
 			numFPrimers = 0;
@@ -266,7 +265,7 @@ int TrimFlowsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(flowFileName));
         string fastaFileName = getOutputFileName("fasta",variables);
 		if(fasta){ outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName); }
         
@@ -287,7 +286,7 @@ int TrimFlowsCommand::execute(){
 			lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
 		}	
 	#else
-		ifstream in; m->openInputFile(flowFileName, in); in >> numFlows; in.close();
+		ifstream in; util.openInputFile(flowFileName, in); in >> numFlows; in.close();
 	///////////////////////////////////////// until I fix multiple processors for windows //////////////////	
 		processors = 1;
 	///////////////////////////////////////// until I fix multiple processors for windows //////////////////		
@@ -330,7 +329,7 @@ int TrimFlowsCommand::execute(){
 			set<string> namesAlreadyProcessed;
             set<string> namesToRemove;
 			flowFilesFileName = getOutputFileName("file",variables);
-			m->openOutputFile(flowFilesFileName, output);
+			util.openOutputFile(flowFilesFileName, output);
 
 			for(int i=0;i<barcodePrimerComboFileNames.size();i++){
 				for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
@@ -341,7 +340,7 @@ int TrimFlowsCommand::execute(){
                                 unsigned long long size;
                                 
                                 //get num bytes in file
-                                barcodePrimerComboFileNames[i][j] = m->getFullPathName(barcodePrimerComboFileNames[i][j]);
+                                barcodePrimerComboFileNames[i][j] = util.getFullPathName(barcodePrimerComboFileNames[i][j]);
                                 pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
                                 if (pFile==NULL) perror ("Error opening file");
                                 else{
@@ -351,11 +350,11 @@ int TrimFlowsCommand::execute(){
                                 }
                                 
                                 if(size < 10){
-                                    m->mothurRemove(barcodePrimerComboFileNames[i][j]);
+                                    util.mothurRemove(barcodePrimerComboFileNames[i][j]);
                                     namesToRemove.insert(barcodePrimerComboFileNames[i][j]);
                                 }
                                 else{
-                                    output << m->getFullPathName(barcodePrimerComboFileNames[i][j]) << endl;
+                                    output << util.getFullPathName(barcodePrimerComboFileNames[i][j]) << endl;
                                 }
                                 namesAlreadyProcessed.insert(barcodePrimerComboFileNames[i][j]);
                             }
@@ -372,15 +371,15 @@ int TrimFlowsCommand::execute(){
 		}
 		else{
 			flowFilesFileName = getOutputFileName("file",variables);
-			m->openOutputFile(flowFilesFileName, output);
+			util.openOutputFile(flowFilesFileName, output);
 			
-			output << m->getFullPathName(trimFlowFileName) << endl;
+			output << util.getFullPathName(trimFlowFileName) << endl;
 			
 			output.close();
 		}
 		outputTypes["file"].push_back(flowFilesFileName);
 		outputNames.push_back(flowFilesFileName);
-        m->setFileFile(flowFilesFileName);
+        current->setFileFile(flowFilesFileName);
 			
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -401,23 +400,23 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 	
 	try {
 		ofstream trimFlowFile;
-		m->openOutputFile(trimFlowFileName, trimFlowFile);
+		util.openOutputFile(trimFlowFileName, trimFlowFile);
 		trimFlowFile.setf(ios::fixed, ios::floatfield); trimFlowFile.setf(ios::showpoint);
 
 		ofstream scrapFlowFile;
-		m->openOutputFile(scrapFlowFileName, scrapFlowFile);
+		util.openOutputFile(scrapFlowFileName, scrapFlowFile);
 		scrapFlowFile.setf(ios::fixed, ios::floatfield); scrapFlowFile.setf(ios::showpoint);
 		
 		ofstream fastaFile;
-		if(fasta){	m->openOutputFile(fastaFileName, fastaFile);	}
+		if(fasta){	util.openOutputFile(fastaFileName, fastaFile);	}
 		
 		ifstream flowFile;
-		m->openInputFile(flowFileName, flowFile);
+		util.openInputFile(flowFileName, flowFile);
 		
 		flowFile.seekg(line->start);
 		
 		if(line->start == 0){
-			flowFile >> numFlows; m->gobble(flowFile);
+			flowFile >> numFlows; util.gobble(flowFile);
 			scrapFlowFile << numFlows << endl;
 			trimFlowFile << maxFlows << endl;
 			if(allFiles){
@@ -425,7 +424,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 					for(int j=0;j<thisBarcodePrimerComboFileNames[0].size();j++){
                         if (thisBarcodePrimerComboFileNames[i][j] != "") {
                             ofstream temp;
-                            m->openOutputFile(thisBarcodePrimerComboFileNames[i][j], temp);
+                            util.openOutputFile(thisBarcodePrimerComboFileNames[i][j], temp);
                             temp << maxFlows << endl;
                             temp.close();
                         }
@@ -595,7 +594,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
                     
                     if(allFiles){
                         ofstream output;
-                        m->openOutputFileAppend(thisBarcodePrimerComboFileNames[barcodeIndex][primerIndex], output);
+                        util.openOutputFileAppend(thisBarcodePrimerComboFileNames[barcodeIndex][primerIndex], output);
                         output.setf(ios::fixed, ios::floatfield); trimFlowFile.setf(ios::showpoint);
                         
                         flowData.printFlows(output);
@@ -701,7 +700,7 @@ int TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
                             
                             ofstream temp;
                             map<string, string> variables;
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
+                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(flowFileName));
                             variables["[tag]"] = comboGroupName;
                             string fileName = getOutputFileName("flow", variables);
                             if (uniqueNames.count(fileName) == 0) {
@@ -711,7 +710,7 @@ int TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
                             }
                             
                             outFlowFileNames[itBar->first][itPrimer->first] = fileName;
-                            m->openOutputFile(fileName, temp);		temp.close();
+                            util.openOutputFile(fileName, temp);		temp.close();
                         }
                     }
                 }
@@ -742,7 +741,7 @@ int TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
                             
                             ofstream temp;
                             map<string, string> variables;
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
+                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(flowFileName));
                             variables["[tag]"] = comboGroupName;
                             string fileName = getOutputFileName("flow", variables);
                             if (uniqueNames.count(fileName) == 0) {
@@ -752,7 +751,7 @@ int TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
                             }
                             
                             outFlowFileNames[itBar->second][itPrimer->second] = fileName;
-                            m->openOutputFile(fileName, temp);		temp.close();
+                            util.openOutputFile(fileName, temp);		temp.close();
                         }
                     }
                 }
@@ -778,7 +777,7 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 		unsigned long long size;
 		
 		//get num bytes in file
-        flowFileName = m->getFullPathName(flowFileName);
+        flowFileName = util.getFullPathName(flowFileName);
 		pFile = fopen (flowFileName.c_str(),"rb");
 		if (pFile==NULL) perror ("Error opening file");
 		else{
@@ -799,10 +798,10 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 			unsigned long long spot = (i+1) * chunkSize;
 			
 			ifstream in;
-			m->openInputFile(flowFileName, in);
+			util.openInputFile(flowFileName, in);
 			in.seekg(spot);
 			
-			string dummy = m->getline(in);
+			string dummy = util.getline(in);
 			
 			//there was not another sequence before the end of the file
 			unsigned long long sanityPos = in.tellg();
@@ -824,9 +823,9 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 		}
 
 		ifstream in;
-		m->openInputFile(flowFileName, in);
+		util.openInputFile(flowFileName, in);
 		in >> numFlows;
-		m->gobble(in);
+		util.gobble(in);
 		//unsigned long long spot = in.tellg();
 		//filePos[0] = spot;
 		in.close();
@@ -867,18 +866,18 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 					for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
 						for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
                             if (tempBarcodePrimerComboFileNames[i][j] != "") {
-                                tempBarcodePrimerComboFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+                                tempBarcodePrimerComboFileNames[i][j] += toString(process) + ".temp";
                                 ofstream temp;
-                                m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
+                                util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
                                 temp.close();
                             }
 						}
 					}
 				}
 				driverCreateTrim(flowFileName,
-								 (trimFlowFileName + m->mothurGetpid(process) + ".temp"),
-								 (scrapFlowFileName + m->mothurGetpid(process) + ".temp"),
-								 (fastaFileName + m->mothurGetpid(process) + ".temp"),
+								 (trimFlowFileName + toString(process) + ".temp"),
+								 (scrapFlowFileName + toString(process) + ".temp"),
+								 (fastaFileName + toString(process) + ".temp"),
 								 tempBarcodePrimerComboFileNames, lines[process]);
 
 				exit(0);
@@ -892,15 +891,15 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));
                     if(allFiles){
                         for(int i=0;i<barcodePrimerComboFileNames.size();i++){
                             for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
                                 if (barcodePrimerComboFileNames[i][j] != "") {
                                     string tempFile = barcodePrimerComboFileNames[i][j] +(toString(processIDS[i])) + ".temp";
-                                    m->mothurRemove(tempFile);
+                                    util.mothurRemove(tempFile);
                                 }
                             }
                         }
@@ -914,7 +913,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         if (recalc) {
             //test line, also set recalc to true.
             //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-				for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+				for (int i=0;i<processIDS.size();i++) {util.mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));util.mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));util.mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
@@ -940,18 +939,18 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
                         for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
                             for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
                                 if (tempBarcodePrimerComboFileNames[i][j] != "") {
-                                    tempBarcodePrimerComboFileNames[i][j] += m->mothurGetpid(process) + ".temp";
+                                    tempBarcodePrimerComboFileNames[i][j] += toString(process) + ".temp";
                                     ofstream temp;
-                                    m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
+                                    util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
                                     temp.close();
                                 }
                             }
                         }
                     }
                     driverCreateTrim(flowFileName,
-                                     (trimFlowFileName + m->mothurGetpid(process) + ".temp"),
-                                     (scrapFlowFileName + m->mothurGetpid(process) + ".temp"),
-                                     (fastaFileName + m->mothurGetpid(process) + ".temp"),
+                                     (trimFlowFileName + toString(process) + ".temp"),
+                                     (scrapFlowFileName + toString(process) + ".temp"),
+                                     (fastaFileName + toString(process) + ".temp"),
                                      tempBarcodePrimerComboFileNames, lines[process]);
                     
                     exit(0);
@@ -966,14 +965,14 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 		
 		//parent do my part
 		ofstream temp;
-		m->openOutputFile(trimFlowFileName, temp);
+		util.openOutputFile(trimFlowFileName, temp);
 		temp.close();
 
-		m->openOutputFile(scrapFlowFileName, temp);
+		util.openOutputFile(scrapFlowFileName, temp);
 		temp.close();
 		
 		if(fasta){
-			m->openOutputFile(fastaFileName, temp);
+			util.openOutputFile(fastaFileName, temp);
 			temp.close();
 		}
 		
@@ -1007,7 +1006,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
                         if (tempBarcodePrimerComboFileNames[i][j] != "") {
                             tempBarcodePrimerComboFileNames[i][j] += extension;
                             ofstream temp;
-                            m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
+                            util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
                             temp.close();
 						}
 					}
@@ -1024,14 +1023,14 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 		
 		//using the main process as a worker saves time and memory
 		ofstream temp;
-		m->openOutputFile(trimFlowFileName, temp);
+		util.openOutputFile(trimFlowFileName, temp);
 		temp.close();
 		
-		m->openOutputFile(scrapFlowFileName, temp);
+		util.openOutputFile(scrapFlowFileName, temp);
 		temp.close();
 		
 		if(fasta){
-			m->openOutputFile(fastaFileName, temp);
+			util.openOutputFile(fastaFileName, temp);
 			temp.close();
 		}
 		
@@ -1042,7 +1041,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
                     if (tempBarcodePrimerComboFileNames[i][j] != "") {
                         tempBarcodePrimerComboFileNames[i][j] += toString(processors-1) + ".temp";
                         ofstream temp;
-                        m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
+                        util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
                         temp.close();
                     }
 					
@@ -1072,25 +1071,25 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 			
 			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
 			
-			m->appendFiles((trimFlowFileName + toString(processIDS[i]) + ".temp"), trimFlowFileName);
-			m->mothurRemove((trimFlowFileName + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((trimFlowFileName + toString(processIDS[i]) + ".temp"), trimFlowFileName);
+			util.mothurRemove((trimFlowFileName + toString(processIDS[i]) + ".temp"));
 //			m->mothurOut("\tDone with trim.flow file"); m->mothurOutEndLine();
 
-			m->appendFiles((scrapFlowFileName + toString(processIDS[i]) + ".temp"), scrapFlowFileName);
-			m->mothurRemove((scrapFlowFileName + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((scrapFlowFileName + toString(processIDS[i]) + ".temp"), scrapFlowFileName);
+			util.mothurRemove((scrapFlowFileName + toString(processIDS[i]) + ".temp"));
 //			m->mothurOut("\tDone with scrap.flow file"); m->mothurOutEndLine();
 
 			if(fasta){
-				m->appendFiles((fastaFileName + toString(processIDS[i]) + ".temp"), fastaFileName);
-				m->mothurRemove((fastaFileName + toString(processIDS[i]) + ".temp"));
+				util.appendFiles((fastaFileName + toString(processIDS[i]) + ".temp"), fastaFileName);
+				util.mothurRemove((fastaFileName + toString(processIDS[i]) + ".temp"));
 //				m->mothurOut("\tDone with flow.fasta file"); m->mothurOutEndLine();
 			}
 			if(allFiles){						
 				for (int j = 0; j < barcodePrimerComboFileNames.size(); j++) {
 					for (int k = 0; k < barcodePrimerComboFileNames[0].size(); k++) {
                         if (barcodePrimerComboFileNames[j][k] != "") {
-                            m->appendFiles((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"), barcodePrimerComboFileNames[j][k]);
-                            m->mothurRemove((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"));
+                            util.appendFiles((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"), barcodePrimerComboFileNames[j][k]);
+                            util.mothurRemove((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"));
                         }
 					}
 				}

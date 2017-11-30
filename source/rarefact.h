@@ -29,6 +29,7 @@ private:
 	void mergeVectors(SharedRAbundVector*, SharedRAbundVector*);
 	vector<SharedRAbundVector*> lookup;
 	MothurOut* m;
+    Utils util;
 	
 	int createProcesses(vector<int>&, RarefactionCurveData*, int, int);
 	int driver(RarefactionCurveData*, int, int);

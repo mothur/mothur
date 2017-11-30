@@ -48,7 +48,7 @@ OptiMatrix::OptiMatrix(SparseDistanceMatrix* sparseMatrix, string nc, string f) 
     //The singletons are stored separately by the OptiMatrix class.
     
     map<string, int> nameAssignment;
-    if (namefile != "") { nameAssignment = m->readNames(namefile); }
+    if (namefile != "") { nameAssignment = util.readNames(namefile); }
     else  {  CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
     int count = 0;
     map<int, int> indexSwap;
@@ -82,7 +82,7 @@ OptiMatrix::OptiMatrix(SparseDistanceMatrix* sparseMatrix, string nc, string f) 
     
     map<string, string> names;
     if (namefile != "") {
-        m->readNames(namefile, names);
+        util.readNames(namefile, names);
         for (int i = 0; i < singletons.size(); i++) {
             singletons[i] = names[singletons[i]];
         }
@@ -211,12 +211,12 @@ int OptiMatrix::readPhylip(){
         ifstream fileHandle;
         string numTest;
         
-        m->openInputFile(distFile, fileHandle);
+        Utils util; util.openInputFile(distFile, fileHandle);
         fileHandle >> numTest >> name;
         nameMap.push_back(name);
         singletonIndexSwap[0] = 0;
         
-        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
         
         //square test
@@ -281,7 +281,7 @@ int OptiMatrix::readPhylip(){
         
         map<string, string> names;
         if (namefile != "") {
-            m->readNames(namefile, names);
+            util.readNames(namefile, names);
             for (int i = 0; i < singletons.size(); i++) {
                 singletons[i] = names[singletons[i]];
             }
@@ -290,13 +290,11 @@ int OptiMatrix::readPhylip(){
         Progress* reading;
         ifstream in;
         
-        m->openInputFile(distFile, in);
+        util.openInputFile(distFile, in);
         in >> nseqs >> name;
         
         if (namefile != "") { name = names[name]; } //redundant names
         nameMap[singletonIndexSwap[0]] = name;
-
-        int fivepercent = (int)(0.05 * nseqs);
         
         string line = "";
         if(square == 0){
@@ -308,14 +306,14 @@ int OptiMatrix::readPhylip(){
                 
                 if (m->getControl_pressed()) {  in.close();  delete reading; return 0; }
                 
-                in >> name; m->gobble(in);
+                in >> name; util.gobble(in);
                 
                 if (namefile != "") { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
                 for(int j=0;j<i;j++){
                     
-                    in >> distance; m->gobble(in);
+                    in >> distance; util.gobble(in);
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
@@ -327,30 +325,23 @@ int OptiMatrix::readPhylip(){
                     }
                     index++; reading->update(index);
                 }
-                
-                if (m->getDebug()) {
-                    if((i % fivepercent) == 0){
-                        unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
-                        m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
-                    }
-                }
             }
         }else{
             reading = new Progress("Reading matrix:     ", nseqs * nseqs);
             int index = nseqs;
             
-            for(int i=0;i<nseqs;i++){ in >> distance;  } m->gobble(in);
+            for(int i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
             
             for(int i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  in.close();  delete reading; return 0; }
                 
-                in >> name; m->gobble(in);
+                in >> name; util.gobble(in);
                 
                 if (namefile != "") { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
                 for(int j=0;j<nseqs;j++){
-                    in >> distance; m->gobble(in);
+                    in >> distance; util.gobble(in);
 
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
@@ -362,21 +353,11 @@ int OptiMatrix::readPhylip(){
                     }
                     index++; reading->update(index);
                 }
-                
-                if (m->getDebug()) {
-                    if((i % fivepercent) == 0){
-                        unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
-                        m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
-                    }
-                }
             }
         }
         in.close();
         reading->finish();
         delete reading;
-
-        if (m->getDebug()) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
-            m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n"); }
 
         return 0;
         
@@ -390,8 +371,9 @@ int OptiMatrix::readPhylip(){
 
 int OptiMatrix::readColumn(){
     try {
+        Utils util;
         map<string, int> nameAssignment;
-        if (namefile != "") { nameAssignment = m->readNames(namefile); }
+        if (namefile != "") { nameAssignment = util.readNames(namefile); }
         else  {  CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
         int count = 0;
         for (map<string, int>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
@@ -404,14 +386,14 @@ int OptiMatrix::readColumn(){
         
         ///////////////////// Read to eliminate singletons ///////////////////////
         ifstream fileHandle;
-        m->openInputFile(distFile, fileHandle);
+        util.openInputFile(distFile, fileHandle);
         vector<bool> singleton; singleton.resize(nameAssignment.size(), true);
         map<int, int> singletonIndexSwap;
         while(fileHandle){  //let's assume it's a triangular matrix...
             
-            fileHandle >> firstName; m->gobble(fileHandle);
-            fileHandle >> secondName; m->gobble(fileHandle);
-            fileHandle >> distance;	m->gobble(fileHandle); // get the row and column names and distance
+            fileHandle >> firstName; util.gobble(fileHandle);
+            fileHandle >> secondName; util.gobble(fileHandle);
+            fileHandle >> distance;	util.gobble(fileHandle); // get the row and column names and distance
             
             if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             
@@ -451,20 +433,20 @@ int OptiMatrix::readColumn(){
         
         map<string, string> names;
         if (namefile != "") {
-            m->readNames(namefile, names);
+            util.readNames(namefile, names);
             for (int i = 0; i < singletons.size(); i++) {
                 singletons[i] = names[singletons[i]];
             }
         }
         
         ifstream in;
-        m->openInputFile(distFile, in);
+        util.openInputFile(distFile, in);
         
         while(in){  //let's assume it's a triangular matrix...
             
-            in >> firstName; m->gobble(in);
-            in >> secondName; m->gobble(in);
-            in >> distance;	m->gobble(in); // get the row and column names and distance
+            in >> firstName; util.gobble(in);
+            in >> secondName; util.gobble(in);
+            in >> distance;	util.gobble(in); // get the row and column names and distance
             
             if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             
@@ -500,9 +482,6 @@ int OptiMatrix::readColumn(){
         in.close();
         nameAssignment.clear();
         
-        if (m->getDebug()) { unsigned long long ramUsed = m->getRAMUsed(); unsigned long long total = m->getTotalRAM();
-            m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n"); }
-        
         return 1;
         
     }
@@ -514,8 +493,9 @@ int OptiMatrix::readColumn(){
 /***********************************************************************/
 int OptiMatrix::readBlast(){
     try {
+        Utils util;
         map<string, int> nameAssignment;
-        if (namefile != "") { nameAssignment = m->readNames(namefile); }
+        if (namefile != "") { nameAssignment = util.readNames(namefile); }
         else if (countfile != "") {  CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
         else { readBlastNames(nameAssignment);  }
         int count = 0;
@@ -536,7 +516,7 @@ int OptiMatrix::readBlast(){
         
         ///////////////////// Read to eliminate singletons ///////////////////////
         ifstream fileHandle;
-        m->openInputFile(distFile, fileHandle);
+        util.openInputFile(distFile, fileHandle);
         
         map<int, int> singletonIndexSwap;
         map<int, int> blastSingletonIndexSwap;
@@ -547,7 +527,7 @@ int OptiMatrix::readBlast(){
         if (!fileHandle.eof()) {
             //read in line from file
             fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-            m->gobble(fileHandle);
+            util.gobble(fileHandle);
             
             currentRow = firstName;
             lengthThisSeq = numBases;
@@ -585,7 +565,7 @@ int OptiMatrix::readBlast(){
             
             //read in line from file
             fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-            m->gobble(fileHandle);
+            util.gobble(fileHandle);
             
             string temp = firstName + secondName; //to check if this file has repeat lines, ie. is this a blast instead of a blscreen file
             
@@ -745,7 +725,7 @@ int OptiMatrix::readBlast(){
         overlapSingleton.clear();
 
         ifstream in;
-        m->openInputFile(distFile, in);
+        util.openInputFile(distFile, in);
         
         dists.resize(nameAssignment.size());
         closeness.resize(nonSingletonCount);
@@ -753,7 +733,7 @@ int OptiMatrix::readBlast(){
         
         map<string, string> names;
         if (namefile != "") {
-            m->readNames(namefile, names);
+            util.readNames(namefile, names);
             for (int i = 0; i < singletons.size(); i++) {
                 singletons[i] = names[singletons[i]];
             }
@@ -764,7 +744,7 @@ int OptiMatrix::readBlast(){
         if (!in.eof()) {
             //read in line from file
             in >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-            m->gobble(fileHandle);
+            util.gobble(fileHandle);
             
             currentRow = firstName;
             lengthThisSeq = numBases;
@@ -814,7 +794,7 @@ int OptiMatrix::readBlast(){
             
             //read in line from file
             in >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-            m->gobble(fileHandle);
+            util.gobble(fileHandle);
             
             string temp = firstName + secondName; //to check if this file has repeat lines, ie. is this a blast instead of a blscreen file
             
@@ -989,13 +969,13 @@ int OptiMatrix::readBlastNames(map<string, int>& nameAssignment) {
         int num = 0;
         
         ifstream in;
-        m->openInputFile(distFile, in);
+        Utils util; util.openInputFile(distFile, in);
         
         //read first line
         in >> prevName;
         
         for (int i = 0; i < 11; i++) {  in >> hold;  }
-        m->gobble(in);
+        util.gobble(in);
         
         //save name in nameMap
         nameAssignment[prevName] = num; num++;
@@ -1008,7 +988,7 @@ int OptiMatrix::readBlastNames(map<string, int>& nameAssignment) {
             in >> name;
             
             for (int i = 0; i < 11; i++) {  in >> hold;  }
-            m->gobble(in);
+            util.gobble(in);
             
             //is this a new name?
             if (name != prevName) {

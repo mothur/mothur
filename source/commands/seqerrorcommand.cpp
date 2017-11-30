@@ -160,14 +160,14 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -175,7 +175,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				it = parameters.find("reference");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
@@ -183,7 +183,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a names file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -191,7 +191,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a names file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -199,7 +199,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				it = parameters.find("qfile");
 				//user has given a quality score file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
@@ -207,67 +207,66 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				it = parameters.find("report");
 				//user has given a alignment report file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["report"] = inputDir + it->second;		}
 				}
 				
 			}
 			//check for required parameters
-			queryFileName = validParameter.validFile(parameters, "fasta", true);
+			queryFileName = validParameter.validFile(parameters, "fasta");
 			if (queryFileName == "not found") { 
-				queryFileName = m->getFastaFile(); 
+				queryFileName = current->getFastaFile(); 
 				if (queryFileName != "") { m->mothurOut("Using " + queryFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (queryFileName == "not open") { queryFileName = ""; abort = true; }	
-			else { m->setFastaFile(queryFileName); }
+			else { current->setFastaFile(queryFileName); }
 			
-			referenceFileName = validParameter.validFile(parameters, "reference", true);
+			referenceFileName = validParameter.validFile(parameters, "reference");
 			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command."); m->mothurOutEndLine(); abort = true; }
 			else if (referenceFileName == "not open") { abort = true; }	
 			
 			//check for optional parameters
-			namesFileName = validParameter.validFile(parameters, "name", true);
+			namesFileName = validParameter.validFile(parameters, "name");
 			if(namesFileName == "not found"){	namesFileName = "";	}
 			else if (namesFileName == "not open") { namesFileName = ""; abort = true; }	
-			else { m->setNameFile(namesFileName); }
+			else { current->setNameFile(namesFileName); }
             
             //check for optional parameters
-			countfile = validParameter.validFile(parameters, "count", true);
+			countfile = validParameter.validFile(parameters, "count");
 			if(countfile == "not found"){	countfile = "";	}
 			else if (countfile == "not open") { countfile = ""; abort = true; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
-			qualFileName = validParameter.validFile(parameters, "qfile", true);
+			qualFileName = validParameter.validFile(parameters, "qfile");
 			if(qualFileName == "not found"){	qualFileName = "";	}
 			else if (qualFileName == "not open") { qualFileName = ""; abort = true; }	
-			else { m->setQualFile(qualFileName); }
+			else { current->setQualFile(qualFileName); }
 			
-			reportFileName = validParameter.validFile(parameters, "report", true);
+			reportFileName = validParameter.validFile(parameters, "report");
 			if(reportFileName == "not found"){	reportFileName = "";	}
 			else if (reportFileName == "not open") { reportFileName = ""; abort = true; }	
 			
-			outputDir = validParameter.validFile(parameters, "outputdir", false);
+			outputDir = validParameter.valid(parameters, "outputdir");
 			if (outputDir == "not found"){ //if user entered a file with a path then preserve it
-				outputDir = m->hasPath(queryFileName); }
+				outputDir = util.hasPath(queryFileName); }
 			
             if ((countfile != "") && (namesFileName != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found") { temp = "1.00"; }
-			m->mothurConvert(temp, threshold);
+			temp = validParameter.valid(parameters, "threshold");	if (temp == "not found") { temp = "1.00"; }
+			util.mothurConvert(temp, threshold);
 			
-			temp = validParameter.validFile(parameters, "ignorechimeras", false);	if (temp == "not found") { temp = "T"; }
-			ignoreChimeras = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "ignorechimeras");	if (temp == "not found") { temp = "T"; }
+			ignoreChimeras = util.isTrue(temp);
 			
-            temp = validParameter.validFile(parameters, "aligned", false);			if (temp == "not found"){	temp = "t";				}
-			aligned = m->isTrue(temp); 
+            temp = validParameter.valid(parameters, "aligned");			if (temp == "not found"){	temp = "t";				}
+			aligned = util.isTrue(temp); 
 
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp); 
 
 			if ((namesFileName == "") && (queryFileName != "")){
 				vector<string> files; files.push_back(queryFileName); 
@@ -303,14 +302,14 @@ int SeqErrorCommand::execute(){
 	try{
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		int start = time(NULL);
+		long start = time(NULL);
 		maxLength = 5000;
 		totalBases = 0;
 		totalMatches = 0;
         substitutionMatrix.resize(6);
         for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}
 		
-        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string errorSummaryFileName = getOutputFileName("errorsummary",variables);
@@ -356,11 +355,11 @@ int SeqErrorCommand::execute(){
 		
 		printErrorFRFile(errorForward, errorReverse);
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
 
 		string errorCountFileName = getOutputFileName("errorcount",variables);
 		ofstream errorCountFile;
-		m->openOutputFile(errorCountFileName, errorCountFile);
+		util.openOutputFile(errorCountFileName, errorCountFile);
 		outputNames.push_back(errorCountFileName);  outputTypes["errorcount"].push_back(errorCountFileName);
         m->mothurOut("\nMultiply error rate by 100 to obtain the percent sequencing errors.\n");
 		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n");
@@ -372,13 +371,13 @@ int SeqErrorCommand::execute(){
 		}
 		errorCountFile.close();
 		
-//		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+//		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
 
 		printSubMatrix();
         
 		string megAlignmentFileName = getOutputFileName("errorref-query",variables);
 		ofstream megAlignmentFile;
-		m->openOutputFile(megAlignmentFileName, megAlignmentFile);
+		util.openOutputFile(megAlignmentFileName, megAlignmentFile);
 		outputNames.push_back(megAlignmentFileName);  outputTypes["errorref-query"].push_back(megAlignmentFileName);
         
 		for(int i=0;i<numRefs;i++){
@@ -423,12 +422,12 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 				process++;
 			}else if (pid == 0){
 				
-				num = driver(filename, qFileName, rFileName, summaryFileName + m->mothurGetpid(process) + ".temp", errorOutputFileName+ m->mothurGetpid(process) + ".temp", chimeraOutputFileName + m->mothurGetpid(process) + ".temp", lines[process], qLines[process], rLines[process]);
+				num = driver(filename, qFileName, rFileName, summaryFileName + toString(process) + ".temp", errorOutputFileName+ toString(process) + ".temp", chimeraOutputFileName + toString(process) + ".temp", lines[process], qLines[process], rLines[process]);
 				
 				//pass groupCounts to parent
 				ofstream out;
-				string tempFile = filename + m->mothurGetpid(process) + ".info.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = filename + toString(process) + ".info.temp";
+				util.openOutputFile(tempFile, out);
 				
 				//output totalBases and totalMatches
 				out << num << '\t' << totalBases << '\t' << totalMatches << endl << endl;
@@ -532,20 +531,20 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 			
 			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
 			
-			m->appendFiles((summaryFileName + toString(processIDS[i]) + ".temp"), summaryFileName);
-			m->mothurRemove((summaryFileName + toString(processIDS[i]) + ".temp"));
-			m->appendFiles((errorOutputFileName + toString(processIDS[i]) + ".temp"), errorOutputFileName);
-			m->mothurRemove((errorOutputFileName + toString(processIDS[i]) + ".temp"));
-			m->appendFiles((chimeraOutputFileName + toString(processIDS[i]) + ".temp"), chimeraOutputFileName);
-			m->mothurRemove((chimeraOutputFileName + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((summaryFileName + toString(processIDS[i]) + ".temp"), summaryFileName);
+			util.mothurRemove((summaryFileName + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((errorOutputFileName + toString(processIDS[i]) + ".temp"), errorOutputFileName);
+			util.mothurRemove((errorOutputFileName + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((chimeraOutputFileName + toString(processIDS[i]) + ".temp"), chimeraOutputFileName);
+			util.mothurRemove((chimeraOutputFileName + toString(processIDS[i]) + ".temp"));
 			
 			ifstream in;
 			string tempFile =  filename + toString(processIDS[i]) + ".info.temp";
-			m->openInputFile(tempFile, in);
+			util.openInputFile(tempFile, in);
 			
 			//input totalBases and totalMatches
 			int tempBases, tempMatches, tempNumSeqs;
-			in >> tempNumSeqs >> tempBases >> tempMatches; m->gobble(in);
+			in >> tempNumSeqs >> tempBases >> tempMatches; util.gobble(in);
 			totalBases += tempBases; totalMatches += tempMatches; num += tempNumSeqs;
 			
 			//input substitutionMatrix
@@ -554,9 +553,9 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 				for (int j = 0; j < substitutionMatrix[i].size(); j++) {
 					in >> tempNum; substitutionMatrix[i][j] += tempNum;
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
-			m->gobble(in);
+			util.gobble(in);
 			
 			//input qScoreErrorMap
 			char first;
@@ -568,27 +567,27 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 					in >> tempNum; thisScoreErrorMap[i] += tempNum;
 				}
 				qScoreErrorMap[first] = thisScoreErrorMap;
-				m->gobble(in);
+				util.gobble(in);
 			}
-			m->gobble(in);
+			util.gobble(in);
 			
 			//input qualForwardMap
 			for(int i = 0; i < qualForwardMap.size(); i++) {
 				for (int j = 0; j < qualForwardMap[i].size(); j++) {
 					in >> tempNum; qualForwardMap[i][j] += tempNum;
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
-			m->gobble(in);
+			util.gobble(in);
 			
 			//input qualReverseMap
 			for(int i = 0; i < qualReverseMap.size(); i++) {
 				for (int j = 0; j < qualReverseMap[i].size(); j++) {
 					in >> tempNum; qualReverseMap[i][j] += tempNum;
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
-			m->gobble(in);
+			util.gobble(in);
 			
 			//input errorForward
 			for (int i = 0; i < errorForward.size(); i++) {
@@ -599,9 +598,9 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 					in >> tempNum; thisErrorForward[i] += tempNum;
 				}
 				errorForward[first] = thisErrorForward;
-				m->gobble(in);
+				util.gobble(in);
 			}
-			m->gobble(in);
+			util.gobble(in);
 			
 			//input errorReverse
 			for (int i = 0; i < errorReverse.size(); i++) {
@@ -612,27 +611,27 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 					in >> tempNum; thisErrorReverse[i] += tempNum;
 				}
 				errorReverse[first] = thisErrorReverse;
-				m->gobble(in);
+				util.gobble(in);
 			}
-			m->gobble(in);
+			util.gobble(in);
 			
 			//input misMatchCounts
 			int misMatchSize;
-			in >> misMatchSize; m->gobble(in);
+			in >> misMatchSize; util.gobble(in);
 			if (misMatchSize > misMatchCounts.size()) {	misMatchCounts.resize(misMatchSize, 0);	}
 			for (int j = 0; j < misMatchSize; j++) {
 				in >> tempNum; misMatchCounts[j] += tempNum;
 			}
-			m->gobble(in);
+			util.gobble(in);
 			
 			//input megaAlignVector
 			string thisLine;
 			for (int j = 0; j < megaAlignVector.size(); j++) {
-				thisLine = m->getline(in); m->gobble(in); megaAlignVector[j] += thisLine + '\n';
+				thisLine = util.getline(in); util.gobble(in); megaAlignVector[j] += thisLine + '\n';
 			}
-			m->gobble(in);
+			util.gobble(in);
 			
-			in.close(); m->mothurRemove(tempFile);
+			in.close(); util.mothurRemove(tempFile);
 			
 		}
 #endif		
@@ -676,20 +675,20 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		
 		//open inputfiles and go to beginning place for this processor
 		ifstream queryFile;
-		m->openInputFile(filename, queryFile);
+		util.openInputFile(filename, queryFile);
         
 		queryFile.seekg(line.start);
 		
 		ifstream reportFile;
 		ifstream qualFile;
 		if((qFileName != "" && rFileName != "" && aligned)){
-			m->openInputFile(qFileName, qualFile);
+			util.openInputFile(qFileName, qualFile);
 			qualFile.seekg(qline.start);  
 			
 			//gobble headers
 			if (rline.start == 0) {  report.readHeaders(reportFile, rFileName); }
 			else{
-				m->openInputFile(rFileName, reportFile);
+				util.openInputFile(rFileName, reportFile);
 				reportFile.seekg(rline.start); 
 			}
 			
@@ -702,7 +701,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		}
 		else if(qFileName != "" && !aligned){
 
-            m->openInputFile(qFileName, qualFile);
+            util.openInputFile(qFileName, qualFile);
 			qualFile.seekg(qline.start);  
 			
 			qualForwardMap.resize(maxLength);
@@ -714,17 +713,17 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
         }
         
 		ofstream outChimeraReport;
-		m->openOutputFile(chimeraOutputFileName, outChimeraReport);
+		util.openOutputFile(chimeraOutputFileName, outChimeraReport);
 		
         RefChimeraTest chimeraTest = RefChimeraTest(referenceSeqs, aligned);
         if (line.start == 0) { chimeraTest.printHeader(outChimeraReport); }        
         
 		ofstream errorSummaryFile;
-		m->openOutputFile(summaryFileName, errorSummaryFile);
+		util.openOutputFile(summaryFileName, errorSummaryFile);
 		if (line.start == 0) { printErrorHeader(errorSummaryFile); }
 		
 		ofstream errorSeqFile;
-		m->openOutputFile(errorOutputFileName, errorSeqFile);
+		util.openOutputFile(errorOutputFileName, errorSeqFile);
 		
 		megaAlignVector.assign(numRefs, "");
 		
@@ -859,10 +858,10 @@ void SeqErrorCommand::getReferences(){
 		int minEndPos = 100000;
 		
 		
-        int start = time(NULL);
+        long start = time(NULL);
         
         ifstream referenceFile;
-        m->openInputFile(referenceFileName, referenceFile);
+        util.openInputFile(referenceFileName, referenceFile);
         
         while(referenceFile){
             Sequence currentSeq(referenceFile);
@@ -880,7 +879,7 @@ void SeqErrorCommand::getReferences(){
                 referenceSeqs.push_back(currentSeq);
             }
             
-            m->gobble(referenceFile);
+            util.gobble(referenceFile);
         }
         referenceFile.close();
         
@@ -1011,7 +1010,7 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 
 map<string, int> SeqErrorCommand::getWeights(){
 	ifstream nameFile;
-	m->openInputFile(namesFileName, nameFile);
+	util.openInputFile(namesFileName, nameFile);
 	
 	string seqName;
 	string redundantSeqs;
@@ -1019,8 +1018,8 @@ map<string, int> SeqErrorCommand::getWeights(){
 	
 	while(nameFile){
 		nameFile >> seqName >> redundantSeqs;
-		nameCountMap[seqName] = m->getNumNames(redundantSeqs); 
-		m->gobble(nameFile);
+		nameCountMap[seqName] = util.getNumNames(redundantSeqs); 
+		util.gobble(nameFile);
 	}
     
     nameFile.close();
@@ -1116,12 +1115,12 @@ void SeqErrorCommand::printErrorData(Compare error, int numParentSeqs, ofstream&
 
 void SeqErrorCommand::printSubMatrix(){
 	try {
-        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string subMatrixFileName = getOutputFileName("errormatrix",variables);
 		ofstream subMatrixFile;
-		m->openOutputFile(subMatrixFileName, subMatrixFile);
+		util.openOutputFile(subMatrixFileName, subMatrixFile);
 		outputNames.push_back(subMatrixFileName);  outputTypes["errormatrix"].push_back(subMatrixFileName);
 		vector<string> bases(6);
 		bases[0] = "A";
@@ -1166,12 +1165,12 @@ void SeqErrorCommand::printSubMatrix(){
 
 void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map<char, vector<int> > errorReverse){
 	try{
-        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string errorForwardFileName = getOutputFileName("errorforward",variables);
 		ofstream errorForwardFile;
-		m->openOutputFile(errorForwardFileName, errorForwardFile);
+		util.openOutputFile(errorForwardFileName, errorForwardFile);
 		outputNames.push_back(errorForwardFileName);  outputTypes["errorforward"].push_back(errorForwardFileName);
 
 		errorForwardFile << "position\ttotalseqs\tmatch\tsubstitution\tinsertion\tdeletion\tambiguous" << endl;
@@ -1189,7 +1188,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map
 
 		string errorReverseFileName = getOutputFileName("errorreverse",variables);
 		ofstream errorReverseFile;
-		m->openOutputFile(errorReverseFileName, errorReverseFile);
+		util.openOutputFile(errorReverseFileName, errorReverseFile);
 		outputNames.push_back(errorReverseFileName);  outputTypes["errorreverse"].push_back(errorReverseFileName);
 
 		errorReverseFile << "position\ttotalseqs\tmatch\tsubstitution\tinsertion\tdeletion\tambiguous" << endl;
@@ -1215,12 +1214,12 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map
 
 void SeqErrorCommand::printErrorQuality(map<char, vector<int> > qScoreErrorMap){
 	try{
-        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string errorQualityFileName = getOutputFileName("errorquality",variables);
 		ofstream errorQualityFile;
-		m->openOutputFile(errorQualityFileName, errorQualityFile);
+		util.openOutputFile(errorQualityFileName, errorQualityFile);
 		outputNames.push_back(errorQualityFileName);  outputTypes["errorquality"].push_back(errorQualityFileName);
 
 		errorQualityFile << "qscore\tmatches\tsubstitutions\tinsertions\tambiguous" << endl;
@@ -1250,12 +1249,12 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 				}
 			}
 		}
-        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string qualityForwardFileName = getOutputFileName("errorqualforward",variables);
 		ofstream qualityForwardFile;
-		m->openOutputFile(qualityForwardFileName, qualityForwardFile);
+		util.openOutputFile(qualityForwardFileName, qualityForwardFile);
 		outputNames.push_back(qualityForwardFileName);  outputTypes["errorqualforward"].push_back(qualityForwardFileName);
 
 		for(int i=0;i<numColumns;i++){	qualityForwardFile << '\t' << i;	}	qualityForwardFile << endl;
@@ -1273,7 +1272,7 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 		
 		string qualityReverseFileName = getOutputFileName("errorqualreverse",variables);
 		ofstream qualityReverseFile;
-		m->openOutputFile(qualityReverseFileName, qualityReverseFile);
+		util.openOutputFile(qualityReverseFileName, qualityReverseFile);
 		outputNames.push_back(qualityReverseFileName);  outputTypes["errorqualreverse"].push_back(qualityReverseFileName);
 		
 		for(int i=0;i<numColumns;i++){	qualityReverseFile << '\t' << i;	}	qualityReverseFile << endl;
@@ -1305,7 +1304,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//set file positions for fasta file
-		fastaFilePos = m->divideFile(filename, processors);
+		fastaFilePos = util.divideFile(filename, processors);
 		
 		if (qfilename == "") { }
         else {
@@ -1313,11 +1312,11 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
             map<string, int> firstSeqNames;
             for (int i = 0; i < (fastaFilePos.size()-1); i++) {
                 ifstream in;
-                m->openInputFile(filename, in);
+                util.openInputFile(filename, in);
                 in.seekg(fastaFilePos[i]);
                 
                 //adjust start if null strings
-                if (i == 0) {  m->zapGremlins(in); m->gobble(in);  }
+                if (i == 0) {  util.zapGremlins(in); util.gobble(in);  }
                 
                 Sequence temp(in);
                 firstSeqNames[temp.getName()] = i;
@@ -1332,11 +1331,11 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
             if (qfilename != "") {
                 //seach for filePos of each first name in the qfile and save in qfileFilePos
                 ifstream inQual;
-                m->openInputFile(qfilename, inQual);
+                util.openInputFile(qfilename, inQual);
                 
                 string input;
                 while(!inQual.eof()){
-                    input = m->getline(inQual);
+                    input = util.getline(inQual);
                     
                     if (input.length() != 0) {
                         if(input[0] == '>'){ //this is a sequence name line
@@ -1345,7 +1344,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                             string sname = "";  nameStream >> sname;
                             sname = sname.substr(1);
                             
-                            m->checkName(sname);
+                            util.checkName(sname);
                             
                             map<string, int>::iterator it = firstSeqNames.find(sname);
                             
@@ -1374,7 +1373,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                 unsigned long long size;
                 
                 //get num bytes in file
-                qfilename = m->getFullPathName(qfilename);
+                qfilename = util.getFullPathName(qfilename);
                 pFile = fopen (qfilename.c_str(),"rb");
                 if (pFile==NULL) perror ("Error opening file");
                 else{
@@ -1391,7 +1390,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                 string junk, input;
                 ifstream inR;
                 
-                m->openInputFile(rfilename, inR);
+                util.openInputFile(rfilename, inR);
                 
                 //read column headers
                 for (int i = 0; i < 16; i++) {
@@ -1401,14 +1400,14 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                 
                 while(!inR.eof()){
                     
-                    input = m->getline(inR);
+                    input = util.getline(inR);
                     
                     if (input.length() != 0) {
                         
                         istringstream nameStream(input);
                         string sname = "";  nameStream >> sname;
                         
-                        m->checkName(sname);
+                        util.checkName(sname);
                         
                         map<string, int>::iterator it = firstSeqNamesReport.find(sname);
                         
@@ -1420,7 +1419,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                     }
                     
                     if (firstSeqNamesReport.size() == 0) { break; }
-                    m->gobble(inR);
+                    util.gobble(inR);
                 }
                 inR.close();
                 
@@ -1437,7 +1436,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                 unsigned long long sizeR;
                 
                 //get num bytes in file
-                rfilename = m->getFullPathName(rfilename);
+                rfilename = util.getFullPathName(rfilename);
                 rFile = fopen (rfilename.c_str(),"rb");
                 if (rFile==NULL) perror ("Error opening file");
                 else{
@@ -1457,7 +1456,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 		unsigned long long size;
 		
 		//get num bytes in file
-        filename = m->getFullPathName(filename);
+        filename = util.getFullPathName(filename);
 		pFile = fopen (filename.c_str(),"rb");
 		if (pFile==NULL) perror ("Error opening file");
 		else{
@@ -1472,7 +1471,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
             FILE * qFile;
             
             //get num bytes in file
-            qfilename = m->getFullPathName(qfilename);
+            qfilename = util.getFullPathName(qfilename);
             qFile = fopen (qfilename.c_str(),"rb");
             if (qFile==NULL) perror ("Error opening file");
             else{
@@ -1490,7 +1489,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
              FILE * rFile;
              
              //get num bytes in file
-             rfilename = m->getFullPathName(rfilename);
+             rfilename = util.getFullPathName(rfilename);
              rFile = fopen (rfilename.c_str(),"rb");
              if (rFile==NULL) perror ("Error opening file");
              else{

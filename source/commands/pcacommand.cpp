@@ -110,14 +110,14 @@ PCACommand::PCACommand(string option)  {
 			outputTypes["loadings"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -125,32 +125,32 @@ PCACommand::PCACommand(string option)  {
 				it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  mode = "sharedfile"; inputFile = sharedfile; m->setSharedFile(sharedfile); }
+			else {  mode = "sharedfile"; inputFile = sharedfile; current->setSharedFile(sharedfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") { relabundfile = ""; abort = true; }	
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else {  mode = "relabund"; inputFile = relabundfile; m->setRelAbundFile(relabundfile); }
+			else {  mode = "relabund"; inputFile = relabundfile; current->setRelAbundFile(relabundfile); }
 			
 			
 			if ((sharedfile == "") && (relabundfile == "")) { 
 				//is there are current file available for any of these?
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { inputFile = sharedfile; mode = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					relabundfile = m->getRelAbundFile(); 
+					relabundfile = current->getRelAbundFile(); 
 					if (relabundfile != "") { inputFile = relabundfile; mode = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a relabund or shared file."); m->mothurOutEndLine(); 
@@ -160,21 +160,21 @@ PCACommand::PCACommand(string option)  {
 			}
 				
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(inputFile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(inputFile); //if user entered a file with a path then preserve it	
 			}
 						
-			string temp = validParameter.validFile(parameters, "metric", false);	if (temp == "not found"){	temp = "T";				}
-			metric = m->isTrue(temp); 
+			string temp = validParameter.valid(parameters, "metric");	if (temp == "not found"){	temp = "T";				}
+			metric = util.isTrue(temp); 
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; if(labels.size() == 0) {  m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); } }
-			else { m->splitAtDash(label, labels); }
+			else { util.splitAtDash(label, labels); }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = "";  }
-			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	}
+			else { util.splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	}
 					
 			
 		}
@@ -222,7 +222,7 @@ int PCACommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
 			
-            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete lookupFloat; return 0;  }
+            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } delete input; delete lookupFloat; return 0;  }
 			
 			if(labels.count(lookupFloat->getLabel()) == 1){
 				processedLabels.insert(lookupFloat->getLabel());
@@ -231,7 +231,7 @@ int PCACommand::execute(){
 				process(lookupFloat);
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookupFloat->getLabel();
 				
 				delete lookupFloat;
@@ -255,7 +255,7 @@ int PCACommand::execute(){
 		}
 		
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete lookupFloat;  return 0;  }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } delete input; delete lookupFloat;  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -283,7 +283,7 @@ int PCACommand::execute(){
 		delete lookupFloat;
 		delete input;
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -384,7 +384,7 @@ int PCACommand::process(SharedRAbundFloatVectors*& lookupFloat){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		string fbase = outputDir + m->getRootName(m->getSimpleName(inputFile));
+		string fbase = outputDir + util.getRootName(util.getSimpleName(inputFile));
 		//string outputFileName = fbase + lookupFloat[0]->getLabel();
 		output(fbase, lookupFloat->getLabel(), Groups, X, d);
 		
@@ -396,13 +396,13 @@ int PCACommand::process(SharedRAbundFloatVectors*& lookupFloat){
 				
 				vector< vector<double> > PCAEuclidDists = linearCalc.calculateEuclidianDistance(X, i); //G is the pca file
 				
-				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 
 				double corr = linearCalc.calcPearson(PCAEuclidDists, observedEuclideanDistance);
 								
 				m->mothurOut("Rsq " + toString(i) + " axis: " + toString(corr * corr)); m->mothurOutEndLine();
 				
-				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 			}
 		}
 		
@@ -429,7 +429,7 @@ void PCACommand::output(string fbase, string label, vector<string> name_list, ve
         variables["[filename]"] = fbase;
         variables["[distance]"] = label;
         string pcaFileName = getOutputFileName("pca",variables);
-        m->openOutputFile(pcaFileName, pcaData);
+        util.openOutputFile(pcaFileName, pcaData);
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
 		outputNames.push_back(pcaFileName);
@@ -437,7 +437,7 @@ void PCACommand::output(string fbase, string label, vector<string> name_list, ve
 		
 		ofstream pcaLoadings;
         string loadingsFilename = getOutputFileName("loadings",variables);
-         m->openOutputFile(loadingsFilename, pcaLoadings);
+         util.openOutputFile(loadingsFilename, pcaLoadings);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);
 		pcaLoadings.setf(ios::showpoint);
 		outputNames.push_back(loadingsFilename);

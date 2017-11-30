@@ -110,17 +110,17 @@ AmovaCommand::AmovaCommand(string option) {
 			outputTypes["amova"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
@@ -128,43 +128,43 @@ AmovaCommand::AmovaCommand(string option) {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
 			}
 			
-			phylipFileName = validParameter.validFile(parameters, "phylip", true);
+			phylipFileName = validParameter.validFile(parameters, "phylip");
 			if (phylipFileName == "not open") { phylipFileName = ""; abort = true; }
 			else if (phylipFileName == "not found") { 
 				//if there is a current phylip file, use it
-				phylipFileName = m->getPhylipFile(); 
+				phylipFileName = current->getPhylipFile(); 
 				if (phylipFileName != "") { m->mothurOut("Using " + phylipFileName + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setPhylipFile(phylipFileName); }
+			}else { current->setPhylipFile(phylipFileName); }
 			
 			//check for required parameters
-			designFileName = validParameter.validFile(parameters, "design", true);
+			designFileName = validParameter.validFile(parameters, "design");
 			if (designFileName == "not open") { designFileName = ""; abort = true; }
 			else if (designFileName == "not found") {
 				//if there is a current design file, use it
-				designFileName = m->getDesignFile(); 
+				designFileName = current->getDesignFile(); 
 				if (designFileName != "") { m->mothurOut("Using " + designFileName + " as input file for the design parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }				
-			}else { m->setDesignFile(designFileName); }	
+			}else { current->setDesignFile(designFileName); }	
 
-			string temp = validParameter.validFile(parameters, "iters", false);
+			string temp = validParameter.valid(parameters, "iters");
 			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+			util.mothurConvert(temp, iters); 
 			
-			temp = validParameter.validFile(parameters, "alpha", false);
+			temp = validParameter.valid(parameters, "alpha");
 			if (temp == "not found") { temp = "0.05"; }
-			m->mothurConvert(temp, experimentwiseAlpha); 
+			util.mothurConvert(temp, experimentwiseAlpha); 
             
-            string sets = validParameter.validFile(parameters, "sets", false);			
+            string sets = validParameter.valid(parameters, "sets");			
 			if (sets == "not found") { sets = ""; }
 			else { 
-				m->splitAtDash(sets, Sets);
+				util.splitAtDash(sets, Sets);
 			}
 		}
 	}
@@ -183,7 +183,7 @@ int AmovaCommand::execute(){
 		//read design file
 		designMap = new DesignMap(designFileName);
 
-		if (outputDir == "") { outputDir = m->hasPath(phylipFileName); }
+		if (outputDir == "") { outputDir = util.hasPath(phylipFileName); }
 						
 		//read in distance matrix and square it
 		ReadPhylipVector readMatrix(phylipFileName);
@@ -198,7 +198,7 @@ int AmovaCommand::execute(){
                 
                 if (group == "not found") {
                     m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
-                }else if (!m->inUsersGroups(group, Sets)){  //not in set we want remove it
+                }else if (!util.inUsersGroups(group, Sets)){  //not in set we want remove it
                     //remove from all other rows
                     for(int j=0;j<distanceMatrix.size();j++){ distanceMatrix[j].erase(distanceMatrix[j].begin()+i); }
                     distanceMatrix.erase(distanceMatrix.begin()+i);
@@ -230,10 +230,10 @@ int AmovaCommand::execute(){
 		
 		//create a new filename
 		ofstream AMOVAFile;
-        map<string, string> variables; variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipFileName));
+        map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipFileName));
 		string AMOVAFileName = getOutputFileName("amova", variables);	
         
-		m->openOutputFile(AMOVAFileName, AMOVAFile);
+		util.openOutputFile(AMOVAFileName, AMOVAFile);
 		outputNames.push_back(AMOVAFileName); outputTypes["amova"].push_back(AMOVAFileName);
 		
 		double fullANOVAPValue = runAMOVA(AMOVAFile, origGroupSampleMap, experimentwiseAlpha);
@@ -309,19 +309,12 @@ double AmovaCommand::runAMOVA(ofstream& AMOVAFile, map<string, vector<int> > gro
 		if(pValue < 1/(double)iters){	pString = '<' + toString(1/(double)iters);	}
 		else						{	pString = toString(pValue);					}
 		
+        vector<string> sampleNames;
+		for(it = groupSampleMap.begin();it!=groupSampleMap.end();it++){ sampleNames.push_back(it->first); }
+        string output = util.getStringFromVector(sampleNames, "-");
 		
-		//print anova table
-		it = groupSampleMap.begin();
-		AMOVAFile << it->first;
-		m->mothurOut(it->first);
-		it++;
-		for(it;it!=groupSampleMap.end();it++){
-			AMOVAFile << '-' << it->first;
-			m->mothurOut('-' + it->first);
-		}
-		
-		AMOVAFile << "\tAmong\tWithin\tTotal" << endl;
-		m->mothurOut("\tAmong\tWithin\tTotal\n");
+		AMOVAFile << output << "\tAmong\tWithin\tTotal" << endl;
+		m->mothurOut(output + "\tAmong\tWithin\tTotal\n");
 		
 		AMOVAFile << "SS\t" << ssAmongOrig << '\t' << ssWithinOrig << '\t' << ssTotalOrig << endl;
 		m->mothurOut("SS\t" + toString(ssAmongOrig) + '\t' + toString(ssWithinOrig) + '\t' + toString(ssTotalOrig) + '\n');

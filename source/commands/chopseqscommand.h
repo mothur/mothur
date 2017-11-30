@@ -93,23 +93,23 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 	
 	try {
         ofstream out;
-		pDataArray->m->openOutputFile(pDataArray->outFasta, out);
+		pDataArray->util.openOutputFile(pDataArray->outFasta, out);
         
         ofstream outAcc;
-		pDataArray->m->openOutputFile(pDataArray->outAccnos, outAcc);
+		pDataArray->util.openOutputFile(pDataArray->outAccnos, outAcc);
         
 		ifstream in;
-		pDataArray->m->openInputFile(pDataArray->filename, in);
+		pDataArray->util.openInputFile(pDataArray->filename, in);
         
         ofstream outfTemp;
-        if (pDataArray->fastaFileTemp != "") { pDataArray->m->openOutputFile(pDataArray->fastaFileTemp, outfTemp); }
+        if (pDataArray->fastaFileTemp != "") { pDataArray->util.openOutputFile(pDataArray->fastaFileTemp, outfTemp); }
 
         
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			in.seekg(0);
-            pDataArray->m->zapGremlins(in);
+            pDataArray->util.zapGremlins(in);
 		}else { //this accounts for the difference in line endings. 
-			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
+			in.seekg(pDataArray->start-1); pDataArray->util.gobble(in); 
 		}
 
 		bool done = false;
@@ -118,9 +118,9 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 						
-			if (pDataArray->m->getControl_pressed()) {  in.close(); out.close(); outAcc.close(); pDataArray->m->mothurRemove(pDataArray->outFasta); pDataArray->m->mothurRemove(pDataArray->outAccnos); if (pDataArray->fastaFileTemp != "") { outfTemp.close(); pDataArray->m->mothurRemove(pDataArray->fastaFileTemp); } return 0;  }
+			if (pDataArray->m->getControl_pressed()) {  in.close(); out.close(); outAcc.close(); pDataArray->util.mothurRemove(pDataArray->outFasta); pDataArray->util.mothurRemove(pDataArray->outAccnos); if (pDataArray->fastaFileTemp != "") { outfTemp.close(); pDataArray->util.mothurRemove(pDataArray->fastaFileTemp); } return 0;  }
             
-            Sequence seq(in); pDataArray->m->gobble(in);
+            Sequence seq(in); pDataArray->util.gobble(in);
 			
 			if (seq.getName() != "") {
 				//string newSeqString = getChopped(seq);

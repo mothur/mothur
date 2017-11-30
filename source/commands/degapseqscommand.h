@@ -78,23 +78,23 @@ static DWORD WINAPI MyDegapThreadFunction(LPVOID lpParam){
         pDataArray->count = 0;
         
         ifstream inFASTA;
-        pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
+        pDataArray->util.openInputFile(pDataArray->filename, inFASTA);
         
         if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
             inFASTA.seekg(0);
-            pDataArray->m->zapGremlins(inFASTA);
+            pDataArray->util.zapGremlins(inFASTA);
         }else { //this accounts for the difference in line endings.
-            inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA);
+            inFASTA.seekg(pDataArray->start-1); pDataArray->util.gobble(inFASTA);
         }
 
         ofstream outFASTA;
-        pDataArray->m->openOutputFile(pDataArray->outputFileName, outFASTA);
+        pDataArray->util.openOutputFile(pDataArray->outputFileName, outFASTA);
         
         for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
             
             if (pDataArray->m->getControl_pressed()) {  break; }
             
-            Sequence currSeq(inFASTA);  pDataArray->m->gobble(inFASTA);
+            Sequence currSeq(inFASTA);  pDataArray->util.gobble(inFASTA);
             if (currSeq.getName() != "") {
                 outFASTA << ">" << currSeq.getName() << endl;
                 outFASTA << currSeq.getUnaligned() << endl;

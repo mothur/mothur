@@ -130,14 +130,14 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
             outputTypes["fastq"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fastq");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
 				}
@@ -145,7 +145,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
                 it = parameters.find("file");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["file"] = inputDir + it->second;		}
 				}
@@ -153,7 +153,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
                 it = parameters.find("oligos");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
 				}
@@ -161,19 +161,19 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
                 it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			fastaQFile = validParameter.validFile(parameters, "fastq", true);
+			fastaQFile = validParameter.validFile(parameters, "fastq");
 			if (fastaQFile == "not found") {	fastaQFile= "";	}
 			else if (fastaQFile == "not open")	{	fastaQFile = ""; abort = true;	}
             else { inputfile = fastaQFile; }
             
-            file = validParameter.validFile(parameters, "file", true);
+            file = validParameter.validFile(parameters, "file");
 			if (file == "not found") {	file = "";	}
 			else if (file == "not open")	{	file = ""; abort = true;	}
             else { inputfile = file; fileOption = true; }
@@ -181,50 +181,50 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
             if ((file == "") && (fastaQFile == "")) {  m->mothurOut("You must provide a file or fastq option."); m->mothurOutEndLine(); abort = true;  }
 
             
-            oligosfile = validParameter.validFile(parameters, "oligos", true);
+            oligosfile = validParameter.validFile(parameters, "oligos");
 			if (oligosfile == "not found") {	oligosfile = "";	}
 			else if (oligosfile == "not open")	{	oligosfile = ""; abort = true;	}
-            else { m->setOligosFile(oligosfile); split = 2; }
+            else { current->setOligosFile(oligosfile); split = 2; }
             
-            groupfile = validParameter.validFile(parameters, "group", true);
+            groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not found") {	groupfile = "";	}
 			else if (groupfile == "not open")	{	groupfile = ""; abort = true;	}
-            else { m->setGroupFile(groupfile); split = 2; }
+            else { current->setGroupFile(groupfile); split = 2; }
             
             if ((groupfile != "") && (oligosfile != "")) { m->mothurOut("You must enter ONLY ONE of the following: oligos or group."); m->mothurOutEndLine(); abort = true;  }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);	if (outputDir == "not found"){	outputDir = m->hasPath(inputfile); 	}
+			outputDir = validParameter.valid(parameters, "outputdir");	if (outputDir == "not found"){	outputDir = util.hasPath(inputfile); 	}
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "fasta", false);	if(temp == "not found"){	temp = "T";	}
-			fasta = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "fasta");	if(temp == "not found"){	temp = "T";	}
+			fasta = util.isTrue(temp); 
 
-			temp = validParameter.validFile(parameters, "qfile", false);	if(temp == "not found"){	temp = "T";	}
-			qual = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "qfile");	if(temp == "not found"){	temp = "T";	}
+			qual = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "pacbio", false);	if(temp == "not found"){	temp = "F";	}
-			pacbio = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "pacbio");	if(temp == "not found"){	temp = "F";	}
+			pacbio = util.isTrue(temp);
 
-            temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, bdiffs);
+            temp = validParameter.valid(parameters, "bdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, bdiffs);
 			
-			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, pdiffs);
+			temp = validParameter.valid(parameters, "pdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, pdiffs);
             
-            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, ldiffs);
+            temp = validParameter.valid(parameters, "ldiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, ldiffs);
             
-            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, sdiffs);
+            temp = validParameter.valid(parameters, "sdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, sdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
-			m->mothurConvert(temp, tdiffs);
+			temp = validParameter.valid(parameters, "tdiffs");		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
+			util.mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
 
 			
-            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "illumina1.8+";	}
+            format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
             
             if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  { 
 				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
@@ -232,8 +232,8 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 			}
 
             if ((!fasta) && (!qual) && (file == "") && (fastaQFile == "") && (oligosfile == "")) { m->mothurOut("[ERROR]: no outputs selected. Aborting."); m->mothurOutEndLine(); abort=true; }
-            temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
-			reorient = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "F"; }
+			reorient = util.isTrue(temp);
 
 		}		
 	}
@@ -283,20 +283,20 @@ int ParseFastaQCommand::execute(){
                         //add group names to fastq files and make copies
                         ofstream temp, temp2;
                         map<string, string> variables;
-                        variables["[filename]"] = m->getRootName(files[i][0]);
+                        variables["[filename]"] = util.getRootName(files[i][0]);
                         variables["[group]"] = file2Group[i];
                         variables["[tag]"] = "forward";
                         string newffqFile = getOutputFileName("fastq", variables);
-                        m->openOutputFile(newffqFile, temp);		temp.close();
-                        m->appendFiles(files[i][0], newffqFile);
+                        util.openOutputFile(newffqFile, temp);		temp.close();
+                        util.appendFiles(files[i][0], newffqFile);
                         outputNames.push_back(newffqFile); outputTypes["fastq"].push_back(newffqFile);
                         
-                        variables["[filename]"] = m->getRootName(files[i][1]);
+                        variables["[filename]"] = util.getRootName(files[i][1]);
                         variables["[group]"] = file2Group[i];
                         variables["[tag]"] = "reverse";
                         string newfrqFile = getOutputFileName("fastq", variables);
-                        m->openOutputFile(newfrqFile, temp2);		temp2.close();
-                        m->appendFiles(files[i][1], newfrqFile);
+                        util.openOutputFile(newfrqFile, temp2);		temp2.close();
+                        util.appendFiles(files[i][1], newfrqFile);
                         outputNames.push_back(newfrqFile); outputTypes["fastq"].push_back(newfrqFile);
                     }
                     
@@ -315,24 +315,24 @@ int ParseFastaQCommand::execute(){
                 for(int j=0;j<fastqFileNames[0].size();j++){
                     if (fastqFileNames[i][j] != "") {
                         if (namesToRemove.count(fastqFileNames[i][j]) == 0) {
-                            if(m->isBlank(fastqFileNames[i][j])){
-                                m->mothurRemove(fastqFileNames[i][j]);
+                            if(util.isBlank(fastqFileNames[i][j])){
+                                util.mothurRemove(fastqFileNames[i][j]);
                                 namesToRemove.insert(fastqFileNames[i][j]);
                                 
-                                if (pairedOligos) { if (fileOption) { m->mothurRemove(rfastqFileNames[i][j]); namesToRemove.insert(rfastqFileNames[i][j]); } }
+                                if (pairedOligos) { if (fileOption) { util.mothurRemove(rfastqFileNames[i][j]); namesToRemove.insert(rfastqFileNames[i][j]); } }
                                 
                                 if(fasta){
-                                    m->mothurRemove(fastaFileNames[i][j]);
+                                    util.mothurRemove(fastaFileNames[i][j]);
                                     namesToRemove.insert(fastaFileNames[i][j]);
                                     
-                                    if (pairedOligos) { if (fileOption) { m->mothurRemove(rfastaFileNames[i][j]); namesToRemove.insert(rfastaFileNames[i][j]); } }
+                                    if (pairedOligos) { if (fileOption) { util.mothurRemove(rfastaFileNames[i][j]); namesToRemove.insert(rfastaFileNames[i][j]); } }
                                 }
                                 
                                 if(qual){
-                                    m->mothurRemove(qualFileNames[i][j]);
+                                    util.mothurRemove(qualFileNames[i][j]);
                                     namesToRemove.insert(qualFileNames[i][j]);
                                     
-                                    if (pairedOligos) { if (fileOption) { m->mothurRemove(rqualFileNames[i][j]); namesToRemove.insert(rqualFileNames[i][j]); } }
+                                    if (pairedOligos) { if (fileOption) { util.mothurRemove(rqualFileNames[i][j]); namesToRemove.insert(rqualFileNames[i][j]); } }
                                 }
                             }
                         }
@@ -355,31 +355,31 @@ int ParseFastaQCommand::execute(){
             }
             
             //ffqnoMatchFile, rfqnoMatchFile, ffnoMatchFile, rfnoMatchFile, fqnoMatchFile, rqnoMatchFile
-            if(m->isBlank(ffqnoMatchFile)){  m->mothurRemove(ffqnoMatchFile); }
+            if(util.isBlank(ffqnoMatchFile)){  util.mothurRemove(ffqnoMatchFile); }
             else { outputNames.push_back(ffqnoMatchFile); outputTypes["fastq"].push_back(ffqnoMatchFile); }
             
             if(fasta){
-                if(m->isBlank(ffnoMatchFile)){  m->mothurRemove(ffnoMatchFile); }
+                if(util.isBlank(ffnoMatchFile)){  util.mothurRemove(ffnoMatchFile); }
                 else { outputNames.push_back(ffnoMatchFile); outputTypes["fasta"].push_back(ffnoMatchFile); }
             }
             
             if(qual){
-                if(m->isBlank(fqnoMatchFile)){  m->mothurRemove(fqnoMatchFile); }
+                if(util.isBlank(fqnoMatchFile)){  util.mothurRemove(fqnoMatchFile); }
                 else { outputNames.push_back(fqnoMatchFile); outputTypes["qfile"].push_back(fqnoMatchFile); }
             }
             
             if (pairedOligos) {
                 if (fileOption) {
-                    if(m->isBlank(rfqnoMatchFile)){  m->mothurRemove(rfqnoMatchFile); }
+                    if(util.isBlank(rfqnoMatchFile)){  util.mothurRemove(rfqnoMatchFile); }
                     else { outputNames.push_back(rfqnoMatchFile); outputTypes["fastq"].push_back(rfqnoMatchFile); }
                     
                     if(fasta){
-                        if(m->isBlank(rfnoMatchFile)){  m->mothurRemove(rfnoMatchFile); }
+                        if(util.isBlank(rfnoMatchFile)){  util.mothurRemove(rfnoMatchFile); }
                         else { outputNames.push_back(rfnoMatchFile); outputTypes["fasta"].push_back(rfnoMatchFile); }
                     }
                     
                     if(qual){
-                        if(m->isBlank(rqnoMatchFile)){  m->mothurRemove(rqnoMatchFile); }
+                        if(util.isBlank(rqnoMatchFile)){  util.mothurRemove(rqnoMatchFile); }
                         else { outputNames.push_back(rqnoMatchFile); outputTypes["qfile"].push_back(rqnoMatchFile); }
                     }
                 }
@@ -391,18 +391,18 @@ int ParseFastaQCommand::execute(){
         else if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
         
         
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  outputTypes.clear(); outputNames.clear();  return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  outputTypes.clear(); outputNames.clear();  return 0; }
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("qfile");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setQualFile(currentName); }
 		}		
 		
 		m->mothurOutEndLine();
@@ -425,26 +425,26 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
         
         //open Output Files
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
         string ffastaFile = getOutputFileName("fasta",variables);
         string fqualFile = getOutputFileName("qfile",variables);
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputReverse));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputReverse));
         string rfastaFile = getOutputFileName("fasta",variables);
         string rqualFile = getOutputFileName("qfile",variables);
         ofstream outfFasta, outfQual, outrFasta, outrQual;
         
-        if (fasta) { m->openOutputFile(ffastaFile, outfFasta);  outputNames.push_back(ffastaFile); outputTypes["fasta"].push_back(ffastaFile);	m->openOutputFile(rfastaFile, outrFasta);  outputNames.push_back(rfastaFile); outputTypes["fasta"].push_back(rfastaFile);}
-        if (qual) { m->openOutputFile(fqualFile, outfQual);	outputNames.push_back(fqualFile);  outputTypes["qfile"].push_back(fqualFile);	m->openOutputFile(rqualFile, outrQual);	outputNames.push_back(rqualFile);  outputTypes["qfile"].push_back(rqualFile);	}
+        if (fasta) { util.openOutputFile(ffastaFile, outfFasta);  outputNames.push_back(ffastaFile); outputTypes["fasta"].push_back(ffastaFile);	util.openOutputFile(rfastaFile, outrFasta);  outputNames.push_back(rfastaFile); outputTypes["fasta"].push_back(rfastaFile);}
+        if (qual) { util.openOutputFile(fqualFile, outfQual);	outputNames.push_back(fqualFile);  outputTypes["qfile"].push_back(fqualFile);	util.openOutputFile(rqualFile, outrQual);	outputNames.push_back(rqualFile);  outputTypes["qfile"].push_back(rqualFile);	}
         
         ifstream inf;
-        m->openInputFile(inputfile, inf);
+        util.openInputFile(inputfile, inf);
         
         ifstream inr;
-        m->openInputFile(inputReverse, inr);
+        util.openInputFile(inputReverse, inr);
         
         ifstream inFIndex, inRIndex;
-        if (files[2] != "") { m->openInputFile(files[2], inFIndex);  }
-        if (files[3] != "") { m->openInputFile(files[3], inRIndex);  }
+        if (files[2] != "") { util.openInputFile(files[2], inFIndex);  }
+        if (files[3] != "") { util.openInputFile(files[3], inRIndex);  }
         
         int count = 0;
         while (!inf.eof() && !inr.eof()) {
@@ -521,23 +521,23 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                     
                     if(trashCodeLength == 0){
                         ofstream out;
-                        m->openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
+                        util.openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
                         copyForward.printFastq(out);
                         out.close();
                         
                         ofstream out2;
-                        m->openOutputFileAppend(rfastqFileNames[barcodeIndex][primerIndex], out2);
+                        util.openOutputFileAppend(rfastqFileNames[barcodeIndex][primerIndex], out2);
                         copyReverse.printFastq(out2);
                         out2.close();
                         
                         //print no match fasta, if wanted
                         if (fasta) {
                             ofstream outf, outr;
-                            m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], outf);
+                            util.openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], outf);
                             thisfRead.getSequence().printSequence(outf);
                             outf.close();
                             
-                            m->openOutputFileAppend(rfastaFileNames[barcodeIndex][primerIndex], outr);
+                            util.openOutputFileAppend(rfastaFileNames[barcodeIndex][primerIndex], outr);
                             thisrRead.getSequence().printSequence(outr);
                             outr.close();
                         }
@@ -545,11 +545,11 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                         //print no match quality parse, if wanted
                         if (qual) {
                             ofstream outq, outq2;
-                            m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], outq);
+                            util.openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], outq);
                             thisfRead.getQuality().printQScores(outq);
                             outq.close();
                             
-                            m->openOutputFileAppend(rqualFileNames[barcodeIndex][primerIndex], outq2);
+                            util.openOutputFileAppend(rqualFileNames[barcodeIndex][primerIndex], outq2);
                             thisrRead.getQuality().printQScores(outq2);
                             outq2.close();
                         }
@@ -557,22 +557,22 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                     }else{
                         //print no match fastq
                         ofstream out, out2;
-                        m->openOutputFileAppend(ffqnoMatchFile, out);
+                        util.openOutputFileAppend(ffqnoMatchFile, out);
                         copyForward.printFastq(out);
                         out.close();
                         
-                        m->openOutputFileAppend(rfqnoMatchFile, out2);
+                        util.openOutputFileAppend(rfqnoMatchFile, out2);
                         copyReverse.printFastq(out2);
                         out2.close();
                         
                         //print no match fasta, if wanted
                         if (fasta) {
                             ofstream outf, outr;
-                            m->openOutputFileAppend(ffnoMatchFile, outf);
+                            util.openOutputFileAppend(ffnoMatchFile, outf);
                             thisfRead.getSequence().printSequence(outf);
                             outf.close();
                             
-                            m->openOutputFileAppend(rfnoMatchFile, outr);
+                            util.openOutputFileAppend(rfnoMatchFile, outr);
                             thisrRead.getSequence().printSequence(outr);
                             outr.close();
                         }
@@ -580,11 +580,11 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                         //print no match quality parse, if wanted
                         if (qual) {
                             ofstream outq, outq2;
-                            m->openOutputFileAppend(fqnoMatchFile, outq);
+                            util.openOutputFileAppend(fqnoMatchFile, outq);
                             thisfRead.getQuality().printQScores(outq);
                             outq.close();
                             
-                            m->openOutputFileAppend(rqnoMatchFile, outq2);
+                            util.openOutputFileAppend(rqnoMatchFile, outq2);
                             thisrRead.getQuality().printQScores(outq2);
                             outq2.close();
                         }
@@ -620,17 +620,17 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
         
         //open Output Files
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
         string fastaFile = getOutputFileName("fasta",variables);
         string qualFile = getOutputFileName("qfile",variables);
         ofstream outFasta, outQual;
         
         //fasta and quality files for whole input file
-        if (fasta) { m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);	}
-        if (qual) { m->openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qfile"].push_back(qualFile);		}
+        if (fasta) { util.openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);	}
+        if (qual) { util.openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qfile"].push_back(qualFile);		}
         
         ifstream in;
-        m->openInputFile(inputfile, in);
+        util.openInputFile(inputfile, in);
         
         //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
         for (int i = -64; i < 65; i++) {
@@ -680,14 +680,14 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                     if(trashCodeLength == 0){ //files in here are per group
                         //print fastq to barcode and primer match
                         ofstream out;
-                        m->openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
+                        util.openOutputFileAppend(fastqFileNames[barcodeIndex][primerIndex], out);
                         copy.printFastq(out);
                         out.close();
                         
                         //print fasta match if wanted
                         if (fasta) {
                             ofstream outf;
-                            m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], outf);
+                            util.openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], outf);
                             thisRead.getSequence().printSequence(outf);
                             outf.close();
                         }
@@ -695,21 +695,21 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                         //print qual match, if wanted
                         if (qual) {
                             ofstream outq;
-                            m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], outq);
+                            util.openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], outq);
                             thisRead.getQuality().printQScores(outq);
                             outq.close();
                         }
                     }else{
                         //print no match fastq
                         ofstream out;
-                        m->openOutputFileAppend(ffqnoMatchFile, out);
+                        util.openOutputFileAppend(ffqnoMatchFile, out);
                         copy.printFastq(out);
                         out.close();
                         
                         //print no match fasta, if wanted
                         if (fasta) {
                             ofstream outf;
-                            m->openOutputFileAppend(ffnoMatchFile, outf);
+                            util.openOutputFileAppend(ffnoMatchFile, outf);
                             thisRead.getSequence().printSequence(outf);
                             outf.close();
                         }
@@ -717,7 +717,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                         //print no match quality parse, if wanted
                         if (qual) {
                             ofstream outq;
-                            m->openOutputFileAppend(fqnoMatchFile, outq);
+                            util.openOutputFileAppend(fqnoMatchFile, outq);
                             thisRead.getQuality().printQScores(outq);
                             outq.close();
                         }
@@ -998,14 +998,14 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
         string forward, reverse, findex, rindex;
         
         ifstream in;
-        m->openInputFile(inputfile, in);
+        util.openInputFile(inputfile, in);
         
         while(!in.eof()) {
             
             if (m->getControl_pressed()) { return files; }
             
-            string line = m->getline(in);  m->gobble(in);
-            vector<string> pieces = m->splitWhiteSpace(line);
+            string line = util.getline(in);  util.gobble(in);
+            vector<string> pieces = util.splitWhiteSpace(line);
             
             string group = "";
             if (pieces.size() == 2) {
@@ -1019,7 +1019,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 if (oligosfile != "") { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
                 if (groupfile != "") { m->mothurOut("[ERROR]: You cannot have an groupfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
                 group = pieces[0];
-                m->checkGroupName(group);
+                util.checkGroupName(group);
                 forward = pieces[1];
                 reverse = pieces[2];
                 findex = "";
@@ -1043,34 +1043,34 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ", forwardIndex = " + findex + ", reverseIndex = " + rindex + ".\n"); }
             
             if (inputDir != "") {
-                string path = m->hasPath(forward);
+                string path = util.hasPath(forward);
                 if (path == "") {  forward = inputDir + forward;  }
                 
-                path = m->hasPath(reverse);
+                path = util.hasPath(reverse);
                 if (path == "") {  reverse = inputDir + reverse;  }
                 
                 if (findex != "") {
-                    path = m->hasPath(findex);
+                    path = util.hasPath(findex);
                     if (path == "") {  findex = inputDir + findex;  }
                 }
                 
                 if (rindex != "") {
-                    path = m->hasPath(rindex);
+                    path = util.hasPath(rindex);
                     if (path == "") {  rindex = inputDir + rindex;  }
                 }
             }
             
             //check to make sure both are able to be opened
             ifstream in2;
-            bool openForward = m->openInputFile(forward, in2, "noerror");
+            bool openForward = util.openInputFile(forward, in2, "noerror");
             
             //if you can't open it, try default location
             if (!openForward) {
-                if (m->getDefaultPath() != "") { //default path is set
-                    string tryPath = m->getDefaultPath() + m->getSimpleName(forward);
+                if (current->getDefaultPath() != "") { //default path is set
+                    string tryPath = current->getDefaultPath() + util.getSimpleName(forward);
                     m->mothurOut("Unable to open " + forward + ". Trying default " + tryPath); m->mothurOutEndLine();
                     ifstream in3;
-                    openForward = m->openInputFile(tryPath, in3, "noerror");
+                    openForward = util.openInputFile(tryPath, in3, "noerror");
                     in3.close();
                     forward = tryPath;
                 }
@@ -1078,11 +1078,11 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             
             //if you can't open it, try output location
             if (!openForward) {
-                if (m->getOutputDir() != "") { //default path is set
-                    string tryPath = m->getOutputDir() + m->getSimpleName(forward);
+                if (current->getOutputDir() != "") { //default path is set
+                    string tryPath = current->getOutputDir() + util.getSimpleName(forward);
                     m->mothurOut("Unable to open " + forward + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                     ifstream in4;
-                    openForward = m->openInputFile(tryPath, in4, "noerror");
+                    openForward = util.openInputFile(tryPath, in4, "noerror");
                     forward = tryPath;
                     in4.close();
                 }
@@ -1093,15 +1093,15 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             }else{  in2.close();  }
             
             ifstream in3;
-            bool openReverse = m->openInputFile(reverse, in3, "noerror");
+            bool openReverse = util.openInputFile(reverse, in3, "noerror");
             
             //if you can't open it, try default location
             if (!openReverse) {
-                if (m->getDefaultPath() != "") { //default path is set
-                    string tryPath = m->getDefaultPath() + m->getSimpleName(reverse);
+                if (current->getDefaultPath() != "") { //default path is set
+                    string tryPath = current->getDefaultPath() + util.getSimpleName(reverse);
                     m->mothurOut("Unable to open " + reverse + ". Trying default " + tryPath); m->mothurOutEndLine();
                     ifstream in3;
-                    openReverse = m->openInputFile(tryPath, in3, "noerror");
+                    openReverse = util.openInputFile(tryPath, in3, "noerror");
                     in3.close();
                     reverse = tryPath;
                 }
@@ -1109,11 +1109,11 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             
             //if you can't open it, try output location
             if (!openReverse) {
-                if (m->getOutputDir() != "") { //default path is set
-                    string tryPath = m->getOutputDir() + m->getSimpleName(reverse);
+                if (current->getOutputDir() != "") { //default path is set
+                    string tryPath = current->getOutputDir() + util.getSimpleName(reverse);
                     m->mothurOut("Unable to open " + reverse + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                     ifstream in4;
-                    openReverse = m->openInputFile(tryPath, in4, "noerror");
+                    openReverse = util.openInputFile(tryPath, in4, "noerror");
                     reverse = tryPath;
                     in4.close();
                 }
@@ -1126,15 +1126,15 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             bool openFindex = true;
             if (findex != "") {
                 ifstream in4;
-                openFindex = m->openInputFile(findex, in4, "noerror"); in4.close();
+                openFindex = util.openInputFile(findex, in4, "noerror"); in4.close();
                 
                 //if you can't open it, try default location
                 if (!openFindex) {
-                    if (m->getDefaultPath() != "") { //default path is set
-                        string tryPath = m->getDefaultPath() + m->getSimpleName(findex);
+                    if (current->getDefaultPath() != "") { //default path is set
+                        string tryPath = current->getDefaultPath() + util.getSimpleName(findex);
                         m->mothurOut("Unable to open " + findex + ". Trying default " + tryPath); m->mothurOutEndLine();
                         ifstream in5;
-                        openFindex = m->openInputFile(tryPath, in5, "noerror");
+                        openFindex = util.openInputFile(tryPath, in5, "noerror");
                         in5.close();
                         findex = tryPath;
                     }
@@ -1142,11 +1142,11 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 
                 //if you can't open it, try output location
                 if (!openFindex) {
-                    if (m->getOutputDir() != "") { //default path is set
-                        string tryPath = m->getOutputDir() + m->getSimpleName(findex);
+                    if (current->getOutputDir() != "") { //default path is set
+                        string tryPath = current->getOutputDir() + util.getSimpleName(findex);
                         m->mothurOut("Unable to open " + findex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                         ifstream in6;
-                        openFindex = m->openInputFile(tryPath, in6, "noerror");
+                        openFindex = util.openInputFile(tryPath, in6, "noerror");
                         findex = tryPath;
                         in6.close();
                     }
@@ -1160,15 +1160,15 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             bool openRindex = true;
             if (rindex != "") {
                 ifstream in7;
-                openRindex = m->openInputFile(rindex, in7, "noerror"); in7.close();
+                openRindex = util.openInputFile(rindex, in7, "noerror"); in7.close();
                 
                 //if you can't open it, try default location
                 if (!openRindex) {
-                    if (m->getDefaultPath() != "") { //default path is set
-                        string tryPath = m->getDefaultPath() + m->getSimpleName(rindex);
+                    if (current->getDefaultPath() != "") { //default path is set
+                        string tryPath = current->getDefaultPath() + util.getSimpleName(rindex);
                         m->mothurOut("Unable to open " + rindex + ". Trying default " + tryPath); m->mothurOutEndLine();
                         ifstream in8;
-                        openRindex = m->openInputFile(tryPath, in8, "noerror");
+                        openRindex = util.openInputFile(tryPath, in8, "noerror");
                         in8.close();
                         rindex = tryPath;
                     }
@@ -1176,11 +1176,11 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
                 
                 //if you can't open it, try output location
                 if (!openRindex) {
-                    if (m->getOutputDir() != "") { //default path is set
-                        string tryPath = m->getOutputDir() + m->getSimpleName(rindex);
+                    if (current->getOutputDir() != "") { //default path is set
+                        string tryPath = current->getOutputDir() + util.getSimpleName(rindex);
                         m->mothurOut("Unable to open " + rindex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                         ifstream in9;
-                        openRindex = m->openInputFile(tryPath, in9, "noerror");
+                        openRindex = util.openInputFile(tryPath, in9, "noerror");
                         rindex = tryPath;
                         in9.close();
                     }
@@ -1315,7 +1315,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                         map<string, string> variables;
                         if (fileOption) {   variables["[tag]"] = "forward";     }
                         
-                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
                         variables["[group]"] = comboGroupName;
                         string fastqFileName = getOutputFileName("fastq", variables);
                         if (uniqueNames.count(fastqFileName) == 0) {
@@ -1324,11 +1324,11 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                         }
                         
                         fastqFileNames[itBar->first][itPrimer->first] = fastqFileName;
-                        m->openOutputFile(fastqFileName, temp);		temp.close();
+                        util.openOutputFile(fastqFileName, temp);		temp.close();
                         
                         if (fileOption) {
                             variables["[tag]"] = "reverse";
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
                             string rfastqFileName = getOutputFileName("fastq", variables);
                             if (uniqueNames.count(rfastqFileName) == 0) {
                                 outputNames.push_back(rfastqFileName);
@@ -1337,11 +1337,11 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             
                             ofstream temp2;
                             rfastqFileNames[itBar->first][itPrimer->first] = rfastqFileName;
-                            m->openOutputFile(rfastqFileName, temp2);		temp2.close();
+                            util.openOutputFile(rfastqFileName, temp2);		temp2.close();
                         }
                         
                         if(fasta){
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
                             variables["[group]"] = comboGroupName;
                             
                             if (fileOption) {   variables["[tag]"] = "forward";     }
@@ -1353,7 +1353,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             
                             ofstream temp3;
                             fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
-                            m->openOutputFile(fastaFileName, temp3);		temp3.close();
+                            util.openOutputFile(fastaFileName, temp3);		temp3.close();
                             
                             if (fileOption) {
                                 variables["[tag]"] = "reverse";
@@ -1365,12 +1365,12 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                                 
                                 ofstream temp4;
                                 rfastaFileNames[itBar->first][itPrimer->first] = fastaFileName2;
-                                m->openOutputFile(fastaFileName2, temp4);		temp4.close();
+                                util.openOutputFile(fastaFileName2, temp4);		temp4.close();
                             }
                         }
                         
                         if(qual){
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
                             variables["[group]"] = comboGroupName;
                             if (fileOption) {   variables["[tag]"] = "forward";     }
                             string qualFileName = getOutputFileName("qfile", variables);
@@ -1381,7 +1381,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             
                             ofstream temp4;
                             qualFileNames[itBar->first][itPrimer->first] = qualFileName;
-                            m->openOutputFile(qualFileName, temp4);		temp4.close();
+                            util.openOutputFile(qualFileName, temp4);		temp4.close();
                             
                             if (fileOption) {
                                 variables["[tag]"] = "reverse";
@@ -1393,7 +1393,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             
                                 ofstream temp5;
                                 rqualFileNames[itBar->first][itPrimer->first] = qualFileName2;
-                                m->openOutputFile(qualFileName2, temp5);		temp5.close();
+                                util.openOutputFile(qualFileName2, temp5);		temp5.close();
                             }
                         }
 
@@ -1404,39 +1404,39 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
             //make blank files for no matches
             ofstream temp, tempff, tempfq, rtemp, temprf, temprq;
             map<string, string> variables;
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
             variables["[group]"] = "scrap";
             if (fileOption) {  variables["[tag]"] = "forward"; }
             ffqnoMatchFile = getOutputFileName("fastq", variables);
-            m->openOutputFile(ffqnoMatchFile, temp);		temp.close();
+            util.openOutputFile(ffqnoMatchFile, temp);		temp.close();
             
             if (fileOption) {
                 variables["[tag]"] = "reverse";
                 rfqnoMatchFile = getOutputFileName("fastq", variables);
-                m->openOutputFile(rfqnoMatchFile, rtemp);		rtemp.close();
+                util.openOutputFile(rfqnoMatchFile, rtemp);		rtemp.close();
             }
             
             if (fasta) {
                 if (fileOption) {  variables["[tag]"] = "forward"; }
                 ffnoMatchFile = getOutputFileName("fasta", variables);
-                m->openOutputFile(ffnoMatchFile, tempff);		tempff.close();
+                util.openOutputFile(ffnoMatchFile, tempff);		tempff.close();
                 
                 if (fileOption) {
                     variables["[tag]"] = "reverse";
                     rfnoMatchFile = getOutputFileName("fasta", variables);
-                    m->openOutputFile(rfnoMatchFile, temprf);		temprf.close();
+                    util.openOutputFile(rfnoMatchFile, temprf);		temprf.close();
                 }
             }
             
             if (qual) {
                 if (fileOption) {  variables["[tag]"] = "forward"; }
                 fqnoMatchFile = getOutputFileName("qfile", variables);
-                m->openOutputFile(fqnoMatchFile, tempfq);		tempfq.close();
+                util.openOutputFile(fqnoMatchFile, tempfq);		tempfq.close();
                 
                 if (fileOption) {
                     variables["[tag]"] = "reverse";
                     rqnoMatchFile = getOutputFileName("qfile", variables);
-                    m->openOutputFile(rqnoMatchFile, temprq);		temprq.close();
+                    util.openOutputFile(rqnoMatchFile, temprq);		temprq.close();
                 }
             }
 
@@ -1482,7 +1482,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                         
                         ofstream temp;
                         map<string, string> variables;
-                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
                         variables["[group]"] = comboGroupName;
                         string fastqFileName = getOutputFileName("fastq", variables);
                         if (uniqueNames.count(fastqFileName) == 0) {
@@ -1491,10 +1491,10 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                         }
                         
                         fastqFileNames[itBar->second][itPrimer->second] = fastqFileName;
-                        m->openOutputFile(fastqFileName, temp);		temp.close();
+                        util.openOutputFile(fastqFileName, temp);		temp.close();
                         
                         if(fasta){
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
                             variables["[group]"] = comboGroupName;
                             string fastaFileName = getOutputFileName("fasta", variables);
                             if (uniqueNames.count(fastaFileName) == 0) {
@@ -1504,11 +1504,11 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             
                             ofstream temp3;
                             fastaFileNames[itBar->second][itPrimer->second] = fastaFileName;
-                            m->openOutputFile(fastaFileName, temp3);		temp3.close();
+                            util.openOutputFile(fastaFileName, temp3);		temp3.close();
                         }
                         
                         if(qual){
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
                             variables["[group]"] = comboGroupName;
                             string qualFileName = getOutputFileName("qfile", variables);
                             if (uniqueNames.count(qualFileName) == 0) {
@@ -1518,7 +1518,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
                             
                             ofstream temp4;
                             qualFileNames[itBar->second][itPrimer->second] = qualFileName;
-                            m->openOutputFile(qualFileName, temp4);		temp4.close();
+                            util.openOutputFile(qualFileName, temp4);		temp4.close();
                         }
                     }
                 }
@@ -1527,19 +1527,19 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
             //make blank files for no matches
             ofstream temp, tempff, tempfq;
             map<string, string> variables;
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
             variables["[group]"] = "scrap";
             ffqnoMatchFile = getOutputFileName("fastq", variables);
-            m->openOutputFile(ffqnoMatchFile, temp);		temp.close();
+            util.openOutputFile(ffqnoMatchFile, temp);		temp.close();
             
             if (fasta) {
                 ffnoMatchFile = getOutputFileName("fasta", variables);
-                m->openOutputFile(ffqnoMatchFile, tempff);		tempff.close();
+                util.openOutputFile(ffqnoMatchFile, tempff);		tempff.close();
             }
             
             if (qual) {
                 fqnoMatchFile = getOutputFileName("qfile", variables);
-                m->openOutputFile(fqnoMatchFile, tempfq);		tempfq.close();
+                util.openOutputFile(fqnoMatchFile, tempfq);		tempfq.close();
             }
         }
         
@@ -1572,13 +1572,13 @@ bool ParseFastaQCommand::readGroup(string groupfile){
             for (int j = 0; j < 1; j++) {
                 
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaQFile));
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaQFile));
                 variables["[group]"] = groups[i];
                 string thisFilename = getOutputFileName("fastq",variables);
                 outputNames.push_back(thisFilename);
                 
                 ofstream temp;
-                m->openOutputFileBinary(thisFilename, temp); temp.close();
+                util.openOutputFileBinary(thisFilename, temp); temp.close();
                 fastqFileNames[i].push_back(thisFilename);
                 GroupToFile[groups[i]] = i;
             }
@@ -1587,19 +1587,19 @@ bool ParseFastaQCommand::readGroup(string groupfile){
         //make blank files for no matches
         ofstream temp, tempff, tempfq;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
         variables["[group]"] = "scrap";
         ffqnoMatchFile = getOutputFileName("fastq", variables);
-        m->openOutputFile(ffqnoMatchFile, temp);		temp.close();
+        util.openOutputFile(ffqnoMatchFile, temp);		temp.close();
         
         if (fasta) {
             ffnoMatchFile = getOutputFileName("fasta", variables);
-            m->openOutputFile(ffqnoMatchFile, tempff);		tempff.close();
+            util.openOutputFile(ffqnoMatchFile, tempff);		tempff.close();
         }
         
         if (qual) {
             fqnoMatchFile = getOutputFileName("qfile", variables);
-            m->openOutputFile(fqnoMatchFile, tempfq);		tempfq.close();
+            util.openOutputFile(fqnoMatchFile, tempfq);		tempfq.close();
         }
 		
 		return true;

@@ -49,7 +49,7 @@ public:
 	SharedOrderVector(const SharedOrderVector& ov)	: DataVector(ov.label), data(ov.data), maxRank(ov.maxRank), numBins(ov.numBins), numSeqs(ov.numSeqs), needToUpdate(ov.needToUpdate) {if(needToUpdate == 1){	updateStats();}};
 
 	SharedOrderVector(string, vector<individual>);
-	SharedOrderVector(ifstream&, vector<string>&);
+	SharedOrderVector(ifstream&, vector<string>&, string&);
 	~SharedOrderVector(){};
 	
 	

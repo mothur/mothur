@@ -146,17 +146,17 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -164,7 +164,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 				it = parameters.find("accnos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
@@ -172,7 +172,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -180,7 +180,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -188,7 +188,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -196,7 +196,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -204,7 +204,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -212,7 +212,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
                 it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
@@ -220,7 +220,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -228,7 +228,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
                 it = parameters.find("phylip");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
                 }
@@ -236,7 +236,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
                 it = parameters.find("column");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["column"] = inputDir + it->second;		}
                 }
@@ -244,68 +244,68 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			
 			
 			//check for required parameters
-			accnosfile = validParameter.validFile(parameters, "accnos", true);
+			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { accnosfile = ""; abort = true; }
 			else if (accnosfile == "not found") {  accnosfile = ""; }	
-			else { m->setAccnosFile(accnosfile); }
+			else { current->setAccnosFile(accnosfile); }
             
-            phylipfile = validParameter.validFile(parameters, "phylip", true);
+            phylipfile = validParameter.validFile(parameters, "phylip");
             if (phylipfile == "not open") { phylipfile = ""; abort = true; }
             else if (phylipfile == "not found") { phylipfile = ""; }
-            else { 	m->setPhylipFile(phylipfile); }
+            else { 	current->setPhylipFile(phylipfile); }
             
-            columnfile = validParameter.validFile(parameters, "column", true);
+            columnfile = validParameter.validFile(parameters, "column");
             if (columnfile == "not open") { columnfile = ""; abort = true; }
             else if (columnfile == "not found") { columnfile = ""; }
-            else {  m->setColumnFile(columnfile);	}
+            else {  current->setColumnFile(columnfile);	}
 			
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = "";  abort = true; }
 			else if (groupfile == "not found") {  	groupfile = "";		}
-			else { m->setGroupFile(groupfile); }	
+			else { current->setGroupFile(groupfile); }	
 			
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
-			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not open") { taxfile = ""; abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
-			else { m->setTaxonomyFile(taxfile); }
+			else { current->setTaxonomyFile(taxfile); }
             
-            designfile = validParameter.validFile(parameters, "design", true);
+            designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { designfile = ""; abort = true; }
 			else if (designfile == "not found") {  designfile = "";  }
-			else { m->setDesignFile(designfile); }
+			else { current->setDesignFile(designfile); }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {  sharedfile = "";  }
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
 			
 			
-			countfile = validParameter.validFile(parameters, "count", true);
+			countfile = validParameter.validFile(parameters, "count");
             if (countfile == "not open") { countfile = ""; abort = true; }
             else if (countfile == "not found") { countfile = "";  }	
-            else { m->setCountTableFile(countfile); }
+            else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -320,13 +320,13 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 				//is there are current file available for any of these?
 				if ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")) {
 					//give priority to group, then shared
-					groupfile = m->getGroupFile(); 
+					groupfile = current->getGroupFile(); 
 					if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 					else { 
-						sharedfile = m->getSharedFile(); 
+						sharedfile = current->getSharedFile(); 
 						if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 						else { 
-							countfile = m->getCountTableFile(); 
+							countfile = current->getCountFile(); 
                             if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                             else { 
                                 m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
@@ -335,16 +335,16 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 					}
 				}else {
 					//give priority to shared, then group
-					sharedfile = m->getSharedFile(); 
+					sharedfile = current->getSharedFile(); 
 					if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 					else { 
-						groupfile = m->getGroupFile(); 
+						groupfile = current->getGroupFile(); 
 						if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 						else { 
-							designfile = m->getDesignFile(); 
+							designfile = current->getDesignFile(); 
                             if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
                             else { 
-                                countfile = m->getCountTableFile(); 
+                                countfile = current->getCountFile(); 
                                 if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                                 else { 
                                     m->mothurOut("You have no current groupfile, designfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
@@ -383,7 +383,7 @@ int RemoveGroupsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get groups you want to remove
-		if (accnosfile != "") { m->readAccnos(accnosfile, Groups);   }
+		if (accnosfile != "") { util.readAccnos(accnosfile, Groups);   }
 		
 		if (groupfile != "") {
 			groupMap = new GroupMap(groupfile);
@@ -394,7 +394,7 @@ int RemoveGroupsCommand::execute(){
 			vector<string> namesGroups = groupMap->getNamesOfGroups();
 			vector<string> checkedGroups;
             for (int i = 0; i < Groups.size(); i++) {
-                if (m->inUsersGroups(Groups[i], namesGroups)) { checkedGroups.push_back(Groups[i]); }
+                if (util.inUsersGroups(Groups[i], namesGroups)) { checkedGroups.push_back(Groups[i]); }
                 else {  m->mothurOut("[WARNING]: " + Groups[i] + " is not a valid group in your groupfile, ignoring.\n"); }
             }
             
@@ -420,7 +420,7 @@ int RemoveGroupsCommand::execute(){
             
             for (int i = 0; i < namesOfSeqs.size(); i++) {
                 vector<string> thisSeqsGroups = ct.getGroups(namesOfSeqs[i]);
-                if (m->isSubset(Groups, thisSeqsGroups)) { //you only have seqs from these groups so remove you
+                if (util.isSubset(Groups, thisSeqsGroups)) { //you only have seqs from these groups so remove you
                     names.insert(namesOfSeqs[i]);
                 }
             }
@@ -441,7 +441,7 @@ int RemoveGroupsCommand::execute(){
         if (phylipfile != "")		{		readPhylip();		}
         if (columnfile != "")		{		readColumn();       }
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 				
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -450,55 +450,55 @@ int RemoveGroupsCommand::execute(){
 			m->mothurOutEndLine();
 			
 			//set fasta file as new current fastafile
-			string current = "";
+			string currentName = "";
 			itTypes = outputTypes.find("fasta");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("name");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("group");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("list");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("taxonomy");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("shared");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSharedFile(currentName); }
 			}
             
             itTypes = outputTypes.find("design");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setDesignFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setDesignFile(currentName); }
 			}
             
             itTypes = outputTypes.find("count");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 			}
             
             itTypes = outputTypes.find("phylip");
             if (itTypes != outputTypes.end()) {
-                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName); }
             }
             
             itTypes = outputTypes.find("column");
             if (itTypes != outputTypes.end()) {
-                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setColumnFile(currentName); }
             }
 		}
 		
@@ -515,24 +515,24 @@ int RemoveGroupsCommand::execute(){
 int RemoveGroupsCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
-        variables["[extension]"] = m->getExtension(fastafile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -552,7 +552,7 @@ int RemoveGroupsCommand::readFasta(){
 					}else { removedCount++; }
 				}
 			}
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -574,7 +574,7 @@ int RemoveGroupsCommand::readFasta(){
 int RemoveGroupsCommand::readShared(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
 		
 		//get group names from sharedfile so we can set Groups to the groupNames we want to keep
 		//that way we can take advantage of the reads in inputdata and sharedRabundVector
@@ -583,12 +583,12 @@ int RemoveGroupsCommand::readShared(){
         vector<string> allGroupsNames = lookup->getNamesGroups();
         
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[extension]"] = m->getExtension(sharedfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[extension]"] = util.getExtension(sharedfile);
 	
 		vector<string> groupsToKeep;
 		for (int i = 0; i < allGroupsNames.size(); i++) {
-			if (!m->inUsersGroups(allGroupsNames[i], Groups)) {
+			if (!util.inUsersGroups(allGroupsNames[i], Groups)) {
 				groupsToKeep.push_back(allGroupsNames[i]);
 			}
 		}
@@ -597,7 +597,6 @@ int RemoveGroupsCommand::readShared(){
 		
 		//reset read 
 		delete lookup;
-        m->setSaveNextLabel("");
 		m->setPrintedSharedHeaders(false);
 		
 		InputData input2(sharedfile, "sharedfile", groupsToKeep);
@@ -610,10 +609,10 @@ int RemoveGroupsCommand::readShared(){
 			variables["[tag]"] = lookup->getLabel();
             string outputFileName = getOutputFileName("shared", variables);
 			ofstream out;
-			m->openOutputFile(outputFileName, out);
+			util.openOutputFile(outputFileName, out);
 			outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 			
-            if (m->getControl_pressed()) { out.close();  m->mothurRemove(outputFileName);  delete lookup; return 0; }
+            if (m->getControl_pressed()) { out.close();  util.mothurRemove(outputFileName);  delete lookup; return 0; }
 			
             if (lookup->size() != 0) { wroteSomething = true; }
             if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
@@ -647,44 +646,40 @@ int RemoveGroupsCommand::readShared(){
 int RemoveGroupsCommand::readList(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
 		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[extension]"] = m->getExtension(listfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[extension]"] = util.getExtension(listfile);
+        InputData input(listfile, "list", nullVector);
+        ListVector* list = input.getListVector();
 				
-		ifstream in;
-		m->openInputFile(listfile, in);
-		
-		bool wroteSomething = false;
+        bool wroteSomething = false;
 		int removedCount = 0;
 		
-		while(!in.eof()){
+		while(list != NULL) {
 			
 			removedCount = 0;
 			
-			//read in list vector
-			ListVector list(in);
-            
-            variables["[tag]"] = list.getLabel();
+            variables["[tag]"] = list->getLabel();
             string outputFileName = getOutputFileName("list", variables);
 			
 			ofstream out;
-			m->openOutputFile(outputFileName, out);
+			util.openOutputFile(outputFileName, out);
 			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
             
-            vector<string> binLabels = list.getLabels();
+            vector<string> binLabels = list->getLabels();
             vector<string> newBinLabels;
 			
 			//make a new list vector
 			ListVector newList;
-			newList.setLabel(list.getLabel());
+			newList.setLabel(list->getLabel());
 			
 			//for each bin
-			for (int i = 0; i < list.getNumBins(); i++) {
-				if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			for (int i = 0; i < list->getNumBins(); i++) {
+				if (m->getControl_pressed()) {  out.close();  util.mothurRemove(outputFileName);  return 0; }
 				
 				//parse out names that are in accnos file
-				string binnames = list.get(i);
+				string binnames = list->get(i);
 				
 				string newNames = "";
 				while (binnames.find_first_of(',') != -1) { 
@@ -727,11 +722,11 @@ int RemoveGroupsCommand::readList(){
 				newList.print(out, false);
 			}
 			
-			m->gobble(in);
             out.close();
+            
+            delete list;
+            list = input.getListVector();
 		}
-		in.close();	
-		
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the groups you wish to remove."); m->mothurOutEndLine();  }
 		m->mothurOut("Removed " + toString(removedCount) + " sequences from your list file."); m->mothurOutEndLine();
@@ -748,29 +743,29 @@ int RemoveGroupsCommand::readList(){
 int RemoveGroupsCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
-        variables["[extension]"] = m->getExtension(namefile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+        variables["[extension]"] = util.getExtension(namefile);
 		string outputFileName = getOutputFileName("name", variables);	
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
-			in >> firstCol;		m->gobble(in);		
+			in >> firstCol;		util.gobble(in);		
 			in >> secondCol;			
 			
 			vector<string> parsedNames;
-			m->splitAtComma(secondCol, parsedNames);
+			util.splitAtComma(secondCol, parsedNames);
 						
 			vector<string> validSecond;  validSecond.clear();
 			for (int i = 0; i < parsedNames.size(); i++) {
@@ -809,7 +804,7 @@ int RemoveGroupsCommand::readName(){
 				}
 			}
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -831,23 +826,23 @@ int RemoveGroupsCommand::readName(){
 int RemoveGroupsCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-        variables["[extension]"] = m->getExtension(groupfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+        variables["[extension]"] = util.getExtension(groupfile);
 		string outputFileName = getOutputFileName("group", variables);	
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(groupfile, in);
+		util.openInputFile(groupfile, in);
 		string name, group;
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
@@ -858,7 +853,7 @@ int RemoveGroupsCommand::readGroup(){
 				out << name << '\t' << group << endl;
 			}else {  removedCount++;  }
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -880,23 +875,23 @@ int RemoveGroupsCommand::readGroup(){
 int RemoveGroupsCommand::readCount(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
-        variables["[extension]"] = m->getExtension(countfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(countfile, in);
+		util.openInputFile(countfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
-        string headers = m->getline(in); m->gobble(in);
-        vector<string> columnHeaders = m->splitWhiteSpace(headers);
+        string headers = util.getline(in); util.gobble(in);
+        vector<string> columnHeaders = util.splitWhiteSpace(headers);
         
         vector<string> groups;
         map<int, string> originalGroupIndexes;
@@ -909,7 +904,7 @@ int RemoveGroupsCommand::readCount(){
 
 		vector<string> groupsToKeep;
 		for (int i = 0; i < groups.size(); i++) {
-			if (!m->inUsersGroups(groups[i], Groups)) { groupsToKeep.push_back(groups[i]); }
+			if (!util.inUsersGroups(groups[i], Groups)) { groupsToKeep.push_back(groups[i]); }
 		}
         sort(groupsToKeep.begin(), groupsToKeep.end());
         out << "Representative_Sequence\ttotal";
@@ -919,9 +914,9 @@ int RemoveGroupsCommand::readCount(){
         string name; int oldTotal;
         while (!in.eof()) {
             
-            if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
             
-            in >> name; m->gobble(in); in >> oldTotal; m->gobble(in);
+            in >> name; util.gobble(in); in >> oldTotal; util.gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(oldTotal) + "\n"); }
             
             if (names.count(name) == 0) {
@@ -929,7 +924,7 @@ int RemoveGroupsCommand::readCount(){
                 vector<int> selectedCounts; int thisTotal = 0; int temp;
                 for (int i = 0; i < groups.size(); i++) {  
                     int thisIndex = GroupIndexes[originalGroupIndexes[i]]; 
-                    in >> temp;  m->gobble(in);
+                    in >> temp;  util.gobble(in);
                     if (indexOfGroupsChosen.count(thisIndex) != 0) { //we want this group
                         selectedCounts.push_back(temp); thisTotal += temp;
                     }
@@ -941,9 +936,9 @@ int RemoveGroupsCommand::readCount(){
                 
                 wroteSomething = true;
                 removedCount+= (oldTotal - thisTotal);
-            }else {  m->getline(in); removedCount += oldTotal; }
+            }else {  util.getline(in); removedCount += oldTotal; }
             
-            m->gobble(in);
+            util.gobble(in);
         }
         in.close();
 		out.close();
@@ -964,10 +959,10 @@ int RemoveGroupsCommand::readCount(){
 int RemoveGroupsCommand::readDesign(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(designfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(designfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(designfile));
-        variables["[extension]"] = m->getExtension(designfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(designfile));
+        variables["[extension]"] = util.getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
         DesignMap designMap(designfile);
@@ -975,7 +970,7 @@ int RemoveGroupsCommand::readDesign(){
         vector<string> groupsToKeep;
         vector<string> allGroups = designMap.getNamesGroups();
         for(int i = 0; i < allGroups.size(); i++) {
-            if (!m->inUsersGroups(allGroups[i], Groups)) {
+            if (!util.inUsersGroups(allGroups[i], Groups)) {
                 groupsToKeep.push_back(allGroups[i]);
             }
         }
@@ -983,7 +978,7 @@ int RemoveGroupsCommand::readDesign(){
         bool wroteSomething = false;
         
         ofstream out;
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         
         int numGroupsFound = designMap.printGroups(out, groupsToKeep);
         
@@ -1011,26 +1006,26 @@ int RemoveGroupsCommand::readDesign(){
 int RemoveGroupsCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxfile));
-        variables["[extension]"] = m->getExtension(taxfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
+        variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(taxfile, in);
+		util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
-            in >> name; m->gobble(in);
-            tax = m->getline(in); m->gobble(in);
+            in >> name; util.gobble(in);
+            tax = util.getline(in); util.gobble(in);
 			
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {
@@ -1062,14 +1057,14 @@ int RemoveGroupsCommand::readTax(){
 int RemoveGroupsCommand::readPhylip(){
     try {
         string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += m->hasPath(phylipfile);  }
+        if (outputDir == "") {  thisOutputDir += util.hasPath(phylipfile);  }
         map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(phylipfile));
-        variables["[extension]"] = m->getExtension(phylipfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(phylipfile));
+        variables["[extension]"] = util.getExtension(phylipfile);
         string outputFileName = getOutputFileName("phylip", variables);
         
         ifstream in;
-        m->openInputFile(phylipfile, in);
+        util.openInputFile(phylipfile, in);
         
         float distance;
         int square, nseqs;
@@ -1081,7 +1076,7 @@ int RemoveGroupsCommand::readPhylip(){
         string numTest;
         in >> numTest >> name;
         
-        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
         
         //not one we want to remove
@@ -1136,12 +1131,12 @@ int RemoveGroupsCommand::readPhylip(){
         
         //read through file only printing rows and columns of seqs in names
         ifstream inPhylip;
-        m->openInputFile(phylipfile, inPhylip);
+        util.openInputFile(phylipfile, inPhylip);
         
         inPhylip >> numTest;
         
         ofstream out;
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         outputTypes["phylip"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         out << (nseqs-names.size()) << endl;
         
@@ -1193,14 +1188,14 @@ int RemoveGroupsCommand::readPhylip(){
         else if (count != names.size()) {
             m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(count) + " of them in the phylip file."); m->mothurOutEndLine();
             //rewrite with new number
-            m->renameFile(outputFileName, outputFileName+".temp");
+            util.renameFile(outputFileName, outputFileName+".temp");
             ofstream out2;
-            m->openOutputFile(outputFileName, out2);
+            util.openOutputFile(outputFileName, out2);
             out2 << keptCount << endl;
             
             ifstream in3;
-            m->openInputFile(outputFileName+".temp", in3);
-            in3 >> nseqs; m->gobble(in3);
+            util.openInputFile(outputFileName+".temp", in3);
+            in3 >> nseqs; util.gobble(in3);
             char buffer[4096];
             while (!in3.eof()) {
                 in3.read(buffer, 4096);
@@ -1208,7 +1203,7 @@ int RemoveGroupsCommand::readPhylip(){
             }
             in3.close();
             out2.close();
-            m->mothurRemove(outputFileName+".temp");
+            util.mothurRemove(outputFileName+".temp");
         }
         
         m->mothurOut("Removed " + toString(count) + " groups or sequences from your phylip file."); m->mothurOutEndLine();
@@ -1225,18 +1220,18 @@ int RemoveGroupsCommand::readPhylip(){
 int RemoveGroupsCommand::readColumn(){
     try {
         string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += m->hasPath(columnfile);  }
+        if (outputDir == "") {  thisOutputDir += util.hasPath(columnfile);  }
         map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(columnfile));
-        variables["[extension]"] = m->getExtension(columnfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(columnfile));
+        variables["[extension]"] = util.getExtension(columnfile);
         string outputFileName = getOutputFileName("column", variables);
         outputTypes["column"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
         ofstream out;
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         
         ifstream in;
-        m->openInputFile(columnfile, in);
+        util.openInputFile(columnfile, in);
         
         set<string> removeNames;
         string firstName, secondName;
@@ -1246,7 +1241,7 @@ int RemoveGroupsCommand::readColumn(){
             
             if (m->getControl_pressed()) { out.close(); in.close(); return 0; }
             
-            in >> firstName >> secondName >> distance; m->gobble(in);
+            in >> firstName >> secondName >> distance; util.gobble(in);
             
             //is either names in the accnos file
             if (names.count(firstName) != 0)       {
@@ -1289,7 +1284,7 @@ int RemoveGroupsCommand::fillNames(){
 			
 			string group = groupMap->getGroup(seqs[i]);
 			
-			if (m->inUsersGroups(group, Groups)) {
+			if (util.inUsersGroups(group, Groups)) {
 				names.insert(seqs[i]);
 			}
 		}

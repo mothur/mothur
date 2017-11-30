@@ -21,14 +21,14 @@ AlignTree::AlignTree(string referenceFileName, string taxonomyFileName, int cuto
         readTaxonomy(taxonomyFileName);
      
         ifstream referenceFile;
-        m->openInputFile(referenceFileName, referenceFile);
+        util.openInputFile(referenceFileName, referenceFile);
         bool error = false;
         map<int, int> lengths;
         while(!referenceFile.eof()){
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(referenceFile);  m->gobble(referenceFile);
+            Sequence seq(referenceFile);  util.gobble(referenceFile);
             
             if (seq.getName() != "") {
                 map<string, string>::iterator it = taxonomy.find(seq.getName());

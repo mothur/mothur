@@ -6,6 +6,7 @@
 #include "sharedrabundvector.hpp"
 #include "sequence.hpp"
 #include "mothurout.h"
+#include "utils.hpp"
 
 /* The calculator class is the parent class for all the different estimators implemented in mothur except the tree calculators.
 It has 2 pure functions EstOutput getValues(SAbundVector*), which works on a single group, and 

@@ -105,14 +105,14 @@ MantelCommand::MantelCommand(string option)  {
 			outputTypes["mantel"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip1");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip1"] = inputDir + it->second;		}
 				}
@@ -120,7 +120,7 @@ MantelCommand::MantelCommand(string option)  {
 				it = parameters.find("phylip2");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip2"] = inputDir + it->second;		}
 				}
@@ -128,20 +128,20 @@ MantelCommand::MantelCommand(string option)  {
 			
 			
 			//check for required parameters
-			phylipfile1 = validParameter.validFile(parameters, "phylip1", true);
+			phylipfile1 = validParameter.validFile(parameters, "phylip1");
 			if (phylipfile1 == "not open") { phylipfile1 = ""; abort = true; }
 			else if (phylipfile1 == "not found") { phylipfile1 = ""; m->mothurOut("phylip1 is a required parameter for the mantel command."); m->mothurOutEndLine(); abort = true;  }	
 			
-			phylipfile2 = validParameter.validFile(parameters, "phylip2", true);
+			phylipfile2 = validParameter.validFile(parameters, "phylip2");
 			if (phylipfile2 == "not open") { phylipfile2 = ""; abort = true; }
 			else if (phylipfile2 == "not found") { phylipfile2 = ""; m->mothurOut("phylip2 is a required parameter for the mantel command."); m->mothurOutEndLine(); abort = true;  }	
 			
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(phylipfile1);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(phylipfile1);	}
 			
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "pearson";		}
+			method = validParameter.valid(parameters, "method");		if (method == "not found"){	method = "pearson";		}
 			
-			string temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters);
+			string temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters);
 			
 			if ((method != "pearson") && (method != "spearman") && (method != "kendall")) { m->mothurOut(method + " is not a valid method. Valid methods are pearson, spearman, and kendall."); m->mothurOutEndLine(); abort = true; }
 		}
@@ -223,12 +223,12 @@ int MantelCommand::execute(){
 		if (m->getControl_pressed()) { return 0; }
 		
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile1));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipfile1));
 		string outputFile = getOutputFileName("mantel",variables);
 		outputNames.push_back(outputFile); outputTypes["mantel"].push_back(outputFile);
 		ofstream out;
 		
-		m->openOutputFile(outputFile, out);
+		util.openOutputFile(outputFile, out);
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);

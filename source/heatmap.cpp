@@ -70,8 +70,8 @@ string HeatMap::getPic(RAbundVector* rabund) {
 		}
 		
 		
-		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + rabund->getLabel() + ".heatmap.bin.svg";
-		m->openOutputFile(filenamesvg, outsvg);
+		string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + rabund->getLabel() + ".heatmap.bin.svg";
+		util.openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
 		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(300) + " " + toString((numBinsToDisplay*5 + 120))  + "\">\n";
@@ -162,8 +162,8 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 			}
 		}
 
-		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
-		m->openOutputFile(filenamesvg, outsvg);
+		string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
+		util.openOutputFile(filenamesvg, outsvg);
         int binHeight = 20;
         int labelBump = 100;
         int binWidth = 300;
@@ -464,8 +464,8 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 			}
 		}
 
-		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
-		m->openOutputFile(filenamesvg, outsvg);
+		string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
+		util.openOutputFile(filenamesvg, outsvg);
         
         int binHeight = 20;
         int labelBump = 100;

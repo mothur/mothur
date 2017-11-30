@@ -25,9 +25,9 @@ inline bool compareRAbunds(SharedRAbundVector* left, SharedRAbundVector* right){
 class SharedRAbundVectors : public DataVector {
     
 public:
-    SharedRAbundVectors() : DataVector() {  label = ""; numBins = 0; }
-    SharedRAbundVectors(ifstream&, vector<string>& userGroups);
-    SharedRAbundVectors(SharedRAbundVectors& bv) : DataVector(bv), numBins(bv.numBins) {
+    SharedRAbundVectors() : DataVector() {  label = ""; numBins = 0; otuTag = "Otu"; }
+    SharedRAbundVectors(ifstream&, vector<string>& userGroups, string&, string&);
+    SharedRAbundVectors(SharedRAbundVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
         vector<SharedRAbundVector*> data = bv.getSharedRAbundVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         eliminateZeroOTUS();
@@ -77,6 +77,7 @@ private:
     vector<string> currentLabels;
     map<string, int> groupNames;
     int numBins;
+    string otuTag;
     
 };
 

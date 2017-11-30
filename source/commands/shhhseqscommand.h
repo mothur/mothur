@@ -111,7 +111,7 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
 			
             pDataArray->count++;
             
-			int start = time(NULL);
+			long start = time(NULL);
 			
 			if (pDataArray->m->getControl_pressed()) {  return 0; }
 			
@@ -166,11 +166,11 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 //calc distances for cluster
-                string distFileName = pDataArray->m->getRootName(pDataArray->m->getSimpleName(pDataArray->fastafile)) + pDataArray->groups[k] + ".shhh.dist";
+                string distFileName = pDataArray->util.getRootName(pDataArray->util.getSimpleName(pDataArray->fastafile)) + pDataArray->groups[k] + ".shhh.dist";
                 correct->execute(distFileName);
                 delete correct;
                 
-                if (pDataArray->m->getControl_pressed()) { pDataArray->m->mothurRemove(distFileName); return 0; }
+                if (pDataArray->m->getControl_pressed()) { pDataArray->util.mothurRemove(distFileName); return 0; }
                 
                 //driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, newFFile+groups[i], newNFile+groups[i], newMFile+groups[i]+".map");
                 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,24 +192,24 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 
                 map<string, vector<string> > filenames = clusterCommand->getOutputFiles();
                 string listFileName = filenames["list"][0];
-                string rabundFileName = filenames["rabund"][0]; pDataArray->m->mothurRemove(rabundFileName);
-                string sabundFileName = filenames["sabund"][0]; pDataArray->m->mothurRemove(sabundFileName);
+                string rabundFileName = filenames["rabund"][0]; pDataArray->util.mothurRemove(rabundFileName);
+                string sabundFileName = filenames["sabund"][0]; pDataArray->util.mothurRemove(sabundFileName);
                 
                 delete clusterCommand;
                 pDataArray->m->mothurOut("/******************************************/"); pDataArray->m->mothurOutEndLine();
                 
-                if (pDataArray->m->getControl_pressed()) { pDataArray->m->mothurRemove(distFileName); pDataArray->m->mothurRemove(listFileName); return 0; }
+                if (pDataArray->m->getControl_pressed()) { pDataArray->util.mothurRemove(distFileName); pDataArray->util.mothurRemove(listFileName); return 0; }
                 
                 vector<double> distances(numSeqs * numSeqs);
                 noise.getDistanceData(distFileName, distances);
-                pDataArray->m->mothurRemove(distFileName);
-                if (pDataArray->m->getControl_pressed()) { pDataArray->m->mothurRemove(listFileName); return 0; }
+                pDataArray->util.mothurRemove(distFileName);
+                if (pDataArray->m->getControl_pressed()) { pDataArray->util.mothurRemove(listFileName); return 0; }
                 
                 vector<int> otuData(numSeqs);
                 vector<int> otuFreq;
                 vector<vector<int> > otuBySeqLookUp;
                 noise.getListData(listFileName, cutOff, otuData, otuFreq, otuBySeqLookUp);
-                pDataArray->m->mothurRemove(listFileName);
+                pDataArray->util.mothurRemove(listFileName);
                 if (pDataArray->m->getControl_pressed()) { return 0; }
                 
                 int numOTUs = otuFreq.size();
@@ -315,8 +315,8 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
                 
                 if (pDataArray->m->getControl_pressed()) { return 0; }
                 
-                pDataArray->m->appendFiles(pDataArray->newFName+pDataArray->groups[k], pDataArray->newFName); pDataArray->m->mothurRemove(pDataArray->newFName+pDataArray->groups[k]);
-                pDataArray->m->appendFiles(pDataArray->newNName+pDataArray->groups[k], pDataArray->newNName); pDataArray->m->mothurRemove(pDataArray->newNName+pDataArray->groups[k]);
+                pDataArray->util.appendFiles(pDataArray->newFName+pDataArray->groups[k], pDataArray->newFName); pDataArray->util.mothurRemove(pDataArray->newFName+pDataArray->groups[k]);
+                pDataArray->util.appendFiles(pDataArray->newNName+pDataArray->groups[k], pDataArray->newNName); pDataArray->util.mothurRemove(pDataArray->newNName+pDataArray->groups[k]);
                 pDataArray->mapfileNames.push_back(pDataArray->newMName+pDataArray->groups[k]+".map");
                 
                 pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + pDataArray->groups[k] + "."); pDataArray->m->mothurOutEndLine();

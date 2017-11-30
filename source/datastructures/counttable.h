@@ -95,6 +95,7 @@ class CountTable {
     private:
         string filename;
         MothurOut* m;
+        Utils util;
         bool hasGroups;
         int total, uniques;
         vector<string> groups;

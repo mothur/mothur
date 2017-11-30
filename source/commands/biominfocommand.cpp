@@ -113,14 +113,14 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             }
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.validFile(parameters, "inputdir", false);
+            string inputDir = validParameter.valid(parameters, "inputdir");
             if (inputDir == "not found"){	inputDir = "";		}
             else {
                 string path;
                 it = parameters.find("biom");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["biom"] = inputDir + it->second;		}
                 }
@@ -133,27 +133,27 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             outputTypes["taxsummary"] = tempOutNames;
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
             
             //check for required parameters
-            biomfile = validParameter.validFile(parameters, "biom", true);
+            biomfile = validParameter.validFile(parameters, "biom");
             if (biomfile == "not open") { biomfile = ""; abort = true; }
             else if (biomfile == "not found") { biomfile = ""; m->mothurOut("[ERROR]: You must provide a biom file, please correct.\n");  abort = true;}
-            else { m->setBiomFile(biomfile); }
+            else { current->setBiomFile(biomfile); }
             
-            label = validParameter.validFile(parameters, "label", false);
+            label = validParameter.valid(parameters, "label");
             if (label == "not found") { label = "userLabel"; }
             
-            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
+            output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "detail"; }
             if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
             
-            string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
-            relabund = m->isTrue(temp);
+            string temp = validParameter.valid(parameters, "relabund");		if (temp == "not found"){	temp = "false";			}
+            relabund = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "printlevel", false);		if (temp == "not found"){	temp = "-1";		}
-            m->mothurConvert(temp, printlevel);
+            temp = validParameter.valid(parameters, "printlevel");		if (temp == "not found"){	temp = "-1";		}
+            util.mothurConvert(temp, printlevel);
             
-            basis = validParameter.validFile(parameters, "basis", false);
+            basis = validParameter.valid(parameters, "basis");
             if (basis == "not found") { basis = "otu"; }
             
             if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu."); m->mothurOutEndLine(); }
@@ -172,30 +172,30 @@ int BiomInfoCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        int start = time(NULL);
+        long start = time(NULL);
         
         createFilesFromBiom();
         
         m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " create mothur files from your biom file.\n");	m->mothurOutEndLine();
         
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } }
         
-        string current = "";
+        string currentName = "";
         itTypes = outputTypes.find("shared");
         if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSharedFile(currentName); }
         }
         
         //set taxonomy file as new current taxonomyfile
         itTypes = outputTypes.find("taxonomy");
         if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
         }
         
         //set constaxonomy file as new current constaxonomyfile
         itTypes = outputTypes.find("constaxonomy");
         if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setConsTaxonomyFile(current); }
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setConsTaxonomyFile(currentName); }
         }
         
         m->mothurOutEndLine();
@@ -215,16 +215,16 @@ int BiomInfoCommand::createFilesFromBiom() {
     try {
         //getting output filename
         string filename = biomfile;
-        if (outputDir == "") { outputDir += m->hasPath(filename); }
+        if (outputDir == "") { outputDir += util.hasPath(filename); }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
         variables["[tag]"] = label;
         string sharedFilename = getOutputFileName("shared",variables);
         outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
         
         ofstream out;
-        m->openOutputFile(sharedFilename, out);
+        util.openOutputFile(sharedFilename, out);
         
         /*{
          "id":"/Users/SarahsWork/Desktop/release/temp.job2.shared-unique",
@@ -235,7 +235,7 @@ int BiomInfoCommand::createFilesFromBiom() {
          "date": "Tue Apr 17 13:12:07 2012", */
         
         ifstream in;
-        m->openInputFile(biomfile, in);
+        util.openInputFile(biomfile, in);
         
         string matrixFormat = "";
         int numRows = 0;
@@ -258,7 +258,7 @@ int BiomInfoCommand::createFilesFromBiom() {
         while (!in.eof()) { //split file by tags, so each "line" will have something like "id":"/Users/SarahsWork/Desktop/release/final.tx.1.subsample.1.pick.shared-1"
             if (m->getControl_pressed()) { break; }
             
-            char c = in.get(); m->gobble(in);
+            char c = in.get(); util.gobble(in);
             
             if (c == '[')               { countOpenBrace++;     }
             else if (c == ']')          { countClosedBrace++;   }
@@ -300,7 +300,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             //            if ((biomType != "OTU table") && (biomType != "OTUtable") && (biomType != "Taxon table") && (biomType != "Taxontable")) { m->mothurOut("[ERROR]: " + biomType + " is not a valid biom type for mothur. Only types allowed are OTU table and Taxon table.\n"); m->setControl_pressed(true);  }
         }
         
-        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("matrix_type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a matrix_type provided.\n"); }
@@ -310,7 +310,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             if ((matrixFormat != "sparse") && (matrixFormat != "dense")) { m->mothurOut("[ERROR]: " + matrixFormat + " is not a valid biom matrix_type for mothur. Types allowed are sparse and dense.\n"); m->setControl_pressed(true); }
         }
         
-        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("matrix_element_type");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a matrix_element_type provided.\n"); }
@@ -321,7 +321,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             if (matrixElementType == "float") { m->mothurOut("[WARNING]: the shared file only uses integers, any float values will be rounded down to the nearest integer.\n"); }
         }
         
-        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
         
         vector<string> conTaxonomy;
         it = fileLines.find("rows");
@@ -333,7 +333,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 string mapFilename = getOutputFileName("map",variables);
                 outputNames.push_back(mapFilename); outputTypes["map"].push_back(mapFilename);
                 ofstream outMap;
-                m->openOutputFile(mapFilename, outMap);
+                util.openOutputFile(mapFilename, outMap);
                 
                 bool hasTaxonomy = false;
                 vector< vector<string> > results = readRows(thisLine, numRows, hasTaxonomy);
@@ -363,7 +363,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             }
         }
         
-        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) { out.close(); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("columns");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a columns provided.\n"); }
@@ -378,12 +378,12 @@ int BiomInfoCommand::createFilesFromBiom() {
             if (hasTaxonomy) {
                 //write taxonomy file
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
                 variables["[tag]"] = label;
                 string taxFilename = getOutputFileName("taxonomy",variables);
                 outputNames.push_back(taxFilename); outputTypes["taxonomy"].push_back(taxFilename);
                 ofstream outTax;
-                m->openOutputFile(taxFilename, outTax);
+                util.openOutputFile(taxFilename, outTax);
                 
                 GroupMap* g = NULL;
                 PhyloSummary taxaSum(g, relabund, printlevel);
@@ -391,7 +391,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 for (int i = 0; i < results[1].size(); i++) {
                     if (m->getControl_pressed()) { break; }
                     
-                    string newTax = m->addUnclassifieds(results[1][i], maxLevel, false);
+                    string newTax = util.addUnclassifieds(results[1][i], maxLevel, false);
                     outTax << results[0][i] << '\t' << newTax << endl;
                     
                     taxaSum.addSeqToTree(results[0][i], newTax);
@@ -399,13 +399,13 @@ int BiomInfoCommand::createFilesFromBiom() {
                 outTax.close();
                 
                 //write taxonomy file
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
                 variables["[tag]"] = label;
                 variables["[tag2]"] = "";
                 string taxSumFilename = getOutputFileName("taxsummary",variables);
                 outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
                 ofstream outTaxSum;
-                m->openOutputFile(taxSumFilename, outTaxSum);
+                util.openOutputFile(taxSumFilename, outTaxSum);
                 
                 //write tax.summary
                 if (relabund)   {   taxaSum.print(outTaxSum, relabund);     }
@@ -415,10 +415,10 @@ int BiomInfoCommand::createFilesFromBiom() {
             }
             
             //set fileroot
-            fileroot = outputDir + m->getRootName(m->getSimpleName(biomfile));
+            fileroot = outputDir + util.getRootName(util.getSimpleName(biomfile));
         }
         
-        if (m->getControl_pressed()) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("shape");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a shape provided.\n"); }
@@ -432,7 +432,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             if (shapeNumRows != numRows) { m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumRows) + " rows, but I only read " + toString(numRows) + " rows.\n"); m->setControl_pressed(true); }
         }
         
-        if (m->getControl_pressed()) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+        if (m->getControl_pressed()) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
         
         it = fileLines.find("data");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
@@ -449,12 +449,12 @@ int BiomInfoCommand::createFilesFromBiom() {
                 if ((lookup->getNumBins() == conTaxonomy.size()) && (lookup->getNumBins() == otuNames.size())) {
                     //write taxonomy file
                     map<string, string> variables;
-                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+                    variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
                     variables["[tag]"] = label;
                     string taxFilename = getOutputFileName("constaxonomy",variables);
                     outputNames.push_back(taxFilename); outputTypes["constaxonomy"].push_back(taxFilename);
                     ofstream outTax;
-                    m->openOutputFile(taxFilename, outTax);
+                    util.openOutputFile(taxFilename, outTax);
                     outTax << "OTU\tSize\tTaxonomy\n";
                     
                     CountTable* ct = NULL;
@@ -487,7 +487,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                             containsGroup[groupNames[j]] = abund;
                         }
                         
-                        string newTax = m->addUnclassifieds(conTaxonomy[i], maxLevel, false);
+                        string newTax = util.addUnclassifieds(conTaxonomy[i], maxLevel, false);
                         outTax << otuNames[i] << '\t' << total << '\t' << newTax << endl;
                         
                         if (basis == "sequence") {
@@ -499,13 +499,13 @@ int BiomInfoCommand::createFilesFromBiom() {
                     outTax.close();
                     
                     //write taxonomy file
-                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(filename));
+                    variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
                     variables["[tag]"] = label;
                     variables["[tag2]"] = "cons";
                     string taxSumFilename = getOutputFileName("taxsummary",variables);
                     outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
                     ofstream outTaxSum;
-                    m->openOutputFile(taxSumFilename, outTaxSum);
+                    util.openOutputFile(taxSumFilename, outTaxSum);
                     taxaSum.print(outTaxSum, output);
                     outTaxSum.close();
                     
@@ -556,8 +556,8 @@ SharedRAbundVectors* BiomInfoCommand::readData(string matrixFormat, string line,
                     inBrackets = false;
                     int temp;
                     float temp2;
-                    if (matrixElementType == "float") { m->mothurConvert(num, temp2); temp = (int)temp2; }
-                    else { m->mothurConvert(num, temp); }
+                    if (matrixElementType == "float") { util.mothurConvert(num, temp2); temp = (int)temp2; }
+                    else { util.mothurConvert(num, temp); }
                     nums.push_back(temp);
                     num = "";
                     
@@ -585,7 +585,7 @@ SharedRAbundVectors* BiomInfoCommand::readData(string matrixFormat, string line,
                 if (inBrackets) {
                     if (line[i] == ',') {
                         int temp;
-                        m->mothurConvert(num, temp);
+                        util.mothurConvert(num, temp);
                         nums.push_back(temp);
                         num = "";
                     }else { if (!isspace(line[i])) { num += line[i]; }  }
@@ -613,13 +613,13 @@ int BiomInfoCommand::getDims(string line, int& shapeNumRows, int& shapeNumCols) 
             if ((line[i] == '[') && (!inBar)) {  inBar = true; i++;  if (!(i < line.length())) { break; } }
             else if ((line[i] == ']') && (inBar)) {
                 inBar= false;
-                m->mothurConvert(num, shapeNumCols);
+                util.mothurConvert(num, shapeNumCols);
                 break;
             }
             
             if (inBar) {
                 if (line[i] == ',') {
-                    m->mothurConvert(num, shapeNumRows);
+                    util.mothurConvert(num, shapeNumRows);
                     num = "";
                 }else { if (!isspace(line[i])) { num += line[i]; }  }
             }
@@ -718,7 +718,7 @@ vector<string> BiomInfoCommand::getNamesAndTaxonomies(string line) {
             results.push_back(getName(line)); results.push_back("");
         }else {
             string value;
-            m->splitAtComma(value, line);  //value hold name portion ("id":"Otu01") line holds rest
+            util.splitAtComma(value, line);  //value hold name portion ("id":"Otu01") line holds rest
             results.push_back(getName(value));
             
             string taxonomy = ""; string bootstrap = "";
@@ -748,7 +748,7 @@ vector<string> BiomInfoCommand::getNamesAndTaxonomies(string line) {
 string BiomInfoCommand::getName(string line) {
     try {
         vector<string> nameItems;
-        m->splitAtChar(line, nameItems, ':'); //split part we want containing the ids
+        util.splitAtChar(line, nameItems, ':'); //split part we want containing the ids
         string name = nameItems[1];
         
         //remove "" if needed
@@ -777,32 +777,32 @@ string BiomInfoCommand::getTaxonomy(string taxonomy, string bootstrap) {
         
         if (taxonomy != "") {
             vector<string> taxItems;
-            m->splitAtChar(taxonomy, taxItems, ':'); //split part we want containing the ids
+            util.splitAtChar(taxonomy, taxItems, ':'); //split part we want containing the ids
             string taxons = taxItems[1];
             
             string taxon;
             while((taxons.find_first_of(',') != -1)) {
                 if (m->getControl_pressed()) {break;}
-                m->splitAtComma(taxon, taxons);
+                util.splitAtComma(taxon, taxons);
                 results.push_back(taxon);
             }
-            if (!m->stringBlank(taxons)) { results.push_back(taxons); }
+            if (!util.stringBlank(taxons)) { results.push_back(taxons); }
         }
         
         if (bootstrap != "") {
             vector<string> bootItems;
-            m->splitAtChar(bootstrap, bootItems, ':'); //split part we want containing the ids
+            util.splitAtChar(bootstrap, bootItems, ':'); //split part we want containing the ids
             string bootValues = bootItems[1];
             
             string bootValue;
             int i = 0;
             while((bootValues.find_first_of(',') != -1)) {
                 if (m->getControl_pressed()) {break;}
-                m->splitAtComma(bootValue, bootValues);
+                util.splitAtComma(bootValue, bootValues);
                 results[i]+="("+bootValue+")";
                 i++;
             }
-            if (!m->stringBlank(bootValues)) { results[i]+="("+bootValues+")"; }
+            if (!util.stringBlank(bootValues)) { results[i]+="("+bootValues+")"; }
         }
         
         string result = "";

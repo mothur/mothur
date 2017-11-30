@@ -108,17 +108,17 @@ AnosimCommand::AnosimCommand(string option) {
 			outputTypes["anosim"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
@@ -126,39 +126,39 @@ AnosimCommand::AnosimCommand(string option) {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
 			}
 			
-			phylipFileName = validParameter.validFile(parameters, "phylip", true);
+			phylipFileName = validParameter.validFile(parameters, "phylip");
 			if (phylipFileName == "not open") { phylipFileName = ""; abort = true; }
 			else if (phylipFileName == "not found") { 
 				//if there is a current phylip file, use it
-				phylipFileName = m->getPhylipFile(); 
+				phylipFileName = current->getPhylipFile(); 
 				if (phylipFileName != "") { m->mothurOut("Using " + phylipFileName + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
 				
-			}else { m->setPhylipFile(phylipFileName); }	
+			}else { current->setPhylipFile(phylipFileName); }	
 			
 			//check for required parameters
-			designFileName = validParameter.validFile(parameters, "design", true);
+			designFileName = validParameter.validFile(parameters, "design");
 			if (designFileName == "not open") { designFileName = ""; abort = true; }
 			else if (designFileName == "not found") {
 				//if there is a current design file, use it
-				designFileName = m->getDesignFile(); 
+				designFileName = current->getDesignFile(); 
 				if (designFileName != "") { m->mothurOut("Using " + designFileName + " as input file for the design parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }								
-			}else { m->setDesignFile(designFileName); }	
+			}else { current->setDesignFile(designFileName); }	
 			
-			string temp = validParameter.validFile(parameters, "iters", false);
+			string temp = validParameter.valid(parameters, "iters");
 			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+			util.mothurConvert(temp, iters); 
 			
-			temp = validParameter.validFile(parameters, "alpha", false);
+			temp = validParameter.valid(parameters, "alpha");
 			if (temp == "not found") { temp = "0.05"; }
-			m->mothurConvert(temp, experimentwiseAlpha); 
+			util.mothurConvert(temp, experimentwiseAlpha); 
 		}
 		
 	}
@@ -176,7 +176,7 @@ int AnosimCommand::execute(){
 		//read design file
 		designMap = new DesignMap(designFileName);
 		
-		if (outputDir == "") { outputDir = m->hasPath(phylipFileName); }
+		if (outputDir == "") { outputDir = util.hasPath(phylipFileName); }
 		
 		//read in distance matrix and square it
 		ReadPhylipVector readMatrix(phylipFileName);
@@ -203,10 +203,10 @@ int AnosimCommand::execute(){
 		
 		//create a new filename
 		ofstream ANOSIMFile;
-        map<string, string> variables; variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipFileName));
+        map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipFileName));
 		string ANOSIMFileName = getOutputFileName("anosim", variables);	
         
-		m->openOutputFile(ANOSIMFileName, ANOSIMFile);
+		util.openOutputFile(ANOSIMFileName, ANOSIMFile);
 		outputNames.push_back(ANOSIMFileName); outputTypes["anosim"].push_back(ANOSIMFileName);
 		m->mothurOut("\ncomparison\tR-value\tP-value\n");
 		ANOSIMFile << "comparison\tR-value\tP-value\n";
@@ -300,17 +300,13 @@ double AnosimCommand::runANOSIM(ofstream& ANOSIMFile, vector<vector<double> > dM
 		else						{	pString = toString(pValue);					}
 		
 		
-		map<string, vector<int> >::iterator it=groupSampleMap.begin();
-		m->mothurOut(it->first);
-		ANOSIMFile << it->first;
-		it++;
-		for(it;it!=groupSampleMap.end();it++){
-			m->mothurOut('-' + it->first);
-			ANOSIMFile << '-' << it->first;
-		
-		}
-		m->mothurOut('\t' + toString(RValue) + '\t' + pString);
-		ANOSIMFile << '\t' << RValue << '\t' << pString;
+		//map<string, vector<int> >::iterator it=groupSampleMap.begin();
+        vector<string> sampleNames;
+        for(map<string, vector<int> >::iterator it = groupSampleMap.begin();it!=groupSampleMap.end();it++){ sampleNames.push_back(it->first); }
+        string output = util.getStringFromVector(sampleNames, "-");
+        
+		m->mothurOut(output + '\t' + toString(RValue) + '\t' + pString);
+		ANOSIMFile << output << '\t' << RValue << '\t' << pString;
 
 		if(pValue < alpha){
 			ANOSIMFile << "*";

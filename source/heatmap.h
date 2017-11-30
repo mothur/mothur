@@ -12,6 +12,7 @@
 #include "sharedrabundvector.hpp"
 #include "rabundvector.hpp"
 #include "sharedrabundfloatvector.hpp"
+#include "utils.hpp"
 
 /***********************************************************************/
 struct binCount {
@@ -57,6 +58,7 @@ class HeatMap {
 		string format, sorted, groupComb, scaler, outputDir, inputfile;
 		ofstream outsvg;
 		MothurOut* m;
+        Utils util;
 		int numOTU, fontSize;
         vector<string> currentLabels;
 		

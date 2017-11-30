@@ -120,14 +120,14 @@ ClassifyRFSharedCommand::ClassifyRFSharedCommand(string option) {
         outputTypes["summary"] = tempOutNames;
       
         //if the user changes the input directory command factory will send this info to us in the output parameter
-      string inputDir = validParameter.validFile(parameters, "inputdir", false);
+      string inputDir = validParameter.valid(parameters, "inputdir");
       if (inputDir == "not found"){	inputDir = "";		}
       else {
         string path;
         it = parameters.find("shared");
           //user has given a shared file
         if(it != parameters.end()){
-          path = m->hasPath(it->second);
+          path = util.hasPath(it->second);
             //if the user has not given a path then, add inputdir. else leave path alone.
           if (path == "") {	parameters["shared"] = inputDir + it->second;		}
         }
@@ -135,7 +135,7 @@ ClassifyRFSharedCommand::ClassifyRFSharedCommand(string option) {
         it = parameters.find("design");
           //user has given a design file
         if(it != parameters.end()){
-          path = m->hasPath(it->second);
+          path = util.hasPath(it->second);
             //if the user has not given a path then, add inputdir. else leave path alone.
           if (path == "") {	parameters["design"] = inputDir + it->second;		}
         }
@@ -143,33 +143,33 @@ ClassifyRFSharedCommand::ClassifyRFSharedCommand(string option) {
       }
         //check for parameters
         //get shared file, it is required
-      sharedfile = validParameter.validFile(parameters, "shared", true);
+      sharedfile = validParameter.validFile(parameters, "shared");
       if (sharedfile == "not open") { sharedfile = ""; abort = true; }
       else if (sharedfile == "not found") {
           //if there is a current shared file, use it
-        sharedfile = m->getSharedFile();
+        sharedfile = current->getSharedFile();
         if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
         else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-      }else { m->setSharedFile(sharedfile); }
+      }else { current->setSharedFile(sharedfile); }
       
         //get design file, it is required
-      designfile = validParameter.validFile(parameters, "design", true);
+      designfile = validParameter.validFile(parameters, "design");
       if (designfile == "not open") { sharedfile = ""; abort = true; }
       else if (designfile == "not found") {
           //if there is a current shared file, use it
-        designfile = m->getDesignFile();
+        designfile = current->getDesignFile();
         if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
         else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
-      }else { m->setDesignFile(designfile); }
+      }else { current->setDesignFile(designfile); }
 
       
         //if the user changes the output directory command factory will send this info to us in the output parameter
-      outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){
-        outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it
+      outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
+        outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
       }
       
         // NEW CODE for OTU per split selection criteria
-        string temp = validParameter.validFile(parameters, "splitcriteria", false);
+        string temp = validParameter.valid(parameters, "splitcriteria");
         if (temp == "not found") { temp = "gainratio"; }
         if ((temp == "gainratio") || (temp == "infogain")) {
             treeSplitCriterion = temp;
@@ -178,27 +178,27 @@ ClassifyRFSharedCommand::ClassifyRFSharedCommand(string option) {
             abort = true;
         }
         
-        temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = "100";	}
-        m->mothurConvert(temp, numDecisionTrees);
+        temp = validParameter.valid(parameters, "numtrees"); if (temp == "not found"){	temp = "100";	}
+        util.mothurConvert(temp, numDecisionTrees);
         
             // parameters for pruning
-        temp = validParameter.validFile(parameters, "prune", false);
+        temp = validParameter.valid(parameters, "prune");
         if (temp == "not found") { temp = "f"; }
-        doPruning = m->isTrue(temp);
+        doPruning = util.isTrue(temp);
         
-        temp = validParameter.validFile(parameters, "pruneaggressiveness", false);
+        temp = validParameter.valid(parameters, "pruneaggressiveness");
         if (temp == "not found") { temp = "0.9"; }
-        m->mothurConvert(temp, pruneAggressiveness);
+        util.mothurConvert(temp, pruneAggressiveness);
         
-        temp = validParameter.validFile(parameters, "discarderrortrees", false);
+        temp = validParameter.valid(parameters, "discarderrortrees");
         if (temp == "not found") { temp = "f"; }
-        discardHighErrorTrees = m->isTrue(temp);
+        discardHighErrorTrees = util.isTrue(temp);
         
-        temp = validParameter.validFile(parameters, "errorthreshold", false);
+        temp = validParameter.valid(parameters, "errorthreshold");
         if (temp == "not found") { temp = "0.4"; }
-        m->mothurConvert(temp, highErrorTreeDiscardThreshold);
+        util.mothurConvert(temp, highErrorTreeDiscardThreshold);
         
-        temp = validParameter.validFile(parameters, "otupersplit", false);
+        temp = validParameter.valid(parameters, "otupersplit");
         if (temp == "not found") { temp = "log2"; }
         if ((temp == "squareroot") || (temp == "log2")) {
             optimumFeatureSubsetSelectionCriteria = temp;
@@ -207,21 +207,21 @@ ClassifyRFSharedCommand::ClassifyRFSharedCommand(string option) {
             abort = true;
         }
         
-        temp = validParameter.validFile(parameters, "stdthreshold", false);
+        temp = validParameter.valid(parameters, "stdthreshold");
         if (temp == "not found") { temp = "0.0"; }
-        m->mothurConvert(temp, featureStandardDeviationThreshold);
+        util.mothurConvert(temp, featureStandardDeviationThreshold);
                         
             // end of pruning params
         
-      string groups = validParameter.validFile(parameters, "groups", false);
+      string groups = validParameter.valid(parameters, "groups");
       if (groups == "not found") { groups = ""; }
-      else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
+      else { util.splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
         
         //Commonly used to process list, rabund, sabund, shared and relabund files.  Look at "smart distancing" examples below in the execute function.
-      string label = validParameter.validFile(parameters, "label", false);
+      string label = validParameter.valid(parameters, "label");
       if (label == "not found") { label = ""; }
       else {
-        if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+        if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
         else { allLines = 1;  }
       }
     }
@@ -268,7 +268,7 @@ int ClassifyRFSharedCommand::execute() {
         userLabels.erase(lookup->getLabel());
       }
       
-      if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+      if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
         string saveLabel = lookup->getLabel();
         
           delete lookup;
@@ -395,7 +395,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
         
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "RF.";
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "RF.";
         variables["[distance]"] = lookup[0]->getLabel();
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
@@ -403,7 +403,7 @@ void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVect
         
         //
         map<string, string> variable; 
-        variable["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "misclassifications.";
+        variable["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "misclassifications.";
         variable["[distance]"] = lookup[0]->getLabel();
         string mc_filename = getOutputFileName("summary", variable);
         outputNames.push_back(mc_filename); outputTypes["summary"].push_back(mc_filename);

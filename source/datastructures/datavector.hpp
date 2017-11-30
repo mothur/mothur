@@ -1,9 +1,8 @@
 #ifndef datavector_h
 #define datavector_h
 
-
-#include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 /* This class is parent to listvector, ordervector, rabundvector, sabundvector, sharedordervector, sharedrabundvector, sharedsabundvector. 
 	The child classes all contain OTU information in different forms. */
@@ -23,7 +22,7 @@ class DataVector {
 public:
 	DataVector(){ m = MothurOut::getInstance(); }
 	DataVector(string l) : label(l) { m = MothurOut::getInstance();};
-    DataVector(const DataVector& dv) : label(dv.label){ m = MothurOut::getInstance();};
+    DataVector(const DataVector& dv) : label(dv.label){ m = MothurOut::getInstance();}
 	DataVector(ifstream&) {m = MothurOut::getInstance();}
 	DataVector(ifstream&, GroupMap*){m = MothurOut::getInstance();}
 	virtual ~DataVector(){};
@@ -47,6 +46,7 @@ public:
 protected:
 	string label;
 	MothurOut* m;
+    Utils util;
 
 };
 

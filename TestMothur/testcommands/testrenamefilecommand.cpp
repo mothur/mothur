@@ -57,21 +57,21 @@ TEST_CASE("Testing RenameFileCommand Class") {
         testRename.renameOrCopy(testRename.filenames[0], "greatData.new.fasta");
         
         ifstream in, in2;
-        int ableToOpen = testRename.m->openInputFile("greatData.new.fasta", in);
+        bool ableToOpen = testRename.util.openInputFile("greatData.new.fasta", in);
         in.close();
         
         CAPTURE(ableToOpen);
             
         CHECK(ableToOpen == 0);
         
-        int ableToOpen2 = testRename.m->openInputFile(testRename.filenames[0], in2);
+        bool ableToOpen2 = testRename.util.openInputFile(testRename.filenames[0], in2);
         in2.close();
         
         CAPTURE(ableToOpen2);
         
         CHECK(ableToOpen2 == 0);
         
-        testRename.m->mothurRemove("greatData.new.fasta");
+        testRename.util.mothurRemove("greatData.new.fasta");
     }
     
     SECTION("Testing RenameOrCopy - deleteOld=true") {
@@ -82,7 +82,7 @@ TEST_CASE("Testing RenameFileCommand Class") {
         testRename.renameOrCopy(testRename.filenames[0], "greatData.new.fasta");
         
         ifstream in, in2;
-        int ableToOpen = testRename.m->openInputFile("greatData.new.fasta", in);
+        bool ableToOpen = testRename.util.openInputFile("greatData.new.fasta", in);
         in.close();
         
         CAPTURE(ableToOpen);

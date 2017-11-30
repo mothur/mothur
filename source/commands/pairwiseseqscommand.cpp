@@ -124,30 +124,30 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			outputTypes["column"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			
 			if (inputDir == "not found"){	inputDir = "";		}
 
-			fastaFileName = validParameter.validFile(parameters, "fasta", false);
+			fastaFileName = validParameter.valid(parameters, "fasta");
 			if (fastaFileName == "not found") { 				
 				//if there is a current fasta file, use it
-				string filename = m->getFastaFile(); 
+				string filename = current->getFastaFile(); 
 				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else { 
-				m->splitAtDash(fastaFileName, fastaFileNames);
+				util.splitAtDash(fastaFileName, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = m->getFastaFile(); 
+						fastaFileNames[i] = current->getFastaFile(); 
 						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -160,7 +160,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 					if (!ignore) {
 					
 						if (inputDir != "") {
-							string path = m->hasPath(fastaFileNames[i]);
+							string path = util.hasPath(fastaFileNames[i]);
 							//if the user has not given a path then, add inputdir. else leave path alone.
 							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 						}
@@ -168,15 +168,15 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 						bool ableToOpen;
 						ifstream in;
 
-						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
+						ableToOpen = util.openInputFile(fastaFileNames[i], in, "noerror");
 					
 						//if you can't open it, try default location
 						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
+							if (current->getDefaultPath() != "") { //default path is set
+								string tryPath = current->getDefaultPath() + util.getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
 								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 								in2.close();
 								fastaFileNames[i] = tryPath;
 							}
@@ -184,11 +184,11 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 						
 						//if you can't open it, try output location
 						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+							if (current->getOutputDir() != "") { //default path is set
+								string tryPath = current->getOutputDir() + util.getSimpleName(fastaFileNames[i]);
 								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
 								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 								in2.close();
 								fastaFileNames[i] = tryPath;
 							}
@@ -202,7 +202,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 							fastaFileNames.erase(fastaFileNames.begin()+i);
 							i--;
 						}else {
-							m->setFastaFile(fastaFileNames[i]);
+							current->setFastaFile(fastaFileNames[i]);
 						}
 					}
 				}
@@ -214,46 +214,45 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
-			m->mothurConvert(temp, match);  
+			temp = validParameter.valid(parameters, "match");		if (temp == "not found"){	temp = "1.0";			}
+			util.mothurConvert(temp, match);  
 			
-			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
-			m->mothurConvert(temp, misMatch);  
+			temp = validParameter.valid(parameters, "mismatch");		if (temp == "not found"){	temp = "-1.0";			}
+			util.mothurConvert(temp, misMatch);  
             if (misMatch > 0) { m->mothurOut("[ERROR]: mismatch must be negative.\n"); abort=true; }
 			
-			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-2.0";			}
-			m->mothurConvert(temp, gapOpen);  
+			temp = validParameter.valid(parameters, "gapopen");		if (temp == "not found"){	temp = "-2.0";			}
+			util.mothurConvert(temp, gapOpen);  
             if (gapOpen > 0) { m->mothurOut("[ERROR]: gapopen must be negative.\n"); abort=true; }
 			
-			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
-			m->mothurConvert(temp, gapExtend); 
+			temp = validParameter.valid(parameters, "gapextend");	if (temp == "not found"){	temp = "-1.0";			}
+			util.mothurConvert(temp, gapExtend); 
             if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
-			m->mothurConvert(temp, cutoff); 
+			temp = validParameter.valid(parameters, "cutoff");		if(temp == "not found"){	temp = "1.0"; }
+			util.mothurConvert(temp, cutoff); 
 			
-			temp = validParameter.validFile(parameters, "countends", false);	if(temp == "not found"){	temp = "T";	}
-			countends = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "countends");	if(temp == "not found"){	temp = "T";	}
+			countends = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "compress", false);		if(temp == "not found"){  temp = "F"; }
-			compress = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "compress");		if(temp == "not found"){  temp = "F"; }
+			compress = util.isTrue(temp); 
 			
-			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
+			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 			
-			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output=="phylip") { output = "lt"; }
 			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
 			
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "onegap";  }
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
 			}
-			m->splitAtDash(calc, Estimators);
+			util.splitAtDash(calc, Estimators);
 		}
 		
 	}
@@ -277,10 +276,10 @@ int PairwiseSeqsCommand::execute(){
 			
 			m->mothurOut("Processing sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
-			if (outputDir == "") {  outputDir += m->hasPath(fastaFileNames[s]); }
+			if (outputDir == "") {  outputDir += util.hasPath(fastaFileNames[s]); }
 			
 			ifstream inFASTA;
-			m->openInputFile(fastaFileNames[s], inFASTA);
+			util.openInputFile(fastaFileNames[s], inFASTA);
 			alignDB = SequenceDB(inFASTA); 
 			inFASTA.close();
 			
@@ -289,19 +288,19 @@ int PairwiseSeqsCommand::execute(){
 			string outputFile = "";
 			
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
 			if (output == "lt") { //does the user want lower triangle phylip formatted file 
 				variables["[outputtag]"] = "phylip";
                 outputFile = getOutputFileName("phylip", variables);
-				m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
+				util.mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			}else if (output == "column") { //user wants column format
 				outputFile = getOutputFileName("column", variables);
 				outputTypes["column"].push_back(outputFile);
-				m->mothurRemove(outputFile);
+				util.mothurRemove(outputFile);
 			}else { //assume square
                 variables["[outputtag]"] = "square";
                 outputFile = getOutputFileName("phylip", variables);
-				m->mothurRemove(outputFile);
+				util.mothurRemove(outputFile);
 				outputTypes["phylip"].push_back(outputFile);
 			}
 								
@@ -327,12 +326,12 @@ int PairwiseSeqsCommand::execute(){
 				createProcesses(outputFile); 
 			}
 
-			if (m->getControl_pressed()) { outputTypes.clear();   m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear();   util.mothurRemove(outputFile); return 0; }
 			
 			ifstream fileHandle;
 			fileHandle.open(outputFile.c_str());
 			if(fileHandle) {
-				m->gobble(fileHandle);
+				util.gobble(fileHandle);
 				if (fileHandle.eof()) { m->mothurOut(outputFile + " is blank. This can result if there are no distances below your cutoff.");  m->mothurOutEndLine(); }
 			}
 			
@@ -345,20 +344,20 @@ int PairwiseSeqsCommand::execute(){
 
             m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 			
-			if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outputFile); return 0; }
 		}
 		
 		//set phylip file as new current phylipfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("phylip");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName); }
 		}
 		
 		//set column file as new current columnfile
 		itTypes = outputTypes.find("column");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setColumnFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -393,8 +392,8 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 				processIDS.push_back(pid); 
 				process++;
 			}else if (pid == 0){
-				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
-				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
+				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + toString(process) + ".temp", cutoff); }
+				else { driver(lines[process].start, lines[process].end, filename + toString(process) + ".temp", "square"); }
 				exit(0);
 			}else { 
                 m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
@@ -442,8 +441,8 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
                     processIDS.push_back(pid);
                     process++;
                 }else if (pid == 0){
-                    if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
-                    else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
+                    if (output != "square") {  driver(lines[process].start, lines[process].end, filename + toString(process) + ".temp", cutoff); }
+                    else { driver(lines[process].start, lines[process].end, filename + toString(process) + ".temp", "square"); }
                     exit(0);
                 }else {
                     m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
@@ -508,8 +507,8 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
         
         //append and remove temp files
 		for (int i=0;i<processIDS.size();i++) { 
-			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
-			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
+			util.mothurRemove((filename + toString(processIDS[i]) + ".temp"));
 		}
         
 	}

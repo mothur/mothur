@@ -17,16 +17,17 @@
 
 InputData::InputData(string fName, string f, vector<string> userGroups) : format(f){
 	m = MothurOut::getInstance();
-	m->openInputFile(fName, fileHandle);
+	util.openInputFile(fName, fileHandle);
 	filename = fName;
-	m->setSaveNextLabel("");
+	nextDistanceLabel = "";
     groups = userGroups;
+    otuTag = util.getTag(fName);
 }
 /***********************************************************************/
 
 InputData::~InputData(){
 	fileHandle.close();
-	m->setSaveNextLabel("");
+	nextDistanceLabel = "";
 }
 
 /***********************************************************************/
@@ -35,7 +36,7 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 	try {
 		m = MothurOut::getInstance();
 		ifstream ofHandle;
-		m->openInputFile(orderFileName, ofHandle);
+		util.openInputFile(orderFileName, ofHandle);
 		string name;
 
 		int count = 0;
@@ -44,12 +45,13 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 			ofHandle >> name;
 			orderMap[name] = count;
 			count++;
-			m->gobble(ofHandle);
+			util.gobble(ofHandle);
 		}
 		ofHandle.close();
 	
-		m->openInputFile(fName, fileHandle);
-		m->setSaveNextLabel("");
+		util.openInputFile(fName, fileHandle);
+		nextDistanceLabel = "";
+        otuTag = util.getTag(fName);
 		
 	}
 	catch(exception& e) {
@@ -63,7 +65,7 @@ ListVector* InputData::getListVector(){
 	try {
 		if(!fileHandle.eof()){
 			if(format == "list") {
-				list = new ListVector(fileHandle);
+				list = new ListVector(fileHandle, nextDistanceLabel, otuTag);
                 if (list != NULL) {
                     //pass labels to others distances in file
                     if (currentLabels.size() == 0) { currentLabels = list->getLabels(); }
@@ -71,7 +73,7 @@ ListVector* InputData::getListVector(){
                 }
 			}else{ list = NULL;  }
 					
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 			return list;
 		}
 		else{
@@ -88,9 +90,8 @@ ListVector* InputData::getListVector(){
 ListVector* InputData::getListVector(string label){
 	try {
 		ifstream in;
-		string  thisLabel;
-		m->openInputFile(filename, in);
-        m->setSaveNextLabel("");
+		util.openInputFile(filename, in);
+        nextDistanceLabel = "";
 		
 		if(in){
 
@@ -98,8 +99,8 @@ ListVector* InputData::getListVector(string label){
 			
 				while (in.eof() != true) {
 					
-					list = new ListVector(in);
-					thisLabel = list->getLabel();
+					list = new ListVector(in, nextDistanceLabel, otuTag);
+					nextDistanceLabel = list->getLabel();
                     
                     if (list != NULL) {
                         //pass labels to others distances in file
@@ -108,10 +109,10 @@ ListVector* InputData::getListVector(string label){
                     }
 					
 					//if you are at the last label
-					if (thisLabel == label) {  break;  }
+					if (nextDistanceLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete list;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 			}else{ list = NULL;  }
 			
@@ -130,10 +131,9 @@ ListVector* InputData::getListVector(string label){
 /***********************************************************************/
 ListVector* InputData::getListVector(string label, bool resetFP){
 	try {
-		string  thisLabel;
 		fileHandle.clear();
 		fileHandle.seekg(0);
-        m->setSaveNextLabel("");
+        nextDistanceLabel = "";
 		
 		if(fileHandle){
 
@@ -141,8 +141,8 @@ ListVector* InputData::getListVector(string label, bool resetFP){
 			
 				while (fileHandle.eof() != true) {
 					
-					list = new ListVector(fileHandle); m->gobble(fileHandle);
-					thisLabel = list->getLabel();
+					list = new ListVector(fileHandle, nextDistanceLabel, otuTag); util.gobble(fileHandle);
+					nextDistanceLabel = list->getLabel();
                     
                      if (list != NULL) {
                          //pass labels to others distances in file
@@ -151,7 +151,7 @@ ListVector* InputData::getListVector(string label, bool resetFP){
                      }
 					
 					//if you are at the last label
-					if (thisLabel == label) {  break;  }
+					if (nextDistanceLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete list;	}
 				}
@@ -175,7 +175,7 @@ SharedListVector* InputData::getSharedListVector(){
 	try {
 		if(fileHandle){
 			if (format == "shared")  {
-				SharedList = new SharedListVector(fileHandle, groups);
+				SharedList = new SharedListVector(fileHandle, groups, nextDistanceLabel, otuTag);
                 if (SharedList != NULL) {
                     //pass labels to others distances in file
                     if (currentLabels.size() == 0) { currentLabels = SharedList->getLabels(); }
@@ -184,7 +184,7 @@ SharedListVector* InputData::getSharedListVector(){
 
 			}else{ SharedList = NULL;  }
 					
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 			return SharedList;
 		}
 		else{
@@ -202,7 +202,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 	try {
 		ifstream in;
 		string  thisLabel;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		
 		if(in){
 
@@ -210,7 +210,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 			
 				while (in.eof() != true) {
 					
-					SharedList = new SharedListVector(in, groups);
+					SharedList = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					thisLabel = SharedList->getLabel();
                     
                     if (SharedList != NULL) {
@@ -222,7 +222,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete SharedList;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}else{ SharedList = NULL;  }
@@ -248,11 +248,11 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 	try {
 		if(fileHandle){
 			if (format == "sharedfile")  {
-				SharedOrder = new SharedOrderVector(fileHandle, groups);
+				SharedOrder = new SharedOrderVector(fileHandle, groups, nextDistanceLabel);
                 if (SharedOrder->getNumBins() == 0) { delete SharedOrder; SharedOrder =  NULL; } //no valid groups
 			}else{ SharedOrder = NULL;  }
 				
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 			return SharedOrder;
 			
 		}else{
@@ -271,8 +271,8 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 	try {
 		ifstream in;
 		string  thisLabel;
-		m->openInputFile(filename, in);
-        m->setSaveNextLabel("");
+		util.openInputFile(filename, in);
+        nextDistanceLabel = "";
 		
 		if(in){
 
@@ -280,7 +280,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 			
 				while (in.eof() != true) {
 					
-					SharedOrder = new SharedOrderVector(in, groups);
+					SharedOrder = new SharedOrderVector(in, groups, nextDistanceLabel);
 					thisLabel = SharedOrder->getLabel();
                     if (SharedOrder->getNumBins() == 0) { delete SharedOrder; SharedOrder =  NULL; break; } //no valid groups
 					
@@ -288,7 +288,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete SharedOrder;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}else{ SharedOrder = NULL;  }
@@ -314,10 +314,10 @@ OrderVector* InputData::getOrderVector(){
 	try {
 		if(fileHandle){
 			if((format == "list") || (format == "listorder")) {
-				input = new ListVector(fileHandle);
+				input = new ListVector(fileHandle, nextDistanceLabel, otuTag);
 			}
 			else if (format == "shared")  {
-				input = new SharedListVector(fileHandle, groups);
+				input = new SharedListVector(fileHandle, groups, nextDistanceLabel, otuTag);
 			}
 			else if(format == "rabund"){
 				input = new RAbundVector(fileHandle);
@@ -329,7 +329,7 @@ OrderVector* InputData::getOrderVector(){
 				input = new SAbundVector(fileHandle);
 			}
 						
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 			
 			output = new OrderVector();	
 			*output = (input->getOrderVector());
@@ -352,35 +352,35 @@ OrderVector* InputData::getOrderVector(string label){
 	
 		ifstream in;
 		string  thisLabel;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		
 		if(in){
 			if((format == "list") || (format == "listorder")) {
-                m->setSaveNextLabel("");
+                nextDistanceLabel = "";
 				while (in.eof() != true) {
 					
-					input = new ListVector(in);
+					input = new ListVector(in, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
 					
 					//if you are at the last label
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 			}
 			else if (format == "shared")  {
-				m->setSaveNextLabel("");
+				nextDistanceLabel = "";
 				while (in.eof() != true) {
 					
-					input = new SharedListVector(in, groups);
+					input = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
 					
 					//if you are at the last label
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -395,7 +395,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -410,7 +410,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -425,7 +425,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 					
 				}
 
@@ -453,7 +453,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(){
     try {
         if(fileHandle){
             if (format == "sharedfile")  {
-                SharedRAbundVectors* shared = new SharedRAbundVectors(fileHandle, groups);
+                SharedRAbundVectors* shared = new SharedRAbundVectors(fileHandle, groups, nextDistanceLabel, otuTag);
                 if (shared != NULL) {
                     //pass labels to others distances in file
                     if (currentLabels.size() == 0) { currentLabels = shared->getOTUNames(); }
@@ -462,7 +462,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(){
                 }
                 return shared;
             }else if (format == "shared") {
-                SharedList = new SharedListVector(fileHandle, groups);
+                SharedList = new SharedListVector(fileHandle, groups, nextDistanceLabel, otuTag);
                 
                 if (SharedList != NULL) {
                     //pass labels to others distances in file
@@ -472,7 +472,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(){
                     return SharedList->getSharedRAbundVector();
                 }
             }
-            m->gobble(fileHandle);
+            util.gobble(fileHandle);
         }
         
         //this is created to signal to calling function that the input file is at eof
@@ -492,14 +492,14 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 		ifstream in;
 		string  thisLabel;
 		
-		m->openInputFile(filename, in);
-		m->setSaveNextLabel("");
+		util.openInputFile(filename, in);
+		nextDistanceLabel = "";
 	
 		if(in){
 			if (format == "sharedfile")  {
 				while (in.eof() != true) {
 					
-					SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(in, groups);
+					SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(in, groups, nextDistanceLabel, otuTag);
 					if (SharedRAbund != NULL) {
 						thisLabel = SharedRAbund->getLabel();
                         
@@ -516,13 +516,13 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 							delete SharedRAbund;
 						}
 					}else{  break;  }
-					m->gobble(in);
+					util.gobble(in);
 					
 				}
 			}else if (format == "shared") {
 				while (in.eof() != true) {
 					
-					SharedList = new SharedListVector(in, groups);
+					SharedList = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					
 					if (SharedList != NULL) {
 						thisLabel = SharedList->getLabel();
@@ -537,7 +537,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 							delete SharedList;
 						}
 					}else{  break;  }
-					m->gobble(in);
+					util.gobble(in);
 					
 				}
 			
@@ -562,7 +562,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(){
 	try {
 		if(fileHandle){
 			if (format == "relabund")  {
-				SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors(fileHandle, groups);
+				SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors(fileHandle, groups, nextDistanceLabel, otuTag);
                 if (SharedRelAbund->getNumBins() == 0) { delete SharedRelAbund; SharedRelAbund = NULL;  } //no valid groups
                 else { //pass labels to others distances in file
                     if (currentLabels.size() == 0) { currentLabels = SharedRelAbund->getOTUNames(); }
@@ -570,7 +570,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(){
                 }
                 return SharedRelAbund;
 			}else if (format == "sharedfile")  {
-				SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(fileHandle, groups);
+				SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(fileHandle, groups, nextDistanceLabel, otuTag);
 				if (SharedRAbund != NULL) {
                     //pass labels to others distances in file
                     if (currentLabels.size() == 0) { currentLabels = SharedRAbund->getOTUNames(); }
@@ -585,7 +585,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(){
 				}
 						
 			}
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 		}
 				
 		//this is created to signal to calling function that the input file is at eof
@@ -603,14 +603,14 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 		ifstream in;
 		string  thisLabel;
 		
-		m->openInputFile(filename, in);
-		m->setSaveNextLabel("");
+		util.openInputFile(filename, in);
+		nextDistanceLabel = "";
 		
 		if(in){
 			if (format == "relabund")  {
 				while (in.eof() != true) {
 					
-					SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors(in, groups);
+					SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors(in, groups, nextDistanceLabel, otuTag);
 					if (SharedRelAbund != NULL) {
 						thisLabel = SharedRelAbund->getLabel();
                         
@@ -623,12 +623,12 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 						if (thisLabel == label) {  in.close(); return SharedRelAbund;  }
 						else { delete SharedRelAbund; }
 					}else{  break;  }
-					m->gobble(in);
+					util.gobble(in);
 				}
 			}else if (format == "sharedfile")  {
 				while (in.eof() != true) {
 					
-					SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(in, groups);
+					SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(in, groups, nextDistanceLabel, otuTag);
 					if (SharedRAbund != NULL) {
 						thisLabel = SharedRAbund->getLabel();
                         
@@ -647,7 +647,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
                             return SharedRelAbund;
 						}else { delete SharedRAbund; }
 					}else{  break;  }
-					m->gobble(in);
+					util.gobble(in);
 				}
 			}	
 		}
@@ -670,10 +670,10 @@ SAbundVector* InputData::getSAbundVector(){
 	try {
 		if(fileHandle){
 			if (format == "list") {
-				input = new ListVector(fileHandle);
+				input = new ListVector(fileHandle, nextDistanceLabel, otuTag);
 			}
 			else if (format == "shared")  {
-				input = new SharedListVector(fileHandle, groups);
+				input = new SharedListVector(fileHandle, groups, nextDistanceLabel, otuTag);
 			}
 			else if(format == "rabund"){
 				input = new RAbundVector(fileHandle);
@@ -684,7 +684,7 @@ SAbundVector* InputData::getSAbundVector(){
 			else if(format == "sabund"){
 				input = new SAbundVector(fileHandle);
 			}					
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 
 			sabund = new SAbundVector();
 			*sabund = (input->getSAbundVector());
@@ -706,35 +706,35 @@ SAbundVector* InputData::getSAbundVector(string label){
 	
 		ifstream in;
 		string  thisLabel;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		
 		if(in){
 			if (format == "list") {
-                m->setSaveNextLabel("");
+                nextDistanceLabel = "";
 				while (in.eof() != true) {
 					
-					input = new ListVector(in);
+					input = new ListVector(in, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
 					
 					//if you are at the last label
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 			}
 			else if (format == "shared")  {
-				m->setSaveNextLabel("");
+				nextDistanceLabel = "";
 				while (in.eof() != true) {
 					
-					input = new SharedListVector(in, groups);
+					input = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
 					
 					//if you are at the last label
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -749,7 +749,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -764,7 +764,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -779,7 +779,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 					
 				}
 
@@ -808,10 +808,10 @@ RAbundVector* InputData::getRAbundVector(){
 	try {
 		if(fileHandle){
 			if (format == "list") {
-				input = new ListVector(fileHandle);
+				input = new ListVector(fileHandle, nextDistanceLabel, otuTag);
 			}
 			else if (format == "shared")  {
-				input = new SharedListVector(fileHandle, groups);
+				input = new SharedListVector(fileHandle, groups, nextDistanceLabel, otuTag);
 			}
 			else if(format == "rabund"){
 				input = new RAbundVector(fileHandle);
@@ -823,7 +823,7 @@ RAbundVector* InputData::getRAbundVector(){
 				input = new SAbundVector(fileHandle);
 			}
 			
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 
 			rabund = new RAbundVector();
 			*rabund = (input->getRAbundVector());
@@ -845,37 +845,37 @@ RAbundVector* InputData::getRAbundVector(string label){
 	
 		ifstream in;
 		string  thisLabel;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		
 		if(in){
 			if (format == "list") {
-                m->setSaveNextLabel("");
+                nextDistanceLabel = "";
 			
 				while (in.eof() != true) {
 					
-					input = new ListVector(in);
+					input = new ListVector(in, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
 					
 					//if you are at the last label
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 			}
 			else if (format == "shared")  {
-                m->setSaveNextLabel("");
+                nextDistanceLabel = "";
 				
 				while (in.eof() != true) {
 					
-					input = new SharedListVector(in, groups);
+					input = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
 					
 					//if you are at the last label
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -890,7 +890,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -905,7 +905,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 				}
 
 			}
@@ -920,7 +920,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					m->gobble(in);
+					util.gobble(in);
 					
 				}
 

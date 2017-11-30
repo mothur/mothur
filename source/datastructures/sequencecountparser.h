@@ -13,6 +13,7 @@
 #include "mothurout.h"
 #include "sequence.hpp"
 #include "counttable.h"
+#include "utils.hpp"
 
 /* This class reads a fasta and count file and parses the data by group. The countfile must contain group information.
  

@@ -133,14 +133,14 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			format = "";
 				
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -148,7 +148,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -156,7 +156,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -164,7 +164,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -172,51 +172,51 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 
 			//required parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  format = "phylip"; 	inputfile = phylipfile; m-> setPhylipFile(phylipfile); if (outputDir == "") { outputDir += m->hasPath(phylipfile); }  }
+			else {  format = "phylip"; 	inputfile = phylipfile; current->setPhylipFile(phylipfile); if (outputDir == "") { outputDir += util.hasPath(phylipfile); }  }
 			
-			columnfile = validParameter.validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  format = "column";	inputfile = columnfile; m->setColumnFile(columnfile); if (outputDir == "") { outputDir += m->hasPath(columnfile); } }
+			else {  format = "column";	inputfile = columnfile; current->setColumnFile(columnfile); if (outputDir == "") { outputDir += util.hasPath(columnfile); } }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "shared";	inputfile = sharedfile; m->setSharedFile(sharedfile); if (outputDir == "") { outputDir += m->hasPath(sharedfile); } }
+			else {  format = "shared";	inputfile = sharedfile; current->setSharedFile(sharedfile); if (outputDir == "") { outputDir += util.hasPath(sharedfile); } }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 			//error checking on files			
 			if ((sharedfile == "") && ((phylipfile == "") && (columnfile == "")))	{ 
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { format = "shared"; inputfile = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
 					//is there are current file available for either of these?
 					//give priority to column, then phylip
-					columnfile = m->getColumnFile(); 
+					columnfile = current->getColumnFile(); 
 					if (columnfile != "") {  format = "column"; inputfile = columnfile; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
 					else { 
-						phylipfile = m->getPhylipFile(); 
+						phylipfile = current->getPhylipFile(); 
 						if (phylipfile != "") { format = "phylip";  inputfile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 						else { 
 							m->mothurOut("No valid current files. You must provide a shared or phylip or column file."); m->mothurOutEndLine(); 
@@ -229,10 +229,10 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			
 			if (columnfile != "") {
 				if (namefile == "") { 
-					namefile = m->getNameFile(); 
+					namefile = current->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
-                        countfile = m->getCountTableFile(); 
+                        countfile = current->getCountFile(); 
 						if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                         else { 
                             m->mothurOut("You need to provide a name or count file if you are going to use the column format."); m->mothurOutEndLine(); 
@@ -244,39 +244,39 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 							
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 				
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "jest-thetayc";  }
 			else { 
 				if (calc == "default")  {  calc = "jest-thetayc";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
 				
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			string temp = validParameter.validFile(parameters, "fontsize", false);				if (temp == "not found") { temp = "24"; }
-			m->mothurConvert(temp, fontsize);
+			string temp = validParameter.valid(parameters, "fontsize");				if (temp == "not found") { temp = "24"; }
+			util.mothurConvert(temp, fontsize);
 			
 			if (!abort) {
 				ValidCalculators validCalculator;
@@ -334,7 +334,7 @@ int HeatMapSimCommand::execute(){
 		
 		delete heatmap;
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear(); return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear(); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -385,7 +385,7 @@ int HeatMapSimCommand::runCommandShared() {
 				userLabels.erase(lookup->getLabel());
 			}
 				
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
@@ -470,7 +470,7 @@ int HeatMapSimCommand::runCommandDist() {
 		//read distance file and create distance vector and names vector
 		if (format == "phylip") {
 			//read phylip file
-			m->openInputFile(phylipfile, in);
+			util.openInputFile(phylipfile, in);
 			
 			string name;
 			int numSeqs;
@@ -518,7 +518,7 @@ int HeatMapSimCommand::runCommandDist() {
 					if (m->getControl_pressed()) { return 0; }
 					
 					for(int j=0;j<numSeqs;j++) { in >> matrix[i][j];  }
-					m->gobble(in);
+					util.gobble(in);
 				}
 			}else { 
 				double dist;
@@ -532,7 +532,7 @@ int HeatMapSimCommand::runCommandDist() {
 						in >> dist;
 						matrix[i][j] = dist;  matrix[j][i] = dist;
 					}
-					m->gobble(in);
+					util.gobble(in);
 				}
 			}
 			in.close();
@@ -563,10 +563,10 @@ int HeatMapSimCommand::runCommandDist() {
 			//read column file
 			string first, second;
 			double dist;
-			m->openInputFile(columnfile, in);
+			util.openInputFile(columnfile, in);
 			
 			while (!in.eof()) {
-				in >> first >> second >> dist; m->gobble(in);
+				in >> first >> second >> dist; util.gobble(in);
 				
 				if (m->getControl_pressed()) { return 0; }
 				

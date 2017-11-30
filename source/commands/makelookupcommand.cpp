@@ -108,14 +108,14 @@ MakeLookupCommand::MakeLookupCommand(string option)  {
             outputTypes["lookup"] = tempOutNames; 
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 string path;
 				it = parameters.find("flow");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
 				}
@@ -123,7 +123,7 @@ MakeLookupCommand::MakeLookupCommand(string option)  {
 				it = parameters.find("error");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["error"] = inputDir + it->second;		}
 				}
@@ -131,7 +131,7 @@ MakeLookupCommand::MakeLookupCommand(string option)  {
 				it = parameters.find("reference");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
@@ -139,32 +139,32 @@ MakeLookupCommand::MakeLookupCommand(string option)  {
             }
                         
 			//check for parameters
-            errorFileName = validParameter.validFile(parameters, "error", true);
+            errorFileName = validParameter.validFile(parameters, "error");
 			if (errorFileName == "not open") { errorFileName = ""; abort = true; }
 			else if (errorFileName == "not found") { errorFileName = ""; m->mothurOut("[ERROR]: error parameter is required."); m->mothurOutEndLine();  abort = true; }
 			
-			flowFileName = validParameter.validFile(parameters, "flow", true);
+			flowFileName = validParameter.validFile(parameters, "flow");
 			if (flowFileName == "not open") { flowFileName = ""; abort = true; }
 			else if (flowFileName == "not found") { flowFileName = ""; m->mothurOut("[ERROR]: flow parameter is required."); m->mothurOutEndLine();  abort = true; }
-			else {   m->setFlowFile(flowFileName);	}
+			else {   current->setFlowFile(flowFileName);	}
 			
-			refFastaFileName = validParameter.validFile(parameters, "reference", true);
+			refFastaFileName = validParameter.validFile(parameters, "reference");
 			if (refFastaFileName == "not open") { abort = true; }
 			else if (refFastaFileName == "not found") { refFastaFileName = ""; m->mothurOut("[ERROR]: reference parameter is required."); m->mothurOutEndLine();  abort = true; }
                       
             //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){
-				outputDir = m->hasPath(flowFileName); //if user entered a file with a path then preserve it
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
+				outputDir = util.hasPath(flowFileName); //if user entered a file with a path then preserve it
 			}
             
-            string temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "10000";	}
-			m->mothurConvert(temp, thresholdCount);
+            string temp = validParameter.valid(parameters, "threshold");	if (temp == "not found"){	temp = "10000";	}
+			util.mothurConvert(temp, thresholdCount);
             
-            barcodeSequence = validParameter.validFile(parameters, "barcode", false);	if (barcodeSequence == "not found"){	barcodeSequence = "AACCGTGTC";	}
+            barcodeSequence = validParameter.valid(parameters, "barcode");	if (barcodeSequence == "not found"){	barcodeSequence = "AACCGTGTC";	}
             
-            keySequence = validParameter.validFile(parameters, "key", false);	if (keySequence == "not found"){	keySequence = "TCAG";	}
+            keySequence = validParameter.valid(parameters, "key");	if (keySequence == "not found"){	keySequence = "TCAG";	}
             
-            temp = validParameter.validFile(parameters, "order", false);  if (temp == "not found"){ 	temp = "A";	}
+            temp = validParameter.valid(parameters, "order");  if (temp == "not found"){ 	temp = "A";	}
             if (temp.length() > 1) {  m->mothurOut("[ERROR]: " + temp + " is not a valid option for order. order options are A, B, or I. A = TACG, B = TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC, and I = TACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGC.\n");  abort=true;
             }
             else {
@@ -206,13 +206,13 @@ int MakeLookupCommand::execute(){
         
         //Create flows for reference sequences...
         ifstream refFASTA;
-        m->openInputFile(refFastaFileName, refFASTA);                        //  *   open reference sequence file
+        util.openInputFile(refFastaFileName, refFASTA);                        //  *   open reference sequence file
         map<string, vector<double> > refFlowgrams;
         
         while(!refFASTA.eof()){
             if (m->getControl_pressed()) { refFASTA.close(); return 0; }
             
-            Sequence seq(refFASTA);  m->gobble(refFASTA);
+            Sequence seq(refFASTA);  util.gobble(refFASTA);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: seq = " + seq.getName() + ".\n"); }
             
@@ -230,15 +230,15 @@ int MakeLookupCommand::execute(){
         if (m->getDebug()) { m->mothurOut("[DEBUG]: here .\n"); }
         //Loop through each sequence in the flow file and the error summary file.
         ifstream flowFile;
-        m->openInputFile(flowFileName, flowFile);
+        util.openInputFile(flowFileName, flowFile);
         int numFlows;
         flowFile >> numFlows;
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: numflows = " + toString(numFlows) +  ".\n"); }
         
         ifstream errorFile;
-        m->openInputFile(errorFileName, errorFile);
-        m->getline(errorFile); //grab headers
+        util.openInputFile(errorFileName, errorFile);
+        util.getline(errorFile); //grab headers
         
         string errorQuery, flowQuery, referenceName, dummy;
         string chimera;
@@ -259,7 +259,7 @@ int MakeLookupCommand::execute(){
            
             
             if(chimera == "2"){
-                m->getline(flowFile);
+                util.getline(flowFile);
             }
             else{
                 
@@ -269,7 +269,7 @@ int MakeLookupCommand::execute(){
                 map<string, vector<double> >::iterator it = refFlowgrams.find(referenceName);       //  * compare sequence to its closest reference
                 if (it == refFlowgrams.end()) {
                     m->mothurOut("[WARNING]: missing reference flow " + referenceName + ", ignoring flow " + flowQuery + ".\n");
-                    m->getline(flowFile); m->gobble(flowFile);
+                    util.getline(flowFile); util.gobble(flowFile);
                 }else {
                     vector<double> refFlow = it->second;
                     vector<double> flowgram; flowgram.resize(numFlows);
@@ -280,7 +280,7 @@ int MakeLookupCommand::execute(){
                         flowFile >> intensity;
                         flowgram[i] = intensity;// (int)round(100 * intensity);
                     }
-                    m->gobble(flowFile);
+                    util.gobble(flowFile);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: before align.\n"); }
                     
@@ -301,8 +301,8 @@ int MakeLookupCommand::execute(){
                 }
                 
             }
-            m->gobble(errorFile);
-            m->gobble(flowFile);
+            util.gobble(errorFile);
+            util.gobble(flowFile);
         }
         errorFile.close(); flowFile.close();
         
@@ -365,12 +365,12 @@ int MakeLookupCommand::execute(){
         
         //output data table.  column one is the probability of each homopolymer length
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(flowFileName));
 		string outputFile = getOutputFileName("lookup",variables);
 		outputNames.push_back(outputFile); outputTypes["lookup"].push_back(outputFile);
         
         ofstream lookupFile;
-        m->openOutputFile(outputFile, lookupFile);
+        util.openOutputFile(outputFile, lookupFile);
         lookupFile.precision(8);
         
         for(int j=0;j<11;j++){
@@ -385,7 +385,7 @@ int MakeLookupCommand::execute(){
         
         m->mothurOut("\nData for homopolymer lengths of " + toString(N) + " and longer were imputed for this analysis\n\n");
          
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

@@ -109,6 +109,7 @@ struct summarySharedData {
 	string sumFile, sumAllFile;
     int count;
     bool main, mult;
+    Utils util;
     
 	summarySharedData(){}
 	summarySharedData(string sf, string sfa, MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu, bool mai, bool mu) {

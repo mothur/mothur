@@ -89,7 +89,7 @@ void RareDisplay::close(){
             sort((it->second).begin(), (it->second).end());
             
             vector<double> thisResults = it->second;
-            double meanResults = m->getAverage(thisResults);
+            double meanResults = util.getAverage(thisResults);
 			data[0] = meanResults;
 			data[1] = (it->second)[(int)(0.025*(nIters-1))];
 			data[2] = (it->second)[(int)(0.975*(nIters-1))];
@@ -115,27 +115,27 @@ void RareDisplay::close(){
 void RareDisplay::inputTempFiles(string filename){
 	try {
 		ifstream in;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		
 		int thisIters, size;
-		in >> thisIters >> size; m->gobble(in);
+		in >> thisIters >> size; util.gobble(in);
         nIters += thisIters;
 		
 		for (int i = 0; i < size; i++) {
 			int tempCount;
-            in >> tempCount; m->gobble(in);
+            in >> tempCount; util.gobble(in);
             map<int, vector<double> >::iterator it = results.find(tempCount);
             if (it != results.end()) {
                 for (int j = 0; j < thisIters; j++) {
                     double value;
-                    in >> value; m->gobble(in);
+                    in >> value; util.gobble(in);
                     (it->second).push_back(value);
                 }
             }else {
                 vector<double> tempValues;
                 for (int j = 0; j < thisIters; j++) {
                     double value;
-                    in >> value; m->gobble(in);
+                    in >> value; util.gobble(in);
                     tempValues.push_back(value);
                 }
                 results[tempCount] = tempValues;
@@ -155,7 +155,7 @@ void RareDisplay::inputTempFiles(string filename){
 void RareDisplay::outputTempFiles(string filename){
 	try {
 		ofstream out;
-		m->openOutputFile(filename, out);
+		util.openOutputFile(filename, out);
 		
 		out << nIters-1 << '\t' << results.size() << endl;
 		

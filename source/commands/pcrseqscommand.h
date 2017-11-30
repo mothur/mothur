@@ -108,22 +108,22 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
 	
 	try {
         ofstream goodFile;
-		pDataArray->m->openOutputFile(pDataArray->goodFasta, goodFile);
+		pDataArray->util.openOutputFile(pDataArray->goodFasta, goodFile);
         
         ofstream badFile;
-		pDataArray->m->openOutputFile(pDataArray->badFasta, badFile);
+		pDataArray->util.openOutputFile(pDataArray->badFasta, badFile);
         
         ofstream locationsFile;
-		pDataArray->m->openOutputFile(pDataArray->locationsName, locationsFile);
+		pDataArray->util.openOutputFile(pDataArray->locationsName, locationsFile);
 		
 		ifstream inFASTA;
-		pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
+		pDataArray->util.openInputFile(pDataArray->filename, inFASTA);
         
 		//print header if you are process 0
 		if ((pDataArray->fstart == 0) || (pDataArray->fstart == 1)) {
 			inFASTA.seekg(0);
 		}else { //this accounts for the difference in line endings. 
-			inFASTA.seekg(pDataArray->fstart-1); pDataArray->m->gobble(inFASTA); 
+			inFASTA.seekg(pDataArray->fstart-1); pDataArray->util.gobble(inFASTA); 
 		}
         
         set<int> lengths;
@@ -159,7 +159,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
             pDataArray->count++;
 			if (pDataArray->m->getControl_pressed()) {  break; }
 			
-			Sequence currSeq(inFASTA); pDataArray->m->gobble(inFASTA);
+			Sequence currSeq(inFASTA); pDataArray->util.gobble(inFASTA);
             
             if (pDataArray->fileAligned) { //assume aligned until proven otherwise
                 lengths.insert(currSeq.getAligned().length());

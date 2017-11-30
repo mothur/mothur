@@ -137,14 +137,14 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -152,7 +152,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 				it = parameters.find("oligos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
 				}
@@ -160,7 +160,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
                 it = parameters.find("ecoli");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["ecoli"] = inputDir + it->second;		}
 				}
@@ -168,7 +168,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -176,7 +176,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -184,7 +184,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
                 it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -192,7 +192,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -201,49 +201,49 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
             
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else if (fastafile == "not open") { fastafile = ""; abort = true; }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
             //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(fastafile);	}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "keepprimer", false);  if (temp == "not found")    {	temp = "f";	}
-			keepprimer = m->isTrue(temp);	
+			temp = validParameter.valid(parameters, "keepprimer");  if (temp == "not found")    {	temp = "f";	}
+			keepprimer = util.isTrue(temp);	
             
-            temp = validParameter.validFile(parameters, "keepdots", false);  if (temp == "not found")    {	temp = "t";	}
-			keepdots = m->isTrue(temp);	
+            temp = validParameter.valid(parameters, "keepdots");  if (temp == "not found")    {	temp = "t";	}
+			keepdots = util.isTrue(temp);	
             
-			temp = validParameter.validFile(parameters, "oligos", true);
+			temp = validParameter.validFile(parameters, "oligos");
 			if (temp == "not found"){	oligosfile = "";		}
 			else if(temp == "not open"){	oligosfile = ""; abort = true;	} 
-			else					{	oligosfile = temp; m->setOligosFile(oligosfile);		}
+			else					{	oligosfile = temp; current->setOligosFile(oligosfile);		}
 			
-            ecolifile = validParameter.validFile(parameters, "ecoli", true);
+            ecolifile = validParameter.validFile(parameters, "ecoli");
 			if (ecolifile == "not found"){	ecolifile = "";		}
 			else if(ecolifile == "not open"){	ecolifile = ""; abort = true;	} 
 			
-            namefile = validParameter.validFile(parameters, "name", true);
+            namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found"){	namefile = "";		}
 			else if(namefile == "not open"){	namefile = ""; abort = true;	} 
-            else { m->setNameFile(namefile); }
+            else { current->setNameFile(namefile); }
             
-            groupfile = validParameter.validFile(parameters, "group", true);
+            groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not found"){	groupfile = "";		}
 			else if(groupfile == "not open"){	groupfile = ""; abort = true;	} 
-            else { m->setGroupFile(groupfile); }
+            else { current->setGroupFile(groupfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -253,28 +253,27 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
             }
             
-            taxfile = validParameter.validFile(parameters, "taxonomy", true);
+            taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not found"){	taxfile = "";		}
 			else if(taxfile == "not open"){	taxfile = ""; abort = true;	} 
-            else { m->setTaxonomyFile(taxfile); }
+            else { current->setTaxonomyFile(taxfile); }
 			 			
-			temp = validParameter.validFile(parameters, "start", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, start);
+			temp = validParameter.valid(parameters, "start");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, start);
             
-            temp = validParameter.validFile(parameters, "end", false);	if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, end);
+            temp = validParameter.valid(parameters, "end");	if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, end);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
+                    
+            temp = validParameter.valid(parameters, "pdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, pdiffs);
             
-            temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, pdiffs);
-            
-            temp = validParameter.validFile(parameters, "rdiffs", false);		if (temp == "not found") { temp = "0"; }
-            m->mothurConvert(temp, rdiffs);
+            temp = validParameter.valid(parameters, "rdiffs");		if (temp == "not found") { temp = "0"; }
+            util.mothurConvert(temp, rdiffs);
 			
-            nomatch = validParameter.validFile(parameters, "nomatch", false);	if (nomatch == "not found") { nomatch = "reject"; }
+            nomatch = validParameter.valid(parameters, "nomatch");	if (nomatch == "not found") { nomatch = "reject"; }
 			
             if ((nomatch != "reject") && (nomatch != "keep")) { m->mothurOut("[ERROR]: " + nomatch + " is not a valid entry for nomatch. Choices are reject and keep.\n");  abort = true; }
             
@@ -316,14 +315,14 @@ int PcrSeqsCommand::execute(){
         
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        int start = time(NULL);
+        long start = time(NULL);
         fileAligned = true; pairedOligos = false;
         
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
-        variables["[extension]"] = m->getExtension(fastafile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[extension]"] = util.getExtension(fastafile);
 		string trimSeqFile = getOutputFileName("fasta",variables);
 		outputNames.push_back(trimSeqFile); outputTypes["fasta"].push_back(trimSeqFile);
         variables["[tag]"] = "scrap";
@@ -337,7 +336,7 @@ int PcrSeqsCommand::execute(){
         vector<unsigned long long> positions; 
         long long numFastaSeqs = 0;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(fastafile, processors);
+        positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
         if (processors == 1) {
@@ -364,18 +363,18 @@ int PcrSeqsCommand::execute(){
         
         //don't write or keep if blank
         if (badNames.size() != 0)   { writeAccnos(badNames);        }   
-        if (m->isBlank(badSeqFile)) { m->mothurRemove(badSeqFile);  }
+        if (util.isBlank(badSeqFile)) { util.mothurRemove(badSeqFile);  }
         else { outputNames.push_back(badSeqFile); outputTypes["fasta"].push_back(badSeqFile); }
         
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         if (namefile != "")			{		readName(badNames);		}   
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         if (groupfile != "")		{		readGroup(badNames);    }
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 		if (taxfile != "")			{		readTax(badNames);		}
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
   		if (countfile != "")			{		readCount(badNames);		}
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
       
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -384,35 +383,35 @@ int PcrSeqsCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("accnos");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("taxonomy");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 		}
         
         itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
         
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
@@ -448,13 +447,13 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-                string locationsFile = m->mothurGetpid(process) + ".temp";
-				num = driverPcr(filename, goodFileName + m->mothurGetpid(process) + ".temp", badFileName + m->mothurGetpid(process) + ".temp", locationsFile, badSeqNames, lines[process], pstart, adjustNeeded);
+                string locationsFile = toString(process) + ".temp";
+				num = driverPcr(filename, goodFileName + toString(process) + ".temp", badFileName + toString(process) + ".temp", locationsFile, badSeqNames, lines[process], pstart, adjustNeeded);
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = filename + toString(process) + ".num.temp";
+				util.openOutputFile(tempFile, out);
                 out << pstart << '\t' << adjustNeeded << endl;
 				out << num << '\t' << badSeqNames.size() << endl;
                 for (set<string>::iterator it = badSeqNames.begin(); it != badSeqNames.end(); it++) {
@@ -473,7 +472,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
+                    util.mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
                 }
                 recalc = true;
                 break;
@@ -483,11 +482,11 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {util.mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
-            vector<unsigned long long> positions = m->divideFile(filename, processors);
+            vector<unsigned long long> positions = util.divideFile(filename, processors);
             for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(linePair(positions[i], positions[(i+1)]));  }
             
             num = 0;
@@ -502,13 +501,13 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
                     processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                     process++;
                 }else if (pid == 0){
-                    string locationsFile = m->mothurGetpid(process) + ".temp";
-                    num = driverPcr(filename, goodFileName + m->mothurGetpid(process) + ".temp", badFileName + m->mothurGetpid(process) + ".temp", locationsFile, badSeqNames, lines[process], pstart, adjustNeeded);
+                    string locationsFile = toString(process) + ".temp";
+                    num = driverPcr(filename, goodFileName + toString(process) + ".temp", badFileName + toString(process) + ".temp", locationsFile, badSeqNames, lines[process], pstart, adjustNeeded);
                     
                     //pass numSeqs to parent
                     ofstream out;
-                    string tempFile = filename + m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
+                    string tempFile = filename + toString(process) + ".num.temp";
+                    util.openOutputFile(tempFile, out);
                     out << pstart << '\t' << adjustNeeded << endl;
                     out << num << '\t' << badSeqNames.size() << endl;
                     for (set<string>::iterator it = badSeqNames.begin(); it != badSeqNames.end(); it++) {
@@ -526,7 +525,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             
         }
 
-        string locationsFile = m->mothurGetpid(process) + ".temp";
+        string locationsFile = toString(process) + ".temp";
         num = driverPcr(filename, goodFileName, badFileName, locationsFile, badSeqNames, lines[0], pstart, adjustNeeded);
         
 		//force parent to wait until all the processes are done
@@ -538,34 +537,34 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
+			util.openInputFile(tempFile, in);
             int numBadNames = 0; string name = "";
             int tpstart = -1; bool tempAdjust = false;
             
 			if (!in.eof()) {
-                in >> tpstart >> tempAdjust; m->gobble(in);
+                in >> tpstart >> tempAdjust; util.gobble(in);
                 
                 if (tempAdjust) { adjustNeeded = true; }
                 if (tpstart != -1)   {
                     if (tpstart != pstart) { adjustNeeded = true; }
                     if (tpstart < pstart) { pstart = tpstart; } //smallest start
                 } 
-                int tempNum = 0; in >> tempNum >> numBadNames; num += tempNum; m->gobble(in);
+                int tempNum = 0; in >> tempNum >> numBadNames; num += tempNum; util.gobble(in);
             }
             for (int j = 0; j < numBadNames; j++) {
-                in >> name; m->gobble(in);
+                in >> name; util.gobble(in);
                 badSeqNames.insert(name);
             }
-			in.close(); m->mothurRemove(tempFile);
+			in.close(); util.mothurRemove(tempFile);
             
-            m->appendFiles((goodFileName + toString(processIDS[i]) + ".temp"), goodFileName);
-            m->mothurRemove((goodFileName + toString(processIDS[i]) + ".temp"));
+            util.appendFiles((goodFileName + toString(processIDS[i]) + ".temp"), goodFileName);
+            util.mothurRemove((goodFileName + toString(processIDS[i]) + ".temp"));
             
-            m->appendFiles((badFileName + toString(processIDS[i]) + ".temp"), badFileName);
-            m->mothurRemove((badFileName + toString(processIDS[i]) + ".temp"));
+            util.appendFiles((badFileName + toString(processIDS[i]) + ".temp"), badFileName);
+            util.mothurRemove((badFileName + toString(processIDS[i]) + ".temp"));
             
-            m->appendFiles((toString(processIDS[i]) + ".temp"), locationsFile);
-            m->mothurRemove((toString(processIDS[i]) + ".temp"));
+            util.appendFiles((toString(processIDS[i]) + ".temp"), locationsFile);
+            util.mothurRemove((toString(processIDS[i]) + ".temp"));
 		}
     #else
         
@@ -580,9 +579,9 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		HANDLE  hThreadArray[processors-1]; 
 		
         string locationsFile = "locationsFile.txt";
-        m->mothurRemove(locationsFile);
-        m->mothurRemove(goodFileName);
-        m->mothurRemove(badFileName);
+        util.mothurRemove(locationsFile);
+        util.mothurRemove(goodFileName);
+        util.mothurRemove(badFileName);
         
 		//Create processor worker threads.
 		for( int i=0; i<processors-1; i++ ){
@@ -623,14 +622,14 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		}
         
         for (int i = 0; i < processIDS.size(); i++) {
-            m->appendFiles((goodFileName + toString(processIDS[i]) + ".temp"), goodFileName);
-            m->mothurRemove((goodFileName + toString(processIDS[i]) + ".temp"));
+            util.appendFiles((goodFileName + toString(processIDS[i]) + ".temp"), goodFileName);
+            util.mothurRemove((goodFileName + toString(processIDS[i]) + ".temp"));
             
-            m->appendFiles((badFileName + toString(processIDS[i]) + ".temp"), badFileName);
-            m->mothurRemove((badFileName + toString(processIDS[i]) + ".temp"));
+            util.appendFiles((badFileName + toString(processIDS[i]) + ".temp"), badFileName);
+            util.mothurRemove((badFileName + toString(processIDS[i]) + ".temp"));
             
-            m->appendFiles((locationsFile+toString(processIDS[i]) + ".temp"), locationsFile);
-            m->mothurRemove((locationsFile+toString(processIDS[i]) + ".temp"));
+            util.appendFiles((locationsFile+toString(processIDS[i]) + ".temp"), locationsFile);
+            util.mothurRemove((locationsFile+toString(processIDS[i]) + ".temp"));
 		}
         
 #endif	
@@ -640,7 +639,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
         if (fileAligned && adjustNeeded) {
             //find pend - pend is the biggest ending value, but we must account for when we adjust the start.  That adjustment may make the "new" end larger then the largest end. So lets find out what that "new" end will be.
             ifstream inLocations;
-            m->openInputFile(locationsFile, inLocations);
+            util.openInputFile(locationsFile, inLocations);
             
             while(!inLocations.eof()) {
                 
@@ -648,8 +647,8 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
                 
                 string name = "";
                 int thisStart = -1; int thisEnd = -1;
-                if (numFPrimers != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
-                if (numRPrimers != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
+                if (numFPrimers != 0)    { inLocations >> name >> thisStart; util.gobble(inLocations); }
+                if (numRPrimers != 0)  { inLocations >> name >> thisEnd;   util.gobble(inLocations); }
                 else { pend = -1; break; }
                 
                 int myDiff = 0;
@@ -668,7 +667,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             inLocations.close();
             
             adjustDots(goodFileName, locationsFile, pstart, pend);
-        }else { m->mothurRemove(locationsFile); }
+        }else { util.mothurRemove(locationsFile); }
         
         return num;
         
@@ -683,16 +682,16 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta, string locationsName, set<string>& badSeqNames, linePair filePos, int& pstart, bool& adjustNeeded){
 	try {
 		ofstream goodFile;
-		m->openOutputFile(goodFasta, goodFile);
+		util.openOutputFile(goodFasta, goodFile);
         
         ofstream badFile;
-		m->openOutputFile(badFasta, badFile);
+		util.openOutputFile(badFasta, badFile);
         
         ofstream locationsFile;
-		m->openOutputFile(locationsName, locationsFile);
+		util.openOutputFile(locationsName, locationsFile);
 		
 		ifstream inFASTA;
-		m->openInputFile(filename, inFASTA);
+		util.openInputFile(filename, inFASTA);
         
 		inFASTA.seekg(filePos.start);
         
@@ -724,7 +723,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
             
 			if (m->getControl_pressed()) {  break; }
 			
-			Sequence currSeq(inFASTA); m->gobble(inFASTA);
+			Sequence currSeq(inFASTA); util.gobble(inFASTA);
             
             if (fileAligned) { //assume aligned until proven otherwise
                 lengths.insert(currSeq.getAligned().length());
@@ -950,13 +949,13 @@ bool PcrSeqsCommand::isAligned(string seq, map<int, int>& aligned){
 int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, int pend){
     try {
         ifstream inFasta;
-        m->openInputFile(goodFasta, inFasta);
+        util.openInputFile(goodFasta, inFasta);
         
         ifstream inLocations;
-        m->openInputFile(locations, inLocations);
+        util.openInputFile(locations, inLocations);
         
         ofstream out;
-        m->openOutputFile(goodFasta+".temp", out);
+        util.openOutputFile(goodFasta+".temp", out);
         
         set<int> lengths;
         //cout << pstart << '\t' << pend << endl;
@@ -965,12 +964,12 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
         while(!inFasta.eof()) {
             if(m->getControl_pressed()) { break; }
             
-            Sequence seq(inFasta); m->gobble(inFasta);
+            Sequence seq(inFasta); util.gobble(inFasta);
             
             string name = "";
             int thisStart = -1; int thisEnd = -1;
-            if (numFPrimers != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
-            if (numRPrimers != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
+            if (numFPrimers != 0)    { inLocations >> name >> thisStart; util.gobble(inLocations); }
+            if (numRPrimers != 0)  { inLocations >> name >> thisEnd;   util.gobble(inLocations); }
             
             
             //cout << "'" << seq.getName() << "'" << '\t' << thisStart << '\t' << thisEnd << '\t' << seq.getAligned().length() << endl;
@@ -1007,9 +1006,9 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
         inFasta.close();
         inLocations.close();
         out.close();
-        m->mothurRemove(locations);
-        m->mothurRemove(goodFasta);
-        m->renameFile(goodFasta+".temp", goodFasta);
+        util.mothurRemove(locations);
+        util.mothurRemove(goodFasta);
+        util.renameFile(goodFasta+".temp", goodFasta);
         
         //cout << "final lengths = \n";
         //for (set<int>::iterator it = lengths.begin(); it != lengths.end(); it++) {
@@ -1028,7 +1027,7 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
 bool PcrSeqsCommand::readEcoli(){
 	try {
 		ifstream in;
-		m->openInputFile(ecolifile, in);
+		util.openInputFile(ecolifile, in);
 		
         //read seq
         if (!in.eof()){ 
@@ -1051,14 +1050,14 @@ bool PcrSeqsCommand::readEcoli(){
 int PcrSeqsCommand::writeAccnos(set<string> badNames){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFileName = getOutputFileName("accnos",variables);
         outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
         
         ofstream out;
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         
         for (set<string>::iterator it = badNames.begin(); it != badNames.end(); it++) {
             if (m->getControl_pressed()) { break; }
@@ -1078,31 +1077,31 @@ int PcrSeqsCommand::writeAccnos(set<string> badNames){
 int PcrSeqsCommand::readName(set<string>& names){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
-        variables["[extension]"] = m->getExtension(namefile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+        variables["[extension]"] = util.getExtension(namefile);
 		string outputFileName = getOutputFileName("name", variables);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		ifstream in;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
-			in >> firstCol;		m->gobble(in);		
+			in >> firstCol;		util.gobble(in);		
 			in >> secondCol;			
 			
             string savedSecond = secondCol;
 			vector<string> parsedNames;
-			m->splitAtComma(secondCol, parsedNames);
+			util.splitAtComma(secondCol, parsedNames);
 			
 			vector<string> validSecond;  validSecond.clear();
 			for (int i = 0; i < parsedNames.size(); i++) {
@@ -1118,7 +1117,7 @@ int PcrSeqsCommand::readName(set<string>& names){
                 out << firstCol << '\t' << savedSecond << endl;
                 wroteSomething = true;
             }
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -1139,27 +1138,27 @@ int PcrSeqsCommand::readName(set<string>& names){
 int PcrSeqsCommand::readGroup(set<string> names){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-        variables["[extension]"] = m->getExtension(groupfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+        variables["[extension]"] = util.getExtension(groupfile);
 		string outputFileName = getOutputFileName("group", variables);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		ifstream in;
-		m->openInputFile(groupfile, in);
+		util.openInputFile(groupfile, in);
 		string name, group;
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
-			in >> name;		m->gobble(in);		//read from first column
-			in >> group;	m->gobble(in);		//read from second column
+			in >> name;		util.gobble(in);		//read from first column
+			in >> group;	util.gobble(in);		//read from second column
 			
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {
@@ -1187,27 +1186,27 @@ int PcrSeqsCommand::readGroup(set<string> names){
 int PcrSeqsCommand::readTax(set<string> names){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxfile));
-        variables["[extension]"] = m->getExtension(taxfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
+        variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
 
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		ifstream in;
-		m->openInputFile(taxfile, in);
+		util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
-            in >> name; m->gobble(in);
-            tax = m->getline(in); m->gobble(in);
+            in >> name; util.gobble(in);
+            tax = util.getline(in); util.gobble(in);
 			
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {
@@ -1235,30 +1234,30 @@ int PcrSeqsCommand::readTax(set<string> names){
 int PcrSeqsCommand::readCount(set<string> badSeqNames){
 	try {
 		ifstream in;
-		m->openInputFile(countfile, in);
+		util.openInputFile(countfile, in);
 		set<string>::iterator it;
 		
 		map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(countfile));
-        variables["[extension]"] = m->getExtension(countfile);
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[extension]"] = util.getExtension(countfile);
 		string goodCountFile = getOutputFileName("count", variables);
 
         outputNames.push_back(goodCountFile);  outputTypes["count"].push_back(goodCountFile);
-		ofstream goodCountOut;	m->openOutputFile(goodCountFile, goodCountOut);
+		ofstream goodCountOut;	util.openOutputFile(goodCountFile, goodCountOut);
 		
-        string headers = m->getline(in); m->gobble(in);
+        string headers = util.getline(in); util.gobble(in);
         goodCountOut << headers << endl;
-        string test = headers; vector<string> pieces = m->splitWhiteSpace(test);
+        string test = headers; vector<string> pieces = util.splitWhiteSpace(test);
         
         string name, rest; int thisTotal, removedCount; removedCount = 0; rest = "";
         bool wroteSomething = false;
         while (!in.eof()) {
             
-			if (m->getControl_pressed()) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
+			if (m->getControl_pressed()) { goodCountOut.close(); in.close(); util.mothurRemove(goodCountFile); return 0; }
             
-			in >> name; m->gobble(in); 
-            in >> thisTotal; m->gobble(in);
-            if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
+			in >> name; util.gobble(in); 
+            in >> thisTotal; util.gobble(in);
+            if (pieces.size() > 2) {  rest = util.getline(in); util.gobble(in);  }
             
 			if (badSeqNames.count(name) != 0) { removedCount+=thisTotal; }
 			else{
@@ -1269,7 +1268,7 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
 		in.close();
 		goodCountOut.close();
         
-        if (m->getControl_pressed()) { m->mothurRemove(goodCountFile);   }
+        if (m->getControl_pressed()) { util.mothurRemove(goodCountFile);   }
         
         if (wroteSomething == false) {  m->mothurOut("Your count file contains only sequences from the .accnos file."); m->mothurOutEndLine(); }
         
@@ -1280,7 +1279,7 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
             ct.printTable(goodCountFile);
         }
 		
-		if (m->getControl_pressed()) { m->mothurRemove(goodCountFile);   }
+		if (m->getControl_pressed()) { util.mothurRemove(goodCountFile);   }
         
         m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file."); m->mothurOutEndLine();
 

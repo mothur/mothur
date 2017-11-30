@@ -138,14 +138,14 @@ MGClusterCommand::MGClusterCommand(string option) {
             outputTypes["sensspec"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("blast");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["blast"] = inputDir + it->second;		}
 				}
@@ -153,7 +153,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -161,7 +161,7 @@ MGClusterCommand::MGClusterCommand(string option) {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -169,25 +169,25 @@ MGClusterCommand::MGClusterCommand(string option) {
 
 			
 			//check for required parameters
-			blastfile = validParameter.validFile(parameters, "blast", true);
+			blastfile = validParameter.validFile(parameters, "blast");
 			if (blastfile == "not open") { blastfile = ""; abort = true; }	
 			else if (blastfile == "not found") { blastfile = ""; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(blastfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(blastfile); //if user entered a file with a path then preserve it	
 			}
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; }	
 			else if (countfile == "not found") { countfile = ""; }
-            else { m->setCountTableFile(countfile); }
+            else { current->setCountFile(countfile); }
             
             if (countfile != "" && namefile != "") { m->mothurOut("[ERROR]: Cannot have both a name file and count file. Please use one or the other."); m->mothurOutEndLine(); abort = true; }
 			
@@ -195,53 +195,53 @@ MGClusterCommand::MGClusterCommand(string option) {
 			
 			//check for optional parameter and set defaults
 			string temp;
-            temp = validParameter.validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
+            temp = validParameter.valid(parameters, "precision");		if (temp == "not found") { temp = "100"; }
 			precisionLength = temp.length();
-			m->mothurConvert(temp, precision); 
+			util.mothurConvert(temp, precision); 
 			
             cutoffSet = false;
-			temp = validParameter.validFile(parameters, "cutoff", false);
+			temp = validParameter.valid(parameters, "cutoff");
             if (temp == "not found") { temp = "0.70"; }
             else { cutoffSet = true;  }
-			m->mothurConvert(temp, cutoff);
+			util.mothurConvert(temp, cutoff);
 			
-			method = validParameter.validFile(parameters, "method", false);
+			method = validParameter.valid(parameters, "method");
 			if (method == "not found") { method = "opti"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "opti")) { }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average or opti."); m->mothurOutEndLine(); abort = true; }
             
-            metric = validParameter.validFile(parameters, "metric", false);		if (metric == "not found") { metric = "mcc"; }
+            metric = validParameter.valid(parameters, "metric");		if (metric == "not found") { metric = "mcc"; }
             
             if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
             
-            initialize = validParameter.validFile(parameters, "initialize", false);		if (initialize == "not found") { initialize = "singleton"; }
+            initialize = validParameter.valid(parameters, "initialize");		if (initialize == "not found") { initialize = "singleton"; }
             
             if ((initialize == "singleton") || (initialize == "oneotu")){ }
             else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
             
-            temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.0001"; }
-            m->mothurConvert(temp, stableMetric);
+            temp = validParameter.valid(parameters, "delta");		if (temp == "not found")  { temp = "0.0001"; }
+            util.mothurConvert(temp, stableMetric);
             
-            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
-            m->mothurConvert(temp, maxIters);
+            temp = validParameter.valid(parameters, "iters");		if (temp == "not found")  { temp = "100"; }
+            util.mothurConvert(temp, maxIters);
 
-			temp = validParameter.validFile(parameters, "length", false);			if (temp == "not found") { temp = "5"; }
-			m->mothurConvert(temp, length); 
+			temp = validParameter.valid(parameters, "length");			if (temp == "not found") { temp = "5"; }
+			util.mothurConvert(temp, length); 
 			
-			temp = validParameter.validFile(parameters, "penalty", false);			if (temp == "not found") { temp = "0.10"; }
-			m->mothurConvert(temp, penalty); 
+			temp = validParameter.valid(parameters, "penalty");			if (temp == "not found") { temp = "0.10"; }
+			util.mothurConvert(temp, penalty); 
 			
-			temp = validParameter.validFile(parameters, "min", false);				if (temp == "not found") { temp = "true"; }
-			minWanted = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "min");				if (temp == "not found") { temp = "true"; }
+			minWanted = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "merge", false);			if (temp == "not found") { temp = "true"; }
-			merge = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "merge");			if (temp == "not found") { temp = "true"; }
+			merge = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "adjust", false);				if (temp == "not found") { if (cutoffSet) { temp = "F"; }else { temp="T"; } }
-            if (m->isNumeric1(temp))    { m->mothurConvert(temp, adjust);   }
-            else if (m->isTrue(temp))   { adjust = 1.0;                     }
+            temp = validParameter.valid(parameters, "adjust");				if (temp == "not found") { if (cutoffSet) { temp = "F"; }else { temp="T"; } }
+            if (util.isNumeric1(temp))    { util.mothurConvert(temp, adjust);   }
+            else if (util.isTrue(temp))   { adjust = 1.0;                     }
             else                        { adjust = -1.0;                    }
 		}
 
@@ -256,7 +256,7 @@ int MGClusterCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        fileroot = outputDir + m->getRootName(m->getSimpleName(blastfile));
+        fileroot = outputDir + util.getRootName(util.getSimpleName(blastfile));
         tag = "";
         if (method == "furthest")		{ tag = "fn";  }
         else if (method == "nearest")	{ tag = "nn";  }
@@ -276,22 +276,22 @@ int MGClusterCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set list file as new current listfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("list");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 		}
 		
 		//set rabund file as new current rabundfile
 		itTypes = outputTypes.find("rabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setRabundFile(currentName); }
 		}
 		
 		//set sabund file as new current sabundfile
 		itTypes = outputTypes.find("sabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSabundFile(currentName); }
 		}
 	
 		return 0;
@@ -372,14 +372,14 @@ int MGClusterCommand::runOptiCluster(){
 
         m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
         
-        if (outputDir == "") { outputDir += m->hasPath(distfile); }
+        if (outputDir == "") { outputDir += util.hasPath(distfile); }
         
         ofstream listFile;
-        m->openOutputFile(listFileName,	listFile);
+        util.openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
         
         ofstream outStep;
-        m->openOutputFile(outputName, outStep);
+        util.openOutputFile(outputName, outStep);
         
         int iters = 0;
         double listVectorMetric = 0; //worst state
@@ -400,7 +400,7 @@ int MGClusterCommand::runOptiCluster(){
         
         while ((delta > stableMetric) && (iters < maxIters)) {
             
-            int start = time(NULL);
+            long start = time(NULL);
             
             if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
@@ -432,7 +432,7 @@ int MGClusterCommand::runOptiCluster(){
             for (int i = 0; i < list->getNumBins(); i++) {
                 if (m->getControl_pressed()) { break; }
                 string bin = list->get(i);
-                vector<string> names; m->splitAtComma(bin, names);
+                vector<string> names; util.splitAtComma(bin, names);
                 for (int j = 0; j < names.size(); j++) { seqToBin[names[j]] = i; }
             }
             
@@ -454,7 +454,7 @@ int MGClusterCommand::runOptiCluster(){
                         list->set(binKeep, bin+','+list->get(binKeep));
                         list->set(binRemove, "");
                         
-                        vector<string> binNames; m->splitAtComma(bin, binNames);
+                        vector<string> binNames; util.splitAtComma(bin, binNames);
                         //update binInfo //save name and new bin number
                         for (int k = 0; k < binNames.size(); k++) { seqToBin[binNames[k]] = binKeep; }
                         mergedBinCount++;
@@ -476,8 +476,8 @@ int MGClusterCommand::runOptiCluster(){
         string rabundFileName = getOutputFileName("rabund", variables);
         
         if (countfile == "") {
-            m->openOutputFile(sabundFileName,	sabundFile);
-            m->openOutputFile(rabundFileName,	rabundFile);
+            util.openOutputFile(sabundFileName,	sabundFile);
+            util.openOutputFile(rabundFileName,	rabundFile);
             outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
@@ -493,7 +493,7 @@ int MGClusterCommand::runOptiCluster(){
         
         string sensspecFilename = fileroot+ tag + ".sensspec";
         ofstream sensFile;
-        m->openOutputFile(sensspecFilename,	sensFile);
+        util.openOutputFile(sensspecFilename,	sensFile);
         outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
         
         
@@ -568,15 +568,15 @@ int MGClusterCommand::runMothurCluster(){
         map<string, int> oldSeq2Bin;
         
         if (countfile == "") {
-            m->openOutputFile(sabundFileName,	sabundFile);
-            m->openOutputFile(rabundFileName,	rabundFile);
+            util.openOutputFile(sabundFileName,	sabundFile);
+            util.openOutputFile(rabundFileName,	rabundFile);
         }
-        m->openOutputFile(listFileName,	listFile);
+        util.openOutputFile(listFileName,	listFile);
         list->printHeaders(listFile);
         
         if (m->getControl_pressed()) {
             delete nameMap; delete read; delete list; delete rabund;
-            listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();  m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
+            listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();  util.mothurRemove(rabundFileName); util.mothurRemove(sabundFileName); } util.mothurRemove(listFileName);
             outputTypes.clear();
             return 0;
         }
@@ -598,7 +598,7 @@ int MGClusterCommand::runMothurCluster(){
         
         if (m->getControl_pressed()) {
             delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
-            listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
+            listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   util.mothurRemove(rabundFileName); util.mothurRemove(sabundFileName); } util.mothurRemove(listFileName);
             outputTypes.clear();
             return 0;
         }
@@ -613,13 +613,13 @@ int MGClusterCommand::runMothurCluster(){
             
             if (m->getControl_pressed()) {
                 delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
-                listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
+                listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   util.mothurRemove(rabundFileName); util.mothurRemove(sabundFileName); } util.mothurRemove(listFileName);
                 outputTypes.clear();
                 return 0;
             }
             
             float dist = distMatrix->getSmallDist();
-            float rndDist = m->ceilDist(dist, precision);
+            float rndDist = util.ceilDist(dist, precision);
             
             if(previousDist <= 0.0000 && dist != previousDist){
                 oldList.setLabel("unique");
@@ -631,7 +631,7 @@ int MGClusterCommand::runMothurCluster(){
                     
                     if (m->getControl_pressed()) {
                         delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
-                        listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
+                        listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   util.mothurRemove(rabundFileName); util.mothurRemove(sabundFileName); } util.mothurRemove(listFileName);
                         outputTypes.clear();
                         return 0;
                     }
@@ -662,7 +662,7 @@ int MGClusterCommand::runMothurCluster(){
                 
                 if (m->getControl_pressed()) {
                     delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
-                    listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
+                    listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   util.mothurRemove(rabundFileName); util.mothurRemove(sabundFileName); } util.mothurRemove(listFileName);
                     outputTypes.clear();
                     return 0;
                 }
@@ -690,13 +690,13 @@ int MGClusterCommand::runMothurCluster(){
         }
         if (m->getControl_pressed()) {
             delete nameMap;
-            listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   m->mothurRemove(rabundFileName); m->mothurRemove(sabundFileName); } m->mothurRemove(listFileName);
+            listFile.close(); if (countfile == "") { rabundFile.close(); sabundFile.close();   util.mothurRemove(rabundFileName); util.mothurRemove(sabundFileName); } util.mothurRemove(listFileName);
             outputTypes.clear();
             return 0; 
         }
         
         if (saveCutoff != cutoff) {
-            saveCutoff = m->ceilDist(saveCutoff, precision);
+            saveCutoff = util.ceilDist(saveCutoff, precision);
             m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();
         }
         
@@ -763,7 +763,7 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 					newList->set(binKeep, newList->get(binRemove)+','+newList->get(binKeep));
 					newList->set(binRemove, "");	
 					
-                    vector<string> binNames; m->splitAtComma(names, binNames);
+                    vector<string> binNames; util.splitAtComma(names, binNames);
 					//update binInfo //save name and new bin number
                     for (int i = 0; i < binNames.size(); i++) { binInfo[binNames[i]] = binKeep; }
 				}
@@ -792,7 +792,7 @@ void MGClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVe
         for(int i = 0; i < list->getNumBins(); i++) { 
            vector<string> binNames;
            string bin = list->get(i);
-           m->splitAtComma(bin, binNames);
+           util.splitAtComma(bin, binNames);
            int total = 0;
            for (int j = 0; j < binNames.size(); j++) { 
                total += ct->getNumSeqs(binNames[j]);

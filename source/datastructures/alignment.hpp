@@ -15,6 +15,7 @@
 
 #include "mothur.h"
 #include "alignmentcell.hpp"
+#include "currentfile.h"
 
 /**************************************************************************************************/
 
@@ -56,6 +57,7 @@ protected:
     map<int, int> ABaseMap;
     map<int, int> BBaseMap;
 	MothurOut* m;
+    CurrentFile* current;
 };
 
 /**************************************************************************************************/

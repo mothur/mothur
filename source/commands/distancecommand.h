@@ -34,6 +34,7 @@ struct distanceData {
 	string output;
 	long long numNewFasta, count;
 	bool countends;
+    Utils util;
 	
 	distanceData(){}
 	distanceData(int s, int e, string dbname, float c, SequenceDB db, vector<string> Est, MothurOut* mout, string o, long long num, bool cnt) {

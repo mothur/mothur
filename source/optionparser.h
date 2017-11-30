@@ -15,6 +15,8 @@
 #include "mothur.h"
 #include "mothurout.h"
 #include "command.hpp"
+#include "utils.hpp"
+#include "currentfile.h"
 
 /***********************************************************************/
 
@@ -28,6 +30,8 @@ public:
 private:
 	map<string, string> parameters;
 	MothurOut* m;
+    CurrentFile* current;
+    Utils util;
 };
 
 /***********************************************************************/

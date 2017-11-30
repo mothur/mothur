@@ -10,6 +10,7 @@
  */
 
 #include "calculator.h"
+#include "utils.hpp"
 
 /***********************************************************************/
 
@@ -29,6 +30,7 @@ class HeatMapSim {
 		int fontSize;
 		ofstream outsvg;
 		MothurOut* m;
+        Utils util;
 			
 };
 

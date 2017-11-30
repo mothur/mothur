@@ -187,40 +187,40 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 	
 	try {
         ofstream trimFASTAFile;
-		pDataArray->m->openOutputFile(pDataArray->trimFileName, trimFASTAFile);
+		pDataArray->util.openOutputFile(pDataArray->trimFileName, trimFASTAFile);
 		
 		ofstream scrapFASTAFile;
-		pDataArray->m->openOutputFile(pDataArray->scrapFileName, scrapFASTAFile);
+		pDataArray->util.openOutputFile(pDataArray->scrapFileName, scrapFASTAFile);
 		
 		ofstream trimQualFile;
 		ofstream scrapQualFile;
 		if(pDataArray->qFileName != ""){
-			pDataArray->m->openOutputFile(pDataArray->trimQFileName, trimQualFile);
-			pDataArray->m->openOutputFile(pDataArray->scrapQFileName, scrapQualFile);
+			pDataArray->util.openOutputFile(pDataArray->trimQFileName, trimQualFile);
+			pDataArray->util.openOutputFile(pDataArray->scrapQFileName, scrapQualFile);
 		}
 		
 		ofstream trimNameFile;
 		ofstream scrapNameFile;
 		if(pDataArray->nameFile != ""){
-			pDataArray->m->openOutputFile(pDataArray->trimNFileName, trimNameFile);
-			pDataArray->m->openOutputFile(pDataArray->scrapNFileName, scrapNameFile);
+			pDataArray->util.openOutputFile(pDataArray->trimNFileName, trimNameFile);
+			pDataArray->util.openOutputFile(pDataArray->scrapNFileName, scrapNameFile);
 		}
 		
 		
 		ofstream outGroupsFile;
-		if ((pDataArray->createGroup) && (pDataArray->countfile == "")){	pDataArray->m->openOutputFile(pDataArray->groupFileName, outGroupsFile);   }
+		if ((pDataArray->createGroup) && (pDataArray->countfile == "")){	pDataArray->util.openOutputFile(pDataArray->groupFileName, outGroupsFile);   }
 		if(pDataArray->allFiles){
 			for (int i = 0; i < pDataArray->fastaFileNames.size(); i++) { //clears old file
 				for (int j = 0; j < pDataArray->fastaFileNames[i].size(); j++) { //clears old file
 					if (pDataArray->fastaFileNames[i][j] != "") {
 						ofstream temp;
-						pDataArray->m->openOutputFile(pDataArray->fastaFileNames[i][j], temp);			temp.close();
+						pDataArray->util.openOutputFile(pDataArray->fastaFileNames[i][j], temp);			temp.close();
 						if(pDataArray->qFileName != ""){
-							pDataArray->m->openOutputFile(pDataArray->qualFileNames[i][j], temp);			temp.close();
+							pDataArray->util.openOutputFile(pDataArray->qualFileNames[i][j], temp);			temp.close();
 						}
 						
 						if(pDataArray->nameFile != ""){
-							pDataArray->m->openOutputFile(pDataArray->nameFileNames[i][j], temp);			temp.close();
+							pDataArray->util.openOutputFile(pDataArray->nameFileNames[i][j], temp);			temp.close();
 						}
 					}
 				}
@@ -230,26 +230,26 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
         ofstream trimCountFile;
 		ofstream scrapCountFile;
 		if(pDataArray->countfile != ""){
-			pDataArray->m->openOutputFile(pDataArray->trimCFileName, trimCountFile);
-			pDataArray->m->openOutputFile(pDataArray->scrapCFileName, scrapCountFile);
+			pDataArray->util.openOutputFile(pDataArray->trimCFileName, trimCountFile);
+			pDataArray->util.openOutputFile(pDataArray->scrapCFileName, scrapCountFile);
             if ((pDataArray->lineStart == 0) || (pDataArray->lineStart == 1)) { trimCountFile << "Representative_Sequence\ttotal" << endl; scrapCountFile << "Representative_Sequence\ttotal" << endl; }
 		}
         
 		ifstream inFASTA;
-		pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
+		pDataArray->util.openInputFile(pDataArray->filename, inFASTA);
 		if ((pDataArray->lineStart == 0) || (pDataArray->lineStart == 1)) {
 			inFASTA.seekg(0);
 		}else { //this accounts for the difference in line endings. 
-			inFASTA.seekg(pDataArray->lineStart-1); pDataArray->m->gobble(inFASTA); 
+			inFASTA.seekg(pDataArray->lineStart-1); pDataArray->util.gobble(inFASTA); 
 		}
 		
 		ifstream qFile;
 		if(pDataArray->qFileName != "")	{
-			pDataArray->m->openInputFile(pDataArray->qFileName, qFile);
+			pDataArray->util.openInputFile(pDataArray->qFileName, qFile);
 			if ((pDataArray->qlineStart == 0) || (pDataArray->qlineStart == 1)) {
                 qFile.seekg(0);
             }else { //this accounts for the difference in line endings. 
-                qFile.seekg(pDataArray->qlineStart-1); pDataArray->m->gobble(qFile); 
+                qFile.seekg(pDataArray->qlineStart-1); pDataArray->util.gobble(qFile); 
             } 
 		}
 		
@@ -306,12 +306,12 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
             string commentString = "";
 			int currentSeqsDiffs = 0;
             
-			Sequence currSeq(inFASTA); pDataArray->m->gobble(inFASTA);
+			Sequence currSeq(inFASTA); pDataArray->util.gobble(inFASTA);
             Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
 			
 			QualityScores currQual; QualityScores savedQual;
 			if(pDataArray->qFileName != ""){
-				currQual = QualityScores(qFile);  pDataArray->m->gobble(qFile);
+				currQual = QualityScores(qFile);  pDataArray->util.gobble(qFile);
                 savedQual.setName(currQual.getName()); savedQual.setScores(currQual.getScores());
 			}
               
@@ -566,7 +566,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                                     map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
                                     if (itName != pDataArray->nameMap.end()) { 
                                         vector<string> thisSeqsNames; 
-                                        pDataArray->m->splitAtChar(itName->second, thisSeqsNames, ',');
+                                        pDataArray->util.splitAtChar(itName->second, thisSeqsNames, ',');
                                         numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
                                         for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
                                             outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
@@ -583,12 +583,12 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                         
                         if(pDataArray->allFiles){
                             ofstream output;
-                            pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
+                            pDataArray->util.openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
                             currSeq.printSequence(output);
                             output.close();
                             
                             if(pDataArray->qFileName != ""){
-                                pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output);
+                                pDataArray->util.openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output);
                                 currQual.printQScores(output);
                                 output.close();							
                             }
@@ -596,7 +596,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                             if(pDataArray->nameFile != ""){
                                 map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
                                 if (itName != pDataArray->nameMap.end()) { 
-                                    pDataArray->m->openOutputFileAppend(pDataArray->nameFileNames[barcodeIndex][primerIndex], output);
+                                    pDataArray->util.openOutputFileAppend(pDataArray->nameFileNames[barcodeIndex][primerIndex], output);
                                     output << itName->first << '\t' << itName->second << endl; 
                                     output.close();
                                 }else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }

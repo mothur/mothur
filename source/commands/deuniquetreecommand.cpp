@@ -99,14 +99,14 @@ DeuniqueTreeCommand::DeuniqueTreeCommand(string option)  {
 			outputTypes["tree"] = tempOutNames;
 						
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("tree");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
 				}
@@ -114,30 +114,30 @@ DeuniqueTreeCommand::DeuniqueTreeCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
 			}
 			
             //check for required parameters
-			treefile = validParameter.validFile(parameters, "tree", true);
+			treefile = validParameter.validFile(parameters, "tree");
 			if (treefile == "not open") { abort = true; }
 			else if (treefile == "not found") { 				//if there is a current design file, use it
-				treefile = m->getTreeFile(); 
+				treefile = current->getTreeFile(); 
 				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
-			}else { m->setTreeFile(treefile); }	
+			}else { current->setTreeFile(treefile); }	
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") { 				//if there is a current design file, use it
-				namefile = m->getNameFile(); 
+				namefile = current->getNameFile(); 
 				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current name file and the name parameter is required."); m->mothurOutEndLine(); abort = true; }								
-			}else { m->setNameFile(namefile); }
+			}else { current->setNameFile(namefile); }
 			
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(treefile);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
 		}
 		
 	}
@@ -153,21 +153,21 @@ int DeuniqueTreeCommand::execute() {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		m->setTreeFile(treefile);
+		current->setTreeFile(treefile);
 		
 		TreeReader* reader = new TreeReader(treefile, "", namefile);
         vector<Tree*> T = reader->getTrees();
         map<string, string> nameMap;
-        m->readNames(namefile, nameMap);
+        util.readNames(namefile, nameMap);
         delete reader;		
 		
 		//print new Tree
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
 		string outputFile = getOutputFileName("tree", variables);
 		outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 		ofstream out;
-		m->openOutputFile(outputFile, out);
+		util.openOutputFile(outputFile, out);
 		T[0]->print(out, nameMap);
 		out.close();
 		
@@ -175,10 +175,10 @@ int DeuniqueTreeCommand::execute() {
 		for (int i = 0; i < T.size(); i++) { delete T[i]; }
 				
 		//set phylip file as new current phylipfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("tree");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTreeFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTreeFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();

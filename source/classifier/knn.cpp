@@ -29,7 +29,7 @@ void Knn::setDistName(string s) {
 	try {
 		outDistName = s;
 		ofstream outDistance;
-		m->openOutputFile(outDistName, outDistance);
+		util.openOutputFile(outDistName, outDistance);
 		outDistance << "Name\tBestMatch\tDistance" << endl;
 		outDistance.close();
 	}
@@ -58,7 +58,7 @@ string Knn::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped) {
         vector<float> Scores;
 		vector<int> closest = database->findClosestSequences(seq, num, Scores); 
 	
-		if (search == "distance") { ofstream outDistance; m->openOutputFileAppend(outDistName, outDistance); outDistance << seq->getName() << '\t' << database->getName(closest[0]) << '\t' << Scores[0] << endl; outDistance.close();  }
+		if (search == "distance") { ofstream outDistance; util.openOutputFileAppend(outDistName, outDistance); outDistance << seq->getName() << '\t' << database->getName(closest[0]) << '\t' << Scores[0] << endl; outDistance.close();  }
 	
 		if (m->getControl_pressed()) { return tax; }
 

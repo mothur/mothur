@@ -400,7 +400,8 @@ int Bellerophon::writePrefs(string file) {
 	try {
 	
 		ofstream outTemp;
-		m->openOutputFile(file, outTemp);
+        Utils util;
+		util.openOutputFile(file, outTemp);
 		
 		//lets you know what part of the pref matrix you are writing
 		outTemp << 0 << '\t' << iters << endl;
@@ -409,7 +410,7 @@ int Bellerophon::writePrefs(string file) {
 			
 			for (int j = 0; j < numSeqs; j++) {
 				
-				if (m->getControl_pressed()) { outTemp.close(); m->mothurRemove(file); return 0; }
+				if (m->getControl_pressed()) { outTemp.close(); util.mothurRemove(file); return 0; }
 				
 				outTemp << pref[i][j].name << '\t' << pref[i][j].leftParent << '\t' << pref[i][j].rightParent << '\t';
 				outTemp << pref[i][j].score << '\t' << pref[i][j].closestLeft << '\t' << pref[i][j].closestRight << '\t' << pref[i][j].midpoint <<  endl;
@@ -430,28 +431,29 @@ int Bellerophon::readPrefs(string file) {
 	try {
 	
 		ifstream inTemp;
-		m->openInputFile(file, inTemp);
+        Utils util;
+		util.openInputFile(file, inTemp);
 		
 		int start, num;
 		
 		//lets you know what part of the pref matrix you are writing
-		inTemp >> start >> num;  m->gobble(inTemp);
+		inTemp >> start >> num;  util.gobble(inTemp);
 		
 		for (int i = start; i < num; i++) {
 			
 			for (int j = 0; j < numSeqs; j++) {
 				
-				if (m->getControl_pressed()) { inTemp.close(); m->mothurRemove(file); return 0; }
+				if (m->getControl_pressed()) { inTemp.close(); util.mothurRemove(file); return 0; }
 			
 				inTemp >> pref[i][j].name >> pref[i][j].leftParent >> pref[i][j].rightParent;
 				inTemp >> pref[i][j].score >> pref[i][j].closestLeft >> pref[i][j].closestRight >> pref[i][j].midpoint;
-				m->gobble(inTemp);
+				util.gobble(inTemp);
 			}
 		}
 		
 		inTemp.close();
 		
-		m->mothurRemove(file);
+		util.mothurRemove(file);
 		
 		return 0;
 	}

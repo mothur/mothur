@@ -18,7 +18,7 @@ inline bool compareQuanMembers(quanMember left, quanMember right){
 } 
 //***************************************************************************************************************
 
-Pintail::Pintail(string filename, string temp, bool f, string mask, string cons, string q, int win, int inc, string o) : MothurChimera() {
+Pintail::Pintail(string filename, string temp, bool f, string mask, string cons, string q, int win, int inc, string o, string version) : MothurChimera() {
 	try {
 	
 		fastafile = filename; 
@@ -34,7 +34,7 @@ Pintail::Pintail(string filename, string temp, bool f, string mask, string cons,
 		distcalculator = new eachGapDist();
 		decalc = new DeCalculator();
 		
-		doPrep();
+		doPrep(version);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Pintail", "Pintail");
@@ -56,7 +56,7 @@ Pintail::~Pintail() {
 	}
 }
 //***************************************************************************************************************
-int Pintail::doPrep() {
+int Pintail::doPrep(string version) {
 	try {
 		
 		mergedFilterString = "";
@@ -73,7 +73,7 @@ int Pintail::doPrep() {
 		m->mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
 			m->mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the frequency of the highest base in each position to a .freq file so that you can input them using the conservation parameter next time you run this command.  Providing the .freq file will improve speed.    "); cout.flush();
-			probabilityProfile = decalc->calcFreq(templateSeqs, templateFileName); 
+			probabilityProfile = decalc->calcFreq(templateSeqs, templateFileName, version);
 			if (m->getControl_pressed()) {  return 0;  }
 			m->mothurOut("Done."); m->mothurOutEndLine();
 		}else				{   probabilityProfile = readFreq();	m->mothurOut("Done.");		  }
@@ -151,20 +151,20 @@ int Pintail::doPrep() {
 			string noOutliers, outliers;
 			
 			if ((!filter) && (seqMask == "")) {
-				noOutliers = m->getRootName(m->getSimpleName(templateFileName)) + "pintail.quan";
+				noOutliers = util.getRootName(util.getSimpleName(templateFileName)) + "pintail.quan";
 			}else if ((!filter) && (seqMask != "")) { 
-				noOutliers =m->getRootName(m->getSimpleName(templateFileName)) + "pintail.masked.quan";
+				noOutliers =util.getRootName(util.getSimpleName(templateFileName)) + "pintail.masked.quan";
 			}else if ((filter) && (seqMask != "")) { 
-				noOutliers = m->getRootName(m->getSimpleName(templateFileName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "masked.quan";
+				noOutliers = util.getRootName(util.getSimpleName(templateFileName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastafile)) + "masked.quan";
 			}else if ((filter) && (seqMask == "")) { 
-				noOutliers = m->getRootName(m->getSimpleName(templateFileName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "quan";
+				noOutliers = util.getRootName(util.getSimpleName(templateFileName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastafile)) + "quan";
 			}
 
 			decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
 			
 			if (m->getControl_pressed()) {  return 0;  }
 		
-			string outputString = "#" + m->getVersion() + "\n";
+			string outputString = "#" + current->getVersion() + "\n";
 			
 			//adjust quantiles
 			for (int i = 0; i < quantilesMembers.size(); i++) {
@@ -343,10 +343,10 @@ vector<float> Pintail::readFreq() {
 		set<int> h = decalc->getPos();  //positions of bases in masking sequence
 		
 		ifstream in;
-		m->openInputFile(consfile, in);
+		util.openInputFile(consfile, in);
 		
 		//read version
-		string line = m->getline(in); m->gobble(in);
+		string line = util.getline(in); util.gobble(in);
 				
 		while(!in.eof()){
 			
@@ -363,7 +363,7 @@ vector<float> Pintail::readFreq() {
 				prob.push_back(Pi);  
 			}
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		return prob;
@@ -404,10 +404,10 @@ vector< vector<float> > Pintail::readQuantiles() {
 		quan.push_back(temp); 
 
 		ifstream in;
-		m->openInputFile(quanfile, in);
+		util.openInputFile(quanfile, in);
 		
 		//read version
-		string line = m->getline(in); m->gobble(in);
+		string line = util.getline(in); util.gobble(in);
 			
 		while(!in.eof()){
 			
@@ -424,7 +424,7 @@ vector< vector<float> > Pintail::readQuantiles() {
 			
 			quan.push_back(temp);  
 	
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 
@@ -442,7 +442,7 @@ void Pintail::printQuanFile(string file, string outputString) {
 	try {
 	
 			ofstream outQuan;
-			m->openOutputFile(file, outQuan);
+			util.openOutputFile(file, outQuan);
 			
 			outQuan << outputString;
 			

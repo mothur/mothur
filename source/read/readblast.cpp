@@ -40,7 +40,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (m->getControl_pressed()) { return 0; }
 
 		ifstream fileHandle;
-		m->openInputFile(blastfile, fileHandle);
+		util.openInputFile(blastfile, fileHandle);
 		
 		string firstName, secondName, eScore, currentRow;
 		string repeatName = "";
@@ -68,7 +68,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (!fileHandle.eof()) {
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 			
 			currentRow = firstName;
 			lengthThisSeq = numBases;
@@ -104,7 +104,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
 			//cout << firstName << '\t' << secondName << '\t' << percentId << '\t' << numBases << '\t' << mismatch << '\t' << gap << '\t' << startQuery << '\t' << endQuery << '\t' << startRef << '\t' << endRef << '\t' << eScore << '\t' << score << endl;	
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 			
 			string temp = firstName + secondName; //to check if this file has repeat lines, ie. is this a blast instead of a blscreen file
 			
@@ -267,16 +267,16 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		int num = 1;
 		
 		ifstream in;
-		m->openInputFile(blastfile, in);
+		util.openInputFile(blastfile, in);
 		
 		//ofstream outName;
-		//m->openOutputFile((blastfile + ".tempOutNames"), outName);
+		//util.openOutputFile((blastfile + ".tempOutNames"), outName);
 		
 		//read first line
 		in >> prevName;
 	
 		for (int i = 0; i < 11; i++) {  in >> hold;  }
-		m->gobble(in);
+		util.gobble(in);
 				
 		//save name in nameMap
 		nameMap->push_back(prevName);
@@ -288,7 +288,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 			in >> name;
 	
 			for (int i = 0; i < 11; i++) {  in >> hold;  }
-			m->gobble(in);
+			util.gobble(in);
 			
 			//is this a new name?
 			if (name != prevName) {
@@ -306,9 +306,9 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		in.close();
 		
 		//write out names file
-		//string outNames = m->getRootName(blastfile) + "names";
+		//string outNames = util.getRootName(blastfile) + "names";
 		//ofstream out;
-		//m->openOutputFile(outNames, out);
+		//util.openOutputFile(outNames, out);
 		//nameMap->print(out);
 		//out.close();
 		

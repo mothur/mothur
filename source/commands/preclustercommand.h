@@ -179,15 +179,15 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
  		int numSeqs = 0;
 		vector<seqPNode> alignSeqs;
 		//clear out old files
-		ofstream outF; pDataArray->m->openOutputFile(pDataArray->newFName, outF); outF.close();
-		ofstream outN; pDataArray->m->openOutputFile(pDataArray->newNName, outN);  outN.close();
+		ofstream outF; pDataArray->util.openOutputFile(pDataArray->newFName, outF); outF.close();
+		ofstream outN; pDataArray->util.openOutputFile(pDataArray->newNName, outN);  outN.close();
 		
 		//precluster each group
 		for (int k = pDataArray->start; k < pDataArray->end; k++) {
 			
             pDataArray->count++;
             
-			int start = time(NULL);
+			long start = time(NULL);
 			
             if (pDataArray->m->getControl_pressed()) { if (pDataArray->countfile != "") { delete cparser; } else { delete parser; } delete alignment;return 0; }
 			
@@ -298,7 +298,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			//int count = process(); - same function below
 			
 			ofstream out;
-			pDataArray->m->openOutputFile(pDataArray->newMName+pDataArray->groups[k]+".map", out);
+			pDataArray->util.openOutputFile(pDataArray->newMName+pDataArray->groups[k]+".map", out);
 			pDataArray->mapFileNames.push_back(pDataArray->newMName+pDataArray->groups[k]+".map");
 			
             //sort seqs by number of identical seqs
@@ -469,8 +469,8 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			ofstream outFasta;
 			ofstream outNames;
 			
-			pDataArray->m->openOutputFileAppend(pDataArray->newFName, outFasta);
-			pDataArray->m->openOutputFileAppend(pDataArray->newNName, outNames);
+			pDataArray->util.openOutputFileAppend(pDataArray->newFName, outFasta);
+			pDataArray->util.openOutputFileAppend(pDataArray->newNName, outNames);
             
 			for (int i = 0; i < alignSeqs.size(); i++) {
 				if (alignSeqs[i].numIdentical != 0) {

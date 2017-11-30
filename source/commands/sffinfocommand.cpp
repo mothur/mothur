@@ -146,21 +146,21 @@ SffInfoCommand::SffInfoCommand(string option)  {
             outputTypes["sff"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);	  if (inputDir == "not found"){	inputDir = "";		}
+			string inputDir = validParameter.valid(parameters, "inputdir");	  if (inputDir == "not found"){	inputDir = "";		}
 
-			sffFilename = validParameter.validFile(parameters, "sff", false);
+			sffFilename = validParameter.valid(parameters, "sff");
 			if (sffFilename == "not found") { sffFilename = "";  }
 			else { 
-				m->splitAtDash(sffFilename, filenames);
+				util.splitAtDash(sffFilename, filenames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < filenames.size(); i++) {
 					bool ignore = false;
 					if (filenames[i] == "current") { 
-						filenames[i] = m->getSFFFile(); 
+						filenames[i] = current->getSFFFile(); 
 						if (filenames[i] != "") {  m->mothurOut("Using " + filenames[i] + " as input file for the sff parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current sfffile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -170,66 +170,27 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						if (inputDir != "") {
-							string path = m->hasPath(filenames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	filenames[i] = inputDir + filenames[i];		}
-						}
-		
-						ifstream in;
-						bool ableToOpen = m->openInputFile(filenames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(filenames[i]);
-								m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								filenames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(filenames[i]);
-								m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								filenames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							filenames.erase(filenames.begin()+i);
-							i--;
-						}else { m->setSFFFile(filenames[i]); }
-					}
+                    if (!ignore) {
+                        if (util.checkLocations(filenames[i], current->getLocations())) { current->setSFFFile(filenames[i]); }
+                        else { m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded.\n"); filenames.erase(filenames.begin()+i); i--; } //erase from file list
+                    }
 				}
 				
 				//make sure there is at least one valid file left
 				if (filenames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
 			
-			accnosName = validParameter.validFile(parameters, "accnos", false);
+			accnosName = validParameter.valid(parameters, "accnos");
 			if (accnosName == "not found") { accnosName = "";  }
 			else { 
 				hasAccnos = true;
-				m->splitAtDash(accnosName, accnosFileNames);
+				util.splitAtDash(accnosName, accnosFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < accnosFileNames.size(); i++) {
 					bool ignore = false;
 					if (accnosFileNames[i] == "current") { 
-						accnosFileNames[i] = m->getAccnosFile(); 
+						accnosFileNames[i] = current->getAccnosFile(); 
 						if (accnosFileNames[i] != "") {  m->mothurOut("Using " + accnosFileNames[i] + " as input file for the accnos parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current accnosfile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -239,65 +200,27 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-					
-						if (inputDir != "") {
-							string path = m->hasPath(accnosFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	accnosFileNames[i] = inputDir + accnosFileNames[i];		}
-						}
-		
-						ifstream in;
-						bool ableToOpen = m->openInputFile(accnosFileNames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(accnosFileNames[i]);
-								m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								accnosFileNames[i] = tryPath;
-							}
-						}
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(accnosFileNames[i]);
-								m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								accnosFileNames[i] = tryPath;
-							}
-						}
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + accnosFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							accnosFileNames.erase(accnosFileNames.begin()+i);
-							i--;
-						}
-					}
+                    if (!ignore) {
+                        if (util.checkLocations(accnosFileNames[i], current->getLocations())) { current->setAccnosFile(accnosFileNames[i]); }
+                        else { m->mothurOut("Unable to open " + accnosFileNames[i] + ". It will be disregarded.\n"); accnosFileNames.erase(accnosFileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 				
 				//make sure there is at least one valid file left
 				if (accnosFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
             
-            oligosfile = validParameter.validFile(parameters, "oligos", false);
+            oligosfile = validParameter.valid(parameters, "oligos");
 			if (oligosfile == "not found") { oligosfile = "";  }
 			else { 
 				hasOligos = true;
-				m->splitAtDash(oligosfile, oligosFileNames);
+				util.splitAtDash(oligosfile, oligosFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < oligosFileNames.size(); i++) {
 					bool ignore = false;
 					if (oligosFileNames[i] == "current") { 
-						oligosFileNames[i] = m->getOligosFile(); 
+						oligosFileNames[i] = current->getOligosFile(); 
 						if (oligosFileNames[i] != "") {  m->mothurOut("Using " + oligosFileNames[i] + " as input file for the oligos parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current oligosfile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -306,66 +229,28 @@ SffInfoCommand::SffInfoCommand(string option)  {
 							i--;
 						}
 					}
-					
-					if (!ignore) {
-                        
-						if (inputDir != "") {
-							string path = m->hasPath(oligosFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	oligosFileNames[i] = inputDir + oligosFileNames[i];		}
-						}
-                        
-						ifstream in;
-						bool ableToOpen = m->openInputFile(oligosFileNames[i], in, "noerror");
-                        
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(oligosFileNames[i]);
-								m->mothurOut("Unable to open " + oligosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								oligosFileNames[i] = tryPath;
-							}
-						}
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(oligosFileNames[i]);
-								m->mothurOut("Unable to open " + oligosFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								oligosFileNames[i] = tryPath;
-							}
-						}
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + oligosFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							oligosFileNames.erase(oligosFileNames.begin()+i);
-							i--;
-						}
-					}
+                    
+                    if (!ignore) {
+                        if (util.checkLocations(oligosFileNames[i], current->getLocations())) { current->setOligosFile(oligosFileNames[i]); }
+                        else { m->mothurOut("Unable to open " + oligosFileNames[i] + ". It will be disregarded.\n"); oligosFileNames.erase(oligosFileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 				
 				//make sure there is at least one valid file left
 				if (oligosFileNames.size() == 0) { m->mothurOut("no valid oligos files."); m->mothurOutEndLine(); abort = true; }
 			}
             
-            groupfile = validParameter.validFile(parameters, "group", false);
+            groupfile = validParameter.valid(parameters, "group");
 			if (groupfile == "not found") { groupfile = "";  }
 			else {
 				hasGroup = true;
-				m->splitAtDash(groupfile, groupFileNames);
+				util.splitAtDash(groupfile, groupFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < groupFileNames.size(); i++) {
 					bool ignore = false;
 					if (groupFileNames[i] == "current") {
-						groupFileNames[i] = m->getGroupFile();
+						groupFileNames[i] = current->getGroupFile();
 						if (groupFileNames[i] != "") {  m->mothurOut("Using " + groupFileNames[i] + " as input file for the group parameter where you had given current."); m->mothurOutEndLine(); }
 						else {
 							m->mothurOut("You have no current group file, ignoring current."); m->mothurOutEndLine(); ignore=true;
@@ -374,49 +259,11 @@ SffInfoCommand::SffInfoCommand(string option)  {
 							i--;
 						}
 					}
-					
-					if (!ignore) {
-                        
-						if (inputDir != "") {
-							string path = m->hasPath(groupFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	groupFileNames[i] = inputDir + groupFileNames[i];		}
-						}
-                        
-						ifstream in;
-						bool ableToOpen = m->openInputFile(groupFileNames[i], in, "noerror");
-                        
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(groupFileNames[i]);
-								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								groupFileNames[i] = tryPath;
-							}
-						}
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(groupFileNames[i]);
-								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								groupFileNames[i] = tryPath;
-							}
-						}
-						in.close();
-						
-						if (!ableToOpen) {
-							m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							groupFileNames.erase(groupFileNames.begin()+i);
-							i--;
-						}
-					}
+                    
+                    if (!ignore) {
+                        if (util.checkLocations(groupFileNames[i], current->getLocations())) { current->setGroupFile(groupFileNames[i]); }
+                        else { m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded.\n"); groupFileNames.erase(groupFileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 				
 				//make sure there is at least one valid file left
@@ -439,64 +286,64 @@ SffInfoCommand::SffInfoCommand(string option)  {
 				if (accnosFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide a accnos file, you must have one for each sff file."); m->mothurOutEndLine(); }
 			}
 			
-			string temp = validParameter.validFile(parameters, "qfile", false);			if (temp == "not found"){	temp = "T";				}
-			qual = m->isTrue(temp); 
+			string temp = validParameter.valid(parameters, "qfile");			if (temp == "not found"){	temp = "T";				}
+			qual = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "fasta", false);				if (temp == "not found"){	temp = "T";				}
-			fasta = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "fasta");				if (temp == "not found"){	temp = "T";				}
+			fasta = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "flow", false);					if (temp == "not found"){	temp = "T";				}
-			flow = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "flow");					if (temp == "not found"){	temp = "T";				}
+			flow = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "trim", false);					if (temp == "not found"){	temp = "T";				}
-			trim = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "trim");					if (temp == "not found"){	temp = "T";				}
+			trim = util.isTrue(temp); 
             
-            temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, bdiffs);
+            temp = validParameter.valid(parameters, "bdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, bdiffs);
 			
-			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, pdiffs);
+			temp = validParameter.valid(parameters, "pdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, pdiffs);
             
-            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, ldiffs);
+            temp = validParameter.valid(parameters, "ldiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, ldiffs);
             
-            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, sdiffs);
+            temp = validParameter.valid(parameters, "sdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, sdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
-			m->mothurConvert(temp, tdiffs);
+			temp = validParameter.valid(parameters, "tdiffs");		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
+			util.mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
             
-			temp = validParameter.validFile(parameters, "sfftxt", false);				
+			temp = validParameter.valid(parameters, "sfftxt");
 			if (temp == "not found")	{	temp = "F";	 sfftxt = false; sfftxtFilename = "";		}
-			else if (m->isTrue(temp))	{	sfftxt = true;		sfftxtFilename = "";				}
+			else if (util.isTrue(temp))	{	sfftxt = true;		sfftxtFilename = "";				}
 			else {
 				//you are a filename
 				if (inputDir != "") {
 					map<string,string>::iterator it = parameters.find("sfftxt");
 					//user has given a template file
 					if(it != parameters.end()){ 
-						string path = m->hasPath(it->second);
+						string path = util.hasPath(it->second);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	parameters["sfftxt"] = inputDir + it->second;		}
 					}
 				}
 				
-				sfftxtFilename = validParameter.validFile(parameters, "sfftxt", true);
+				sfftxtFilename = validParameter.validFile(parameters, "sfftxt");
 				if (sfftxtFilename == "not found") { sfftxtFilename = "";  }
 				else if (sfftxtFilename == "not open") { sfftxtFilename = "";  }
 			}
 			
 			if ((sfftxtFilename == "") && (filenames.size() == 0)) {  
 				//if there is a current sff file, use it
-				string filename = m->getSFFFile(); 
+				string filename = current->getSFFFile(); 
 				if (filename != "") { filenames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the sff parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("[ERROR]: you must provide a valid sff or sfftxt file."); m->mothurOutEndLine(); abort=true;  }
 			}
             
-            temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
-			reorient = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "F"; }
+			reorient = util.isTrue(temp);
             
 		}
 	}
@@ -512,11 +359,11 @@ int SffInfoCommand::execute(){
      
 		for (int s = 0; s < filenames.size(); s++) {
 			
-			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 			
-			int start = time(NULL);
+			long start = time(NULL);
 			
-            filenames[s] = m->getFullPathName(filenames[s]);
+            filenames[s] = util.getFullPathName(filenames[s]);
 			m->mothurOut("Extracting info from " + filenames[s] + " ..." ); m->mothurOutEndLine();
 			
 			string accnos = "";
@@ -533,23 +380,23 @@ int SffInfoCommand::execute(){
 		
 		if (sfftxtFilename != "") {  parseSffTxt(); }
 		
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("qfile");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setQualFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("flow");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFlowFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFlowFile(currentName); }
 		}
 		
 		//report output filenames
@@ -570,7 +417,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 	try {
         oligosObject = new Oligos();
 		currentFileName = input;
-		if (outputDir == "") {  outputDir += m->hasPath(input); }
+		if (outputDir == "") {  outputDir += util.hasPath(input); }
 		
 		if (accnos != "")	{  readAccnosFile(accnos);  }
 		else				{	seqNames.clear();		}
@@ -589,7 +436,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
         
 		ofstream outSfftxt, outFasta, outQual, outFlow;
 		string outFastaFileName, outQualFileName;
-        string rootName = outputDir + m->getRootName(m->getSimpleName(input));
+        string rootName = outputDir + util.getRootName(util.getSimpleName(input));
         if(rootName.find_last_of(".") == rootName.npos){ rootName += "."; }
         
         map<string, string> variables; 
@@ -600,13 +447,13 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		outFastaFileName = getOutputFileName("fasta",variables);
         outQualFileName = getOutputFileName("qfile",variables);
         
-		if (sfftxt) { m->openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName);  outputTypes["sfftxt"].push_back(sfftxtFileName); }
-		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
-		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qfile"].push_back(outQualFileName);  }
-		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outFlow.setf(ios::fixed, ios::floatfield); outFlow.setf(ios::showpoint); outputTypes["flow"].push_back(outFlowFileName);  }
+		if (sfftxt) { util.openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName);  outputTypes["sfftxt"].push_back(sfftxtFileName); }
+		if (fasta)	{ util.openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
+		if (qual)	{ util.openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qfile"].push_back(outQualFileName);  }
+		if (flow)	{ util.openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outFlow.setf(ios::fixed, ios::floatfield); outFlow.setf(ios::showpoint); outputTypes["flow"].push_back(outFlowFileName);  }
         
 		ifstream in;
-		m->openInputFileBinary(input, in);
+		util.openInputFileBinary(input, in);
 		
 		CommonHeader header;
 		readCommonHeader(in, header);
@@ -622,7 +469,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		if (flow)	{	outFlow << header.numFlowsPerRead << endl;	}
         
         //ofstream outtemp;
-        //m->openOutputFileBinary("./temp", outtemp);
+        //util.openOutputFileBinary("./temp", outtemp);
         //printCommonHeaderForDebug(header, outtemp, 20000);
         //outtemp.close();
 		//read through the sff file
@@ -681,10 +528,10 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
                     //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << endl;
 					if (filehandles[i][j] != "") {
 						if (namesToRemove.count(filehandles[i][j]) == 0) {
-							if(m->isBlank(filehandles[i][j])){
+							if(util.isBlank(filehandles[i][j])){
                                 //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " is blank removing" << endl;
-								m->mothurRemove(filehandles[i][j]);
-                                m->mothurRemove(filehandlesHeaders[i][j]);
+								util.mothurRemove(filehandles[i][j]);
+                                util.mothurRemove(filehandlesHeaders[i][j]);
 								namesToRemove.insert(filehandles[i][j]);
                             }
 						}
@@ -696,11 +543,11 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             for (int i = 0; i < filehandles.size(); i++) {
                 for (int j = 0; j < filehandles[i].size(); j++) {
                     if (filehandles[i][j] != "") {
-                        m->appendSFFFiles(filehandles[i][j], filehandlesHeaders[i][j]);
-                        m->renameFile(filehandlesHeaders[i][j], filehandles[i][j]);
-                        m->mothurRemove(filehandlesHeaders[i][j]);
+                        util.appendSFFFiles(filehandles[i][j], filehandlesHeaders[i][j]);
+                        util.renameFile(filehandlesHeaders[i][j], filehandles[i][j]);
+                        util.mothurRemove(filehandlesHeaders[i][j]);
                         //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " done appending headers and removing " << filehandlesHeaders[i][j] << endl;
-                        if (numSplitReads[i][j] == 0) { m->mothurRemove(filehandles[i][j]); }
+                        if (numSplitReads[i][j] == 0) { util.mothurRemove(filehandles[i][j]); }
                     }
                 }
             }
@@ -714,7 +561,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
                 }else { outputTypes["sff"].push_back(outputNames[i]); }
             }
             //cout << "here4" << endl;
-            if(m->isBlank(noMatchFile)){  m->mothurRemove(noMatchFile); }
+            if(util.isBlank(noMatchFile)){  util.mothurRemove(noMatchFile); }
             else { outputNames.push_back(noMatchFile); outputTypes["sff"].push_back(noMatchFile); }
         }
         
@@ -817,15 +664,15 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 //**********************************************************************************************************************
 int SffInfoCommand::adjustCommonHeader(CommonHeader header){
 	try {
-        string endian = m->findEdianness();
+        string endian = util.findEdianness();
         
         char* mybuffer = new char[4];
         ifstream in;
-        m->openInputFileBinary(currentFileName, in);
+        util.openInputFileBinary(currentFileName, in);
         
         ofstream outNoMatchHeader;
         string tempNoHeader = "tempNoMatchHeader";
-        m->openOutputFileBinary(tempNoHeader, outNoMatchHeader);
+        util.openOutputFileBinary(tempNoHeader, outNoMatchHeader);
         
         //magic number
         in.read(mybuffer,4);
@@ -833,7 +680,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(mybuffer, lengthRead);
                 out.close();
@@ -849,7 +696,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(mybuffer, lengthRead);
                 out.close();
@@ -875,7 +722,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << thisbuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(thisbuffer, 8);
                 out.close();
@@ -899,7 +746,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << thisbuffer2 << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(thisbuffer2, 4);
                 out.close();
@@ -923,7 +770,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
                 thisbuffer[2] = (numSplitReads[i][j] >> 8) & 0xFF;
                 thisbuffer[3] = numSplitReads[i][j] & 0xFF;
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << thisbuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 //unsigned int numTReads = (be_int4(*(unsigned int *)(thisbuffer)));
                 //cout << "numReads = " << numTReads << endl;
@@ -948,7 +795,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(mybuffer, lengthRead);
                 out.close();
@@ -964,7 +811,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(mybuffer, lengthRead);
                 out.close();
@@ -980,7 +827,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(mybuffer, lengthRead);
                 out.close();
@@ -996,7 +843,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(mybuffer, lengthRead);
                 out.close();
@@ -1012,7 +859,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(mybuffer, lengthRead);
                 out.close();
@@ -1028,7 +875,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
                 out.write(mybuffer, lengthRead);
                 out.close();
@@ -1047,8 +894,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) { 
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                int able = m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, spot-spotInFile);
                 out.close();
             }
@@ -1058,9 +904,9 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         delete[] mybuffer;
         in.close();
         
-        m->appendSFFFiles(noMatchFile, tempNoHeader);
-        m->renameFile(tempNoHeader, noMatchFile);
-        m->mothurRemove(tempNoHeader);
+        util.appendSFFFiles(noMatchFile, tempNoHeader);
+        util.renameFile(tempNoHeader, noMatchFile);
+        util.mothurRemove(tempNoHeader);
         
 		return 0;
         
@@ -1073,10 +919,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
 //**********************************************************************************************************************
 int SffInfoCommand::printCommonHeaderForDebug(CommonHeader& header, ofstream& out, int numReads){
     try {
-        string endian = m->findEdianness();
+        string endian = util.findEdianness();
       
         ifstream in;
-        m->openInputFileBinary(currentFileName, in);
+        util.openInputFileBinary(currentFileName, in);
         
         //magic number
         char* mybuffer = new char[4];
@@ -1339,20 +1185,20 @@ bool SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, 
                 mybuffer = new char [spot-startSpotInFile];
                 
                 ifstream in2;
-                m->openInputFileBinary(currentFileName, in2);
+                util.openInputFileBinary(currentFileName, in2);
                 in2.seekg(startSpotInFile);
                 in2.read(mybuffer,spot-startSpotInFile);
                 
                 if(trashCodeLength == 0){
                     ofstream out;
-                    m->openOutputFileBinaryAppend(filehandles[barcodeIndex][primerIndex], out);
+                    util.openOutputFileBinaryAppend(filehandles[barcodeIndex][primerIndex], out);
                     out.write(mybuffer, in2.gcount());
                     out.close();
                     numSplitReads[barcodeIndex][primerIndex]++;
 				}
 				else{
 					ofstream out;
-                    m->openOutputFileBinaryAppend(noMatchFile, out);
+                    util.openOutputFileBinaryAppend(noMatchFile, out);
                     out.write(mybuffer, in2.gcount());
                     out.close();
                     numNoMatch++;
@@ -1525,7 +1371,7 @@ int SffInfoCommand::decodeName(string& timestamp, string& region, string& xy, st
 		
 		if (name.length() >= 6) {
 			string time = name.substr(0, 6);
-			unsigned int timeNum = m->fromBase36(time);
+			unsigned int timeNum = util.fromBase36(time);
 			
 			int q1 = timeNum / 60;
 			int sec = timeNum - 60 * q1;
@@ -1546,7 +1392,7 @@ int SffInfoCommand::decodeName(string& timestamp, string& region, string& xy, st
 			region = name.substr(7, 2);
 		
 			string xyNum = name.substr(9);
-			unsigned int myXy = m->fromBase36(xyNum);
+			unsigned int myXy = util.fromBase36(xyNum);
 			int x = myXy >> 12;
 			int y = myXy & 4095;
 		
@@ -1784,11 +1630,11 @@ int SffInfoCommand::readAccnosFile(string filename) {
 		seqNames.clear();
 		
 		ifstream in;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		string name;
 		
 		while(!in.eof()){
-			in >> name; m->gobble(in);
+			in >> name; util.gobble(in);
 						
 			seqNames.insert(name);
 			
@@ -1808,18 +1654,18 @@ int SffInfoCommand::parseSffTxt() {
 	try {
 		
 		ifstream inSFF;
-		m->openInputFile(sfftxtFilename, inSFF);
+		util.openInputFile(sfftxtFilename, inSFF);
 		
-		if (outputDir == "") {  outputDir += m->hasPath(sfftxtFilename); }
+		if (outputDir == "") {  outputDir += util.hasPath(sfftxtFilename); }
 		
 		//output file names
 		ofstream outFasta, outQual, outFlow;
 		string outFastaFileName, outQualFileName;
-		string fileRoot = m->getRootName(m->getSimpleName(sfftxtFilename));
+		string fileRoot = util.getRootName(util.getSimpleName(sfftxtFilename));
 		if (fileRoot.length() > 0) {
 			//rip off last .
 			fileRoot = fileRoot.substr(0, fileRoot.length()-1);
-			fileRoot = m->getRootName(fileRoot);
+			fileRoot = util.getRootName(fileRoot);
 		}
 		
         map<string, string> variables; 
@@ -1830,24 +1676,24 @@ int SffInfoCommand::parseSffTxt() {
 		outFastaFileName = getOutputFileName("fasta",variables);
         outQualFileName = getOutputFileName("qfile",variables);
 		
-		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
-		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qfile"].push_back(outQualFileName);  }
-		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outFlow.setf(ios::fixed, ios::floatfield); outFlow.setf(ios::showpoint); outputTypes["flow"].push_back(outFlowFileName);  }
+		if (fasta)	{ util.openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
+		if (qual)	{ util.openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qfile"].push_back(outQualFileName);  }
+		if (flow)	{ util.openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outFlow.setf(ios::fixed, ios::floatfield); outFlow.setf(ios::showpoint); outputTypes["flow"].push_back(outFlowFileName);  }
 		
 		//read common header
-		string commonHeader = m->getline(inSFF);
-		string magicNumber = m->getline(inSFF);	
-		string version = m->getline(inSFF);
-		string indexOffset = m->getline(inSFF);
-		string indexLength = m->getline(inSFF);
+		string commonHeader = util.getline(inSFF);
+		string magicNumber = util.getline(inSFF);	
+		string version = util.getline(inSFF);
+		string indexOffset = util.getline(inSFF);
+		string indexLength = util.getline(inSFF);
 		int numReads = parseHeaderLineToInt(inSFF);
-		string headerLength = m->getline(inSFF);
-		string keyLength = m->getline(inSFF);
+		string headerLength = util.getline(inSFF);
+		string keyLength = util.getline(inSFF);
 		int numFlows = parseHeaderLineToInt(inSFF);
-		string flowgramCode = m->getline(inSFF);
-		string flowChars = m->getline(inSFF);
-		string keySequence = m->getline(inSFF);
-		m->gobble(inSFF);
+		string flowgramCode = util.getline(inSFF);
+		string flowChars = util.getline(inSFF);
+		string keySequence = util.getline(inSFF);
+		util.gobble(inSFF);
 		
 		string seqName;
 		
@@ -1863,18 +1709,18 @@ int SffInfoCommand::parseSffTxt() {
 			//parse read header
 			inSFF >> seqName;
 			seqName = seqName.substr(1);
-			m->gobble(inSFF);
+			util.gobble(inSFF);
 			header.name = seqName;
 			
 			string runPrefix = parseHeaderLineToString(inSFF);		header.timestamp = runPrefix;
 			string regionNumber = parseHeaderLineToString(inSFF);	header.region = regionNumber;
 			string xyLocation = parseHeaderLineToString(inSFF);		header.xy = xyLocation;
-			m->gobble(inSFF);
+			util.gobble(inSFF);
 				
 			string runName = parseHeaderLineToString(inSFF);
 			string analysisName = parseHeaderLineToString(inSFF);
 			string fullPath = parseHeaderLineToString(inSFF);
-			m->gobble(inSFF);
+			util.gobble(inSFF);
 			
 			string readHeaderLen = parseHeaderLineToString(inSFF);  convert(readHeaderLen, header.headerLength);
 			string nameLength = parseHeaderLineToString(inSFF);		convert(nameLength, header.nameLength);
@@ -1883,7 +1729,7 @@ int SffInfoCommand::parseSffTxt() {
 			int clipQualRight = parseHeaderLineToInt(inSFF);		header.clipQualRight = clipQualRight;
 			string clipAdapLeft = parseHeaderLineToString(inSFF);	convert(clipAdapLeft, header.clipAdapterLeft);
 			string clipAdapRight = parseHeaderLineToString(inSFF);	convert(clipAdapRight, header.clipAdapterRight);
-			m->gobble(inSFF);
+			util.gobble(inSFF);
 				
 			seqRead read;
 			
@@ -1898,7 +1744,7 @@ int SffInfoCommand::parseSffTxt() {
 			
 			string bases = parseHeaderLineToString(inSFF);										read.bases = bases;
 			vector<unsigned int> qualityScores = parseHeaderLineToIntVector(inSFF, numBases);	read.qualScores = qualityScores;
-			m->gobble(inSFF);
+			util.gobble(inSFF);
 					
 			//if you have provided an accosfile and this seq is not in it, then dont print
 			bool print = true;
@@ -1948,7 +1794,7 @@ int SffInfoCommand::parseHeaderLineToInt(ifstream& file){
 			}
 			
 		}
-		m->gobble(file);
+		util.gobble(file);
 		return number;
 	}
 	catch(exception& e) {
@@ -1968,13 +1814,13 @@ string SffInfoCommand::parseHeaderLineToString(ifstream& file){
 			char c = file.get(); 
 			
 			if (c == ':'){
-				//m->gobble(file);
-				//text = m->getline(file);	
+				//util.gobble(file);
+				//text = util.getline(file);	
 				file >> text;
 				break;
 			}
 		}
-		m->gobble(file);
+		util.gobble(file);
 		
 		return text;
 	}
@@ -2001,7 +1847,7 @@ vector<unsigned short> SffInfoCommand::parseHeaderLineToFloatVector(ifstream& fi
 				break;
 			}
 		}
-		m->gobble(file);	
+		util.gobble(file);	
 		return floatVector;
 	}
 	catch(exception& e) {
@@ -2025,7 +1871,7 @@ vector<unsigned int> SffInfoCommand::parseHeaderLineToIntVector(ifstream& file, 
 				break;
 			}
 		}
-		m->gobble(file);	
+		util.gobble(file);	
 		return intVector;
 	}
 	catch(exception& e) {
@@ -2109,7 +1955,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
                         
                         ofstream temp;
                         map<string, string> variables;
-                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(currentFileName));
                         variables["[group]"] = comboGroupName;
                         string thisFilename = getOutputFileName("sff",variables);
                         if (uniqueNames.count(thisFilename) == 0) {
@@ -2118,17 +1964,17 @@ bool SffInfoCommand::readOligos(string oligoFile){
                         }
                         
                         filehandles[itBar->second][itPrimer->second] = thisFilename;
-                        m->openOutputFileBinary(thisFilename, temp);		temp.close();
+                        util.openOutputFileBinary(thisFilename, temp);		temp.close();
                     }
                 }
             }
         }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(currentFileName));
         variables["[group]"] = "scrap";
 		noMatchFile = getOutputFileName("sff",variables);
-        m->mothurRemove(noMatchFile);
+        util.mothurRemove(noMatchFile);
         numNoMatch = 0;
 		
         filehandlesHeaders.resize(filehandles.size());
@@ -2138,7 +1984,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
             for (int j = 0; j < filehandles[i].size(); j++) {
                 filehandlesHeaders[i].push_back(filehandles[i][j]+"headers");
                 ofstream temp;
-                m->openOutputFileBinary(filehandles[i][j]+"headers", temp); temp.close();
+                util.openOutputFileBinary(filehandles[i][j]+"headers", temp); temp.close();
             }
         }
         
@@ -2173,22 +2019,22 @@ bool SffInfoCommand::readGroup(string oligoFile){
 		filehandles.resize(groups.size());
         for (int i = 0; i < filehandles.size(); i++) {
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(currentFileName));
                 variables["[group]"] = groups[i];
                 string thisFilename = getOutputFileName("sff",variables);
                 outputNames.push_back(thisFilename);
                
                 ofstream temp;
-                m->openOutputFileBinary(thisFilename, temp); temp.close();
+                util.openOutputFileBinary(thisFilename, temp); temp.close();
                 filehandles[i].push_back(thisFilename);
                 GroupToFile[groups[i]] = i;
         }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(currentFileName));
         variables["[group]"] = "scrap";
 		noMatchFile = getOutputFileName("sff",variables);
-        m->mothurRemove(noMatchFile);
+        util.mothurRemove(noMatchFile);
         numNoMatch = 0;
         
 		
@@ -2200,7 +2046,7 @@ bool SffInfoCommand::readGroup(string oligoFile){
                 string thisHeader = filehandles[i][j]+"headers";
                 filehandlesHeaders[i].push_back(thisHeader);
                 ofstream temp;
-                m->openOutputFileBinary(thisHeader, temp); temp.close();
+                util.openOutputFileBinary(thisHeader, temp); temp.close();
             }
         }
 		

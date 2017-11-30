@@ -20,10 +20,11 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		count = 0;
 		path = b;
 		threadID = tid;
+        Utils util;
 
 		int randNumber = m->getRandomNumber();;
 		//int randNumber = 12345;
-		string pid = m->mothurGetpid(threadID);
+		string pid = toString(threadID);
 		
         if (m->getDebug()) { m->mothurOut("[DEBUG]: tag = " + tag + "\t pid = " + pid + "\n"); }
         
@@ -32,60 +33,27 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		blastFileName = tag + pid + toString(randNumber) + ".blast";
 		
 		//make sure blast exists in the write place
-		if (path == "") {
-			path = m->getBlastPath();
-			//string tempPath = path;
-			//for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-			//path = path.substr(0, (tempPath.find_last_of('m')));
-			
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			path += "blast/bin/";	
-#else
-			path += "blast\\bin\\";
-#endif			
-		}
-		
-		
-		string formatdbCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		formatdbCommand = path + "formatdb";	//	format the database, -o option gives us the ability
-#else
-		formatdbCommand = path + "formatdb.exe";
-#endif
-		
+		if (path == "") {  path = current->getBlastPath() + "blast" + PATH_SEPARATOR + "bin" + PATH_SEPARATOR; }
+
 		//test to make sure formatdb exists
 		ifstream in;
-		formatdbCommand = m->getFullPathName(formatdbCommand);
-		bool ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
+        string formatdbCommand = path + "formatdb" + EXECUTABLE_EXT;
+		formatdbCommand = util.getFullPathName(formatdbCommand);
+		bool ableToOpen = util.openInputFile(formatdbCommand, in, "no error"); in.close();
 		if(!ableToOpen) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-		
-		string blastCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		blastCommand = path + "blastall";	//	format the database, -o option gives us the ability
-#else
-		blastCommand = path + "blastall.exe";
-		//wrap entire string in ""
-		//blastCommand = "\"" + blastCommand + "\"";
-#endif
 		
 		//test to make sure formatdb exists
 		ifstream in2;
-		blastCommand = m->getFullPathName(blastCommand);
-		ableToOpen = m->openInputFile(blastCommand, in2, "no error"); in2.close();
+        string blastCommand = path + "blastall" + EXECUTABLE_EXT;
+		blastCommand = util.getFullPathName(blastCommand);
+		ableToOpen = util.openInputFile(blastCommand, in2, "no error"); in2.close();
 		if(!ableToOpen) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
-		
-		
-		string megablastCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		megablastCommand = path + "megablast";	//	format the database, -o option gives us the ability
-#else
-		megablastCommand = path + "megablast.exe";
-#endif
-		
+
 		//test to make sure formatdb exists
 		ifstream in3;
-		megablastCommand = m->getFullPathName(megablastCommand);
-		ableToOpen = m->openInputFile(megablastCommand, in3, "no error"); in3.close();
+        string megablastCommand = path + "megablast" + EXECUTABLE_EXT;
+		megablastCommand = util.getFullPathName(megablastCommand);
+		ableToOpen = util.openInputFile(megablastCommand, in3, "no error"); in3.close();
 		if(!ableToOpen) {	m->mothurOut("[ERROR]: " +  megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
         
 	}
@@ -102,71 +70,36 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 		
 		path = b;
 		threadID = tid;
+        Utils util;
 		
 		//make sure blast exists in the write place
-		if (path == "") {
-			path = m->getBlastPath();
-			//string tempPath = path;
-			//for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-			//path = path.substr(0, (tempPath.find_last_of('m')));
-			
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			path += "blast/bin/";	
-#else
-			path += "blast\\bin\\";
-#endif			
-		}
+		if (path == "") {  path = current->getBlastPath() + "blast" + PATH_SEPARATOR + "bin" + PATH_SEPARATOR; }
 		
 		int randNumber = m->getRandomNumber();;
-		string pid = m->mothurGetpid(threadID);
+		string pid = toString(threadID);
 		dbFileName = pid + toString(randNumber) + ".template.unaligned.fasta";
 		queryFileName = pid + toString(randNumber) + ".candidate.unaligned.fasta";
 		blastFileName = pid + toString(randNumber) + ".blast";
 		
-		string formatdbCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		formatdbCommand = path + "formatdb";	//	format the database, -o option gives us the ability
-#else
-		formatdbCommand = path + "formatdb.exe";
-		//wrap entire string in ""
-		//formatdbCommand = "\"" + formatdbCommand + "\"";
-#endif
-		
-		//test to make sure formatdb exists
-		ifstream in;
-		formatdbCommand = m->getFullPathName(formatdbCommand);
-		bool ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
+        //test to make sure formatdb exists
+        ifstream in;
+        string formatdbCommand = path + "formatdb" + EXECUTABLE_EXT;
+        formatdbCommand = util.getFullPathName(formatdbCommand);
+        bool ableToOpen = util.openInputFile(formatdbCommand, in, "no error"); in.close();
 		if(!ableToOpen) {	m->mothurOut("[ERROR]: " +  formatdbCommand + " file does not exist. mothur requires formatdb.exe."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
 		
-		string blastCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		blastCommand = path + "blastall";	//	format the database, -o option gives us the ability
-#else
-		blastCommand = path + "blastall.exe";
-		//wrap entire string in ""
-		//blastCommand = "\"" + blastCommand + "\"";
-#endif
-		
-		//test to make sure formatdb exists
-		ifstream in2;
-		blastCommand = m->getFullPathName(blastCommand);
-		ableToOpen = m->openInputFile(blastCommand, in2, "no error"); in2.close();
+        //test to make sure formatdb exists
+        ifstream in2;
+        string blastCommand = path + "blastall" + EXECUTABLE_EXT;
+        blastCommand = util.getFullPathName(blastCommand);
+        ableToOpen = util.openInputFile(blastCommand, in2, "no error"); in2.close();
 		if(!ableToOpen) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe."); m->mothurOutEndLine(); m->setControl_pressed(true); }
 		
-		
-		string megablastCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		megablastCommand = path + "megablast";	//	format the database, -o option gives us the ability
-#else
-		megablastCommand = path + "megablast.exe";
-		//wrap entire string in ""
-		//megablastCommand = "\"" + megablastCommand + "\"";
-#endif
-		
-		//test to make sure formatdb exists
-		ifstream in3;
-		megablastCommand = m->getFullPathName(megablastCommand);
-		ableToOpen = m->openInputFile(megablastCommand, in3, "no error"); in3.close();
+        //test to make sure formatdb exists
+        ifstream in3;
+        string megablastCommand = path + "megablast" + EXECUTABLE_EXT;
+        megablastCommand = util.getFullPathName(megablastCommand);
+        ableToOpen = util.openInputFile(megablastCommand, in3, "no error"); in3.close();
 		if(!ableToOpen) {	m->mothurOut("[ERROR]: " + megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
 		
 		
@@ -181,14 +114,15 @@ BlastDB::BlastDB(string b, int tid) : Database() {
 
 BlastDB::~BlastDB(){
 	try{
-		m->mothurRemove(queryFileName);				//	let's clean stuff up and remove the temp files
-		m->mothurRemove(dbFileName);					//	let's clean stuff up and remove the temp files
-		m->mothurRemove((dbFileName+".nsq"));					//	let's clean stuff up and remove the temp files
-		m->mothurRemove((dbFileName+".nsi"));					//	let's clean stuff up and remove the temp files
-		m->mothurRemove((dbFileName+".nsd"));					//	let's clean stuff up and remove the temp files
-		m->mothurRemove((dbFileName+".nin"));					//	let's clean stuff up and remove the temp files
-		m->mothurRemove((dbFileName+".nhr"));					//	let's clean stuff up and remove the temp files
-		m->mothurRemove(blastFileName.c_str());				//	let's clean stuff up and remove the temp files
+        Utils util;
+		util.mothurRemove(queryFileName);				//	let's clean stuff up and remove the temp files
+		util.mothurRemove(dbFileName);					//	let's clean stuff up and remove the temp files
+		util.mothurRemove((dbFileName+".nsq"));					//	let's clean stuff up and remove the temp files
+		util.mothurRemove((dbFileName+".nsi"));					//	let's clean stuff up and remove the temp files
+		util.mothurRemove((dbFileName+".nsd"));					//	let's clean stuff up and remove the temp files
+		util.mothurRemove((dbFileName+".nin"));					//	let's clean stuff up and remove the temp files
+		util.mothurRemove((dbFileName+".nhr"));					//	let's clean stuff up and remove the temp files
+		util.mothurRemove(blastFileName.c_str());				//	let's clean stuff up and remove the temp files
 	}
 	catch(exception& e) {
 		m->errorOut(e, "BlastDB", "~BlastDB");
@@ -205,7 +139,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
 		int randNumber = m->getRandomNumber();;
 		string pid = scrubName(seq->getName());
 		
-		m->openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
+        Utils util; util.openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -230,11 +164,11 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
 		system(blastCommand.c_str());
 		
 		ifstream m8FileHandle;
-		m->openInputFile(blastFileName+pid+toString(randNumber), m8FileHandle, "no error");
+		util.openInputFile(blastFileName+pid+toString(randNumber), m8FileHandle, "no error");
 		
 		string dummy;
 		int templateAccession;
-		m->gobble(m8FileHandle);
+		util.gobble(m8FileHandle);
 		
 		while(!m8FileHandle.eof()){
             float searchScore;
@@ -243,13 +177,13 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
 			//get rest of junk in line
 			while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}	} 
 			
-			m->gobble(m8FileHandle);
+			util.gobble(m8FileHandle);
 			topMatches.push_back(templateAccession);
             scores.push_back(searchScore);
 		}
 		m8FileHandle.close();
-		m->mothurRemove((queryFileName+pid+toString(randNumber)));
-		m->mothurRemove((blastFileName+pid+toString(randNumber)));
+		util.mothurRemove((queryFileName+pid+toString(randNumber)));
+		util.mothurRemove((blastFileName+pid+toString(randNumber)));
 
 		return topMatches;
 	}
@@ -271,7 +205,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		int randNumber = m->getRandomNumber();
 		string pid = scrubName(seq->getName());
 		
-		m->openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
+        Utils util; util.openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -297,11 +231,11 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		system(blastCommand.c_str());
 
 		ifstream m8FileHandle;
-		m->openInputFile(blastFileName+pid+toString(randNumber), m8FileHandle, "no error");
+		util.openInputFile(blastFileName+pid+toString(randNumber), m8FileHandle, "no error");
 	
 		string dummy, eScore;
 		int templateAccession;
-		m->gobble(m8FileHandle);
+		util.gobble(m8FileHandle);
 		
 		while(!m8FileHandle.eof()){
 			m8FileHandle >> dummy >> templateAccession >> searchScore >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
@@ -310,7 +244,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 			//get rest of junk in line
 			//while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}else{ cout << c; }	} //
 				//cout << endl;
-			m->gobble(m8FileHandle);
+			util.gobble(m8FileHandle);
 			if (searchScore >= minPerID) { 
 				topMatches.push_back(templateAccession);
 				//Scores.push_back(searchScore);
@@ -318,8 +252,8 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 //cout << templateAccession << endl;
 		}
 		m8FileHandle.close();
-		m->mothurRemove((queryFileName+pid+toString(randNumber)));
-		m->mothurRemove((blastFileName+pid+toString(randNumber)));
+		util.mothurRemove((queryFileName+pid+toString(randNumber)));
+		util.mothurRemove((blastFileName+pid+toString(randNumber)));
 //cout << "\n" ;		
 		return topMatches;
 	}
@@ -333,7 +267,7 @@ void BlastDB::addSequence(Sequence seq) {
 	try {
 	
 		ofstream unalignedFastaFile;
-		m->openOutputFileAppend(dbFileName, unalignedFastaFile);				
+        Utils util; util.openOutputFileAppend(dbFileName, unalignedFastaFile);
 	
 		//	generating a fasta file with unaligned template
 		unalignedFastaFile << '>' << count << endl;					//	sequences, which will be input to formatdb

@@ -7,6 +7,7 @@
 //
 
 #include "decisiontree.hpp"
+#include "utils.hpp"
 
 DecisionTree::DecisionTree(vector< vector<int> >& baseDataSet,
                            vector<int> globalDiscardedFeatureIndices,
@@ -43,7 +44,7 @@ int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& tr
                 randomlySampledTestData[i][j] = bootstrappedTestSamples[i][j];
             }
         }
-        
+        Utils util;
         for (int i = 0; i < numFeatures; i++) {
             if (m->getControl_pressed()) { return 0; }
             
@@ -54,7 +55,7 @@ int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& tr
                 // we can save some time here by discarding that feature
                 
                 vector<int> featureVector = testSampleFeatureVectors[i];
-                if (m->getStandardDeviation(featureVector) > featureStandardDeviationThreshold) {
+                if (util.getStandardDeviation(featureVector) > featureStandardDeviationThreshold) {
                     // NOTE: only shuffle the features, never shuffle the output vector
                     // so i = 0 and i will be alwaays <= (numFeatures - 1) as the index at numFeatures will denote
                     // the feature vector

@@ -1,8 +1,8 @@
 #ifndef FILEOUTPUT_H
 #define FILEOUTPUT_H
 
-#include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 /***********************************************************************/
 
@@ -22,6 +22,7 @@ public:
 protected:
 	int renameOk;
 	MothurOut* m;
+    Utils util;
 
 };	
 	

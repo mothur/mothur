@@ -14,6 +14,7 @@
 PhyloTree::PhyloTree(){
 	try {
 		m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
 		numNodes = 1;
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
@@ -34,32 +35,33 @@ PhyloTree::PhyloTree(){
 PhyloTree::PhyloTree(ifstream& in, string filename){
 	try {
 		m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
 		calcTotals = false;
 		numNodes = 0;
 		numSeqs = 0;
 		
         //read version
-        string line = m->getline(in); m->gobble(in);
+        string line = util.getline(in); util.gobble(in);
         
-        in >> numNodes; m->gobble(in);
+        in >> numNodes; util.gobble(in);
         
         tree.resize(numNodes);
         
-        in >> maxLevel; m->gobble(in);
+        in >> maxLevel; util.gobble(in);
         
         for (int i = 0; i < tree.size(); i++) {
-            tree[i].name = m->getline(in); m->gobble(in);
-            in >> tree[i].level >> tree[i].parent; m->gobble(in);
+            tree[i].name = util.getline(in); util.gobble(in);
+            in >> tree[i].level >> tree[i].parent; util.gobble(in);
         }
         
         //read genus nodes
         int numGenus = 0;
-        in >> numGenus; m->gobble(in);
+        in >> numGenus; util.gobble(in);
         
         int gnode, gsize;
         totals.clear();
         for (int i = 0; i < numGenus; i++) {
-            in >> gnode >> gsize; m->gobble(in);
+            in >> gnode >> gsize; util.gobble(in);
             
             uniqueTaxonomies.insert(gnode);
             totals.push_back(gsize);
@@ -76,6 +78,7 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 PhyloTree::PhyloTree(string tfile){
 	try {
 		m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
 		numNodes = 1;
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
@@ -86,7 +89,7 @@ PhyloTree::PhyloTree(string tfile){
 		string name, tax;
 		
         map<string, string> temp;
-        m->readTax(tfile, temp, true);
+        util.readTax(tfile, temp, true);
         
         for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
             addSeqToTree(itTemp->first, itTemp->second);
@@ -147,7 +150,7 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
 		
 		int currentNode = 0;
 
-        m->removeConfidences(seqTaxonomy);
+        util.removeConfidences(seqTaxonomy);
         
         string taxon;
         while(seqTaxonomy != ""){
@@ -192,7 +195,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		int level = 0;
 		
 		tree[0].accessions.push_back(seqName);
-		m->removeConfidences(seqTaxonomy);
+		util.removeConfidences(seqTaxonomy);
         string taxon;// = getNextTaxon(seqTaxonomy);
 	
 		while(seqTaxonomy != ""){
@@ -328,7 +331,7 @@ void PhyloTree::binUnclassified(string file){
 	try {
 	
 		ofstream out;
-		m->openOutputFile(file, out);
+		util.openOutputFile(file, out);
 		
 		map<string, int>::iterator itBin;
 		map<string, int>::iterator childPointer;
@@ -450,7 +453,7 @@ void PhyloTree::print(ofstream& out, vector<TaxNode>& copy){
 	try {
 		
 		//output mothur version
-		out << "#" << m->getVersion() << endl;
+		out << "#" << current->getVersion() << endl;
 		
 		out << copy.size() << endl;
 		
@@ -479,10 +482,10 @@ void PhyloTree::print(ofstream& out, vector<TaxNode>& copy){
 void PhyloTree::printTreeNodes(string treefilename) {
 	try {
         ofstream outTree;
-        m->openOutputFile(treefilename, outTree);
+        util.openOutputFile(treefilename, outTree);
         
         //output mothur version
-        outTree << "#" << m->getVersion() << endl;
+        outTree << "#" << current->getVersion() << endl;
         
         //print treenodes
         outTree << tree.size() << endl;

@@ -117,14 +117,14 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			outputTypes["filter"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -132,33 +132,33 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 				it = parameters.find("hard");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["hard"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			fasta = validParameter.validFile(parameters, "fasta", false);
+			fasta = validParameter.valid(parameters, "fasta");
 			if (fasta == "not found") { 				
-				fasta = m->getFastaFile(); 
+				fasta = current->getFastaFile(); 
 				if (fasta != "") { 
                     fastafileNames.push_back(fasta);  
                     m->mothurOut("Using " + fasta + " as input file for the fasta parameter."); m->mothurOutEndLine();
-                    string simpleName = m->getSimpleName(fasta);
+                    string simpleName = util.getSimpleName(fasta);
                     filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
                 }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else { 
-				m->splitAtDash(fasta, fastafileNames);
+				util.splitAtDash(fasta, fastafileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastafileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastafileNames[i] == "current") { 
-						fastafileNames[i] = m->getFastaFile(); 
+						fastafileNames[i] = current->getFastaFile(); 
 						if (fastafileNames[i] != "") {  m->mothurOut("Using " + fastafileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -168,55 +168,15 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						if (inputDir != "") {
-							string path = m->hasPath(fastafileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastafileNames[i] = inputDir + fastafileNames[i];		}
-						}
-
-						ifstream in;
-						bool ableToOpen = m->openInputFile(fastafileNames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastafileNames[i]);
-								m->mothurOut("Unable to open " + fastafileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastafileNames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastafileNames[i]);
-								m->mothurOut("Unable to open " + fastafileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastafileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastafileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							fastafileNames.erase(fastafileNames.begin()+i);
-							i--;
-						}else{  
-							string simpleName = m->getSimpleName(fastafileNames[i]);
-							filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
-							m->setFastaFile(fastafileNames[i]);
-						}
-						in.close();
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(fastafileNames[i], current->getLocations())) {
+                            string simpleName = util.getSimpleName(fastafileNames[i]);
+                            filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
+                            current->setFastaFile(fastafileNames[i]);
+                        }
+                        else { fastafileNames.erase(fastafileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 				
 				//make sure there is at least one valid file left
 				if (fastafileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
@@ -224,29 +184,28 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			
 			if (!abort) {
 				//if the user changes the output directory command factory will send this info to us in the output parameter 
-				outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 					outputDir = "";	
-					outputDir += m->hasPath(fastafileNames[0]); //if user entered a file with a path then preserve it	
+					outputDir += util.hasPath(fastafileNames[0]); //if user entered a file with a path then preserve it	
 				}
 			}
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			
 			string temp;
-			hard = validParameter.validFile(parameters, "hard", true);				if (hard == "not found") { hard = ""; }
+			hard = validParameter.validFile(parameters, "hard");				if (hard == "not found") { hard = ""; }
 			else if (hard == "not open") { hard = ""; abort = true; }	
 
-			temp = validParameter.validFile(parameters, "trump", false);			if (temp == "not found") { temp = "*"; }
+			temp = validParameter.valid(parameters, "trump");			if (temp == "not found") { temp = "*"; }
 			trump = temp[0];
 			
-			temp = validParameter.validFile(parameters, "soft", false);				if (temp == "not found") { soft = 0; }
+			temp = validParameter.valid(parameters, "soft");				if (temp == "not found") { soft = 0; }
 			else {  soft = (float)atoi(temp.c_str()) / 100.0;  }
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp); 
 			
-			vertical = validParameter.validFile(parameters, "vertical", false);		
+			vertical = validParameter.valid(parameters, "vertical");		
 			if (vertical == "not found") { 
 				if ((hard == "") && (trump == '*') && (soft == 0)) { vertical = "T"; } //you have not given a hard file or set the trump char.
 				else { vertical = "F";  }
@@ -269,7 +228,7 @@ int FilterSeqsCommand::execute() {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ifstream inFASTA;
-		m->openInputFile(fastafileNames[0], inFASTA);
+		util.openInputFile(fastafileNames[0], inFASTA);
 		
 		Sequence testSeq(inFASTA);
 		alignmentLength = testSeq.getAlignLength();
@@ -292,7 +251,7 @@ int FilterSeqsCommand::execute() {
 		if (fastafileNames.size() > 3) { variables["[filename]"] = outputDir + "merge."; }
 		string filterFile = getOutputFileName("filter", variables);  
 		
-		m->openOutputFile(filterFile, outFilter);
+		util.openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
 		outFilter.close();
 		outputNames.push_back(filterFile); outputTypes["filter"].push_back(filterFile);
@@ -310,7 +269,7 @@ int FilterSeqsCommand::execute() {
 			if(filter[i] == '1'){	filteredLength++;	}
 		}
 		
-		if (m->getControl_pressed()) {  outputTypes.clear(); for(int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->getControl_pressed()) {  outputTypes.clear(); for(int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
 
 		
 		m->mothurOutEndLine();
@@ -320,10 +279,10 @@ int FilterSeqsCommand::execute() {
 		m->mothurOut("Number of sequences used to construct filter: " + toString(numSeqs)); m->mothurOutEndLine();
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -348,14 +307,14 @@ int FilterSeqsCommand::filterSequences() {
 		for (int s = 0; s < fastafileNames.size(); s++) {
 			
             map<string, string> variables;
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafileNames[s]));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafileNames[s]));
             string filteredFasta = getOutputFileName("fasta", variables);
             
             vector<unsigned long long> positions;
             if (savedPositions.size() != 0) { positions = savedPositions[s]; }
             else {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            positions = m->divideFile(fastafileNames[s], processors);
+            positions = util.divideFile(fastafileNames[s], processors);
 #else
             positions = m->setFilePosFasta(fastafileNames[s], numSeqs);
             if (numSeqs < processors) { processors = numSeqs; }
@@ -396,15 +355,15 @@ int FilterSeqsCommand::filterSequences() {
 void driverRunFilter(filterRunData* params) {
 	try {
 		ofstream out;
-		params->m->openOutputFile(params->outputFilename, out);
+		params->util.openOutputFile(params->outputFilename, out);
 		
 		ifstream in;
-		params->m->openInputFile(params->filename, in);
+		params->util.openInputFile(params->filename, in);
 				
 		in.seekg(params->start);
         
         //adjust start if null strings
-        if (params->start == 0) {  params->m->zapGremlins(in); params->m->gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
 
 		bool done = false;
 		params->count = 0;
@@ -413,7 +372,7 @@ void driverRunFilter(filterRunData* params) {
 				
 				if (params->m->getControl_pressed()) { break; }
 				
-				Sequence seq(in); params->m->gobble(in);
+				Sequence seq(in); params->util.gobble(in);
 				if (seq.getName() != "") {
 					string align = seq.getAligned();
 					string filterSeq = "";
@@ -452,7 +411,7 @@ void driverRunFilter(filterRunData* params) {
 
 long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename, string filteredFastaName, vector<linePair> lines) {
 	try {
-        m->mothurRemove(filteredFastaName);
+        util.mothurRemove(filteredFastaName);
         long long num = 0;
         
         //create array of worker threads
@@ -490,8 +449,8 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
         
         //append and remove temp files
         for (int i=0;i<processors-1;i++) {
-            m->appendFiles((filteredFastaName + toString(i+1) + ".temp"), filteredFastaName);
-            m->mothurRemove((filteredFastaName + toString(i+1) + ".temp"));
+            util.appendFiles((filteredFastaName + toString(i+1) + ".temp"), filteredFastaName);
+            util.mothurRemove((filteredFastaName + toString(i+1) + ".temp"));
         }
 
         return num;
@@ -512,13 +471,13 @@ string FilterSeqsCommand::createFilter() {
 		
 		F.setLength(alignmentLength);
 		
-		if(trump != '*' || m->isTrue(vertical) || soft != 0){ F.initialize(); }
+		if(trump != '*' || util.isTrue(vertical) || soft != 0){ F.initialize(); }
 		
 		if(hard.compare("") != 0)	{	F.doHard(hard);		}
 		else						{	F.setFilter(string(alignmentLength, '1'));	}
 		
 		numSeqs = 0;
-		if(trump != '*' || m->isTrue(vertical) || soft != 0){
+		if(trump != '*' || util.isTrue(vertical) || soft != 0){
 			for (int s = 0; s < fastafileNames.size(); s++) {
 			
                 numSeqs += createProcessesCreateFilter(F, fastafileNames[s]);
@@ -528,7 +487,7 @@ string FilterSeqsCommand::createFilter() {
 		}
 
 		F.setNumSeqs(numSeqs);
-		if(m->isTrue(vertical) == 1)	{	F.doVertical();	}
+		if(util.isTrue(vertical) == 1)	{	F.doVertical();	}
 		if(soft != 0)                   {	F.doSoft();		}
 		filterString = F.getFilter();
         
@@ -553,12 +512,12 @@ void driverCreateFilter(filterData* params) {
         else                                {	params->F.setFilter(string(params->alignmentLength, '1'));	}
         
 		ifstream in;
-		params->m->openInputFile(params->filename, in);
+		params->util.openInputFile(params->filename, in);
 				
 		in.seekg(params->start);
         
         //adjust start if null strings
-        if (params->start == 0) {  params->m->zapGremlins(in); params->m->gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
 
 		bool done = false;
 		params->count = 0;
@@ -568,7 +527,7 @@ void driverCreateFilter(filterData* params) {
 				
             if (params->m->getControl_pressed()) { break; }
 					
-			Sequence seq(in); params->m->gobble(in);
+			Sequence seq(in); params->util.gobble(in);
 			if (seq.getName() != "") {
                     if (params->m->getDebug()) { params->m->mothurOutJustToScreen("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); }
                 if (seq.getAligned().length() != params->alignmentLength) { params->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct.\n"); error = true; if (!params->m->getDebug()) { params->m->setControl_pressed(true); }else{ params->m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); } }
@@ -609,7 +568,7 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         vector<unsigned long long> positions;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(filename, processors);
+        positions = util.divideFile(filename, processors);
         for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else
         long long numFastaSeqs = 0;
@@ -629,7 +588,7 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         if (!recalced) {  savedPositions.push_back(positions); }
         
 		long long num = 0;
-        bool doVertical = m->isTrue(vertical);
+        bool doVertical = util.isTrue(vertical);
 
         //create array of worker threads
         vector<thread*> workerThreads;

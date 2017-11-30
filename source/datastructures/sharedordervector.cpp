@@ -26,13 +26,13 @@ SharedOrderVector::SharedOrderVector(string id, vector<individual>  ov) :
 //This function is used to read a .shared file for the collect.shared, rarefaction.shared and summary.shared commands
 //if you don't use a list and groupfile.  
 
-SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups) : DataVector() {  //reads in a shared file
+SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups, string& previousLabel) : DataVector() {  //reads in a shared file
 	try {
 		maxRank = 0; numBins = 0; numSeqs = 0;
         int numUserGroups = userGroups.size();
 				
 		groupmap = new GroupMap();
-        if (!m->isSubset(groupmap->getNamesOfGroups(), userGroups)) { m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); m->setControl_pressed(true); }
+        if (!util.isSubset(groupmap->getNamesOfGroups(), userGroups)) { m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); m->setControl_pressed(true); }
 		
 		int num, inputData, count;
 		count = 0;  numSeqs = 0;
@@ -41,33 +41,33 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups) : 
 		
 		//read in first row since you know there is at least 1 group.
 		//are we at the beginning of the file??
-		if (m->getSaveNextLabel() == "") {
+		if (previousLabel == "") {
 			f >> label; 
 			
 			//is this a shared file that has headers
 			if (label == "label") { 
 				//gets "group"
-				f >> label; m->gobble(f);
+				f >> label; util.gobble(f);
 				
 				//gets "numOtus"
-				f >> label; m->gobble(f);
+				f >> label; util.gobble(f);
 				
 				//eat rest of line
-				label = m->getline(f); m->gobble(f);
+				label = util.getline(f); util.gobble(f);
 				
 				//parse labels to save
 				istringstream iStringStream(label);
 				while(!iStringStream.eof()){
 					if (m->getControl_pressed()) { break; }
 					string temp;
-					iStringStream >> temp;  m->gobble(iStringStream);
+					iStringStream >> temp;  util.gobble(iStringStream);
 					
 					currentLabels.push_back(temp);
 				}
 				
 				f >> label;
 			}
-		}else { label = m->getSaveNextLabel(); }
+		}else { label = previousLabel; }
 		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;
@@ -76,7 +76,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups) : 
             userGroups.push_back(groupN);
             readData = true;
         }else{
-            if (m->inUsersGroups(groupN, userGroups)) { readData = true; }
+            if (util.inUsersGroups(groupN, userGroups)) { readData = true; }
             //else - skipline because you are a group we dont care about
         }
 		
@@ -96,9 +96,9 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups) : 
                     numSeqs++;
                 }
             }
-        } else { m->getline(f); }
+        } else { util.getline(f); }
 		
-		m->gobble(f);
+		util.gobble(f);
 		
 		if (!(f.eof())) { f >> nextLabel; }
 		
@@ -111,7 +111,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups) : 
                 userGroups.push_back(groupN);
                 readData = true;
             }else{
-                if (m->inUsersGroups(groupN, userGroups)) { readData = true; }
+                if (util.inUsersGroups(groupN, userGroups)) { readData = true; }
                 //else - skipline because you are a group we dont care about
             }
 
@@ -131,15 +131,15 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups) : 
                         numSeqs++;
                     }
                 }
-            }else { m->getline(f); }
+            }else { util.getline(f); }
 			
-			m->gobble(f);
+			util.gobble(f);
 				
 			if (f.eof() != true) { f >> nextLabel; }
 
 		}
 		
-		m->setSaveNextLabel(nextLabel);
+		previousLabel = nextLabel;
         
         sort(userGroups.begin(), userGroups.end());
         for (int i = 0; i < userGroups.size(); i++) { setNamesOfGroups(userGroups[i]); }

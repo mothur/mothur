@@ -179,16 +179,16 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 	
 	try {
 		ofstream out;
-		pDataArray->m->openOutputFile(pDataArray->outputFName, out);
+		pDataArray->util.openOutputFile(pDataArray->outputFName, out);
 		
 		ofstream out2;
-		pDataArray->m->openOutputFile(pDataArray->accnos, out2);
+		pDataArray->util.openOutputFile(pDataArray->accnos, out2);
 		
 		ofstream out3;
-		if (pDataArray->trim) {  pDataArray->m->openOutputFile(pDataArray->fasta, out3); }
+		if (pDataArray->trim) {  pDataArray->util.openOutputFile(pDataArray->fasta, out3); }
 		
 		ifstream inFASTA;
-		pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
+		pDataArray->util.openInputFile(pDataArray->filename, inFASTA);
 		
 		
 		
@@ -203,9 +203,9 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
 			chimera->printHeader(out); 
 			inFASTA.seekg(0);
-            pDataArray->m->zapGremlins(inFASTA);
+            pDataArray->util.zapGremlins(inFASTA);
 		}else { //this accounts for the difference in line endings. 
-			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
+			inFASTA.seekg(pDataArray->start-1); pDataArray->util.gobble(inFASTA); 
 		}
 		
 		if (pDataArray->m->getControl_pressed()) { out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera;  return 0;	}
@@ -225,7 +225,7 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 			
 			if (pDataArray->m->getControl_pressed()) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera; return 1;	}
 			
-			Sequence* candidateSeq = new Sequence(inFASTA);  pDataArray->m->gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  pDataArray->util.gobble(inFASTA);
 			string candidateAligned = candidateSeq->getAligned();
 			
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
@@ -347,7 +347,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 	
 	try {
         ofstream outCountList;
-        if (pDataArray->hasCount && pDataArray->dups) { pDataArray->m->openOutputFile(pDataArray->countlist, outCountList); }
+        if (pDataArray->hasCount && pDataArray->dups) { pDataArray->util.openOutputFile(pDataArray->countlist, outCountList); }
 
 		int totalSeqs = 0;
         pDataArray->end = 0;
@@ -356,12 +356,12 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 			
 			if (pDataArray->m->getControl_pressed()) {  return 0;  }
 			
-			int start = time(NULL);
+			long start = time(NULL);
 			string thisFastaName = itFile->first;
 			map<string, int> thisPriority = itFile->second;
-			string thisoutputFileName = pDataArray->m->getRootName(pDataArray->m->getSimpleName(thisFastaName)) + pDataArray->fileGroup[thisFastaName] + "slayer.chimera";
-			string thisaccnosFileName = pDataArray->m->getRootName(pDataArray->m->getSimpleName(thisFastaName)) + pDataArray->fileGroup[thisFastaName] + "slayer.accnos";
-			string thistrimFastaFileName = pDataArray->m->getRootName(pDataArray->m->getSimpleName(thisFastaName)) + pDataArray->fileGroup[thisFastaName] + "slayer.fasta";
+			string thisoutputFileName = pDataArray->util.getRootName(pDataArray->util.getSimpleName(thisFastaName)) + pDataArray->fileGroup[thisFastaName] + "slayer.chimera";
+			string thisaccnosFileName = pDataArray->util.getRootName(pDataArray->util.getSimpleName(thisFastaName)) + pDataArray->fileGroup[thisFastaName] + "slayer.accnos";
+			string thistrimFastaFileName = pDataArray->util.getRootName(pDataArray->util.getSimpleName(thisFastaName)) + pDataArray->fileGroup[thisFastaName] + "slayer.fasta";
 			
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Checking sequences from group: " + pDataArray->fileGroup[thisFastaName] + "."); pDataArray->m->mothurOutEndLine(); 
 		
@@ -369,16 +369,16 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
 			ofstream out;
-			pDataArray->m->openOutputFile(thisoutputFileName, out);
+			pDataArray->util.openOutputFile(thisoutputFileName, out);
 			
 			ofstream out2;
-			pDataArray->m->openOutputFile(thisaccnosFileName, out2);
+			pDataArray->util.openOutputFile(thisaccnosFileName, out2);
 			
 			ofstream out3;
-			if (pDataArray->trim) {  pDataArray->m->openOutputFile(thistrimFastaFileName, out3); }
+			if (pDataArray->trim) {  pDataArray->util.openOutputFile(thistrimFastaFileName, out3); }
 			
 			ifstream inFASTA;
-			pDataArray->m->openInputFile(thisFastaName, inFASTA);
+			pDataArray->util.openInputFile(thisFastaName, inFASTA);
 			
 			MothurChimera* chimera;
 			chimera = new ChimeraSlayer(thisFastaName, pDataArray->templatefile, pDataArray->trim, thisPriority, pDataArray->search, pDataArray->ksize, pDataArray->match, pDataArray->mismatch, pDataArray->window, pDataArray->divR, pDataArray->minSimilarity, pDataArray->minCoverage, pDataArray->minBS, pDataArray->minSNP, pDataArray->parents, pDataArray->iters, pDataArray->increment, pDataArray->numwanted, pDataArray->realign, pDataArray->blastlocation, pDataArray->threadId);	
@@ -401,7 +401,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 				
 				if (pDataArray->m->getControl_pressed()) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera; return 1;	}
 				
-				Sequence* candidateSeq = new Sequence(inFASTA);  pDataArray->m->gobble(inFASTA);
+				Sequence* candidateSeq = new Sequence(inFASTA);  pDataArray->util.gobble(inFASTA);
 				string candidateAligned = candidateSeq->getAligned();
 				
 				if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
@@ -515,13 +515,13 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
             //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
             //This table will zero out group counts for seqs determined to be chimeric by that group.
             if (pDataArray->dups) {
-                if (!pDataArray->m->isBlank(thisaccnosFileName)) {
+                if (!pDataArray->util.isBlank(thisaccnosFileName)) {
                     ifstream in;
-                    pDataArray->m->openInputFile(thisaccnosFileName, in);
+                    pDataArray->util.openInputFile(thisaccnosFileName, in);
                     string name;
                     if (pDataArray->hasCount) {
                         while (!in.eof()) {
-                            in >> name; pDataArray->m->gobble(in);
+                            in >> name; pDataArray->util.gobble(in);
                             outCountList << name << '\t' << pDataArray->fileGroup[thisFastaName] << endl;
                         }
                         in.close();
@@ -531,13 +531,13 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
                             map<string, string> thisnamemap = itGroupNameMap->second;
                             map<string, string>::iterator itN;
                             ofstream out;
-                            pDataArray->m->openOutputFile(thisaccnosFileName+".temp", out);
+                            pDataArray->util.openOutputFile(thisaccnosFileName+".temp", out);
                             while (!in.eof()) {
-                                in >> name; pDataArray->m->gobble(in);
+                                in >> name; pDataArray->util.gobble(in);
                                 //pDataArray->m->mothurOut("here = " + name + '\t');
                                 itN = thisnamemap.find(name);
                                 if (itN != thisnamemap.end()) {
-                                    vector<string> tempNames; pDataArray->m->splitAtComma(itN->second, tempNames);
+                                    vector<string> tempNames; pDataArray->util.splitAtComma(itN->second, tempNames);
                                     for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                     //pDataArray->m->mothurOut(itN->second + '\n');
                                     
@@ -545,7 +545,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
                             }
                             out.close();
                             in.close();
-                            pDataArray->m->renameFile(thisaccnosFileName+".temp", thisaccnosFileName);
+                            pDataArray->util.renameFile(thisaccnosFileName+".temp", thisaccnosFileName);
                         }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + pDataArray->fileGroup[thisFastaName] + ".\n"); pDataArray->m->setControl_pressed(true); }
                     }
                     
@@ -554,10 +554,10 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
             
             
 			//append files
-			pDataArray->m->appendFiles(thisoutputFileName, pDataArray->outputFName); pDataArray->m->mothurRemove(thisoutputFileName); 
-			pDataArray->m->appendFiles(thisaccnosFileName, pDataArray->accnos); pDataArray->m->mothurRemove(thisaccnosFileName);
-			if (pDataArray->trim) { pDataArray->m->appendFiles(thistrimFastaFileName, pDataArray->fasta); pDataArray->m->mothurRemove(thistrimFastaFileName); }
-			pDataArray->m->mothurRemove(thisFastaName);
+			pDataArray->util.appendFiles(thisoutputFileName, pDataArray->outputFName); pDataArray->util.mothurRemove(thisoutputFileName); 
+			pDataArray->util.appendFiles(thisaccnosFileName, pDataArray->accnos); pDataArray->util.mothurRemove(thisaccnosFileName);
+			if (pDataArray->trim) { pDataArray->util.appendFiles(thistrimFastaFileName, pDataArray->fasta); pDataArray->util.mothurRemove(thistrimFastaFileName); }
+			pDataArray->util.mothurRemove(thisFastaName);
 			
 			totalSeqs += numSeqs;
 			

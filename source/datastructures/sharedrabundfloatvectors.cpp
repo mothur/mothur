@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 //reads a shared file
-SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& userGroups) : DataVector() {
+SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& userGroups, string& nextLabel, string& labelTag) : DataVector() {
     try {
         int num;
         string holdLabel, nextLabel, groupN;
@@ -20,30 +20,35 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
         for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();
         
         //are we at the beginning of the file??
-        if (m->getSaveNextLabel() == "") {
+        if (nextLabel == "") {
             f >> label;
             
             //is this a shared file that has headers
             if (label == "label") {
                 //gets "group"
-                f >> label; m->gobble(f);
+                f >> label; util.gobble(f);
                 
                 //gets "numOtus"
-                f >> label; m->gobble(f);
+                f >> label; util.gobble(f);
                 
                 //eat rest of line
-                label = m->getline(f); m->gobble(f);
+                label = util.getline(f); util.gobble(f);
                 
                 //parse labels to save
                 istringstream iStringStream(label);
                 while(!iStringStream.eof()){
                     if (m->getControl_pressed()) { break; }
                     string temp;
-                    iStringStream >> temp;  m->gobble(iStringStream);
+                    iStringStream >> temp;  util.gobble(iStringStream);
                     
                     currentLabels.push_back(temp);
                 }
                 
+                if (currentLabels.size() != 0) {
+                    string binLabelTag = currentLabels[0];
+                    labelTag = "";
+                    for (int i = 0; i < binLabelTag.length(); i++) { if (isalpha(binLabelTag[i])){ labelTag += binLabelTag[i]; } }
+                }
                 f >> label >> groupN >> num;
             }else {
                 //read in first row since you know there is at least 1 group.
@@ -51,9 +56,10 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
                 
                 //make binlabels because we don't have any
                 string snumBins = toString(num);
+                if (labelTag == "") { labelTag = "Otu"; }
                 for (int i = 0; i < num; i++) {
                     //if there is a bin label use it otherwise make one
-                    string binLabel = "Otu";
+                    string binLabel = labelTag;
                     string sbinNumber = toString(i+1);
                     if (sbinNumber.length() < snumBins.length()) {
                         int diff = snumBins.length() - sbinNumber.length();
@@ -64,7 +70,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
                 }
             }
         }else {
-            label = m->getSaveNextLabel();
+            label = nextLabel;
             
             //read in first row since you know there is at least 1 group.
             f >> groupN >> num;
@@ -76,7 +82,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
             userGroups.push_back(groupN);
             readData = true;
         }else{
-            if (m->inUsersGroups(groupN, userGroups)) { readData = true; }
+            if (util.inUsersGroups(groupN, userGroups)) { readData = true; }
             else { remove = true; }// skipline because you are a group we dont care about
         }
 
@@ -88,8 +94,8 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
             //add new vector to lookup
             SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN, numBins);
             push_back(temp);
-        } else { m->getline(f); }
-        m->gobble(f);
+        } else { util.getline(f); }
+        util.gobble(f);
         
         if (!(f.eof())) { f >> nextLabel; }
         
@@ -101,20 +107,21 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
                 userGroups.push_back(groupN);
                 readData = true;
             }else{
-                if (m->inUsersGroups(groupN, userGroups)) { readData = true; }
+                if (util.inUsersGroups(groupN, userGroups)) { readData = true; }
                 else { remove = true; }// skipline because you are a group we dont care about
             }
             
             if (readData) {
                 SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN, numBins);
                 push_back(temp);
-            }else { m->getline(f); }
-            m->gobble(f);
+            }else { util.getline(f); }
+            util.gobble(f);
             
             if (f.eof() != true) { f >> nextLabel; }
         }
         if (remove) { eliminateZeroOTUS(); }
-        m->setSaveNextLabel(nextLabel);
+        
+        otuTag = labelTag;
         
         //error in names of user inputted Groups
         if (lookup.size() < userGroups.size()) { m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); m->setControl_pressed(true); }
@@ -293,7 +300,7 @@ void SharedRAbundFloatVectors::setOTUNames(vector<string> names){
 /***********************************************************************/
 vector<string> SharedRAbundFloatVectors::getOTUNames(){
     try {
-        m->getOTUNames(currentLabels, numBins);
+        util.getOTUNames(currentLabels, numBins, otuTag);
         return currentLabels;
     }
     catch(exception& e) {
@@ -408,7 +415,7 @@ void SharedRAbundFloatVectors::removeGroups(vector<string> g){
         bool remove = false;
         for (vector<SharedRAbundFloatVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             //if this sharedrabund is not from a group the user wants then delete it.
-            if (m->inUsersGroups((*it)->getGroup(), g) ) {
+            if (util.inUsersGroups((*it)->getGroup(), g) ) {
                 remove = true;
                 delete (*it); (*it) = NULL;
                 it = lookup.erase(it);

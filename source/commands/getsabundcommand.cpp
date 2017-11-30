@@ -105,14 +105,14 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 			outputTypes["sabund"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -120,7 +120,7 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 				it = parameters.find("rabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
 				}
@@ -128,7 +128,7 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -136,27 +136,27 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 			
 			
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else {  format = "list"; inputfile = listfile; m->setListFile(listfile); }
+			else {  format = "list"; inputfile = listfile; current->setListFile(listfile); }
 			
-			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			rabundfile = validParameter.validFile(parameters, "rabund");
 			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
 			else if (rabundfile == "not found") { rabundfile = ""; }
-			else {  format = "rabund"; inputfile = rabundfile; m->setRabundFile(rabundfile); }
+			else {  format = "rabund"; inputfile = rabundfile; current->setRabundFile(rabundfile); }
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = ""; }
-			else {  m->setCountTableFile(countfile); }
+			else {  current->setCountFile(countfile); }
             
 						//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -164,10 +164,10 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 				//is there are current file available for any of these?
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
-				listfile = m->getListFile(); 
+				listfile = current->getListFile(); 
 				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 
-					rabundfile = m->getRabundFile(); 
+					rabundfile = current->getRabundFile(); 
 					if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a list or rabund file."); m->mothurOutEndLine(); 
@@ -179,7 +179,7 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
             if ((countfile != "") && (listfile == "")) { m->mothurOut("[ERROR]: You can only use the count file with a list file, aborting.\n"); abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile); 	}			
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile); 	}			
 			
 			
 		}
@@ -197,9 +197,9 @@ int GetSAbundCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
 		filename = getOutputFileName("sabund", variables);
-		m->openOutputFile(filename, out);
+		util.openOutputFile(filename, out);
 		
         if (countfile != "") {
             processList(out);
@@ -213,7 +213,7 @@ int GetSAbundCommand::execute(){
             set<string> processedLabels;
             set<string> userLabels = labels;
             
-            if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete sabund;  return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); util.mothurRemove(filename);  delete sabund;  return 0; }
             
             
             while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -223,13 +223,13 @@ int GetSAbundCommand::execute(){
 					
 					sabund->print(out);
 					
-                    if (m->getControl_pressed()) { outputTypes.clear();  out.close(); m->mothurRemove(filename);  delete sabund;   return 0; }
+                    if (m->getControl_pressed()) { outputTypes.clear();  out.close(); util.mothurRemove(filename);  delete sabund;   return 0; }
                     
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+                if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = sabund->getLabel();
 					
 					delete sabund;
@@ -238,7 +238,7 @@ int GetSAbundCommand::execute(){
 					m->mothurOut(sabund->getLabel());  m->mothurOutEndLine();
 					sabund->print(out);
 					
-					if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete sabund;   return 0; }
+					if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); util.mothurRemove(filename);  delete sabund;   return 0; }
                     
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -276,13 +276,13 @@ int GetSAbundCommand::execute(){
                 sabund->print(out);
                 delete sabund;
                 
-                if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); m->mothurRemove(filename); return 0; }
+                if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); util.mothurRemove(filename); return 0; }
                 
             }
 		}
 		out.close();
         
-        if (m->getControl_pressed()) {  outputTypes.clear();  m->mothurRemove(filename);  return 0; }
+        if (m->getControl_pressed()) {  outputTypes.clear();  util.mothurRemove(filename);  return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -290,10 +290,10 @@ int GetSAbundCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set sabund file as new current sabundfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("sabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSabundFile(currentName); }
 		}
 		
 		return 0;		
@@ -337,7 +337,7 @@ int GetSAbundCommand::processList(ofstream& out){
                 userLabels.erase(list->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+            if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = list->getLabel();
                 
                 delete list;
@@ -414,7 +414,7 @@ int GetSAbundCommand::createRabund(CountTable& ct, ListVector*& list, RAbundVect
             if (m->getControl_pressed()) { return 0; }
             vector<string> binNames;
             string bin = list->get(i);
-            m->splitAtComma(bin, binNames);
+            util.splitAtComma(bin, binNames);
             int total = 0;
             for (int j = 0; j < binNames.size(); j++) {
                 total += ct.getNumSeqs(binNames[j]);

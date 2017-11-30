@@ -38,7 +38,7 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
 }
 /**************************************************************************************************/
 TestOptiMatrix::~TestOptiMatrix() {
-    m->mothurRemove(phylipFile);
+    util.mothurRemove(phylipFile);
 }
 /**************************************************************************************************
 TEST_CASE("Testing OptiMatrix Class") {

@@ -12,6 +12,7 @@
 
 #include "mothur.h"
 #include "sequence.hpp"
+#include "utils.hpp"
 
 
 /***********************************************************************/
@@ -89,7 +90,7 @@ public:
 
 	void doHard(string hard) {
 		ifstream fileHandle;
-		m->openInputFile(hard, fileHandle);
+        Utils util; util.openInputFile(hard, fileHandle);
 	
 		fileHandle >> filter;
 	

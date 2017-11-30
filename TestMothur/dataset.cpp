@@ -23,7 +23,7 @@ void TestDataSet::createCountTable() {
         string firstCol = itNameMap->first;
         string secondCol = itNameMap->second;
         vector<string> names;
-        m->splitAtChar(secondCol, names, ',');
+        util.splitAtChar(secondCol, names, ',');
         
         //set to 0
         map<string, int> groupCounts;
@@ -75,12 +75,12 @@ void TestDataSet::fillSeqs() {
      string testfile ="/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.fasta";
     
     ifstream in;
-    m->openInputFile(testfile, in);
+    util.openInputFile(testfile, in);
     
     while (!in.eof()) {
         if (m->getControl_pressed()) { break; }
         
-        Sequence read(in); m->gobble(in);
+        Sequence read(in); util.gobble(in);
         seqs.push_back(read);
     }
     in.close();
@@ -91,7 +91,7 @@ void TestDataSet::fillNames() {
     
     //read info from stable file
     string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.names";
-    m->readNames(testfile, nameMap);
+    util.readNames(testfile, nameMap);
 }
 /***********************************************************************/
 void TestDataSet::fillGroup() {

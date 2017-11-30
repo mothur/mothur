@@ -32,7 +32,7 @@ SequenceDB::SequenceDB(int newSize) {
 SequenceDB::SequenceDB(ifstream& filehandle) {
 	try{
 		length = 0; samelength = true;
-				
+        Utils util;
 		//read through file
 		while (!filehandle.eof()) {
 			//input sequence info into sequencedb
@@ -45,7 +45,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 			}
 			
 			//takes care of white space
-			m->gobble(filehandle);
+			util.gobble(filehandle);
 		}
 
 		filehandle.close();

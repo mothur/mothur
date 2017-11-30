@@ -105,7 +105,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 			
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 
@@ -113,7 +113,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 				it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
@@ -121,7 +121,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -131,23 +131,23 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
             outputTypes["coremicrobiome"] = tempOutNames; 
 
 			//check for parameters
-            sharedfile = validParameter.validFile(parameters, "shared", true);
+            sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else { inputFileName = sharedfile; format = "sharedfile"; m->setSharedFile(sharedfile); }
+			else { inputFileName = sharedfile; format = "sharedfile"; current->setSharedFile(sharedfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") { abort = true; }
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else { inputFileName = relabundfile; format = "relabund"; m->setRelAbundFile(relabundfile); }
+			else { inputFileName = relabundfile; format = "relabund"; current->setRelAbundFile(relabundfile); }
             
             if ((relabundfile == "") && (sharedfile == "")) { 
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") {  inputFileName = sharedfile; format="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					relabundfile = m->getRelAbundFile(); 
+					relabundfile = current->getRelAbundFile(); 
 					if (relabundfile != "") {  inputFileName = relabundfile; format="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); 
@@ -157,27 +157,27 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 			}
             
             //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = m->hasPath(inputFileName); //if user entered a file with a path then preserve it	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
+				outputDir = util.hasPath(inputFileName); //if user entered a file with a path then preserve it	
 			}
             
-            string groups = validParameter.validFile(parameters, "groups", false);			
+            string groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
+			else { util.splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
             
-            string label = validParameter.validFile(parameters, "label", false);			
+            string label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
             
-            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "fraction"; }
+            output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "fraction"; }
 						
 			if ((output != "fraction") && (output != "count")) { m->mothurOut(output + " is not a valid output form. Options are fraction and count. I will use fraction."); m->mothurOutEndLine(); output = "fraction"; }
             
-            string temp = validParameter.validFile(parameters, "abundance", false);	if (temp == "not found"){	temp = "-1";	}
-			m->mothurConvert(temp, abund);
+            string temp = validParameter.valid(parameters, "abundance");	if (temp == "not found"){	temp = "-1";	}
+			util.mothurConvert(temp, abund);
             
             if (abund != -1) { 
                 if ((abund < 0) || (abund > 100)) { m->mothurOut(toString(abund) + " is not a valid number for abund. Must be between 0 and 100.\n"); }
@@ -190,7 +190,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
                             if (found) { factorString += "0"; }
                         }
                     }
-                    m->mothurConvert(factorString, factor);
+                    util.mothurConvert(factorString, factor);
                 }else {
                     factor = 100;
                     abund /= 100;
@@ -199,8 +199,8 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
                 factor = 100;
             }
             
-            temp = validParameter.validFile(parameters, "samples", false);	if (temp == "not found"){	temp = "-1";	}
-			m->mothurConvert(temp, samples);
+            temp = validParameter.valid(parameters, "samples");	if (temp == "not found"){	temp = "-1";	}
+			util.mothurConvert(temp, samples);
 
 		}
 		
@@ -234,7 +234,7 @@ int GetCoreMicroBiomeCommand::execute(){
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+            if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
@@ -246,7 +246,7 @@ int GetCoreMicroBiomeCommand::execute(){
                 userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -266,13 +266,13 @@ int GetCoreMicroBiomeCommand::execute(){
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
             
             //get next line to process
             lookup = input.getSharedRAbundFloatVectors();				
         }
         
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -301,7 +301,7 @@ int GetCoreMicroBiomeCommand::execute(){
 
         }
         
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
         
         //output files created by command
 		m->mothurOutEndLine();
@@ -321,12 +321,12 @@ int GetCoreMicroBiomeCommand::execute(){
 int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
 	try {
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[tag]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("coremicrobiome", variables);
         outputNames.push_back(outputFileName);  outputTypes["coremicrobiome"].push_back(outputFileName);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
         int numSamples = lookup->size();
         int numOtus = lookup->getNumBins();
@@ -412,10 +412,10 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
         if (m->getControl_pressed()) { return 0; }
         
         if ((samples != -1) || (abund != -1))  {
-            string outputFileName2 = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup->getLabel() + ".core.microbiomelist";
+            string outputFileName2 = outputDir + util.getRootName(util.getSimpleName(inputFileName)) + lookup->getLabel() + ".core.microbiomelist";
             outputNames.push_back(outputFileName2);  outputTypes["coremicrobiome"].push_back(outputFileName2);
             ofstream out2;
-            m->openOutputFile(outputFileName2, out2);
+            util.openOutputFile(outputFileName2, out2);
             
             if ((abund == -1) && (samples != -1)) { //we want all OTUs with this number of samples
                 out2 << "Relabund\tOTUList_for_samples=" << samples << "\n";
@@ -429,7 +429,7 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
                 if (m->getControl_pressed()) { break; }
                 
                 vector<string> temp = it->second;
-                string list = m->makeList(temp);
+                string list = util.makeList(temp);
                 
                 if ((abund != -1) && (samples == -1)) { //fill with all samples
                     out2 << it->first << '\t' << list << endl;

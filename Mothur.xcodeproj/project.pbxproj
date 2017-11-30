@@ -387,6 +387,10 @@
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
+		48B44EEE1FB5006500789C45 /* currentfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EED1FB5006500789C45 /* currentfile.cpp */; };
+		48B44EEF1FB5006500789C45 /* currentfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EED1FB5006500789C45 /* currentfile.cpp */; };
+		48B44EF21FB9EF8200789C45 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EF01FB9EF8200789C45 /* utils.cpp */; };
+		48B44EF31FB9EF8200789C45 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EF01FB9EF8200789C45 /* utils.cpp */; };
 		48B662031BBB1B6600997EE4 /* testrenameseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */; };
 		48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
@@ -896,6 +900,9 @@
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = TestMothur/testcommands/testrenamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenamefilecommand.h; path = TestMothur/testcommands/testrenamefilecommand.h; sourceTree = SOURCE_ROOT; };
+		48B44EED1FB5006500789C45 /* currentfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = currentfile.cpp; path = source/currentfile.cpp; sourceTree = "<group>"; };
+		48B44EF01FB9EF8200789C45 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cpp; path = source/utils.cpp; sourceTree = "<group>"; };
+		48B44EF11FB9EF8200789C45 /* utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = utils.hpp; path = source/utils.hpp; sourceTree = "<group>"; };
 		48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenameseqscommand.cpp; path = TestMothur/testcommands/testrenameseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = TestMothur/testcommands/testrenameseqscommand.h; sourceTree = SOURCE_ROOT; };
 		48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvectors.cpp; path = source/datastructures/sharedrabundvectors.cpp; sourceTree = SOURCE_ROOT; };
@@ -1746,6 +1753,9 @@
 				A7E9B6B612D37EC400DA6239 /* consensus.h */,
 				A7E9B6B512D37EC400DA6239 /* consensus.cpp */,
 				A7AACFBA132FE008003D6C4D /* currentfile.h */,
+				48B44EED1FB5006500789C45 /* currentfile.cpp */,
+				48B44EF01FB9EF8200789C45 /* utils.cpp */,
+				48B44EF11FB9EF8200789C45 /* utils.hpp */,
 				A7E9B6C912D37EC400DA6239 /* display.h */,
 				A7E9B6D112D37EC400DA6239 /* dlibshuff.cpp */,
 				A7E9B6D212D37EC400DA6239 /* dlibshuff.h */,
@@ -2800,7 +2810,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "Schloss Lab";
 				TargetAttributes = {
 					481FB5181AC0A63E0076CFF3 = {
@@ -2893,6 +2903,7 @@
 				481FB5861AC1B6FF0076CFF3 /* chimerarealigner.cpp in Sources */,
 				481FB5A81AC1B7300076CFF3 /* collectcommand.cpp in Sources */,
 				481FB5961AC1B71B0076CFF3 /* chimeraccodecommand.cpp in Sources */,
+				48B44EEF1FB5006500789C45 /* currentfile.cpp in Sources */,
 				4827A4DC1CB3ED2200345170 /* fastqdataset.cpp in Sources */,
 				481FB61B1AC1B7AC0076CFF3 /* trimflowscommand.cpp in Sources */,
 				481FB6781AC1B88F0076CFF3 /* readcolumn.cpp in Sources */,
@@ -2949,6 +2960,7 @@
 				481FB61E1AC1B7AC0076CFF3 /* unifracweightedcommand.cpp in Sources */,
 				48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */,
 				48E544341E92C49700FF6AB8 /* gtest-port.cc in Sources */,
+				48B44EF31FB9EF8200789C45 /* utils.cpp in Sources */,
 				481FB5951AC1B71B0076CFF3 /* chimerabellerophoncommand.cpp in Sources */,
 				481FB68D1AC1BA9E0076CFF3 /* classify.cpp in Sources */,
 				481FB65F1AC1B8450076CFF3 /* myseqdist.cpp in Sources */,
@@ -3411,6 +3423,7 @@
 				A7E9B92412D37EC400DA6239 /* rarecalc.cpp in Sources */,
 				A7E9B92512D37EC400DA6239 /* raredisplay.cpp in Sources */,
 				A7E9B92612D37EC400DA6239 /* rarefact.cpp in Sources */,
+				48B44EF21FB9EF8200789C45 /* utils.cpp in Sources */,
 				A7E9B92712D37EC400DA6239 /* rarefactcommand.cpp in Sources */,
 				A7E9B92812D37EC400DA6239 /* rarefactsharedcommand.cpp in Sources */,
 				A7E9B92912D37EC400DA6239 /* readblast.cpp in Sources */,
@@ -3461,6 +3474,7 @@
 				A7E9B95512D37EC400DA6239 /* sharedochiai.cpp in Sources */,
 				A7E9B95612D37EC400DA6239 /* sharedordervector.cpp in Sources */,
 				A7E9B95A12D37EC400DA6239 /* sharedsobs.cpp in Sources */,
+				48B44EEE1FB5006500789C45 /* currentfile.cpp in Sources */,
 				A7E9B95B12D37EC400DA6239 /* sharedsobscollectsummary.cpp in Sources */,
 				A7E9B95C12D37EC400DA6239 /* sharedsorabund.cpp in Sources */,
 				A7E9B95D12D37EC400DA6239 /* sharedsorclass.cpp in Sources */,
@@ -3697,15 +3711,26 @@
 		1DEB928A08733DD80010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEPLOYMENT_LOCATION = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_SSE3_EXTENSIONS = NO;
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
@@ -3714,9 +3739,12 @@
 				);
 				GCC_VERSION = "";
 				"GCC_VERSION[arch=*]" = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
@@ -3752,13 +3780,24 @@
 		1DEB928B08733DD80010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEPLOYMENT_LOCATION = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.39.5\\\"\"",
@@ -3766,11 +3805,14 @@
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 				);
 				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;

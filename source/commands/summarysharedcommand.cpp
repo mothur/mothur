@@ -125,88 +125,87 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
             outputTypes["phylip"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
 			}
 			
 			//get shared file
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
 			
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
 					
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			else { 
 				 if (calc == "default")  {  calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
-			else {  m->splitAtDash(groups, Groups);
+			else {  util.splitAtDash(groups, Groups);
                     if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
 			
-			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
-			all = m->isTrue(temp);
+			string temp = validParameter.valid(parameters, "all");				if (temp == "not found") { temp = "false"; }
+			all = util.isTrue(temp);
 			
-            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+            temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters); 
             
-            output = validParameter.validFile(parameters, "output", false);		
+            output = validParameter.valid(parameters, "output");
             if(output == "not found"){	output = "lt"; }
             else { createPhylip = true; }
 			if ((output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
             
-            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
-			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
+			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
             else {  
-                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
                 else { subsample = false; }
             }
             
             if (subsample == false) { iters = 0; }
             
-            temp = validParameter.validFile(parameters, "distance", false);					if (temp == "not found") { temp = "false"; }
-			createPhylip = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "distance");					if (temp == "not found") { temp = "false"; }
+			createPhylip = util.isTrue(temp);
             if (subsample) { createPhylip = true; }
             
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
             mult = false;
             numCalcs = 0;
@@ -316,7 +315,7 @@ int SummarySharedCommand::execute(){
 		
 		ofstream outputFileHandle, outAll;
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
 		string outputFileName = getOutputFileName("summary",variables);
 		
 		//if the users entered no valid calculators don't execute command
@@ -333,7 +332,7 @@ int SummarySharedCommand::execute(){
 		//output headings for files
 		/******************************************************/
 		//output estimator names as column headers
-		m->openOutputFile(outputFileName, outputFileHandle);
+		util.openOutputFile(outputFileName, outputFileHandle);
 		outputFileHandle << "label" <<'\t' << "comparison" << '\t'; 
 		for(int i=0;i<sumCalculators.size();i++){
 			outputFileHandle << '\t' << sumCalculators[i]->getName();
@@ -346,7 +345,7 @@ int SummarySharedCommand::execute(){
         variables["[tag]"]= "multiple";
 		string outAllFileName = getOutputFileName("summary",variables);
 		if (mult ) {
-			m->openOutputFile(outAllFileName, outAll);
+			util.openOutputFile(outAllFileName, outAll);
 			outputNames.push_back(outAllFileName);
 			
 			outAll << "label" <<'\t' << "comparison" << '\t'; 
@@ -360,17 +359,17 @@ int SummarySharedCommand::execute(){
 			delete lookup;
 			
 			//close files and clean up
-			m->mothurRemove(outputFileName);
-			if (mult ) { m->mothurRemove(outAllFileName);  }
+			util.mothurRemove(outputFileName);
+			if (mult ) { util.mothurRemove(outAllFileName);  }
 			return 0;
 		//if you only have 2 groups you don't need a .sharedmultiple file
 		}else if ((lookup->size() == 2) && (mult )) {
 			mult = false;
-			m->mothurRemove(outAllFileName);
+			util.mothurRemove(outAllFileName);
 			outputNames.pop_back();
 		}
 		
-		if (m->getControl_pressed()) { if (mult) {  m->mothurRemove(outAllFileName);  } m->mothurRemove(outputFileName); delete lookup; for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0; }
+		if (m->getControl_pressed()) { if (mult) {  util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName); delete lookup; for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0; }
 		/******************************************************/
         if (subsample) { 
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
@@ -405,7 +404,7 @@ int SummarySharedCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->getControl_pressed()) {
-				if (mult) {  m->mothurRemove(outAllFileName);  } m->mothurRemove(outputFileName);  delete lookup; for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0;
+				if (mult) {  util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName);  delete lookup; for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0;
 			}
 
 		
@@ -419,7 +418,7 @@ int SummarySharedCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup->getLabel();
 					
 					delete lookup;
@@ -446,7 +445,7 @@ int SummarySharedCommand::execute(){
 		}
 		
 		if (m->getControl_pressed()) {
-			if (mult) { m->mothurRemove(outAllFileName);  } m->mothurRemove(outputFileName); for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0;
+			if (mult) { util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName); for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0;
 		}
 
 		//output error messages about any remaining user labels
@@ -480,7 +479,7 @@ int SummarySharedCommand::execute(){
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		
-		if (m->getControl_pressed()) { m->mothurRemove(outAllFileName);   m->mothurRemove(outputFileName);  return 0; }
+		if (m->getControl_pressed()) { util.mothurRemove(outAllFileName);   util.mothurRemove(outputFileName);  return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -631,7 +630,7 @@ void driverSummaryShared(summarySharedData* params) {
         //loop through calculators and add to file all for all calcs that can do mutiple groups
         if (params->mult && params->main) {
             ofstream outAll;
-            params->m->openOutputFile(params->sumAllFile, outAll);
+            params->util.openOutputFile(params->sumAllFile, outAll);
             
             //output label
             outAll << params->thisLookup[0]->getLabel() << '\t';
@@ -659,7 +658,7 @@ void driverSummaryShared(summarySharedData* params) {
         }
         
         ofstream outputFileHandle;
-        params->m->openOutputFile(params->sumFile, outputFileHandle);
+        params->util.openOutputFile(params->sumFile, outputFileHandle);
         
         vector<SharedRAbundVector*> subset;
         for (int k = params->start; k < params->end; k++) { // pass cdd each set of groups to compare
@@ -763,16 +762,16 @@ int SummarySharedCommand::runCalcs(vector<SharedRAbundVector*>& thisItersLookup,
         delete dataBundle;
         for (int i = 0; i < newLookup.size(); i++) { delete newLookup[i]; } newLookup.clear();
         
-        m->appendFiles((sumFileName + extension), sumFileName);
-        m->mothurRemove((sumFileName + extension));
-        if (mult) { m->appendFiles((sumAllFile + extension), sumAllFile); }
+        util.appendFiles((sumFileName + extension), sumFileName);
+        util.mothurRemove((sumFileName + extension));
+        if (mult) { util.appendFiles((sumAllFile + extension), sumAllFile); }
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             
             string extension = toString(i+1) + ".temp";
-            m->appendFiles((sumFileName + extension), sumFileName);
-            m->mothurRemove((sumFileName + extension));
+            util.appendFiles((sumFileName + extension), sumFileName);
+            util.mothurRemove((sumFileName + extension));
             
             //delete pDataArray[i]->thisLookup;
             if (createPhylip) {
@@ -848,7 +847,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         }
                         
                         map<string, string> variables; 
-                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
                         variables["[calc]"] = sumCalculatorsNames[i];
                         variables["[distance]"] = thisLookup[0]->getLabel();
                         variables["[outputtag]"] = output;
@@ -856,7 +855,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         string distFileName = getOutputFileName("phylip",variables);
                         outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                         ofstream outDist;
-                        m->openOutputFile(distFileName, outDist);
+                        util.openOutputFile(distFileName, outDist);
                         outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
                         
                         printSims(outDist, matrix, GroupNames);
@@ -870,10 +869,10 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 
         if (iters != 0) {
             //we need to find the average distance and standard deviation for each groups distance
-            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals);
+            vector< vector<seqDist>  > calcAverages = util.getAverages(calcDistsTotals);
             
             //find standard deviation
-            vector< vector<seqDist>  > stdDev = m->getStandardDeviation(calcDistsTotals, calcAverages); 
+            vector< vector<seqDist>  > stdDev = util.getStandardDeviation(calcDistsTotals, calcAverages); 
             
             //print results
             for (int i = 0; i < calcDists.size(); i++) {
@@ -900,7 +899,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 }
                 
                 map<string, string> variables; 
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
                 variables["[calc]"] = sumCalculatorsNames[i];
                 variables["[distance]"] = thisLookup[0]->getLabel();
                 variables["[outputtag]"] = output;
@@ -908,7 +907,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 string distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outAve;
-                m->openOutputFile(distFileName, outAve);
+                util.openOutputFile(distFileName, outAve);
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
                 
                 printSims(outAve, matrix, GroupNames);
@@ -919,7 +918,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
-                m->openOutputFile(distFileName, outSTD);
+                util.openOutputFile(distFileName, outSTD);
                 outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
                 
                 printSims(outSTD, stdmatrix, GroupNames);

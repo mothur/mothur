@@ -164,17 +164,17 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
                 it = parameters.find("file");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["file"] = inputDir + it->second;		}
 				}
@@ -182,58 +182,57 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
                 it = parameters.find("lookup");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["lookup"] = inputDir + it->second;		}
 				}
 			}
             
-			filename = validParameter.validFile(parameters, "file", true);
+			filename = validParameter.validFile(parameters, "file");
             if (filename == "not open") { filename = ""; abort = true; }
             else if (filename == "not found") { filename = "";  }
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "trim", false);					if (temp == "not found"){	temp = "T";				}
-			trim = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "trim");					if (temp == "not found"){	temp = "T";				}
+			trim = util.isTrue(temp); 
             
-            temp = validParameter.validFile(parameters, "minflows", false);	if (temp == "not found") { temp = "450"; }
-			m->mothurConvert(temp, minFlows);  
+            temp = validParameter.valid(parameters, "minflows");	if (temp == "not found") { temp = "450"; }
+			util.mothurConvert(temp, minFlows);  
             
-			temp = validParameter.validFile(parameters, "maxflows", false);	if (temp == "not found") { temp = "450"; }
-			m->mothurConvert(temp, maxFlows);  
+			temp = validParameter.valid(parameters, "maxflows");	if (temp == "not found") { temp = "450"; }
+			util.mothurConvert(temp, maxFlows);  
             
-            temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found"){	temp = "9";		}
-			m->mothurConvert(temp, maxHomoP);  
+            temp = validParameter.valid(parameters, "maxhomop");		if (temp == "not found"){	temp = "9";		}
+			util.mothurConvert(temp, maxHomoP);  
             
-			temp = validParameter.validFile(parameters, "signal", false);		if (temp == "not found"){	temp = "0.50";	}
-			m->mothurConvert(temp, signal);  
+			temp = validParameter.valid(parameters, "signal");		if (temp == "not found"){	temp = "0.50";	}
+			util.mothurConvert(temp, signal);  
             
-			temp = validParameter.validFile(parameters, "noise", false);		if (temp == "not found"){	temp = "0.70";	}
-			m->mothurConvert(temp, noise);  
+			temp = validParameter.valid(parameters, "noise");		if (temp == "not found"){	temp = "0.70";	}
+			util.mothurConvert(temp, noise);  
             
-			temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found"){	temp = "0";		}
-			m->mothurConvert(temp, bdiffs);
+			temp = validParameter.valid(parameters, "bdiffs");		if (temp == "not found"){	temp = "0";		}
+			util.mothurConvert(temp, bdiffs);
 			
-			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found"){	temp = "0";		}
-			m->mothurConvert(temp, pdiffs);
+			temp = validParameter.valid(parameters, "pdiffs");		if (temp == "not found"){	temp = "0";		}
+			util.mothurConvert(temp, pdiffs);
 			
-            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, ldiffs);
+            temp = validParameter.valid(parameters, "ldiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, ldiffs);
             
-            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, sdiffs);
+            temp = validParameter.valid(parameters, "sdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, sdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
-			m->mothurConvert(temp, tdiffs);
+			temp = validParameter.valid(parameters, "tdiffs");		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
+			util.mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
             
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
             
-			temp = validParameter.validFile(parameters, "order", false);  if (temp == "not found"){ 	temp = "A";	}
+			temp = validParameter.valid(parameters, "order");  if (temp == "not found"){ 	temp = "A";	}
             if (temp.length() > 1) {  m->mothurOut("[ERROR]: " + temp + " is not a valid option for order. order options are A, B, or I. A = TACG, B = TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC, and I = TACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGC.\n");  abort=true;
             }
             else {
@@ -248,52 +247,52 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
             }
 
             
-            temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.01";		}
-			m->mothurConvert(temp, cutoff); 
+            temp = validParameter.valid(parameters, "cutoff");	if (temp == "not found"){	temp = "0.01";		}
+			util.mothurConvert(temp, cutoff); 
 			
-			temp = validParameter.validFile(parameters, "mindelta", false);	if (temp == "not found"){	temp = "0.000001";	}
+			temp = validParameter.valid(parameters, "mindelta");	if (temp == "not found"){	temp = "0.000001";	}
 			minDelta = temp; 
             
-			temp = validParameter.validFile(parameters, "maxiter", false);	if (temp == "not found"){	temp = "1000";		}
-			m->mothurConvert(temp, maxIters); 
+			temp = validParameter.valid(parameters, "maxiter");	if (temp == "not found"){	temp = "1000";		}
+			util.mothurConvert(temp, maxIters); 
             
-            temp = validParameter.validFile(parameters, "large", false);	if (temp == "not found"){	temp = "0";		}
-			m->mothurConvert(temp, largeSize); 
+            temp = validParameter.valid(parameters, "large");	if (temp == "not found"){	temp = "0";		}
+			util.mothurConvert(temp, largeSize); 
             if (largeSize != 0) { large = true; }
             else { large = false;  }
             if (largeSize < 0) {  m->mothurOut("The value of the large cannot be negative.\n"); }
             
-			temp = validParameter.validFile(parameters, "sigma", false);if (temp == "not found")	{	temp = "60";		}
-			m->mothurConvert(temp, sigma); 
+			temp = validParameter.valid(parameters, "sigma");if (temp == "not found")	{	temp = "60";		}
+			util.mothurConvert(temp, sigma); 
             
-            temp = validParameter.validFile(parameters, "flip", false);
+            temp = validParameter.valid(parameters, "flip");
 			if (temp == "not found")    {	flip = 0;	}
-			else {  flip = m->isTrue(temp);		}
+			else {  flip = util.isTrue(temp);		}
 			
-			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, maxAmbig);  
+			temp = validParameter.valid(parameters, "maxambig");		if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, maxAmbig);  
                        
-			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, minLength); 
+			temp = validParameter.valid(parameters, "minlength");	if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, minLength); 
 			
-			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, maxLength);
+			temp = validParameter.valid(parameters, "maxlength");	if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, maxLength);
 						
-			temp = validParameter.validFile(parameters, "keepfirst", false);	if (temp == "not found") { temp = "0"; }
+			temp = validParameter.valid(parameters, "keepfirst");	if (temp == "not found") { temp = "0"; }
 			convert(temp, keepFirst);
             
-			temp = validParameter.validFile(parameters, "removelast", false);	if (temp == "not found") { temp = "0"; }
+			temp = validParameter.valid(parameters, "removelast");	if (temp == "not found") { temp = "0"; }
 			convert(temp, removeLast);
 			
-			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
-			allFiles = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "allfiles");		if (temp == "not found") { temp = "F"; }
+			allFiles = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "keepforward", false);		if (temp == "not found") { temp = "F"; }
-			keepforward = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "keepforward");		if (temp == "not found") { temp = "F"; }
+			keepforward = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "lookup", true);
+            temp = validParameter.validFile(parameters, "lookup");
 			if (temp == "not found")	{
-                string path = m->getProgramPath();
+                string path = current->getProgramPath();
                 //string tempPath = path;
                 //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
                 //path = path.substr(0, (tempPath.find_last_of('m')));
@@ -303,23 +302,23 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 #else
                 path += "lookupFiles\\";
 #endif
-				lookupFileName = m->getFullPathName(path) + "LookUp_Titanium.pat";
-				bool ableToOpen = m->checkLocations(lookupFileName, inputDir);
+				lookupFileName = util.getFullPathName(path) + "LookUp_Titanium.pat";
+				bool ableToOpen = util.checkLocations(lookupFileName, current->getLocations());
                 if (!ableToOpen) { abort=true; }
 			}else if(temp == "not open")	{	
 				
-				lookupFileName = validParameter.validFile(parameters, "lookup", false);
+				lookupFileName = validParameter.valid(parameters, "lookup");
 				
 				//if you can't open it its not inputDir, try mothur excutable location
-				string exepath = m->getProgramPath();
+				string exepath = current->getProgramPath();
 				//string tempPath = exepath;
 				//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
 				//exepath = exepath.substr(0, (tempPath.find_last_of('m')));
                 
-				string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
+				string tryPath = util.getFullPathName(exepath) + util.getSimpleName(lookupFileName);
 				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
 				ifstream in2;
-				bool ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+				bool ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 				in2.close();
 				lookupFileName = tryPath;
 				
@@ -341,8 +340,8 @@ int SffMultipleCommand::execute(){
         readFile(sffFiles, oligosFiles);
         
         string thisOutputDir = outputDir;
-        if (thisOutputDir == "") { thisOutputDir = m->hasPath(filename); }
-        string fileroot = thisOutputDir + m->getRootName(m->getSimpleName(filename));
+        if (thisOutputDir == "") { thisOutputDir = util.hasPath(filename); }
+        string fileroot = thisOutputDir + util.getRootName(util.getSimpleName(filename));
         map<string, string> variables; 
 		variables["[filename]"] = fileroot;
         string fasta = getOutputFileName("fasta",variables);
@@ -361,17 +360,17 @@ int SffMultipleCommand::execute(){
         if (processors == 1) { driver(sffFiles, oligosFiles, 0, sffFiles.size(), fasta, name, group); }
         else { createProcesses(sffFiles, oligosFiles, fasta, name, group); } 
 		
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 		
         if (append) { 
             outputNames.push_back(fasta); outputTypes["fasta"].push_back(fasta);
-            m->setFastaFile(fasta);
+            current->setFastaFile(fasta);
             outputNames.push_back(name); outputTypes["name"].push_back(name);
-            m->setNameFile(name);
-            if (makeGroup) { outputNames.push_back(group); outputTypes["group"].push_back(group); m->setGroupFile(group); }
+            current->setNameFile(name);
+            if (makeGroup) { outputNames.push_back(group); outputTypes["group"].push_back(group); current->setGroupFile(group); }
         }
         
-        m->setProcessors(toString(processors));
+        current->setProcessors(toString(processors));
         
 		//report output filenames
 		m->mothurOutEndLine();
@@ -391,7 +390,7 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
 	try {
         
         ifstream in;
-        m->openInputFile(filename, in);
+        util.openInputFile(filename, in);
         bool allBlank = true;
         bool allFull = true;
         
@@ -403,9 +402,9 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
             in >> sff;
             
             //ignore file pairing
-            if(sff[0] == '#'){ while (!in.eof())	{	char c = in.get();  if (c == 10 || c == 13){	break;	}	} m->gobble(in); }
+            if(sff[0] == '#'){ while (!in.eof())	{	char c = in.get();  if (c == 10 || c == 13){	break;	}	} util.gobble(in); }
             else { //check for oligos file
-                bool ableToOpenSff = m->checkLocations(sff, inputDir);
+                bool ableToOpenSff = util.checkLocations(sff, current->getLocations());
                 
                 oligos = "";
             
@@ -420,7 +419,7 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
                 if (ableToOpenSff) {
                     sffFiles.push_back(sff);
                     if (oligos != "") {
-                        bool ableToOpenOligos = m->checkLocations(oligos, inputDir);
+                        bool ableToOpenOligos = util.checkLocations(oligos, current->getLocations());
                         if (ableToOpenOligos) {  allBlank = false; }
                         else { m->mothurOut("Can not find " + oligos + ". Ignoring.\n"); oligos = ""; }
                     }
@@ -428,7 +427,7 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
                     oligosFiles.push_back(oligos); //will push a blank if there is not an oligos for this sff file
                 }else { m->mothurOut("Can not find " + sff + ". Ignoring.\n"); }
             }
-            m->gobble(in);
+            util.gobble(in);
         }
         in.close();
         
@@ -446,7 +445,7 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
 //runs sffinfo, summary.seqs, trim.flows, shhh.flows, trim.seqs, summary.seqs for each sff file.
 int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFiles, int start, int end, string fasta, string name, string group){
     try {
-        m->mothurRemove(fasta); m->mothurRemove(name); m->mothurRemove(group);
+        util.mothurRemove(fasta); util.mothurRemove(name); util.mothurRemove(group);
         int count = 0;
         for (int s = start; s < end; s++) {
             
@@ -682,9 +681,9 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
             
             if (append) {
-                m->appendFiles(fastaFile, fasta);
-                m->appendFiles(nameFile, name);
-                if (makeGroup) { m->appendFiles(groupFile, group);  }
+                util.appendFiles(fastaFile, fasta);
+                util.appendFiles(nameFile, name);
+                if (makeGroup) { util.appendFiles(groupFile, group);  }
             }
             
             
@@ -755,12 +754,12 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end, fasta + m->mothurGetpid(process) + ".temp", name  + m->mothurGetpid(process) + ".temp", group  + m->mothurGetpid(process) + ".temp");
+				num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end, fasta + toString(process) + ".temp", name  + toString(process) + ".temp", group  + toString(process) + ".temp");
                 
                 //pass numSeqs to parent
 				ofstream out;
-				string tempFile = m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = toString(process) + ".num.temp";
+				util.openOutputFile(tempFile, out);
 				out << num << '\t' << outputNames.size() << endl;
                 for (int i = 0; i < outputNames.size(); i++) {  out << outputNames[i] << endl;  }
 				out.close();
@@ -776,9 +775,9 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(name + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(group + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(name + (toString(processIDS[i]) + ".temp"));
+                    util.mothurRemove(group + (toString(processIDS[i]) + ".temp"));
                 }
                 recalc = true;
                 break;
@@ -787,7 +786,7 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));m->mothurRemove(group + (toString(processIDS[i]) + ".temp"));m->mothurRemove(name + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {util.mothurRemove(fasta + (toString(processIDS[i]) + ".temp"));util.mothurRemove(group + (toString(processIDS[i]) + ".temp"));util.mothurRemove(name + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //redo file divide
             lines.clear();
@@ -813,12 +812,12 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
                     processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
                     process++;
                 }else if (pid == 0){
-                    num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end, fasta + m->mothurGetpid(process) + ".temp", name  + m->mothurGetpid(process) + ".temp", group  + m->mothurGetpid(process) + ".temp");
+                    num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end, fasta + toString(process) + ".temp", name  + toString(process) + ".temp", group  + toString(process) + ".temp");
                     
                     //pass numSeqs to parent
                     ofstream out;
-                    string tempFile = m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
+                    string tempFile = toString(process) + ".num.temp";
+                    util.openOutputFile(tempFile, out);
                     out << num << '\t' << outputNames.size() << endl;
                     for (int i = 0; i < outputNames.size(); i++) {  out << outputNames[i] << endl;  }
                     out.close();
@@ -845,25 +844,25 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
         for (int i=0;i<processIDS.size();i++) { 
             ifstream in;
 			string tempFile = toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
+			util.openInputFile(tempFile, in);
 			if (!in.eof()) { 
                 int tempNum = 0; int outputNamesSize = 0; 
-                in >> tempNum >> outputNamesSize; m->gobble(in);
+                in >> tempNum >> outputNamesSize; util.gobble(in);
                 for (int j = 0; j < outputNamesSize; j++) {
                     string tempName;
-                    in >> tempName; m->gobble(in);
+                    in >> tempName; util.gobble(in);
                     outputNames.push_back(tempName);
                 }
                 if (tempNum != numFilesToComplete[i+1]) {
                     m->mothurOut("[ERROR]: main process expected " + toString(processIDS[i]) + " to complete " + toString(numFilesToComplete[i+1]) + " files, and it only reported completing " + toString(tempNum) + ". This will cause file mismatches.  The flow files may be too large to process with multiple processors. \n");
                 }
             }
-			in.close(); m->mothurRemove(tempFile);
+			in.close(); util.mothurRemove(tempFile);
             
             if (append) {
-                m->appendFiles(fasta+toString(processIDS[i])+".temp", fasta);   m->mothurRemove(fasta+toString(processIDS[i])+".temp");
-                m->appendFiles(name+toString(processIDS[i])+".temp", name);     m->mothurRemove(name+toString(processIDS[i])+".temp");
-                if (makeGroup) { m->appendFiles(group+toString(processIDS[i])+".temp", group);  m->mothurRemove(group+toString(processIDS[i])+".temp"); }
+                util.appendFiles(fasta+toString(processIDS[i])+".temp", fasta);   util.mothurRemove(fasta+toString(processIDS[i])+".temp");
+                util.appendFiles(name+toString(processIDS[i])+".temp", name);     util.mothurRemove(name+toString(processIDS[i])+".temp");
+                if (makeGroup) { util.appendFiles(group+toString(processIDS[i])+".temp", group);  util.mothurRemove(group+toString(processIDS[i])+".temp"); }
             }
         }
 #endif

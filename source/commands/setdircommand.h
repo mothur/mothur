@@ -35,7 +35,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	CommandFactory* commandFactory;
 	string output, input, tempdefault, blastLocation;
 	bool abort, debugorSeedOnly, modifyNames;
     int random;

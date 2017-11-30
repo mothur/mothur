@@ -99,8 +99,8 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + m->mothurGetpid(process) + ".unweighted.results.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = outputDir + toString(process) + ".unweighted.results.temp";
+				util.openOutputFile(tempFile, out);
 				out << myresults.size() << endl;
 				for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
 				out.close();
@@ -116,7 +116,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(outputDir + (toString(processIDS[i]) + ".unweighted.results.temp"));
+                    util.mothurRemove(outputDir + (toString(processIDS[i]) + ".unweighted.results.temp"));
                 }
                 recalc = true;
                 break;
@@ -126,7 +126,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
         if (recalc) {
             //test line, also set recalc to true.
             //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-				 for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i])) + ".unweighted.results.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+				 for (int i=0;i<processIDS.size();i++) {util.mothurRemove(outputDir + (toString(processIDS[i])) + ".unweighted.results.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //if the users enters no groups then give them the score of all groups
             int numGroups = Groups.size();
@@ -190,8 +190,8 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
                     
                     //pass numSeqs to parent
                     ofstream out;
-                    string tempFile = outputDir + m->mothurGetpid(process) + ".unweighted.results.temp";
-                    m->openOutputFile(tempFile, out);
+                    string tempFile = outputDir + toString(process) + ".unweighted.results.temp";
+                    util.openOutputFile(tempFile, out);
                     out << myresults.size() << endl;
                     for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
                     out.close();
@@ -219,12 +219,12 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 		for (int i=0;i<(processors-1);i++) { 
 			ifstream in;
 			string s = outputDir + toString(processIDS[i]) + ".unweighted.results.temp";
-			m->openInputFile(s, in);
+			util.openInputFile(s, in);
 			
 			//get quantiles
 			if (!in.eof()) {
 				int num;
-				in >> num; m->gobble(in);
+				in >> num; util.gobble(in);
 				
 				if (m->getControl_pressed()) { break; }
 				
@@ -233,10 +233,10 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 					in >> w;
 					results.push_back(w);
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
 			in.close();
-			m->mothurRemove(s);
+			util.mothurRemove(s);
 		}
 #else
 		//fill in functions
@@ -451,8 +451,8 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + m->mothurGetpid(process) + ".unweighted.results.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = outputDir + toString(process) + ".unweighted.results.temp";
+				util.openOutputFile(tempFile, out);
 				out << myresults.size() << endl;
 				for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
 				out.close();
@@ -475,12 +475,12 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 		for (int i=0;i<(processors-1);i++) { 
 			ifstream in;
 			string s = outputDir + toString(processIDS[i]) + ".unweighted.results.temp";
-			m->openInputFile(s, in);
+			util.openInputFile(s, in);
 			
 			//get quantiles
 			if (!in.eof()) {
 				int num;
-				in >> num; m->gobble(in);
+				in >> num; util.gobble(in);
 					
 				if (m->getControl_pressed()) { break; }
 				
@@ -490,10 +490,10 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 					
 					results.push_back(w);
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
 			in.close();
-			m->mothurRemove(s);
+			util.mothurRemove(s);
 		}
 #else
        //for some reason it doesn't seem to be calculating hte random trees scores.  all scores are the same even though copytree appears to be randomized.
@@ -554,7 +554,8 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		
 		int count = 0;
 		
-		Tree* copyTree = new Tree(ct);
+        vector<string> Treenames = t->getTreeNames();
+		Tree* copyTree = new Tree(ct, Treenames);
 		
 		for (int h = start; h < (start+num); h++) {
 		

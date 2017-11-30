@@ -12,6 +12,8 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
+#include "currentfile.h"
 
 /**************************************************************************************************/
 
@@ -78,6 +80,8 @@ private:
 	int maxLevel;
 	bool calcTotals;
 	MothurOut* m;
+    CurrentFile* current;
+    Utils util;
 };
 
 /**************************************************************************************************/

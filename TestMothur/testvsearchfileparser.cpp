@@ -34,24 +34,24 @@ TEST_CASE("Testing VsearchParser Class") {
         CHECK(vsearchParser.getVsearchFile() == "tempSeqs.txt.sorted.fasta.temp");
         
         ifstream in;
-        testVParser.m->openInputFile(vsearchParser.getVsearchFile(), in);
+        testVParser.util.openInputFile(vsearchParser.getVsearchFile(), in);
         
         while (!in.eof()) {
-            Sequence seq(in); testVParser.m->gobble(in);
+            Sequence seq(in); testVParser.util.gobble(in);
             
             vector<string> pieces;
             string name = seq.getName();
             
-            testVParser.m->splitAtChar(name, pieces, '=');
+            testVParser.util.splitAtChar(name, pieces, '=');
             string abundString = pieces[1].substr(0, pieces[1].length()-1);
             int abund = 0;
-            testVParser.m->mothurConvert(abundString, abund);
+            testVParser.util.mothurConvert(abundString, abund);
             int totalSeqs = testVParser.ct->getNumSeqs(testVParser.removeAbundances(name));
             
             CHECK(abund == totalSeqs);
         }
         in.close();
-        testVParser.m->mothurRemove("tempSeqs.txt.sorted.fasta.temp");
+        testVParser.util.mothurRemove("tempSeqs.txt.sorted.fasta.temp");
     }
     
     SECTION("Remove Abundances") {
@@ -68,19 +68,19 @@ TEST_CASE("Testing VsearchParser Class") {
         
         vsearchParser.getVsearchFile();
         ifstream in;
-        testVParser.m->openInputFile(vsearchParser.getVsearchFile(), in);
+        testVParser.util.openInputFile(vsearchParser.getVsearchFile(), in);
         
         vector<string> seqNames;
         while (!in.eof()) {
-            Sequence seq(in); testVParser.m->gobble(in);
+            Sequence seq(in); testVParser.util.gobble(in);
             string name = seq.getName();
             seqNames.push_back(name);
         }
         in.close();
-        testVParser.m->mothurRemove("tempSeqs.txt.sorted.fasta.temp");
+        testVParser.util.mothurRemove("tempSeqs.txt.sorted.fasta.temp");
         
         ofstream out;
-        testVParser.m->openOutputFile("temp.txt", out);
+        testVParser.util.openOutputFile("temp.txt", out);
         map<int, string> binNames;
         for (int i = 0; i < seqNames.size(); i++) {
             int bin = (i+1)%10;
@@ -99,10 +99,10 @@ TEST_CASE("Testing VsearchParser Class") {
         testVParser.createListFile("temp.txt", "temp.list", "temp.rabund", "temp.sabund", numBins, "0.03");
         
         ifstream in2;
-        testVParser.m->openInputFile("temp.list", in2);
+        testVParser.util.openInputFile("temp.list", in2);
         ListVector list2(in2);
         in2.close();
-        testVParser.m->mothurRemove("temp.list"); testVParser.m->mothurRemove("temp.rabund"); testVParser.m->mothurRemove("temp.sabund");
+        testVParser.util.mothurRemove("temp.list"); testVParser.util.mothurRemove("temp.rabund"); testVParser.util.mothurRemove("temp.sabund");
         
         //for each bin
         for (int i = 0; i < list2.getNumBins(); i++) {

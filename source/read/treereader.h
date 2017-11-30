@@ -27,6 +27,7 @@ private:
     MothurOut* m;
 	vector<Tree*> trees;
     CountTable* ct;
+    vector<string> Treenames;
     //map<string, string> nameMap; //dupName -> uniqueName
    // map<string, string> names;
     

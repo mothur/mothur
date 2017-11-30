@@ -114,14 +114,14 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			outputTypes["database"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -129,7 +129,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 				it = parameters.find("repname");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["repname"] = inputDir + it->second;		}
 				}
@@ -137,7 +137,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 				it = parameters.find("constaxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
 				}
@@ -145,7 +145,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 				it = parameters.find("repfasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["repfasta"] = inputDir + it->second;		}
 				}
@@ -153,7 +153,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -161,7 +161,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -169,7 +169,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -177,26 +177,26 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
             
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found") {	listfile = "";			}
 			else if (listfile == "not open") { listfile = ""; abort = true; }	
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
             
-            sharedfile = validParameter.validFile(parameters, "shared", true);
+            sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not found") {	sharedfile = "";			}
 			else if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
             
             if ((sharedfile == "") && (listfile == "")) { 
 				//is there are current file available for either of these?
 				//give priority to list, then shared
-				listfile = m->getListFile(); 
+				listfile = current->getListFile(); 
 				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 
-					sharedfile = m->getSharedFile(); 
+					sharedfile = current->getSharedFile(); 
 					if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("[ERROR]: No valid current files. You must provide a shared or list file before you can use the create.database command."); m->mothurOutEndLine();
@@ -206,38 +206,38 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			}
 			else if ((sharedfile != "") && (listfile != "")) { m->mothurOut("When executing a create.database command you must enter ONLY ONE of the following: shared or list."); m->mothurOutEndLine(); abort = true; }
             
-            if (sharedfile != "") { if (outputDir == "") { outputDir = m->hasPath(sharedfile); } }
-            else { if (outputDir == "") { outputDir = m->hasPath(listfile); } }
+            if (sharedfile != "") { if (outputDir == "") { outputDir = util.hasPath(sharedfile); } }
+            else { if (outputDir == "") { outputDir = util.hasPath(listfile); } }
 			
-			contaxonomyfile = validParameter.validFile(parameters, "constaxonomy", true);
+			contaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
 			if (contaxonomyfile == "not found") {  //if there is a current list file, use it
                contaxonomyfile = "";  m->mothurOut("The constaxonomy parameter is required, aborting."); m->mothurOutEndLine(); abort = true;
 			}
 			else if (contaxonomyfile == "not open") { contaxonomyfile = ""; abort = true; }
 
-            repfastafile = validParameter.validFile(parameters, "repfasta", true);
+            repfastafile = validParameter.validFile(parameters, "repfasta");
 			if (repfastafile == "not found") { repfastafile = ""; }
 			else if (repfastafile == "not open") { repfastafile = ""; abort = true; }
 
-            repnamesfile = validParameter.validFile(parameters, "repname", true);
+            repnamesfile = validParameter.validFile(parameters, "repname");
 			if (repnamesfile == "not found") {  repnamesfile = "";  			}
 			else if (repnamesfile == "not open") { repnamesfile = ""; abort = true; }
             
             if ((repnamesfile != "") && (repfastafile == "")) { m->mothurOut("[ERROR]: You must provide a repfasta file if you are using a repnames file."); m->mothurOutEndLine();
                 abort = true; }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not found") {  countfile = "";  			}
 			else if (countfile == "not open") { countfile = ""; abort = true; }
             
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-            label = validParameter.validFile(parameters, "label", false);			
+            label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your listfile.\n");}
         }
 	}
@@ -272,13 +272,13 @@ int CreateDatabaseCommand::execute(){
         int numUniqueNamesFile = 0;
         CountTable ct;
         if (repnamesfile != "") {
-            numUniqueNamesFile = m->readNames(repnamesfile, repNames, 1);
+            numUniqueNamesFile = util.readNames(repnamesfile, repNames, 1);
             //the repnames file does not have the same order as the list file bins so we need to sort and reassemble for the search below
             map<string, string> tempRepNames;
             for (map<string, string>::iterator it = repNames.begin(); it != repNames.end();) {
                 string bin = it->first;
                 vector<string> temp;
-                m->splitAtChar(bin, temp, ',');
+                util.splitAtChar(bin, temp, ',');
                 sort(temp.begin(), temp.end());
                 bin = "";
                 for (int i = 0; i < temp.size()-1; i++) {
@@ -319,13 +319,13 @@ int CreateDatabaseCommand::execute(){
         
         
         map<string, string> variables; 
-        if (listfile != "") {  variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile)); }
-        else { variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)); }
+        if (listfile != "") {  variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile)); }
+        else { variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile)); }
         string outputFileName = getOutputFileName("database", variables); 
         outputNames.push_back(outputFileName); outputTypes["database"].push_back(outputFileName);
         
         ofstream out;
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         
         string header = "OTUNumber\tAbundance";
 
@@ -373,7 +373,7 @@ int CreateDatabaseCommand::execute(){
                 
                 vector<string> binNames;
                 string bin = list->get(i);
-                m->splitAtComma(bin, binNames);
+                util.splitAtComma(bin, binNames);
                 
                 string seqRepName = "";
                 int numSeqsRep = binNames.size();
@@ -501,7 +501,7 @@ int CreateDatabaseCommand::execute(){
             }
         }
         out.close();
-        if (m->getControl_pressed()) { m->mothurRemove(outputFileName); return 0; }
+        if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return 0; }
         
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -521,7 +521,7 @@ int CreateDatabaseCommand::findIndex(vector<string>& otuLabels, string label){
 	try {
         int index = -1;
         for (int i = 0; i < otuLabels.size(); i++) {
-            if (m->isLabelEquivalent(otuLabels[i],label)) { index = i; break; }
+            if (util.isLabelEquivalent(otuLabels[i],label)) { index = i; break; }
         }
 		return index;
     }
@@ -537,10 +537,10 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<st
         vector<int> sizes; 
         
         ifstream in;
-        m->openInputFile(contaxonomyfile, in);
+        util.openInputFile(contaxonomyfile, in);
         
         //read headers
-        m->getline(in);
+        util.getline(in);
         
         while (!in.eof()) {
             
@@ -549,8 +549,8 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<st
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size; m->gobble(in);
-            tax = m->getline(in); m->gobble(in);
+            in >> otu >> size; util.gobble(in);
+            tax = util.getline(in); util.gobble(in);
             
             sizes.push_back(size);
             taxonomies.push_back(tax);
@@ -572,7 +572,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
         vector<int> sizes; 
         
         ifstream in;
-        m->openInputFile(repfastafile, in);
+        util.openInputFile(repfastafile, in);
         
         set<int> sanity;
         while (!in.eof()) {
@@ -580,20 +580,20 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
             if (m->getControl_pressed()) { break; }
             
             string binInfo;
-            Sequence seq(in, binInfo, true);  m->gobble(in);
+            Sequence seq(in, binInfo, true);  util.gobble(in);
             
             //the binInfo should look like - binNumber|size ie. 1|200 if it is binNumber|size|group then the user gave us the wrong repfasta file
             vector<string> info;
-            m->splitAtChar(binInfo, info, '|');
+            util.splitAtChar(binInfo, info, '|');
             //if (info.size() != 2) { m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->setControl_pressed(true); break;}
             
             int size = 0;
-            m->mothurConvert(info[1], size);
+            util.mothurConvert(info[1], size);
             
             int binNumber = 0;
             string temp = "";
             for (int i = 0; i < info[0].size(); i++) { if (isspace(info[0][i])) {;}else{temp +=info[0][i]; } }
-            m->mothurConvert(m->getSimpleLabel(temp), binNumber);
+            util.mothurConvert(util.getSimpleLabel(temp), binNumber);
             set<int>::iterator it = sanity.find(binNumber);
             if (it != sanity.end()) {
                 m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->setControl_pressed(true); break;
@@ -635,7 +635,7 @@ ListVector* CreateDatabaseCommand::getList(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -712,7 +712,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
                 delete lookup;

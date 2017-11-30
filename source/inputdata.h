@@ -8,7 +8,7 @@
 #include "listvector.hpp"
 #include "sharedrabundvectors.hpp"
 #include "sharedrabundfloatvectors.hpp"
-
+#include "utils.hpp"
 
 class InputData {
 	
@@ -35,6 +35,7 @@ public:
 	SharedRAbundFloatVectors* getSharedRAbundFloatVectors(string);  //pass the label you want
     
 private:
+    Utils util;
 	string format;
 	ifstream fileHandle;
 	DataVector* input;
@@ -49,6 +50,8 @@ private:
 	MothurOut* m;
     vector<string> currentLabels;
     vector<string> groups;
+    string nextDistanceLabel;
+    string otuTag;
 };
 
 

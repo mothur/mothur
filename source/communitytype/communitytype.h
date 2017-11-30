@@ -14,6 +14,8 @@
 
 #include "mothurout.h"
 #include "linearalgebra.h"
+#include "utils.hpp"
+
 /**************************************************************************************************/
 
 class CommunityTypeFinder {
@@ -56,7 +58,7 @@ protected:
     vector<vector<double> > error;
     vector<vector<int> > countMatrix;
     vector<double> weights;
-
+    Utils util;
 
 
     int numPartitions;

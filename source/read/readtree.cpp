@@ -44,21 +44,15 @@ int ReadTree::AssembleTrees() {
 /***********************************************************************/
 int ReadTree::readSpecialChar(istream& f, char c, string name) {
     try {
-	
-		m->gobble(f);
+        Utils util;
+		util.gobble(f);
 		char d = f.get();
 	
-		if(d == EOF){
-			m->mothurOut("Error: Input file ends prematurely, expecting a " + name + "\n");
-			exit(1);
-		}
-		if(d != c){
-			m->mothurOut("Error: Expected " + name + " in input file.  Found " + toString(d) + ".\n");
-			exit(1);
-		}
-		if(d == ')' && f.peek() == '\n'){
-			m->gobble(f);
-		}	
+		if(d == EOF){ m->mothurOut("Error: Input file ends prematurely, expecting a " + name + "\n"); exit(1); }
+        
+		if(d != c){ m->mothurOut("Error: Expected " + name + " in input file.  Found " + toString(d) + ".\n"); exit(1); }
+        
+		if(d == ')' && f.peek() == '\n'){ util.gobble(f); }
 		return d;
 	}
 	catch(exception& e) {
@@ -70,14 +64,12 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 
 int ReadTree::readNodeChar(istream& f) {
 	try {
-//		while(isspace(d=f.get()))		{;}
-		m->gobble(f);
+        Utils util;
+		util.gobble(f);
 		char d = f.get();
 
-		if(d == EOF){
-			m->mothurOut("Error: Input file ends prematurely, expecting a left parenthesis\n");
-			exit(1);
-		}
+		if(d == EOF){ m->mothurOut("Error: Input file ends prematurely, expecting a left parenthesis\n"); exit(1); }
+        
 		return d;
 	}
 	catch(exception& e) {
@@ -96,7 +88,7 @@ float ReadTree::readBranchLength(istream& f) {
 			m->mothurOut("Error: Missing branch length in input tree.\n");
 			exit(1);
 		}
-		m->gobble(f);
+		util.gobble(f);
 		return b;
 	}
 	catch(exception& e) {
@@ -138,7 +130,7 @@ int ReadNewickTree::read(CountTable* ct) {
 				}
 
 				//make new tree
-				T = new Tree(ct); 
+				T = new Tree(ct, Treenames);
 
 				numNodes = T->getNumNodes();
 				numLeaves = T->getNumLeaves();
@@ -147,12 +139,12 @@ int ReadNewickTree::read(CountTable* ct) {
 				
 				//save trees for later commands
 				Trees.push_back(T); 
-				m->gobble(filehandle);
+				util.gobble(filehandle);
 			}
 		//if you are a nexus file
 		}else if ((c = filehandle.peek()) == '#') {
 			//get right number of seqs from nexus file.
-			Tree* temp = new Tree(ct);  delete temp;
+			Tree* temp = new Tree(ct, Treenames);  delete temp;
 			
 			nexusTranslation(ct);  //reads file through the translation and updates treemap
 			while((c = filehandle.peek()) != EOF) {
@@ -177,7 +169,7 @@ int ReadNewickTree::read(CountTable* ct) {
 				filehandle.putback(c);  //put back first ( of tree.
 				
 				//make new tree
-				T = new Tree(ct); 
+				T = new Tree(ct, Treenames);
 				numNodes = T->getNumNodes();
 				numLeaves = T->getNumLeaves();
 				
@@ -206,7 +198,7 @@ string ReadNewickTree::nexusTranslation(CountTable* ct) {
 	try {
 		
 		holder = "";
-		int numSeqs = m->getTreenames().size(); //must save this some when we clear old names we can still know how many sequences there were
+		int numSeqs = Treenames.size(); //must save this some when we clear old names we can still know how many sequences there were
 		int comment = 0;
 		
 		// get past comments
@@ -253,7 +245,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
 
 			lc = readNewickInt(filehandle, n, T, ct);
-			if (lc == -1) { m->mothurOut("error with lc"); m->mothurOutEndLine(); m->setControl_pressed(true); return -1; } //reports an error in reading
+			if (lc == -1) { m->mothurOut("error with lc\n");  m->setControl_pressed(true); return -1; } //reports an error in reading
 	
 			if(filehandle.peek()==','){							
 				readSpecialChar(filehandle,',',"comma");
@@ -265,7 +257,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 		
 			if(rooted != 1){								
 				rc = readNewickInt(filehandle, n, T, ct);
-				if (rc == -1) { m->mothurOut("error with rc"); m->mothurOutEndLine(); m->setControl_pressed(true); return -1; } //reports an error in reading
+				if (rc == -1) { m->mothurOut("error with rc\n");  m->setControl_pressed(true); return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
 					readSpecialChar(filehandle,')',"right parenthesis");
 				}											
@@ -398,7 +390,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 				m->mothurOut("Name: " + name + " is not in your groupfile, and will be disregarded. \n");  //readOk = -1; return n1;
 				
                 vector<string> currentGroups = ct->getNamesOfGroups();
-                if (!m->inUsersGroups("xxx", currentGroups)) {  ct->addGroup("xxx");  }
+                Utils util; if (!util.inUsersGroups("xxx", currentGroups)) {  ct->addGroup("xxx");  }
                 currentGroups = ct->getNamesOfGroups();
                 vector<int> thisCounts; thisCounts.resize(currentGroups.size(), 0);
                 for (int h = 0; h < currentGroups.size(); h++) {  

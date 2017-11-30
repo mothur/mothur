@@ -61,6 +61,7 @@ class TrimOligos {
 	protected:
 		int pdiffs, bdiffs, ldiffs, sdiffs, rdiffs;
         bool paired, hasIndex;
+        Utils util;
 	
 		map<string, int> barcodes;
 		map<string, int> primers;

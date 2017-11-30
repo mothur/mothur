@@ -135,11 +135,10 @@ AlignCommand::AlignCommand(string option)  {
 			outputTypes["accnos"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
-			
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
@@ -149,28 +148,28 @@ AlignCommand::AlignCommand(string option)  {
 
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
 			}
 
-			candidateFileName = validParameter.validFile(parameters, "fasta", false);
+			candidateFileName = validParameter.valid(parameters, "fasta");
 			if (candidateFileName == "not found") { 
 				//if there is a current fasta file, use it
-				string filename = m->getFastaFile(); 
+				string filename = current->getFastaFile();
 				if (filename != "") { candidateFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the candidate parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { 
-				m->splitAtDash(candidateFileName, candidateFileNames);
+				util.splitAtDash(candidateFileName, candidateFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < candidateFileNames.size(); i++) {
-					//candidateFileNames[i] = m->getFullPathName(candidateFileNames[i]);
+					//candidateFileNames[i] = util.getFullPathName(candidateFileNames[i]);
 					
 					bool ignore = false;
 					if (candidateFileNames[i] == "current") { 
-						candidateFileNames[i] = m->getFastaFile(); 
+						candidateFileNames[i] = current->getFastaFile();
 						if (candidateFileNames[i] != "") {  m->mothurOut("Using " + candidateFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -181,53 +180,9 @@ AlignCommand::AlignCommand(string option)  {
 					}
 					
 					if (!ignore) {
-					
-						if (inputDir != "") {
-							string path = m->hasPath(candidateFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	candidateFileNames[i] = inputDir + candidateFileNames[i];		}
-						}
-		
-						bool ableToOpen;
-						ifstream in;
-						ableToOpen = m->openInputFile(candidateFileNames[i], in, "noerror");
-						in.close();	
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(candidateFileNames[i]);
-								m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								candidateFileNames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try output location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(candidateFileNames[i]);
-								m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								candidateFileNames[i] = tryPath;
-							}
-						}
-						
-										
-
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + candidateFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							candidateFileNames.erase(candidateFileNames.begin()+i);
-							i--;
-						}else {
-							m->setFastaFile(candidateFileNames[i]);
-						}
-					}
+                        if (util.checkLocations(candidateFileNames[i], current->getLocations())) { current->setFastaFile(candidateFileNames[i]); }
+                        else { candidateFileNames.erase(candidateFileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 				
 				//make sure there is at least one valid file left
@@ -237,40 +192,39 @@ AlignCommand::AlignCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	temp = "8";				}
-			m->mothurConvert(temp, kmerSize); 
+			temp = validParameter.valid(parameters, "ksize");		if (temp == "not found"){	temp = "8";				}
+			util.mothurConvert(temp, kmerSize); 
 			
-			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
-			m->mothurConvert(temp, match);  
+			temp = validParameter.valid(parameters, "match");		if (temp == "not found"){	temp = "1.0";			}
+			util.mothurConvert(temp, match);  
 			
-			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
-			m->mothurConvert(temp, misMatch);  
+			temp = validParameter.valid(parameters, "mismatch");		if (temp == "not found"){	temp = "-1.0";			}
+			util.mothurConvert(temp, misMatch);  
 			
-			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-5.0";			}
-			m->mothurConvert(temp, gapOpen);  
+			temp = validParameter.valid(parameters, "gapopen");		if (temp == "not found"){	temp = "-5.0";			}
+			util.mothurConvert(temp, gapOpen);  
 			
-			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-2.0";			}
-			m->mothurConvert(temp, gapExtend); 
+			temp = validParameter.valid(parameters, "gapextend");	if (temp == "not found"){	temp = "-2.0";			}
+			util.mothurConvert(temp, gapExtend); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
-			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "t";				}
-			flip = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "flip");			if (temp == "not found"){	temp = "t";				}
+			flip = util.isTrue(temp);
 			
 			//this has to go after save so that if the user sets save=t and provides no reference we abort
-			templateFileName = validParameter.validFile(parameters, "reference", true);
+			templateFileName = validParameter.validFile(parameters, "reference");
 			if (templateFileName == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required for the align.seqs command, aborting.\n"); abort = true;
 			}else if (templateFileName == "not open") { abort = true; }	
 			
-			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "0.50";			}
-			m->mothurConvert(temp, threshold); 
+			temp = validParameter.valid(parameters, "threshold");	if (temp == "not found"){	temp = "0.50";			}
+			util.mothurConvert(temp, threshold); 
 			
-			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
+			search = validParameter.valid(parameters, "search");		if (search == "not found"){	search = "kmer";		}
 			if ((search != "suffix") && (search != "kmer") && (search != "blast")) { m->mothurOut("invalid search option: choices are kmer, suffix or blast."); m->mothurOutEndLine(); abort=true; }
 			
-			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
+			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh") && (align != "blast") && (align != "noalign")) { m->mothurOut("invalid align option: choices are needleman, gotoh, blast or noalign."); m->mothurOutEndLine(); abort=true; }
 
 		}
@@ -302,8 +256,8 @@ int AlignCommand::execute(){
 			
 			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
-			if (outputDir == "") {  outputDir += m->hasPath(candidateFileNames[s]); }
-            map<string, string> variables; variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s]));
+			if (outputDir == "") {  outputDir += util.hasPath(candidateFileNames[s]); }
+            map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(candidateFileNames[s]));
 			string alignFileName = getOutputFileName("fasta", variables);  
 			string reportFileName = getOutputFileName("alignreport", variables);
 			string accnosFileName = getOutputFileName("accnos", variables);
@@ -318,7 +272,7 @@ int AlignCommand::execute(){
 
 			vector<unsigned long long> positions; 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			positions = m->divideFile(candidateFileNames[s], processors);
+			positions = util.divideFile(candidateFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 		#else
             positions = m->setFilePosFasta(candidateFileNames[s], numFastaSeqs);
@@ -335,10 +289,10 @@ int AlignCommand::execute(){
 			
             numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
 				
-			if (m->getControl_pressed()) { m->mothurRemove(accnosFileName); m->mothurRemove(alignFileName); m->mothurRemove(reportFileName); outputTypes.clear();  return 0; }
+			if (m->getControl_pressed()) { util.mothurRemove(accnosFileName); util.mothurRemove(alignFileName); util.mothurRemove(reportFileName); outputTypes.clear();  return 0; }
 			
 			//delete accnos file if its blank else report to user
-			if (m->isBlank(accnosFileName)) {  m->mothurRemove(accnosFileName);  hasAccnos = false; }
+			if (util.isBlank(accnosFileName)) {  util.mothurRemove(accnosFileName);  hasAccnos = false; }
 			else { 
 				m->mothurOut("[WARNING]: " + toString(numFlipped[1]) + " of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
 				if (!flip) {
@@ -356,7 +310,7 @@ int AlignCommand::execute(){
 		string currentFasta = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; m->setFastaFile(currentFasta); }
+			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; current->setFastaFile(currentFasta); }
 		}
 		
 		m->mothurOutEndLine();
@@ -387,6 +341,7 @@ struct alignStruct {
     
     MothurOut* m;
     AlignmentDB* templateDB;
+    Utils util;
     
        alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se) {
         
@@ -415,15 +370,15 @@ struct alignStruct {
 void alignDriver(alignStruct* params) {
 	try {
 		ofstream alignmentFile;
-		params->m->openOutputFile(params->alignFName, alignmentFile);
+		params->util.openOutputFile(params->alignFName, alignmentFile);
 		
 		ofstream accnosFile;
-		params->m->openOutputFile(params->accnosFName, accnosFile);
+		params->util.openOutputFile(params->accnosFName, accnosFile);
 		
 		NastReport report(params->reportFName);
 		
 		ifstream inFASTA;
-		params->m->openInputFile(params->inputFilename, inFASTA);
+		params->util.openInputFile(params->inputFilename, inFASTA);
 
 		inFASTA.seekg(params->filePos.start);
 
@@ -451,7 +406,7 @@ void alignDriver(alignStruct* params) {
 			
 			if (params->m->getControl_pressed()) {  break; }
 			
-			Sequence* candidateSeq = new Sequence(inFASTA);  params->m->gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  params->util.gobble(inFASTA);
 			report.setCandidate(candidateSeq);
 
 			int origNumBases = candidateSeq->getNumBases();
@@ -585,9 +540,10 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             //alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se)
-            alignStruct* dataBundle = new alignStruct(*lines[i+1], (alignFileName + toString(i+1) + ".temp"),
-                                                        reportFileName + toString(i+1) + ".temp",
-                                                        accnosFName + toString(i+1) + ".temp", filename,
+            int threadID = i+1;
+            alignStruct* dataBundle = new alignStruct(*lines[i+1], (alignFileName + toString(threadID) + ".temp"),
+                                                        reportFileName + toString(threadID) + ".temp",
+                                                        accnosFName + toString(threadID) + ".temp", filename,
                                                         m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
             data.push_back(dataBundle);
 
@@ -616,19 +572,20 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to align " + toString(num) + " sequences.\n\n");
         
         vector<string> nonBlankAccnosFiles;
-        if (!(m->isBlank(accnosFName))) { nonBlankAccnosFiles.push_back(accnosFName); }
-        else { m->mothurRemove(accnosFName); } //remove so other files can be renamed to it
+        if (!(util.isBlank(accnosFName))) { nonBlankAccnosFiles.push_back(accnosFName); }
+        else { util.mothurRemove(accnosFName); } //remove so other files can be renamed to it
         
         for (int i = 0; i < processors-1; i++) {
-            m->appendFiles((alignFileName + toString(i+1) + ".temp"), alignFileName);
-            m->mothurRemove((alignFileName + toString(i+1) + ".temp"));
+            int threadID = i+1;
+            util.appendFiles((alignFileName + toString(threadID) + ".temp"), alignFileName);
+            util.mothurRemove((alignFileName + toString(threadID) + ".temp"));
             
-            appendReportFiles((reportFileName + toString(i+1) + ".temp"), reportFileName);
-            m->mothurRemove((reportFileName + toString(i+1) + ".temp"));
+            appendReportFiles((reportFileName + toString(threadID) + ".temp"), reportFileName);
+            util.mothurRemove((reportFileName + toString(threadID) + ".temp"));
             
-            if (!(m->isBlank(accnosFName + toString(i+1) + ".temp"))) {
-                nonBlankAccnosFiles.push_back(accnosFName + toString(i+1) + ".temp");
-            }else { m->mothurRemove((accnosFName + toString(i+1) + ".temp"));  }
+            if (!(util.isBlank(accnosFName + toString(threadID) + ".temp"))) {
+                nonBlankAccnosFiles.push_back(accnosFName + toString(threadID) + ".temp");
+            }else { util.mothurRemove((accnosFName + toString(threadID) + ".temp"));  }
             
         }
         
@@ -637,12 +594,12 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             rename(nonBlankAccnosFiles[0].c_str(), accnosFName.c_str());
             
             for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-                m->appendFiles(nonBlankAccnosFiles[h], accnosFName);
-                m->mothurRemove(nonBlankAccnosFiles[h]);
+                util.appendFiles(nonBlankAccnosFiles[h], accnosFName);
+                util.mothurRemove(nonBlankAccnosFiles[h]);
             }
         }else { //recreate the accnosfile if needed
             ofstream out;
-            m->openOutputFile(accnosFName, out);
+            util.openOutputFile(accnosFName, out);
             out.close();
         }
         
@@ -660,8 +617,8 @@ void AlignCommand::appendReportFiles(string temp, string filename) {
 		
 		ofstream output;
 		ifstream input;
-		m->openOutputFileAppend(filename, output);
-		m->openInputFile(temp, input);
+		util.openOutputFileAppend(filename, output);
+		util.openInputFile(temp, input);
 
 		while (!input.eof())	{	char c = input.get(); if (c == 10 || c == 13){	break;	}	} // get header line
 				

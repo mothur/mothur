@@ -101,7 +101,7 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
             outputTypes["kruskall-wallis"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 
@@ -109,7 +109,7 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
 				it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["desing"] = inputDir + it->second;		}
 				}
@@ -117,45 +117,45 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
             }
             
             //get shared file, it is required
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile();
+				sharedfile = current->getSharedFile();
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
             
             //get shared file, it is required
-			designfile = validParameter.validFile(parameters, "design", true);
+			designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { designfile = ""; abort = true; }
 			else if (designfile == "not found") {
 				//if there is a current shared file, use it
-				designfile = m->getDesignFile();
+				designfile = current->getDesignFile();
 				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setDesignFile(designfile); }
+			}else { current->setDesignFile(designfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){
-				outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
+				outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
 			}
             
-            string label = validParameter.validFile(parameters, "label", false);
+            string label = validParameter.valid(parameters, "label");
 			if (label == "not found") { label = ""; }
 			else {
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
             
-            mclass = validParameter.validFile(parameters, "class", false);
+            mclass = validParameter.valid(parameters, "class");
 			if (mclass == "not found") { mclass = ""; }
             
 		}
@@ -205,7 +205,7 @@ int KruskalWallisCommand::execute(){
                 userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -280,12 +280,12 @@ int KruskalWallisCommand::execute(){
 int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, vector<string> currentLabels) {
 	try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup[0]->getLabel();
 		string outputFileName = getOutputFileName("kruskall-wallis",variables);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["kruskall-wallis"].push_back(outputFileName);
         out << "OTULabel\tKW\tPvalue\n";
         

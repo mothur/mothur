@@ -15,12 +15,12 @@ void Summary::processNameCount(string n) { //name or count file to include in co
         nameMap.clear(); nameCountNumUniques = 0;
         if (n != "") {
             hasNameOrCount = true;
-            if (m->isCountFile(n)) {
+            if (isCountFile(n)) {
                 CountTable ct;
                 ct.readTable(n, false, false);
                 nameMap = ct.getNameMap();
                 type = "count";
-            }else { nameMap = m->readNames(n); type = "name"; }
+            }else { Utils util; nameMap = util.readNames(n); type = "name"; }
         }
         nameCountNumUniques = nameMap.size();
     }
@@ -29,6 +29,39 @@ void Summary::processNameCount(string n) { //name or count file to include in co
         exit(1);
     }
 }
+//**********************************************************************************************************************
+bool Summary::isCountFile(string inputfile){
+    try {
+        bool isCount = true;
+        
+        ifstream in;
+        Utils util; util.openInputFile(inputfile, in);
+        
+        //read headers
+        string line = util.getline(in);
+        
+        in.close();
+        
+        vector<string> pieces = util.splitWhiteSpace(line);
+        
+        if (pieces.size() >= 2) {
+            CountTable ct;
+            vector<string> defaultHeaders = ct.getHardCodedHeaders();
+            if (defaultHeaders.size() >= 2) {
+                if (pieces[0] != defaultHeaders[0]) { isCount = false; }
+                if (pieces[1] != defaultHeaders[1]) { isCount = false; }
+            }else { isCount = false; }
+        }else { isCount = false; }
+        
+        
+        return isCount;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Summary", "isCountFile");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 vector<long long> Summary::getDefaults() {
     try {
@@ -197,16 +230,16 @@ long long Summary::summarizeFasta(string fastafile, string n, string output) {
 void driverSummarize(seqSumData* params) { //(string fastafile, string output, linePair lines) {
     try {
         ofstream out;
-        if (params->summaryFile != "") { params->m->openOutputFile(params->summaryFile, out); }
+        if (params->summaryFile != "") { params->util.openOutputFile(params->summaryFile, out); }
         
         ifstream in;
-        params->m->openInputFile(params->filename, in);
+        params->util.openInputFile(params->filename, in);
         
         in.seekg(params->start);
         
         //print header if you are process 0
         if (params->start == 0) {
-            params->m->zapGremlins(in); params->m->gobble(in);
+            params->util.zapGremlins(in); params->util.gobble(in);
             //print header if you are process 0
             if (params->summaryFile != "") { out << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl; }
         }
@@ -218,7 +251,7 @@ void driverSummarize(seqSumData* params) { //(string fastafile, string output, l
             
             if (params->m->getControl_pressed()) {  break; }
             
-            Sequence seq(in); params->m->gobble(in);
+            Sequence seq(in); params->util.gobble(in);
             
             if (seq.getName() != "") {
                 
@@ -300,11 +333,9 @@ long long Summary::summarizeFasta(string fastafile, string output) {
     try {
         long long num = 0;
         vector<linePair> lines;
-        string p = m->getProcessors();
-        int processors = 1; m->mothurConvert(p, processors);
         vector<unsigned long long> positions;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(fastafile, processors);
+        positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	 }
 #else
         positions = m->setFilePosFasta(fastafile, num);
@@ -403,8 +434,8 @@ long long Summary::summarizeFasta(string fastafile, string output) {
             if (output == "") {  outputName = "";  }
 
             if (outputName != "") {
-                m->appendFiles((output + toString(i) + ".temp"), output);
-                m->mothurRemove((output + toString(i) + ".temp"));
+                util.appendFiles((output + toString(i) + ".temp"), output);
+                util.mothurRemove((output + toString(i) + ".temp"));
             }
         }
         
@@ -440,12 +471,12 @@ long long Summary::summarizeFastaSummary(string summaryfile, string n) {
 void driverFastaSummarySummarize(seqSumData* params) {
     try {
         ifstream in;
-        params->m->openInputFile(params->filename, in);
+        params->util.openInputFile(params->filename, in);
         
         in.seekg(params->start);
         
         //print header if you are process 0
-        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); params->count++; }
+        if (params->start == 0) { params->util.zapGremlins(in); params->util.getline(in); params->util.gobble(in); params->count++; }
         
         bool done = false;
         string name;
@@ -457,7 +488,7 @@ void driverFastaSummarySummarize(seqSumData* params) {
             if (params->m->getControl_pressed()) {  break; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; params->m->gobble(in);
+            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; params->util.gobble(in);
             
             if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
             
@@ -516,11 +547,8 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-        string p = m->getProcessors(); 
-        int processors = 1; m->mothurConvert(p, processors);
-        
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFilePerLine(summaryfile, processors);
+        positions = util.divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
         positions = m->setFilePosEachLine(summaryfile, num);
@@ -632,12 +660,12 @@ long long Summary::summarizeContigsSummary(string summaryfile, string n) {
 void driverContigsSummarySummarize(seqSumData* params) {
     try {
         ifstream in;
-        params->m->openInputFile(params->filename, in);
+        params->util.openInputFile(params->filename, in);
         
         in.seekg(params->start);
         
         //print header if you are process 0
-        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); params->count++; }
+        if (params->start == 0) { params->util.zapGremlins(in); params->util.getline(in); params->util.gobble(in); params->count++; }
         
         bool done = false;
         string name;
@@ -648,7 +676,7 @@ void driverContigsSummarySummarize(seqSumData* params) {
             if (params->m->getControl_pressed()) { break; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns; params->m->gobble(in);
+            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns; params->util.gobble(in);
             
             if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(thisOStart) + "\t" + toString(thisOEnd) + "\t" + toString(length) + "\n"); }
             
@@ -712,10 +740,8 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-        string p = m->getProcessors();
-        int processors = 1; m->mothurConvert(p, processors);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFilePerLine(summaryfile, processors);
+        positions = util.divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
         positions = m->setFilePosEachLine(summaryfile, num);
@@ -836,12 +862,12 @@ long long Summary::summarizeAlignSummary(string summaryfile, string n) {
 void driverAlignSummarySummarize(seqSumData* params) {
     try {
         ifstream in;
-        params->m->openInputFile(params->filename, in);
+        params->util.openInputFile(params->filename, in);
         
         in.seekg(params->start);
         
         //print header if you are process 0
-        if (params->start == 0) { params->m->zapGremlins(in); params->m->getline(in); params->m->gobble(in); params->count++; }
+        if (params->start == 0) { params->util.zapGremlins(in); params->util.getline(in); params->util.gobble(in); params->count++; }
         
         bool done = false;
         string name, TemplateName, SearchMethod, AlignmentMethod;
@@ -852,7 +878,7 @@ void driverAlignSummarySummarize(seqSumData* params) {
             
             if (params->m->getControl_pressed()) {  break; }
             
-            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; params->m->gobble(in);
+            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; params->util.gobble(in);
             
             
             if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(TemplateName) + "\t" + toString(SearchScore) + "\t" + toString(length) + "\n"); }
@@ -910,10 +936,8 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-        string p = m->getProcessors();
-        int processors = 1; m->mothurConvert(p, processors);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFilePerLine(summaryfile, processors);
+        positions = util.divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
         positions = m->setFilePosEachLine(summaryfile, num);

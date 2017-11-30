@@ -44,7 +44,7 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
                 totalGroups[indexGroupMap[itGroup->second]]++;
             }else {
                 //look for it in names of groups to see if the user accidently used the wrong file
-                if (m->inUsersGroups(seqName, groups)) {
+                if (util.inUsersGroups(seqName, groups)) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
                 m->mothurOut("[ERROR]: Your group file does not contain " + seqName + ". Please correct."); m->mothurOutEndLine();
@@ -95,10 +95,10 @@ bool CountTable::testGroups(string file, vector<string>& groups) {
     try {
         m = MothurOut::getInstance(); hasGroups = false; total = 0;
         ifstream in;
-        m->openInputFile(file, in);
+        util.openInputFile(file, in);
     
-        string headers = m->getline(in); m->gobble(in);
-        vector<string> columnHeaders = m->splitWhiteSpace(headers);
+        string headers = util.getline(in); util.gobble(in);
+        vector<string> columnHeaders = util.splitWhiteSpace(headers);
         if (columnHeaders.size() > 2) {
             hasGroups = true;
         
@@ -121,13 +121,13 @@ bool CountTable::setNamesOfGroups(vector<string> mygroups) {
     try {
         //remove groups from table not in new groups we are setting
         for (int i = 0; i < groups.size(); i++) {
-            if (m->inUsersGroups(groups[i], mygroups)) {}
+            if (util.inUsersGroups(groups[i], mygroups)) {}
             else { removeGroup(groups[i]);  }
         }
         
         //add any new groups in new groups list to table
         for (int i = 0; i < mygroups.size(); i++) {
-            if (m->inUsersGroups(mygroups[i], groups)) {}
+            if (util.inUsersGroups(mygroups[i], groups)) {}
             else { addGroup(mygroups[i]);  }
         }
         
@@ -178,20 +178,20 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
         
         //open input file
         ifstream in;
-        m->openInputFile(namefile, in);
+        util.openInputFile(namefile, in);
         
         int total = 0;
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
             string firstCol, secondCol;
-            in >> firstCol; m->gobble(in); in >> secondCol; m->gobble(in);
+            in >> firstCol; util.gobble(in); in >> secondCol; util.gobble(in);
             
-            m->checkName(firstCol);
-            m->checkName(secondCol);
+            util.checkName(firstCol);
+            util.checkName(secondCol);
             
             vector<string> names;
-            m->splitAtChar(secondCol, names, ',');
+            util.splitAtChar(secondCol, names, ',');
             
             map<string, int> groupCounts;
             int thisTotal = 0;
@@ -265,10 +265,10 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
     try {
         filename = file;
         ifstream in;
-        m->openInputFile(filename, in);
+        util.openInputFile(filename, in);
         
-        string headers = m->getline(in); m->gobble(in);
-        vector<string> columnHeaders = m->splitWhiteSpace(headers);
+        string headers = util.getline(in); util.gobble(in);
+        vector<string> columnHeaders = util.splitWhiteSpace(headers);
         
         int numGroups = 0;
         groups.clear();
@@ -292,7 +292,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
             
             if (m->getControl_pressed()) { break; }
             
-            in >> name; m->gobble(in); in >> thisTotal; m->gobble(in);
+            in >> name; util.gobble(in); in >> thisTotal; util.gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
             
             if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct."); m->mothurOutEndLine();
@@ -302,9 +302,9 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
             vector<int> groupCounts; groupCounts.resize(numGroups, 0);
             if (columnHeaders.size() > 2) { //file contains groups
                 if (readGroups) { //user wants to save them
-                    for (int i = 0; i < numGroups; i++) {  int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; m->gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex];  }
+                    for (int i = 0; i < numGroups; i++) {  int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; util.gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex];  }
                 }else { //read and discard
-                    m->getline(in); m->gobble(in);
+                    util.getline(in); util.gobble(in);
                 }
             }
             
@@ -342,7 +342,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
 int CountTable::printTable(string file) {
     try {
         ofstream out;
-        m->openOutputFile(file, out); 
+        util.openOutputFile(file, out); 
 		out << "Representative_Sequence\ttotal";
         for (int i = 0; i < groups.size(); i++) { out << '\t' << groups[i]; }
         out << endl;
@@ -436,7 +436,7 @@ vector<int> CountTable::getGroupCounts(string seqName) {
             map<string, int>::iterator it = indexNameMap.find(seqName);
             if (it == indexNameMap.end()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
-                if (m->inUsersGroups(seqName, groups)) {
+                if (util.inUsersGroups(seqName, groups)) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
                 m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
@@ -484,7 +484,7 @@ int CountTable::getGroupCount(string seqName, string groupName) {
                 map<string, int>::iterator it2 = indexNameMap.find(seqName);
                 if (it2 == indexNameMap.end()) {
                     //look for it in names of groups to see if the user accidently used the wrong file
-                    if (m->inUsersGroups(seqName, groups)) {
+                    if (util.inUsersGroups(seqName, groups)) {
                         m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                     }
                     m->mothurOut("[ERROR]: seq " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
@@ -513,7 +513,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
                 map<string, int>::iterator it2 = indexNameMap.find(seqName);
                 if (it2 == indexNameMap.end()) {
                     //look for it in names of groups to see if the user accidently used the wrong file
-                    if (m->inUsersGroups(seqName, groups)) {
+                    if (util.inUsersGroups(seqName, groups)) {
                         m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                     }
                     m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
@@ -538,7 +538,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
 //add group
 int CountTable::addGroup(string groupName) {
     try {        
-        bool sanity = m->inUsersGroups(groupName, groups);
+        bool sanity = util.inUsersGroups(groupName, groups);
         if (sanity) { m->mothurOut("[ERROR]: " + groupName + " is already in the count table, cannot add again.\n"); m->setControl_pressed(true);  return 0; }
         
         groups.push_back(groupName);
@@ -664,7 +664,7 @@ int CountTable::renameSeq(string oldSeqName, string newSeqName) {
         if (it == indexNameMap.end()) {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
-                if (m->inUsersGroups(oldSeqName, groups)) {
+                if (util.inUsersGroups(oldSeqName, groups)) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + oldSeqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
@@ -692,7 +692,7 @@ int CountTable::getNumSeqs(string seqName) {
         if (it == indexNameMap.end()) {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
-                if (m->inUsersGroups(seqName, groups)) {
+                if (util.inUsersGroups(seqName, groups)) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
@@ -739,7 +739,7 @@ int CountTable::get(string seqName) {
         if (it == indexNameMap.end()) {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
-                if (m->inUsersGroups(seqName, groups)) {
+                if (util.inUsersGroups(seqName, groups)) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
@@ -791,7 +791,7 @@ int CountTable::remove(string seqName) {
         }else {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
-                if (m->inUsersGroups(seqName, groups)) {
+                if (util.inUsersGroups(seqName, groups)) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
@@ -934,7 +934,7 @@ int CountTable::mergeCounts(string seq1, string seq2) {
         if (it == indexNameMap.end()) {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
-                if (m->inUsersGroups(seq1, groups)) {
+                if (util.inUsersGroups(seq1, groups)) {
                     m->mothurOut("[WARNING]: Your group or design file contains a group named " + seq1 + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                 }
             }
@@ -944,7 +944,7 @@ int CountTable::mergeCounts(string seq1, string seq2) {
             if (it2 == indexNameMap.end()) {
                 if (hasGroupInfo()) {
                     //look for it in names of groups to see if the user accidently used the wrong file
-                    if (m->inUsersGroups(seq2, groups)) {
+                    if (util.inUsersGroups(seq2, groups)) {
                         m->mothurOut("[WARNING]: Your group or design file contains a group named " + seq2 + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
                     }
                 }

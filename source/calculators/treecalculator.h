@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "tree.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 /* The tree calculator class is the parent class for tree calculators in mothur. */ 
 

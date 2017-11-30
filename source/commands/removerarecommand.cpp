@@ -132,17 +132,17 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -150,7 +150,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -158,7 +158,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 				it = parameters.find("sabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
 				}
@@ -166,7 +166,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 				it = parameters.find("rabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
 				}
@@ -174,7 +174,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -182,7 +182,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -190,35 +190,35 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			
 			
 			//check for file parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
-			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			sabundfile = validParameter.validFile(parameters, "sabund");
 			if (sabundfile == "not open") { abort = true; }
 			else if (sabundfile == "not found") {  sabundfile = "";  }	
-			else { m->setSabundFile(sabundfile); }
+			else { current->setSabundFile(sabundfile); }
 			
-			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			rabundfile = validParameter.validFile(parameters, "rabund");
 			if (rabundfile == "not open") { abort = true; }
 			else if (rabundfile == "not found") {  rabundfile = "";  }				
-			else { m->setRabundFile(rabundfile); }
+			else { current->setRabundFile(rabundfile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = "";  abort = true; }
 			else if (sharedfile == "not found") {  sharedfile = "";  }
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             			
             if ((groupfile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
@@ -228,16 +228,16 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 				//is there are current file available for any of these?
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					listfile = m->getListFile(); 
+					listfile = current->getListFile(); 
 					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 					else { 
-						rabundfile = m->getRabundFile(); 
+						rabundfile = current->getRabundFile(); 
 						if (rabundfile != "") {  m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
 						else { 
-							sabundfile = m->getSabundFile(); 
+							sabundfile = current->getSabundFile(); 
 							if (sabundfile != "") {  m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
 							else { 
 								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file."); m->mothurOutEndLine(); 
@@ -248,24 +248,24 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 				}
 			} 
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = "all"; }
-			m->splitAtDash(groups, Groups);
+			util.splitAtDash(groups, Groups);
             if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			string temp = validParameter.validFile(parameters, "nseqs", false);	 
+			string temp = validParameter.valid(parameters, "nseqs");
 			if (temp == "not found") { m->mothurOut("nseqs is a required parameter."); m->mothurOutEndLine(); abort = true; }
-			else { m->mothurConvert(temp, nseqs); }
+			else { util.mothurConvert(temp, nseqs); }
 			
-			temp = validParameter.validFile(parameters, "bygroup", false);	 if (temp == "not found") { temp = "f"; }
-			byGroup = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "bygroup");	 if (temp == "not found") { temp = "f"; }
+			byGroup = util.isTrue(temp);
 			
 			if (byGroup && (sharedfile == "")) { m->mothurOut("The byGroup parameter is only valid with a shared file."); m->mothurOutEndLine(); }
 			
@@ -293,7 +293,7 @@ int RemoveRareCommand::execute(){
 		if (listfile != "")			{		processList();		}
 		if (sharedfile != "")		{		processShared();	}
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 			
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -302,35 +302,35 @@ int RemoveRareCommand::execute(){
 			m->mothurOutEndLine();
 			
 			//set rabund file as new current rabundfile
-			string current = "";
+			string currentName = "";
 			itTypes = outputTypes.find("rabund");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setRabundFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("sabund");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSabundFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("group");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("list");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("shared");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSharedFile(currentName); }
 			}
             
             itTypes = outputTypes.find("count");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 			}
 		}
 		
@@ -369,7 +369,7 @@ int RemoveRareCommand::processList(){
 					break;
 				}
 				
-				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
 					delete list;
@@ -387,21 +387,21 @@ int RemoveRareCommand::processList(){
 		}
         
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
         map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[extension]"] = m->getExtension(listfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[extension]"] = util.getExtension(listfile);
         variables["[tag]"] = list->getLabel();
 		string outputFileName = getOutputFileName("list", variables);
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-        variables["[extension]"] = m->getExtension(groupfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+        variables["[extension]"] = util.getExtension(groupfile);
 		string outputGroupFileName = getOutputFileName("group", variables);
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
-        variables["[extension]"] = m->getExtension(countfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[extension]"] = util.getExtension(countfile);
         string outputCountFileName = getOutputFileName("count", variables);
         
 		ofstream out, outGroup;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		bool wroteSomething = false;
 
@@ -412,7 +412,7 @@ int RemoveRareCommand::processList(){
 		if (groupfile != "") { 
 			groupMap = new GroupMap(groupfile); groupMap->readMap(); 
             if (Groups.size() == 0) { Groups = groupMap->getNamesOfGroups(); }
-			m->openOutputFile(outputGroupFileName, outGroup);
+			util.openOutputFile(outputGroupFileName, outGroup);
 		}else if (countfile != "") {
             ct.readTable(countfile, true, false);
             if (ct.hasGroupInfo()) {
@@ -432,13 +432,13 @@ int RemoveRareCommand::processList(){
 			
 			//for each bin
 			for (int i = 0; i < list->getNumBins(); i++) {
-				if (m->getControl_pressed()) {  if (groupfile != "") { delete groupMap; outGroup.close(); m->mothurRemove(outputGroupFileName); } out.close();  m->mothurRemove(outputFileName);  return 0; }
+				if (m->getControl_pressed()) {  if (groupfile != "") { delete groupMap; outGroup.close(); util.mothurRemove(outputGroupFileName); } out.close();  util.mothurRemove(outputFileName);  return 0; }
 				
 				//parse out names that are in accnos file
 				string binnames = list->get(i);
 				vector<string> names;
 				string saveBinNames = binnames;
-				m->splitAtComma(binnames, names);
+				util.splitAtComma(binnames, names);
                 int binsize = names.size();
 				
 				vector<string> newGroupFile;
@@ -448,7 +448,7 @@ int RemoveRareCommand::processList(){
 					for(int k = 0; k < names.size(); k++) {
 						string group = groupMap->getGroup(names[k]);
 						
-						if (m->inUsersGroups(group, Groups)) {
+						if (util.inUsersGroups(group, Groups)) {
 							newGroupFile.push_back(names[k] + "\t" + group); 
 								
 							newNames.push_back(names[k]);	
@@ -466,7 +466,7 @@ int RemoveRareCommand::processList(){
                             
                             int thisSeqsCount = 0;
                             for (int n = 0; n < thisSeqsGroups.size(); n++) {
-                                if (m->inUsersGroups(thisSeqsGroups[n], Groups)) {
+                                if (util.inUsersGroups(thisSeqsGroups[n], Groups)) {
                                     thisSeqsCount += ct.getGroupCount(names[k], thisSeqsGroups[n]);
                                 }
                             }
@@ -505,7 +505,7 @@ int RemoveRareCommand::processList(){
             if (ct.hasGroupInfo()) {
                 vector<string> allGroups = ct.getNamesOfGroups();
                 for (int i = 0; i < allGroups.size(); i++) {
-                    if (!m->inUsersGroups(allGroups[i], Groups)) { ct.removeGroup(allGroups[i]); }
+                    if (!util.inUsersGroups(allGroups[i], Groups)) { ct.removeGroup(allGroups[i]); }
                 }
 
             }
@@ -527,15 +527,15 @@ int RemoveRareCommand::processList(){
 int RemoveRareCommand::processSabund(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sabundfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile));
-        variables["[extension]"] = m->getExtension(sabundfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sabundfile));
+        variables["[extension]"] = util.getExtension(sabundfile);
 		string outputFileName = getOutputFileName("sabund", variables);
 		outputTypes["sabund"].push_back(outputFileName); outputNames.push_back(outputFileName);
 
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		InputData input(sabundfile, "sabund", nullVector);
@@ -561,7 +561,7 @@ int RemoveRareCommand::processSabund(){
 				if (sabund->getNumBins() > 0) { sabund->print(out); }
 			}
 			
-			if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = sabund->getLabel();
 				
 				delete sabund;
@@ -629,15 +629,15 @@ int RemoveRareCommand::processSabund(){
 int RemoveRareCommand::processRabund(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(rabundfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile));
-        variables["[extension]"] = m->getExtension(rabundfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(rabundfile));
+        variables["[extension]"] = util.getExtension(rabundfile);
 		string outputFileName = getOutputFileName("rabund", variables);
 		outputTypes["rabund"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		InputData input(rabundfile, "rabund", nullVector);
@@ -665,7 +665,7 @@ int RemoveRareCommand::processRabund(){
 				if (newRabund.getNumBins() > 0) { newRabund.print(out); }
 			}
 			
-			if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = rabund->getLabel();
 				
 				delete rabund;
@@ -756,7 +756,7 @@ int RemoveRareCommand::processShared(){
 				processLookup(lookup);
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				delete lookup;
@@ -816,16 +816,16 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 	try {
 		
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[extension]"] = m->getExtension(sharedfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[extension]"] = util.getExtension(sharedfile);
         variables["[tag]"] = lookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);
 		outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		vector<SharedRAbundVector> newRabunds;  newRabunds.resize(lookup->size());
         vector<string> headers;

@@ -106,14 +106,14 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
             outputTypes["group"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -121,7 +121,7 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -129,7 +129,7 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -137,37 +137,37 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 
 			
 			//check for required parameters
-			fastaFile = validParameter.validFile(parameters, "fasta", true);
+			fastaFile = validParameter.validFile(parameters, "fasta");
 			if (fastaFile == "not open") { abort = true; }
 			else if (fastaFile == "not found") { 				
-				fastaFile = m->getFastaFile(); 
+				fastaFile = current->getFastaFile(); 
 				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setFastaFile(fastaFile); }	
+			}else { current->setFastaFile(fastaFile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
 			}
 			
-			nameFile = validParameter.validFile(parameters, "name", true);
+			nameFile = validParameter.validFile(parameters, "name");
 			if (nameFile == "not open") { abort = true; }
 			else if (nameFile == "not found"){	nameFile = ""; }
-			else { m->setNameFile(nameFile); }
+			else { current->setNameFile(nameFile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true;  }
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
             if ((countfile != "") && (nameFile != "")) { m->mothurOut("When executing a deunique.seqs command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
             
 			if ((countfile == "") && (nameFile == "")) { //look for currents
-                nameFile = m->getNameFile();
+                nameFile = current->getNameFile();
 				if (nameFile != "") { m->mothurOut("Using " + nameFile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 				else {
-                    countfile = m->getCountTableFile();
+                    countfile = current->getCountFile();
                     if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                     else {  m->mothurOut("[ERROR]: You have no current name or count files one is required."); m->mothurOutEndLine(); abort = true; }
                 }
@@ -190,44 +190,44 @@ int DeUniqueSeqsCommand::execute() {
 		//prepare filenames and open files
 		ofstream out;
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastaFile);  }
-        string outFastaFile = thisOutputDir + m->getRootName(m->getSimpleName(fastaFile));
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastaFile);  }
+        string outFastaFile = thisOutputDir + util.getRootName(util.getSimpleName(fastaFile));
        
         map<string, string> variables;
         variables["[filename]"] = outFastaFile;
         outFastaFile = getOutputFileName("fasta", variables);
-		m->openOutputFile(outFastaFile, out);
+		util.openOutputFile(outFastaFile, out);
 		
 		map<string, string> nameMap;
         CountTable ct;
         ofstream outGroup;
         string outGroupFile;
         vector<string> groups;
-        if (nameFile != "") { m->readNames(nameFile, nameMap); }
+        if (nameFile != "") { util.readNames(nameFile, nameMap); }
         else {
             ct.readTable(countfile, true, false);
             
             if (ct.hasGroupInfo()) {
                 thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
-                outGroupFile = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+                if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                outGroupFile = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
                 variables["[filename]"] = outGroupFile;
                 outGroupFile = getOutputFileName("group", variables);
-                m->openOutputFile(outGroupFile, outGroup);
+                util.openOutputFile(outGroupFile, outGroup);
                 groups = ct.getNamesOfGroups();
             }
         }
         
-		if (m->getControl_pressed()) {  out.close(); outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); m->mothurRemove(outGroupFile); } } return 0; }
+		if (m->getControl_pressed()) {  out.close(); outputTypes.clear(); util.mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); util.mothurRemove(outGroupFile); } } return 0; }
 		
 		ifstream in;
-		m->openInputFile(fastaFile, in);
+		util.openInputFile(fastaFile, in);
 		
 		while (!in.eof()) {
 		
-			if (m->getControl_pressed()) { in.close(); out.close(); outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); m->mothurRemove(outGroupFile); } } return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); outputTypes.clear(); util.mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); util.mothurRemove(outGroupFile); } } return 0; }
 			
-			Sequence seq(in); m->gobble(in);
+			Sequence seq(in); util.gobble(in);
 			
 			if (seq.getName() != "") {
 				
@@ -238,7 +238,7 @@ int DeUniqueSeqsCommand::execute() {
                     if (it == nameMap.end()) {	m->mothurOut("[ERROR]: Your namefile does not contain " + seq.getName() + ", aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     else {
                         vector<string> names;
-                        m->splitAtComma(it->second, names);
+                        util.splitAtComma(it->second, names);
                         
                         //output sequences
                         for (int i = 0; i < names.size(); i++) {
@@ -274,7 +274,7 @@ int DeUniqueSeqsCommand::execute() {
         if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); } }
 		
 						
-		if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) {  m->mothurRemove(outGroupFile); } }return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) {  util.mothurRemove(outGroupFile); } }return 0; }
 		
         outputNames.push_back(outFastaFile);  outputTypes["fasta"].push_back(outFastaFile);
         if (countfile != "") { if (ct.hasGroupInfo()) { outputNames.push_back(outGroupFile);  outputTypes["group"].push_back(outGroupFile); } }
@@ -286,15 +286,15 @@ int DeUniqueSeqsCommand::execute() {
 		
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
         
         itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 		}
 
 		

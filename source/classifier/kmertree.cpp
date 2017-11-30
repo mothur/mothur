@@ -24,13 +24,13 @@ KmerTree::KmerTree(string referenceFileName, string taxonomyFileName, int k, int
         readTaxonomy(taxonomyFileName);
         
         ifstream referenceFile;
-        m->openInputFile(referenceFileName, referenceFile);
+        util.openInputFile(referenceFileName, referenceFile);
         bool error = false;
         while(!referenceFile.eof()){
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(referenceFile);  m->gobble(referenceFile);
+            Sequence seq(referenceFile);  util.gobble(referenceFile);
             
             if (seq.getName() != "") {
                 map<string, string>::iterator it = taxonomy.find(seq.getName());

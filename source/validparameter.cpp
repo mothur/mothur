@@ -14,6 +14,8 @@
 ValidParameters::ValidParameters() {
 	try {
 		m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
+        locations = current->getLocations();
 		initParameterRanges();
 		commandName = "";
 	}
@@ -27,6 +29,8 @@ ValidParameters::ValidParameters() {
 ValidParameters::ValidParameters(string c) {
 	try {
 		m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
+        locations = current->getLocations();
 		initParameterRanges();
 		commandName = c;
 	}
@@ -69,7 +73,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 		vector<string> range = parameterRanges[parameter];
 		
 		vector<string> values;
-		m->splitAtDash(value, values);
+        Utils util; util.splitAtDash(value, values);
 		
 		for(int i = 0; i < values.size(); i++) {
 			value = values.at(i);
@@ -210,95 +214,61 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 /*******************************************************/
 
 /******************************************************/
-
-string ValidParameters::validFile(map<string, string>& container, string parameter, bool isFile) {
+string ValidParameters::valid(map<string, string>& container, string parameter) {
+    try {
+        map<string, string>::iterator it;
+        
+        it = container.find(parameter);
+        if(it != container.end()){ }
+        else { return "not found"; }
+        
+        return it->second;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidParameters", "valid");
+        exit(1);
+    }
+}
+/******************************************************/
+string ValidParameters::validFile(map<string, string>& container, string parameter, vector<string> locations) {
 	try {
 		bool ableToOpen;
+        Utils util;
 		
 		map<string, string>::iterator it;
 		
 		it = container.find(parameter);
 		if(it != container.end()){ //no parameter given
-            
-			if(isFile ) {
-				
                 if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
                 else {
                 
 				int pos = (it->second).find(".tx.");
-				if (pos != string::npos) { m->setSharedHeaderMode("tax"); }
-				else { m->setSharedHeaderMode("otu"); }
+				if (pos != string::npos) { current->setSharedHeaderMode("tax"); }
+				else { current->setSharedHeaderMode("otu"); }
 			
-				ifstream in;
-				ableToOpen = m->openInputFile(it->second, in, "noerror");
-				in.close();
-				
-                //if you can't open it, try default location
-                if (!ableToOpen) {
-                    if (m->getDefaultPath() != "") { //default path is set
-                        string tryPath = m->getDefaultPath() + m->getSimpleName(it->second);
-                        m->mothurOut("Unable to open " + it->second + ". Trying default " + tryPath); m->mothurOutEndLine();
-                        ifstream in2;
-                        ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-                        in2.close();
-                        container[parameter] = tryPath;
-                    }
-                }
-				
-                //if you can't open it, try mothur's location
-                if (!ableToOpen) {
-                    //look for mothurs exe
-                    string mpath = m->getProgramPath();
-                    //string tempPath = mpath;
-                    //for (int i = 0; i < mpath.length(); i++) { tempPath[i] = tolower(mpath[i]); }
-                    //mpath = mpath.substr(0, (tempPath.find_last_of('m')));
-                        
-                    string tryPath = mpath + m->getSimpleName(it->second);
-                    m->mothurOut("Unable to open " + it->second + ". Trying mothur's location " + tryPath); m->mothurOutEndLine();
-                    ifstream in2;
-                    ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-                    in2.close();
-                    container[parameter] = tryPath;
-                }
-                    
-				//if you can't open it, try default location
-				if (!ableToOpen) {
-					if (m->getOutputDir() != "") { //default path is set
-						string tryPath = m->getOutputDir() + m->getSimpleName(it->second);
-						m->mothurOut("Unable to open " + it->second + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-						ifstream in2;
-						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-						container[parameter] = tryPath;
-						in2.close();
-					}
-				}
-				
-				if (!ableToOpen) { 
-					m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine();
-					return "not open"; 
-				}
+                string filename = it->second;
+                if (util.checkLocations(filename, current->getLocations())) { container[parameter] = filename; }
+                else { m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine(); return "not open";  }
 				
 				//check phylip file to make sure its really phylip and not column
 				if ((it->first == "phylip") && (ableToOpen)) {
 					ifstream inPhylip;
-					m->openInputFile(it->second, inPhylip);
+					util.openInputFile(it->second, inPhylip);
 										
 					string numTest, name;
 					inPhylip >> numTest >> name;
 					inPhylip.close();
 					
-					if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting."); m->mothurOutEndLine(); return "not found"; }
+					if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting."); m->mothurOutEndLine(); return "not found"; }
 				}
                 
                 //check for blank file
                 if (ableToOpen) {
-                    if (m->isBlank(container[parameter])) {
+                    if (util.isBlank(container[parameter])) {
                         m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting."); m->mothurOutEndLine(); return "not found"; 
                     }
                 }
                 }
-                
-			}
 		}else { return "not found"; }
 		
 		return it->second;
@@ -309,7 +279,56 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 		exit(1);
 	}
 }
-
+/******************************************************/
+string ValidParameters::validFile(map<string, string>& container, string parameter) {
+    try {
+        bool ableToOpen;
+        Utils util;
+        
+        map<string, string>::iterator it;
+        
+        it = container.find(parameter);
+        if(it != container.end()){ //no parameter given
+            if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
+            else {
+                
+                int pos = (it->second).find(".tx.");
+                if (pos != string::npos) { current->setSharedHeaderMode("tax"); }
+                else { current->setSharedHeaderMode("otu"); }
+                
+                string filename = it->second;
+                if (util.checkLocations(filename, current->getLocations())) { container[parameter] = filename; }
+                else { m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine(); return "not open";  }
+                
+                //check phylip file to make sure its really phylip and not column
+                if ((it->first == "phylip") && (ableToOpen)) {
+                    ifstream inPhylip;
+                    util.openInputFile(it->second, inPhylip);
+                    
+                    string numTest, name;
+                    inPhylip >> numTest >> name;
+                    inPhylip.close();
+                    
+                    if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting."); m->mothurOutEndLine(); return "not found"; }
+                }
+                
+                //check for blank file
+                if (ableToOpen) {
+                    if (util.isBlank(container[parameter])) {
+                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting."); m->mothurOutEndLine(); return "not found";
+                    }
+                }
+            }
+        }else { return "not found"; }
+        
+        return it->second;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidParameters", "validFile");
+        exit(1);
+    }
+}
 /***********************************************************************/
 
 /***********************************************************************/

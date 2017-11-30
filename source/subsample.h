@@ -37,6 +37,7 @@ class SubSample {
     private:
     
         MothurOut* m;
+        Utils util;
         map<string, string> deconvolute(map<string, string> wholeSet, vector<string>& subsampleWanted); //returns new nameMap containing only subsampled names, and removes redundants from subsampled wanted because it makes the new nameMap.
 
 

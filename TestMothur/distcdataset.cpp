@@ -32,16 +32,16 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();
         
         ifstream in;
-        m->openInputFile(accnosfile, in);
+        util.openInputFile(accnosfile, in);
         
         ofstream out;
-        m->openOutputFile("temp.accnos", out);
+        util.openOutputFile("temp.accnos", out);
         
         int count = 0; string name;
         while(!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            in >> name; m->gobble(in);
+            in >> name; util.gobble(in);
             out << name << endl;
             count++;
             
@@ -49,7 +49,7 @@ vector<string> DistCDataSet::getFiles(int numSeqs) {
         }
         in.close();
         out.close();
-        m->mothurRemove(accnosfile);
+        util.mothurRemove(accnosfile);
         
         inputString = "count=" + countFile + ", accnos=temp.accnos";
         m->mothurOut("/******************************************/"); m->mothurOutEndLine();

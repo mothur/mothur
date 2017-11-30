@@ -48,7 +48,7 @@ class DeCalculator {
 		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
 		map<int, int> trimSeqs(Sequence&, vector<Sequence>&);
 		void removeObviousOutliers(vector< vector<float> >&, int);
-		vector<float> calcFreq(vector<Sequence*>, string);
+		vector<float> calcFreq(vector<Sequence*>, string, string);
 		vector<int> findWindows(Sequence*, int, int, int&, int);
 		vector<float> calcObserved(Sequence*, Sequence*, vector<int>, int);
 		vector<float>  calcExpected(vector<float>, float);

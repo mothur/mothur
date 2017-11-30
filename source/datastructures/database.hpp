@@ -15,6 +15,8 @@
 
 #include "mothur.h"
 #include "sequence.hpp"
+#include "currentfile.h"
+#include "utils.hpp"
 
 /**************************************************************************************************/
 struct seqMatch {  //used to select top n matches
@@ -44,7 +46,7 @@ inline bool compareSeqMatchesReverse (seqMatch member, seqMatch member2){ //sort
 class Database {
 
 public:
-    Database(){ longest = 0; numSeqs = 0; m = MothurOut::getInstance(); }
+    Database(){ longest = 0; numSeqs = 0; m = MothurOut::getInstance(); current = CurrentFile::getInstance(); }
     virtual ~Database(){};
 	virtual void generateDB() = 0;
     virtual void readKmerDB(ifstream&){};
@@ -63,8 +65,10 @@ public:
 	
 protected:
 	MothurOut* m;
+    CurrentFile* current;
 	int numSeqs, longest;
     std::mutex mutex;
+    Utils util;
 	
 	
 };

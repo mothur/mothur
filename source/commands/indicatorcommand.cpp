@@ -111,22 +111,19 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			m->setRunParse(true);
-			m->setTreenames(nullVector);
-			
 			vector<string> tempOutNames;
 			outputTypes["tree"] = tempOutNames;
 			outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("tree");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
 				}
@@ -134,7 +131,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -142,7 +139,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
@@ -150,56 +147,55 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
 			}
 			
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 
 			//check for required parameters
-			treefile = validParameter.validFile(parameters, "tree", true);
+			treefile = validParameter.validFile(parameters, "tree");
 			if (treefile == "not open") { treefile = ""; abort = true; }
 			else if (treefile == "not found") { treefile = ""; 	}		
-			else { m->setTreeFile(treefile); }	
+			else { current->setTreeFile(treefile); }	
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else { inputFileName = sharedfile; m->setSharedFile(sharedfile); }
+			else { inputFileName = sharedfile; current->setSharedFile(sharedfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") { abort = true; }
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else { inputFileName = relabundfile; m->setRelAbundFile(relabundfile); }
+			else { inputFileName = relabundfile; current->setRelAbundFile(relabundfile); }
 			
-			designfile = validParameter.validFile(parameters, "design", true);
+			designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { designfile = ""; abort = true; }
 			else if (designfile == "not found") { designfile = ""; }
-			else { m->setDesignFile(designfile); }
+			else { current->setDesignFile(designfile); }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = "";  Groups.push_back("all"); }
-			else { m->splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	}
+			else { util.splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	}
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
 			
-			string temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+			string temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
-			
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
+            
 			if ((relabundfile == "") && (sharedfile == "")) { 
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") {  inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					relabundfile = m->getRelAbundFile(); 
+					relabundfile = current->getRelAbundFile(); 
 					if (relabundfile != "") {  inputFileName = relabundfile; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); 
@@ -210,10 +206,10 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			
 			
 			if ((designfile == "") && (treefile == "")) { 
-				treefile = m->getTreeFile(); 
+				treefile = current->getTreeFile(); 
 				if (treefile != "") {  m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
 				else { 
-					designfile = m->getDesignFile(); 
+					designfile = current->getDesignFile(); 
 					if (designfile != "") {  m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("[ERROR]: You must provide either a tree or design file."); m->mothurOutEndLine(); abort = true; 
@@ -240,7 +236,7 @@ int IndicatorCommand::execute(){
 		
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
-		int start = time(NULL);
+		long start = time(NULL);
 	
 		//read designfile if given and set up groups for read of sharedfiles
         vector<string> allGroups;
@@ -275,21 +271,22 @@ int IndicatorCommand::execute(){
 		/***************************************************/
 		if (treefile != "") {
 			string groupfile = ""; 
-			m->setTreeFile(treefile);
-			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
+			current->setTreeFile(treefile);
+            vector<string> Treenames;
+			Tree tree(treefile, Treenames);  //extracts names from tree to make faked out groupmap
 			ct = new CountTable();
 			bool mismatch = false;
             
             set<string> nameMap;
             map<string, string> groupMap;
             set<string> gps;
-            vector<string> Treenames = m->getTreenames();
+            
             for (int i = 0; i < Treenames.size(); i++) {
                 nameMap.insert(Treenames[i]);
                 //sanity check - is this a group that is not in the sharedfile?
                 if (i == 0) { gps.insert("Group1"); }
 				if (designfile == "") {
-					if (!(m->inUsersGroups(Treenames[i], allGroups))) {
+					if (!(util.inUsersGroups(Treenames[i], allGroups))) {
 						m->mothurOut("[ERROR]: " + Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 						mismatch = true;
 					}
@@ -299,7 +296,7 @@ int IndicatorCommand::execute(){
 					vector<string> myNames = designMap->getNamesGroups(myGroups);
 					
 					for(int k = 0; k < myNames.size(); k++) {
-						if (!(m->inUsersGroups(myNames[k], allGroups))) {
+						if (!(util.inUsersGroups(myNames[k], allGroups))) {
 							m->mothurOut("[ERROR]: " + myNames[k] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 							mismatch = true;
 						}
@@ -319,7 +316,7 @@ int IndicatorCommand::execute(){
 				return 0;
 			}
 		 
-			read = new ReadNewickTree(treefile);
+			read = new ReadNewickTree(treefile, Treenames);
 			int readOk = read->read(ct); 
 			
 			if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete ct; delete read; return 0; }
@@ -340,7 +337,7 @@ int IndicatorCommand::execute(){
 			/***************************************************/
 			//    create ouptut tree - respecting pickedGroups //
 			/***************************************************/
-			Tree* outputTree = new Tree(Groups.size(), ct);
+			Tree* outputTree = new Tree(Groups.size(), ct, Treenames);
 			
 			outputTree->getSubTree(T[0], Groups);
 			outputTree->assembleTree();
@@ -370,14 +367,14 @@ int IndicatorCommand::execute(){
         if (sharedfile != "") {  delete lookup; }
         else { delete lookupFloat; }
         
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0; }
 		
 		//set tree file as new current treefile
 		if (treefile != "") {
-			string current = "";
+			string currentName = "";
 			itTypes = outputTypes.find("tree");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTreeFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTreeFile(currentName); }
 			}
 		}
 		
@@ -400,14 +397,14 @@ int IndicatorCommand::execute(){
 int IndicatorCommand::GetIndicatorSpecies(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(inputFileName);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFileName));
 		string outputFileName = getOutputFileName("summary", variables);
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		m->mothurOutEndLine(); m->mothurOut("Species\tIndicator_Groups\tIndicatorValue\tpValue\n");
 		
@@ -531,14 +528,14 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 	try {
 		
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(inputFileName);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFileName));
 		string outputFileName = getOutputFileName("summary",variables);
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		int numBins = 0;
@@ -555,8 +552,8 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		m->mothurOutEndLine(); m->mothurOut("Node\tSpecies\tIndicator_Groups\tIndicatorValue\tpValue\n");
 		
 		string treeOutputDir = outputDir;
-		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
-        variables["[filename]"] = treeOutputDir + m->getRootName(m->getSimpleName(treefile));
+		if (outputDir == "") {  treeOutputDir += util.hasPath(treefile);  }
+        variables["[filename]"] = treeOutputDir + util.getRootName(util.getSimpleName(treefile));
 		string outputTreeFileName = getOutputFileName("tree", variables);
 		
 		
@@ -736,7 +733,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		out.close();
 	
 		ofstream outTree;
-		m->openOutputFile(outputTreeFileName, outTree);
+		util.openOutputFile(outputTreeFileName, outTree);
 		outputNames.push_back(outputTreeFileName); outputTypes["tree"].push_back(outputTreeFileName);
 		
 		T->print(outTree, "both");
@@ -1037,7 +1034,7 @@ int IndicatorCommand::getShared(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
                 delete lookup;
@@ -1114,7 +1111,7 @@ int IndicatorCommand::getSharedFloat(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookupFloat->getLabel();
 				
 				delete lookupFloat;
@@ -1226,8 +1223,8 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
 					
 					//pass pvalues to parent
 					ofstream out;
-					string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
-					m->openOutputFile(tempFile, out);
+					string tempFile = toString(process) + ".pvalues.temp";
+					util.openOutputFile(tempFile, out);
 					
                     //pass values
                     for (int i = 0; i < pvalues.size(); i++) {  out << pvalues[i] << '\t'; } out << endl;
@@ -1245,7 +1242,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
                     }
                     m->setControl_pressed(false);
                     for (int i=0;i<processIDS.size();i++) {
-                        m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
+                        util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
                     }
                     recalc = true;
                     break;
@@ -1255,7 +1252,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
             if (recalc) {
                 //test line, also set recalc to true.
                 //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+					  for (int i=0;i<processIDS.size();i++) {util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                 
                 //divide iters between processors
                 processIDS.resize(0);
@@ -1281,8 +1278,8 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
                         
                         //pass pvalues to parent
                         ofstream out;
-                        string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
-                        m->openOutputFile(tempFile, out);
+                        string tempFile = toString(process) + ".pvalues.temp";
+                        util.openOutputFile(tempFile, out);
                         
                         //pass values
                         for (int i = 0; i < pvalues.size(); i++) {  out << pvalues[i] << '\t'; } out << endl;
@@ -1311,15 +1308,15 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
 			for (int i = 0; i < processIDS.size(); i++) {
 				ifstream in;
 				string tempFile =  toString(processIDS[i]) + ".pvalues.temp";
-				m->openInputFile(tempFile, in);
+				util.openInputFile(tempFile, in);
 				
 				////// to do ///////////
 				int numTemp; numTemp = 0; 
 				for (int j = 0; j < pvalues.size(); j++) {
-					in >> numTemp; m->gobble(in);
+					in >> numTemp; util.gobble(in);
 					pvalues[j] += numTemp;
 				}
-				in.close(); m->mothurRemove(tempFile);
+				in.close(); util.mothurRemove(tempFile);
 			}
 			for (int i = 0; i < pvalues.size(); i++) { pvalues[i] /= (double)iters; }
 #else
@@ -1458,8 +1455,8 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 					
 					//pass pvalues to parent
 					ofstream out;
-					string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
-					m->openOutputFile(tempFile, out);
+					string tempFile = toString(process) + ".pvalues.temp";
+					util.openOutputFile(tempFile, out);
 					
 					//pass values
 					for (int i = 0; i < pvalues.size(); i++) {
@@ -1480,7 +1477,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
                     }
                     m->setControl_pressed(false);
                     for (int i=0;i<processIDS.size();i++) {
-                        m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
+                        util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
                     }
                     recalc = true;
                     break;
@@ -1490,7 +1487,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
             if (recalc) {
                 //test line, also set recalc to true.
                 //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-                    for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                    for (int i=0;i<processIDS.size();i++) {util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                 
                 //divide iters between processors
                 processIDS.resize(0);
@@ -1516,8 +1513,8 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
                         
                         //pass pvalues to parent
                         ofstream out;
-                        string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
-                        m->openOutputFile(tempFile, out);
+                        string tempFile = toString(process) + ".pvalues.temp";
+                        util.openOutputFile(tempFile, out);
                         
                         //pass values
                         for (int i = 0; i < pvalues.size(); i++) {  out << pvalues[i] << '\t'; } out << endl;
@@ -1546,15 +1543,15 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 			for (int i = 0; i < processIDS.size(); i++) {
 				ifstream in;
 				string tempFile =  toString(processIDS[i]) + ".pvalues.temp";
-				m->openInputFile(tempFile, in);
+				util.openInputFile(tempFile, in);
 				
 				////// to do ///////////
 				int numTemp; numTemp = 0;
 				for (int j = 0; j < pvalues.size(); j++) {
-					in >> numTemp; m->gobble(in);
+					in >> numTemp; util.gobble(in);
 					pvalues[j] += numTemp;
 				}
-				in.close(); m->mothurRemove(tempFile);
+				in.close(); util.mothurRemove(tempFile);
 			}
 			for (int i = 0; i < pvalues.size(); i++) { pvalues[i] /= (double)iters; }
 #else

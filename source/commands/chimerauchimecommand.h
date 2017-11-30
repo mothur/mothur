@@ -152,15 +152,15 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 	
 	try {
 		
-		pDataArray->outputFName = pDataArray->m->getFullPathName(pDataArray->outputFName);
-		pDataArray->filename = pDataArray->m->getFullPathName(pDataArray->filename);
-		pDataArray->alns = pDataArray->m->getFullPathName(pDataArray->alns);
+		pDataArray->outputFName = pDataArray->util.getFullPathName(pDataArray->outputFName);
+		pDataArray->filename = pDataArray->util.getFullPathName(pDataArray->filename);
+		pDataArray->alns = pDataArray->util.getFullPathName(pDataArray->alns);
 		
 		//clears files
 		ofstream out, out1, out2;
-		pDataArray->m->openOutputFile(pDataArray->outputFName, out); out.close(); 
-		pDataArray->m->openOutputFile(pDataArray->accnos, out1); out1.close();
-		if (pDataArray->chimealns) { pDataArray->m->openOutputFile(pDataArray->alns, out2); out2.close(); }
+		pDataArray->util.openOutputFile(pDataArray->outputFName, out); out.close(); 
+		pDataArray->util.openOutputFile(pDataArray->accnos, out1); out1.close();
+		if (pDataArray->chimealns) { pDataArray->util.openOutputFile(pDataArray->alns, out2); out2.close(); }
 		
 		//parse fasta and name file by group
 		SequenceParser* parser;
@@ -180,11 +180,11 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 		int numChimeras = 0;
         
         ofstream outCountList;
-        if (pDataArray->hasCount && pDataArray->dups) { pDataArray->m->openOutputFile(pDataArray->countlist, outCountList); }
+        if (pDataArray->hasCount && pDataArray->dups) { pDataArray->util.openOutputFile(pDataArray->countlist, outCountList); }
 
 		
 		for (int i = pDataArray->start; i < pDataArray->end; i++) {
-			int start = time(NULL);	 if (pDataArray->m->getControl_pressed()) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
+			long start = time(NULL);	 if (pDataArray->m->getControl_pressed()) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
 			
 			int error;
             long long numSeqs = 0;
@@ -451,10 +451,10 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 			//create accnos file from uchime results
 			ifstream in; 
-			pDataArray->m->openInputFile(outputFName, in);
+			pDataArray->util.openInputFile(outputFName, in);
 			
 			ofstream out;
-			pDataArray->m->openOutputFile(accnos, out);
+			pDataArray->util.openOutputFile(accnos, out);
             
 			
 			int num = 0;
@@ -476,14 +476,14 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 				name = name.substr(0, name.find_last_of('/'));
 				
 				for (int j = 0; j < 15; j++) {  in >> chimeraFlag; }
-				pDataArray->m->gobble(in);
+				pDataArray->util.gobble(in);
 				
 				if (chimeraFlag == "Y") {
                     if (pDataArray->dups) {
                         if (!pDataArray->hasCount) { //output redundant names for each group
                             itN = thisnamemap.find(name);
                             if (itN != thisnamemap.end()) {
-                                vector<string> tempNames; pDataArray->m->splitAtComma(itN->second, tempNames);
+                                vector<string> tempNames; pDataArray->util.splitAtComma(itN->second, tempNames);
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                             }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->setControl_pressed(true); }
 
@@ -507,12 +507,12 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			if (pDataArray->m->getControl_pressed()) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
 			
 			//remove file made for uchime
-			pDataArray->m->mothurRemove(filename);
+			pDataArray->util.mothurRemove(filename);
 			
 			//append files
-			pDataArray->m->appendFiles(outputFName, pDataArray->outputFName); pDataArray->m->mothurRemove(outputFName);
-			pDataArray->m->appendFiles(accnos, pDataArray->accnos); pDataArray->m->mothurRemove(accnos);
-			if (pDataArray->chimealns) { pDataArray->m->appendFiles(alns, pDataArray->alns); pDataArray->m->mothurRemove(alns); }
+			pDataArray->util.appendFiles(outputFName, pDataArray->outputFName); pDataArray->util.mothurRemove(outputFName);
+			pDataArray->util.appendFiles(accnos, pDataArray->accnos); pDataArray->util.mothurRemove(accnos);
+			if (pDataArray->chimealns) { pDataArray->util.appendFiles(alns, pDataArray->alns); pDataArray->util.mothurRemove(alns); }
 			
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(num) + " sequences from group " + pDataArray->groups[i] + ".");	pDataArray->m->mothurOutEndLine();					
 			
@@ -538,14 +538,14 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 	
 	try {
 		
-		pDataArray->outputFName = pDataArray->m->getFullPathName(pDataArray->outputFName);
-		pDataArray->filename = pDataArray->m->getFullPathName(pDataArray->filename);
-		pDataArray->alns = pDataArray->m->getFullPathName(pDataArray->alns);
+		pDataArray->outputFName = pDataArray->util.getFullPathName(pDataArray->outputFName);
+		pDataArray->filename = pDataArray->util.getFullPathName(pDataArray->filename);
+		pDataArray->alns = pDataArray->util.getFullPathName(pDataArray->alns);
 		
 		int totalSeqs = 0;
 		int numChimeras = 0;
 	
-		int start = time(NULL);	 if (pDataArray->m->getControl_pressed()) { return 0; }
+		long start = time(NULL);	 if (pDataArray->m->getControl_pressed()) { return 0; }
 			
 		//to allow for spaces in the path
 		string outputFName = "\"" + pDataArray->outputFName + "\"";
@@ -581,16 +581,16 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
         //prepFile(filename, outputFileName);
         /******************************************/
         ifstream in23;
-        pDataArray->m->openInputFile((filename.substr(1, filename.length()-2)), in23);
+        pDataArray->util.openInputFile((filename.substr(1, filename.length()-2)), in23);
         
         ofstream out23;
-        pDataArray->m->openOutputFile(outputFileName, out23);
+        pDataArray->util.openOutputFile(outputFileName, out23);
         
         int fcount = 0;
         while (!in23.eof()) {
             if (pDataArray->m->getControl_pressed()) { break;  }
             
-            Sequence seq(in23); pDataArray->m->gobble(in23);
+            Sequence seq(in23); pDataArray->util.gobble(in23);
             
             if (seq.getName() != "") { seq.printSequence(out23); fcount++; }
         }
@@ -839,10 +839,10 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		
 		//create accnos file from uchime results
 		ifstream in; 
-		pDataArray->m->openInputFile(outputFName, in);
+		pDataArray->util.openInputFile(outputFName, in);
 		
 		ofstream out;
-		pDataArray->m->openOutputFile(accnos, out);
+		pDataArray->util.openOutputFile(accnos, out);
 		
 		numChimeras = 0;
 		while(!in.eof()) {
@@ -854,7 +854,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 			in >> chimeraFlag >> name;
 			
 			for (int j = 0; j < 15; j++) {  in >> chimeraFlag; }
-			pDataArray->m->gobble(in);
+			pDataArray->util.gobble(in);
 			
 			if (chimeraFlag == "Y") {  out << name << endl; numChimeras++; }
 			totalSeqs++;
