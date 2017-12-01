@@ -22,7 +22,7 @@ CommandOptionParser::CommandOptionParser(string input){
 		int closeParen = input.find_last_of(')');
 		optionString = "";
 		commandString = "";
-        cout << input << endl;
+       
         if(openParen != string::npos && closeParen != string::npos){
             //gobble extra spaces
             int spot = 0;

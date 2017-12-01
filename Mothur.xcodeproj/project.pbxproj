@@ -3660,7 +3660,7 @@
 					"VERSION=\"\\\"1.39.5\\\"\"",
 					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
+					"LOGFILE_NAME=\"\\\"dev/null\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
@@ -3694,7 +3694,7 @@
 					"VERSION=\"\\\"1.39.5\\\"\"",
 					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
+					"LOGFILE_NAME=\"\\\"dev/null\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;

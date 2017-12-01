@@ -641,7 +641,7 @@ void driverClassifier(classifyData* params){
             }
             delete candidateSeq;
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             unsigned long long pos = inFASTA.tellg();
             if ((pos == -1) || (pos >= params->end)) { break; }
 #else
