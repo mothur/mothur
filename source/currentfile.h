@@ -138,6 +138,7 @@ class CurrentFile {
 		void operator=( const CurrentFile& ); // Disable assignment operator
 	
 		CurrentFile() {
+            m = MothurOut::getInstance();
             defaultPath=""; blastPath=""; testFilePath = "";
             inputDir = ""; outputDir= "";
             accnosfile = "";

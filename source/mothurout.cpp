@@ -42,7 +42,7 @@ void MothurOut::setLogFileName(string filename, bool append)  {
             if (append)     {
                 util.openOutputFileAppend(filename, out);
                 out << "\n\n************************************************************\n\n\n";
-            }else            {  util.openOutputFile(filename, out);       }
+            }else            {  bool opendLog = util.openOutputFile(filename, out);       if (!opendLog) { control_pressed = true; } }
         }
 	}
 	catch(exception& e) {
@@ -104,7 +104,6 @@ void MothurOut::closeLog()  {
 MothurOut::~MothurOut() {
 	try {
 		_uniqueInstance = 0;
-		
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -114,11 +113,9 @@ MothurOut::~MothurOut() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output) {
 	try {
-        output = buffer + output; buffer = "";
+        if (buffer != "") { output = buffer + output; buffer = ""; }
         if (output.find("[ERROR]") != string::npos) { numErrors++; }
-        
         if (output.find("[WARNING]") != string::npos) { numWarnings++; }
-
         
         if (!quietMode) {
             if (!devNull) { out << output; }
@@ -140,7 +137,7 @@ void MothurOut::mothurOut(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToScreen(string output) {
 	try {
-        output = buffer + output; buffer = "";
+        if (buffer != "") { output = buffer + output; buffer = ""; }
 		if (output.find("[ERROR]") != string::npos) { numErrors++; }
         
         if (output.find("[WARNING]") != string::npos) { numWarnings++; }
@@ -162,7 +159,6 @@ void MothurOut::mothurOutJustToScreen(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutEndLine() {
 	try {
-        
 		if (!quietMode) {
             if (!devNull) { out << buffer << endl; }
             logger() << buffer << endl;
@@ -177,9 +173,8 @@ void MothurOut::mothurOutEndLine() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output, ofstream& outputFile) {
 	try {
-        output = buffer + output; buffer = "";
+        if (buffer != "") { output = buffer + output; buffer = ""; }
         if (output.find("[ERROR]") != string::npos) { numErrors++; }
-        
         if (output.find("[WARNING]") != string::npos) { numWarnings++; }
         
         if (!quietMode) {
@@ -218,9 +213,8 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
-        output = buffer + output; buffer = "";
+        if (buffer != "") { output = buffer + output; buffer = ""; }
         if (output.find("[ERROR]") != string::npos) { numErrors++; }
-
         if (output.find("[WARNING]") != string::npos) { numWarnings++; }
         
         if (!quietMode) {

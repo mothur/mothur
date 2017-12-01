@@ -335,7 +335,7 @@ bool ScriptEngine::getInput(){
 			if (input == "") { input = "quit()"; }
 			
             mout->appendLogBuffer("\nmothur > " + input + "\n");
-			
+        
             if (mout->getControl_pressed()) { input = "quit()"; }
 				
 			//allow user to omit the () on the quit command

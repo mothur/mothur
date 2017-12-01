@@ -20,12 +20,12 @@ struct logger {
     
     template< class T >
     logger& operator <<( const T& o ) {
-        lock_guard<std::mutex> guard(token);
+        //lock_guard<std::mutex> guard(token);
         cout << o; return *this;
     }
     
     logger& operator<<(ostream& (*m)(ostream&) ) {
-        lock_guard<std::mutex> guard(token);
+        //lock_guard<std::mutex> guard(token);
         cout << m; return *this;
     }
 private:
@@ -79,7 +79,8 @@ class MothurOut {
             devNull = false;
             numErrors = 0;
             numWarnings = 0;
-            logFileName = ""; buffer = "";
+            logFileName = "";
+            buffer = "";
             seed = std::chrono::system_clock::now().time_since_epoch().count();
 		}
 		~MothurOut();
@@ -87,12 +88,8 @@ class MothurOut {
 		ofstream out;
         long long seed;
         int numErrors, numWarnings;
-        string logFileName;
-        bool changedSeqNames, devNull;
-        bool executing, debug, quietMode;
-        bool control_pressed;
-        string buffer;
-		
+        string logFileName, buffer;
+        bool changedSeqNames, devNull, control_pressed, executing, debug, quietMode;
 };
 /***********************************************/
 

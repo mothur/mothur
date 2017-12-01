@@ -210,7 +210,7 @@ int CurrentFile::setProcessors(string p)  {
             if (concurentThreadsSupported < 1) { concurentThreadsSupported = 1; } //in case thread errors
             processors = toString(concurentThreadsSupported);
             m->mothurOut("[ERROR]: " + p + " is not an integer. Setting processors to " + toString(processors) + "\n");
-        }else { processors = p;  }
+        }else { processors = p;  m->mothurOut("\nUsing " + toString(processors) + " processors.\n"); }
         int numProcessors = 1;
         util.mothurConvert(p, numProcessors);
         return numProcessors;
@@ -224,14 +224,11 @@ int CurrentFile::setProcessors(string p)  {
 void CurrentFile::setDefaultPath(string pathname)  {
     try {
         
-        if (pathname != "") {
-            //add / to name if needed
+        if (pathname != "") { //add / to name if needed
             string lastChar = pathname.substr(pathname.length()-1);
             if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
         }
-        
         defaultPath = util.getFullPathName(pathname);
-        
     }
     catch(exception& e) {
         m->errorOut(e, "CurrentFile", "setDefaultPath");

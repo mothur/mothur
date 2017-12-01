@@ -22,8 +22,8 @@ CommandOptionParser::CommandOptionParser(string input){
 		int closeParen = input.find_last_of(')');
 		optionString = "";
 		commandString = "";
-
-		if(openParen != -1 && closeParen != -1){	
+        cout << input << endl;
+        if(openParen != string::npos && closeParen != string::npos){
             //gobble extra spaces
             int spot = 0;
             for (int i = 0; i < input.length(); i++) {  if (!(isspace(input[i]))) { spot = i; break; } }
@@ -32,6 +32,7 @@ CommandOptionParser::CommandOptionParser(string input){
 			optionString = input.substr((openParen+1), (closeParen-openParen-1)); //optionString contains everything between "(" and ")".
             if (!(commandString == "set.logfile")) {
                 if (m->getLogFileName() == "") {
+                    cout << "setting the logfile name " << endl;
                     time_t ltime = time(NULL); /* calendar time */
                     string outputPath = current->getOutputDir();
                     if (outputPath == "") { outputPath = current->getDefaultPath();  }

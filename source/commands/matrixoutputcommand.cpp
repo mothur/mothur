@@ -526,18 +526,15 @@ int process(distSharedData* params){
             driver(thisItersRabunds, calcDists, matrixCalculators, params->m);
             
             for (int i = 0; i < thisItersRabunds.size(); i++) { delete thisItersRabunds[i]; }
-            cout << thisIter << endl;
             if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ){
-                if((thisIter) % 100 == 0){	params->m->mothurOutJustToScreen(toString(thisIter)+"\n"); 		}
+                if((thisIter+1) % 100 == 0){	params->m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
                 params->calcDistsTotals.push_back(calcDists);
                 for (int i = 0; i < calcDists.size(); i++) {
                     for (int j = 0; j < calcDists[i].size(); j++) {
                         if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisItersGroupNames[calcDists[i][j].seq1] + " - " + thisItersGroupNames[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
                     } 
                 }
-                 cout << " in other \n";
             }else { //print results for whole dataset
-                cout << " in main \n";
                 for (int i = 0; i < calcDists.size(); i++) {
                     if (params->m->getControl_pressed()) { break; }
                     
@@ -560,7 +557,7 @@ int process(distSharedData* params){
             for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             delete thisItersLookup;
 		}
-		
+		if((params->numIters) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->numIters)+"\n"); 		}
         
 		return 0;
 	}
@@ -583,7 +580,6 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         for (int i = 0; i < processors; i++) {
             if(i == (processors - 1)){	numItersPerProcessor = (iters+1) - i * numItersPerProcessor; 	}
             lines.push_back(numItersPerProcessor);
-            cout << numItersPerProcessor << endl;
         }
         
         //create array of worker threads
