@@ -77,9 +77,6 @@ bool InteractEngine::getInput(){
 		
         while(quitCommandCalled != 1){
             
-            
-            if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
-            
             input = getCommand();
             
             if (mout->getControl_pressed()) { input = "quit()"; }
@@ -220,11 +217,8 @@ bool BatchEngine::getInput(){
 			count++;
 			
             if (input[0] != '#') {
-				if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
-				
 				mout->appendLogBuffer("\nmothur > " + input + "\n");
 				
-							
 				if (mout->getControl_pressed()) { input = "quit()"; }
 				
 				//allow user to omit the () on the quit command
@@ -339,11 +333,8 @@ bool ScriptEngine::getInput(){
 			input = getNextCommand(listOfCommands);	
 			
 			if (input == "") { input = "quit()"; }
-                    
-            if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 			
-				mout->appendLogBuffer("\nmothur > " + input + "\n");
-			
+            mout->appendLogBuffer("\nmothur > " + input + "\n");
 			
             if (mout->getControl_pressed()) { input = "quit()"; }
 				

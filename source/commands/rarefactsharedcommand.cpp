@@ -218,7 +218,6 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			temp = validParameter.valid(parameters, "jumble");			if (temp == "not found") { temp = "T"; }
 			if (util.isTrue(temp)) { jumble = true; }
 			else { jumble = false; }
-			m->setJumble(jumble);
             
             temp = validParameter.valid(parameters, "groupmode");		if (temp == "not found") { temp = "T"; }
 			groupMode = util.isTrue(temp);
@@ -374,7 +373,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 			if(allLines == 1 || labels.count(subset->getLabel()) == 1){
 				m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
                 vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
-				rCurve = new Rarefact(rabunds, rDisplays);
+				rCurve = new Rarefact(rabunds, rDisplays, jumble);
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
                 for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
@@ -400,7 +399,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
                 
                 m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
                 vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
-                rCurve = new Rarefact(rabunds, rDisplays);
+                rCurve = new Rarefact(rabunds, rDisplays, jumble);
                 rCurve->getSharedCurve(freq, nIters);
                 delete rCurve;
                 for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
@@ -469,7 +468,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             
 			m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
             vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
-			rCurve = new Rarefact(rabunds, rDisplays);
+			rCurve = new Rarefact(rabunds, rDisplays, jumble);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
             for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
@@ -525,7 +524,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
             }
             
             vector<SharedRAbundVector*> rabunds = thisItersLookup->getSharedRAbundVectors();
-            rCurve = new Rarefact(rabunds, rDisplays);
+            rCurve = new Rarefact(rabunds, rDisplays, jumble);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
             for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}

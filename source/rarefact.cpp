@@ -237,7 +237,7 @@ try {
 		}
 		
 		//if jumble is false all iters will be the same
-		if (m->getJumble() == false)  {  nIters = 1;  }
+		if (!jumble)  {  nIters = 1;  }
 		
 		//convert freq percentage to number
 		int increment = 1;
@@ -251,7 +251,7 @@ try {
 			}
 			
             //randomize the groups
-			if (m->getJumble() )  { util.mothurRandomShuffle(lookup); }
+			if (jumble)  { util.mothurRandomShuffle(lookup); }
 			
 			//make merge the size of lookup[0]
 			SharedRAbundVector* merge = new SharedRAbundVector(lookup[0]->getNumBins());

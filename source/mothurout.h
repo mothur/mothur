@@ -64,13 +64,8 @@ class MothurOut {
         void setControl_pressed(bool t)                 { control_pressed = t;              }
         bool getChangedSeqNames()                       { return changedSeqNames;           }
         void setChangedSeqNames(bool t)                 { changedSeqNames = t;              }
-        bool getModifyNames()                           { return modifyNames;               }
-        void setModifyNames(bool t)                     { modifyNames = t;                  }
         bool getExecuting()                             { return executing;                 }
         void setExecuting(bool t)                       { executing = t;                    }
-        bool getJumble()                                { return jumble;                    }
-        void setJumble(bool t)                          { jumble = t;                       }
-        
     
 	private:
 		static MothurOut* _uniqueInstance;
@@ -80,8 +75,7 @@ class MothurOut {
 			control_pressed = false;
             debug = false;
             quietMode = false;
-            changedSeqNames = false;
-            modifyNames = true;
+            changedSeqNames = true;
             devNull = false;
             numErrors = 0;
             numWarnings = 0;
@@ -94,11 +88,10 @@ class MothurOut {
         long long seed;
         int numErrors, numWarnings;
         string logFileName;
-        bool changedSeqNames, modifyNames, devNull;
-        bool executing, runParse, jumble, debug, quietMode;
+        bool changedSeqNames, devNull;
+        bool executing, debug, quietMode;
         bool control_pressed;
         string buffer;
-        std::mutex token;
 		
 };
 /***********************************************/

@@ -108,7 +108,7 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             temp = validParameter.valid(parameters, "modifynames");
 			if (temp == "not found") {  modifyNames = true;  nomod=true; }
             else {  modifyNames = util.isTrue(temp); }
-            m->setModifyNames(modifyNames);
+            m->setChangedSeqNames(modifyNames);
             
             bool seed = false;
             temp = validParameter.valid(parameters, "seed");

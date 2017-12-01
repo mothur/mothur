@@ -11,9 +11,9 @@ class Rarefact {
 	
 public:
 	Rarefact(OrderVector& o, vector<Display*> disp, int p, set<int> en) :
-			numSeqs(o.getNumSeqs()), order(o), displays(disp), label(o.getLabel()), processors(p), ends(en)  { m = MothurOut::getInstance(); }
-	Rarefact(vector<SharedRAbundVector*> shared, vector<Display*> disp) :
-					 lookup(shared), displays(disp) {  m = MothurOut::getInstance(); }
+    numSeqs(o.getNumSeqs()), order(o), displays(disp), label(o.getLabel()), processors(p), ends(en)  { m = MothurOut::getInstance(); jumble = false; }
+	Rarefact(vector<SharedRAbundVector*> shared, vector<Display*> disp, bool j) :
+					 lookup(shared), displays(disp), jumble(j) {  m = MothurOut::getInstance(); }
 
 	~Rarefact(){};
 	int getCurve(float, int);
@@ -29,6 +29,7 @@ private:
 	void mergeVectors(SharedRAbundVector*, SharedRAbundVector*);
 	vector<SharedRAbundVector*> lookup;
 	MothurOut* m;
+    bool jumble;
     Utils util;
 	
 	int createProcesses(vector<int>&, RarefactionCurveData*, int, int);
