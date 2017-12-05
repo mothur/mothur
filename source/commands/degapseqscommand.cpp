@@ -250,6 +250,7 @@ void driverDegap(degapData* params){
                 outFASTA << ">" << currSeq.getName() << endl;
                 outFASTA << currSeq.getUnaligned() << endl;
                 params->count++;
+                params->m->mothurOutJustToScreen(toString(params->count) + "\n"); 
             }
             
 #if defined NON_WINDOWS

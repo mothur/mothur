@@ -149,6 +149,7 @@ public:
     int max(vector<int> v) {  int max = 0; vector<int>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     float max(vector<float> v) {  float max = 0; vector<float>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     double max(vector<double> v) {  double max = 0; vector<double>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
+    long long max(vector<long long> v) {  long long max = 0; vector<long long>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     
     //type conversion
     bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
@@ -198,6 +199,7 @@ public:
     int getOTUNames(vector<string>&, int, string);
     string getTag(string); //filename
     string findEdianness();
+    string removeNs(string seq);
 
     
     

@@ -284,7 +284,7 @@ string Utils::getFullPathName(string fileName){
 #endif
                 newFileName = homeDir + fileName.substr(fileName.find("~")+1);
                 return newFileName;
-        }else { //find path
+            }else { //find path
                 string pattern = ".";  pattern += PATH_SEPARATOR;
                 if (path.rfind(pattern) == string::npos) { return fileName; } //already complete name
                 else { newFileName = fileName.substr(fileName.rfind(pattern)+2); } //save the complete part of the name
@@ -308,7 +308,8 @@ string Utils::getFullPathName(string fileName){
                 dirs.push_back(simpleCWD);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
                 
                 index = dirs.size()-1;
-                while((pos = path.rfind(PATH_SEPARATOR)) != string::npos) { //while you don't have a complete path
+                string searchString = "."; searchString += PATH_SEPARATOR;
+                while((pos = path.rfind(searchString)) != string::npos) { //while you don't have a complete path
                     if (pos == 0) { break;  //you are at the end
                     }else if (path[(pos-1)] == '.') { //you want your parent directory ../
                         path = path.substr(0, pos-1);
@@ -317,7 +318,7 @@ string Utils::getFullPathName(string fileName){
                     }else if (path[(pos-1)] == '/') { //you want the current working dir ./
                         path = path.substr(0, pos);
                     }else if (pos == 1) { break;  //you are at the end
-                    }else { m->mothurOut("[ERROR}: Can not resolve path for " +  fileName + "\n"); return fileName; }
+                    }else { m->mothurOut("[ERROR}: Can not resolve path for " +  fileName + "\n"); m->setControl_pressed(true); return fileName;  }
                 }
             }
             
@@ -1159,6 +1160,18 @@ string Utils::getStringFromVector(vector<double>& list, string delim){
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string Utils::removeNs(string seq){
+    try {
+        string newSeq = "";
+        for (int i = 0; i < seq.length(); i++) { if (seq[i] != 'N') {  newSeq += seq[i]; } }
+        return newSeq;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "removeNs");
         exit(1);
     }
 }

@@ -247,7 +247,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 				else { current->setSharedHeaderMode("otu"); }
 			
                 string filename = it->second;
-                if (util.checkLocations(filename, current->getLocations())) { container[parameter] = filename; }
+                if (util.checkLocations(filename, locations)) { container[parameter] = filename; }
                 else { m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine(); return "not open";  }
 				
 				//check phylip file to make sure its really phylip and not column

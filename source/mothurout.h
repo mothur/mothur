@@ -20,12 +20,12 @@ struct logger {
     
     template< class T >
     logger& operator <<( const T& o ) {
-        lock_guard<std::mutex> guard(token);
+        //lock_guard<std::mutex> guard(token);
         cout << o; return *this;
     }
     
     logger& operator<<(ostream& (*m)(ostream&) ) {
-        lock_guard<std::mutex> guard(token);
+        //lock_guard<std::mutex> guard(token);
         cout << m; return *this;
     }
 private:

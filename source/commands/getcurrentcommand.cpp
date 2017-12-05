@@ -215,11 +215,8 @@ int GetCurrentCommand::execute(){
         }
         
         
-        string temp = "./";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-            temp = ".\\";
-#endif
+        string temp = "."; temp += PATH_SEPARATOR;
+
         temp = util.getFullPathName(temp);
         m->mothurOutEndLine(); m->mothurOut("Current working directory: " + temp); m->mothurOutEndLine();
         
