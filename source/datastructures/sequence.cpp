@@ -345,7 +345,7 @@ string Sequence::getSequenceName(ifstream& fastaFile) {
             
             util.checkName(name);
             
-        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  } }
         
 		return name;
 	}
@@ -368,7 +368,7 @@ string Sequence::getSequenceName(boost::iostreams::filtering_istream& fastaFile)
             
             util.checkName(name);
             
-        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }  }
         
         return name;
     }
@@ -391,7 +391,7 @@ string Sequence::getSequenceName(istringstream& fastaFile) {
             
             util.checkName(name);
             
-        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }  }
         
 		return name;
 	}

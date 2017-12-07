@@ -191,53 +191,10 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						
-						if (inputDir != "") {
-							string path = util.hasPath(fastaFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-						}
-						
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = util.openInputFile(fastaFileNames[i], in, "noerror");
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (current->getDefaultPath() != "") { //default path is set
-								string tryPath = current->getDefaultPath() + util.getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						if (!ableToOpen) {
-							if (current->getOutputDir() != "") { //default path is set
-								string tryPath = current->getOutputDir() + util.getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}else {
-							current->setFastaFile(fastaFileNames[i]);
-						}
-					}
+                    if (!ignore) {
+                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
+                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 				
 				//make sure there is at least one valid file left
@@ -266,54 +223,11 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						
-						if (inputDir != "") {
-							string path = util.hasPath(nameFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
-						}
-						
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = util.openInputFile(nameFileNames[i], in, "noerror");
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (current->getDefaultPath() != "") { //default path is set
-								string tryPath = current->getDefaultPath() + util.getSimpleName(nameFileNames[i]);
-								m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								nameFileNames[i] = tryPath;
-							}
-						}
-						
-						if (!ableToOpen) {
-							if (current->getOutputDir() != "") { //default path is set
-								string tryPath = current->getOutputDir() + util.getSimpleName(nameFileNames[i]);
-								m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								nameFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							nameFileNames.erase(nameFileNames.begin()+i);
-							i--;
-						}else {
-							current->setNameFile(nameFileNames[i]);
-						}
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(nameFileNames[i], current->getLocations())) { current->setNameFile(nameFileNames[i]); }
+                        else { nameFileNames.erase(nameFileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 			}
             
             if (nameFileNames.size() != 0) { hasName = true; }
@@ -341,53 +255,10 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						
-						if (inputDir != "") {
-							string path = util.hasPath(countfileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	countfileNames[i] = inputDir + countfileNames[i];		}
-						}
-						
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = util.openInputFile(countfileNames[i], in, "noerror");
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (current->getDefaultPath() != "") { //default path is set
-								string tryPath = current->getDefaultPath() + util.getSimpleName(countfileNames[i]);
-								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								countfileNames[i] = tryPath;
-							}
-						}
-						
-						if (!ableToOpen) {
-							if (current->getOutputDir() != "") { //default path is set
-								string tryPath = current->getOutputDir() + util.getSimpleName(countfileNames[i]);
-								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								countfileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + countfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							countfileNames.erase(countfileNames.begin()+i);
-							i--;
-						}else {
-							current->setCountFile(countfileNames[i]);
-						}
-					}
+                    if (!ignore) {
+                        if (util.checkLocations(countfileNames[i], current->getLocations())) { current->setCountFile(countfileNames[i]); }
+                        else { countfileNames.erase(countfileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 			}
             
@@ -421,54 +292,11 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						
-						if (inputDir != "") {
-							string path = util.hasPath(groupFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	groupFileNames[i] = inputDir + groupFileNames[i];		}
-						}
-						
-						bool ableToOpen;
-						ifstream in;
-						
-						ableToOpen = util.openInputFile(groupFileNames[i], in, "noerror");
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (current->getDefaultPath() != "") { //default path is set
-								string tryPath = current->getDefaultPath() + util.getSimpleName(groupFileNames[i]);
-								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								groupFileNames[i] = tryPath;
-							}
-						}
-						
-						if (!ableToOpen) {
-							if (current->getOutputDir() != "") { //default path is set
-								string tryPath = current->getOutputDir() + util.getSimpleName(groupFileNames[i]);
-								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								groupFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							groupFileNames.erase(groupFileNames.begin()+i);
-							i--;
-						}else {
-							current->setGroupFile(groupFileNames[i]);
-						}
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(groupFileNames[i], current->getLocations())) { current->setGroupFile(groupFileNames[i]); }
+                        else { groupFileNames.erase(groupFileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 				
 				//make sure there is at least one valid file left
 				if (groupFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid group files."); m->mothurOutEndLine(); abort = true; }
@@ -555,42 +383,17 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			
 			//look for uchime exe
 			path = current->getProgramPath();
-			
-			string uchimeCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			uchimeCommand = path + "uchime";	//	format the database, -o option gives us the ability
-            if (m->getDebug()) { 
-                m->mothurOut("[DEBUG]: Uchime location using \"which uchime\" = "); 
-                Command* newCommand = new SystemCommand("which uchime"); m->mothurOutEndLine();
-                newCommand->execute();
-                delete newCommand;
-                m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = "); 
-                newCommand = new SystemCommand("which mothur"); m->mothurOutEndLine();
-                newCommand->execute();
-                delete newCommand;
-            }
-#else
-			uchimeCommand = path + "\\uchime.exe";
-#endif
-        
-			//test to make sure uchime exists
+			string uchimeCommand = path + "uchime" + EXECUTABLE_EXT;
 			ifstream in;
 			uchimeCommand = util.getFullPathName(uchimeCommand);
 			bool ableToOpen = util.openInputFile(uchimeCommand, in, "no error"); in.close();
 			if(!ableToOpen) {	
                 m->mothurOut(uchimeCommand + " file does not exist. Checking path... \n");
                 //check to see if uchime is in the path??
-                
-                string uLocation = ""; 
-                
                 ifstream in2;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-                uLocation = util.findProgramPath("uchime");
+                string uLocation = "uchime"; uLocation += EXECUTABLE_EXT;
+                uLocation = util.findProgramPath(uLocation);
                 ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
-#else
-                uLocation = util.findProgramPath("uchime.exe");
-                ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
-#endif
 
                 if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the uchime executable."); m->mothurOutEndLine(); abort = true; } 
                 else {  m->mothurOut("Found uchime in your path, using " + uLocation + "\n");uchimeLocation = uLocation; }
@@ -604,6 +407,386 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+struct uchimeData {
+    string fastafile;
+    string namefile;
+    string groupfile;
+    string outputFName;
+    string accnos, alns, filename, templatefile, uchimeLocation, countlist;
+    string driverAccnos, driverAlns, driverOutputFName;
+    
+    int count, numChimeras;
+    map<string, string> uniqueNamesMap;
+    vector<string> groups;
+    uchimeVariables* vars;
+    MothurOut* m;
+    Utils util;
+    
+    uchimeData(){}
+    uchimeData(string o, string uloc, string t, string file, string f, string n, string g, string ac,  string al, string nc, vector<string> gr, uchimeVariables* vs) {
+        fastafile = f;
+        namefile = n;
+        groupfile = g;
+        filename = file;
+        outputFName = o;
+        templatefile = t;
+        accnos = ac;
+        alns = al;
+        m = MothurOut::getInstance();
+        groups = gr;
+        count = 0;
+        numChimeras = 0;
+        uchimeLocation = uloc;
+        countlist = nc;
+        vars = vs;
+        driverAccnos = ac;
+        driverAlns = al;
+        driverOutputFName = o;
+    }
+    void setDriverNames(string o, string al, string ac) {
+        driverAccnos = ac;
+        driverAlns = al;
+        driverOutputFName = o;
+    }
+    
+};
+//**********************************************************************************************************************
+int driver(uchimeData* params){
+    try {
+        
+        params->driverOutputFName = params->util.getFullPathName(params->driverOutputFName);
+        params->filename = params->util.getFullPathName(params->filename);
+        params->driverAlns = params->util.getFullPathName(params->driverAlns);
+        
+        //to allow for spaces in the path
+        params->driverOutputFName = "\"" + params->driverOutputFName + "\"";
+        params->filename = "\"" + params->filename + "\"";
+        params->driverAlns = "\"" + params->driverAlns + "\"";
+        
+        if (params->filename.length() > 257) {
+            params->m->mothurOut("[ERROR]: " + params->filename + " filename is " + toString(params->filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); params->m->setControl_pressed(true); return 0;
+        }else if ((params->driverAlns.length() > 257) && (params->vars->chimealns)) {
+            params->m->mothurOut("[ERROR]: " + params->driverAlns + " filename is " + toString(params->driverAlns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); params->m->setControl_pressed(true); return 0;
+        }else if (params->driverOutputFName.length() > 257) {
+            params->m->mothurOut("[ERROR]: " + params->driverOutputFName + " filename is " + toString(params->driverOutputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); params->m->setControl_pressed(true); return 0;
+        }
+        
+        vector<char*> cPara;
+        
+        string uchimeCommand = params->uchimeLocation;
+        uchimeCommand = "\"" + uchimeCommand + "\" ";
+        
+        char* tempUchime;
+        tempUchime= new char[uchimeCommand.length()+1];
+        *tempUchime = '\0';
+        strncat(tempUchime, uchimeCommand.c_str(), uchimeCommand.length());
+        cPara.push_back(tempUchime);
+        
+        //are you using a reference file
+        if (params->templatefile != "self") {
+            string outputFileName = params->filename.substr(1, params->filename.length()-2) + ".uchime_formatted";
+            ifstream in;
+            params->util.openInputFile(params->filename.substr(1, params->filename.length()-2), in);
+            
+            ofstream out;
+            params->util.openOutputFile(outputFileName, out);
+            
+            while (!in.eof()) {
+                if (params->m->getControl_pressed()) { break;  }
+                
+                Sequence seq(in); params->util.gobble(in);
+                
+                if (seq.getName() != "") { seq.printSequence(out); }
+            }
+            in.close(); out.close();
+            
+            params->filename = outputFileName;
+            params->filename = "\"" + params->filename + "\"";
+            //add reference file
+            char* tempRef = new char[5];
+            //strcpy(tempRef, "--db");
+            *tempRef = '\0'; strncat(tempRef, "--db", 4);
+            cPara.push_back(tempRef);
+            char* tempR = new char[params->templatefile.length()+1];
+            //strcpy(tempR, templatefile.c_str());
+            *tempR = '\0'; strncat(tempR, params->templatefile.c_str(), params->templatefile.length());
+            cPara.push_back(tempR);
+        }
+        
+        char* tempIn = new char[8];
+        *tempIn = '\0'; strncat(tempIn, "--input", 7);
+        //strcpy(tempIn, "--input");
+        cPara.push_back(tempIn);
+        char* temp = new char[params->filename.length()+1];
+        *temp = '\0'; strncat(temp, params->filename.c_str(), params->filename.length());
+        //strcpy(temp, filename.c_str());
+        cPara.push_back(temp);
+        
+        char* tempO = new char[12];
+        *tempO = '\0'; strncat(tempO, "--uchimeout", 11);
+        //strcpy(tempO, "--uchimeout");
+        cPara.push_back(tempO);
+        char* tempout = new char[params->driverOutputFName.length()+1];
+        //strcpy(tempout, outputFName.c_str());
+        *tempout = '\0'; strncat(tempout, params->driverOutputFName.c_str(), params->driverOutputFName.length());
+        cPara.push_back(tempout);
+        
+        if (params->vars->chimealns) {
+            char* tempA = new char[13];
+            *tempA = '\0'; strncat(tempA, "--uchimealns", 12);
+            //strcpy(tempA, "--uchimealns");
+            cPara.push_back(tempA);
+            char* tempa = new char[params->driverAlns.length()+1];
+            //strcpy(tempa, alns.c_str());
+            *tempa = '\0'; strncat(tempa, params->driverAlns.c_str(), params->driverAlns.length());
+            cPara.push_back(tempa);
+        }
+        
+        if (params->vars->strand != "") {
+            char* tempA = new char[9];
+            *tempA = '\0'; strncat(tempA, "--strand", 8);
+            cPara.push_back(tempA);
+            char* tempa = new char[params->vars->strand.length()+1];
+            *tempa = '\0'; strncat(tempa, params->vars->strand.c_str(), params->vars->strand.length());
+            cPara.push_back(tempa);
+        }
+        
+        if (params->vars->useAbskew) {
+            char* tempskew = new char[9];
+            *tempskew = '\0'; strncat(tempskew, "--abskew", 8);
+            //strcpy(tempskew, "--abskew");
+            cPara.push_back(tempskew);
+            char* tempSkew = new char[params->vars->abskew.length()+1];
+            //strcpy(tempSkew, abskew.c_str());
+            *tempSkew = '\0'; strncat(tempSkew, params->vars->abskew.c_str(), params->vars->abskew.length());
+            cPara.push_back(tempSkew);
+        }
+        
+        if (params->vars->useMinH) {
+            char* tempminh = new char[7];
+            *tempminh = '\0'; strncat(tempminh, "--minh", 6);
+            //strcpy(tempminh, "--minh");
+            cPara.push_back(tempminh);
+            char* tempMinH = new char[params->vars->minh.length()+1];
+            *tempMinH = '\0'; strncat(tempMinH, params->vars->minh.c_str(), params->vars->minh.length());
+            //strcpy(tempMinH, minh.c_str());
+            cPara.push_back(tempMinH);
+        }
+        
+        if (params->vars->useMindiv) {
+            char* tempmindiv = new char[9];
+            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", 8);
+            //strcpy(tempmindiv, "--mindiv");
+            cPara.push_back(tempmindiv);
+            char* tempMindiv = new char[params->vars->mindiv.length()+1];
+            *tempMindiv = '\0'; strncat(tempMindiv, params->vars->mindiv.c_str(), params->vars->mindiv.length());
+            //strcpy(tempMindiv, mindiv.c_str());
+            cPara.push_back(tempMindiv);
+        }
+        
+        if (params->vars->useXn) {
+            char* tempxn = new char[5];
+            //strcpy(tempxn, "--xn");
+            *tempxn = '\0'; strncat(tempxn, "--xn", 4);
+            cPara.push_back(tempxn);
+            char* tempXn = new char[params->vars->xn.length()+1];
+            //strcpy(tempXn, xn.c_str());
+            *tempXn = '\0'; strncat(tempXn, params->vars->xn.c_str(), params->vars->xn.length());
+            cPara.push_back(tempXn);
+        }
+        
+        if (params->vars->useDn) {
+            char* tempdn = new char[5];
+            //strcpy(tempdn, "--dn");
+            *tempdn = '\0'; strncat(tempdn, "--dn", 4);
+            cPara.push_back(tempdn);
+            char* tempDn = new char[params->vars->dn.length()+1];
+            *tempDn = '\0'; strncat(tempDn, params->vars->dn.c_str(), params->vars->dn.length());
+            //strcpy(tempDn, dn.c_str());
+            cPara.push_back(tempDn);
+        }
+        
+        if (params->vars->useXa) {
+            char* tempxa = new char[5];
+            //strcpy(tempxa, "--xa");
+            *tempxa = '\0'; strncat(tempxa, "--xa", 4);
+            cPara.push_back(tempxa);
+            char* tempXa = new char[params->vars->xa.length()+1];
+            *tempXa = '\0'; strncat(tempXa, params->vars->xa.c_str(), params->vars->xa.length());
+            //strcpy(tempXa, xa.c_str());
+            cPara.push_back(tempXa);
+        }
+        
+        if (params->vars->useChunks) {
+            char* tempchunks = new char[9];
+            //strcpy(tempchunks, "--chunks");
+            *tempchunks = '\0'; strncat(tempchunks, "--chunks", 8);
+            cPara.push_back(tempchunks);
+            char* tempChunks = new char[params->vars->chunks.length()+1];
+            *tempChunks = '\0'; strncat(tempChunks, params->vars->chunks.c_str(), params->vars->chunks.length());
+            //strcpy(tempChunks, chunks.c_str());
+            cPara.push_back(tempChunks);
+        }
+        
+        if (params->vars->useMinchunk) {
+            char* tempminchunk = new char[11];
+            //strcpy(tempminchunk, "--minchunk");
+            *tempminchunk = '\0'; strncat(tempminchunk, "--minchunk", 10);
+            cPara.push_back(tempminchunk);
+            char* tempMinchunk = new char[params->vars->minchunk.length()+1];
+            *tempMinchunk = '\0'; strncat(tempMinchunk, params->vars->minchunk.c_str(), params->vars->minchunk.length());
+            //strcpy(tempMinchunk, minchunk.c_str());
+            cPara.push_back(tempMinchunk);
+        }
+        
+        if (params->vars->useIdsmoothwindow) {
+            char* tempidsmoothwindow = new char[17];
+            *tempidsmoothwindow = '\0'; strncat(tempidsmoothwindow, "--idsmoothwindow", 16);
+            //strcpy(tempidsmoothwindow, "--idsmoothwindow");
+            cPara.push_back(tempidsmoothwindow);
+            char* tempIdsmoothwindow = new char[params->vars->idsmoothwindow.length()+1];
+            *tempIdsmoothwindow = '\0'; strncat(tempIdsmoothwindow, params->vars->idsmoothwindow.c_str(), params->vars->idsmoothwindow.length());
+            //strcpy(tempIdsmoothwindow, idsmoothwindow.c_str());
+            cPara.push_back(tempIdsmoothwindow);
+        }
+        
+        if (params->vars->useMaxp) {
+            char* tempmaxp = new char[7];
+            //strcpy(tempmaxp, "--maxp");
+            *tempmaxp = '\0'; strncat(tempmaxp, "--maxp", 6);
+            cPara.push_back(tempmaxp);
+            char* tempMaxp = new char[params->vars->maxp.length()+1];
+            *tempMaxp = '\0'; strncat(tempMaxp, params->vars->maxp.c_str(), params->vars->maxp.length());
+            //strcpy(tempMaxp, maxp.c_str());
+            cPara.push_back(tempMaxp);
+        }
+        
+        if (!params->vars->skipgaps) {
+            char* tempskipgaps = new char[13];
+            //strcpy(tempskipgaps, "--[no]skipgaps");
+            *tempskipgaps = '\0'; strncat(tempskipgaps, "--noskipgaps", 12);
+            cPara.push_back(tempskipgaps);
+        }
+        
+        if (!params->vars->skipgaps2) {
+            char* tempskipgaps2 = new char[14];
+            //strcpy(tempskipgaps2, "--[no]skipgaps2");
+            *tempskipgaps2 = '\0'; strncat(tempskipgaps2, "--noskipgaps2", 13);
+            cPara.push_back(tempskipgaps2);
+        }
+        
+        if (params->vars->useMinlen) {
+            char* tempminlen = new char[9];
+            *tempminlen = '\0'; strncat(tempminlen, "--minlen", 8);
+            //strcpy(tempminlen, "--minlen");
+            cPara.push_back(tempminlen);
+            char* tempMinlen = new char[params->vars->minlen.length()+1];
+            //strcpy(tempMinlen, minlen.c_str());
+            *tempMinlen = '\0'; strncat(tempMinlen, params->vars->minlen.c_str(), params->vars->minlen.length());
+            cPara.push_back(tempMinlen);
+        }
+        
+        if (params->vars->useMaxlen) {
+            char* tempmaxlen = new char[9];
+            //strcpy(tempmaxlen, "--maxlen");
+            *tempmaxlen = '\0'; strncat(tempmaxlen, "--maxlen", 8);
+            cPara.push_back(tempmaxlen);
+            char* tempMaxlen = new char[params->vars->maxlen.length()+1];
+            *tempMaxlen = '\0'; strncat(tempMaxlen, params->vars->maxlen.c_str(), params->vars->maxlen.length());
+            //strcpy(tempMaxlen, maxlen.c_str());
+            cPara.push_back(tempMaxlen);
+        }
+        
+        if (params->vars->ucl) {
+            char* tempucl = new char[5];
+            strcpy(tempucl, "--ucl");
+            cPara.push_back(tempucl);
+        }
+        
+        if (params->vars->useQueryfract) {
+            char* tempqueryfract = new char[13];
+            *tempqueryfract = '\0'; strncat(tempqueryfract, "--queryfract", 12);
+            //strcpy(tempqueryfract, "--queryfract");
+            cPara.push_back(tempqueryfract);
+            char* tempQueryfract = new char[params->vars->queryfract.length()+1];
+            *tempQueryfract = '\0'; strncat(tempQueryfract, params->vars->queryfract.c_str(), params->vars->queryfract.length());
+            //strcpy(tempQueryfract, queryfract.c_str());
+            cPara.push_back(tempQueryfract);
+        }
+        
+        
+        char** uchimeParameters;
+        uchimeParameters = new char*[cPara.size()];
+        string commandString = "";
+        for (int i = 0; i < cPara.size(); i++) {  uchimeParameters[i] = cPara[i];  commandString += toString(cPara[i]) + " "; }
+        
+        //int numArgs = cPara.size();
+        //uchime_main(numArgs, uchimeParameters);
+        
+#if defined NON_WINDOWS
+#else
+        commandString = "\"" + commandString + "\"";
+#endif
+        if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
+        system(commandString.c_str());
+        
+        //free memory
+        for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
+        delete[] uchimeParameters;
+        
+        //remove "" from filenames
+        params->driverOutputFName = params->driverOutputFName.substr(1, params->driverOutputFName.length()-2);
+        params->filename = params->filename.substr(1, params->filename.length()-2);
+        params->driverAlns = params->driverAlns.substr(1, params->driverAlns.length()-2);
+        
+        if (params->m->getControl_pressed()) { return 0; }
+        
+        //create accnos file from uchime results
+        ifstream in;
+        params->util.openInputFile(params->driverOutputFName, in);
+        
+        ofstream out;
+        params->util.openOutputFile(params->driverAccnos, out);
+        
+        int num = 0;
+        params->numChimeras = 0;
+        while(!in.eof()) {
+            
+            if (params->m->getControl_pressed()) { break; }
+            
+            string name = "";
+            string chimeraFlag = "";
+            //in >> chimeraFlag >> name;
+            
+            string line = params->util.getline(in);
+            vector<string> pieces = params->util.splitWhiteSpace(line);
+            if (pieces.size() > 2) {
+                name = pieces[1];
+                //fix name if needed
+                if (params->templatefile == "self") {
+                    name = name.substr(0, name.length()-1); //rip off last /
+                    name = name.substr(0, name.find_last_of('/'));
+                }
+                
+                chimeraFlag = pieces[pieces.size()-1];
+            }
+            //for (int i = 0; i < 15; i++) {  in >> chimeraFlag; }
+            params->util.gobble(in);
+            
+            if (chimeraFlag == "Y") {  out << name << endl; params->numChimeras++; }
+            num++;
+        }
+        in.close();
+        out.close();
+        
+        return num;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "ChimeraUchimeCommand", "driver");
+        exit(1);
+    }
+}
 //***************************************************************************************************************
 
 int ChimeraUchimeCommand::execute(){
@@ -612,6 +795,10 @@ int ChimeraUchimeCommand::execute(){
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		m->mothurOut("\nuchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code is donated to the public domain.\n\n");
+        
+        vars = new uchimeVariables();
+        vars->setBooleans(dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
+        vars->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand);
 		
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 			
@@ -633,10 +820,11 @@ int ChimeraUchimeCommand::execute(){
 			//you provided a groupfile
 			string groupFile = "";
             bool hasGroup = false;
+            vector<string> groups;
 			if (groupFileNames.size() != 0) { groupFile = groupFileNames[s]; hasGroup = true; }
             else if (hasCount) {
                 CountTable ct;
-                if (ct.testGroups(nameFileNames[s])) { hasGroup = true; }
+                if (ct.testGroups(nameFileNames[s], groups)) { hasGroup = true; }
                 variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(nameFileNames[s]));
                 newCountFile = getOutputFileName("count", variables);
             }
@@ -675,67 +863,33 @@ int ChimeraUchimeCommand::execute(){
 				fastaFileNames[s] = newFasta;
 			}
 			
-			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}				
+            if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars; return 0;	}
 			
 			if (hasGroup) {
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
 					nameFile = nameFileNames[s];
 				}else { nameFile = getNamesFile(fastaFileNames[s]); }
 				
-				//Parse sequences by group
-                vector<string> groups;
-                map<string, string> uniqueNames;
-                vector<string> temp;
-                if (hasCount) {
-                    cparser = new SequenceCountParser(nameFile, fastaFileNames[s], temp);
-                    groups = cparser->getNamesOfGroups();
-                    uniqueNames = cparser->getAllSeqsMap();
-                }else{
-                    sparser = new SequenceParser(groupFile, fastaFileNames[s], nameFile, temp);
-                    groups = sparser->getNamesOfGroups();
-                    uniqueNames = sparser->getAllSeqsMap();
-                }
+                if (!hasCount) { GroupMap g; g.readMap(groupFile); groups = g.getNamesOfGroups();  }
 					
-				if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
+				if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0; }
 								
 				//clears files
 				ofstream out, out1, out2;
 				util.openOutputFile(outputFileName, out); out.close(); 
 				util.openOutputFile(accnosFileName, out1); out1.close();
 				if (chimealns) { util.openOutputFile(alnsFileName, out2); out2.close(); }
-				int totalSeqs = 0;
-				
-				if(processors == 1)	{	totalSeqs = driverGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, 0, groups.size(), groups);
-                    
-                    if (hasCount && dups) {
-                        CountTable c; c.readTable(nameFile, true, false);
-                        if (!util.isBlank(newCountFile)) {
-                            ifstream in2;
-                            util.openInputFile(newCountFile, in2);
-                            
-                            string name, group;
-                            while (!in2.eof()) {
-                                in2 >> name >> group; util.gobble(in2);
-                                c.setAbund(name, group, 0);
-                            }
-                            in2.close();
-                        }
-                        util.mothurRemove(newCountFile);
-                        c.printTable(newCountFile);
-                    }
+                map<string, string> uniqueNames;
+				int totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, nameFile, groupFile, fastaFileNames[s], uniqueNames);
 
-                }else{	totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, nameFile, groupFile, fastaFileNames[s]);			}
-
-				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}				
+				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars;  return 0;	}
                
-                
                 if (!dups) { 
                     int totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, alnsFileName);
 				
                     m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.");	m->mothurOutEndLine();
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
 				}else {
-                    
                     if (hasCount) {
                         set<string> doNotRemove;
                         CountTable c; c.readTable(newCountFile, true, true);
@@ -758,20 +912,18 @@ int ChimeraUchimeCommand::execute(){
                     }
                 }
                 
-                if (hasCount) { delete cparser; }
-                else { delete sparser; }
-                
-				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}				
-					
+				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0;	}
 			}else{
-				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
+				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0;	}
 			
 				int numSeqs = 0;
 				int numChimeras = 0;
+                uchimeData* dataBundle = new uchimeData(outputFileName, uchimeLocation, templatefile, fastaFileNames[s], fastaFileNames[s], nameFile, groupFile, accnosFileName, alnsFileName, accnosFileName+".byCount.temp", nullVector, vars);
 
-				if(processors == 1){ numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras); }
-				else{	numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras); }
-				
+                numSeqs = driver(dataBundle);
+                numChimeras = dataBundle->numChimeras;
+                delete dataBundle;
+
 				//add headings
 				ofstream out;
 				util.openOutputFile(outputFileName+".temp", out); 
@@ -781,7 +933,7 @@ int ChimeraUchimeCommand::execute(){
 				util.appendFiles(outputFileName, outputFileName+".temp");
 				util.mothurRemove(outputFileName); rename((outputFileName+".temp").c_str(), outputFileName.c_str());
 				
-				if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
+				if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars; return 0; }
 			
 				//remove file made for uchime
 				if (templatefile == "self") {  util.mothurRemove(fastaFileNames[s]); }
@@ -794,6 +946,8 @@ int ChimeraUchimeCommand::execute(){
 			if (chimealns) { outputNames.push_back(alnsFileName); outputTypes["alns"].push_back(alnsFileName); }
 		}
 	
+        delete vars;
+        
 		//set accnos file as new current accnosfile
 		string currentName = "";
 		itTypes = outputTypes.find("accnos");
@@ -1140,629 +1294,116 @@ string ChimeraUchimeCommand::getNamesFile(string& inputFile){
 	}
 }
 //**********************************************************************************************************************
-int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, string accnos, string alns, string countlist, int start, int end, vector<string> groups){
+void driverGroups(uchimeData* params){
 	try {
-		
+        //parse fasta and name file by group
+        SequenceParser* parser;
+        SequenceCountParser* cparser;
+        if (params->vars->hasCount) {
+            CountTable* ct = new CountTable();
+            ct->readTable(params->namefile, true, false);
+            cparser = new SequenceCountParser(params->fastafile, *ct, params->groups);
+            delete ct;
+            params->uniqueNamesMap = cparser->getAllSeqsMap();
+        }else {
+            if (params->namefile != "") { parser = new SequenceParser(params->groupfile, params->fastafile, params->namefile, params->groups); }
+            else						{ parser = new SequenceParser(params->groupfile, params->fastafile, params->groups);	 }
+            params->uniqueNamesMap = parser->getAllSeqsMap();
+        }
+        
 		int totalSeqs = 0;
-		int numChimeras = 0;
-        
-        
         ofstream outCountList;
-        if (hasCount && dups) { util.openOutputFile(countlist, outCountList); }
+        if (params->vars->hasCount && params->vars->dups) { params->util.openOutputFile(params->countlist, outCountList); }
         
-		for (int i = start; i < end; i++) {
-			long start = time(NULL);	 if (m->getControl_pressed()) {  outCountList.close(); util.mothurRemove(countlist); return 0; }
+		for (int i = 0; i < params->groups.size(); i++) {
+			long start = time(NULL);
+            if (params->m->getControl_pressed()) {  outCountList.close(); params->util.mothurRemove(params->countlist); break; }
             
 			int error;
             long long numSeqs = 0;
-            if (hasCount) { error = cparser->getSeqs(groups[i], filename, "/ab=", "/", numSeqs, true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, "/ab=", "/", numSeqs, true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
+            if (params->vars->hasCount) { error = cparser->getSeqs(params->groups[i], params->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || params->m->getControl_pressed()) {  break; } }
+            else { error = parser->getSeqs(params->groups[i], params->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || params->m->getControl_pressed()) {  break; } }
 			totalSeqs += numSeqs;
             
-			driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
+            params->setDriverNames((params->outputFName + params->groups[i]), (params->alns+ params->groups[i]), (params->accnos+params->groups[i]));
+			driver(params);
 			
-			if (m->getControl_pressed()) { return 0; }
+            if (params->m->getControl_pressed()) { break; }
 			
 			//remove file made for uchime
-			if (!m->getDebug()) {  util.mothurRemove(filename);  }
-            else { m->mothurOut("[DEBUG]: saving file: " + filename + ".\n"); }
+			if (!params->m->getDebug()) {  params->util.mothurRemove(params->filename);  }
+            else { params->m->mothurOut("[DEBUG]: saving file: " + params->filename + ".\n"); }
 			
             //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
             //This table will zero out group counts for seqs determined to be chimeric by that group.
-            if (dups) {
-                if (!util.isBlank(accnos+groups[i])) {
+            if (params->vars->dups) {
+                if (!params->util.isBlank(params->accnos+params->groups[i])) {
                     ifstream in;
-                    util.openInputFile(accnos+groups[i], in);
+                    params->util.openInputFile(params->accnos+params->groups[i], in);
                     string name;
-                    if (hasCount) {
+                    if (params->vars->hasCount) {
                         while (!in.eof()) {
-                            in >> name; util.gobble(in);
-                            outCountList << name << '\t' << groups[i] << endl;
+                            in >> name; params->util.gobble(in);
+                            outCountList << name << '\t' << params->groups[i] << endl;
                         }
                         in.close();
                     }else {
-                        map<string, string> thisnamemap = sparser->getNameMap(groups[i]);
+                        map<string, string> thisnamemap = parser->getNameMap(params->groups[i]);
                         map<string, string>::iterator itN;
                         ofstream out;
-                        util.openOutputFile(accnos+groups[i]+".temp", out);
+                        params->util.openOutputFile(params->accnos+params->groups[i]+".temp", out);
                         while (!in.eof()) {
-                            in >> name; util.gobble(in); 
+                            in >> name; params->util.gobble(in);
                             itN = thisnamemap.find(name);
                             if (itN != thisnamemap.end()) {
-                                vector<string> tempNames; util.splitAtComma(itN->second, tempNames); 
+                                vector<string> tempNames; params->util.splitAtComma(itN->second, tempNames);
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                 
-                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->setControl_pressed(true); }
+                            }else { params->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); params->m->setControl_pressed(true); }
                         }
                         out.close();
                         in.close();
-                        util.renameFile(accnos+groups[i]+".temp", accnos+groups[i]);
+                        params->util.renameFile(params->accnos+params->groups[i]+".temp", params->accnos+params->groups[i]);
                     }
                    
                 }
             }
             
 			//append files
-			util.appendFiles((outputFName+groups[i]), outputFName); util.mothurRemove((outputFName+groups[i]));
-			util.appendFiles((accnos+groups[i]), accnos); util.mothurRemove((accnos+groups[i]));
-			if (chimealns) { util.appendFiles((alns+groups[i]), alns); util.mothurRemove((alns+groups[i])); }
+			params->util.appendFiles((params->outputFName+params->groups[i]), params->outputFName); params->util.mothurRemove((params->outputFName+params->groups[i]));
+			params->util.appendFiles((params->accnos+params->groups[i]), params->accnos); params->util.mothurRemove((params->accnos+params->groups[i]));
+			if (params->vars->chimealns) { params->util.appendFiles((params->alns+params->groups[i]), params->alns); params->util.mothurRemove((params->alns+params->groups[i])); }
 			
-			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + groups[i] + ".");	m->mothurOutEndLine();					
+			params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + params->groups[i] + ".\n");
 		}
-
-        if (hasCount && dups) { outCountList.close(); }
         
-        return totalSeqs;
+        if (params->vars->hasCount) { delete cparser; }
+        else { delete parser; }
+        
+        if (!params->m->getControl_pressed()) {
+            if (params->vars->hasCount && params->vars->dups) { outCountList.close(); }
+        }
+        params->count = totalSeqs;
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "driverGroups");
+		params->m->errorOut(e, "ChimeraUchimeCommand", "driverGroups");
 		exit(1);
 	}
 }	
-//**********************************************************************************************************************
-
-int ChimeraUchimeCommand::driver(string outputFName, string filename, string accnos, string alns, int& numChimeras){
-	try {
-		
-		outputFName = util.getFullPathName(outputFName);
-		filename = util.getFullPathName(filename);
-		alns = util.getFullPathName(alns);
-		
-		//to allow for spaces in the path
-		outputFName = "\"" + outputFName + "\"";
-		filename = "\"" + filename + "\"";
-		alns = "\"" + alns + "\"";
-        
-        if (filename.length() > 257) {
-            m->mothurOut("[ERROR]: " + filename + " filename is " + toString(filename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->setControl_pressed(true); return 0;
-        }else if ((alns.length() > 257) && (chimealns)) {
-            m->mothurOut("[ERROR]: " + alns + " filename is " + toString(alns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); m->setControl_pressed(true); return 0;
-        }else if (outputFName.length() > 257) {
-            m->mothurOut("[ERROR]: " + outputFName + " filename is " + toString(outputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); m->setControl_pressed(true); return 0;
-        }
-				
-		vector<char*> cPara;
-		
-		string uchimeCommand = uchimeLocation;
-        uchimeCommand = "\"" + uchimeCommand + "\" ";
-        
-        char* tempUchime;
-		tempUchime= new char[uchimeCommand.length()+1]; 
-		*tempUchime = '\0';
-		strncat(tempUchime, uchimeCommand.c_str(), uchimeCommand.length());
-		cPara.push_back(tempUchime);
-		
-        //are you using a reference file
-		if (templatefile != "self") {
-            string outputFileName = filename.substr(1, filename.length()-2) + ".uchime_formatted";
-            prepFile(filename.substr(1, filename.length()-2), outputFileName);
-            filename = outputFileName;
-            filename = "\"" + filename + "\"";
-			//add reference file
-			char* tempRef = new char[5]; 
-			//strcpy(tempRef, "--db"); 
-			*tempRef = '\0'; strncat(tempRef, "--db", 4);
-			cPara.push_back(tempRef);  
-			char* tempR = new char[templatefile.length()+1];
-			//strcpy(tempR, templatefile.c_str());
-			*tempR = '\0'; strncat(tempR, templatefile.c_str(), templatefile.length());
-			cPara.push_back(tempR);
-		}
-		
-		char* tempIn = new char[8]; 
-		*tempIn = '\0'; strncat(tempIn, "--input", 7);
-		//strcpy(tempIn, "--input"); 
-		cPara.push_back(tempIn);
-		char* temp = new char[filename.length()+1];
-		*temp = '\0'; strncat(temp, filename.c_str(), filename.length());
-		//strcpy(temp, filename.c_str());
-		cPara.push_back(temp);
-		
-		char* tempO = new char[12]; 
-		*tempO = '\0'; strncat(tempO, "--uchimeout", 11);
-		//strcpy(tempO, "--uchimeout"); 
-		cPara.push_back(tempO);
-		char* tempout = new char[outputFName.length()+1];
-		//strcpy(tempout, outputFName.c_str());
-		*tempout = '\0'; strncat(tempout, outputFName.c_str(), outputFName.length());
-		cPara.push_back(tempout);
-		
-		if (chimealns) {
-			char* tempA = new char[13]; 
-			*tempA = '\0'; strncat(tempA, "--uchimealns", 12);
-			//strcpy(tempA, "--uchimealns"); 
-			cPara.push_back(tempA);
-			char* tempa = new char[alns.length()+1];
-			//strcpy(tempa, alns.c_str());
-			*tempa = '\0'; strncat(tempa, alns.c_str(), alns.length());
-			cPara.push_back(tempa);
-		}
-        
-        if (strand != "") {
-			char* tempA = new char[9]; 
-			*tempA = '\0'; strncat(tempA, "--strand", 8);
-			cPara.push_back(tempA);
-			char* tempa = new char[strand.length()+1];
-			*tempa = '\0'; strncat(tempa, strand.c_str(), strand.length());
-			cPara.push_back(tempa);
-		}
-		
-		if (useAbskew) {
-			char* tempskew = new char[9];
-			*tempskew = '\0'; strncat(tempskew, "--abskew", 8);
-			//strcpy(tempskew, "--abskew"); 
-			cPara.push_back(tempskew);
-			char* tempSkew = new char[abskew.length()+1];
-			//strcpy(tempSkew, abskew.c_str());
-			*tempSkew = '\0'; strncat(tempSkew, abskew.c_str(), abskew.length());
-			cPara.push_back(tempSkew);
-		}
-		
-		if (useMinH) {
-			char* tempminh = new char[7]; 
-			*tempminh = '\0'; strncat(tempminh, "--minh", 6);
-			//strcpy(tempminh, "--minh"); 
-			cPara.push_back(tempminh);
-			char* tempMinH = new char[minh.length()+1];
-			*tempMinH = '\0'; strncat(tempMinH, minh.c_str(), minh.length());
-			//strcpy(tempMinH, minh.c_str());
-			cPara.push_back(tempMinH);
-		}
-		
-		if (useMindiv) {
-			char* tempmindiv = new char[9]; 
-			*tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", 8);
-			//strcpy(tempmindiv, "--mindiv"); 
-			cPara.push_back(tempmindiv);
-			char* tempMindiv = new char[mindiv.length()+1];
-			*tempMindiv = '\0'; strncat(tempMindiv, mindiv.c_str(), mindiv.length());
-			//strcpy(tempMindiv, mindiv.c_str());
-			cPara.push_back(tempMindiv);
-		}
-		
-		if (useXn) {
-			char* tempxn = new char[5]; 
-			//strcpy(tempxn, "--xn"); 
-			*tempxn = '\0'; strncat(tempxn, "--xn", 4);
-			cPara.push_back(tempxn);
-			char* tempXn = new char[xn.length()+1];
-			//strcpy(tempXn, xn.c_str());
-			*tempXn = '\0'; strncat(tempXn, xn.c_str(), xn.length());
-			cPara.push_back(tempXn);
-		}
-		
-		if (useDn) {
-			char* tempdn = new char[5]; 
-			//strcpy(tempdn, "--dn"); 
-			*tempdn = '\0'; strncat(tempdn, "--dn", 4);
-			cPara.push_back(tempdn);
-			char* tempDn = new char[dn.length()+1];
-			*tempDn = '\0'; strncat(tempDn, dn.c_str(), dn.length());
-			//strcpy(tempDn, dn.c_str());
-			cPara.push_back(tempDn);
-		}
-		
-		if (useXa) {
-			char* tempxa = new char[5]; 
-			//strcpy(tempxa, "--xa"); 
-			*tempxa = '\0'; strncat(tempxa, "--xa", 4);
-			cPara.push_back(tempxa);
-			char* tempXa = new char[xa.length()+1];
-			*tempXa = '\0'; strncat(tempXa, xa.c_str(), xa.length());
-			//strcpy(tempXa, xa.c_str());
-			cPara.push_back(tempXa);
-		}
-		
-		if (useChunks) {
-			char* tempchunks = new char[9]; 
-			//strcpy(tempchunks, "--chunks"); 
-			*tempchunks = '\0'; strncat(tempchunks, "--chunks", 8);
-			cPara.push_back(tempchunks);
-			char* tempChunks = new char[chunks.length()+1];
-			*tempChunks = '\0'; strncat(tempChunks, chunks.c_str(), chunks.length());
-			//strcpy(tempChunks, chunks.c_str());
-			cPara.push_back(tempChunks);
-		}
-		
-		if (useMinchunk) {
-			char* tempminchunk = new char[11]; 
-			//strcpy(tempminchunk, "--minchunk"); 
-			*tempminchunk = '\0'; strncat(tempminchunk, "--minchunk", 10);
-			cPara.push_back(tempminchunk);
-			char* tempMinchunk = new char[minchunk.length()+1];
-			*tempMinchunk = '\0'; strncat(tempMinchunk, minchunk.c_str(), minchunk.length());
-			//strcpy(tempMinchunk, minchunk.c_str());
-			cPara.push_back(tempMinchunk);
-		}
-		
-		if (useIdsmoothwindow) {
-			char* tempidsmoothwindow = new char[17]; 
-			*tempidsmoothwindow = '\0'; strncat(tempidsmoothwindow, "--idsmoothwindow", 16);
-			//strcpy(tempidsmoothwindow, "--idsmoothwindow"); 
-			cPara.push_back(tempidsmoothwindow);
-			char* tempIdsmoothwindow = new char[idsmoothwindow.length()+1];
-			*tempIdsmoothwindow = '\0'; strncat(tempIdsmoothwindow, idsmoothwindow.c_str(), idsmoothwindow.length());
-			//strcpy(tempIdsmoothwindow, idsmoothwindow.c_str());
-			cPara.push_back(tempIdsmoothwindow);
-		}
-		
-		/*if (useMinsmoothid) {
-			char* tempminsmoothid = new char[14]; 
-			//strcpy(tempminsmoothid, "--minsmoothid"); 
-			*tempminsmoothid = '\0'; strncat(tempminsmoothid, "--minsmoothid", 13);
-			cPara.push_back(tempminsmoothid);
-			char* tempMinsmoothid = new char[minsmoothid.length()+1];
-			*tempMinsmoothid = '\0'; strncat(tempMinsmoothid, minsmoothid.c_str(), minsmoothid.length());
-			//strcpy(tempMinsmoothid, minsmoothid.c_str());
-			cPara.push_back(tempMinsmoothid);
-		}*/
-		
-		if (useMaxp) {
-			char* tempmaxp = new char[7]; 
-			//strcpy(tempmaxp, "--maxp"); 
-			*tempmaxp = '\0'; strncat(tempmaxp, "--maxp", 6);
-			cPara.push_back(tempmaxp);
-			char* tempMaxp = new char[maxp.length()+1];
-			*tempMaxp = '\0'; strncat(tempMaxp, maxp.c_str(), maxp.length());
-			//strcpy(tempMaxp, maxp.c_str());
-			cPara.push_back(tempMaxp);
-		}
-		
-		if (!skipgaps) {
-			char* tempskipgaps = new char[13]; 
-			//strcpy(tempskipgaps, "--[no]skipgaps");
-			*tempskipgaps = '\0'; strncat(tempskipgaps, "--noskipgaps", 12);
-			cPara.push_back(tempskipgaps);
-		}
-		
-		if (!skipgaps2) {
-			char* tempskipgaps2 = new char[14]; 
-			//strcpy(tempskipgaps2, "--[no]skipgaps2"); 
-			*tempskipgaps2 = '\0'; strncat(tempskipgaps2, "--noskipgaps2", 13);
-			cPara.push_back(tempskipgaps2);
-		}
-		
-		if (useMinlen) {
-			char* tempminlen = new char[9]; 
-			*tempminlen = '\0'; strncat(tempminlen, "--minlen", 8);
-			//strcpy(tempminlen, "--minlen"); 
-			cPara.push_back(tempminlen);
-			char* tempMinlen = new char[minlen.length()+1];
-			//strcpy(tempMinlen, minlen.c_str());
-			*tempMinlen = '\0'; strncat(tempMinlen, minlen.c_str(), minlen.length());
-			cPara.push_back(tempMinlen);
-		}
-		
-		if (useMaxlen) {
-			char* tempmaxlen = new char[9]; 
-			//strcpy(tempmaxlen, "--maxlen"); 
-			*tempmaxlen = '\0'; strncat(tempmaxlen, "--maxlen", 8);
-			cPara.push_back(tempmaxlen);
-			char* tempMaxlen = new char[maxlen.length()+1];
-			*tempMaxlen = '\0'; strncat(tempMaxlen, maxlen.c_str(), maxlen.length());
-			//strcpy(tempMaxlen, maxlen.c_str());
-			cPara.push_back(tempMaxlen);
-		}
-		
-		if (ucl) {
-			char* tempucl = new char[5]; 
-			strcpy(tempucl, "--ucl"); 
-			cPara.push_back(tempucl);
-		}
-		
-		if (useQueryfract) {
-			char* tempqueryfract = new char[13]; 
-			*tempqueryfract = '\0'; strncat(tempqueryfract, "--queryfract", 12);
-			//strcpy(tempqueryfract, "--queryfract"); 
-			cPara.push_back(tempqueryfract);
-			char* tempQueryfract = new char[queryfract.length()+1];
-			*tempQueryfract = '\0'; strncat(tempQueryfract, queryfract.c_str(), queryfract.length());
-			//strcpy(tempQueryfract, queryfract.c_str());
-			cPara.push_back(tempQueryfract);
-		}
-		
-		
-		char** uchimeParameters;
-		uchimeParameters = new char*[cPara.size()];
-		string commandString = "";
-		for (int i = 0; i < cPara.size(); i++) {  uchimeParameters[i] = cPara[i];  commandString += toString(cPara[i]) + " "; } 
-		//int numArgs = cPara.size();
-		
-		//uchime_main(numArgs, uchimeParameters); 
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-		commandString = "\"" + commandString + "\"";
-#endif
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
-		system(commandString.c_str());
-		
-		//free memory
-		for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
-		delete[] uchimeParameters; 
-		
-		//remove "" from filenames
-		outputFName = outputFName.substr(1, outputFName.length()-2);
-		filename = filename.substr(1, filename.length()-2);
-		alns = alns.substr(1, alns.length()-2);
-		
-		if (m->getControl_pressed()) { return 0; }
-		
-		//create accnos file from uchime results
-		ifstream in; 
-		util.openInputFile(outputFName, in);
-		
-		ofstream out;
-		util.openOutputFile(accnos, out);
-		
-		int num = 0;
-		numChimeras = 0;
-		while(!in.eof()) {
-			
-			if (m->getControl_pressed()) { break; }
-			
-			string name = "";
-			string chimeraFlag = "";
-			//in >> chimeraFlag >> name;
-			
-            string line = util.getline(in);
-            vector<string> pieces = util.splitWhiteSpace(line);
-            if (pieces.size() > 2) { 
-                name = pieces[1];
-                //fix name if needed
-                if (templatefile == "self") { 
-                    name = name.substr(0, name.length()-1); //rip off last /
-                    name = name.substr(0, name.find_last_of('/'));
-                }
-                
-                chimeraFlag = pieces[pieces.size()-1];
-			}
-			//for (int i = 0; i < 15; i++) {  in >> chimeraFlag; }
-			util.gobble(in);
-			
-			if (chimeraFlag == "Y") {  out << name << endl; numChimeras++; }
-			num++;
-		}
-		in.close();
-		out.close();
-		
-        //if (templatefile != "self") {  util.mothurRemove(filename); }
-        
-		return num;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "driver");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-//uchime can't handle some of the things allowed in mothurs fasta files. This functions "cleans up" the file.
-int ChimeraUchimeCommand::prepFile(string filename, string output) {
-	try {
-        
-        ifstream in;
-        util.openInputFile(filename, in);
-        
-        ofstream out;
-        util.openOutputFile(output, out);
-        
-        while (!in.eof()) {
-            if (m->getControl_pressed()) { break;  }
-            
-            Sequence seq(in); util.gobble(in);
-            
-            if (seq.getName() != "") { seq.printSequence(out); }
-        }
-        in.close();
-        out.close();
-        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "prepFile");
-		exit(1);
-	}
-}
 /**************************************************************************************************/
 
-int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename, string accnos, string alns, int& numChimeras) {
+int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups, string nameFile, string groupFile, string fastaFile, map<string, string>& allSeqsMap) {
 	try {
-		
-		processIDS.clear();
-		int process = 1;
-		int num = 0;
-		vector<string> files;
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-		//break up file into multiple files
-		util.divideFile(filename, processors, files);
-		
-		if (m->getControl_pressed()) {  return 0;  }
-				
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driver(outputFileName + toString(toString(process)) + ".temp", files[process], accnos + toString(toString(process)) + ".temp", alns + toString(toString(process)) + ".temp", numChimeras);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = outputFileName + toString(toString(process)) + ".num.temp";
-				util.openOutputFile(tempFile, out);
-				out << num << endl;
-				out << numChimeras << endl;
-				out.close();
-				
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                exit(0);
-            }
-		}
-		
-		//do my part
-		num = driver(outputFileName, files[0], accnos, alns, numChimeras);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
-			util.openInputFile(tempFile, in);
-			if (!in.eof()) { 
-				int tempNum = 0; 
-				in >> tempNum; util.gobble(in);
-				num += tempNum; 
-				in >> tempNum;
-				numChimeras += tempNum;
-			}
-			in.close(); util.mothurRemove(tempFile);
-		}
-#else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the preClusterData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		//divide file
-		int count = 0;
-		int spot = 0;
-        files.resize(processors, "");
-        
-		for (int i = 0; i < processors; i++) {
-            ofstream temp;
-			files[i] = filename+toString(i)+".temp";
-			util.openOutputFile(filename+toString(i)+".temp", temp);
-		}
-		
-		ifstream in;
-		util.openInputFile(filename, in);
-		
-		while(!in.eof()) {
-			Sequence tempSeq(in); util.gobble(in); 
-			
-			if (tempSeq.getName() != "") {
-                ofstream temp;
-                util.openOutputFileAppend(files[spot], temp);
-                tempSeq.printSequence(temp); temp.close();
-				spot++; count++;
-				if (spot == processors) { spot = 0; }
-			}
-		}
-		in.close();
-		
-		//sanity check for number of processors
-		if (count < processors) { processors = count; }
-		
-		vector<uchimeData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		vector<string> dummy; //used so that we can use the same struct for MyUchimeSeqsThreadFunction and MyUchimeThreadFunction
-		
-		//Create processor worker threads.
-		for( int i=1; i<processors; i++ ){
-			// Allocate memory for thread data.
-			string extension = toString(i) + ".temp";
-			
-			uchimeData* tempUchime = new uchimeData(outputFileName+extension, uchimeLocation, templatefile, files[i], "", "", "", accnos+extension, alns+extension, "", dummy, m, 0, 0,  i);
-			tempUchime->setBooleans(dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
-			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand);
-			
-			pDataArray.push_back(tempUchime);
-			processIDS.push_back(i);
-			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i-1] = CreateThread(NULL, 0, MyUchimeSeqsThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
-		}
-		
-		
-		//using the main process as a worker saves time and memory
-		num = driver(outputFileName, files[0], accnos, alns, numChimeras);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-			numChimeras += pDataArray[i]->numChimeras;
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-#endif		
-		
-		//append output files
-		for(int i=0;i<processIDS.size();i++){
-			util.appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-			util.mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
-			
-			util.appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
-			util.mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
-			
-			if (chimealns) {
-				util.appendFiles((alns + toString(processIDS[i]) + ".temp"), alns);
-				util.mothurRemove((alns + toString(processIDS[i]) + ".temp"));
-			}
-		}
-		
-		//get rid of the file pieces.
-		for (int i = 0; i < files.size(); i++) { util.mothurRemove(files[i]); }
-        
-		return num;	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "createProcesses");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-
-int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups, string nameFile, string groupFile, string fastaFile) {
-	try {
-		
-		processIDS.clear();
-		int process = 1;
-		int num = 0;
-        
+        //numChimeras = 0;
         CountTable newCount;
         if (hasCount && dups) { newCount.readTable(nameFile, true, false); }
-		
-		//sanity check
-		if (groups.size() < processors) { processors = groups.size(); }
-		
-		//divide the groups between the processors
-		vector<linePair> lines;
+        
+        //sanity check
+        if (groups.size() < processors) { processors = groups.size(); }
+        
+        //divide the groups between the processors
+        vector<linePair> lines;
         int remainingPairs = groups.size();
         int startIndex = 0;
         for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
@@ -1772,101 +1413,55 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
             startIndex = startIndex + numPairs;
             remainingPairs = remainingPairs - numPairs;
         }
-
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-				
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driverGroups(outputFName + toString(toString(process)) + ".temp", filename + toString(toString(process)) + ".temp", accnos + toString(toString(process)) + ".temp", alns + toString(toString(process)) + ".temp", accnos + ".byCount." + toString(toString(process)) + ".temp", lines[process].start, lines[process].end, groups);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = outputFName + toString(toString(process)) + ".num.temp";
-				util.openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-				
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                exit(0);
-            }
-
-		}
-            
-		//do my part
-		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
         
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  outputFName + toString(processIDS[i]) + ".num.temp";
-			util.openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); util.mothurRemove(tempFile);
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<uchimeData*> data;
+        
+        long long num = 0;
+        time_t start, end;
+        time(&start);
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            vector<string> thisGroups;
+            for (int j = lines[i+1].start; j < lines[i+1].end; j++) { thisGroups.push_back(groups[j]); }
+            uchimeData* dataBundle = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverGroups, dataBundle));
         }
         
-#else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the uchimeData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<uchimeData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=1; i<processors; i++ ){
-			// Allocate memory for thread data.
-			string extension = toString(i) + ".temp";
-			
-			uchimeData* tempUchime = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, accnos+".byCount."+extension, groups, m, lines[i].start, lines[i].end,  i);
-			tempUchime->setBooleans(dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
-			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand);
-			
-			pDataArray.push_back(tempUchime);
-			processIDS.push_back(i);
-			
-			//MyUchimeThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i-1] = CreateThread(NULL, 0, MyUchimeThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
-		}
-		
-		
-		//using the main process as a worker saves time and memory
-		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
+        vector<string> thisGroups;
+        for (int j = lines[0].start; j < lines[0].end; j++) { thisGroups.push_back(groups[j]); }
+        uchimeData* dataBundle = new uchimeData(outputFName, uchimeLocation, templatefile, filename, fastaFile, nameFile, groupFile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
+        driverGroups(dataBundle);
+        num = dataBundle->count;
+        int numChimeras = dataBundle->numChimeras;
+        allSeqsMap = dataBundle->uniqueNamesMap;
         
+        delete dataBundle;
         
-#endif		
-      
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            num += data[i]->count;
+            numChimeras += data[i]->numChimeras;
+            for (map<string, string>::iterator itMap = data[i]->uniqueNamesMap.begin(); itMap != data[i]->uniqueNamesMap.end(); itMap++)  {  allSeqsMap[itMap->first] = itMap->second; }
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
+        time(&end);
+        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to check " + toString(num) + " sequences.\n\n");
+        
         //read my own
         if (hasCount && dups) {
-            if (!util.isBlank(accnos + ".byCount")) {
+            string countlisttemp = accnos+".byCount.temp";
+            if (!util.isBlank(countlisttemp)) {
                 ifstream in2;
-                util.openInputFile(accnos + ".byCount", in2);
+                util.openInputFile(countlisttemp, in2);
                 
                 string name, group;
                 while (!in2.eof()) {
@@ -1875,26 +1470,22 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
                 }
                 in2.close();
             }
-            util.mothurRemove(accnos + ".byCount");
+            util.mothurRemove(countlisttemp);
         }
-       
-		//append output files
-		for(int i=0;i<processIDS.size();i++){
-			util.appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
-			util.mothurRemove((outputFName + toString(processIDS[i]) + ".temp"));
-			
-			util.appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
-			util.mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
-			
-			if (chimealns) {
-				util.appendFiles((alns + toString(processIDS[i]) + ".temp"), alns);
-				util.mothurRemove((alns + toString(processIDS[i]) + ".temp"));
-			}
+        
+        //append output files
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            util.appendFiles((outputFName+extension), outputFName);
+            util.mothurRemove((outputFName+extension));
+            
+            util.appendFiles((accnos+extension), accnos);
+            util.mothurRemove((accnos+extension));
             
             if (hasCount && dups) {
-                if (!util.isBlank(accnos + ".byCount." + toString(processIDS[i]) + ".temp")) {
+                if (!util.isBlank(accnos+".byCount."+extension)) {
                     ifstream in2;
-                    util.openInputFile(accnos + ".byCount." + toString(processIDS[i]) + ".temp", in2);
+                    util.openInputFile(accnos+".byCount."+extension, in2);
                     
                     string name, group;
                     while (!in2.eof()) {
@@ -1903,16 +1494,15 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
                     }
                     in2.close();
                 }
-                util.mothurRemove(accnos + ".byCount." + toString(processIDS[i]) + ".temp");
+                util.mothurRemove(accnos+".byCount."+extension);
             }
-
-		}
+            
+        }
         
         //print new *.pick.count_table
         if (hasCount && dups) {  newCount.printTable(newCountFile);   }
- 		
-		return num;	
-		
+        
+        return num;	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraUchimeCommand", "createProcessesGroups");

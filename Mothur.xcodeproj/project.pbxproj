@@ -871,6 +871,8 @@
 		485B0E071F264F2E00CA5F57 /* sharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvector.hpp; path = source/datastructures/sharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
 		485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvector.cpp; path = source/datastructures/sharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
 		485B0E0D1F27C40500CA5F57 /* sharedrabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundfloatvector.hpp; path = source/datastructures/sharedrabundfloatvector.hpp; sourceTree = SOURCE_ROOT; };
+		486741981FD9ACCE00B07480 /* sharedwriter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedwriter.hpp; path = source/sharedwriter.hpp; sourceTree = "<group>"; };
+		4867419A1FD9B3FE00B07480 /* writer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = writer.h; sourceTree = "<group>"; };
 		48705ABB19BE32C50075E977 /* getmimarkspackagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getmimarkspackagecommand.cpp; path = source/commands/getmimarkspackagecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48705ABC19BE32C50075E977 /* getmimarkspackagecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getmimarkspackagecommand.h; path = source/commands/getmimarkspackagecommand.h; sourceTree = SOURCE_ROOT; };
 		48705ABD19BE32C50075E977 /* oligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = oligos.cpp; path = source/datastructures/oligos.cpp; sourceTree = SOURCE_ROOT; };
@@ -1814,6 +1816,7 @@
 				7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */,
 				A77410F514697C300098E6AC /* seqnoise.h */,
 				A77410F414697C300098E6AC /* seqnoise.cpp */,
+				486741981FD9ACCE00B07480 /* sharedwriter.hpp */,
 				A7E9BA5312D39A5E00DA6239 /* read */,
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
 				A7E9B83012D37EC400DA6239 /* slibshuff.cpp */,
@@ -1838,6 +1841,7 @@
 				A7D9378B17B15215001E90B0 /* wilcox.h */,
 				A7D9378917B146B5001E90B0 /* wilcox.cpp */,
 				A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */,
+				4867419A1FD9B3FE00B07480 /* writer.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";

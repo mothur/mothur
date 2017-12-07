@@ -10,6 +10,8 @@
 #include "degapseqscommand.h"
 
 
+
+
 //**********************************************************************************************************************
 vector<string> DegapSeqsCommand::setParameters(){	
 	try {
@@ -211,18 +213,18 @@ int DegapSeqsCommand::execute(){
 // that can be passed using a single void pointer (LPVOID).
 struct degapData {
     string filename;
-    string outputFileName;
+    int count;
     unsigned long long start;
     unsigned long long end;
-    int count;
+    OutputWriter* threadWriter;
     MothurOut* m;
     Utils util;
     
     degapData(){}
-    degapData(string f, string of, MothurOut* mout, unsigned long long st, unsigned long long en) {
+    degapData(string f, unsigned long long st, unsigned long long en, OutputWriter* w) { //InputReader* i
+        m = MothurOut::getInstance();
         filename = f;
-        outputFileName = of;
-        m = mout;
+        threadWriter = w;
         start = st;
         end = en;
         count = 0;
@@ -239,19 +241,17 @@ void driverDegap(degapData* params){
         
         if (params->start == 0) {  params->util.zapGremlins(inFASTA); params->util.gobble(inFASTA); }
         
-        ofstream outFASTA;
-        params->util.openOutputFile(params->outputFileName, outFASTA);
-        
         while(!inFASTA.eof()){
             if (params->m->getControl_pressed()) {  break; }
             
-            Sequence currSeq(inFASTA);  params->util.gobble(inFASTA);
+            Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
             if (currSeq.getName() != "") {
-                outFASTA << ">" << currSeq.getName() << endl;
-                outFASTA << currSeq.getUnaligned() << endl;
+                params->threadWriter->write(">"+currSeq.getName()+"\n"+currSeq.getUnaligned()+"\n");
                 params->count++;
-                params->m->mothurOutJustToScreen(toString(params->count) + "\n"); 
             }
+    
+            //report progress
+            if((params->count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(params->count) + "\n");  }
             
 #if defined NON_WINDOWS
             unsigned long long pos = inFASTA.tellg();
@@ -259,16 +259,11 @@ void driverDegap(degapData* params){
 #else
             if (params->count == params->end) { break; }
 #endif
-            
-            //report progress
-            if((params->count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(params->count) + "\n"); 		}
-            
         }
         //report progress
         if((params->count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(params->count) + "\n"); 		}
         
         inFASTA.close();
-        outFASTA.close();
     }
     catch(exception& e) {
         params->m->errorOut(e, "DegapSeqsCommand", "driver");
@@ -288,13 +283,12 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
         time(&start);
         
         vector<unsigned long long> positions;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        if (processors == 1) {
-            lines.push_back(new linePair(0, -1)); //forces it to read whole file
-        }else {
+        if (processors == 1) { lines.push_back(new linePair(0, -1)); }//forces it to read whole file
+        else {
             positions = m->setFilePosFasta(filename, num);
             if (num < processors) { processors = num; }
             
@@ -308,32 +302,34 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
         }
 #endif
         
+        auto synchronizedFile = std::make_shared<SynchronizedOutputFile>(outputFileName);
+        
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            degapData* dataBundle = new degapData(filename, (outputFileName + toString(i+1) + ".temp"), m, lines[i+1].start, lines[i+1].end);
+            OutputWriter* threadWriter = new OutputWriter(synchronizedFile);
+            degapData* dataBundle = new degapData(filename, lines[i+1].start, lines[i+1].end, threadWriter);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverDegap, dataBundle));
         }
         
-        degapData* dataBundle = new degapData(filename, outputFileName, m, lines[0].start, lines[0].end);
+        OutputWriter* threadWriter = new OutputWriter(synchronizedFile);
+        degapData* dataBundle = new degapData(filename, lines[0].start, lines[0].end, threadWriter);
         driverDegap(dataBundle);
         num = dataBundle->count;
+        delete threadWriter;
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             
-            util.appendFiles(data[i]->outputFileName, outputFileName);
-            util.mothurRemove(data[i]->outputFileName);
-
+            delete data[i]->threadWriter;
             delete data[i];
             delete workerThreads[i];
         }
         
         time(&end);
-        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to classify " + toString(num) + " sequences.\n\n");
     
         return num;
     }
