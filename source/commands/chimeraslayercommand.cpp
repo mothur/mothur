@@ -29,8 +29,6 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pminsnp("minsnp", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pminsnp);
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pminbs);
 		CommandParameter psearch("search", "Multiple", "kmer-blast", "blast", "", "", "","",false,false); parameters.push_back(psearch);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-        
 		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "","fasta",false,false); parameters.push_back(ptrim);
 		CommandParameter psplit("split", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psplit);
@@ -67,7 +65,6 @@ string ChimeraSlayerCommand::getHelpString(){
         helpString += "The count parameter allows you to provide a count file. The count file reference=self. If your count file contains group information, when checking sequences, only sequences from the same group as the query sequence will be used as the reference. When you use a count file with group info and dereplicate=T, mothur will create a *.pick.count_table file containing seqeunces after chimeras are removed. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
-		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "If the dereplicate parameter is false, then if one group finds the seqeunce to be chimeric, then all groups find it to be chimeric, default=f.\n";
 		helpString += "The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest piece, default=F. \n";
 		helpString += "The split parameter allows you to check both pieces of non-chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n";
@@ -309,9 +306,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
-			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
-			processors = current->setProcessors(temp);
-			
 			string path;
 			it = parameters.find("reference");
 			//user has given a template file
@@ -353,9 +347,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 					templatefile = ""; abort = true;
 			}
 			
-			
-			
-			temp = validParameter.valid(parameters, "ksize");			if (temp == "not found") { temp = "7"; }
+			string temp = validParameter.valid(parameters, "ksize");			if (temp == "not found") { temp = "7"; }
 			util.mothurConvert(temp, ksize);
 						
 			temp = validParameter.valid(parameters, "window");			if (temp == "not found") { temp = "50"; }
@@ -482,6 +474,7 @@ int ChimeraSlayerCommand::execute(){
 			fileGroup[fastaFileNames[s]] = "noGroup";
             map<string, string> uniqueNames; 
 			int totalChimeras = 0;
+            int numSeqs = 0;
 			lines.clear();
 			
 			if (templatefile == "self") { 
@@ -502,28 +495,7 @@ int ChimeraSlayerCommand::execute(){
 				itFile = fileToPriority.begin();
 				string thisFastaName = itFile->first;
 				map<string, int> thisPriority = itFile->second;
-				//break up file
-				vector<unsigned long long> positions; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				positions = util.divideFile(thisFastaName, processors);
-				for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
-#else
-				if (processors == 1) {	lines.push_back(linePair(0, 1000)); }
-				else {
-					positions = m->setFilePosFasta(thisFastaName, numSeqs); 
-                    if (numSeqs < processors) { processors = numSeqs; }
-					
-					//figure out how many sequences you have to process
-					int numSeqsPerProcessor = numSeqs / processors;
-					for (int i = 0; i < processors; i++) {
-						int startIndex =  i * numSeqsPerProcessor;
-						if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
-						lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-					}
-				}
-#endif
-				if(processors == 1){ numSeqs = driver(lines[0], outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority);  }
-				else{ numSeqs = createProcesses(outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority); }
+                numSeqs = driver(outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority);
 				
 				if (m->getControl_pressed()) {  outputTypes.clear(); if (trim) { util.mothurRemove(trimFastaFileName); } util.mothurRemove(outputFileName); util.mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }				
 
@@ -535,54 +507,50 @@ int ChimeraSlayerCommand::execute(){
                     newCountFile = getOutputFileName("count", variables);
                 }
 
-				if (processors == 1) {
-                    numSeqs = driverGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile);
-                    if (hasCount && dups) {
-                        CountTable c; c.readTable(nameFileNames[s], true, false);
-                        if (!util.isBlank(newCountFile)) {
-                            ifstream in2;
-                            util.openInputFile(newCountFile, in2);
-                            
-                            string name, group;
-                            while (!in2.eof()) {
-                                in2 >> name >> group; util.gobble(in2);
-                                c.setAbund(name, group, 0);
-                            }
-                            in2.close();
+				
+                numSeqs = driverGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile);
+                if (hasCount && dups) {
+                    CountTable c; c.readTable(nameFileNames[s], true, false);
+                    if (!util.isBlank(newCountFile)) {
+                        ifstream in2;
+                        util.openInputFile(newCountFile, in2);
+                        
+                        string name, group;
+                        while (!in2.eof()) {
+                            in2 >> name >> group; util.gobble(in2);
+                            c.setAbund(name, group, 0);
                         }
-                        util.mothurRemove(newCountFile);
-                        c.printTable(newCountFile);
+                        in2.close();
                     }
-
+                    util.mothurRemove(newCountFile);
+                    c.printTable(newCountFile);
                 }
-				else {  numSeqs = createProcessesGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile, countFile); 		} //destroys fileToPriority
 
-
-                    if (!dups) {
-                        totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, trimFastaFileName);
-                        m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine();
-                    }else {
-                        if (hasCount) {
-                            set<string> doNotRemove;
-                            CountTable c; c.readTable(newCountFile, true, true);
-                            vector<string> namesInTable = c.getNamesOfSeqs();
-                            for (int i = 0; i < namesInTable.size(); i++) {
-                                int temp = c.getNumSeqs(namesInTable[i]);
-                                if (temp == 0) {  c.remove(namesInTable[i]);  }
-                                else { doNotRemove.insert((namesInTable[i])); }
-                            }
-                            //remove names we want to keep from accnos file.
-                            set<string> accnosNames = util.readAccnos(accnosFileName);
-                            ofstream out2;
-                            util.openOutputFile(accnosFileName, out2);
-                            for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
-                                if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
-                            }
-                            out2.close();
-                            c.printTable(newCountFile);
-                            outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
+                if (!dups) {
+                    totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, trimFastaFileName);
+                    m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine();
+                }else {
+                    if (hasCount) {
+                        set<string> doNotRemove;
+                        CountTable c; c.readTable(newCountFile, true, true);
+                        vector<string> namesInTable = c.getNamesOfSeqs();
+                        for (int i = 0; i < namesInTable.size(); i++) {
+                            int temp = c.getNumSeqs(namesInTable[i]);
+                            if (temp == 0) {  c.remove(namesInTable[i]);  }
+                            else { doNotRemove.insert((namesInTable[i])); }
                         }
+                        //remove names we want to keep from accnos file.
+                        set<string> accnosNames = util.readAccnos(accnosFileName);
+                        ofstream out2;
+                        util.openOutputFile(accnosFileName, out2);
+                        for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                            if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
+                        }
+                        out2.close();
+                        c.printTable(newCountFile);
+                        outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
                     }
+                }
 			}
 			
             m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
@@ -831,9 +799,7 @@ int ChimeraSlayerCommand::setUpForSelfReference(SequenceParser*& parser, map<str
 		string groupFile = "";
 		if (groupFileNames.size() != 0) { groupFile = groupFileNames[s]; }
 		
-		if (groupFile == "") { 
-			if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
-						
+		if (groupFile == "") {
 			//sort fastafile by abundance, returns new sorted fastafile name
 			m->mothurOut("Sorting fastafile according to abundance..."); cout.flush(); 
 			priority = sortFastaFile(fastaFileNames[s], nameFile);
@@ -878,9 +844,7 @@ int ChimeraSlayerCommand::setUpForSelfReference(SequenceCountParser*& parser, ma
 		}else {  m->setControl_pressed(true); return 0; }
          
 		CountTable ct;
-		if (!ct.testGroups(nameFile)) {  
-			if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
-            
+		if (!ct.testGroups(nameFile)) {
 			//sort fastafile by abundance, returns new sorted fastafile name
 			m->mothurOut("Sorting fastafile according to abundance..."); cout.flush(); 
 			priority = sortFastaFile(fastaFileNames[s], nameFile);
@@ -967,14 +931,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 			m->mothurOutEndLine(); m->mothurOut("Checking sequences from group: " + fileGroup[thisFastaName] + "."); m->mothurOutEndLine(); 
 			
 			lines.clear();
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			int proc = 1;
-			vector<unsigned long long> positions = util.divideFile(thisFastaName, proc);
-			lines.push_back(linePair(positions[0], positions[1]));	
-#else
-			lines.push_back(linePair(0, 1000)); 
-#endif			
-			int numSeqs = driver(lines[0], thisoutputFileName, thisFastaName, thisaccnosFileName, thistrimFastaFileName, thisPriority);
+			int numSeqs = driver(thisoutputFileName, thisFastaName, thisaccnosFileName, thistrimFastaFileName, thisPriority);
 			
             //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
             //This table will zero out group counts for seqs determined to be chimeric by that group.
@@ -1034,239 +991,9 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accnos, string fasta, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup, string countlist, string countFile) {
-	try {
-		int process = 1;
-		int num = 0;
-		processIDS.clear();
-        bool recalc = false;
-        map<string, map<string, int> > copyFileToPriority;
-        copyFileToPriority = fileToPriority;
-		
-		if (fileToPriority.size() < processors) { processors = fileToPriority.size(); }
-        
-        CountTable newCount;
-        if (hasCount && dups) { newCount.readTable(countFile, true, false); }
-		
-		int groupsPerProcessor = fileToPriority.size() / processors;
-		int remainder = fileToPriority.size() % processors;
-		
-		vector< map<string, map<string, int> > > breakUp;
-		
-		for (int i = 0; i < processors; i++) {
-			map<string, map<string, int> > thisFileToPriority;
-			map<string, map<string, int> >::iterator itFile;
-			int count = 0;
-			int enough = groupsPerProcessor;
-			if (i == 0) { enough = groupsPerProcessor + remainder; }
-			
-			for (itFile = fileToPriority.begin(); itFile != fileToPriority.end();) {
-				thisFileToPriority[itFile->first] = itFile->second;
-				fileToPriority.erase(itFile++);
-				count++;
-				if (count == enough) { break; }
-			}	
-			breakUp.push_back(thisFileToPriority);
-		}
-				
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driverGroups(outputFName + toString(toString(process)) + ".temp", accnos + toString(process) + ".temp", fasta + toString(toString(process)) + ".temp", breakUp[process], fileGroup, accnos + toString(toString(process)) + ".byCount");
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = outputFName + toString(toString(process)) + ".num.temp";
-				util.openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
-            }
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-                    processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            groupsPerProcessor = copyFileToPriority.size() / processors;
-            remainder = copyFileToPriority.size() % processors;
-            breakUp.clear();
-            
-            for (int i = 0; i < processors; i++) {
-                map<string, map<string, int> > thisFileToPriority;
-                map<string, map<string, int> >::iterator itFile;
-                int count = 0;
-                int enough = groupsPerProcessor;
-                if (i == 0) { enough = groupsPerProcessor + remainder; }
-                
-                for (itFile = copyFileToPriority.begin(); itFile != copyFileToPriority.end();) {
-                    thisFileToPriority[itFile->first] = itFile->second;
-                    copyFileToPriority.erase(itFile++);
-                    count++;
-                    if (count == enough) { break; }
-                }	
-                breakUp.push_back(thisFileToPriority);
-            }
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driverGroups(outputFName + toString(toString(process)) + ".temp", accnos + toString(process) + ".temp", fasta + toString(toString(process)) + ".temp", breakUp[process], fileGroup, accnos + toString(toString(process)) + ".byCount");
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = outputFName + toString(toString(process)) + ".num.temp";
-                    util.openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup, accnos + ".byCount");
-
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  outputFName + toString(processIDS[i]) + ".num.temp";
-			util.openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0;  in >> tempNum; num += tempNum; }
-			in.close(); util.mothurRemove(tempFile);
-		}
-#else
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the slayerData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<slayerData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for(int i=1; i<processors; i++ ){
-			string extension = toString(i) + ".temp";
-			slayerData* tempslayer = new slayerData(group2NameMap, hasCount, dups, (accnos + toString(i) +".byCount"), (outputFName + extension), (fasta + extension), (accnos + extension), templatefile, search, blastlocation, trimera, trim, realign, m, breakUp[i], fileGroup, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
-			pDataArray.push_back(tempslayer);
-			processIDS.push_back(i);
-			
-			//MySlayerThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i-1] = CreateThread(NULL, 0, MySlayerGroupThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
-		}
-		
-		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup, accnos + ".byCount");
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            if (pDataArray[i]->fileToPriority.size() != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->end) + " of " + toString(pDataArray[i]->fileToPriority.size()) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true);
-            }
-			num += pDataArray[i]->count;
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-#endif	
-        //read my own
-        if (hasCount && dups) {
-            if (!util.isBlank(accnos + ".byCount")) {
-                ifstream in2;
-                util.openInputFile(accnos + ".byCount", in2);
-                
-                string name, group;
-                while (!in2.eof()) {
-                    in2 >> name >> group; util.gobble(in2);
-                    newCount.setAbund(name, group, 0);
-                }
-                in2.close();
-            }
-            util.mothurRemove(accnos + ".byCount");
-        }
-
-		
-		//append output files
-		for(int i=0;i<processIDS.size();i++){
-			util.appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
-			util.mothurRemove((outputFName + toString(processIDS[i]) + ".temp"));
-			
-			util.appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
-			util.mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
-			
-			if (trim) {
-				util.appendFiles((fasta + toString(processIDS[i]) + ".temp"), fasta);
-				util.mothurRemove((fasta + toString(processIDS[i]) + ".temp"));
-			}
-            
-            if (hasCount && dups) {
-                if (!util.isBlank(accnos + toString(processIDS[i]) + ".byCount")) {
-                    ifstream in2;
-                    util.openInputFile(accnos  + toString(processIDS[i]) + ".byCount", in2);
-                    
-                    string name, group;
-                    while (!in2.eof()) {
-                        in2 >> name >> group; util.gobble(in2);
-                        newCount.setAbund(name, group, 0);
-                    }
-                    in2.close();
-                }
-                util.mothurRemove(accnos + toString(processIDS[i]) + ".byCount");
-            }
-
-		}
-		
-        //print new *.pick.count_table
-        if (hasCount && dups) {  newCount.printTable(countlist);   }
-		
-		return num;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "createProcessesGroups");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 
-int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string filename, string accnos, string fasta, map<string, int>& priority){
+int ChimeraSlayerCommand::driver(string outputFName, string filename, string accnos, string fasta, map<string, int>& priority){
 	try {
 		
         if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
@@ -1295,14 +1022,10 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 		ifstream inFASTA;
 		util.openInputFile(filename, inFASTA);
 
-		inFASTA.seekg(filePos.start);
-		
-		if (filePos.start == 0) { chimera->printHeader(out); }
+		chimera->printHeader(out);
 
-		bool done = false;
 		int count = 0;
-	
-		while (!done) {
+		while (!inFASTA.eof()) {
 		
 			if (m->getControl_pressed()) {	delete chimera; out.close(); out2.close(); if (trim) { out3.close(); } inFASTA.close(); return 1;	}
 		
@@ -1370,14 +1093,6 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 				}
 				count++;
 			}
-			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				unsigned long long pos = inFASTA.tellg();
-				if ((pos == -1) || (pos >= filePos.end)) { break; }
-			#else
-				if (inFASTA.eof()) { break; }
-			#endif
-			
 			delete candidateSeq;
 			//report progress
 			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count) + "\n");		}
@@ -1395,168 +1110,12 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 		delete chimera;
 				
 		return count;
-		
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "driver");
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-
-int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename, string accnos, string fasta, map<string, int>& thisPriority) {
-	try {
-		int process = 0;
-		int num = 0;
-		processIDS.clear();
-        bool recalc = false;
-        
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + "\n"); }
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driver(lines[process], outputFileName + toString(toString(process)) + ".temp", filename, accnos + toString(toString(process)) + ".temp", fasta + toString(toString(process)) + ".temp", thisPriority);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = outputFileName + toString(toString(process)) + ".num.temp";
-				util.openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
-            }
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            lines.clear();
-            vector<unsigned long long> positions = util.divideFile(filename, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 0;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driver(lines[process], outputFileName + toString(toString(process)) + ".temp", filename, accnos + toString(toString(process)) + ".temp", fasta + toString(toString(process)) + ".temp", thisPriority);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = outputFileName + toString(toString(process)) + ".num.temp";
-                    util.openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
-			util.openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0;  in >> tempNum; num += tempNum; }
-			in.close(); util.mothurRemove(tempFile);
-		}
-#else
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the slayerData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<slayerData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors];
-		HANDLE  hThreadArray[processors]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors; i++ ){
-			string extension = toString(i) + ".temp";
-			slayerData* tempslayer = new slayerData((outputFileName + extension), (fasta + extension), (accnos + extension), filename, templatefile, search, blastlocation, trimera, trim, realign, m, lines[i].start, lines[i].end, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
-			pDataArray.push_back(tempslayer);
-			processIDS.push_back(i);
-			
-			//MySlayerThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MySlayerThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-				
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-#endif	
-		
-		rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
-		rename((accnos + toString(processIDS[0]) + ".temp").c_str(), accnos.c_str());
-		if (trim) {  rename((fasta + toString(processIDS[0]) + ".temp").c_str(), fasta.c_str()); }
-		
-		//append output files
-		for(int i=1;i<processIDS.size();i++){
-			util.appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-			util.mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
-			
-			util.appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
-			util.mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
-			
-			if (trim) {
-				util.appendFiles((fasta + toString(processIDS[i]) + ".temp"), fasta);
-				util.mothurRemove((fasta + toString(processIDS[i]) + ".temp"));
-			}
-		}
-		
-		
-		return num;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "createProcesses");
-		exit(1);
-	}
-}
-
 /**************************************************************************************************/
 
 int ChimeraSlayerCommand::divideInHalf(Sequence querySeq, string& leftQuery, string& rightQuery) {
