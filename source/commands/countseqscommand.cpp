@@ -18,7 +18,6 @@ vector<string> CountSeqsCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "NameSHared-sharedGroup", "NameSHared", "none","count",false,false,true); parameters.push_back(pshared);
 		CommandParameter pname("name", "InputTypes", "", "", "NameSHared", "NameSHared", "none","count",false,false,true); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
-        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -40,7 +39,6 @@ string CountSeqsCommand::getHelpString(){
 		helpString += "The count.seqs aka. make.table command reads a name or shared file and outputs a .count_table file.  You may also provide a group with the names file to get the counts broken down by group.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
-        helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The count.seqs command should be in the following format: count.seqs(name=yourNameFile).\n";
 		helpString += "Example count.seqs(name=amazon.names) or make.table(name=amazon.names).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. name), '=' and parameters (i.e.yourNameFile).\n";
@@ -169,13 +167,9 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			if (groups == "not found") { groups = "all"; }
 			util.splitAtDash(groups, Groups);
             if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
-            
-            string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
-			processors = current->setProcessors(temp);
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-
 		}
 		
 	}
@@ -191,30 +185,20 @@ int CountSeqsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-        processors=1;
-#endif
-		
         map<string, string> variables;
 
         if (namefile != "") {
-            unsigned long long total = 0;
-            long start = time(NULL);
             if (outputDir == "") { outputDir = util.hasPath(namefile); }
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(namefile));
             string outputFileName = getOutputFileName("count", variables);
             
-            total = process(outputFileName);
+            long start = time(NULL);
+            unsigned long long total = process(outputFileName);
             
             if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return 0; }
             
-            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create a table for " + toString(total) + " sequences.");
-            m->mothurOutEndLine(); m->mothurOutEndLine();
-            
-            m->mothurOutEndLine();
-            m->mothurOut("Total number of sequences: " + toString(total)); m->mothurOutEndLine();
- 
+            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create a table for " + toString(total) + " sequences.\n\n");
+            m->mothurOut("Total number of sequences: " + toString(total) + "\n");
         }else {
             if (outputDir == "") { outputDir = util.hasPath(sharedfile); }
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
@@ -366,7 +350,7 @@ unsigned long long CountSeqsCommand::process(string outputFileName){
         outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
 		out << "Representative_Sequence\ttotal";
         
-        GroupMap* groupMap;
+        GroupMap* groupMap = NULL;
 		if (groupfile != "") { 
 			groupMap = new GroupMap(groupfile); groupMap->readMap(); 
 			
@@ -377,14 +361,12 @@ unsigned long long CountSeqsCommand::process(string outputFileName){
 			sort(Groups.begin(), Groups.end());
 			
 			//print groupNames
-			for (int i = 0; i < Groups.size(); i++) {
-				out << '\t' << Groups[i];
-			}
+			for (int i = 0; i < Groups.size(); i++) { out << '\t' << Groups[i]; }
 		}
 		out << endl;
         out.close();
         
-        unsigned long long total = createProcesses(groupMap, outputFileName);
+        unsigned long long total = driver(outputFileName, groupMap);
         
         if (groupfile != "") { delete groupMap; }
         
@@ -396,114 +378,7 @@ unsigned long long CountSeqsCommand::process(string outputFileName){
 	}
 }
 /**************************************************************************************************/
-unsigned long long CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName) {
-	try {
-		
-		vector<int> processIDS;
-		int process = 0;
-        vector<unsigned long long> positions;
-        vector<linePair> lines;
-        unsigned long long numSeqs = 0;
-        bool recalc = false;
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		positions = util.divideFilePerLine(namefile, processors);
-		for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
-#else
-		lines.push_back(linePair(0, 1000));
-#endif
-
-        		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		
-		//loop through and create all the processes you want
-		while (process != processors-1) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-                string filename = toString(process) + ".temp";
-				numSeqs = driver(lines[process].start, lines[process].end, filename, groupMap);
-                
-                string tempFile = toString(process) + ".num.temp";
-                ofstream outTemp;
-                util.openOutputFile(tempFile, outTemp);
-                
-                outTemp << numSeqs << endl;
-                outTemp.close();
-                
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                for (int i=0;i<processIDS.size();i++) {
-                    util.mothurRemove((toString(processIDS[i]) + ".temp"));
-                    util.mothurRemove((toString(processIDS[i]) + ".num.temp"));
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
-            }
-		}
-		
-        
-		string filename = toString(process) + ".temp";
-        numSeqs = driver(lines[processors-1].start, lines[processors-1].end, filename, groupMap);
-        
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) {
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-        
-        for (int i = 0; i < processIDS.size(); i++) {
-            string tempFile = toString(processIDS[i]) +  ".num.temp";
-            ifstream intemp;
-            util.openInputFile(tempFile, intemp);
-            
-            int num;
-            intemp >> num; intemp.close();
-            numSeqs += num;
-            util.mothurRemove(tempFile);
-        }
-#else
-		string filename = toString(processors-1) + ".temp";
-        numSeqs = driver(lines[processors-1].start, lines[processors-1].end, filename, groupMap);
-#endif
-		
-		//append output files
-		for(int i=0;i<processIDS.size();i++){
-			util.appendFiles((toString(processIDS[i]) + ".temp"), outputFileName);
-			util.mothurRemove((toString(processIDS[i]) + ".temp"));
-		}
-        util.appendFiles(filename, outputFileName);
-        util.mothurRemove(filename);
-
-        
-        //sanity check
-        if (groupfile != "") {
-            if (numSeqs != groupMap->getNumSeqs()) {
-                m->mothurOut("[ERROR]: processes reported processing " + toString(numSeqs) + " sequences, but group file indicates you have " + toString(groupMap->getNumSeqs()) + " sequences.");
-                if (processors == 1) { m->mothurOut(" Could you have a file mismatch?\n"); }
-                else { m->mothurOut(" Either you have a file mismatch or a process failed to complete the task assigned to it.\n"); m->setControl_pressed(true); }
-            }
-		}
-		return numSeqs;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CountSeqsCommand", "createProcesses");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-unsigned long long CountSeqsCommand::driver(unsigned long long start, unsigned long long end, string outputFileName, GroupMap*& groupMap) {
+unsigned long long CountSeqsCommand::driver(string outputFileName, GroupMap*& groupMap) {
 	try {
         
         ofstream out;
@@ -511,22 +386,16 @@ unsigned long long CountSeqsCommand::driver(unsigned long long start, unsigned l
         
         ifstream in;
 		util.openInputFile(namefile, in);
-		in.seekg(start);
-        
-        //adjust start if null strings
-        if (start == 0) {  util.zapGremlins(in); util.gobble(in);  }
-
-		bool done = false;
+		
         unsigned long long total = 0;
-		while (!done) {
+		while (!in.eof()) {
 			if (m->getControl_pressed()) { break; }
 			
 			string firstCol, secondCol;
 			in >> firstCol; util.gobble(in); in >> secondCol; util.gobble(in);
-            //cout << firstCol << '\t' << secondCol << endl;
+            
             util.checkName(firstCol);
             util.checkName(secondCol);
-			//cout << firstCol << '\t' << secondCol << endl;
             
 			vector<string> names;
 			util.splitAtChar(secondCol, names, ',');
@@ -565,20 +434,11 @@ unsigned long long CountSeqsCommand::driver(unsigned long long start, unsigned l
 			}
 			
 			total += names.size();
-            
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            unsigned long long pos = in.tellg();
-            if ((pos == -1) || (pos >= end)) { break; }
-#else
-            if (in.eof()) { break; }
-#endif
-
-		}
+        }
 		in.close();
         out.close();
         
         return total;
-
     }
 	catch(exception& e) {
 		m->errorOut(e, "CountSeqsCommand", "driver");

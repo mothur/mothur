@@ -13,7 +13,6 @@
 #include "command.hpp"
 #include "groupmap.h"
 
-
 class CountSeqsCommand : public Command {
 	
 public:
@@ -40,21 +39,15 @@ private:
 	string namefile, groupfile, outputDir, groups, sharedfile;
 	bool abort, allLines;
 	vector<string> Groups, outputNames;
-    int processors;
     set<string> labels;
     
     unsigned long long process(string);
     map<int, string> processNameFile(string);
     map<int, string> getGroupNames(string, set<string>&);
     
-    unsigned long long createProcesses(GroupMap*&, string);
-    unsigned long long driver(unsigned long long, unsigned long long, string, GroupMap*&);
+    unsigned long long driver(string, GroupMap*&);
     unsigned long long processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables, vector<string>);
-
-    
 };
-
-
 
 #endif
 
