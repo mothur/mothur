@@ -41,7 +41,7 @@ private:
 	vector<string> outputNames;
 	vector<string> fastaFileNames;
     
-    int createProcesses(string, string);
+    long long createProcesses(string, string);
 	
 };
 #endif

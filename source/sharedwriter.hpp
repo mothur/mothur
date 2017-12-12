@@ -35,7 +35,7 @@ private:
     ofstream out;
 };
 
-/***********************************************************************/
+/***********************************************************************
 class SynchronizedInputFile {
 public:
     SynchronizedInputFile (const string& p) : path(p) { util.openInputFile(p, in); }

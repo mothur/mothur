@@ -271,7 +271,7 @@ void driverDegap(degapData* params){
     }
 }
 //***************************************************************************************************************
-int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
+long long DegapSeqsCommand::createProcesses(string filename, string outputFileName){
     try{
         //create array of worker threads
         vector<thread*> workerThreads;
@@ -279,9 +279,6 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
         vector<linePair> lines;
         
         long long num = 0;
-        time_t start, end;
-        time(&start);
-        
         vector<unsigned long long> positions;
 #if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);
@@ -328,9 +325,6 @@ int DegapSeqsCommand::createProcesses(string filename, string outputFileName){
             delete data[i];
             delete workerThreads[i];
         }
-        
-        time(&end);
-    
         return num;
     }
     catch(exception& e) {
