@@ -83,7 +83,7 @@ private:
     string outputDir;
     vector<string> outputNames;
     string sharedfile, method, calc;
-    int minpartitions, maxpartitions, optimizegap, processors, iters, subsampleSize;
+    int minpartitions, maxpartitions, optimizegap, iters, subsampleSize;
     vector<string> Groups, Estimators;
     set<string> labels;
     
@@ -104,5 +104,6 @@ struct summaryData {
     vector<double> partMean, partLCI, partUCI;
     
 };
+/**************************************************************************************************/
 
 #endif

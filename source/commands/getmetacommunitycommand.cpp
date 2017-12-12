@@ -24,7 +24,6 @@ vector<string> GetMetaCommunityCommand::setParameters(){
         CommandParameter pminpartitions("minpartitions", "Number", "", "5", "", "", "","",false,false,true); parameters.push_back(pminpartitions);
         CommandParameter pmaxpartitions("maxpartitions", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pmaxpartitions);
         CommandParameter poptimizegap("optimizegap", "Number", "", "3", "", "", "","",false,false,true); parameters.push_back(poptimizegap);
-        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
    		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -53,7 +52,6 @@ string GetMetaCommunityCommand::getHelpString(){
 		helpString += "The minpartitions parameter is used to .... Default=5.\n";
         helpString += "The maxpartitions parameter is used to .... Default=10.\n";
         helpString += "The optimizegap parameter is used to .... Default=3.\n";
-        helpString += "The processors parameter allows you to specify number of processors to use.  The default is 1.\n";
 		helpString += "The get.communitytype command should be in the following format: get.communitytype(shared=yourSharedFile).\n";
 		return helpString;
 	}
@@ -167,13 +165,6 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
             
             temp = validParameter.valid(parameters, "optimizegap");          if (temp == "not found"){	temp = "3";	 }
 			util.mothurConvert(temp, optimizegap);
-            
-            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
-			//set processors to 1 until we figure out whats going on with this command.
-            temp = "1";
-            //m->setProcessors(temp);
-            m->mothurOut("Using 1 processor\n");
-			util.mothurConvert(temp, processors);
             
             string groups = validParameter.valid(parameters, "groups");
 			if (groups == "not found") { groups = ""; }
@@ -335,21 +326,6 @@ int GetMetaCommunityCommand::execute(){
 //**********************************************************************************************************************
 int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
 	try {
-        
-        //#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-       // #else
-        //until bug is resolved
-        processors=1; //qFinderDMM not thread safe
-        //#endif
-        
-        vector<int> processIDS;
-		int process = 1;
-		int num = 0;
-        int minPartition = 0;
-		
-		//sanity check
-		if (maxpartitions < processors) { processors = maxpartitions; }
-        
         map<string, string> variables;
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = thislookup->getLabel();
@@ -361,154 +337,13 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
 		vector< vector<int> > dividedPartitions;
         vector< vector<string> > rels, matrix;
         vector<string> doneFlags;
-        dividedPartitions.resize(processors);
-        rels.resize(processors);
-        matrix.resize(processors);
+        dividedPartitions.resize(1);
+        rels.resize(1);
+        matrix.resize(1);
+        int minPartition = 0;
         
-        //for each file group figure out which process will complete it
-        //want to divide the load intelligently so the big files are spread between processes
-        for (int i=1; i<=maxpartitions; i++) {
-            //cout << i << endl;
-            int processToAssign = (i+1) % processors;
-            if (processToAssign == 0) { processToAssign = processors; }
-            
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: assigning " + toString(i) + " to process " + toString(processToAssign-1) + "\n"); }
-            dividedPartitions[(processToAssign-1)].push_back(i);
-            
-            variables["[tag]"] = toString(i);
-            string relName = getOutputFileName("relabund", variables);
-            string mName = getOutputFileName("matrix", variables);
-            rels[(processToAssign-1)].push_back(relName);
-            matrix[(processToAssign-1)].push_back(mName);
-        }
-        
-        for (int i = 0; i < processors; i++) { //read from everyone elses, just write to yours
-            string tempDoneFile = util.getRootName(util.getSimpleName(sharedfile)) + toString(i) + ".done.temp";
-            doneFlags.push_back(tempDoneFile);
-            ofstream out;
-            util.openOutputFile(tempDoneFile, out); //clear out 
-            out.close();
-        }
-        
-
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-                outputNames.clear();
-				num = processDriver(thislookup, dividedPartitions[process], (outputFileName + toString(process)), rels[process], matrix[process], doneFlags, process);
-                
-                //pass numSeqs to parent
-				ofstream out;
-				string tempFile = toString(process) + ".outputNames.temp";
-				util.openOutputFile(tempFile, out);
-                out << num << endl;
-                out << outputNames.size() << endl;
-				for (int i = 0; i < outputNames.size(); i++) { out << outputNames[i] << endl; }
-				out.close();
-                
-				exit(0);
-			}else {
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
-		}
-		
-		//do my part
-        if (method == "dmm") {  m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");  }
-        else {
-            m->mothurOut("K\tCH");
-            vector<string> namesOfGroups = thislookup->getNamesGroups();
-            for (int i = 0; i < namesOfGroups.size(); i++) {  m->mothurOut('\t' + namesOfGroups[i]); }
-            m->mothurOut("\n");
-        }
-		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) {
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-        
-        vector<string> tempOutputNames = outputNames;
-        for (int i=0;i<processIDS.size();i++) {
-            ifstream in;
-			string tempFile = toString(processIDS[i]) + ".outputNames.temp";
-			util.openInputFile(tempFile, in);
-			if (!in.eof()) {
-                int tempNum = 0;
-                in >> tempNum; util.gobble(in);
-                if (tempNum < minPartition) { minPartition = tempNum; }
-                in >> tempNum; util.gobble(in);
-                for (int i = 0; i < tempNum; i++) {
-                    string tempName = "";
-                    in >> tempName; util.gobble(in);
-                    tempOutputNames.push_back(tempName);
-                }
-            }
-			in.close(); util.mothurRemove(tempFile);
-            
-            util.appendFilesWithoutHeaders(outputFileName + toString(processIDS[i]), outputFileName);
-            util.mothurRemove(outputFileName + toString(processIDS[i]));
-        }
-        
-        if (processors > 1) { 
-            outputNames.clear();
-            for (int i = 0; i < tempOutputNames.size(); i++) { //remove files if needed
-                string name = tempOutputNames[i];
-                vector<string> parts;
-                util.splitAtChar(name, parts, '.');
-                bool keep = true;
-                if (((parts[parts.size()-1] == "relabund") || (parts[parts.size()-1] == "posterior")) && (parts[parts.size()-2] == "mix")) {
-                    string tempNum = parts[parts.size()-3];
-                    int num;  util.mothurConvert(tempNum, num);
-                    //if (num > minPartition) {
-                     //   util.mothurRemove(tempOutputNames[i]);
-                    //    keep = false; if (m->getDebug()) { m->mothurOut("[DEBUG]: removing " + tempOutputNames[i] + ".\n"); }
-                    //}
-                }
-                if (keep) { outputNames.push_back(tempOutputNames[i]); }
-            }
-            
-            //reorder fit file
-            ifstream in;
-            util.openInputFile(outputFileName, in);
-            string headers = util.getline(in); util.gobble(in);
-            
-            map<int, string> file;
-            while (!in.eof()) {
-                string numString, line;
-                int num;
-                in >> numString; line = util.getline(in); util.gobble(in);
-                util.mothurConvert(numString, num);
-                file[num] = line;
-            }
-            in.close();
-            ofstream out;
-            util.openOutputFile(outputFileName, out);
-            out << headers << endl;
-            for (map<int, string>::iterator it = file.begin(); it != file.end(); it++) {
-                out << it->first << '\t' << it->second << endl;
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: printing: " + toString(it->first) + '\t' + it->second + ".\n"); }
-            }
-            out.close();
-        }
-        
-#else
         m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");
 		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
-#endif
-        for (int i = 0; i < processors; i++) { //read from everyone elses, just write to yours
-            string tempDoneFile = util.getRootName(util.getSimpleName(sharedfile)) + toString(i) + ".done.temp";
-            util.mothurRemove(tempDoneFile);
-        }
         
         if (m->getControl_pressed()) { return 0; }
         
@@ -520,7 +355,6 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
         if (method == "dmm") {  generateSummaryFile(minPartition, variables, piValues); } //pam doesn't make a relabund file
         
         return 0;
-
     }
 	catch(exception& e) {
 		m->errorOut(e, "GetMetaCommunityCommand", "createProcesses");
