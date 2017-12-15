@@ -2888,11 +2888,11 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
             qLines.push_back(linePair(0, 1000)); qLines.push_back(linePair(0, 1000));  //qual[0], qual[1] - forward and reverse
         }else{
             long long numFastaSeqs = 0;
-            fastaFilePos = m->setFilePosFasta(fasta[0], numFastaSeqs, delim); //forward
+            fastaFilePos = util.setFilePosFasta(fasta[0], numFastaSeqs, delim); //forward
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
             long long numRFastaSeqs = 0;
-            qfileFilePos = m->setFilePosFasta(fasta[1], numRFastaSeqs, delim); //reverse
+            qfileFilePos = util.setFilePosFasta(fasta[1], numRFastaSeqs, delim); //reverse
             
             if (numFastaSeqs != numRFastaSeqs) {
                 if (delim == '>') {
@@ -2919,8 +2919,8 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 fastaFilePos.clear();
                 qfileFilePos.clear();
                 
-                if (qual[0] != "NONE") {  fastaFilePos = m->setFilePosFasta(qual[0], numFQualSeqs, delim);  } //forward index or qual file
-                if (qual[1] != "NONE") {  qfileFilePos = m->setFilePosFasta(qual[1], numRQualSeqs, delim);  }//reverse index or qual file
+                if (qual[0] != "NONE") {  fastaFilePos = util.setFilePosFasta(qual[0], numFQualSeqs, delim);  } //forward index or qual file
+                if (qual[1] != "NONE") {  qfileFilePos = util.setFilePosFasta(qual[1], numRQualSeqs, delim);  }//reverse index or qual file
                 
                 if (qual[0] == "NONE") { fastaFilePos = qfileFilePos; numFQualSeqs = numRQualSeqs; } //fill with duds, if both were NONE then qual.size() == 0
                 if (qual[1] == "NONE") { qfileFilePos = fastaFilePos; numRQualSeqs = numFQualSeqs; } //fill with duds, if both were NONE then qual.size() == 0

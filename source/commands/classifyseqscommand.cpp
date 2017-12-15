@@ -699,7 +699,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         if (processors == 1) {
             lines.push_back(new linePair(0, 1000));
         }else {
-            positions = m->setFilePosFasta(filename, num);
+            positions = util.setFilePosFasta(filename, num);
             if (num < processors) { processors = num; }
             
             //figure out how many sequences you have to process

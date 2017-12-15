@@ -294,7 +294,7 @@ int TrimFlowsCommand::execute(){
 			lines.push_back(new linePair(0, 1000));
 		}else {
 			long long numFlowLines;
-			flowFilePos = m->setFilePosEachLine(flowFileName, numFlowLines);
+			flowFilePos = util.setFilePosEachLine(flowFileName, numFlowLines);
 			flowFilePos.erase(flowFilePos.begin() + 1); numFlowLines--;
 			
 			//figure out how many sequences you have to process

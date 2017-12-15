@@ -275,7 +275,7 @@ int AlignCommand::execute(){
 			positions = util.divideFile(candidateFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 		#else
-            positions = m->setFilePosFasta(candidateFileNames[s], numFastaSeqs);
+            positions = util.setFilePosFasta(candidateFileNames[s], numFastaSeqs);
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
             //figure out how many sequences you have to process

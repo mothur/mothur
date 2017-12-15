@@ -633,7 +633,7 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
 #else
         if (processors == 1) { lines.push_back(new linePair(0, -1)); }//forces it to read whole file
         else {
-            positions = m->setFilePosFasta(filename, num);
+            positions = util.setFilePosFasta(filename, num);
             if (num < processors) { processors = num; }
             
             //figure out how many sequences you have to process

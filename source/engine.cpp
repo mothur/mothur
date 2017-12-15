@@ -48,7 +48,7 @@ InteractEngine::InteractEngine(string path){
     #ifdef MOTHUR_FILES
     #else
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        if (mout->getProgramPath() != "") { mout->setDefaultPath(mout->getProgramPath()); }
+        if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
     #endif
     
     if (mout->getLogFileName() == "") {
@@ -179,7 +179,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 #ifdef MOTHUR_FILES
 #else
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        if (mout->getProgramPath() != "") { mout->setDefaultPath(mout->getProgramPath()); }
+        if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
 #endif
 
 				
@@ -300,7 +300,7 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 #else
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
         //string tempDefault = path.substr(0, (path.find_last_of('m')));
-        if (path != "") { mout->setDefaultPath(path); }
+        if (path != "") { current->setDefaultPath(path); }
 #endif
 
 				

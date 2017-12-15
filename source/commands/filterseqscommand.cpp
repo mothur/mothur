@@ -316,7 +316,7 @@ int FilterSeqsCommand::filterSequences() {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             positions = util.divideFile(fastafileNames[s], processors);
 #else
-            positions = m->setFilePosFasta(fastafileNames[s], numSeqs);
+            positions = util.setFilePosFasta(fastafileNames[s], numSeqs);
             if (numSeqs < processors) { processors = numSeqs; }
 #endif
             }
@@ -572,7 +572,7 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else
         long long numFastaSeqs = 0;
-        positions = m->setFilePosFasta(filename, numFastaSeqs);
+        positions = util.setFilePosFasta(filename, numFastaSeqs);
         if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         
         //figure out how many sequences you have to process

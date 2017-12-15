@@ -28,6 +28,9 @@ public:
         seq.printSequence(out);
     }
     
+    void setFixedShowPoint() {  out.setf(ios::fixed, ios::showpoint);  }
+    void setPrecision(int p)  { out << setprecision(p);  }
+    
 private:
     string path;
     std::mutex writerMutex;

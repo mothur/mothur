@@ -1125,7 +1125,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 #else
         
         long long numFastaSeqs = 0;
-        positions = m->setFilePosFasta(fastafile, numFastaSeqs);
+        positions = util.setFilePosFasta(fastafile, numFastaSeqs);
         if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         
         //figure out how many sequences you have to process

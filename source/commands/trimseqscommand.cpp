@@ -1674,12 +1674,12 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             if (qfilename != "") {  qLines.push_back(linePair(0, 1000)); }
         }else{
             long long numFastaSeqs = 0;
-            fastaFilePos = m->setFilePosFasta(filename, numFastaSeqs); 
+            fastaFilePos = util.setFilePosFasta(filename, numFastaSeqs); 
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         
             if (qfilename != "") { 
                 long long numQualSeqs = 0;
-                qfileFilePos = m->setFilePosFasta(qfilename, numQualSeqs); 
+                qfileFilePos = util.setFilePosFasta(qfilename, numQualSeqs); 
                 
                 if (numFastaSeqs != numQualSeqs) {
                     m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file."); m->mothurOutEndLine(); m->setControl_pressed(true); 

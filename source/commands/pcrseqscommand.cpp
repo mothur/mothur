@@ -328,7 +328,6 @@ int PcrSeqsCommand::execute(){
         variables["[tag]"] = "scrap";
         string badSeqFile = getOutputFileName("fasta",variables);
 		
-		
         length = 0;
 		if(oligosfile != ""){    readOligos();     if (m->getDebug()) { m->mothurOut("[DEBUG]: read oligos file. numprimers = " + toString(numFPrimers) + ", revprimers = " + toString(numRPrimers) + ".\n"); } }  if (m->getControl_pressed()) {  return 0; }
         if(ecolifile != "") {    readEcoli();      }  if (m->getControl_pressed()) {  return 0; }
@@ -342,7 +341,7 @@ int PcrSeqsCommand::execute(){
         if (processors == 1) {
             lines.push_back(linePair(0, 1000));
         }else {
-            positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
+            positions = util.setFilePosFasta(fastafile, numFastaSeqs); 
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
             //figure out how many sequences you have to process

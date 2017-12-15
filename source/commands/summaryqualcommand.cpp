@@ -207,7 +207,7 @@ int SummaryQualCommand::execute(){
 		if (processors == 1) {
 			lines.push_back(linePair(0, 1000)); 
 		}else {
-			positions = m->setFilePosFasta(qualfile, numSeqs); 
+			positions = util.setFilePosFasta(qualfile, numSeqs); 
             if (numSeqs < processors) { processors = numSeqs; }
 			
 			//figure out how many sequences you have to process

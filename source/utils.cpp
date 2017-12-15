@@ -660,7 +660,7 @@ vector<bool> Utils::isGZ(string filename){
         }
         fileHandle.close();
 #else
-        mothurOut("[ERROR]: cannot test for gz format without enabling boost libraries.\n"); m->setControl_pressed(true);
+        m->mothurOut("[ERROR]: cannot test for gz format without enabling boost libraries.\n"); m->setControl_pressed(true);
 #endif
         return results; //results[0] = true; results[1] = true;
     }
@@ -1754,7 +1754,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
         
         proc = (filePos.size() - 1);
 #else
-        mothurOut("[ERROR]: Windows version should not be calling the divideFile function."); mothurOutEndLine();
+        m->mothurOut("[ERROR]: Windows version should not be calling the divideFile function.\n");
         proc=1;
         filePos.push_back(size);
 #endif
@@ -1854,7 +1854,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
         
         proc = (filePos.size() - 1);
 #else
-        mothurOut("[ERROR]: Windows version should not be calling the divideFile function."); mothurOutEndLine();
+        m->mothurOut("[ERROR]: Windows version should not be calling the divideFile function.\n");
         proc=1;
         filePos.push_back(size);
 #endif
@@ -1931,7 +1931,7 @@ vector<unsigned long long> Utils::divideFilePerLine(string filename, int& proc) 
         
         proc = (filePos.size() - 1);
 #else
-        mothurOut("[ERROR]: Windows version should not be calling the divideFile function."); mothurOutEndLine();
+        m->mothurOut("[ERROR]: Windows version should not be calling the divideFile function.\n");
         proc=1;
         filePos.push_back(size);
 #endif
@@ -4003,7 +4003,7 @@ int Utils::getTimeStamp(string filename) {
             
             timeStamp = t;
         }
-        else { mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); control_pressed = true; }
+        else { m->mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); m->setControl_pressed(true); }
         
 #endif
         
