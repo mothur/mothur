@@ -109,6 +109,7 @@ struct trimData {
     map<string, string> groupMap;
     map<int, oligosPair> pairedBarcodes;
     map<int, oligosPair> pairedPrimers;
+    Utils util;
     
 	trimData(){}
 	trimData(string fn, string qn, string nf, string cf, string tn, string sn, string tqn, string sqn, string tnn, string snn, string tcn, string scn,string gn, vector<vector<string> > ffn, vector<vector<string> > qfn, vector<vector<string> > nfn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend,  MothurOut* mout,
@@ -186,6 +187,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 	pDataArray = (trimData*)lpParam;
 	
 	try {
+        
         ofstream trimFASTAFile;
 		pDataArray->util.openOutputFile(pDataArray->trimFileName, trimFASTAFile);
 		

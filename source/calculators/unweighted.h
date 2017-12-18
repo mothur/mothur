@@ -25,15 +25,10 @@ class Unweighted : public TreeCalculator  {
 		EstOutput getValues(Tree*, string, string, int, string);
 		
 	private:
-		struct linePair {
-			int start;
-			int num;
-			linePair(int i, int j) : start(i), num(j) {}
-		};
 		vector<linePair> lines;
         Utils util;
 		
-        vector<string> Groups;
+        vector<string> Groups, Treenames;
 		EstOutput data;
 		int processors;
 		string outputDir;
@@ -57,6 +52,8 @@ struct unweightedData {
     Tree* t;
     CountTable* ct;
     bool includeRoot;
+    vector<string> Treenames;
+    Utils util;
     
 	unweightedData(){}
 	unweightedData(MothurOut* mout, int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count, bool ir) {
@@ -67,6 +64,7 @@ struct unweightedData {
         t = tree;
         ct = count;
         includeRoot = ir;
+        Treenames = tree->getTreeNames();
 	}
 };
 
@@ -214,7 +212,7 @@ static DWORD WINAPI MyUnWeightedRandomThreadFunction(LPVOID lpParam){
 		
 		int count = 0;
 		
-		Tree* copyTree = new Tree(pDataArray->ct);
+		Tree* copyTree = new Tree(pDataArray->ct, pDataArray->Treenames);
 		
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {
             

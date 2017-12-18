@@ -45,6 +45,8 @@ struct parsData {
     vector< vector<string> > namesOfGroupCombos;
     Tree* t;
     CountTable* ct;
+    Utils util;
+    vector<string> Treenames;
     
 	parsData(){}
 	parsData(MothurOut* mout, int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count) {
@@ -54,6 +56,7 @@ struct parsData {
         namesOfGroupCombos = ngc;
         t = tree;
         ct = count;
+        Treenames = t->getTreeNames();
 	}
 };
 
@@ -67,7 +70,7 @@ static DWORD WINAPI MyParsimonyThreadFunction(LPVOID lpParam){
         
         pDataArray->results.resize(pDataArray->num);
 		
-		Tree* copyTree = new Tree(pDataArray->ct);
+		Tree* copyTree = new Tree(pDataArray->ct, pDataArray->Treenames);
 		int count = 0;
 		
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {

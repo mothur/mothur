@@ -72,6 +72,7 @@ struct pcrData {
 	MothurOut* m;
     set<string> badSeqNames;
     bool keepprimer, keepdots, fileAligned, adjustNeeded;
+    Utils util;
 	
 	pcrData(){}
 	pcrData(string f, string gf, string bfn, string loc, MothurOut* mout, string ol, string ec, string nm, bool kp, bool kd, int st, int en, int l, int pd, int rd, unsigned long long fst, unsigned long long fen) {

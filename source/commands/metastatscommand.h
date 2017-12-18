@@ -71,6 +71,7 @@ struct metastatsData {
 	MothurOut* m;
 	string sharedfile;
     string outputDir;
+    Utils util;
 	
 	metastatsData(){}
 	metastatsData(string sf, string oDir, MothurOut* mout, int st, int en, vector< vector<string> > ns, SharedRAbundVectors*& lu, vector<string> dg, int i, float thr) {
@@ -143,7 +144,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 				
 				pDataArray->m->mothurOutEndLine();
 				MothurMetastats mothurMeta(pDataArray->threshold, pDataArray->iters);
-				mothurMeta.runMetastats(outputFileName, data2, setACount);
+				mothurMeta.runMetastats(outputFileName, data2, setACount, pDataArray->thisLookUp->getOTUNames());
 				pDataArray->m->mothurOutEndLine();
 				pDataArray->m->mothurOutEndLine(); 
 			}

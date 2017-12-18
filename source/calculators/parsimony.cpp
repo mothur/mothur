@@ -223,20 +223,20 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);
             trees.push_back(copyTree);
             
-            parsData* temppars = new parsData(m, lines[i].start, lines[i].num, namesOfGroupCombos, copyTree, copyCount);
+            parsData* temppars = new parsData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount);
 			pDataArray.push_back(temppars);
 			processIDS.push_back(i);
             
 			hThreadArray[i-1] = CreateThread(NULL, 0, MyParsimonyThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, ct);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);

@@ -284,7 +284,7 @@ long long DegapSeqsCommand::createProcesses(string filename, string outputFileNa
         positions = util.divideFile(filename, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        if (processors == 1) { lines.push_back(new linePair(0, -1)); }//forces it to read whole file
+        if (processors == 1) { lines.push_back(linePair(0, -1)); }//forces it to read whole file
         else {
             positions = util.setFilePosFasta(filename, num);
             if (num < processors) { processors = num; }

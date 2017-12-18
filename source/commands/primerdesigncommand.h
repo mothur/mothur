@@ -82,6 +82,7 @@ struct primerDesignData {
     set<int> otusToRemove;
     vector<Sequence> consSeqs;
     int numBinsProcessed;
+    Utils util;
 	
 	primerDesignData(){}
 	primerDesignData(string sf, MothurOut* mout, int st, int en, vector<double> min, vector<double> max, set<string> pri, vector<Sequence> seqs, int d, int otun, int l, int tid) {

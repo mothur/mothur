@@ -20,6 +20,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		outputDir = o;
         
         CountTable* ct = t->getCountTable();
+        Treenames = t->getTreeNames();
 		
 		if (m->getControl_pressed()) { return data; }
 		
@@ -62,6 +63,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
         vector<int> processIDS;
 		EstOutput results;
         bool recalc = false;
+        vector<string> Treenames = t->getTreeNames();
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -75,7 +77,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				process++;
 			}else if (pid == 0){
 				EstOutput Myresults;
-				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
+				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, ct);
 			
 				//pass numSeqs to parent
 				ofstream out;
@@ -104,7 +106,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			}
 		}
 	
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, ct);
 	
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -150,20 +152,20 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);
             trees.push_back(copyTree);
             
-            weightedData* tempweighted = new weightedData(m, lines[i].start, lines[i].num, namesOfGroupCombos, copyTree, copyCount, includeRoot);
+            weightedData* tempweighted = new weightedData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount, includeRoot);
 			pDataArray.push_back(tempweighted);
 			processIDS.push_back(i);
             
 			hThreadArray[i-1] = CreateThread(NULL, 0, MyWeightedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, ct);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);

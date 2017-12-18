@@ -538,14 +538,14 @@ void DistanceCommand::createProcesses(string filename) {
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             distanceData* dataBundle = new distanceData(lines[i+1].start, lines[i+1].end, (filename + toString(i+1) + ".temp"),
-                                                      cutoff, alignDB, Estimators, m, output, numNewFasta, countends);
+                                                      cutoff, alignDB, Estimators, output, numNewFasta, countends);
             data.push_back(dataBundle);
             
             if (output != "square") { workerThreads.push_back(new thread(driverColumn, dataBundle)); }
             else { workerThreads.push_back(new thread(driverPhylip, dataBundle)); }
         }
         
-        distanceData* dataBundle = new distanceData(lines[0].start, lines[0].end, filename, cutoff, alignDB, Estimators, m, output, numNewFasta, countends);
+        distanceData* dataBundle = new distanceData(lines[0].start, lines[0].end, filename, cutoff, alignDB, Estimators, output, numNewFasta, countends);
         if (output != "square") { driverColumn(dataBundle); }
         else { driverPhylip(dataBundle); }
         long long distsBelowCutoff = dataBundle->count;

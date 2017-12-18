@@ -74,6 +74,7 @@ struct shhhseqsData {
 	int sigma, threadID, count;
 	vector<string> groups;
 	vector<string> mapfileNames;
+    Utils util;
 	
 	shhhseqsData(){}
 	shhhseqsData(string f, string n, string g, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int s, int tid) {

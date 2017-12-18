@@ -37,14 +37,14 @@ struct distanceData {
     Utils util;
 	
 	distanceData(){}
-	distanceData(int s, int e, string dbname, float c, SequenceDB db, vector<string> Est, MothurOut* mout, string o, long long num, bool cnt) {
+	distanceData(int s, int e, string dbname, float c, SequenceDB db, vector<string> Est, string o, long long num, bool cnt) {
 		startLine = s;
 		endLine = e;
 		dFileName = dbname;
 		cutoff = c;
 		alignDB = db;
 		Estimators = Est;
-		m = mout;
+        m = MothurOut::getInstance();
 		output = o;
 		numNewFasta = num;
 		countends = cnt;

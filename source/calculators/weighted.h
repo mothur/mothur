@@ -26,14 +26,9 @@ class Weighted : public TreeCalculator  {
 		EstOutput getValues(Tree*, int, string);
 		
 	private:
-		struct linePair {
-			int start;
-			int num;
-			linePair(int i, int j) : start(i), num(j) {}
-		};
 		vector<linePair> lines;
         Utils util;
-        vector<string> Groups;
+        vector<string> Groups, Treenames;
 		EstOutput data;
 		map<string, int>::iterator it;
 		map<string, double> WScore; //a score for each group combination i.e. AB, AC, BC.

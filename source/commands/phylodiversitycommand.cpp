@@ -405,6 +405,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 		vector<int> processIDS;
 		map< string, vector<float> >::iterator itSum;
         bool recalc = false;
+        vector<string> Treenames = t->getTreeNames();
 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
@@ -550,7 +551,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);
@@ -562,7 +563,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
             set<int> copynumSampledList = numSampledList;
             map<string, int> copyRootForGrouping = rootForGroup;
             
-            phylodivData* temp = new phylodivData(m, procIters[i], copydiv, copysumDiv, copyTree, copyCount, increment, copyrandomLeaf, copynumSampledList, copyRootForGrouping, subsample, subsampleSize);
+            phylodivData* temp = new phylodivData(m, procIters[i], copydiv, copysumDiv, copyTree, copyCount, increment, copyrandomLeaf, copynumSampledList, copyRootForGrouping, subsample, subsampleSize, Groups);
 			pDataArray.push_back(temp);
 			processIDS.push_back(i);
             

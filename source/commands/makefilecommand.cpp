@@ -188,19 +188,19 @@ int MakeFileCommand::execute(){
                         if (numDiffs > 1) { break; }
                         else if (simpleName1[j] != simpleName2[j]) { numDiffs++; }
                     }
-                    if (numDiffs > 1) { singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i]; }
+                    if (numDiffs > 1) { singles.push_back(util.getSimpleName(fastqFiles[i])); lastFile = fastqFiles[i]; }
                     else { //only one diff = paired files
                         vector<string> temp;
-                        temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
+                        temp.push_back(util.getSimpleName(fastqFiles[i])); temp.push_back(util.getSimpleName(fastqFiles[i+1])); lastFile = fastqFiles[i+1];
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: Pairing " + fastqFiles[i] + " with " + fastqFiles[i+1] + ".\n"); }
                         paired.push_back(temp);
                         i++;
                     }
                 }else{
-                    singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
+                    singles.push_back(util.getSimpleName(fastqFiles[i])); lastFile = fastqFiles[i];
                 }
             }
-            if (lastFile != fastqFiles[fastqFiles.size()-1]) { singles.push_back(fastqFiles[fastqFiles.size()-1]); }
+            if (lastFile != fastqFiles[fastqFiles.size()-1]) { singles.push_back(util.getSimpleName(fastqFiles[fastqFiles.size()-1])); }
             
             if (singles.size() != 0) {
                 map<string, string> variables;
@@ -212,9 +212,7 @@ int MakeFileCommand::execute(){
                 outputNames.push_back(filename); outputTypes["file"].push_back(filename);
                 current->setFileFile(filename);
                 
-                for (int i = 0; i < singles.size(); i++) {
-                    out << singles[i] << endl;
-                }
+                for (int i = 0; i < singles.size(); i++) { out << singles[i] << endl; }
                 out.close();
             }
             

@@ -115,6 +115,7 @@ struct preClusterData {
 	vector<string> mapFileNames;
     bool topdown;
 	float match, misMatch, gapOpen, gapExtend;
+    Utils util;
     
 	preClusterData(){}
 	preClusterData(string f, string n, string g, string c, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, bool td, int tid, string me, string al, float ma, float misma, float gpOp, float gpEx) {

@@ -76,6 +76,7 @@ struct indicatorData {
     int iters, num;
     vector<float> indicatorValues;
     vector<float> pvalues;
+    Utils util;
 	
 	indicatorData(){}
 	indicatorData(MothurOut* mout, int it, vector< vector<SharedRAbundFloatVector*> > ng, int n, vector<float> iv) {

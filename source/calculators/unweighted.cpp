@@ -20,6 +20,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
         
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = Groups.size();
+        Treenames = t->getTreeNames();
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -93,7 +94,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				process++;
 			}else if (pid == 0){
 				EstOutput myresults;
-				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
+				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, ct);
 				
 				if (m->getControl_pressed()) { exit(0); }
 				
@@ -184,7 +185,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
                     process++;
                 }else if (pid == 0){
                     EstOutput myresults;
-                    myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
+                    myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, ct);
                     
                     if (m->getControl_pressed()) { exit(0); }
                     
@@ -205,7 +206,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
             }
         }
         
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, ct);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -250,7 +251,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);
@@ -432,6 +433,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 	try {
         int process = 1;
 		vector<int> processIDS;
+        vector<string> Treenames = t->getTreeNames();
 		
 		EstOutput results;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -445,7 +447,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				process++;
 			}else if (pid == 0){
 				EstOutput myresults;
-				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, usingGroups, ct);
+				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, usingGroups, ct);
 				
 				if (m->getControl_pressed()) { exit(0); }
 				
@@ -461,7 +463,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
             }
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, usingGroups, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, usingGroups, ct);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -510,7 +512,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);

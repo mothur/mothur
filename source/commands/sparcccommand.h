@@ -58,7 +58,8 @@ struct sparccData {
     vector<vector<float> > pValues;
     int numSamplings, maxIterations, numPermutations;
     string normalizeMethod;
-	
+    Utils util;
+    
 	sparccData(){}
 	sparccData(MothurOut* mout, int it, vector< vector<float> > cs, vector< vector<float> > co, int ns, int mi, int np, string nm) {
 		m = mout;

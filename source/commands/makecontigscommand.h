@@ -132,6 +132,7 @@ struct contigsData {
     string compositeGroupFile, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile;
     map<string, int> totalGroupCounts;
     map<int, string> file2Group;
+    Utils util;
     
 	
 	contigsData(){}
@@ -340,7 +341,7 @@ static DWORD WINAPI MyGroupContigsThreadFunction(LPVOID lpParam){
             string thisOutputDir = pDataArray->outputDir;
             
             string inputFile = ffastqfile;
-            if (pDataArray->outputDir == "") {  thisOutputDir = pDataArray->m->hasPath(inputFile); }
+            if (pDataArray->outputDir == "") {  thisOutputDir = pDataArray->util.hasPath(inputFile); }
             pDataArray->outputQual = thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile)) + ".trim.qfile";
             pDataArray->outputScrapQual = thisOutputDir + pDataArray->util.getRootName(pDataArray->util.getSimpleName(inputFile)) + ".scrap.qfile";
             pDataArray->inputFiles.push_back(ffastqfile); pDataArray->inputFiles.push_back(rfastqfile);

@@ -64,6 +64,7 @@ struct seqSumQualData {
 	MothurOut* m;
     bool hasNameMap;
 	map<string, int> nameMap;
+    Utils util;
 	
 	~seqSumQualData(){}
 	seqSumQualData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool n, map<string, int> nam) {

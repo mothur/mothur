@@ -84,9 +84,7 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 				lookup->set(binNumber, abundance);
 				rank->set(abundance, rank->get(abundance)+1);
 
-				if((i == 0) || ((i+1) % increment == 0) || (ends.count(i+1) != 0)){
-					rcd->updateRankData(rank);
-				}
+				if((i == 0) || ((i+1) % increment == 0) || (ends.count(i+1) != 0)){ rcd->updateRankData(rank); }
 			}
 	
 			if((numSeqs % increment != 0) || (ends.count(numSeqs) != 0)){ rcd->updateRankData(rank); }

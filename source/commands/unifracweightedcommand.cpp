@@ -741,6 +741,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 		vector<int> processIDS;
 		EstOutput results;
         bool recalc = false;
+        vector<string> Treenames = t->getTreeNames();
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//loop through and create all the processes you want
@@ -858,7 +859,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);
@@ -866,7 +867,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
             
             vector< vector<double> > copyScores = rScores;
             
-            weightedRandomData* tempweighted = new weightedRandomData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, copyScores);
+            weightedRandomData* tempweighted = new weightedRandomData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, copyScores, Groups);
 			pDataArray.push_back(tempweighted);
 			processIDS.push_back(i);
             
