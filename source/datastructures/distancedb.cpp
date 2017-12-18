@@ -73,8 +73,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted, vec
 				
 				//calc distance from this sequence to every sequence in the template
 				for (int i = 0; i < data.size(); i++) {
-					distCalculator->calcDist(*query, data[i]);
-					float dist = distCalculator->getDist();
+					double dist = distCalculator->calcDist(*query, data[i]);
 					
 					//save distance to each template sequence
 					dists[i].seq1 = -1;
@@ -97,8 +96,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted, vec
 				int bestIndex = 0;
 				float smallDist = 100000;
 				for (int i = 0; i < data.size(); i++) {
-					distCalculator->calcDist(*query, data[i]);
-					float dist = distCalculator->getDist();
+					double dist = distCalculator->calcDist(*query, data[i]);
 					
 					//are you smaller?
 					if (dist < smallDist) {

@@ -396,8 +396,7 @@ int driverColumn(pairwiseData* params){
                 seqI.setAligned(alignment->getSeqAAln());
                 seqJ.setAligned(alignment->getSeqBAln());
                 
-                distCalculator->calcDist(seqI, seqJ);
-                double dist = distCalculator->getDist();
+                double dist = distCalculator->calcDist(seqI, seqJ);
                 
                 if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + "\n distance = " + toString(dist) + "\n"); }
                 
@@ -479,8 +478,7 @@ int driverLt(pairwiseData* params){
                 seqI.setAligned(alignment->getSeqAAln());
                 seqJ.setAligned(alignment->getSeqBAln());
                 
-                distCalculator->calcDist(seqI, seqJ);
-                double dist = distCalculator->getDist();
+                double dist = distCalculator->calcDist(seqI, seqJ);
                 
                 if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
                 
@@ -567,8 +565,7 @@ int driverSquare(pairwiseData* params){
                 seqI.setAligned(alignment->getSeqAAln());
                 seqJ.setAligned(alignment->getSeqBAln());
                 
-                distCalculator->calcDist(seqI, seqJ);
-                double dist = distCalculator->getDist();
+                double dist = distCalculator->calcDist(seqI, seqJ);
                 
                 outFile << '\t' << dist;
                 

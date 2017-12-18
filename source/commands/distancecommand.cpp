@@ -348,20 +348,69 @@ void driverColumn(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (params->countends) {
-            for (int i=0; i<params->Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) ) {
-                    if (params->Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                    else if (params->Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
-                    else if (params->Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
-                }
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
             }
         }else {
-            for (int i=0; i<params->Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) ) {
-                    if (params->Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                    else if (params->Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                    else if (params->Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+        
+        int startTime = time(NULL);
+        
+        params->count = 0;
+        for(int i=params->startLine;i<params->endLine;i++){
+            
+            Sequence seqI = params->alignDB.get(i);
+            for(int j=0;j<i;j++){
+                
+                if (params->m->getControl_pressed()) { break;  }
+                
+                if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
+                
+                Sequence seqJ = params->alignDB.get(j);
+                double dist = distCalculator->calcDist(seqI, seqJ);
+                
+                if(dist <= params->cutoff){
+                    params->threadWriter->write(seqI.getName() + " " + seqJ.getName() + " " + toString(dist) + "\n");
+                    params->count++;
                 }
+            }
+            
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+            
+        }
+        params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
+        
+        delete distCalculator;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "DistanceCommand", "driverColumn");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+/////// need to fix to work with calcs and sequencedb
+void driverLt(distanceData* params){
+    try {
+        ValidCalculators validCalculator;
+        DistCalc* distCalculator;
+        if (params->countends) {
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
             }
         }
         
@@ -370,45 +419,35 @@ void driverColumn(distanceData* params){
         
         //column file
         ofstream outFile;
-        params->util.openOutputFile(params->dFileName, outFile);
+        params->util.openOutputFile(params->outputFileName, outFile);
         outFile.setf(ios::fixed, ios::showpoint);
         outFile << setprecision(4);
         
-        if((params->output == "lt") && params->startLine == 0){	outFile << numSeqs << endl;	}
+        if(params->startLine == 0){	outFile << numSeqs << endl;	}
         
         
         params->count = 0;
         for(int i=params->startLine;i<params->endLine;i++){
-            if(params->output == "lt")	{
-                string name = params->alignDB.get(i).getName();
-                if (name.length() < 10) { //pad with spaces to make compatible
-                    while (name.length() < 10) {  name += " ";  }
-                }
-                outFile << name;
-            }
+            
+            string name = params->alignDB.get(i).getName();
+            if (name.length() < 10) {  while (name.length() < 10) {  name += " ";  } }
+            outFile << name;
+            
             for(int j=0;j<i;j++){
                 
                 if (params->m->getControl_pressed()) { break;  }
                 
-                //if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
-                //the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
                 if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
                 
-                distCalculator->calcDist(params->alignDB.get(i), params->alignDB.get(j));
-                double dist = distCalculator->getDist();
+                double dist = distCalculator->calcDist(params->alignDB.get(i), params->alignDB.get(j));
                 
-                if(dist <= params->cutoff){
-                    if (params->output == "column") { outFile << params->alignDB.get(i).getName() << ' ' << params->alignDB.get(j).getName() << ' ' << dist << endl; }
-                    params->count++;
-                }
-                if (params->output == "lt") {  outFile  << '\t' << dist; }
+                if(dist <= params->cutoff){ params->count++; }
+                outFile  << '\t' << dist;
             }
             
-            if (params->output == "lt") { outFile << endl; }
+            outFile << endl;
             
-            if(i % 100 == 0){
-                params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n");
-            }
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
             
         }
         params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
@@ -417,39 +456,34 @@ void driverColumn(distanceData* params){
         delete distCalculator;
     }
     catch(exception& e) {
-        params->m->errorOut(e, "DistanceCommand", "driver");
+        params->m->errorOut(e, "DistanceCommand", "driverLt");
         exit(1);
     }
 }
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
-void driverPhylip(distanceData* params){
+void driverSquare(distanceData* params){
     try {
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (params->countends) {
-            for (int i=0; i<params->Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) ) {
-                    if (params->Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                    else if (params->Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
-                    else if (params->Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
-                }
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
             }
         }else {
-            for (int i=0; i<params->Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("distance", params->Estimators[i]) ) {
-                    if (params->Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                    else if (params->Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                    else if (params->Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
-                }
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
             }
         }
-        
         int startTime = time(NULL);
         
         //column file
         ofstream outFile;
-        params->util.openOutputFile(params->dFileName, outFile);
+        params->util.openOutputFile(params->outputFileName, outFile);
         outFile.setf(ios::fixed, ios::showpoint);
         outFile << setprecision(4);
         
@@ -469,8 +503,7 @@ void driverPhylip(distanceData* params){
                 
                 if (params->m->getControl_pressed()) { break; }
                 
-                distCalculator->calcDist(params->alignDB.get(i), params->alignDB.get(j));
-                double dist = distCalculator->getDist();
+                double dist = distCalculator->calcDist(params->alignDB.get(i), params->alignDB.get(j));
                 
                 if(dist <= params->cutoff){ params->count++; }
                 
@@ -490,7 +523,7 @@ void driverPhylip(distanceData* params){
         delete distCalculator;
     }
     catch(exception& e) {
-        params->m->errorOut(e, "DistanceCommand", "driver");
+        params->m->errorOut(e, "DistanceCommand", "driverSquare");
         exit(1);
     }
 }
@@ -498,19 +531,14 @@ void driverPhylip(distanceData* params){
 /**************************************************************************************************/
 void DistanceCommand::createProcesses(string filename) {
 	try {
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<distanceData*> data;
+        long long num = alignDB.getNumSeqs();
         unsigned long long numDists = 0;
         
-        if (output == "square") {
-            numDists = numSeqs * numSeqs;
-        }else {
-            for(int i=0;i<numSeqs;i++){
-                for(int j=0;j<i;j++){
-                    numDists++;
-                    if (numDists > processors) { break; }
-                }
-            }
-        }
-        
+        if (output == "square") { numDists = numSeqs * numSeqs; }
+        else { for(int i=0;i<numSeqs;i++){ for(int j=0;j<i;j++){ numDists++; if (numDists > processors) { break; } } } }
         if (numDists < processors) { processors = numDists; }
         
         vector<linePair> lines;
@@ -524,30 +552,44 @@ void DistanceCommand::createProcesses(string filename) {
                 lines[i].start = int ((float(i)/float(processors)) * numSeqs);
                 lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
             }
-            
         }
-        
-        //create array of worker threads
-        vector<thread*> workerThreads;
-        vector<distanceData*> data;
-        
-        long long num = alignDB.getNumSeqs();
+    
+        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(filename);
+        synchronizedOutputFile->setFixedShowPoint();
+        synchronizedOutputFile->setPrecision(4);
         
         time_t start, end;
         time(&start);
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            distanceData* dataBundle = new distanceData(lines[i+1].start, lines[i+1].end, (filename + toString(i+1) + ".temp"),
-                                                      cutoff, alignDB, Estimators, output, numNewFasta, countends);
+            OutputWriter* threadWriter = NULL;
+            distanceData* dataBundle = NULL;
+            string extension = toString(i+1) + ".temp";
+            if (output == "column") {
+                threadWriter = new OutputWriter(synchronizedOutputFile);
+                dataBundle = new distanceData(threadWriter);
+            }else { dataBundle = new distanceData(filename+extension); }
+            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, cutoff, alignDB, Estimators[0], numNewFasta, countends);
             data.push_back(dataBundle);
             
-            if (output != "square") { workerThreads.push_back(new thread(driverColumn, dataBundle)); }
-            else { workerThreads.push_back(new thread(driverPhylip, dataBundle)); }
+            thread* thisThread = NULL;
+            if (output == "column")     { thisThread = new thread(driverColumn, dataBundle);        }
+            else if (output == "lt")    { thisThread = new thread(driverLt, dataBundle);            }
+            else                        { thisThread = new thread(driverSquare, dataBundle);        }
+            workerThreads.push_back(thisThread);
         }
         
-        distanceData* dataBundle = new distanceData(lines[0].start, lines[0].end, filename, cutoff, alignDB, Estimators, output, numNewFasta, countends);
-        if (output != "square") { driverColumn(dataBundle); }
-        else { driverPhylip(dataBundle); }
+        OutputWriter* threadWriter = NULL;
+        distanceData* dataBundle = NULL;
+        if (output == "column") {
+            threadWriter = new OutputWriter(synchronizedOutputFile);
+            dataBundle = new distanceData(threadWriter);
+        }else { dataBundle = new distanceData(filename); }
+        dataBundle->setVariables(lines[0].start, lines[0].end, cutoff, alignDB, Estimators[0], numNewFasta, countends);
+        
+        if (output == "column")     { driverColumn(dataBundle);   delete threadWriter;     }
+        else if (output == "lt")    { driverLt(dataBundle);            }
+        else                        { driverSquare(dataBundle);        }
         long long distsBelowCutoff = dataBundle->count;
         delete dataBundle;
         
@@ -555,7 +597,12 @@ void DistanceCommand::createProcesses(string filename) {
             workerThreads[i]->join();
             
             distsBelowCutoff += data[i]->count;
-            
+            if (output == "column") {  delete data[i]->threadWriter; }
+            else {
+                string extension = toString(i+1) + ".temp";
+                util.appendFiles((filename+extension), filename);
+                util.mothurRemove(filename+extension);
+            }
             delete data[i];
             delete workerThreads[i];
         }
@@ -563,13 +610,6 @@ void DistanceCommand::createProcesses(string filename) {
         
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to find distances for " + toString(num) + " sequences. " + toString(distsBelowCutoff) + " distances below cutoff " + toString(cutoff) + ".\n\n");
-
-		//append and remove temp files
-		for (int i=0;i<processors-1;i++) {
-			util.appendFiles((filename + toString(i+1) + ".temp"), filename);
-			util.mothurRemove((filename + toString(i+1) + ".temp"));
-		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "createProcesses");

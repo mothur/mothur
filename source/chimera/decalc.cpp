@@ -744,8 +744,6 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 		Sequence queryLeft(querySeq.getName(), leftQuery);
 		Sequence queryRight(querySeq.getName(), rightQuery);
 		
-//cout << querySeq->getName() << '\t' << leftSpot << '\t' << rightSpot << '\t' << firstBaseSpot << '\t' << lastBaseSpot << endl;
-//cout << queryUnAligned.length() << '\t' << queryLeft.getUnaligned().length() << '\t' << queryRight.getUnaligned().length() << endl;
 		for(int j = 0; j < thisFilteredTemplate.size(); j++){
 			
 			string dbAligned = thisFilteredTemplate[j]->getAligned();
@@ -755,11 +753,8 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 			Sequence dbLeft(thisFilteredTemplate[j]->getName(), leftDB);
 			Sequence dbRight(thisFilteredTemplate[j]->getName(), rightDB);
 
-			distcalculator->calcDist(queryLeft, dbLeft);
-			float distLeft = distcalculator->getDist();
-			
-			distcalculator->calcDist(queryRight, dbRight);
-			float distRight = distcalculator->getDist();
+			double distLeft = distcalculator->calcDist(queryLeft, dbLeft);
+			double distRight = distcalculator->calcDist(queryRight, dbRight);
 
 			SeqDist subjectLeft;
 			subjectLeft.seq = NULL;
@@ -869,8 +864,7 @@ Sequence* DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db) {
 		
 		for(int j = 0; j < db.size(); j++){
 			
-			distcalculator->calcDist(*querySeq, *db[j]);
-			float dist = distcalculator->getDist();
+			double dist = distcalculator->calcDist(*querySeq, *db[j]);
 			
 			if (dist < smallest) { 
 				smallest = dist;

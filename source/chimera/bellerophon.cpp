@@ -261,8 +261,7 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 				
 				if (m->getControl_pressed()) { return 0; }
 			
-				distCalculator->calcDist(s[i], s[j]);
-				float dist = distCalculator->getDist();
+				double dist = distCalculator->calcDist(s[i], s[j]);
 			
 				PCell temp(i, j, dist);
 				sparse->addCell(temp);

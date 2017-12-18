@@ -527,9 +527,8 @@ vector<SeqDist>  Ccode::findClosest(Sequence* q, int numWanted) {
 			Sequence ref = *(templateSeqs[i]); 
 					
 			//find overall dist
-			distCalc->calcDist(query, ref);
-			float dist = distCalc->getDist();	
-				
+			double dist = distCalc->calcDist(query, ref);
+							
 			//save distance
 			SeqDist temp;
 			temp.seq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());

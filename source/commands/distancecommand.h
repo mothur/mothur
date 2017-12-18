@@ -20,36 +20,40 @@
 #include "eachgapignore.h"
 #include "onegapdist.h"
 #include "onegapignore.h"
+#include "writer.h"
 
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct distanceData {
-	long long startLine, endLine;
-	string dFileName;
+	long long startLine, endLine, numNewFasta, count;
 	float cutoff;
 	SequenceDB alignDB;
-	vector<string> Estimators;
 	MothurOut* m;
-	string output;
-	long long numNewFasta, count;
+	OutputWriter* threadWriter;
+    string outputFileName, Estimator;
 	bool countends;
     Utils util;
 	
 	distanceData(){}
-	distanceData(int s, int e, string dbname, float c, SequenceDB db, vector<string> Est, string o, long long num, bool cnt) {
+    distanceData(OutputWriter* ofn) {
+        threadWriter = ofn;
+        m = MothurOut::getInstance();
+    }
+    
+    distanceData(string ofn) {
+        outputFileName = ofn;
+        m = MothurOut::getInstance();
+    }
+	void setVariables(int s, int e,  float c, SequenceDB db, string Est, long long num, bool cnt) {
 		startLine = s;
 		endLine = e;
-		dFileName = dbname;
 		cutoff = c;
 		alignDB = db;
-		Estimators = Est;
-        m = MothurOut::getInstance();
-		output = o;
+		Estimator = Est;
 		numNewFasta = num;
 		countends = cnt;
         count = 0;
-		
 	}
 };
 /**************************************************************************************************/

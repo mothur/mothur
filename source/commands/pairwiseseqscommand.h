@@ -54,9 +54,7 @@ private:
 	SequenceDB alignDB;
 	
 	void createProcesses(string);
-	//int driver(int, int, string, float);
-	//int driver(int, int, string, string);
-	
+		
 	string fastaFileName, align, calc, outputDir, output;
 	float match, misMatch, gapOpen, gapExtend, cutoff;
 	int processors, longestBase;

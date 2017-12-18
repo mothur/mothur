@@ -20,7 +20,7 @@ public:
 	
 	oneGapDist() {}
 	
-	void calcDist(Sequence A, Sequence B){
+	double calcDist(Sequence A, Sequence B){
 		
 		int difference = 0;
 		int minLength = 0;
@@ -77,6 +77,7 @@ public:
 	
 		if(minLength == 0)	{	dist = 1.0000;							}
 		else				{	dist = (double)difference / minLength;	}
+        return dist;
 	}
 	
 };
