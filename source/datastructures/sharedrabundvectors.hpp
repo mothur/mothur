@@ -33,6 +33,7 @@ public:
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         eliminateZeroOTUS();
         setLabels(bv.getLabel());
+        setOTUNames(bv.getOTUNames());
     }
     ~SharedRAbundVectors() { clear(); }
     

@@ -217,13 +217,6 @@ int MetaStatsCommand::execute(){
 	
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        //just used to convert files to test metastats online
-        /****************************************************/
-        //bool convertInputToShared = false;
-        //convertSharedToInput = false;
-        //if (convertInputToShared) { convertToShared(sharedfile); return 0; }
-        /****************************************************/
-		
 		designMap = new DesignMap(designfile);
 
 		InputData input(sharedfile, "sharedfile", Groups);
@@ -244,23 +237,9 @@ int MetaStatsCommand::execute(){
 			}
 		}
 	
-		
-		//only 1 combo
 		if (numGroups == 2) { processors = 1; }
-		else if (numGroups < 2)	{ m->mothurOut("Not enough sets, I need at least 2 valid sets. Unable to complete command."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+		else if (numGroups < 2)	{ m->mothurOut("Not enough sets, I need at least 2 valid sets. Unable to complete command.\n");  m->setControl_pressed(true); }
 
-        if(processors != 1){
-            int remainingPairs = namesOfGroupCombos.size();
-            int startIndex = 0;
-            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-                int numPairs = remainingPairs; //case for last processor
-                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-                lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
-                startIndex = startIndex + numPairs;
-                remainingPairs = remainingPairs - numPairs;
-            }
-        }
-		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -346,345 +325,155 @@ int MetaStatsCommand::execute(){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+struct metastatsData {
+    SharedRAbundVectors* thisLookUp;
+    vector< vector<string> > namesOfGroupCombos;
+    vector<string> designMapGroups, outputNames;
+    int start, num, iters, count;
+    float threshold;
+    Utils util;
+    MothurOut* m;
+    
+    metastatsData(){}
+    metastatsData(int st, int en, vector<string> on, vector< vector<string> > ns, SharedRAbundVectors*& lu, vector<string> dg, int i, float thr) {
+        m = MothurOut::getInstance();
+        outputNames = on;
+        start = st;
+        num = en;
+        namesOfGroupCombos = ns;
+        thisLookUp = lu;
+        designMapGroups = dg;
+        iters = i;
+        threshold = thr;
+        count=0;
+    }
+};
+//**********************************************************************************************************************
+int driver(metastatsData* params) {
+    try {
+        
+        vector<string> thisLookupNames = params->thisLookUp->getNamesGroups();
+        vector<SharedRAbundVector*> thisLookupRabunds = params->thisLookUp->getSharedRAbundVectors();
+        
+        //for each combo
+        for (int c = params->start; c < (params->start+params->num); c++) {
+            
+            //get set names
+            string setA = params->namesOfGroupCombos[c][0];
+            string setB = params->namesOfGroupCombos[c][1];
+            string outputFileName = params->outputNames[c];
+            
+            vector< vector<double> > data2; data2.resize(params->thisLookUp->getNumBins());
+            
+            vector<SharedRAbundVector*> subset;
+            vector<string> subsetGroups;
+            int setACount = 0; int setBCount = 0;
+            for (int i = 0; i < params->thisLookUp->size(); i++) {
+                string thisGroup = thisLookupNames[i];
+                if (params->designMapGroups[i] == setB) {
+                    subset.push_back(thisLookupRabunds[i]);
+                    subsetGroups.push_back(thisGroup);
+                    setBCount++;
+                }else if (params->designMapGroups[i] == setA) {
+                    subset.insert(subset.begin()+setACount, thisLookupRabunds[i]);
+                    subsetGroups.insert(subsetGroups.begin()+setACount, thisGroup);
+                    setACount++;
+                }
+            }
+            
+            if ((setACount == 0) || (setBCount == 0))  { params->m->mothurOut("Missing shared info for " + setA + " or " + setB + ". Skipping comparison.\n"); }
+            else {
+                for (int j = 0; j < params->thisLookUp->getNumBins(); j++) {
+                    data2[j].resize(subset.size(), 0.0);
+                    for (int i = 0; i < subset.size(); i++) { data2[j][i] = (subset[i]->get(j)); }
+                }
+                
+                params->m->mothurOut("\nComparing " + setA + " and " + setB + "...\n");
+                MothurMetastats mothurMeta(params->threshold, params->iters);
+                mothurMeta.runMetastats(outputFileName , data2, setACount, params->thisLookUp->getOTUNames());
+                params->m->mothurOutEndLine();
+            }
+        }
+        
+        for(int i = 0; i < thisLookupRabunds.size(); i++)  {  delete thisLookupRabunds[i];  }
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "MetaStatsCommand", "driver");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 
 int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
 	try {
-		
-		
-				if(processors == 1){
-					driver(0, namesOfGroupCombos.size(), thisLookUp);
-				}else{
-					int process = 1;
-					vector<int> processIDS;
-                    bool recalc = false;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-					//loop through and create all the processes you want
-					while (process != processors) {
-						pid_t pid = fork();
-			
-						if (pid > 0) {
-							processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-							process++;
-						}else if (pid == 0){
-							driver(lines[process].start, lines[process].end, thisLookUp);
-							exit(0);
-						}else { 
-                            m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                            for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                            //wait to die
-                            for (int i=0;i<processIDS.size();i++) {
-                                int temp = processIDS[i];
-                                wait(&temp);
-                            }
-                            m->setControl_pressed(false);
-                            recalc = true;
-                            break;
-						}
-					}
-					
-                    if (recalc) {
-                        //test line, also set recalc to true.
-                        //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-                        
-                        //redo file divide
-                        lines.clear();
-                        int remainingPairs = namesOfGroupCombos.size();
-                        int startIndex = 0;
-                        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-                            int numPairs = remainingPairs; //case for last processor
-                            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-                            lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
-                            startIndex = startIndex + numPairs;
-                            remainingPairs = remainingPairs - numPairs;
-                        }
-                        
-                        processIDS.resize(0);
-                        process = 1;
-                        
-                        //loop through and create all the processes you want
-                        while (process != processors) {
-                            pid_t pid = fork();
-                            
-                            if (pid > 0) {
-                                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                                process++;
-                            }else if (pid == 0){
-                                driver(lines[process].start, lines[process].end, thisLookUp);
-                                exit(0);
-                            }else {
-                                m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                                exit(0);
-                            }
-                        }
-                    }
+        vector<linePair> lines;
+        vector<thread*> workerThreads;
+        vector<metastatsData*> data;
+        
+        int remainingPairs = namesOfGroupCombos.size();
+        int startIndex = 0;
+        vector<vector<string> > outputFileNames;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+            int numPairs = remainingPairs; //case for last processor
+            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+            lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
+            
+            for (int i = startIndex; i < startIndex+numPairs; i++) {
+                //get set names
+                string setA = namesOfGroupCombos[i][0];
+                string setB = namesOfGroupCombos[i][1];
+                
+                //get filename
+                map<string, string> variables;
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+                variables["[distance]"] = thisLookUp->getLabel();
+                variables["[group]"] = setA + "-" + setB;
+                string outputFileName = getOutputFileName("metastats",variables);
+                outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
+            }
+            
+            startIndex = startIndex + numPairs;
+            remainingPairs = remainingPairs - numPairs;
+        }
+        
+        vector<string> designMapGroups = lookup->getNamesGroups();
+        for (int j = 0; j < designMapGroups.size(); j++) {  designMapGroups[j] = designMap->get(designMapGroups[j]); }
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            //make copy of lookup so we don't get access violations
+            SharedRAbundVectors* newLookup = new SharedRAbundVectors(*lookup);
+            
+            metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, outputNames, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
+            data.push_back(dataBundle);
+            
+            thread* thisThread = new thread(driver, dataBundle);
+            workerThreads.push_back(thisThread);
+        }
 
-                    
-					//do my part
-					driver(lines[0].start, lines[0].end, thisLookUp);
-		
-					//force parent to wait until all the processes are done
-					for (int i=0;i<(processors-1);i++) { 
-						int temp = processIDS[i];
-						wait(&temp);
-					}
-        #else
-                    
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //Windows version shared memory, so be careful when passing variables through the summarySharedData struct. 
-                    //Above fork() will clone, so memory is separate, but that's not the case with windows, 
-                    //Taking advantage of shared memory to pass results vectors.
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////
-                    
-                    vector<metastatsData*> pDataArray; 
-                    DWORD   dwThreadIdArray[processors-1];
-                    HANDLE  hThreadArray[processors-1]; 
-                    
-                    //Create processor worker threads.
-                    for( int i=1; i<processors; i++ ){
-                        
-                        //make copy of lookup so we don't get access violations
-                        SharedRAbundVectors* newLookup = new SharedRAbundVectors(*lookup);
-                        vector<string> designMapGroups = lookup->getNamesGroups();
-                        
-                        // Allocate memory for thread data.
-                        metastatsData* tempSum = new metastatsData(sharedfile, outputDir, m, lines[i].start, lines[i].end, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
-                        pDataArray.push_back(tempSum);
-                        processIDS.push_back(i);
-                        
-                        hThreadArray[i-1] = CreateThread(NULL, 0, MyMetastatsThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
-                    }
-                    
-                    //do my part
-					driver(lines[0].start, lines[0].end, thisLookUp);
-                    
-                    //Wait until all threads have terminated.
-                    WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-                    
-                    //Close all thread handles and free memory allocations.
-                    for(int i=0; i < pDataArray.size(); i++){
-                        if (pDataArray[i]->count != (pDataArray[i]->num)) {
-                            m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->num) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
-                        }
-                        delete pDataArray[i]->thisLookUp;
-                        for (int j = 0; j < pDataArray[i]->outputNames.size(); j++) {  
-                            outputNames.push_back(pDataArray[i]->outputNames[j]);
-                            outputTypes["metastats"].push_back(pDataArray[i]->outputNames[j]);
-                        }
-                                                
-                        CloseHandle(hThreadArray[i]);
-                        delete pDataArray[i];
-                    }
-        #endif
+        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, outputNames, namesOfGroupCombos, lookup, designMapGroups, iters, threshold);
+        driver(dataBundle);
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            delete data[i]->thisLookUp;
+            delete data[i];
+            delete workerThreads[i];
+        }
 
-				}
-		
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MetaStatsCommand", "process");
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-int MetaStatsCommand::driver(unsigned long long start, unsigned long long num, SharedRAbundVectors*& thisLookUp) {
-	try {
-	
-        vector<string> thisLookupNames = thisLookUp->getNamesGroups();
-        vector<SharedRAbundVector*> thisLookupRabunds = thisLookUp->getSharedRAbundVectors();
-        
-		//for each combo
-		for (int c = start; c < (start+num); c++) {
-			
-			//get set names
-			string setA = namesOfGroupCombos[c][0];
-			string setB = namesOfGroupCombos[c][1];
-		
-			//get filename
-            map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
-            variables["[distance]"] = thisLookUp->getLabel();
-            variables["[group]"] = setA + "-" + setB;
-			string outputFileName = getOutputFileName("metastats",variables);
-			outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
-			
-			vector< vector<double> > data2; data2.resize(thisLookUp->getNumBins());
-			
-			vector<SharedRAbundVector*> subset;
-            vector<string> subsetGroups;
-			int setACount = 0;
-			int setBCount = 0;
-			for (int i = 0; i < thisLookUp->size(); i++) {
-				string thisGroup = thisLookupNames[i];
-				
-				//is this group for a set we want to compare??
-				//sorting the sets by putting setB at the back and setA in the front
-				if ((designMap->get(thisGroup) == setB)) {
-					subset.push_back(thisLookupRabunds[i]);
-                    subsetGroups.push_back(thisGroup);
-					setBCount++;
-				}else if ((designMap->get(thisGroup) == setA)) {
-					subset.insert(subset.begin()+setACount, thisLookupRabunds[i]);
-                    subsetGroups.insert(subsetGroups.begin()+setACount, thisGroup);
-					setACount++;
-				}
-			}
-			if ((setACount == 0) || (setBCount == 0))  { 
-				m->mothurOut("Missing shared info for " + setA + " or " + setB + ". Skipping comparison."); m->mothurOutEndLine(); 
-				outputNames.pop_back();
-			}else {
-                
-				//fill data
-				for (int j = 0; j < thisLookUp->getNumBins(); j++) {
-					data2[j].resize(subset.size(), 0.0);
-                   
-					for (int i = 0; i < subset.size(); i++) {
-						data2[j][i] = (subset[i]->get(j));
-					}
-				}
-				
-				m->mothurOut("Comparing " + setA + " and " + setB + "..."); m->mothurOutEndLine(); 
-				//metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
-                //if (convertSharedToInput) { convertToInput(subset, subsetGroups, outputFileName);  }
-				
-				m->mothurOutEndLine();
-				MothurMetastats mothurMeta(threshold, iters);
-				mothurMeta.runMetastats(outputFileName , data2, setACount, thisLookUp->getOTUNames());
-				m->mothurOutEndLine();
-				m->mothurOutEndLine(); 
-			}
-		}
-		
-        for(int i = 0; i < thisLookupRabunds.size(); i++)  {  delete thisLookupRabunds[i];  }
-        
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "driver");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-/*Metastats files look like:
- 13_0	14_0	13_52	14_52	70S	71S	72S	M1	M2	M3	C11	C12	C21	C15	C16	C19	C3	C4	C9
- Alphaproteobacteria	0	0	0	0	0	0	5	0	0	0	0	0	0	0	0	0	0	0	0
- Mollicutes	0	0	2	0	0	59	5	11	4	1	0	2	8	1	0	1	0	3	0
- Verrucomicrobiae	0	0	0	0	0	1	6	0	0	0	0	0	0	0	0	0	0	0	0
- Deltaproteobacteria	0	0	0	0	0	6	1	0	1	0	1	1	7	0	0	0	0	0	0
- Cyanobacteria	0	0	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0
- Epsilonproteobacteria	0	0	0	0	0	0	0	0	6	0	0	3	1	0	0	0	0	0	0
- Clostridia	75	65	207	226	801	280	267	210	162	197	81	120	106	148	120	94	84	98	121
- Bacilli	3	2	16	8	21	52	31	70	46	65	4	28	5	23	62	26	20	30	25
- Bacteroidetes (class)	21	25	22	64	226	193	296	172	98	55	19	149	201	85	50	76	113	92	82
- Gammaproteobacteria	0	0	0	0	0	1	0	0	0	0	1	1	0	0	0	1	0	0	0
- TM7_genera_incertae_sedis	0	0	0	0	0	0	0	0	1	0	1	2	0	2	0	0	0	0	0
- Actinobacteria (class)	1	1	1	2	0	0	0	9	3	7	1	1	1	3	1	2	1	2	3
- Betaproteobacteria	0	0	3	3	0	0	9	1	1	0	1	2	3	1	1	0	0	0	0
-
-//this function is just used to convert files to test the differences between the metastats version and mothurs version
-int MetaStatsCommand::convertToShared(string filename) {
-	try {
-        ifstream in;
-        util.openInputFile(filename, in);
-        
-        string header = util.getline(in); util.gobble(in);
-        
-        vector<string> groups = util.splitWhiteSpace(header);
-        vector<RAbundFloatVector*> newLookup;
-        cout << groups.size() << endl;
-        for (int i = 0; i < groups.size(); i++) {
-            cout << "creating group " << groups[i] << endl;
-            RAbundFloatVector* temp = new RAbundFloatVector();
-            temp->setLabel("0.03");
-            newLookup.push_back(temp);
-        }
-        
-        int otuCount = 0;
-        while (!in.eof()) {
-            if (m->getControl_pressed()) { break; }
-            
-            string otuname;
-            in >> otuname; util.gobble(in);
-            otuCount++;
-            cout << otuname << endl;
-            for (int i = 0; i < groups.size(); i++) {
-                double temp;
-                in >> temp; util.gobble(in);
-                newLookup[i]->push_back(temp);
-            }
-            util.gobble(in);
-        }
-        in.close();
-    
-        ofstream out;
-        util.openOutputFile(filename+".shared", out);
-        
-        out << "label\tgroup\tnumOTUs";
-        
-        string snumBins = toString(otuCount);
-        for (int i = 0; i < otuCount; i++) {
-            string binLabel = "Otu";
-            string sbinNumber = toString(i+1);
-            if (sbinNumber.length() < snumBins.length()) {
-                int diff = snumBins.length() - sbinNumber.length();
-                for (int h = 0; h < diff; h++) { binLabel += "0"; }
-            }
-            binLabel += sbinNumber;
-            out << '\t' << binLabel;
-        }
-        out << endl;
-        
-        for (int i = 0; i < groups.size(); i++) {
-            out << "0.03" << '\t' << groups[i] << '\t';
-            newLookup[i]->print(out);
-        }
-        out.close();
-        
-        cout << filename+".shared" << endl;
-        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "convertToShared");
-		exit(1);
-	}
-}
-/**********************************************************************************************************************
-
-int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, vector<string> subsetGroups, string thisfilename) {
-	try {
-        ofstream out;
-        util.openOutputFile(thisfilename+".matrix", out);
-        
-        for (int i = 0; i < subset.size(); i++) {
-            out << '\t' << subsetGroups[i];
-        }
-        out << endl;
-        
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
-        for (int i = 0; i < subset[0]->getNumBins(); i++) {
-            out << currentLabels[i];
-            for (int j = 0; j < subset.size(); j++) {
-                out  << '\t' << subset[j]->get(i);
-            }
-            out << endl;
-        }
-        out.close();
-        
-        cout << thisfilename+".matrix" << endl;
-        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "convertToInput");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************/
 
 

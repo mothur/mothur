@@ -257,14 +257,14 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
             cts.push_back(copyCount);
             trees.push_back(copyTree);
             
-            unweightedData* tempweighted = new unweightedData(m, lines[i].start, lines[i].num, namesOfGroupCombos, copyTree, copyCount, includeRoot);
+            unweightedData* tempweighted = new unweightedData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount, includeRoot);
 			pDataArray.push_back(tempweighted);
 			processIDS.push_back(i);
             
 			hThreadArray[i-1] = CreateThread(NULL, 0, MyUnWeightedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, ct);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
