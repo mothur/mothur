@@ -59,7 +59,10 @@ private:
 	int seqLength;
     
     string getSequenceName(ifstream&);
+    string getCommentString(ifstream&);
+    
     #ifdef USE_BOOST
+    string getCommentString(boost::iostreams::filtering_istream&);
     string getSequenceName(boost::iostreams::filtering_istream&);
     #endif
 };

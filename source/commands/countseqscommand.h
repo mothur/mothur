@@ -45,7 +45,7 @@ private:
     map<int, string> processNameFile(string);
     map<int, string> getGroupNames(string, set<string>&);
     
-    unsigned long long driver(string, GroupMap*&);
+    unsigned long long driver(ofstream&, GroupMap*&);
     unsigned long long processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables, vector<string>);
 };
 

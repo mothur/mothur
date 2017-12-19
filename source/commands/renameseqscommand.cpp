@@ -711,7 +711,7 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
                 string name = "";
                 if (thisFileType == "fasta")        {  seq = new Sequence(in);   name = seq->getName();        }
                 else if (thisFileType == "qfile")   {  qual = new QualityScores(in);  name = qual->getName();  }
-                else if (thisFileType == "group")   {  in >> name; util.gobble(in); in >> group;                 }
+                else if (thisFileType == "group")   {  in >> name; util.gobble(in); in >> group;               }
                 util.gobble(in);
  
                 //get new name

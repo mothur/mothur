@@ -364,9 +364,8 @@ unsigned long long CountSeqsCommand::process(string outputFileName){
 			for (int i = 0; i < Groups.size(); i++) { out << '\t' << Groups[i]; }
 		}
 		out << endl;
-        out.close();
         
-        unsigned long long total = driver(outputFileName, groupMap);
+        unsigned long long total = driver(out, groupMap);
         
         if (groupfile != "") { delete groupMap; }
         
@@ -378,12 +377,8 @@ unsigned long long CountSeqsCommand::process(string outputFileName){
 	}
 }
 /**************************************************************************************************/
-unsigned long long CountSeqsCommand::driver(string outputFileName, GroupMap*& groupMap) {
+unsigned long long CountSeqsCommand::driver(ofstream& out, GroupMap*& groupMap) {
 	try {
-        
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
-        
         ifstream in;
 		util.openInputFile(namefile, in);
 		

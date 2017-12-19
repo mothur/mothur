@@ -44,7 +44,7 @@ QualityScores::QualityScores(ifstream& qFile){
 		m = MothurOut::getInstance();
 
 		int score;
-		seqName = getSequenceName(qFile); util.gobble(qFile);
+        seqName = getSequenceName(qFile); util.gobble(qFile); getCommentString(qFile);
 		
         if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
         
@@ -97,7 +97,7 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
         m = MothurOut::getInstance();
         
         int score;
-        seqName = getSequenceName(qFile); util.gobble(qFile);
+        seqName = getSequenceName(qFile); util.gobble(qFile); getCommentString(qFile);
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
         
@@ -148,7 +148,7 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
 int QualityScores::read(ifstream& qFile){
     try {
         int score;
-        seqName = getSequenceName(qFile); util.gobble(qFile);
+        seqName = getSequenceName(qFile); util.gobble(qFile); getCommentString(qFile);
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
         
@@ -240,6 +240,56 @@ string QualityScores::getSequenceName(boost::iostreams::filtering_istream& qFile
     }
     catch(exception& e) {
         m->errorOut(e, "QualityScores", "getSequenceName");
+        exit(1);
+    }
+}
+#endif
+//********************************************************************************************************************
+//comment can contain '>' so we need to account for that
+string QualityScores::getCommentString(ifstream& fastaFile) {
+    try {
+        char letter;
+        string temp = "";
+        
+        while(fastaFile){
+            letter=fastaFile.get();
+            if((letter == '\r') || (letter == '\n') || letter == -1){
+                util.gobble(fastaFile);  //in case its a \r\n situation
+                break;
+            }else {
+                temp += letter;
+            }
+        }
+        
+        return temp;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "QualityScores", "getCommentString");
+        exit(1);
+    }
+}
+//********************************************************************************************************************
+#ifdef USE_BOOST
+//comment can contain '>' so we need to account for that
+string QualityScores::getCommentString(boost::iostreams::filtering_istream& fastaFile) {
+    try {
+        char letter;
+        string temp = "";
+        
+        while(fastaFile){
+            letter=fastaFile.get();
+            if((letter == '\r') || (letter == '\n') || letter == -1){
+                util.gobble(fastaFile);  //in case its a \r\n situation
+                break;
+            }else {
+                temp += letter;
+            }
+        }
+        
+        return temp;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "QualityScores", "getCommentString");
         exit(1);
     }
 }
