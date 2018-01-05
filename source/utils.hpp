@@ -201,6 +201,7 @@ public:
     string getTag(string); //filename
     string findEdianness();
     string removeNs(string seq);
+    string reverseOligo(string);
 
     
     

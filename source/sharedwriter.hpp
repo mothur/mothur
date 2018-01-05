@@ -23,11 +23,6 @@ public:
         out << dataToWrite;
     }
     
-    void write (Sequence& seq) {
-        std::lock_guard<std::mutex> lock((writerMutex)); // Ensure that only one thread can execute at a time
-        seq.printSequence(out);
-    }
-    
     void setFixedShowPoint() {  out.setf(ios::fixed, ios::showpoint);  }
     void setPrecision(int p)  { out << setprecision(p);  }
     

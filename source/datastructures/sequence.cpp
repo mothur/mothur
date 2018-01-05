@@ -720,7 +720,15 @@ int Sequence::getNumNs(){
     }
     return numNs;
 }
-
+//********************************************************************************************************************
+void Sequence::printSequence(OutputWriter* out){
+    string seqOutput = ">";
+    seqOutput += name + '\t' + comment + '\n';
+    if(isAligned){ seqOutput += aligned + '\n'; }
+    else{ seqOutput += unaligned + '\n'; }
+    
+    out->write(seqOutput);
+}
 //********************************************************************************************************************
 
 void Sequence::printSequence(ostream& out){

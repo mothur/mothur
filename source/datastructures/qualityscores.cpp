@@ -202,7 +202,7 @@ string QualityScores::getSequenceName(ifstream& qFile) {
 		string name = "";
 		
         qFile >> name;
-        util.getline(qFile);
+        //string rest = util.getline(qFile);
 		
 		if (name.length() != 0) { 
             
@@ -226,7 +226,7 @@ string QualityScores::getSequenceName(boost::iostreams::filtering_istream& qFile
         string name = "";
         
         qFile >> name; string temp;
-        std::getline(qFile, temp);
+        //std::getline(qFile, temp);
         
         if (name.length() != 0) {
             
@@ -318,7 +318,22 @@ string QualityScores::getName(){
 		exit(1);
 	}							
 }
-
+/**************************************************************************************************/
+void QualityScores::printQScores(OutputWriter* qFile){
+    try {
+        double aveQScore = calculateAverage(false);
+        
+        string outputQualString = ">";  outputQualString += seqName + '\t' + toString(aveQScore) + '\n';
+        
+        for(int i=0;i<seqLength;i++){ outputQualString += qScores[i] + ' '; } outputQualString += '\n';
+        
+        qFile->write(outputQualString);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "QualityScores", "printQScores");
+        exit(1);
+    }							
+}
 /**************************************************************************************************/
 
 void QualityScores::printQScores(ofstream& qFile){
@@ -328,11 +343,7 @@ void QualityScores::printQScores(ofstream& qFile){
 		
 		qFile << '>' << seqName << '\t' << aveQScore << endl;
 		
-		for(int i=0;i<seqLength;i++){
-			qFile << qScores[i] << ' ';
-		}
-		qFile << endl;
-				
+		for(int i=0;i<seqLength;i++){ qFile << qScores[i] << ' '; } qFile << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "QualityScores", "printQScores");

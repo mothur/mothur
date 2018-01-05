@@ -17,6 +17,7 @@
 #include "mothurout.h"
 #include "sequence.hpp"
 #include "utils.hpp"
+#include "writer.h"
 
 /**************************************************************************************************/
 
@@ -35,6 +36,7 @@ public:
 	vector<int> getQualityScores() { return qScores; }
 	void printQScores(ofstream&);
     void printQScores(ostream&);
+    void printQScores(OutputWriter*);
 	void trimQScores(int, int);
 	void flipQScores();
 	bool stripQualThreshold(Sequence&, double);

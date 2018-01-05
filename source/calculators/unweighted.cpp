@@ -277,7 +277,6 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
-
 #endif	
         return results;
 	}

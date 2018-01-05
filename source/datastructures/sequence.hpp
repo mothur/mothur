@@ -20,7 +20,7 @@
 #include "mothur.h"
 #include "mothurout.h"
 #include "utils.hpp"
-
+#include "writer.h"
 
 /**************************************************************************************************/
 
@@ -75,6 +75,7 @@ public:
 	int getLongHomoPolymer();
 	bool getIsAligned();
 	void printSequence(ostream&);
+    void printSequence(OutputWriter*);
     void printUnAlignedSequence(ostream&);
 	
 private:
