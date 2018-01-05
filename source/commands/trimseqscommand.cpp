@@ -1144,7 +1144,7 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
             if (countfile != "")    { inputString += ", count=" + trimCountFileName;   }
             else {  inputString += ", group=" + groupFile; }
             m->mothurOut("/******************************************/\n");
-            m->mothurOut("Running command: split.groups(" + inputString + ")\n");
+            m->mothurOut("Generating allfiles... Running command: split.groups(" + inputString + ")\n");
             current->setMothurCalling(true);
             
             Command* splitCommand = new SplitGroupCommand(inputString);

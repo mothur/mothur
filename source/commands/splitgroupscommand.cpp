@@ -277,6 +277,7 @@ int SplitGroupCommand::runNameGroup(){
 		if (m->getControl_pressed()) { delete parser; return 0; }
         
 		vector<string> namesGroups = parser->getNamesOfGroups();
+        if (Groups.size() == 0) { Groups = namesGroups; }
 		
 		string fastafileRoot = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		string namefileRoot = outputDir + util.getRootName(util.getSimpleName(namefile));
@@ -284,7 +285,7 @@ int SplitGroupCommand::runNameGroup(){
 		m->mothurOutEndLine();
 		for (int i = 0; i < Groups.size(); i++) {
 			
-			m->mothurOut("Processing group: " + Groups[i]); m->mothurOutEndLine();
+			m->mothurOut("Processing group: " + Groups[i] + "\n"); 
 			
             map<string, string> variables; 
             variables["[filename]"] = fastafileRoot;
