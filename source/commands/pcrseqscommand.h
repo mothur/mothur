@@ -17,6 +17,7 @@
 #include "needlemanoverlap.hpp"
 #include "counttable.h"
 #include "oligos.h"
+#include "removeseqscommand.h"
 
 class PcrSeqsCommand : public Command {
 public:
@@ -36,70 +37,19 @@ public:
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	
-private:    
-    vector<linePair> lines;
+private:
     bool abort, keepprimer, keepdots, fileAligned, pairedOligos;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile, outputDir, nomatch;
-	int start, end, processors, length, pdiffs, rdiffs, numFPrimers, numRPrimers;
-    Oligos oligos;
-	
+	int start, end, processors, length, pdiffs, rdiffs;
     vector<string> outputNames;
     
-    int writeAccnos(set<string>);
-    int readName(set<string>&);
-    int readGroup(set<string>);
-    int readTax(set<string>);
-    int readCount(set<string>);
-    int readOligos();
-    bool readEcoli();
-	int driverPcr(string, string, string, string, set<string>&, linePair, int&, bool&);
-	int createProcesses(string, string, string, set<string>&);
-    bool isAligned(string, map<int, int>&);
-    int adjustDots(string, string, int, int);
+    int writeAccnos(set<string>, string);
+    Sequence readEcoli();
+	long long createProcesses(string, string, string, set<string>&);
+    int adjustDots(string goodFasta, map<string, vector<int> > locations, int pstart, int pend, int numFPrimers, int numRPrimers);
     
 };
 
-/**************************************************************************************************/
-//custom data structure for threads to use.
-// This is passed by void pointer so it can be any data type
-// that can be passed using a single void pointer (LPVOID).
-struct pcrData {
-	string filename; 
-    string goodFasta, badFasta, oligosfile, ecolifile, nomatch, locationsName;
-	unsigned long long fstart;
-	unsigned long long fend;
-	int count, start, end, length, pdiffs, pstart, pend, rdiffs;
-	MothurOut* m;
-    set<string> badSeqNames;
-    bool keepprimer, keepdots, fileAligned, adjustNeeded;
-    Utils util;
-	
-	pcrData(){}
-	pcrData(string f, string gf, string bfn, string loc, MothurOut* mout, string ol, string ec, string nm, bool kp, bool kd, int st, int en, int l, int pd, int rd, unsigned long long fst, unsigned long long fen) {
-		filename = f;
-        goodFasta = gf;
-        badFasta = bfn;
-		m = mout;
-        oligosfile = ol;
-        ecolifile = ec;
-        nomatch = nm;
-        keepprimer = kp;
-        keepdots = kd;
-        end = en;
-		start = st;
-        length = l;
-		fstart = fst;
-        fend = fen;
-        pdiffs = pd;
-        rdiffs = rd;
-        locationsName = loc;
-		count = 0;
-        fileAligned = true;
-        adjustNeeded = false;
-        pstart = -1;
-        pend = -1;
-	}
-};
 /**************************************************************************************************/
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
