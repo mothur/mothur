@@ -762,14 +762,14 @@ int driverPcr(pcrData* params){
             unsigned long long pos = inFASTA.tellg();
             if ((pos == -1) || (pos >= params->fend)) { break; }
 #else
-            if ((params->count == params->lineEnd) || (inFASTA.eof())) { break; }
+            if ((params->count == params->fend) || (inFASTA.eof())) { break; }
 #endif
             
             //report progress
-            if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n");		}
+            if((params->count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n");		}
         }
         //report progress
-        if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n"); 	}
+        if((params->count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
         
         inFASTA.close();
         

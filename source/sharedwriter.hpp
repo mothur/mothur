@@ -11,7 +11,6 @@
 
 #include "mothurout.h"
 #include "utils.hpp"
-#include "sequence.hpp"
 
 /***********************************************************************/
 class SynchronizedOutputFile {
