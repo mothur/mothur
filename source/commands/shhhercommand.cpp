@@ -16,7 +16,6 @@ vector<string> ShhherCommand::setParameters(){
 		CommandParameter pfile("file", "InputTypes", "", "", "none", "fileflow", "none","fasta-name-group-counts-qfile",false,false,true); parameters.push_back(pfile);
 		CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(plookup);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pmaxiter("maxiter", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(pmaxiter);
         CommandParameter plarge("large", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter psigma("sigma", "Number", "", "60", "", "", "","",false,false); parameters.push_back(psigma);
@@ -339,9 +338,6 @@ ShhherCommand::ShhherCommand(string option) {
 				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
 			}else						{	lookupFileName = temp;	}
 			
-			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
-			processors = current->setProcessors(temp);
-
 			temp = validParameter.valid(parameters, "cutoff");	if (temp == "not found"){	temp = "0.01";		}
 			util.mothurConvert(temp, cutoff); 
 			
@@ -394,15 +390,8 @@ int ShhherCommand::execute(){
 		
         int numFiles = flowFileVector.size();
 		
-        if (numFiles < processors) { processors = numFiles; }
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        if (processors == 1) { driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName); }
-        else { createProcesses(flowFileVector); } //each processor processes one file
-#else
         driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName);
-#endif
-        
+
 		if(compositeFASTAFileName != ""){
 			outputNames.push_back(compositeFASTAFileName); outputTypes["fasta"].push_back(compositeFASTAFileName);
 			outputNames.push_back(compositeNamesFileName); outputTypes["name"].push_back(compositeNamesFileName);
@@ -454,215 +443,6 @@ inline bool compareFileSizes(string left, string right){
     
     return (leftsize > rightsize);	
 } 
-/**************************************************************************************************/
-
-int ShhherCommand::createProcesses(vector<string> filenames){
-    try {
-        vector<int> processIDS;
-		int process = 1;
-		int num = 0;
-        bool recalc = false;
-		
-		//sanity check
-		if (filenames.size() < processors) { processors = filenames.size(); }
-        
-        //sort file names by size to divide load better
-        sort(filenames.begin(), filenames.end(), compareFileSizes);
-        
-        vector < vector <string> > dividedFiles; //dividedFiles[1] = vector of filenames for process 1...
-        dividedFiles.resize(processors);
-        
-        //for each file, figure out which process will complete it
-        //want to divide the load intelligently so the big files are spread between processes
-        for (int i = 0; i < filenames.size(); i++) { 
-            int processToAssign = (i+1) % processors; 
-            if (processToAssign == 0) { processToAssign = processors; }
-            
-            dividedFiles[(processToAssign-1)].push_back(filenames[i]);
-        }
-        
-        //now lets reverse the order of ever other process, so we balance big files running with little ones
-        for (int i = 0; i < processors; i++) {
-            int remainder = ((i+1) % processors);
-            if (remainder) {  reverse(dividedFiles[i].begin(), dividedFiles[i].end());  }
-        }
-        
-		
-        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driver(dividedFiles[process], compositeFASTAFileName + toString(process) + ".temp", compositeNamesFileName  + toString(process) + ".temp");
-                
-                //pass numSeqs to parent
-				ofstream out;
-				string tempFile = compositeFASTAFileName + toString(process) + ".num.temp";
-				util.openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-                
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    util.mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));
-                    util.mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));
-                    util.mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".num.temp"));
-                }
-                recalc = true;
-                break;
-
-			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					for (int i=0;i<processIDS.size();i++) {util.mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));util.mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));util.mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            dividedFiles.clear(); //dividedFiles[1] = vector of filenames for process 1...
-            dividedFiles.resize(processors);
-            
-            //for each file, figure out which process will complete it
-            //want to divide the load intelligently so the big files are spread between processes
-            for (int i = 0; i < filenames.size(); i++) {
-                int processToAssign = (i+1) % processors;
-                if (processToAssign == 0) { processToAssign = processors; }
-                
-                dividedFiles[(processToAssign-1)].push_back(filenames[i]);
-            }
-            
-            //now lets reverse the order of ever other process, so we balance big files running with little ones
-            for (int i = 0; i < processors; i++) {
-                int remainder = ((i+1) % processors);
-                if (remainder) {  reverse(dividedFiles[i].begin(), dividedFiles[i].end());  }
-            }
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driver(dividedFiles[process], compositeFASTAFileName + toString(process) + ".temp", compositeNamesFileName  + toString(process) + ".temp");
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = compositeFASTAFileName + toString(process) + ".num.temp";
-                    util.openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-		//do my part
-		driver(dividedFiles[0], compositeFASTAFileName, compositeNamesFileName);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-        
-        #else
-        
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-        
-        /////////////////////// NOT WORKING, ACCESS VIOLATION ON READ OF FLOWGRAMS IN THREAD /////////////////
-        
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the shhhFlowsData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*
-		vector<shhhFlowsData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-			// Allocate memory for thread data.
-			string extension = "";
-			if (i != 0) { extension = toString(i) + ".temp"; }
-			
-            shhhFlowsData* tempFlow = new shhhFlowsData(filenames, (compositeFASTAFileName + extension), (compositeNamesFileName + extension), outputDir, flowOrder, jointLookUp, singleLookUp, m, lines[i].start, lines[i].end, cutoff, sigma, minDelta, maxIters, i);
-			pDataArray.push_back(tempFlow);
-			processIDS.push_back(i);
-            
-			hThreadArray[i] = CreateThread(NULL, 0, ShhhFlowsThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-		//using the main process as a worker saves time and memory
-		//do my part
-		driver(filenames, compositeFASTAFileName, compositeNamesFileName, lines[processors-1].start, lines[processors-1].end);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			for(int j=0; j < pDataArray[i]->outputNames.size(); j++){ outputNames.push_back(pDataArray[i]->outputNames[j]); }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		*/
-        #endif
-        
-        for (int i=0;i<processIDS.size();i++) { 
-            ifstream in;
-			string tempFile =  compositeFASTAFileName + toString(processIDS[i]) + ".num.temp";
-			util.openInputFile(tempFile, in);
-			if (!in.eof()) { 
-                int tempNum = 0; 
-                in >> tempNum; 
-                if (tempNum != dividedFiles[i+1].size()) {
-                    m->mothurOut("[ERROR]: main process expected " + toString(processIDS[i]) + " to complete " + toString(dividedFiles[i+1].size()) + " files, and it only reported completing " + toString(tempNum) + ". This will cause file mismatches.  The flow files may be too large to process with multiple processors. \n");
-                }
-            }
-			in.close(); util.mothurRemove(tempFile);
-            
-            if (compositeFASTAFileName != "") {
-                util.appendFiles((compositeFASTAFileName + toString(processIDS[i]) + ".temp"), compositeFASTAFileName);
-                util.appendFiles((compositeNamesFileName + toString(processIDS[i]) + ".temp"), compositeNamesFileName);
-                util.mothurRemove((compositeFASTAFileName + toString(processIDS[i]) + ".temp"));
-                util.mothurRemove((compositeNamesFileName + toString(processIDS[i]) + ".temp"));
-            }
-        }
-        
-        return 0;
-        
-    }
-	catch(exception& e) {
-		m->errorOut(e, "ShhherCommand", "createProcesses");
-		exit(1);
-	}
-}
 /**************************************************************************************************/
 
 vector<string> ShhherCommand::parseFlowFiles(string filename){
@@ -1263,13 +1043,11 @@ int ShhherCommand::getOTUData(int numSeqs, string fileName,  vector<int>& otuDat
                                vector<int>& seqIndex,
                                map<string, int>& nameMap){
 	try {
+        InputData input(fileName, "list", nullVector);
+        ListVector* list = input.getListVector();
         
-		ifstream listFile;
-		util.openInputFile(fileName, listFile);
-		string label;
-        int numOTUs;
-		
-		listFile >> label >> numOTUs;
+        string label = list->getLabel();
+        int numOTUs = list->getNumBins();
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: Getting OTU Data...\n"); }
         
@@ -1282,73 +1060,38 @@ int ShhherCommand::getOTUData(int numSeqs, string fileName,  vector<int>& otuDat
 		aaI.clear();
 		seqIndex.clear();
 		
-		string singleOTU = "";
-		
 		for(int i=0;i<numOTUs;i++){
 			
 			if (m->getControl_pressed()) { break; }
             if (m->getDebug()) { m->mothurOut("[DEBUG]: processing OTU " + toString(i) + ".\n"); }
             
-			listFile >> singleOTU;
+			string singleOTU = list->get(i);
 			
-			istringstream otuString(singleOTU);
+            vector<string> otuSeqs; util.splitAtComma(singleOTU, otuSeqs);
             
-			while(otuString){
+			for(int j=0;j<otuSeqs.size();j++){
 				
-				string seqName = "";
-				
-				for(int j=0;j<singleOTU.length();j++){
-					char letter = otuString.get();
-					
-					if(letter != ','){
-						seqName += letter;
-					}
-					else{
-						map<string,int>::iterator nmIt = nameMap.find(seqName);
-						int index = nmIt->second;
+                string seqName = otuSeqs[j];
+                map<string,int>::iterator nmIt = nameMap.find(seqName);
+                int index = nmIt->second;
 						
-						nameMap.erase(nmIt);
-						
-						otuData[index] = i;
-						nSeqsPerOTU[i]++;
-						aaP[i].push_back(index);
-						seqName = "";
-					}
-				}
-				
-				map<string,int>::iterator nmIt = nameMap.find(seqName);
-                
-				int index = nmIt->second;
-				nameMap.erase(nmIt);
-                
-				otuData[index] = i;
-				nSeqsPerOTU[i]++;
-				aaP[i].push_back(index);	
-				
-				otuString.get();
-			}
+                nameMap.erase(nmIt);
+                otuData[index] = i;
+                nSeqsPerOTU[i]++;
+                aaP[i].push_back(index);
+            }
 			
 			sort(aaP[i].begin(), aaP[i].end());
-			for(int j=0;j<nSeqsPerOTU[i];j++){
-				seqNumber.push_back(aaP[i][j]);
-			}
-			for(int j=nSeqsPerOTU[i];j<numSeqs;j++){
-				aaP[i].push_back(0);
-			}
-			
-			
+			for(int j=0;j<nSeqsPerOTU[i];j++)       { seqNumber.push_back(aaP[i][j]);   }
+			for(int j=nSeqsPerOTU[i];j<numSeqs;j++) { aaP[i].push_back(0);              }
 		}
 		
-		for(int i=1;i<numOTUs;i++){
-			cumNumSeqs[i] = cumNumSeqs[i-1] + nSeqsPerOTU[i-1];
-		}
+		for(int i=1;i<numOTUs;i++){ cumNumSeqs[i] = cumNumSeqs[i-1] + nSeqsPerOTU[i-1]; }
 		aaI = aaP;
 		seqIndex = seqNumber;
-		
-		listFile.close();	
-        
+        delete list;
+      
         return numOTUs;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "getOTUData");

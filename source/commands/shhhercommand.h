@@ -18,6 +18,7 @@
 #include "sabundvector.hpp"
 #include "listvector.hpp"
 #include "cluster.hpp"
+#include "inputdata.h"
 #include <cfloat>
 
 //**********************************************************************************************************************
@@ -53,7 +54,7 @@ private:
 	bool abort, large;
 	string outputDir, flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName, compositeNamesFileName;
 
-	int processors, maxIters, largeSize;
+	int maxIters, largeSize;
 	float cutoff, sigma, minDelta;
 	string flowOrder;
     
@@ -64,7 +65,6 @@ private:
 	
     vector<string> parseFlowFiles(string);
     int driver(vector<string>, string, string);
-    int createProcesses(vector<string>);
     int getFlowData(string, vector<string>&, vector<int>&, vector<short>&, map<string, int>&, int&);
     int getUniques(int, int, vector<short>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<double>&, vector<short>&);
     int flowDistParentFork(int, string, int, vector<int>&, vector<int>&, vector<int>&, vector<double>&, vector<short>&);

@@ -613,7 +613,7 @@ void driverSFFMultiple(sffMultipleData* params){
             if (params->large) { inputString += ", large=" + toString(params->largeSize); }
             inputString += ", sigma=" +toString(params->sigma);
             inputString += ", mindelta=" + toString(params->minDelta);
-            inputString += ", order=" + params->flowOrder + ", processors=1";
+            inputString += ", order=" + params->flowOrder;
             //run shhh.flows
             params->m->mothurOut("\nRunning command: shhh.flows(" + inputString + ")\n");
             
@@ -785,19 +785,14 @@ long long SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<st
         outputNames = dataBundle->outputNames;
         outputTypes = dataBundle->outputTypes;
         
-        //get info from thread.....
-        //................
-        
-        
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             
-            //get info from thread.....
-            //................
-            //outputNames and outputTypes
+            outputNames.insert(outputNames.end(), data[i]->outputNames.begin(), data[i]->outputNames.end());
+            outputTypes.insert(data[i]->outputTypes.begin(), data[i]->outputTypes.end());
             
             if (append) {
                 string extension = toString(i+1);
