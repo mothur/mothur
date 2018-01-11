@@ -21,21 +21,6 @@ public:
 private:
     std::shared_ptr<SynchronizedOutputFile> sf;
 };
-/***********************************************************************
-
-class InputReader {
-public:
-    InputReader (std::shared_ptr<SynchronizedInputFile> s) : sf(s) {}
-    
-    bool endOfFile() { return sf->endOfFile(); }
-    void read (string& data) { sf->read(data); }
-    void read (Sequence& data) { sf->read(data); }
-private:
-    std::shared_ptr<SynchronizedInputFile> sf;
-};
-
 /***********************************************************************/
 
-
-
-#endif /* writer_h */
+#endif 
