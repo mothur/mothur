@@ -46,12 +46,7 @@ private:
     int keepFirst, removeLast, maxAmbig;
     
     int readFile(vector<string>& sffFiles, vector<string>& oligosFiles);
-    int createProcesses(vector<string> sffFiles, vector<string> oligosFiles, string, string, string);
-    int driver(vector<string> sffFiles, vector<string> oligosFiles, int start, int end, string, string, string);
-    int mergeOutputFileList(map<string, vector<string> >& files, map<string, vector<string> >& temp);
-
-
-    
+    long long createProcesses(vector<string> sffFiles, vector<string> oligosFiles, string, string, string);
 };
 
 #endif

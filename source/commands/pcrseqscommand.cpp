@@ -797,7 +797,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         vector<unsigned long long> positions;
         vector<linePair> lines;
         long long numFastaSeqs = 0;
-#ifdef NON_WINDOWS
+#if defined NON_WINDOWS
         positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
