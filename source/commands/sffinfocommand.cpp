@@ -1160,7 +1160,7 @@ bool SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, 
 			delete[] tempBuffer6;
 
 			//read qual scores
-			read.qualScores.resize(header.numBases);
+			read.qualScores.resize(header.numBases, 0);
 			for (int i = 0; i < header.numBases; i++) {  
 				char temp[1];
 				in.read(temp, 1);
@@ -1207,9 +1207,7 @@ bool SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, 
                 in2.close();
         }    
             
-		}else{
-			m->mothurOut("Error reading."); m->mothurOutEndLine();
-		}
+		}else{ m->mothurOut("Error reading.\n"); }
         
         if (in.eof()) {  return true; }
         
@@ -1229,27 +1227,43 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
         int currentSeqsDiffs = 0;
         
         string seq = read.bases;
+        vector<int> quals;
+        for (int i = 0; i < read.qualScores.size(); i++) {   quals.push_back((int)read.qualScores[i]); }
 
         for (int i = 0; i < seq.length(); i++) { seq[i] = toupper(seq[i]); }
         
         if (trim) {
             if(header.clipQualRight < header.clipQualLeft){
                 if (header.clipQualRight == 0) { //don't trim right
+                    
+                    vector<int>::iterator first = quals.begin() + (header.clipQualLeft-1);
+                    vector<int>::iterator last = quals.begin() + (quals.size()-1);
+                    vector<int> newVec(first, last);
+                    quals = newVec;
                     seq = seq.substr(header.clipQualLeft-1);
                 }else {
                     seq = "NNNN";
+                    quals.clear(); quals.resize(4, 0);
                 }
             }
             else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
                 seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft+1));
+                vector<int>::iterator first = quals.begin() + (header.clipQualLeft-1);
+                vector<int>::iterator last = quals.begin() + (header.clipQualRight-header.clipQualLeft+1);
+                vector<int> newVec(first, last);
+                quals = newVec;
             }
             else {
+                vector<int>::iterator first = quals.begin() + (header.clipQualLeft-1);
+                vector<int>::iterator last = quals.begin() + (quals.size()-1);
+                vector<int> newVec(first, last);
+                quals = newVec;
                 seq = seq.substr(header.clipQualLeft-1);
             }
         }
         
         Sequence currSeq(header.name, seq);
-        QualityScores currQual;
+        QualityScores currQual(header.name, quals);
         
         //for reorient
         Sequence savedSeq(currSeq.getName(), currSeq.getAligned());

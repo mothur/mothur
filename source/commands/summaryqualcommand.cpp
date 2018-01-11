@@ -185,6 +185,7 @@ int SummaryQualCommand::execute(){
 		
 		long start = time(NULL);
 		long long numSeqs = 0;
+        hasNameMap = false;
 		
 		vector<int> position;
 		vector<int> averageQ;
@@ -192,37 +193,15 @@ int SummaryQualCommand::execute(){
 				
 		if (m->getControl_pressed()) { return 0; }
 		
-		if (namefile != "") { nameMap = util.readNames(namefile); }
+        if (namefile != "") { hasNameMap = true; nameMap = util.readNames(namefile); }
 		else if (countfile != "") {
             CountTable ct;
             ct.readTable(countfile, false, false);
             nameMap = ct.getNameMap();
+            hasNameMap = true;
         }
         
-		vector<unsigned long long> positions; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		positions = util.divideFile(qualfile, processors);
-		for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
-#else	
-		if (processors == 1) {
-			lines.push_back(linePair(0, 1000)); 
-		}else {
-			positions = util.setFilePosFasta(qualfile, numSeqs); 
-            if (numSeqs < processors) { processors = numSeqs; }
-			
-			//figure out how many sequences you have to process
-			int numSeqsPerProcessor = numSeqs / processors;
-			for (int i = 0; i < processors; i++) {
-				int startIndex =  i * numSeqsPerProcessor;
-				if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
-				lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-			}
-		}
-#endif
-		
-		
-		if(processors == 1){ numSeqs = driverCreateSummary(position, averageQ, scores, qualfile, lines[0]);  }
-		else{  numSeqs = createProcessesCreateSummary(position, averageQ, scores, qualfile);  }
+        numSeqs = createProcessesCreateSummary(position, averageQ, scores, qualfile);
 		
 		if (m->getControl_pressed()) {  return 0; }
 		
@@ -236,21 +215,18 @@ int SummaryQualCommand::execute(){
 		
 		//output results to screen
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
-		m->mothurOutEndLine();
-		m->mothurOut("Position\tNumSeqs\tAverageQ"); m->mothurOutEndLine();
+		m->mothurOut("\nPosition\tNumSeqs\tAverageQ\n");
 		for (int i = 0; i < position.size(); i+=100) {
 			float average = averageQ[i] / (float) position[i];
-			cout << i << '\t' << position[i] << '\t' << average;
-			m->mothurOutJustToLog(toString(i) + "\t" + toString(position[i]) + "\t" + toString(average)); m->mothurOutEndLine();
+			cout << i << '\t' << position[i] << '\t' << average << '\n';
+			m->mothurOutJustToLog(toString(i) + "\t" + toString(position[i]) + "\t" + toString(average)+"\n");
 		}
 		
-		m->mothurOutEndLine();
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
-		m->mothurOutEndLine();
-		
+        outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
+		m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n\n");
+		m->mothurOut("Output File Names: \n");
+		m->mothurOut(summaryFile+"\n\n");
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -258,276 +234,172 @@ int SummaryQualCommand::execute(){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+//custom data structure for threads to use.
+// This is passed by void pointer so it can be any data type
+// that can be passed using a single void pointer (LPVOID).
+struct seqSumQualData {
+    vector<int> position;
+    vector<int> averageQ;
+    vector< vector<int> > scores;
+    string filename;
+    unsigned long long start;
+    unsigned long long end;
+    int count, numSeqs;
+    MothurOut* m;
+    bool hasNameMap;
+    map<string, int> nameMap;
+    Utils util;
+    
+    ~seqSumQualData(){}
+    seqSumQualData(string f, unsigned long long st, unsigned long long en, bool n, map<string, int> nam) {
+        filename = f;
+        m = MothurOut::getInstance();
+        start = st;
+        end = en;
+        hasNameMap = n;
+        nameMap = nam;
+        count = 0;
+    }
+};
+
 /**************************************************************************************/
-int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& averageQ, vector< vector<int> >& scores, string filename, linePair filePos) {	
+void driverCreateSummary(seqSumQualData* params) {
 	try {
 		ifstream in;
-		util.openInputFile(filename, in);
+		params->util.openInputFile(params->filename, in);
 		
-		in.seekg(filePos.start);
+		in.seekg(params->start);
         
         //adjust start if null strings
-        if (filePos.start == 0) {  util.zapGremlins(in); util.gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
 		
 		bool done = false;
-		int count = 0;
+		params->count = 0;
+        int count = 0;
 		
 		while (!done) {
 			
-			if (m->getControl_pressed()) { in.close(); return 1; }
+			if (params->m->getControl_pressed()) { in.close(); break; }
 			
-			QualityScores current(in); util.gobble(in);
+			QualityScores current(in); params->util.gobble(in);
 			
 			if (current.getName() != "") {
 				
 				int num = 1;
-				if ((namefile != "") || (countfile != "")) {
+				if (params->hasNameMap) {
 					//make sure this sequence is in the namefile, else error 
-					map<string, int>::iterator it = nameMap.find(current.getName());
+					map<string, int>::iterator it = params->nameMap.find(current.getName());
 					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+					if (it == params->nameMap.end()) { params->m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct.\n"); params->m->setControl_pressed(true); }
 					else { num = it->second; }
 				}
 				
 				vector<int> thisScores = current.getQualityScores();
 				
 				//resize to num of positions setting number of seqs with that size to 1
-				if (position.size() < thisScores.size()) { position.resize(thisScores.size(), 0); }
-				if (averageQ.size() < thisScores.size()) { averageQ.resize(thisScores.size(), 0); }
-				if (scores.size() < thisScores.size()) { 
-					scores.resize(thisScores.size()); 
-					for (int i = 0; i < scores.size(); i++) { scores[i].resize(41, 0); }
+				if (params->position.size() < thisScores.size()) { params->position.resize(thisScores.size(), 0); }
+				if (params->averageQ.size() < thisScores.size()) { params->averageQ.resize(thisScores.size(), 0); }
+				if (params->scores.size() < thisScores.size()) {
+					params->scores.resize(thisScores.size());
+					for (int i = 0; i < params->scores.size(); i++) { params->scores[i].resize(41, 0); }
 				}
 				
 				//increase counts of number of seqs with this position
 				//average is really the total, we will average in execute
 				for (int i = 0; i < thisScores.size(); i++) { 
-					position[i] += num; 
-					averageQ[i] += (thisScores[i] * num); //weighting for namesfile
-					if (thisScores[i] > 41) { m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-					else { scores[i][thisScores[i]] += num; }  
+					params->position[i] += num;
+					params->averageQ[i] += (thisScores[i] * num); //weighting for namesfile
+					if (thisScores[i] > 41) { params->m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40.\n");  params->m->setControl_pressed(true); }
+					else { params->scores[i][thisScores[i]] += num; }
 				}
 				
-				count += num;
+				params->count += num;   //totalSeqs
+                count++;                //uniqueSeqs
 			}
 			
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 			unsigned long long pos = in.tellg();
-			if ((pos == -1) || (pos >= filePos.end)) { break; }
+			if ((pos == -1) || (pos >= params->end)) { break; }
 #else
-			if (in.eof()) { break; }
+			if ((count == params->end) || (in.eof())) { break; }
 #endif
 		}
 		
 		in.close();
-		
-		return count;
-	}
+    }
 	catch(exception& e) {
-		m->errorOut(e, "SummaryQualCommand", "driverCreateSummary");
+		params->m->errorOut(e, "SummaryQualCommand", "driverCreateSummary");
 		exit(1);
 	}
 }
 /**************************************************************************************************/
 int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vector<int>& averageQ, vector< vector<int> >& scores, string filename) {
 	try {
-		int process = 1;
-		int numSeqs = 0;
-		processIDS.clear();
-        bool recalc = false;
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				numSeqs = driverCreateSummary(position, averageQ, scores, qualfile, lines[process]);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = qualfile + toString(process) + ".num.temp";
-				util.openOutputFile(tempFile, out);
-				
-				out << numSeqs << endl;
-				out << position.size() << endl;
-				for (int k = 0; k < position.size(); k++)			{		out << position[k] << '\t'; }  out << endl;
-				for (int k = 0; k < averageQ.size(); k++)			{		out << averageQ[k] << '\t'; }  out << endl;
-				for (int k = 0; k < scores.size(); k++)	{		
-					for (int j = 0; j < 41; j++) {
-						out << scores[k][j] << '\t'; 
-					}
-					out << endl;
-				}  
-				out << endl;
-				
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    util.mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));
-                }
-                recalc = true;
-                break;
-			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {util.mothurRemove(qualfile + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+        int numSeqs = 0;
+        vector<unsigned long long> positions;
+        vector<linePair> lines;
+#if defined NON_WINDOWS
+        positions = util.divideFile(filename, processors);
+        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
+#else
+        if (processors == 1) {
+            lines.push_back(linePair(0, 1000));
+        }else {
+            positions = util.setFilePosFasta(qualfile, numSeqs);
+            if (numSeqs < processors) { processors = numSeqs; }
             
-            //redo file divide
-            lines.clear();
-            vector<unsigned long long> positions = util.divideFile(qualfile, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
-            
-            numSeqs = 0;
-            processIDS.resize(0);
-            process = 1;
-            position.clear();
-            averageQ.clear();
-            scores.clear();
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    numSeqs = driverCreateSummary(position, averageQ, scores, qualfile, lines[process]);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = qualfile + toString(process) + ".num.temp";
-                    util.openOutputFile(tempFile, out);
-                    
-                    out << numSeqs << endl;
-                    out << position.size() << endl;
-                    for (int k = 0; k < position.size(); k++)			{		out << position[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < averageQ.size(); k++)			{		out << averageQ[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < scores.size(); k++)	{
-                        for (int j = 0; j < 41; j++) {
-                            out << scores[k][j] << '\t';
-                        }
-                        out << endl;
-                    }  
-                    out << endl;
-                    
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = numSeqs / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
             }
         }
-        
-		//do your part
-		numSeqs = driverCreateSummary(position, averageQ, scores, qualfile, lines[0]);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//parent reads in and combine Filter info
-		for (int i = 0; i < processIDS.size(); i++) {
-			string tempFilename = qualfile + toString(processIDS[i]) + ".num.temp";
-			ifstream in;
-			util.openInputFile(tempFilename, in);
-			
-			int temp, tempNum;
-			in >> tempNum; util.gobble(in); numSeqs += tempNum;
-			in >> tempNum; util.gobble(in);
-			
-			if (position.size() < tempNum) { position.resize(tempNum, 0); }
-			if (averageQ.size() < tempNum) { averageQ.resize(tempNum, 0); }
-			if (scores.size() < tempNum) { 
-				scores.resize(tempNum); 
-				for (int i = 0; i < scores.size(); i++) { scores[i].resize(41, 0); }
-			}
-			
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; position[k]	+= temp;			}		util.gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; averageQ[k] += temp; 		}		util.gobble(in);
-			for (int k = 0; k < tempNum; k++)			{	
-				for (int j = 0; j < 41; j++) {
-					in >> temp; scores[k][j] += temp;
-					util.gobble(in);
-				}	
-			}
-			
-			in.close();
-			util.mothurRemove(tempFilename);
-		}
-		
-#else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the seqSumQualData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to pass results vectors.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<seqSumQualData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors];
-		HANDLE  hThreadArray[processors]; 
-		
-        bool hasNameMap = false;
-        if ((namefile !="") || (countfile != "")) { hasNameMap = true; }
-        
-		//Create processor worker threads.
-		for( int i=0; i<processors; i++ ){
-			
-			// Allocate memory for thread data.
-			seqSumQualData* tempSum = new seqSumQualData(filename, m, lines[i].start, lines[i].end, hasNameMap, nameMap);
-			pDataArray.push_back(tempSum);
-			processIDS.push_back(i);
-        
-			hThreadArray[i] = CreateThread(NULL, 0, MySeqSumQualThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			numSeqs += pDataArray[i]->numSeqs;
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
-            }
-            int tempNum = pDataArray[i]->position.size();
-            if (position.size() < tempNum) { position.resize(tempNum, 0); }
-			if (averageQ.size() < tempNum) { averageQ.resize(tempNum, 0); }
-			if (scores.size() < tempNum) { 
-				scores.resize(tempNum); 
-				for (int i = 0; i < scores.size(); i++) { scores[i].resize(41, 0); }
-			}
-            
-            for (int k = 0; k < tempNum; k++)			{		 position[k]    +=  pDataArray[i]->position[k];         }		
-			for (int k = 0; k < tempNum; k++)			{		 averageQ[k]    +=  pDataArray[i]->averageQ[k];         }		
-			for (int k = 0; k < tempNum; k++)			{	for (int j = 0; j < 41; j++) {  scores[k][j] += pDataArray[i]->scores[k][j];   }	}
+#endif
 
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-#endif		
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<seqSumQualData*> data;
+        //string f, unsigned long long st, unsigned long long en, bool n, map<string, int> nam
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            seqSumQualData* dataBundle = new seqSumQualData(filename, lines[i+1].start, lines[i+1].end, hasNameMap, nameMap);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverCreateSummary, dataBundle));
+        }
+        
+        seqSumQualData* dataBundle = new seqSumQualData(filename, lines[0].start, lines[0].end, hasNameMap, nameMap);
+        
+        driverCreateSummary(dataBundle);
+        numSeqs = dataBundle->count;
+        position = dataBundle->position;
+        averageQ = dataBundle->averageQ;
+        scores = dataBundle->scores;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            numSeqs += data[i]->count;
+            
+            int tempNum = data[i]->position.size();
+            if (position.size() < tempNum) { position.resize(tempNum, 0); }
+            if (averageQ.size() < tempNum) { averageQ.resize(tempNum, 0); }
+            if (scores.size() < tempNum) {
+                scores.resize(tempNum);
+                for (int i = 0; i < scores.size(); i++) { scores[i].resize(41, 0); }
+            }
+            
+            for (int k = 0; k < tempNum; k++)			{		 position[k]    +=  data[i]->position[k];         }
+            for (int k = 0; k < tempNum; k++)			{		 averageQ[k]    +=  data[i]->averageQ[k];         }
+            for (int k = 0; k < tempNum; k++)			{	for (int j = 0; j < 41; j++) {  scores[k][j] += data[i]->scores[k][j];   }	}
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+
 		return numSeqs;
 	}
 	catch(exception& e) {
