@@ -334,9 +334,9 @@ void driverCreateSummary(seqSumQualData* params) {
 	}
 }
 /**************************************************************************************************/
-int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vector<int>& averageQ, vector< vector<int> >& scores, string filename) {
+long long SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vector<int>& averageQ, vector< vector<int> >& scores, string filename) {
 	try {
-        int numSeqs = 0;
+        long long numSeqs = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
 #if defined NON_WINDOWS

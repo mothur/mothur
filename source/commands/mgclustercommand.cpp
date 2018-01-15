@@ -365,7 +365,7 @@ int MGClusterCommand::runOptiCluster(){
         variables["[clustertag]"] = tag;
         sabundFileName = getOutputFileName("sabund", variables);
         rabundFileName = getOutputFileName("rabund", variables);
-        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        //if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         listFileName = getOutputFileName("list", variables);
         string outputName = getOutputFileName("steps", variables);
         outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
@@ -536,7 +536,7 @@ int MGClusterCommand::runMothurCluster(){
         variables["[clustertag]"] = tag;
         sabundFileName = getOutputFileName("sabund", variables);
         rabundFileName = getOutputFileName("rabund", variables);
-        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        //if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         listFileName = getOutputFileName("list", variables);
         
         float previousDist = 0.00000;

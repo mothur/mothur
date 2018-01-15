@@ -185,14 +185,13 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
         
         if (error) { exit(1); }
         
-        
         if (outputType == "distance") { //create distance matrices for each fasta file
             //process each distance file
             for (int i = 0; i < numGroups; i++) {
                 
-                string options = "mothurcalling=true";
-                if (classic) { options += ", fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", output=lt"; }
-                else { options += ", fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
+                string options = "";
+                if (classic) { options += "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", output=lt"; }
+                else { options += "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
                 if (outputDir != "") { options += ", outputdir=" + outputDir; }
                 
                 m->mothurOut("/******************************************/\n");

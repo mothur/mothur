@@ -61,7 +61,7 @@ string RenameFileCommand::getHelpString(){
         helpString += "The rename.file command allows you to rename files and updates the current files saved by mothur.\n";
         helpString += "The rename.file command parameters are: phylip, column, list, rabund, sabund, name, group, design, tree, shared, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, taxonomy, constaxonomy, input, new, prefix, deletedold and shorten.\n";
         helpString += "The new parameter allows you to provide an output file name for the input file you provide.\n";
-        helpString += "The shorten parameter is used to inicate you want mothur to generate output file names for you. For example: stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.an.unique_list.shared would become stability.an.shared. Default=true.";
+        helpString += "The shorten parameter is used to inicate you want mothur to generate output file names for you. For example: stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.an.shared would become stability.an.shared. Default=true.";
         helpString += "The prefix parameter allows you to enter your own prefix for shortened names.";
         helpString += "The deleteold parameter indicates whether you want to delete the old file.  Default=true.";
         helpString += "The rename.file command should be in the following format: \n";

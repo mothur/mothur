@@ -127,19 +127,19 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
 string VsearchFileParser::getNamesFile(string& inputFile){
     try {
         
-        m->mothurOutEndLine(); m->mothurOut("No namesfile given, running unique.seqs command to generate one."); m->mothurOutEndLine(); m->mothurOutEndLine();
+        m->mothurOut("\nNo namesfile given, running unique.seqs command to generate one.\n\n");
         
         //use unique.seqs to create new name and fastafile
-        string inputString = "fasta=" + inputFile + ", format=count, mothurcalling=true";
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-        m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine();
+        string inputString = "fasta=" + inputFile + ", format=count";
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
         Command* uniqueCommand = new DeconvoluteCommand(inputString);
         uniqueCommand->execute();
         
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
         
         delete uniqueCommand;
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("/******************************************/\n");
         
         countfile = filenames["count"][0];
         fastafile = filenames["fasta"][0];

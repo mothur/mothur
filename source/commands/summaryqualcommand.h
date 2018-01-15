@@ -41,7 +41,7 @@ private:
 	map<string, int> nameMap;
 	int processors;
 
-	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector< vector<int> >&, string);
+	long long createProcessesCreateSummary(vector<int>&, vector<int>&, vector< vector<int> >&, string);
 	int printQual(string, vector<int>&, vector<int>&, vector< vector<int> >&);
 };
 /**************************************************************************************************/
