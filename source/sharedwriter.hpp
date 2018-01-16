@@ -22,8 +22,8 @@ public:
         out << dataToWrite;
     }
     
-    void setFixedShowPoint() {  out.setf(ios::fixed, ios::showpoint);  }
-    void setPrecision(int p)  { out << setprecision(p);  }
+    void setFixedShowPoint()    {  out.setf(ios::fixed, ios::showpoint);    }
+    void setPrecision(int p)    {  out << setprecision(p);                  }
     
 private:
     string path;

@@ -966,7 +966,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
         if (hasCount && dups) { newCount.readTable(name, true, false); }
         
 		//sanity check
-		if (groups.size() < processors) { processors = groups.size(); }
+		if (groups.size() < processors) { processors = groups.size(); m->mothurOut("Reducing processors to " + toString(groups.size()) + ".\n"); }
 		
 		//divide the groups between the processors
 		vector<linePair> lines;

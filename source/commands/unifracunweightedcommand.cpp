@@ -328,7 +328,7 @@ int UnifracUnweightedCommand::execute() {
         
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
         
-		if (numComp < processors) { processors = numComp;  }
+		if (numComp < processors) { processors = numComp;  m->mothurOut("Reducing processors to " + toString(numComp) + ".\n"); }
         
         if (consensus && (numComp < 2)) { m->mothurOut("consensus can only be used with numComparisions greater than 1, setting consensus=f.\n"); consensus=false; }
 		

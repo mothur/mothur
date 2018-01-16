@@ -350,7 +350,7 @@ int SffMultipleCommand::execute(){
         
         if (m->getControl_pressed()) { return 0; }
         
-        if (sffFiles.size() < processors) { processors = sffFiles.size(); }
+        if (sffFiles.size() < processors) { processors = sffFiles.size(); m->mothurOut("Reducing processors to " + toString(sffFiles.size()) + ".\n"); }
     
         createProcesses(sffFiles, oligosFiles, fasta, name, group);
 		

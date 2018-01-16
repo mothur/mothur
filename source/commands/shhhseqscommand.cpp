@@ -375,7 +375,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
         bool recalc = false;
 		
 		//sanity check
-		if (groups.size() < processors) { processors = groups.size(); }
+		if (groups.size() < processors) { processors = groups.size(); m->mothurOut("Reducing processors to " + toString(groups.size()) + ".\n"); }
 		
 		//divide the groups between the processors
 		vector<linePair> lines;
