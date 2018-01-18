@@ -31,9 +31,9 @@ public:
         printSharedHeaders = true;
         vector<SharedRAbundVector*> data = bv.getSharedRAbundVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
-        eliminateZeroOTUS();
         setLabels(bv.getLabel());
         setOTUNames(bv.getOTUNames());
+        eliminateZeroOTUS();
     }
     ~SharedRAbundVectors() { clear(); }
     
