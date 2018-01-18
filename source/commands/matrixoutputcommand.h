@@ -113,8 +113,8 @@ struct distSharedData {
     bool mainThread, subsample;
 	
 	distSharedData(){}
-	distSharedData(MothurOut* mout, long long st, bool mt, bool su, int subsize, vector<string> est, SharedRAbundVectors* lu) {
-		m = mout;
+	distSharedData(long long st, bool mt, bool su, int subsize, vector<string> est, SharedRAbundVectors* lu) {
+        m = MothurOut::getInstance();
 		numIters = st;
         Estimators = est;
         thisLookup = lu;

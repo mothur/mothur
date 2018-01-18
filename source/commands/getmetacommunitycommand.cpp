@@ -804,17 +804,13 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
         vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist> > calcDists; calcDists.resize(1);
         
+        SubSample sample;
         for (int thisIter = 0; thisIter < iters+1; thisIter++) {
  
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if (subsample && (thisIter != 0)) {
-                SubSample sample;
-                vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
-                
-                tempLabels = sample.getSample(thisItersLookup, subsampleSize);
-            }
+            if (subsample && (thisIter != 0)) { sample.getSample(thisItersLookup, subsampleSize);  }
             
             driver(thisItersLookup, calcDists, matrixCalculator);
             

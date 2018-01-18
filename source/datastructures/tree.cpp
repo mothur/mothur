@@ -107,13 +107,14 @@ Tree::Tree(CountTable* t, vector<string>& Treenames) : ct(t) {
 	}
 }
 /*****************************************************************/
-Tree::Tree(CountTable* t, vector< vector<double> >& sims, vector<string>& Treenames) : ct(t) {
+Tree::Tree(CountTable* t, vector< vector<double> >& sims, vector<string>& Tnames) : ct(t) {
 	try {
 		m = MothurOut::getInstance();
         current = CurrentFile::getInstance();
 		
-		if (Treenames.size() == 0) {  Treenames = parseTreeFile(current->getTreeFile());   }
-
+        Treenames = Tnames;
+		if (Tnames.size() == 0) {  Treenames = parseTreeFile(current->getTreeFile());   }
+        
 		numLeaves = Treenames.size();
 		numNodes = 2*numLeaves - 1;
 		

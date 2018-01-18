@@ -507,18 +507,13 @@ int process(distSharedData* params){
         for (int i=0; i<matrixCalculators.size(); i++) { params->Estimators.push_back(matrixCalculators[i]->getName()); }
         
         vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
-                  
+        SubSample sample;
         for (int thisIter = 0; thisIter < params->numIters; thisIter++) {
             
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) {
-                SubSample sample;
-                vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
-                
-                tempLabels = sample.getSample(thisItersLookup, params->subsampleSize);
-            }
+            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) { sample.getSample(thisItersLookup, params->subsampleSize); }
             
             vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
             vector<string> thisItersGroupNames = params->thisLookup->getNamesGroups();
@@ -591,10 +586,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
             
             //make copy of lookup so we don't get access violations
             SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
-            
-            //distSharedData(MothurOut* mout, long long st, bool mt, bool su, int subsize, vector<string> est, SharedRAbundVectors* lu)
-            // Allocate memory for thread data.
-            distSharedData* dataBundle = new distSharedData(m, lines[i+1], false, subsample, subsampleSize, Estimators, newLookup);
+            distSharedData* dataBundle = new distSharedData(lines[i+1], false, subsample, subsampleSize, Estimators, newLookup);
             
             data.push_back(dataBundle);
             
@@ -603,7 +595,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         
         //make copy of lookup so we don't get access violations
         SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
-        distSharedData* dataBundle = new distSharedData(m, lines[0], true, subsample, subsampleSize, Estimators, newLookup);
+        distSharedData* dataBundle = new distSharedData(lines[0], true, subsample, subsampleSize, Estimators, newLookup);
         process(dataBundle);
         delete newLookup;
         

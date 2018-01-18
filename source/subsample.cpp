@@ -133,11 +133,8 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
                 temp->setGroup(rabunds[i]->getGroup());
                 
                 for (int j = 0; j < size; j++) {
-                    
                     if (m->getControl_pressed()) {  return currentLabels; }
-                    
-                    int bin = order[j];
-                    temp->increment(bin);
+                    temp->increment(order[j]);
                 }
                 newLookup->push_back(temp);
             }else { SharedRAbundVector* temp = new SharedRAbundVector(*rabunds[i]); newLookup->push_back(temp); }
@@ -147,7 +144,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
         
         for (int i = 0; i < rabunds.size(); i++) { delete rabunds[i]; } rabunds.clear();
         rabunds = newLookup->getSharedRAbundVectors();
-        
+       
         //save mothurOut's binLabels to restore for next label
         vector<string> subsampleBinLabels = newLookup->getOTUNames();
         delete newLookup;

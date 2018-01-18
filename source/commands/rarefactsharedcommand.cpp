@@ -493,14 +493,11 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
 	try {
         
         map<string, vector<string> > filenames;
+        SubSample sample;
         for (int thisIter = 0; thisIter < iters; thisIter++) {
             
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
-            
-             //we want the summary results for the whole dataset, then the subsampling
-            SubSample sample;
-            vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
-            tempLabels = sample.getSample(thisItersLookup, subsampleSize);
+            sample.getSample(thisItersLookup, subsampleSize);
             
             Rarefact* rCurve;
             vector<Display*> rDisplays;

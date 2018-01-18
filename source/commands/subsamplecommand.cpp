@@ -925,16 +925,15 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
         variables["[extension]"] = util.getExtension(sharedfile);
         variables["[distance]"] = thislookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        
-        SubSample sample;
         
-        vector<string> subsampledLabels = sample.getSample(thislookup, size);
+        SubSample sample;
+        sample.getSample(thislookup, size);
         
         if (m->getControl_pressed()) {  return 0; }
         
         ofstream out;
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-
 		thislookup->printHeaders(out);
 		thislookup->print(out);
         out.close();

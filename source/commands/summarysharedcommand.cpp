@@ -800,6 +800,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
         vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(numCalcs);
         
+        SubSample sample;
         for (int thisIter = 0; thisIter < iters+1; thisIter++) {
             
             vector<SharedRAbundVector*> thisItersLookup = thisLookup;
@@ -814,7 +815,6 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     newLookup.push_back(temp);
                 }
                 
-                SubSample sample;
                 sample.getSample(newLookup, subsampleSize, currentLabels);
                 thisItersLookup = newLookup;
             }

@@ -377,6 +377,7 @@ int UnifracWeightedCommand::execute() {
             
             //subsample loop
             vector< vector<double> > calcDistsTotals;  //each iter, each groupCombos dists. this will be used to make .dist files
+            SubSample sample;
             for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //subsampleIters=0, if subsample=f.
                 if (m->getControl_pressed()) { break; }
                 
@@ -387,7 +388,6 @@ int UnifracWeightedCommand::execute() {
                 if (m->getDebug()) { sampleTime = time(NULL); }
                 
                 //uses method of setting groups to doNotIncludeMe
-                SubSample sample;
                 Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }

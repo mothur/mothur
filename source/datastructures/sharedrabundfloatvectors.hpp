@@ -29,10 +29,10 @@ public:
     SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
         vector<SharedRAbundFloatVector*> data = bv.getSharedRAbundFloatVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
-        eliminateZeroOTUS();
         setLabels(bv.getLabel());
         printSharedHeaders = true;
         setOTUNames(bv.getOTUNames());
+        eliminateZeroOTUS();
     }
     ~SharedRAbundFloatVectors() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); }
     

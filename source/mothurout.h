@@ -58,8 +58,8 @@ class MothurOut {
 		void closeLog();
     
         //globals
-        void setRandomSeed(long long s)                 { seed = s;                         }
-        long long getRandomSeed()                       { return seed;                      }
+        void setRandomSeed(unsigned s)                  { seed = s;                         }
+        unsigned getRandomSeed()                        { return seed;                      }
         bool getControl_pressed()                       { return control_pressed;           }
         void setControl_pressed(bool t)                 { control_pressed = t;              }
         bool getChangedSeqNames()                       { return changedSeqNames;           }
@@ -86,7 +86,7 @@ class MothurOut {
 		~MothurOut();
 		
 		ofstream out;
-        long long seed;
+        unsigned seed;
         int numErrors, numWarnings;
         string logFileName, buffer;
         bool changedSeqNames, devNull, control_pressed, executing, debug, quietMode;
