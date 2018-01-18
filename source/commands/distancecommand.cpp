@@ -683,11 +683,7 @@ bool DistanceCommand::sanityCheck() {
 			
 			//both names are in fasta file and distance is below cutoff
 			if ((namesOldFasta.count(name1) == 0) || (namesOldFasta.count(name2) == 0)) {  good = false; break;  }
-			else{
-				if (dist <= cutoff) {
-					outDist << name1 << '\t' << name2 << '\t' << dist << endl;
-				}
-			}
+			else{ if (dist <= cutoff) { outDist << name1 << '\t' << name2 << '\t' << dist << endl; } }
 		}
 		
 		inDist.close();

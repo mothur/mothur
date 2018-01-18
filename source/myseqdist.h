@@ -12,6 +12,7 @@
  */
 
 #include "mothurout.h"
+#include "utils.hpp"
 
 /**************************************************************************************************/
 
@@ -22,28 +23,18 @@ public:
 	~correctDist(){}
 	
 	int addSeq(string, string);
-	int execute(string);
+	void execute(string);
 	
 private:
 	MothurOut* m;
+    Utils util;
+    vector<vector<int> > sequences;
+    vector<string> names;
+    int processors;
+    
 	int getSequences(string);
 	vector<int> fixSequence(string);
-	
-	int driver(int, int, string);
 	int createProcess(string);
-	
-	double getDist(vector<int>&, vector<int>&);
-	int getLastMatch(char, vector<vector<char> >&, int, int, vector<int>&, vector<int>&);
-	
-	vector<vector<double> > correctMatrix;
-	
-	vector<vector<int> > sequences;
-	
-	vector<string> names;	
-	int numSeqs;
-	int processors;
-	vector<int> start;
-	vector<int> end;
 };
 
 /**************************************************************************************************/

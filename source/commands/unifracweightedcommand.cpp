@@ -380,14 +380,11 @@ int UnifracWeightedCommand::execute() {
             SubSample sample;
             for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //subsampleIters=0, if subsample=f.
                 if (m->getControl_pressed()) { break; }
-                
+
+                //uses method of setting groups to doNotIncludeMe
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 CountTable* newCt = new CountTable();
-                
-                int sampleTime = 0;
-                if (m->getDebug()) { sampleTime = time(NULL); }
-                
-                //uses method of setting groups to doNotIncludeMe
+                int sampleTime = time(NULL);
                 Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
@@ -400,8 +397,7 @@ int UnifracWeightedCommand::execute() {
                 //save data to make ave dist, std dist
                 calcDistsTotals.push_back(iterData);
                 
-                delete newCt;
-                delete subSampleTree;
+                delete newCt; delete subSampleTree;
                 
                 if((thisIter+1) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 	}
             }
