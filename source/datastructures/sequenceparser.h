@@ -35,7 +35,6 @@ class SequenceParser {
 		//general operations
 		int getNumGroups();
 		vector<string> getNamesOfGroups();	
-		bool isValidGroup(string);  //return true if string is a valid group
 		
 		int getNumSeqs(string);		//returns the number of unique sequences in a specific group
 		vector<Sequence> getSeqs(string); //returns unique sequences in a specific group
@@ -46,12 +45,11 @@ class SequenceParser {
 		
 		map<string, string> getAllSeqsMap(){ return allSeqsMap; }  //returns map where the key=sequenceName and the value=representativeSequence - helps us remove duplicates after group by group processing
 	private:
-	
-		GroupMap* groupMap;
 		MothurOut* m;
         Utils util;
 	
 		int numSeqs;
+        vector<string> namesOfGroups;
 		map<string, string> allSeqsMap;
 		map<string, vector<Sequence> > seqs; //a vector for each group
 		map<string, map<string, string> > nameMapPerGroup; //nameMap for each group

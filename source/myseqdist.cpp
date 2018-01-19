@@ -274,7 +274,7 @@ int driverCorrect(correctData* params){
         if(params->startLine == 0){ distFile << params->sequences.size() << endl; }
         
         int startTime = time(NULL);
-        params->m->mothurOut("\nCalculating distances...\n");
+        params->m->mothurOut("\nCalculating distances for (" + toString(params->startLine+1) + " to " + toString(params->endLine+1) + ")... \n");
         
         for(int i = params->startLine;i < params->endLine; i++){
             if (params->m->getControl_pressed()) { distFile.close(); return 0; }
