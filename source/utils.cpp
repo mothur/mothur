@@ -3713,6 +3713,35 @@ void Utils::splitAtComma(string& estim, vector<string>& container) {
     }
 }
 /***********************************************************************/
+//This function parses the a string and puts peices in a vector
+void Utils::splitAtComma(string& estim, vector<int>& convertedContainer) {
+    try {
+        string individual = "";
+        vector<string> container;
+        int estimLength = estim.size();
+        for(int i=0;i<estimLength;i++){
+            if(estim[i] == ','){
+                container.push_back(individual);
+                individual = "";
+            }
+            else{
+                individual += estim[i];
+            }
+        }
+        container.push_back(individual);
+        
+        for (int i = 0; i < container.size(); i++) {
+            int temp;
+            if (mothurConvert(container[i], temp)) { convertedContainer.push_back(temp); }
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtComma");
+        exit(1);
+    }
+}
+/***********************************************************************/
 //This function splits up the various option parameters
 void Utils::splitAtChar(string& prefix, string& suffix, char c){
     try {

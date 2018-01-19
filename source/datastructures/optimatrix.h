@@ -26,7 +26,6 @@ public:
     OptiMatrix() { m = MothurOut::getInstance(); }
     OptiMatrix(string, string, double, bool); //distfile, distformat, cutoff, sim
     OptiMatrix(string, string, string, string, double, bool); //distfile, name or count, format, distformat, cutoff, sim
-    //OptiMatrix(SparseDistanceMatrix*, string, string); //sparse matrix, name or count, format
     ~OptiMatrix(){ }
     
     int readFile(string, string, string, string, double, bool); //distfile, name or count, format, distformat, cutoff, sim
@@ -35,6 +34,8 @@ public:
     int getNumClose(int index) { return closeness[index].size(); }
     int getNumSeqs() { return closeness.size(); }
     int getNumSingletons() { return singletons.size(); }
+    long long getNumDists(); //number of distances under cutoff
+    map<string, int> getNameIndexMap();
     
     string getName(int); //name from nameMap index
     ListVector* getListSingle();
@@ -46,7 +47,7 @@ public:
     string getOverlapName(int); //name from nameMap index
     
 protected:
-    
+    Utils util;
     MothurOut* m;
     vector< set<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
     vector< set<int> > blastOverlap;  //empty unless reading a blast file.

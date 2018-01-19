@@ -35,77 +35,6 @@ OptiMatrix::OptiMatrix(string d, string nc, string f, string df, double c, bool 
     else if (distFormat == "blast")     {   readBlast();    }
     
 }
-/***********************************************************************
-OptiMatrix::OptiMatrix(SparseDistanceMatrix* sparseMatrix, string nc, string f) : format(f) {
-    m = MothurOut::getInstance();
-    
-    if (format == "name") { namefile = nc; countfile = ""; }
-    else if (format == "count") { countfile = nc; namefile = ""; }
-    else { countfile = ""; namefile = ""; }
-    
-    //sparse matrix contains singletons and "names" in matrix are the indexes provided by nameassignment class.
-    //This code converts the sparse matrix to an opti matrix by removing the singletons and changing the names.
-    //The singletons are stored separately by the OptiMatrix class.
-    
-    map<string, int> nameAssignment;
-    if (namefile != "") { nameAssignment = util.readNames(namefile); }
-    else  {  CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
-    int count = 0;
-    map<int, int> indexSwap;
-    map<int, string> reverseNameAssignment;
-    for (map<string, int>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) { //nameMap now contains unique names and index into vector
-        reverseNameAssignment[it->second] = it->first;
-        indexSwap[it->second] = count; count++;
-        nameMap.push_back(it->first);
-    }
-    nameAssignment.clear();
-    
-    //index i in seqVec = indexSwap->first. IndexMap->second = index into closeness
-    //singletonIndexSwap[IndexMap->second] = newIndexIntoCloseness
-    vector<bool> singleton; singleton.resize(nameAssignment.size(), true);
-    map<int, int> singletonIndexSwap;
-    for (int i = 0; i < sparseMatrix->seqVec.size(); i++) {
-        if (sparseMatrix->seqVec[i].size() != 0) { singleton[i] = false; }
-        singletonIndexSwap[indexSwap[i]] = indexSwap[i];
-    }
-    
-    int nonSingletonCount = 0;
-    for (int i = 0; i < singleton.size(); i++) {
-        if (!singleton[i]) { //if you are a singleton
-            singletonIndexSwap[indexSwap[i]] = nonSingletonCount;
-            nonSingletonCount++;
-        }else { singletons.push_back(nameMap[i]); }
-    }
-    singleton.clear();
-    
-    closeness.resize(nonSingletonCount);
-    
-    map<string, string> names;
-    if (namefile != "") {
-        util.readNames(namefile, names);
-        for (int i = 0; i < singletons.size(); i++) {
-            singletons[i] = names[singletons[i]];
-        }
-    }
-    
-    for (int i = 0; i < sparseMatrix->seqVec.size(); i++) {
-        int seq1 = singletonIndexSwap[indexSwap[i]];
-        string name = reverseNameAssignment[i];
-        if (namefile != "") { name = names[reverseNameAssignment[i]]; }
-        nameMap[seq1] = name;
-        
-        if (sparseMatrix->seqVec[i].size() == 0) { }//singleton
-        else {
-            for (int j = 0; j < sparseMatrix->seqVec[i].size(); j++) {
-                int seq2 = singletonIndexSwap[indexSwap[sparseMatrix->seqVec[i][j].index]];
-                closeness[seq1].insert(seq2);
-                closeness[seq2].insert(seq1);
-            }
-            sparseMatrix->seqVec[i].clear(); //save memory
-        }
-    }
-}*/
-
 /***********************************************************************/
 int OptiMatrix::readFile(string d, string nc, string f, string df, double c, bool s)  {
     distFile = d; format = f; cutoff = c; sim = s; distFormat = df;
@@ -160,6 +89,24 @@ long int OptiMatrix::print(ostream& out) {
     }
 }
 /***********************************************************************/
+//maps unique name to index in distance matrix
+//used by sensspec to get translate the list file name to the index name for closeness shirt
+map<string, int> OptiMatrix::getNameIndexMap() {
+    try {
+        map<string, int> nameIndexes;
+        for (int i = 0; i < nameMap.size(); i++) {
+            vector<string> thisBinsSeqs; util.splitAtComma(nameMap[i], thisBinsSeqs);
+            if (i < closeness.size()) {  nameIndexes[thisBinsSeqs[0]] = i;  }
+        }
+        
+        return nameIndexes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiMatrix", "getNameIndexMap");
+        exit(1);
+    }
+}
+/***********************************************************************/
 string OptiMatrix::getName(int index) {
     try {
         //return toString(index);
@@ -192,6 +139,18 @@ bool OptiMatrix::isClose(int i, int toFind){
         if (closeness[i].count(toFind) != 0) { found = true; }
         return found;
         
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiMatrix", "isClose");
+        exit(1);
+    }
+}
+/***********************************************************************/
+long long OptiMatrix::getNumDists(){
+    try {
+        long long foundDists = 0;
+        for (int i = 0; i < closeness.size(); i++) { foundDists += closeness[i].size(); }
+        return foundDists;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiMatrix", "isClose");

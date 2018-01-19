@@ -186,6 +186,7 @@ public:
     bool stringBlank (string);
     void splitAtComma(string&, string&);
     void splitAtComma(string&, vector<string>&);
+    void splitAtComma(string&, vector<int>&);
     void splitAtDash(string&, set<int>&);
     void splitAtDash(string&, set<string>&);
     void splitAtDash(string&, vector<string>&);

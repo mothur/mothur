@@ -258,27 +258,14 @@ int SensSpecCommand::execute(){
 
         int startTime = time(NULL);
 
-        //create list file with only unique names, saves time and memory by removing redundant names from list file that are not in the distance file.
-        string newListFile = preProcessList();
-        if (newListFile != "") { listFile = newListFile; }
-
-		setUpOutput();
-		outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
-
 		processListFile();
 
-        //remove temp file if created
-        if (newListFile != "") { util.mothurRemove(newListFile); }
+        if (m->getControl_pressed()) { util.mothurRemove(sensSpecFileName); return 0; }
 
-		if (m->getControl_pressed()) { util.mothurRemove(sensSpecFileName); return 0; }
+        m->mothurOut("It took " + toString(time(NULL) - startTime) + " to run sens.spec.\n");
 
-        m->mothurOut("It took " + toString(time(NULL) - startTime) + " to run sens.spec."); m->mothurOutEndLine();
-
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(sensSpecFileName); m->mothurOutEndLine();
-		m->mothurOutEndLine();
-
+		m->mothurOut("/nOutput File Names: /n");
+		m->mothurOut(sensSpecFileName+"\n\n");
 
 		return 0;
 	}
@@ -287,142 +274,55 @@ int SensSpecCommand::execute(){
 		exit(1);
 	}
 }
-
 //***************************************************************************************************************
 
 int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCutoff){
-
 	try {
+        string label = list->getLabel();
+        long long numSeqs = list->getNumSeqs();
+        int numOTUs = list->getNumBins();
+        
+        if(getCutoff == 1){
+            if(label != "unique"){
+                origCutoff = label;
+                convert(label, cutoff);
+                cutoff = util.ceilDist(cutoff, precision);
+                origCutoff = toString(util.ceilDist(cutoff, precision));
+            }else{ origCutoff = "unique"; cutoff = 0.0000; }
+        }
+        
 
-		string label = list->getLabel();
-		long long numSeqs = list->getNumSeqs();
-		int numOTUs = list->getNumBins();
-
-		if(getCutoff == 1){
-			if(label != "unique"){
-				origCutoff = label;
-				convert(label, cutoff);
-        cutoff = util.ceilDist(cutoff, precision);
-        origCutoff = toString(util.ceilDist(cutoff, precision));
-			}
-			else{
-				origCutoff = "unique";
-				cutoff = 0.0000;
-			}
-		}
+        string nameOrCount = "";
+        string thisNamefile = "";
+        map<string, int> counts;
+        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+        else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
+        
+        string distfile = columnfile;
+        if (format == "phylip") { distfile = phylipfile; }
+        
+        OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
 
 		truePositives = 0;
 		falsePositives = 0;
 		trueNegatives = 0;
 		falseNegatives = 0;
-
-		set<string> distanceMap;
-
-		//could segfault out if there are sequences in phylip-formatted distance
-		//matrix that aren't in the list file
-		if(format == "phylip"){
-
-			ifstream phylipFile;
-			util.openInputFile(distFile, phylipFile);
-			int pNumSeqs;
-			phylipFile >> pNumSeqs;
-
-            double distance; string name;
-
-            vector<string> seqNameVector;
-			m->mothurOut(label); m->mothurOutEndLine();
-
-			for(int i=0;i<pNumSeqs;i++){
-
-				if (m->getControl_pressed()) { return 0; }
-
-                phylipFile >> name; seqNameVector.push_back(name);
-
-				for(int j=0;j<i;j++){
-					phylipFile >> distance;
-
-					if(distance < cutoff){
-
-						string seqNamePair;
-						if(seqNameVector[i] < seqNameVector[j]){
-							seqNamePair = seqNameVector[i] + '-' + seqNameVector[j];
-						} else {
-							seqNamePair = seqNameVector[j] + '-' + seqNameVector[i];
-						}
-
-						distanceMap.insert(seqNamePair);
-					}
-				}
-
-	            util.getline(phylipFile); //get rest of line if square
-	            util.gobble(phylipFile);
-			}
-			phylipFile.close();
-		}
-		else if(format == "column"){
-
-			ifstream columnFile;
-			util.openInputFile(distFile, columnFile);
-
-			string seqNameA, seqNameB;
-			float distance;
-
-			while(columnFile){
-				columnFile >> seqNameA >> seqNameB >> distance;
-				util.gobble(columnFile);
-
-				if(distance < cutoff){
-					string seqNamePair;
-
-					if(seqNameA <= seqNameB){
-						seqNamePair = seqNameA + '-' + seqNameB;
-					} else {
-						seqNamePair = seqNameB + '-' + seqNameA;
-					}
-                    distanceMap.insert(seqNamePair);
-				}
-			}
-			columnFile.close();
-		}
-        //cout << distanceMap.size() << endl;;
-		for(int otu=0;otu<numOTUs;otu++){
-			if (m->getControl_pressed()) { return 0; }
-
-			// get the sequence string from the list vector
-			string seqList = list->get(otu);
-
-			//count number of sequences in the bin
-            vector<string> otuVector;
-			util.splitAtComma(seqList, otuVector);
-
-			// indicate that a pair of sequences are in the same OTU; will
-			// assume that if they don't show up in the map that they're in
-			// different OTUs
-			for(int i=0;i<otuVector.size();i++){
-				for(int j=0;j<i;j++){
-
-					string seqNamePair = "";
-					if(otuVector[i] < otuVector[j]){
-						seqNamePair = otuVector[i] + '-' + otuVector[j];
-					} else{
-						seqNamePair = otuVector[j] + '-' + otuVector[i];
-					}
-
-					set<string>::iterator it = distanceMap.find(seqNamePair);
-
-					if(it != distanceMap.end()){
-						truePositives++;
-						distanceMap.erase(it);
-					} else {
-						falsePositives++;
-					}
-				}
-			}
-		}
         
-        //cout << *(distanceMap.begin()) << endl;
-		falseNegatives = distanceMap.size();
-		trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives);
+        vector< vector< int > > otus = preProcessList(matrix, list);
+
+		for(int otu=0;otu<otus.size();otu++){
+			if (m->getControl_pressed()) { return 0; }
+			
+			for(int i=0;i<otus[otu].size();i++){
+				for(int j=0;j<i;j++){
+                    if (matrix.isClose(otus[otu][i], otus[otu][j])) { truePositives++; }
+                    else { falsePositives++; }
+				}
+			}
+		}
+        long long numDists = matrix.getNumDists();
+        falseNegatives = (numDists/2) - truePositives;
+        trueNegatives = numSeqs * (numSeqs-1)/2  - (falsePositives + falseNegatives + truePositives);
 
 		outputStatistics(label, origCutoff);
 
@@ -433,18 +333,16 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 		exit(1);
 	}
 }
-
 //***************************************************************************************************************
-
 int SensSpecCommand::processListFile(){
 	try{
-
-		string origCutoff = "";
-		bool getCutoff = 0;
-
-		if(cutoff == -1.00)	{	getCutoff = 1;                                          }
-		else 				{	origCutoff = toString(util.ceilDist(cutoff, precision));	}
-
+        setUpOutput();
+        
+        bool getCutoff = 0;
+        string origCutoff = "";
+        if(cutoff == -1.00)	{	getCutoff = 1;                                              }
+        else 				{	origCutoff = toString(util.ceilDist(cutoff, precision));	}
+        
 		InputData input(listFile, "list", nullVector);
 		ListVector* list = input.getListVector();
 		string lastLabel = list->getLabel();
@@ -461,8 +359,6 @@ int SensSpecCommand::processListFile(){
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
 
-				//process
-				// int numSeqs = fillSeqMap(seqMap, list);
 				process(list, getCutoff, origCutoff);
 			}
 
@@ -476,8 +372,6 @@ int SensSpecCommand::processListFile(){
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
 
-				//process
-				//int numSeqs = fillSeqMap(seqMap, list);
 				process(list, getCutoff, origCutoff);
 
 				//restore real lastlabel to save below
@@ -507,9 +401,7 @@ int SensSpecCommand::processListFile(){
 			if (list != NULL) {	delete list;	}
 			list = input.getListVector(lastLabel);
 
-			//process
-			//int numSeqs = fillSeqMap(seqMap, list);
-			process(list, getCutoff, origCutoff);
+            process(list, getCutoff, origCutoff);
 
 			delete list;
 		}
@@ -521,13 +413,12 @@ int SensSpecCommand::processListFile(){
 		exit(1);
 	}
 }
-
 //***************************************************************************************************************
-
 void SensSpecCommand::setUpOutput(){
 	try{
 		ofstream sensSpecFile;
 		util.openOutputFile(sensSpecFileName, sensSpecFile);
+        outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
 
 		sensSpecFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
 
@@ -538,9 +429,7 @@ void SensSpecCommand::setUpOutput(){
 		exit(1);
 	}
 }
-
 //***************************************************************************************************************
-
 void SensSpecCommand::outputStatistics(string label, string cutoff){
 	try{
 		long long tp =  truePositives;
@@ -588,75 +477,14 @@ void SensSpecCommand::outputStatistics(string label, string cutoff){
 	}
 }
 //***************************************************************************************************************
-
-string SensSpecCommand::preProcessList(){
+//removes anyone with no valid dists and changes name to matrix short names
+vector<vector< int> > SensSpecCommand::preProcessList(OptiMatrix& matrix, ListVector* list){
     try {
-        set<string> uniqueNames;
-        //get unique names from distance file
-        if (format == "phylip") {
-
-            ifstream phylipFile;
-            util.openInputFile(distFile, phylipFile);
-            string numTest;
-            int pNumSeqs;
-			phylipFile >> numTest; util.gobble(phylipFile);
-
-			if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
-            else {
-                util.mothurConvert(numTest, pNumSeqs);
-            }
-
-            string seqName;
-            for(int i=0;i<pNumSeqs;i++){
-                if (m->getControl_pressed()) { return ""; }
-                phylipFile >> seqName;  util.getline(phylipFile);  util.gobble(phylipFile);
-                uniqueNames.insert(seqName);
-            }
-            phylipFile.close();
-        }else {
-            if (namefile != "") {
-                ifstream nameFileHandle;
-                util.openInputFile(namefile, nameFileHandle);
-                string uniqueSeqName, redundantSeqNames;
-                
-                while(nameFileHandle){
-                    if (m->getControl_pressed()) { return ""; }
-                    nameFileHandle >> uniqueSeqName >> redundantSeqNames;
-                    uniqueNames.insert(uniqueSeqName);
-                    util.gobble(nameFileHandle);
-                }
-                nameFileHandle.close();
-            }else if (countfile != "") {
-                CountTable ct;
-                ct.readTable(countfile, false, true);
-                vector<string> countNames = ct.getNamesOfSeqs();
-                for (int i = 0; i < countNames.size(); i++) { uniqueNames.insert(countNames[i]); }
-            }
-        }
-
-        //read list file, if numSeqs > unique names then remove redundant names
-        string newListFile = listFile + ".temp";
-        ofstream out;
-        util.openOutputFile(newListFile, out);
-        InputData input(listFile, "list", nullVector);
-        ListVector* list = input.getListVector();
-
-		bool wroteSomething = false;
-
-		 while(list != NULL) {
-
-			if (m->getControl_pressed()) {  out.close(); util.mothurRemove(newListFile);  return ""; }
-
-            //listfile is already unique
-            if (list->getNumSeqs() == uniqueNames.size()) { out.close(); util.mothurRemove(newListFile);  return ""; }
-
-			//make a new list vector
-			ListVector newList;
-			newList.setLabel(list->getLabel());
-            vector<string> binLabels = list->getLabels();
-            vector<string> newLabels;
-
-			//for each bin
+        map<string, int> nameIndex = matrix.getNameIndexMap();
+        vector<vector< int> > newList;
+        
+        if (list != NULL) {
+            //for each bin
 			for (int i = 0; i < list->getNumBins(); i++) {
 
 				//parse out names that are in accnos file
@@ -664,43 +492,28 @@ string SensSpecCommand::preProcessList(){
                 vector<string> bnames;
                 util.splitAtComma(binnames, bnames);
 
-				string newNames = "";
+				vector<int> newNames;
                 for (int j = 0; j < bnames.size(); j++) {
 					string name = bnames[j];
+                    map<string, int>::iterator itSeq1 = nameIndex.find(name);
+                    int seq1Index = -1;
+                    if (itSeq1 != nameIndex.end()) { seq1Index = itSeq1->second; } //you have distances in the matrix
+
 					//if that name is in the .accnos file, add it
-					if (uniqueNames.count(name) != 0) {  newNames += name + ",";  }
+                    if (seq1Index != -1) {  newNames.push_back(seq1Index);  }
 				}
 
 				//if there are names in this bin add to new list
-				if (newNames != "") {
-					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);
-                    newLabels.push_back(binLabels[i]);
-				}
+				if (newNames.size() != 0) { newList.push_back(newNames); }
 			}
-
-			//print new listvector
-			if (newList.getNumBins() != 0) {
-				wroteSomething = true;
-                newList.setLabels(newLabels);
-				newList.print(out);
-			}
-
-             delete list;
-             list = input.getListVector();
-		}
-		out.close();
-
-        if (wroteSomething) { return newListFile; }
-        else { util.mothurRemove(newListFile); }
-
-        return "";
+        }
+        return newList;
     }
     catch(exception& e) {
         m->errorOut(e, "SensSpecCommand", "preProcessList");
         exit(1);
     }
 }
-
-
 //***************************************************************************************************************
+
+

@@ -15,6 +15,7 @@
 #include "command.hpp"
 #include "listvector.hpp"
 #include "inputdata.h"
+#include "optimatrix.h"
 
 class SensSpecCommand : public Command {
 
@@ -36,7 +37,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }
 
 private:
-	string preProcessList();
+	vector< vector< int> > preProcessList(OptiMatrix& matrix, ListVector*);
 	int processListFile();
 	void setUpOutput();
 	void outputStatistics(string, string);
