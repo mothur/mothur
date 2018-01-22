@@ -343,7 +343,7 @@ struct alignStruct {
     AlignmentDB* templateDB;
     Utils util;
     
-       alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se) {
+       alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se) {
         
         filePos.start = fP.start;
         filePos.end = fP.end;
@@ -352,7 +352,7 @@ struct alignStruct {
         accnosFName = ac;
         inputFilename = fname;
         numSeqs = 0;
-        m = mo;
+        m = MothurOut::getInstance();
         alignMethod = al;
         match = ma;
         misMatch = misMa;
@@ -544,14 +544,14 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             alignStruct* dataBundle = new alignStruct(*lines[i+1], (alignFileName + toString(threadID) + ".temp"),
                                                         reportFileName + toString(threadID) + ".temp",
                                                         accnosFName + toString(threadID) + ".temp", filename,
-                                                        m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
+                                                        align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new thread(alignDriver, dataBundle));
          }
         
         alignStruct* dataBundle = new alignStruct(*lines[0], (alignFileName), reportFileName, accnosFName, filename,
-                                                  m, align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
+                                                  align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
         alignDriver(dataBundle);
         numFlipped[0] = dataBundle->flippedResults[0];
         numFlipped[1] = dataBundle->flippedResults[1];
