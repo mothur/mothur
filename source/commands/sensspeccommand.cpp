@@ -275,7 +275,6 @@ int SensSpecCommand::execute(){
 	}
 }
 //***************************************************************************************************************
-
 int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCutoff){
 	try {
         string label = list->getLabel();
@@ -291,7 +290,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
             }else{ origCutoff = "unique"; cutoff = 0.0000; }
         }
         
-
+        //must read each time because cutoff changes
         string nameOrCount = "";
         string thisNamefile = "";
         map<string, int> counts;
@@ -303,12 +302,12 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
 
-		truePositives = 0;
-		falsePositives = 0;
-		trueNegatives = 0;
-		falseNegatives = 0;
+        vector< vector< int > > otus = preProcessList(matrix, list); //converts names to matrix indices, remove any names without distances
         
-        vector< vector< int > > otus = preProcessList(matrix, list);
+        truePositives = 0;
+        falsePositives = 0;
+        trueNegatives = 0;
+        falseNegatives = 0;
 
 		for(int otu=0;otu<otus.size();otu++){
 			if (m->getControl_pressed()) { return 0; }
