@@ -37,15 +37,10 @@ public:
 	
 		
 private:
-	vector<int> processIDS;   //processid
-	vector<linePair*> lines;
-	
-	int driver(linePair*, string, string, string);
-	int createProcesses(string, string, string);
-
+	int driver(string, string, string);
 	bool abort, filter, save;
 	string fastafile, templatefile, outputDir, maskfile;
-	int processors, window, numwanted, numSeqs, templateSeqsLength;
+	int window, numwanted, numSeqs, templateSeqsLength;
 	MothurChimera* chimera;
 	vector<string> fastaFileNames;
 	vector<string> outputNames;

@@ -102,14 +102,14 @@ PCOACommand::PCOACommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -121,25 +121,25 @@ PCOACommand::PCOACommand(string option)  {
 			outputTypes["loadings"] = tempOutNames;
 			
 			//required parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { 			
 				//if there is a current phylip file, use it
-				phylipfile = m->getPhylipFile(); 
+				phylipfile = current->getPhylipFile(); 
 				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setPhylipFile(phylipfile); }	
+			}else { current->setPhylipFile(phylipfile); }	
 			
 			filename = phylipfile;  
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(phylipfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(phylipfile); //if user entered a file with a path then preserve it	
 			}
 			
-			string temp = validParameter.validFile(parameters, "metric", false);	if (temp == "not found"){	temp = "T";				}
-			metric = m->isTrue(temp); 
+			string temp = validParameter.valid(parameters, "metric");	if (temp == "not found"){	temp = "T";				}
+			metric = util.isTrue(temp); 
 		}
 
 	}
@@ -152,7 +152,7 @@ PCOACommand::PCOACommand(string option)  {
 int PCOACommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		cout.setf(ios::fixed, ios::floatfield);
 		cout.setf(ios::showpoint);
@@ -162,7 +162,7 @@ int PCOACommand::execute(){
 		vector<string> names;
 		vector<vector<double> > D;
 	
-		fbase = outputDir + m->getRootName(m->getSimpleName(filename));
+		fbase = outputDir + util.getRootName(util.getSimpleName(filename));
 		
 		ReadPhylipVector readFile(filename);
 		names = readFile.read(D);
@@ -189,7 +189,7 @@ int PCOACommand::execute(){
 		
 		output(fbase, names, G, d);
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (metric) {   
 			
@@ -197,13 +197,13 @@ int PCOACommand::execute(){
 							
 				vector< vector<double> > EuclidDists = linearCalc.calculateEuclidianDistance(G, i); //G is the pcoa file
 				
-				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 				
 				double corr = linearCalc.calcPearson(EuclidDists, D); //G is the pcoa file, D is the users distance matrix
 				
 				m->mothurOut("Rsq " + toString(i) + " axis: " + toString(corr * corr)); m->mothurOutEndLine();
 				
-				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+				if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 			}
 		}
 		
@@ -250,7 +250,7 @@ void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vect
         map<string, string> variables; 
         variables["[filename]"] = fnameRoot;
         string pcoaDataFile = getOutputFileName("pcoa",variables);
-        m->openOutputFile(pcoaDataFile, pcaData);
+        util.openOutputFile(pcoaDataFile, pcaData);
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
 		outputNames.push_back(pcoaDataFile);
@@ -258,7 +258,7 @@ void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vect
 		
 		ofstream pcaLoadings;
         string loadingsFile = getOutputFileName("loadings",variables);
-        m->openOutputFile(loadingsFile, pcaLoadings);
+        util.openOutputFile(loadingsFile, pcaLoadings);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);
 		pcaLoadings.setf(ios::showpoint);
 		outputNames.push_back(loadingsFile);

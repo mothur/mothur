@@ -21,7 +21,7 @@ Sequence::Sequence(string newName, string sequence) {
 		initialize();	
 		name = newName;
         
-        m->checkName(name);
+        util.checkName(name);
 		
 		//setUnaligned removes any gap characters for us
 		setUnaligned(sequence);
@@ -39,7 +39,7 @@ Sequence::Sequence(string newName, string sequence, string justUnAligned) {
 		initialize();	
 		name = newName;
         
-        m->checkName(name);
+        util.checkName(name);
 		
 		//setUnaligned removes any gap characters for us
 		setUnaligned(sequence);
@@ -343,9 +343,9 @@ string Sequence::getSequenceName(ifstream& fastaFile) {
             
 			name = name.substr(1); 
             
-            m->checkName(name);
+            util.checkName(name);
             
-        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  } }
         
 		return name;
 	}
@@ -366,9 +366,9 @@ string Sequence::getSequenceName(boost::iostreams::filtering_istream& fastaFile)
             
             name = name.substr(1);
             
-            m->checkName(name);
+            util.checkName(name);
             
-        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }  }
         
         return name;
     }
@@ -389,9 +389,9 @@ string Sequence::getSequenceName(istringstream& fastaFile) {
             
 			name = name.substr(1); 
             
-            m->checkName(name);
+            util.checkName(name);
             
-        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }  }
         
 		return name;
 	}
@@ -474,7 +474,7 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 		while(fastaFile){
 			letter=fastaFile.get();
 			if((letter == '\r') || (letter == '\n') || letter == -1){
-				m->gobble(fastaFile);  //in case its a \r\n situation
+				util.gobble(fastaFile);  //in case its a \r\n situation
 				break;
 			}else {
                 temp += letter;
@@ -499,7 +499,7 @@ string Sequence::getCommentString(boost::iostreams::filtering_istream& fastaFile
         while(fastaFile){
             letter=fastaFile.get();
             if((letter == '\r') || (letter == '\n') || letter == -1){
-                m->gobble(fastaFile);  //in case its a \r\n situation
+                util.gobble(fastaFile);  //in case its a \r\n situation
                 break;
             }else {
                 temp += letter;
@@ -556,7 +556,7 @@ string Sequence::getCommentString(istringstream& fastaFile) {
 		while(fastaFile){
 			letter=fastaFile.get();
 			if((letter == '\r') || (letter == '\n') || letter == -1){  
-				m->gobble(fastaFile);  //in case its a \r\n situation
+				util.gobble(fastaFile);  //in case its a \r\n situation
 				break;
 			}else {
                 temp += letter;
@@ -720,7 +720,15 @@ int Sequence::getNumNs(){
     }
     return numNs;
 }
-
+//********************************************************************************************************************
+void Sequence::printSequence(OutputWriter* out){
+    string seqOutput = ">";
+    seqOutput += name + '\t' + comment + '\n';
+    if(isAligned){ seqOutput += aligned + '\n'; }
+    else{ seqOutput += unaligned + '\n'; }
+    
+    out->write(seqOutput);
+}
 //********************************************************************************************************************
 
 void Sequence::printSequence(ostream& out){

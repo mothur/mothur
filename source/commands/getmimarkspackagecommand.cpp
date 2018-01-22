@@ -108,7 +108,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 			outputTypes["tsv"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			inputDir = validParameter.validFile(parameters, "inputdir", false);
+			inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 
@@ -116,7 +116,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 				it = parameters.find("oligos");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
 				}
@@ -124,7 +124,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -132,34 +132,34 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
                 it = parameters.find("file");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["file"] = inputDir + it->second;		}
                 }
 				
             }
             
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") {  groupfile = "";  abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-            else {  m->setGroupFile(groupfile); inputfile = groupfile; }
+            else {  current->setGroupFile(groupfile); inputfile = groupfile; }
             
-            oligosfile = validParameter.validFile(parameters, "oligos", true);
+            oligosfile = validParameter.validFile(parameters, "oligos");
             if (oligosfile == "not found")      {	oligosfile = "";	setOligosParameter = false; }
             else if(oligosfile == "not open")	{	abort = true;		}
-            else {	m->setOligosFile(oligosfile); inputfile = oligosfile; setOligosParameter = true; }
+            else {	current->setOligosFile(oligosfile); inputfile = oligosfile; setOligosParameter = true; }
 
-            file = validParameter.validFile(parameters, "file", true);
+            file = validParameter.validFile(parameters, "file");
 			if (file == "not open") {  file = "";  abort = true; }
 			else if (file == "not found") { file = ""; }
             else {  inputfile = file;  fileOption = findFileOption();  }
             
             
             if ((groupfile == "") && (oligosfile == "") && (file == "")) {
-                oligosfile = m->getOligosFile();
+                oligosfile = current->getOligosFile();
                 if (oligosfile != "") { inputfile = oligosfile;  m->mothurOut("Using " + oligosfile + " as input file for the oligos parameter."); m->mothurOutEndLine(); }
                 else {
-                    groupfile = m->getGroupFile();
+                    groupfile = current->getGroupFile();
                     if (groupfile != "") { inputfile = groupfile;  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
                     else {
                         m->mothurOut("[ERROR]: You must provide file, groupfile or oligos file for the get.mimarkspackage command."); m->mothurOutEndLine(); abort = true;
@@ -167,7 +167,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
                 }
             }
             
-            package = validParameter.validFile(parameters, "package", false);         if (package == "not found") { package = "miscellaneous"; }
+            package = validParameter.valid(parameters, "package");         if (package == "not found") { package = "miscellaneous"; }
             
             for (int i = 0; i < package.length(); i++) { package[i] = tolower(package[i]); }
             
@@ -180,8 +180,8 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
             
             
             string temp;
-			temp = validParameter.validFile(parameters, "requiredonly", false);	if(temp == "not found"){	temp = "F";	}
-			requiredonly = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "requiredonly");	if(temp == "not found"){	temp = "F";	}
+			requiredonly = util.isTrue(temp);
 		}
 		
 	}
@@ -195,7 +195,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 int GetMIMarksPackageCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         if ((oligosfile != "") && (file != "")) { Oligos oligos(oligosfile); createGroupNames(oligos);  }
         else if (file != "")  { readFile();     }
@@ -205,13 +205,13 @@ int GetMIMarksPackageCommand::execute(){
             for (int i = 0; i < tempGroups.size(); i++) { Groups.insert(tempGroups[i]); }
         }
         
-        if (outputDir == "") { outputDir += m->hasPath(inputfile); }
+        if (outputDir == "") { outputDir += util.hasPath(inputfile); }
         map<string, string> variables;
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
 		string outputFileName = getOutputFileName("tsv", variables);
 		
         ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["tsv"].push_back(outputFileName);
         
         out << "#This is a tab-delimited file. Additional Documentation can be found at http://www.mothur.org/wiki/MIMarks_Data_Packages." << endl;
@@ -447,7 +447,7 @@ int GetMIMarksPackageCommand::readFile(){
         int format = 2;
         
         ifstream in;
-        m->openInputFile(file, in);
+        util.openInputFile(file, in);
         
         while(!in.eof()) {
             
@@ -455,8 +455,8 @@ int GetMIMarksPackageCommand::readFile(){
             
             if (m->getControl_pressed()) { return 0; }
             
-            string line = m->getline(in);  m->gobble(in);
-            vector<string> pieces = m->splitWhiteSpace(line);
+            string line = util.getline(in);  util.gobble(in);
+            vector<string> pieces = util.splitWhiteSpace(line);
             
             string group = "";
             string thisFileName1, thisFileName2; thisFileName1 = ""; thisFileName2 = "";
@@ -467,7 +467,7 @@ int GetMIMarksPackageCommand::readFile(){
                 thisFileName1 = pieces[1];
                 thisFileName2 = pieces[2];
                 group = pieces[0];
-                m->checkGroupName(group);
+                util.checkGroupName(group);
             }else if (pieces.size() == 4) {
                 if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true); }
                 thisFileName1 = pieces[0];
@@ -479,24 +479,24 @@ int GetMIMarksPackageCommand::readFile(){
             if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
             
             if (inputDir != "") {
-                string path = m->hasPath(thisFileName2);
+                string path = util.hasPath(thisFileName2);
                 if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
                 
-                path = m->hasPath(thisFileName1);
+                path = util.hasPath(thisFileName1);
                 if (path == "") {  thisFileName1 = inputDir + thisFileName1;  }
             }
             
             //check to make sure both are able to be opened
             ifstream in2;
-            bool openForward = m->openInputFile(thisFileName1, in2, "noerror");
+            bool openForward = util.openInputFile(thisFileName1, in2, "noerror");
             
             //if you can't open it, try default location
             if (!openForward) {
-                if (m->getDefaultPath() != "") { //default path is set
-                    string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName1);
+                if (current->getDefaultPath() != "") { //default path is set
+                    string tryPath = current->getDefaultPath() + util.getSimpleName(thisFileName1);
                     m->mothurOut("Unable to open " + thisFileName1 + ". Trying default " + tryPath); m->mothurOutEndLine();
                     ifstream in3;
-                    openForward = m->openInputFile(tryPath, in3, "noerror");
+                    openForward = util.openInputFile(tryPath, in3, "noerror");
                     in3.close();
                     thisFileName1 = tryPath;
                 }
@@ -504,11 +504,11 @@ int GetMIMarksPackageCommand::readFile(){
             
             //if you can't open it, try output location
             if (!openForward) {
-                if (m->getOutputDir() != "") { //default path is set
-                    string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName1);
+                if (current->getOutputDir() != "") { //default path is set
+                    string tryPath = current->getOutputDir() + util.getSimpleName(thisFileName1);
                     m->mothurOut("Unable to open " + thisFileName1 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                     ifstream in4;
-                    openForward = m->openInputFile(tryPath, in4, "noerror");
+                    openForward = util.openInputFile(tryPath, in4, "noerror");
                     thisFileName1 = tryPath;
                     in4.close();
                 }
@@ -521,15 +521,15 @@ int GetMIMarksPackageCommand::readFile(){
             bool openReverse = true;
             
             ifstream in3;
-            openReverse = m->openInputFile(thisFileName2, in3, "noerror");
+            openReverse = util.openInputFile(thisFileName2, in3, "noerror");
             
             //if you can't open it, try default location
             if (!openReverse) {
-                if (m->getDefaultPath() != "") { //default path is set
-                    string tryPath = m->getDefaultPath() + m->getSimpleName(thisFileName2);
+                if (current->getDefaultPath() != "") { //default path is set
+                    string tryPath = current->getDefaultPath() + util.getSimpleName(thisFileName2);
                     m->mothurOut("Unable to open " + thisFileName2 + ". Trying default " + tryPath); m->mothurOutEndLine();
                     ifstream in3;
-                    openReverse = m->openInputFile(tryPath, in3, "noerror");
+                    openReverse = util.openInputFile(tryPath, in3, "noerror");
                     in3.close();
                     thisFileName2 = tryPath;
                 }
@@ -537,11 +537,11 @@ int GetMIMarksPackageCommand::readFile(){
             
             //if you can't open it, try output location
             if (!openReverse) {
-                if (m->getOutputDir() != "") { //default path is set
-                    string tryPath = m->getOutputDir() + m->getSimpleName(thisFileName2);
+                if (current->getOutputDir() != "") { //default path is set
+                    string tryPath = current->getOutputDir() + util.getSimpleName(thisFileName2);
                     m->mothurOut("Unable to open " + thisFileName2 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                     ifstream in4;
-                    openReverse = m->openInputFile(tryPath, in4, "noerror");
+                    openReverse = util.openInputFile(tryPath, in4, "noerror");
                     thisFileName2 = tryPath;
                     in4.close();
                 }
@@ -789,7 +789,7 @@ set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
 int GetMIMarksPackageCommand::findFileOption(){
     try {
         ifstream in;
-        m->openInputFile(file, in);
+        util.openInputFile(file, in);
         
         fileOption = 0;
         
@@ -797,8 +797,8 @@ int GetMIMarksPackageCommand::findFileOption(){
             
             if (m->getControl_pressed()) { return 0; }
             
-            string line = m->getline(in);  m->gobble(in);
-            vector<string> pieces = m->splitWhiteSpace(line);
+            string line = util.getline(in);  util.gobble(in);
+            vector<string> pieces = util.splitWhiteSpace(line);
             
             if (pieces.size() == 2) { //good pair and sff or fastq and oligos
                 if (!setOligosParameter) {

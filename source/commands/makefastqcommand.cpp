@@ -105,14 +105,14 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 			
 						
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -120,7 +120,7 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 				it = parameters.find("qfile");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
@@ -128,26 +128,26 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 			
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; fastafile = ""; }
 			else if (fastafile == "not found") {  		
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") {  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setFastaFile(fastafile); }	
+			}else { current->setFastaFile(fastafile); }	
 			
-			qualfile = validParameter.validFile(parameters, "qfile", true);
+			qualfile = validParameter.validFile(parameters, "qfile");
 			if (qualfile == "not open") { abort = true; qualfile = ""; }
 			else if (qualfile == "not found") {  			
-				qualfile = m->getQualFile(); 
+				qualfile = current->getQualFile(); 
 				if (qualfile != "") {  m->mothurOut("Using " + qualfile + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current qualfile and the qfile parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setQualFile(qualfile); }	
+			}else { current->setQualFile(qualfile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(fastafile);		}
             
-            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "illumina1.8+";	}
+            format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
             
             if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
                 m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
@@ -168,28 +168,28 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 int MakeFastQCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFile = getOutputFileName("fastq",variables);
 		outputNames.push_back(outputFile); outputTypes["fastq"].push_back(outputFile);
 		
 		ofstream out;
-		m->openOutputFile(outputFile, out);
+		util.openOutputFile(outputFile, out);
 		
 		ifstream qFile;
-		m->openInputFile(qualfile, qFile);
+		util.openInputFile(qualfile, qFile);
 		
 		ifstream fFile;
-		m->openInputFile(fastafile, fFile);
+		util.openInputFile(fastafile, fFile);
         
 		while (!fFile.eof() && !qFile.eof()) {
 			
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence currSeq(fFile); m->gobble(fFile);
-			QualityScores currQual(qFile);  m->gobble(qFile);
+			Sequence currSeq(fFile); util.gobble(fFile);
+			QualityScores currQual(qFile);  util.gobble(qFile);
             
             FastqRead fread(currSeq, currQual, format);
             fread.printFastq(out);
@@ -199,7 +199,7 @@ int MakeFastQCommand::execute(){
 		qFile.close();
 		out.close();
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

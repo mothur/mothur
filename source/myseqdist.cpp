@@ -44,49 +44,9 @@ int correctDist::addSeq(string seqName, string seqSeq){
 	}
 }
 /**************************************************************************************************/
-int correctDist::execute(string distanceFileName){
+void correctDist::execute(string distanceFileName){
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-		processors = 1;
-#endif
-		correctMatrix.resize(4);
-		for(int i=0;i<4;i++){	correctMatrix[i].resize(4);	}
-		
-		correctMatrix[0][0] = 0.000000;		//AA
-		correctMatrix[1][0] = 11.619259;	//CA
-		correctMatrix[2][0] = 11.694004;	//TA
-		correctMatrix[3][0] = 7.748623;		//GA
-		
-		correctMatrix[1][1] = 0.000000;		//CC
-		correctMatrix[2][1] = 7.619657;		//TC
-		correctMatrix[3][1] = 12.852562;	//GC
-		
-		correctMatrix[2][2] = 0.000000;		//TT
-		correctMatrix[3][2] = 10.964048;	//TG
-		
-		correctMatrix[3][3] = 0.000000;		//GG
-		
-		for(int i=0;i<4;i++){
-			for(int j=0;j<i;j++){
-				correctMatrix[j][i] = correctMatrix[i][j];
-			}
-		}
-		
-		numSeqs = names.size();
-				
-		if(processors == 1){ driver(0, numSeqs, distanceFileName); }
-		else{
-			
-			for(int i=0;i<processors;i++){
-				start.push_back(int (sqrt(float(i)/float(processors)) * numSeqs));
-				end.push_back(int (sqrt(float(i+1)/float(processors)) * numSeqs));
-			}
-			
-			createProcess(distanceFileName);
-		}
-		
-		return 0;
+        createProcess(distanceFileName);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "correctDist", "execute");
@@ -97,13 +57,13 @@ int correctDist::execute(string distanceFileName){
 int correctDist::getSequences(string sequenceFileName){
 	try {
 		ifstream sequenceFile;
-		m->openInputFile(sequenceFileName, sequenceFile);
+        Utils util; util.openInputFile(sequenceFileName, sequenceFile);
 		string seqName, seqSeq;
 		
 		while(!sequenceFile.eof()){
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence temp(sequenceFile); m->gobble(sequenceFile);
+			Sequence temp(sequenceFile); util.gobble(sequenceFile);
 			
 			if (temp.getName() != "") {
 				names.push_back(temp.getName());
@@ -141,310 +101,245 @@ vector<int> correctDist::fixSequence(string sequence){
 		exit(1);
 	}	
 }
-
 /**************************************************************************************************/
-
-int correctDist::createProcess(string distanceFileName){
-	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
-		vector<int> processIDs;
-        bool recalc = false;
-		
-		while(process != processors){
-			
-			pid_t pid = fork();
-			
-			if(pid > 0){
-				processIDs.push_back(pid);
-				process++;
-			}
-			else if(pid == 0){
-				driver(start[process], end[process], distanceFileName + m->mothurGetpid(process) + ".temp");
-				exit(0);
-			}
-			else{
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDs.size(); i++) { kill (processIDs[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDs.size();i++) {
-                    int temp = processIDs[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
-			}
-		}
-		
-        if (recalc) {
-            start.clear(); end.clear();
-            for(int i=0;i<processors;i++){
-                start.push_back(int (sqrt(float(i)/float(processors)) * numSeqs));
-                end.push_back(int (sqrt(float(i+1)/float(processors)) * numSeqs));
+struct correctData {
+    string outputFileName;
+    long long startLine, endLine;
+    vector<vector<double> > correctMatrix;
+    vector<vector<int> > sequences;
+    MothurOut* m;
+    Utils util;
+    
+    correctData(string ofn, vector<vector<int> > seqs, long long sLine, long long eLine) {
+        outputFileName = ofn;
+        startLine = sLine;
+        endLine = eLine;
+        sequences = seqs;
+        m = MothurOut::getInstance();
+        
+        correctMatrix.resize(4);
+        for(int i=0;i<4;i++){	correctMatrix[i].resize(4);	}
+        
+        correctMatrix[0][0] = 0.000000;		//AA
+        correctMatrix[1][0] = 11.619259;	//CA
+        correctMatrix[2][0] = 11.694004;	//TA
+        correctMatrix[3][0] = 7.748623;		//GA
+        
+        correctMatrix[1][1] = 0.000000;		//CC
+        correctMatrix[2][1] = 7.619657;		//TC
+        correctMatrix[3][1] = 12.852562;	//GC
+        
+        correctMatrix[2][2] = 0.000000;		//TT
+        correctMatrix[3][2] = 10.964048;	//TG
+        
+        correctMatrix[3][3] = 0.000000;		//GG
+        
+        for(int i=0;i<4;i++){
+            for(int j=0;j<i;j++){
+                correctMatrix[j][i] = correctMatrix[i][j];
+            }
+        }
+    }
+};
+/**************************************************************************************************/
+int getLastMatch(char direction, vector<vector<char> >& alignMoves, int i, int j, vector<int>& seqA, vector<int>& seqB, MothurOut* m){
+    try {
+        
+        char nullReturn = -1;
+        
+        while(i>=1 && j>=1){
+            
+            if (m->getControl_pressed()) { return nullReturn; }
+            
+            if(direction == 'd'){
+                if(seqA[i-1] == seqB[j-1])	{	return seqA[i-1];	}
+                else						{	return nullReturn;	}
             }
             
-            processIDs.resize(0);
-            process = 1;
+            else if(direction == 'l')		{	j--;				}
+            else							{	i--;				}
             
-            while(process != processors){
+            direction = alignMoves[i][j];
+        }
+        
+        return nullReturn;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "correctDist", "getLastMatch");
+        exit(1);
+    }	
+}
+/**************************************************************************************************/
+double getDist(vector<int>& seqA, vector<int>& seqB, vector<vector<double> >& correctMatrix, MothurOut* m){
+    try {
+        
+        int lengthA = seqA.size();
+        int lengthB = seqB.size();
+        
+        vector<vector<double> > alignMatrix(lengthA+1);
+        vector<vector<char> > alignMoves(lengthA+1);
+        
+        for(int i=0;i<=lengthA;i++){
+            alignMatrix[i].resize(lengthB+1, 0);
+            alignMoves[i].resize(lengthB+1, 'x');
+        }
+        
+        for(int i=0;i<=lengthA;i++){
+            alignMatrix[i][0] = 15.0 * i;
+            alignMoves[i][0] = 'u';
+        }
+        for(int i=0;i<=lengthB;i++){
+            alignMatrix[0][i] = 15.0 * i;
+            alignMoves[0][i] = 'l';
+        }
+        
+        for(int i=1;i<=lengthA;i++){
+            for(int j=1;j<=lengthB;j++){
                 
-                pid_t pid = fork();
+                if (m->getControl_pressed()) {  return 0;  }
                 
-                if(pid > 0){
-                    processIDs.push_back(pid);
-                    process++;
+                double nogap;
+                nogap = alignMatrix[i-1][j-1] + correctMatrix[seqA[i-1]][seqB[j-1]];
+
+                double gap;
+                double left;
+                if(i == lengthA){ left = alignMatrix[i][j-1]; } //terminal gap
+                else{
+                    if(seqB[j-1] == getLastMatch('l', alignMoves, i, j, seqA, seqB, m))     { gap = 4.0;    }
+                    else                                                                    {  gap = 15.0;  }
+                    
+                    left = alignMatrix[i][j-1] + gap;
                 }
-                else if(pid == 0){
-                    driver(start[process], end[process], distanceFileName + m->mothurGetpid(process) + ".temp");
-                    exit(0);
+                
+                
+                double up;
+                if(j == lengthB){ up = alignMatrix[i-1][j]; }  //terminal gap
+                else{
+                    if(seqA[i-1] == getLastMatch('u', alignMoves, i, j, seqA, seqB, m))     {  gap = 4.0;   }
+                    else                                                                    {  gap = 15.0;  }
+                    
+                    up = alignMatrix[i-1][j] + gap;
+                }
+
+                if(nogap < left){
+                    if(nogap < up){
+                        alignMoves[i][j] = 'd';
+                        alignMatrix[i][j] = nogap;
+                    }
+                    else{
+                        alignMoves[i][j] = 'u';
+                        alignMatrix[i][j] = up;
+                    }
                 }
                 else{
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i=0;i<processIDs.size();i++) {  int temp = processIDs[i]; kill(temp, SIGINT); }
-                    exit(0);
+                    if(left < up){
+                        alignMoves[i][j] = 'l';
+                        alignMatrix[i][j] = left;
+                    }
+                    else{
+                        alignMoves[i][j] = 'u';
+                        alignMatrix[i][j] = up;
+                    }
                 }
             }
         }
         
-		driver(start[0], end[0], distanceFileName);
-		
-		for (int i=0;i<processIDs.size();i++) { 
-			int temp = processIDs[i];
-			wait(&temp);
-		}
-		
-		for(int i=0;i<processIDs.size();i++){
-			m->appendFiles((distanceFileName + toString(processIDs[i]) + ".temp"), distanceFileName);
-			remove((distanceFileName + toString(processIDs[i]) + ".temp").c_str());
-		}
-#endif
+        int i = lengthA;
+        int j = lengthB;
+        int count = 0;
+        
+        while(i > 0 && j > 0){
+            
+            if (m->getControl_pressed()) {  return 0;  }
+            
+            if(alignMoves[i][j] == 'd')         { count++; i--; j--;                    }
+            else if(alignMoves[i][j] == 'u')    { if(j != lengthB){ count++; } i--;     }
+            else if(alignMoves[i][j] == 'l')    {  if(i != lengthA){ count++; } j--;    }
+        }
+        
+        return alignMatrix[lengthA][lengthB] / (double)count;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "correctDist", "getDist");
+        exit(1);
+    }	
+}
+/**************************************************************************************************/
+int driverCorrect(correctData* params){
+    try {
+        ofstream distFile;
+        params->util.openOutputFile(params->outputFileName, distFile);
+        distFile << setprecision(9);
+        
+        if(params->startLine == 0){ distFile << params->sequences.size() << endl; }
+        
+        int startTime = time(NULL);
+        params->m->mothurOut("\nCalculating distances for (" + toString(params->startLine+1) + " to " + toString(params->endLine+1) + ")... \n");
+        
+        for(int i = params->startLine;i < params->endLine; i++){
+            if (params->m->getControl_pressed()) { distFile.close(); return 0; }
+            
+            distFile << i;
+            for(int j=0;j<i;j++){ distFile << ' ' << getDist(params->sequences[i], params->sequences[j], params->correctMatrix, params->m); }
+            distFile << endl;
+            
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); }
+        }
+        distFile.close();
+        
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime)+"\n"); }
+        params->m->mothurOut("Done.\n");
+        
+        return 0;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "correctDist", "driverCorrect");
+        exit(1);
+    }	
+}
+/**************************************************************************************************/
+
+int correctDist::createProcess(string distanceFileName){
+	try {
+        vector<linePair> lines;
+        for(int i=0;i<processors;i++){
+            linePair thisLine(int (sqrt(float(i)/float(processors)) * sequences.size()), int (sqrt(float(i+1)/float(processors)) * sequences.size()));
+            lines.push_back(thisLine);
+        }
+
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<correctData*> data;
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            correctData* dataBundle = new correctData(distanceFileName+extension, sequences, lines[i+1].start, lines[i+1].end);
+            data.push_back(dataBundle);
+            
+            thread* thisThread = new thread(driverCorrect, dataBundle);
+            workerThreads.push_back(thisThread);
+        }
+        
+        correctData* dataBundle = new correctData(distanceFileName, sequences, lines[0].start, lines[0].end);
+        driverCorrect(dataBundle);
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            string extension = toString(i+1) + ".temp";
+            util.appendFiles((distanceFileName+extension), distanceFileName);
+            util.mothurRemove(distanceFileName+extension);
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+
 		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "correctDist", "createProcess");
-		exit(1);
-	}	
-}
-
-/**************************************************************************************************/
-
-int correctDist::driver(int start, int end, string distFileName){
-	try {
-		ofstream distFile;
-		m->openOutputFile(distFileName, distFile);
-		distFile << setprecision(9);
-		
-		if(start == 0){
-			distFile << numSeqs << endl;
-		}
-		
-		int startTime = time(NULL);
-		
-		m->mothurOut("\nCalculating distances...\n");
-		
-		for(int i=start;i<end;i++){
-			
-			distFile << i;
-			
-			for(int j=0;j<i;j++){
-				
-				if (m->getControl_pressed()) { distFile.close(); return 0; }
-				
-				double dist = getDist(sequences[i], sequences[j]);
-				
-				distFile << ' ' << dist;
-			}
-			distFile << endl;
-			
-			if(i % 100 == 0){ m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); }
-		}
-		distFile.close();
-		
-		if((end-1) % 100 != 0){ m->mothurOutJustToScreen(toString(end-1) + "\t" + toString(time(NULL) - startTime)+"\n"); }
-		m->mothurOut("Done.\n");
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "correctDist", "driver");
-		exit(1);
-	}	
-}
-/**************************************************************************************************/
-double correctDist::getDist(vector<int>& seqA, vector<int>& seqB){
-	try {
-		
-		int lengthA = seqA.size();
-		int lengthB = seqB.size();
-		
-		vector<vector<double> > alignMatrix(lengthA+1);
-		vector<vector<char> > alignMoves(lengthA+1);
-		
-		for(int i=0;i<=lengthA;i++){
-			alignMatrix[i].resize(lengthB+1, 0);
-			alignMoves[i].resize(lengthB+1, 'x');
-		}
-		
-		for(int i=0;i<=lengthA;i++){
-			alignMatrix[i][0] = 15.0 * i;
-			alignMoves[i][0] = 'u';
-		}
-		for(int i=0;i<=lengthB;i++){
-			alignMatrix[0][i] = 15.0 * i;
-			alignMoves[0][i] = 'l';
-		}
-		
-		for(int i=1;i<=lengthA;i++){
-			for(int j=1;j<=lengthB;j++){
-				
-				if (m->getControl_pressed()) {  return 0;  }
-				
-				double nogap;		
-				nogap = alignMatrix[i-1][j-1] + correctMatrix[seqA[i-1]][seqB[j-1]];
-				
-				
-				double gap;
-				double left;
-				if(i == lengthA){ //terminal gap
-					left = alignMatrix[i][j-1];
-				}
-				else{
-					if(seqB[j-1] == getLastMatch('l', alignMoves, i, j, seqA, seqB)){
-						gap = 4.0;
-					}
-					else{
-						gap = 15.0;
-					}
-					
-					left = alignMatrix[i][j-1] + gap;
-				}
-				
-				
-				double up;
-				if(j == lengthB){ //terminal gap
-					up = alignMatrix[i-1][j];
-				}
-				else{
-					
-					if(seqA[i-1] == getLastMatch('u', alignMoves, i, j, seqA, seqB)){
-						gap = 4.0;
-					}
-					else{
-						gap = 15.0;
-					}
-					
-					up = alignMatrix[i-1][j] + gap;
-				}
-				
-				
-				
-				if(nogap < left){
-					if(nogap < up){
-						alignMoves[i][j] = 'd';
-						alignMatrix[i][j] = nogap;
-					}
-					else{
-						alignMoves[i][j] = 'u';
-						alignMatrix[i][j] = up;
-					}
-				}
-				else{
-					if(left < up){
-						alignMoves[i][j] = 'l';
-						alignMatrix[i][j] = left;
-					}
-					else{
-						alignMoves[i][j] = 'u';
-						alignMatrix[i][j] = up;
-					}
-				}
-			}
-		}
-		
-		int i = lengthA;
-		int j = lengthB;
-		int count = 0;
-		
-		
-		//	string alignA = "";
-		//	string alignB = "";
-		//	string bases = "ACTG";
-		//	
-		//	for(int i=0;i<lengthA;i++){
-		//		cout << bases[seqA[i]];
-		//	}cout << endl;
-		//
-		//	for(int i=0;i<lengthB;i++){
-		//		cout << bases[seqB[i]];
-		//	}cout << endl;
-		
-		while(i > 0 && j > 0){
-			
-			if (m->getControl_pressed()) {  return 0;  }
-			
-			if(alignMoves[i][j] == 'd'){
-				//			alignA = bases[seqA[i-1]] + alignA;
-				//			alignB = bases[seqB[j-1]] + alignB;
-				
-				count++;
-				i--;
-				j--;
-			}
-			else if(alignMoves[i][j] == 'u'){
-				if(j != lengthB){
-					//				alignA = bases[seqA[i-1]] + alignA;
-					//				alignB = '-' + alignB;
-					count++;
-				}
-				
-				i--;
-			}
-			else if(alignMoves[i][j] == 'l'){
-				if(i != lengthA){
-					//				alignA = '-' + alignA;
-					//				alignB = bases[seqB[j-1]] + alignB;
-					count++;
-				}
-				
-				j--;
-			}
-		}
-		
-		//	cout << alignA << endl << alignB << endl;
-		
-		return alignMatrix[lengthA][lengthB] / (double)count;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "correctDist", "getDist");
-		exit(1);
-	}	
-}
-/**************************************************************************************************/
-int correctDist::getLastMatch(char direction, vector<vector<char> >& alignMoves, int i, int j, vector<int>& seqA, vector<int>& seqB){
-	try {
-		
-		char nullReturn = -1;
-		
-		while(i>=1 && j>=1){
-			
-			if (m->getControl_pressed()) { return nullReturn; }
-			
-			if(direction == 'd'){
-				if(seqA[i-1] == seqB[j-1])	{	return seqA[i-1];	}
-				else						{	return nullReturn;	}
-			}
-			
-			else if(direction == 'l')		{	j--;				}
-			else							{	i--;				}
-			
-			direction = alignMoves[i][j];
-		}
-		
-		return nullReturn;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "correctDist", "getLastMatch");
 		exit(1);
 	}	
 }

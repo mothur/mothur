@@ -47,7 +47,7 @@ void DistanceDB::addSequence(Sequence seq) {
 }
 /**************************************************************************************************/
 //returns indexes to top matches
-vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
+vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted, vector<float>& Scores){
 	try {
 		vector<int> topMatches;
 		Scores.clear();
@@ -55,7 +55,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 		string sequence = query->getAligned();
 		vector<seqDist> dists; 
 		
-		searchScore = -1.0;
+		float searchScore = -1.0;
 	
 		if (numWanted > data.size()){
 			m->mothurOut("numwanted is larger than the number of template sequences, using "+ toString(data.size()) + ".");
@@ -63,6 +63,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 			numWanted = data.size();
 		}
 		
+        lock_guard<std::mutex> guard(mutex);
 		if (sequence.length() != templateSeqsLength) { templateSameLength = false; }
 		
 		if (templateSameLength && templateAligned) {
@@ -72,8 +73,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 				
 				//calc distance from this sequence to every sequence in the template
 				for (int i = 0; i < data.size(); i++) {
-					distCalculator->calcDist(*query, data[i]);
-					float dist = distCalculator->getDist();
+					double dist = distCalculator->calcDist(*query, data[i]);
 					
 					//save distance to each template sequence
 					dists[i].seq1 = -1;
@@ -85,6 +85,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 				
 				//save distance of best match
 				searchScore = dists[0].dist;
+                Scores.push_back(searchScore);
 				
 				//fill topmatches with numwanted closest sequences indexes
 				for (int i = 0; i < numWanted; i++) {
@@ -95,8 +96,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 				int bestIndex = 0;
 				float smallDist = 100000;
 				for (int i = 0; i < data.size(); i++) {
-					distCalculator->calcDist(*query, data[i]);
-					float dist = distCalculator->getDist();
+					double dist = distCalculator->calcDist(*query, data[i]);
 					
 					//are you smaller?
 					if (dist < smallDist) {

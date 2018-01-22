@@ -11,6 +11,7 @@
  */
 
 #include "mothurout.h"
+#include "utils.hpp"
 
 
 class TrialSwap2 {
@@ -32,6 +33,7 @@ public:
     
 private:
     MothurOut* m;
+    Utils util;
     
     double t_test (double, int, double, vector<double>);
     int print_matrix(vector<vector<int> > &, int, int);

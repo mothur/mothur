@@ -106,14 +106,14 @@ ParseListCommand::ParseListCommand(string option)  {
 			outputTypes["list"] = tempOutNames;			
 												
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -121,7 +121,7 @@ ParseListCommand::ParseListCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -129,7 +129,7 @@ ParseListCommand::ParseListCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -139,37 +139,37 @@ ParseListCommand::ParseListCommand(string option)  {
 			
 
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { 
-				listfile = m->getListFile(); 
+				listfile = current->getListFile(); 
 				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("No valid current list file. You must provide a list file."); m->mothurOutEndLine(); 
 					abort = true;
 						
 				}
-			}else { m->setListFile(listfile); }	
+			}else { current->setListFile(listfile); }	
             
             //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(listfile);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(listfile);	}
 			
-            groupfile = validParameter.validFile(parameters, "group", true);
+            groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not found") { groupfile =  "";   groupMap = NULL; }
 			else if (groupfile == "not open") { abort = true; groupfile =  ""; groupMap = NULL; }	
 			else {   
-                m->setGroupFile(groupfile);
+                current->setGroupFile(groupfile);
 				groupMap = new GroupMap(groupfile);
 				
 				int error = groupMap->readMap();
 				if (error == 1) { abort = true; }
             }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not found") { countfile =  "";   }
 			else if (countfile == "not open") { abort = true; countfile =  ""; }	
 			else {   
-                m->setCountTableFile(countfile); 
+                current->setCountFile(countfile); 
                 ct.readTable(countfile, true, false);
                 if (!ct.hasGroupInfo()) { 
                     abort = true;
@@ -186,10 +186,10 @@ ParseListCommand::ParseListCommand(string option)  {
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = "";  allLines = 1; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 		}
@@ -204,26 +204,26 @@ ParseListCommand::ParseListCommand(string option)  {
 int ParseListCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;	
 	
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
 		if (m->getControl_pressed()) { 
 			delete list; if (groupfile != "") { delete groupMap; }
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
+			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 		}
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
 			if (m->getControl_pressed()) { 
 				delete list; if (groupfile != "") { delete groupMap; }
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
 			}
 			
@@ -236,7 +236,7 @@ int ParseListCommand::execute(){
 					userLabels.erase(list->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
 					list = input.getListVector(lastLabel); //get new list vector to process
@@ -260,7 +260,7 @@ int ParseListCommand::execute(){
 		
 		if (m->getControl_pressed()) { 
 			if (groupfile != "") { delete groupMap; }
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
+			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
 		
@@ -280,12 +280,12 @@ int ParseListCommand::execute(){
 		
 		if (m->getControl_pressed()) { 
 			if (groupfile != "") { delete groupMap; }
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
+			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (list != NULL) {	delete list;	}
 			list = input.getListVector(lastLabel); //get new list vector to process
 			
@@ -298,15 +298,15 @@ int ParseListCommand::execute(){
 		if (groupfile != "") { delete groupMap; }
 		
 		if (m->getControl_pressed()) { 
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
+			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("list");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 		}
 			
 		m->mothurOutEndLine();
@@ -339,14 +339,14 @@ int ParseListCommand::parse(ListVector* thisList) {
         
         //set fileroot
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = thisList->getLabel();
         
 		for (int i=0; i<gGroups.size(); i++) {
             variables["[group]"] = gGroups[i];
 			string filename = getOutputFileName("list",variables);
 			ofstream temp;
-            m->openOutputFile(filename, temp); temp.close();
+            util.openOutputFile(filename, temp); temp.close();
             files[gGroups[i]] = filename;
             outputNames.push_back(filename); outputTypes["list"].push_back(filename);
             groupNumBins[gGroups[i]] = 0;
@@ -362,7 +362,7 @@ int ParseListCommand::parse(ListVector* thisList) {
 			string bin = list->get(i); 
 			
 			vector<string> names;
-			m->splitAtComma(bin, names);  //parses bin into individual sequence names
+			util.splitAtComma(bin, names);  //parses bin into individual sequence names
 			
 			//parse bin into list of sequences in each group
 			for (int j = 0; j < names.size(); j++) {
@@ -407,7 +407,7 @@ int ParseListCommand::parse(ListVector* thisList) {
 		for (map<string, string>::iterator it3 = files.begin(); it3 != files.end(); it3++) {
             ofstream out;
             string filename = it3->second;
-            m->openOutputFileAppend(filename, out);
+            util.openOutputFileAppend(filename, out);
             out << groupLabels[it3->first] << endl;
 			out << thisList->getLabel() << '\t' << groupNumBins[it3->first] << groupVector[it3->first] << endl;  // label numBins  listvector for that group
             out.close();

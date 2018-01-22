@@ -75,7 +75,8 @@ try {
 				vector<SharedRAbundVector*> subset;
 
                 //create and initialize vector of sharedvectors, one for each group
-				vector<string> mGroups = m->getGroups();
+				vector<string> mGroups = sharedorder->getGroups();
+                int numGroups = mGroups.size();
                 for (int i = 0; i < mGroups.size(); i++) {
                         SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
                         temp->setLabel(sharedorder->getLabel());
@@ -88,7 +89,7 @@ try {
         
                 //initialize labels for output
                 //makes  'uniqueAB         uniqueAC  uniqueBC' if your groups are A, B, C
-                getGroupComb();
+                getGroupComb(mGroups);
 				
                 for(int i=0;i<displays.size();i++){
                         ccd->registerDisplay(displays[i]); //adds a display[i] to cdd
@@ -100,7 +101,7 @@ try {
 						}
 
 						string groupLabelAll = groupLabel + label + "all\t"; 
-						if ((displays[i]->isCalcMultiple() == true) && (displays[i]->getAll() == true)) {   displays[i]->init(groupLabelAll); }
+						if ((displays[i]->isCalcMultiple() ) && (displays[i]->getAll() )) {   displays[i]->init(groupLabelAll); }
 						else {  displays[i]->init(groupLabel);  }           
                 }
                 
@@ -138,14 +139,14 @@ try {
 													if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
 												}
 						
-                                                ccd->updateSharedData(subset, i+1, m->getNumGroups(), pair);
+                                                ccd->updateSharedData(subset, i+1, numGroups, pair, mGroups);
                                         }
                                         n++;
                                 }
 							
 								//if this is a calculator that can do multiples then do them
 								pair = false;
-								ccd->updateSharedData(lookup, i+1, m->getNumGroups(), pair); 
+								ccd->updateSharedData(lookup, i+1, numGroups, pair, mGroups);
 							
                         }
                         totalNumSeq = i+1;
@@ -167,13 +168,13 @@ try {
 											if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
 										}
 									
-										ccd->updateSharedData(subset, totalNumSeq, m->getNumGroups(), pair);
+										ccd->updateSharedData(subset, totalNumSeq, numGroups, pair, mGroups);
                                 }
                                 n++;
                         }
 						//if this is a calculator that can do multiples then do them
 						pair = false;
-						ccd->updateSharedData(lookup, totalNumSeq, m->getNumGroups(), pair); 
+						ccd->updateSharedData(lookup, totalNumSeq, numGroups, pair, mGroups);
                 }
 	 
                 //resets output files
@@ -197,23 +198,20 @@ try {
 }
 
 /**************************************************************************************/
-
-void Collect::getGroupComb() {
+void Collect::getGroupComb(vector<string> mGroups) {
 	string group;
                 
 	numGroupComb = 0;
                 
 	int n = 1;
-	vector<string> mGroups = m->getGroups();
-	for (int i = 0; i < (m->getNumGroups() - 1); i++) {
-		for (int l = n; l < m->getNumGroups(); l++) {
+    int numGroups = mGroups.size();
+	for (int i = 0; i < (numGroups - 1); i++) {
+		for (int l = n; l < numGroups; l++) {
 			group = mGroups[i] + mGroups[l];
 			groupComb.push_back(group);        
 			numGroupComb++;
 		}
 		n++;
 	}
-
 }
-
 /**************************************************************************************/

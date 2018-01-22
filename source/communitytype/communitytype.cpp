@@ -120,7 +120,7 @@ void CommunityTypeFinder::printSilData(ostream& out, double chi, vector<double> 
 void CommunityTypeFinder::printZMatrix(string fileName, vector<string> sampleName){
     try {
         ofstream printMatrix;
-        m->openOutputFile(fileName, printMatrix); //(fileName.c_str());
+        util.openOutputFile(fileName, printMatrix); //(fileName.c_str());
         printMatrix.setf(ios::fixed, ios::floatfield);
         printMatrix.setf(ios::showpoint);
         
@@ -146,7 +146,7 @@ void CommunityTypeFinder::printZMatrix(string fileName, vector<string> sampleNam
 void CommunityTypeFinder::printRelAbund(string fileName, vector<string> otuNames){
     try {
         ofstream printRA;
-        m->openOutputFile(fileName, printRA); //(fileName.c_str());
+        util.openOutputFile(fileName, printRA); //(fileName.c_str());
         printRA.setf(ios::fixed, ios::floatfield);
         printRA.setf(ios::showpoint);
         
@@ -407,7 +407,7 @@ int CommunityTypeFinder::findkMeans(){
         //randomize samples
         vector<int> temp;
         for (int i = 0; i < numSamples; i++) { temp.push_back(i); }
-        m->mothurRandomShuffle(temp);
+        util.mothurRandomShuffle(temp);
         
         //assign each partition at least one random sample
         int numAssignedSamples = 0;

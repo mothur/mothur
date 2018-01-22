@@ -35,9 +35,7 @@ public:
 	
 private:
 
-	vector<linePair*> lines;
-	vector<int> processIDS;
-    map<int, vector<unsigned long long> > savedPositions;
+    vector< vector<unsigned long long> >  savedPositions;
 
 	string vertical, filter, fasta, hard, outputDir, filterFileName;
 	vector<string> fastafileNames;	
@@ -48,15 +46,12 @@ private:
 	char trump;
 	bool abort, recalced;
 	float soft;
-	int numSeqs;
+	long long numSeqs;
 	
 	string createFilter();
 	int filterSequences();
-	int createProcessesCreateFilter(Filters&, string);
-	int createProcessesRunFilter(string, string, string);
-	int driverRunFilter(string, string, string, linePair*);
-	int driverCreateFilter(Filters& F, string filename, linePair* line);
-	
+	long long createProcessesCreateFilter(Filters&, string);
+	long long createProcessesRunFilter(string, string, string, vector<linePair>);	
 };
 
 
@@ -66,26 +61,29 @@ private:
 // that can be passed using a single void pointer (LPVOID).
 struct filterData {
 	Filters F;
-    int count, tid, alignmentLength;
+    int alignmentLength, threadid;
     unsigned long long start, end;
+    long long count;
     MothurOut* m;
-    string filename, vertical, hard;
+    string filename, hard;
     char trump;
     float soft;
+    bool vertical;
+    Utils util;
 	
 	filterData(){}
-	filterData(string fn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength, char tr, string vert, float so, string ha, int t) {
+	filterData(string fn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength, char tr, bool vert, float so, string ha, int tid) {
         filename = fn;
 		m = mout;
 		start = st;
 		end = en;
-        tid = t;
         trump = tr;
         alignmentLength = aLength;
         vertical = vert;
         soft = so;
         hard = ha;
 		count = 0;
+        threadid = tid;
 	}
 };
 /**************************************************************************************************/
@@ -93,151 +91,26 @@ struct filterData {
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct filterRunData {
-    int count, tid, alignmentLength;
+    int alignmentLength;
     unsigned long long start, end;
+    long long count;
     MothurOut* m;
     string filename;
     string filter, outputFilename;
+    Utils util;
 	
 	filterRunData(){}
-	filterRunData(string f, string fn, string ofn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength, int t) {
+	filterRunData(string f, string fn, string ofn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength) {
         filter = f;
         outputFilename = ofn;
         filename = fn;
 		m = mout;
 		start = st;
 		end = en;
-        tid = t;
         alignmentLength = aLength;
 		count = 0;
 	}
 };
-
 /**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){ 
-	filterData* pDataArray;
-	pDataArray = (filterData*)lpParam;
-	
-	try {
-
-		if (pDataArray->soft != 0)			{  pDataArray->F.setSoft(pDataArray->soft);		}
-		if (pDataArray->trump != '*')		{  pDataArray->F.setTrump(pDataArray->trump);	}
-		
-		pDataArray->F.setLength(pDataArray->alignmentLength);
-		
-		if(pDataArray->trump != '*' || pDataArray->m->isTrue(pDataArray->vertical) || pDataArray->soft != 0){
-			pDataArray->F.initialize();
-		}
-		
-		if(pDataArray->hard.compare("") != 0)	{	pDataArray->F.doHard(pDataArray->hard);		}
-		else						{	pDataArray->F.setFilter(string(pDataArray->alignmentLength, '1'));	}
-        
-		ifstream in;
-		pDataArray->m->openInputFile(pDataArray->filename, in);
-        
-		//print header if you are process 0
-		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
-			in.seekg(0);
-            pDataArray->m->zapGremlins(in);
-		}else { //this accounts for the difference in line endings. 
-			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
-		}
-		
-		pDataArray->count = 0;
-        bool error = false;
-		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
-			
-			if (pDataArray->m->getControl_pressed()) { in.close(); pDataArray->count = 1; return 1; }
-			
-			Sequence current(in); pDataArray->m->gobble(in); 
-			
-			if (current.getName() != "") {
-                if (pDataArray->m->getDebug()) { pDataArray->m->mothurOutJustToScreen("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();}
-                if (current.getAligned().length() != pDataArray->alignmentLength) { pDataArray->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); pDataArray->m->mothurOutEndLine(); error = true; if (!pDataArray->m->getDebug()) { pDataArray->m->setControl_pressed(true); }else{ pDataArray->m->mothurOutJustToLog("[DEBUG]: " + current.getName() + " length = " + toString(current.getAligned().length())); pDataArray->m->mothurOutEndLine();} }
-                
-                if(pDataArray->trump != '*')			{	pDataArray->F.doTrump(current);		}
-                if(pDataArray->m->isTrue(pDataArray->vertical) || pDataArray->soft != 0)	{	pDataArray->F.getFreqs(current);	}
-			}
-            pDataArray->count++;
-            //report progress
-			if((i) % 100 == 0){	pDataArray->m->mothurOutJustToScreen(toString(i)+"\n"); 		}
-		}
-		
-        if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 		}
-        
-		in.close();
-        
-        if (error) { pDataArray->m->setControl_pressed(true); }
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		pDataArray->m->errorOut(e, "FilterSeqsCommand", "MyCreateFilterThreadFunction");
-		exit(1);
-	}
-} 
-/**************************************************************************************************/
-static DWORD WINAPI MyRunFilterThreadFunction(LPVOID lpParam){ 
-	filterRunData* pDataArray;
-	pDataArray = (filterRunData*)lpParam;
-	
-	try {
-        
-        ofstream out;
-		pDataArray->m->openOutputFile(pDataArray->outputFilename, out);
-
-		ifstream in;
-		pDataArray->m->openInputFile(pDataArray->filename, in);
-        
-		//print header if you are process 0
-		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
-			in.seekg(0);
-            pDataArray->m->zapGremlins(in);
-		}else { //this accounts for the difference in line endings. 
-			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
-		}
-		
-		pDataArray->count = 0;
-		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
-			
-			if (pDataArray->m->getControl_pressed()) { in.close(); out.close(); pDataArray->count = 1; return 1; }
-			
-			Sequence seq(in); pDataArray->m->gobble(in);
-            if (seq.getName() != "") {
-                string align = seq.getAligned();
-                string filterSeq = "";
-                
-                for(int j=0;j<pDataArray->alignmentLength;j++){
-                    if(pDataArray->filter[j] == '1'){
-                        filterSeq += align[j];
-                    }
-                }
-                
-                out << '>' << seq.getName() << endl << filterSeq << endl;
-            }
-            pDataArray->count++;
-            //report progress
-			if((i) % 100 == 0){	pDataArray->m->mothurOutJustToScreen(toString(i)+"\n"); 		}
-		}
-		
-        if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 		}
-        
-		in.close();
-        out.close();
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		pDataArray->m->errorOut(e, "FilterSeqsCommand", "MyRunFilterThreadFunction");
-		exit(1);
-	}
-} 
-/**************************************************************************************************/
-#endif
-
 
 #endif

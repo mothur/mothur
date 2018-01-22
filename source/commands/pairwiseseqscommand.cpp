@@ -124,30 +124,30 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			outputTypes["column"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			
 			if (inputDir == "not found"){	inputDir = "";		}
 
-			fastaFileName = validParameter.validFile(parameters, "fasta", false);
+			fastaFileName = validParameter.valid(parameters, "fasta");
 			if (fastaFileName == "not found") { 				
 				//if there is a current fasta file, use it
-				string filename = m->getFastaFile(); 
+				string filename = current->getFastaFile(); 
 				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else { 
-				m->splitAtDash(fastaFileName, fastaFileNames);
+				util.splitAtDash(fastaFileName, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = m->getFastaFile(); 
+						fastaFileNames[i] = current->getFastaFile(); 
 						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -157,54 +157,10 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-					
-						if (inputDir != "") {
-							string path = m->hasPath(fastaFileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-						}
-		
-						bool ableToOpen;
-						ifstream in;
-
-						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try output location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
-								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastaFileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();					
-
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}else {
-							m->setFastaFile(fastaFileNames[i]);
-						}
-					}
+                    if (!ignore) {
+                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
+                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
+                    }
 				}
 				
 				//make sure there is at least one valid file left
@@ -214,46 +170,45 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
-			m->mothurConvert(temp, match);  
+			temp = validParameter.valid(parameters, "match");		if (temp == "not found"){	temp = "1.0";			}
+			util.mothurConvert(temp, match);  
 			
-			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
-			m->mothurConvert(temp, misMatch);  
+			temp = validParameter.valid(parameters, "mismatch");		if (temp == "not found"){	temp = "-1.0";			}
+			util.mothurConvert(temp, misMatch);  
             if (misMatch > 0) { m->mothurOut("[ERROR]: mismatch must be negative.\n"); abort=true; }
 			
-			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-2.0";			}
-			m->mothurConvert(temp, gapOpen);  
+			temp = validParameter.valid(parameters, "gapopen");		if (temp == "not found"){	temp = "-2.0";			}
+			util.mothurConvert(temp, gapOpen);  
             if (gapOpen > 0) { m->mothurOut("[ERROR]: gapopen must be negative.\n"); abort=true; }
 			
-			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
-			m->mothurConvert(temp, gapExtend); 
+			temp = validParameter.valid(parameters, "gapextend");	if (temp == "not found"){	temp = "-1.0";			}
+			util.mothurConvert(temp, gapExtend); 
             if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
-			m->mothurConvert(temp, cutoff); 
+			temp = validParameter.valid(parameters, "cutoff");		if(temp == "not found"){	temp = "1.0"; }
+			util.mothurConvert(temp, cutoff); 
 			
-			temp = validParameter.validFile(parameters, "countends", false);	if(temp == "not found"){	temp = "T";	}
-			countends = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "countends");	if(temp == "not found"){	temp = "T";	}
+			countends = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "compress", false);		if(temp == "not found"){  temp = "F"; }
-			compress = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "compress");		if(temp == "not found"){  temp = "F"; }
+			compress = util.isTrue(temp); 
 			
-			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
+			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 			
-			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output=="phylip") { output = "lt"; }
 			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
 			
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "onegap";  }
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
 			}
-			m->splitAtDash(calc, Estimators);
+			util.splitAtDash(calc, Estimators);
 		}
 		
 	}
@@ -266,7 +221,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 
 int PairwiseSeqsCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		longestBase = 2000; //will need to update this in driver if we find sequences with more bases.  hardcoded so we don't have the pre-read user fasta file.
 		
@@ -277,10 +232,10 @@ int PairwiseSeqsCommand::execute(){
 			
 			m->mothurOut("Processing sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
-			if (outputDir == "") {  outputDir += m->hasPath(fastaFileNames[s]); }
+			if (outputDir == "") {  outputDir += util.hasPath(fastaFileNames[s]); }
 			
 			ifstream inFASTA;
-			m->openInputFile(fastaFileNames[s], inFASTA);
+			util.openInputFile(fastaFileNames[s], inFASTA);
 			alignDB = SequenceDB(inFASTA); 
 			inFASTA.close();
 			
@@ -289,50 +244,30 @@ int PairwiseSeqsCommand::execute(){
 			string outputFile = "";
 			
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
 			if (output == "lt") { //does the user want lower triangle phylip formatted file 
 				variables["[outputtag]"] = "phylip";
                 outputFile = getOutputFileName("phylip", variables);
-				m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
+				util.mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			}else if (output == "column") { //user wants column format
 				outputFile = getOutputFileName("column", variables);
 				outputTypes["column"].push_back(outputFile);
-				m->mothurRemove(outputFile);
+				util.mothurRemove(outputFile);
 			}else { //assume square
                 variables["[outputtag]"] = "square";
                 outputFile = getOutputFileName("phylip", variables);
-				m->mothurRemove(outputFile);
+				util.mothurRemove(outputFile);
 				outputTypes["phylip"].push_back(outputFile);
 			}
-								
-		
-			//if you don't need to fork anything
-			if(processors == 1){
-				if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
-				else { driver(0, numSeqs, outputFile, "square");  }
-			}else{ //you have multiple processors
 				
-				for (int i = 0; i < processors; i++) {
-					distlinePair tempLine;
-					lines.push_back(tempLine);
-					if (output != "square") {
-						lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
-						lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
-					}else{
-						lines[i].start = int ((float(i)/float(processors)) * numSeqs);
-						lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
-					}
-				}
-				
-				createProcesses(outputFile); 
-			}
+            createProcesses(outputFile);
 
-			if (m->getControl_pressed()) { outputTypes.clear();   m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear();   util.mothurRemove(outputFile); return 0; }
 			
 			ifstream fileHandle;
 			fileHandle.open(outputFile.c_str());
 			if(fileHandle) {
-				m->gobble(fileHandle);
+				util.gobble(fileHandle);
 				if (fileHandle.eof()) { m->mothurOut(outputFile + " is blank. This can result if there are no distances below your cutoff.");  m->mothurOutEndLine(); }
 			}
 			
@@ -345,20 +280,20 @@ int PairwiseSeqsCommand::execute(){
 
             m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 			
-			if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFile); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outputFile); return 0; }
 		}
 		
 		//set phylip file as new current phylipfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("phylip");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName); }
 		}
 		
 		//set column file as new current columnfile
 		itTypes = outputTypes.find("column");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setColumnFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -374,53 +309,300 @@ int PairwiseSeqsCommand::execute(){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+struct pairwiseData {
+    string align, distcalcType, outputFileName;
+    unsigned long long start;
+    unsigned long long end;
+    MothurOut* m;
+    float match, misMatch, gapOpen, gapExtend, cutoff;
+    int longestBase;
+    bool countends;
+    SequenceDB alignDB;
+    OutputWriter* threadWriter;
+    Utils util;
+    
+    pairwiseData(){}
+    pairwiseData(OutputWriter* ofn) {
+        threadWriter = ofn;
+        m = MothurOut::getInstance();
+    }
+    
+    pairwiseData(string ofn) {
+        outputFileName = ofn;
+        m = MothurOut::getInstance();
+    }
+    
+    void setVariables(string al, string di, bool co, string op, SequenceDB DB, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int thr, float cu) {
+        align = al;
+        distcalcType = di;
+        countends = co;
+        alignDB = DB;
+        cutoff = cu;
+        start = st;
+        end = en;
+        match = ma;
+        misMatch = misMa;
+        gapOpen = gapO;
+        gapExtend = gapE;
+        longestBase = thr;
+    }
+};
+/**************************************************************************************************/
+int driverColumn(pairwiseData* params){
+    try {
+        int startTime = time(NULL);
+        
+        Alignment* alignment;
+        if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
+        else if(params->align == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);				}
+        else if(params->align == "blast")		{	alignment = new BlastAlignment(params->gapOpen, params->gapExtend, params->match, params->misMatch);		}
+        else if(params->align == "noalign")		{	alignment = new NoAlign();													}
+        else {
+            params->m->mothurOut(params->align + " is not a valid alignment option. I will run the command using needleman.\n");
+            alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);
+        }
+        
+        ValidCalculators validCalculator;
+        DistCalc* distCalculator;
+        if (params->countends) {
+            if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
+                if (params->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->distcalcType == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
+                if (params->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+        
+        for(int i=params->start;i<params->end;i++){
+            
+            Sequence seq = params->alignDB.get(i);
+            if (seq.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seq.getUnaligned().length()+1); }
+        
+            for(int j=0;j<i;j++){
+                
+                if (params->m->getControl_pressed()) {  break;  }
+                
+                Sequence seqI = seq;
+                Sequence seqJ = params->alignDB.get(j);
+                if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
+                
+                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+                seqI.setAligned(alignment->getSeqAAln());
+                seqJ.setAligned(alignment->getSeqBAln());
+                
+                double dist = distCalculator->calcDist(seqI, seqJ);
+                
+                if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + "\n distance = " + toString(dist) + "\n"); }
+                
+                if(dist <= params->cutoff){ params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(dist) + "\n"); }
+            }
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); }
+        }
+        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+"\n");
+        
+        delete alignment;
+        delete distCalculator;
+        
+        return 0;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "PairwiseSeqsCommand", "driver");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+int driverLt(pairwiseData* params){
+    try {
+        
+        int startTime = time(NULL);
+        
+        Alignment* alignment;
+        if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
+        else if(params->align == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);				}
+        else if(params->align == "blast")		{	alignment = new BlastAlignment(params->gapOpen, params->gapExtend, params->match, params->misMatch);		}
+        else if(params->align == "noalign")		{	alignment = new NoAlign();													}
+        else {
+            params->m->mothurOut(params->align + " is not a valid alignment option. I will run the command using needleman.\n");
+            alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);
+        }
+        
+        ValidCalculators validCalculator;
+        DistCalc* distCalculator;
+        if (params->countends) {
+            if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
+                if (params->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->distcalcType == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
+                if (params->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+        
+        //column file
+        ofstream outFile;
+        params->util.openOutputFile(params->outputFileName, outFile);
+        outFile.setf(ios::fixed, ios::showpoint);
+        outFile << setprecision(4);
+        
+        if(params->start == 0){	outFile << params->alignDB.getNumSeqs() << endl;	}
+
+        
+        for(int i=params->start;i<params->end;i++){
+            
+            Sequence seq = params->alignDB.get(i);
+            if (seq.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seq.getUnaligned().length()+1); }
+            
+            string name = seq.getName();
+            if (name.length() < 10) {  while (name.length() < 10) {  name += " ";  } seq.setName(name); } //pad with spaces to make compatible
+            outFile << name;
+            
+            for(int j=0;j<i;j++){
+                
+                if (params->m->getControl_pressed()) { break;  }
+                
+                Sequence seqI = seq;
+                Sequence seqJ = params->alignDB.get(j);
+                if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
+                
+                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+                seqI.setAligned(alignment->getSeqAAln());
+                seqJ.setAligned(alignment->getSeqBAln());
+                
+                double dist = distCalculator->calcDist(seqI, seqJ);
+                
+                if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
+                
+                outFile << '\t' << dist;
+            }
+            
+            outFile << endl;
+            
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); }
+            
+        }
+        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+"\n");
+        
+        outFile.close();
+        delete alignment;
+        delete distCalculator;
+        
+        return 1;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "PairwiseSeqsCommand", "driver");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+int driverSquare(pairwiseData* params){
+    try {
+        
+        int startTime = time(NULL);
+        
+        Alignment* alignment;
+        if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
+        else if(params->align == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);				}
+        else if(params->align == "blast")		{	alignment = new BlastAlignment(params->gapOpen, params->gapExtend, params->match, params->misMatch);		}
+        else if(params->align == "noalign")		{	alignment = new NoAlign();													}
+        else {
+            params->m->mothurOut(params->align + " is not a valid alignment option. I will run the command using needleman.\n");
+            alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);
+        }
+        
+        ValidCalculators validCalculator;
+        DistCalc* distCalculator;
+        if (params->countends) {
+            if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
+                if (params->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->distcalcType == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
+                if (params->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+        
+        //column file
+        ofstream outFile;
+        params->util.openOutputFile(params->outputFileName, outFile);
+        outFile.setf(ios::fixed, ios::showpoint);
+        outFile << setprecision(4);
+        
+        long long numSeqs = params->alignDB.getNumSeqs();
+        if(params->start == 0){	outFile << numSeqs << endl;	}
+        
+        for(int i=params->start;i<params->end;i++){
+            
+            Sequence seq = params->alignDB.get(i);
+            if (seq.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seq.getUnaligned().length()+1); }
+            
+            string name = seq.getName();
+            if (name.length() < 10) {  while (name.length() < 10) {  name += " ";  } seq.setName(name); } //pad with spaces to make compatible
+            outFile << name;
+            
+            for(int j=0;j<numSeqs;j++){
+                
+                if (params->m->getControl_pressed()) { break;  }
+                
+                Sequence seqI = seq;
+                Sequence seqJ = params->alignDB.get(j);
+                if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
+
+                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+                seqI.setAligned(alignment->getSeqAAln());
+                seqJ.setAligned(alignment->getSeqBAln());
+                
+                double dist = distCalculator->calcDist(seqI, seqJ);
+                
+                outFile << '\t' << dist;
+                
+                if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
+            }
+            
+            outFile << endl; 
+            
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n");  }
+            
+        }
+        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+"\n");
+        
+        outFile.close();
+        delete alignment;
+        delete distCalculator;
+        
+        return 1;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "PairwiseSeqsCommand", "driver");
+        exit(1);
+    }
+}
 
 /**************************************************************************************************/
 void PairwiseSeqsCommand::createProcesses(string filename) {
 	try {
-        int process = 1;
-		processIDS.clear();
-        bool recalc = false;
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid); 
-				process++;
-			}else if (pid == 0){
-				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
-				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
-
-			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-				 processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //redo file divide
-            int numSeqs = alignDB.getNumSeqs();
-            lines.clear();
+        vector<linePair> lines;
+        vector<thread*> workerThreads;
+        vector<pairwiseData*> data;
+        long long numSeqs = alignDB.getNumSeqs();
+       
+        if(processors == 1){ lines.push_back(linePair(0, numSeqs));  }
+        else{
             for (int i = 0; i < processors; i++) {
-                distlinePair tempLine;
+                linePair tempLine;
                 lines.push_back(tempLine);
                 if (output != "square") {
                     lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
@@ -430,88 +612,61 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
                     lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
                 }
             }
+        }
+        
+        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(filename); 
+        synchronizedOutputFile->setFixedShowPoint();
+        synchronizedOutputFile->setPrecision(4);
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            OutputWriter* threadWriter = NULL;
+            pairwiseData* dataBundle = NULL;
+            string extension = toString(i+1) + ".temp";
+            if (output == "column") {
+                threadWriter = new OutputWriter(synchronizedOutputFile);
+                dataBundle = new pairwiseData(threadWriter);
+            }else { dataBundle = new pairwiseData(filename+extension); }
+        
+            dataBundle->setVariables(align, Estimators[0], countends, output, alignDB, lines[i+1].start, lines[i+1].end, match, misMatch, gapOpen, gapExtend, longestBase, cutoff);
+            data.push_back(dataBundle);
             
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);
-                    process++;
-                }else if (pid == 0){
-                    if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
-                    else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; kill (temp, SIGINT); }
-                    exit(0);
-                }
-            }
+            thread* thisThread = NULL;
+            if (output == "column")     { thisThread = new thread(driverColumn, dataBundle);        }
+            else if (output == "lt")    { thisThread = new thread(driverLt, dataBundle);            }
+            else                        { thisThread = new thread(driverSquare, dataBundle);        }
+            workerThreads.push_back(thisThread);
         }
 
+        OutputWriter* threadWriter = NULL;
+        pairwiseData* dataBundle = NULL;
+        if (output == "column") {
+            threadWriter = new OutputWriter(synchronizedOutputFile);
+            dataBundle = new pairwiseData(threadWriter);
+        }else { dataBundle = new pairwiseData(filename); }
         
-		//parent do my part
-		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
-		else { driver(lines[0].start, lines[0].end, filename, "square"); }
-
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-#else     
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the distanceData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//that's why the distance calculator was moved inside of the driver to make separate copies.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<pairwiseData*> pDataArray; //[processors-1];
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor-1 worker threads.
-		for( int i=0; i<processors-1; i++ ){
-			string extension = toString(i) + ".temp";
-
-			// Allocate memory for thread data.
-			pairwiseData* tempDist = new pairwiseData((filename+extension), align, "square", Estimators[0], countends, output, alignDB, m, lines[i+1].start, lines[i+1].end, match, misMatch, gapOpen, gapExtend, longestBase, cutoff, i);
-			pDataArray.push_back(tempDist);
-			processIDS.push_back(i);
-			
-			if (output != "square") { hThreadArray[i] = CreateThread(NULL, 0, MyPairwiseThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);  } 
-            else { hThreadArray[i] = CreateThread(NULL, 0, MyPairwiseSquareThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);  }
-		}
-		
-		//do your part
-		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
-		else { driver(lines[0].start, lines[0].end, filename, "square"); }
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
+        dataBundle->setVariables(align, Estimators[0], countends, output, alignDB, lines[0].start, lines[0].end, match, misMatch, gapOpen, gapExtend, longestBase, cutoff);
+    
+        if (output == "column")     {
+            driverColumn(dataBundle);
+            delete threadWriter;
+        }
+        else if (output == "lt")    { driverLt(dataBundle);            }
+        else                        { driverSquare(dataBundle);        }
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            if (output == "column") {  delete data[i]->threadWriter; }
+            else {
+                string extension = toString(i+1) + ".temp";
+                util.appendFiles((filename+extension), filename);
+                util.mothurRemove(filename+extension);
             }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-
-#endif
-        
-        //append and remove temp files
-		for (int i=0;i<processIDS.size();i++) { 
-			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
-			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
-		}
-        
+            delete data[i];
+            delete workerThreads[i];
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PairwiseSeqsCommand", "createProcesses");
@@ -519,201 +674,5 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 	}
 }
 
-/**************************************************************************************************/
-/////// need to fix to work with calcs and sequencedb
-int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, float cutoff){
-	try {
-
-		int startTime = time(NULL);
-        
-        Alignment* alignment;
-        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
-		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
-		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
-		else if(align == "noalign")		{	alignment = new NoAlign();													}
-		else {
-			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
-			m->mothurOutEndLine();
-			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
-		}
-        
-        ValidCalculators validCalculator;
-        DistCalc* distCalculator;
-        if (countends) {
-            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
-                if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
-            }
-        }else {
-            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
-                if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
-            }
-        }
-		
-		//column file
-		ofstream outFile(dFileName.c_str(), ios::trunc);
-		outFile.setf(ios::fixed, ios::showpoint);
-		outFile << setprecision(4);
-		
-		if((output == "lt") && startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
-		
-		for(int i=startLine;i<endLine;i++){
-			if(output == "lt")	{	
-				string name = alignDB.get(i).getName();
-				if (name.length() < 10) { //pad with spaces to make compatible
-					while (name.length() < 10) {  name += " ";  }
-				}
-				outFile << name;
-			}
-			
-			for(int j=0;j<i;j++){
-				
-				if (m->getControl_pressed()) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
-				
-				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
-					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
-				}
-				
-				if (alignDB.get(j).getUnaligned().length() > alignment->getnRows()) {
-					alignment->resize(alignDB.get(j).getUnaligned().length()+1);
-				}
-				
-				Sequence seqI(alignDB.get(i).getName(), alignDB.get(i).getAligned());
-				Sequence seqJ(alignDB.get(j).getName(), alignDB.get(j).getAligned());
-				
-				alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
-				seqI.setAligned(alignment->getSeqAAln());
-				seqJ.setAligned(alignment->getSeqBAln());
-                
-				distCalculator->calcDist(seqI, seqJ);
-				double dist = distCalculator->getDist();
-                
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
-				                
-				if(dist <= cutoff){
-					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
-				}
-				if (output == "lt") {  outFile << '\t' << dist; }
-			}
-			
-			if (output == "lt") { outFile << endl; }
-			
-			if(i % 100 == 0){
-				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n");
-			}
-			
-		}
-		m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+"\n");
-		
-		outFile.close();
-        delete alignment;
-        delete distCalculator;
-		
-		return 1;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PairwiseSeqsCommand", "driver");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-/////// need to fix to work with calcs and sequencedb
-int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, string square){
-	try {
-
-		int startTime = time(NULL);
-        
-        Alignment* alignment;
-        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
-		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
-		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
-		else if(align == "noalign")		{	alignment = new NoAlign();													}
-		else {
-			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
-			m->mothurOutEndLine();
-			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
-		}
-		
-        ValidCalculators validCalculator;
-        DistCalc* distCalculator;
-        if (countends) {
-            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
-                if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
-            }
-        }else {
-            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
-                if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
-            }
-        }
-
-		//column file
-		ofstream outFile(dFileName.c_str(), ios::trunc);
-		outFile.setf(ios::fixed, ios::showpoint);
-		outFile << setprecision(4);
-		
-		if(startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
-		
-		for(int i=startLine;i<endLine;i++){
-				
-			string name = alignDB.get(i).getName();
-			//pad with spaces to make compatible
-			if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
-				
-			outFile << name;
-			
-			for(int j=0;j<alignDB.getNumSeqs();j++){
-				
-				if (m->getControl_pressed()) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
-				
-				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
-					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
-				}
-				
-				if (alignDB.get(j).getUnaligned().length() > alignment->getnRows()) {
-					alignment->resize(alignDB.get(j).getUnaligned().length()+1);
-				}
-				
-				Sequence seqI(alignDB.get(i).getName(), alignDB.get(i).getAligned());
-				Sequence seqJ(alignDB.get(j).getName(), alignDB.get(j).getAligned());
-				
-				alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
-				seqI.setAligned(alignment->getSeqAAln());
-				seqJ.setAligned(alignment->getSeqBAln());
-				
-				distCalculator->calcDist(seqI, seqJ);
-				double dist = distCalculator->getDist();
-								
-				outFile << '\t' << dist;
-                
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
-			}
-			
-			outFile << endl; 
-			
-			if(i % 100 == 0){
-				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
-			}
-			
-		}
-		m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+"\n");
-		
-		outFile.close();
-        delete alignment;
-        delete distCalculator;
-		
-		return 1;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PairwiseSeqsCommand", "driver");
-		exit(1);
-	}
-}
 /**************************************************************************************************/
 

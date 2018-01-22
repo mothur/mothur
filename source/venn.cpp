@@ -33,9 +33,9 @@ vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 		vector<string> outputNames;
 
 		for(int i=0;i<vCalcs.size();i++){
-			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + "." + sabund->getLabel() + "." + vCalcs[i]->getName() + ".svg";
+			string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + "." + sabund->getLabel() + "." + vCalcs[i]->getName() + ".svg";
 			outputNames.push_back(filenamesvg);
-			m->openOutputFile(filenamesvg, outsvg);
+			util.openOutputFile(filenamesvg, outsvg);
 			
 			if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 
@@ -91,9 +91,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + ".svg";
+				string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + ".svg";
 				outputNames.push_back(filenamesvg);
-				m->openOutputFile(filenamesvg, outsvg);
+				util.openOutputFile(filenamesvg, outsvg);
 				
 				if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 				
@@ -147,10 +147,10 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + ".svg";
+				string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + ".svg";
 
 				outputNames.push_back(filenamesvg);
-				m->openOutputFile(filenamesvg, outsvg);
+				util.openOutputFile(filenamesvg, outsvg);
 				
 				if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 				
@@ -164,11 +164,11 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                     if (sharedOtus &&  (labels.size() != 0)) {
                         string groupsTag = "";
                         for (int h = 0; h < lookup.size()-1; h++) { groupsTag += lookup[h]->getGroup() + "-"; }  groupsTag += lookup[lookup.size()-1]->getGroup();
-                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
+                        string filenameShared = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
                         
                         outputNames.push_back(filenameShared);
                         ofstream outShared;
-                        m->openOutputFile(filenameShared, outShared);
+                        util.openOutputFile(filenameShared, outShared);
                         outShared << "Groups\tNumShared\tOTULabels\n";
                         outShared << lookup[0]->getGroup() + "-" + lookup[1]->getGroup() << '\t' << labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
@@ -263,10 +263,10 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 			
-				string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + ".svg";
+				string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + ".svg";
 
 				outputNames.push_back(filenamesvg);
-				m->openOutputFile(filenamesvg, outsvg);
+				util.openOutputFile(filenamesvg, outsvg);
 				
 				if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 				
@@ -452,11 +452,11 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                     if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
                         string groupsTag = "";
                         for (int h = 0; h < lookup.size()-1; h++) { groupsTag += lookup[h]->getGroup() + "-"; }  groupsTag += lookup[lookup.size()-1]->getGroup();
-                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
+                        string filenameShared = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
                         
                         outputNames.push_back(filenameShared);
                        
-                        m->openOutputFile(filenameShared, outShared);
+                        util.openOutputFile(filenameShared, outShared);
                         outShared << "Groups\tNumShared\tOTULabels\n";
                     }
 					vector<SharedRAbundVector*> subset;
@@ -624,9 +624,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				
 				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { m->mothurOut(vCalcs[i]->getName() + " is not a valid calculator with four groups.  It will be disregarded. "); m->mothurOutEndLine(); }
 				else{
-					string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + "-" + lookup[3]->getGroup() + ".svg";
+					string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + "-" + lookup[3]->getGroup() + ".svg";
 					outputNames.push_back(filenamesvg);
-					m->openOutputFile(filenamesvg, outsvg);
+					util.openOutputFile(filenamesvg, outsvg);
 
 					if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
 					
@@ -659,11 +659,11 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                     if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
                         string groupsTag = "";
                         for (int h = 0; h < lookup.size()-1; h++) { groupsTag += lookup[h]->getGroup() + "-"; }  groupsTag += lookup[lookup.size()-1]->getGroup();
-                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
+                        string filenameShared = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
                         
                         outputNames.push_back(filenameShared);
                         
-                        m->openOutputFile(filenameShared, outShared);
+                        util.openOutputFile(filenameShared, outShared);
                         outShared << "Groups\tNumShared\tOTULabels\n";
                     }
 

@@ -10,6 +10,7 @@
 #define __Mothur__designmap__
 
 #include "mothurout.h"
+#include "utils.hpp"
 
 /* This class is a representation of the design file.  
  
@@ -84,6 +85,7 @@ private:
     vector< vector<string> > designMap;
     map<string, int> indexGroupNameMap; //maps groupName to row in values
     map<string, int> indexCategoryMap;  //maps category to column in values
+    Utils util;
 };
 
 

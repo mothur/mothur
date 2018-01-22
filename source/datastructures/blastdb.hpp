@@ -22,7 +22,7 @@ public:
 	
 	void generateDB();
 	void addSequence(Sequence);
-	vector<int> findClosestSequences(Sequence*, int);
+	vector<int> findClosestSequences(Sequence*, int, vector<float>&);
 	vector<int> findClosestMegaBlast(Sequence*, int, int);
 	
 private:
@@ -39,6 +39,7 @@ private:
 	float gapExtend;
 	float match;
 	float misMatch;
+    
 	
 };
 

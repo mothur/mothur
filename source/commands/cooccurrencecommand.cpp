@@ -106,14 +106,14 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -124,49 +124,49 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 		
 	        //check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
 			//get shared file
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
 
 			
-			metric = validParameter.validFile(parameters, "metric", false);				if (metric == "not found") { metric = "cscore"; }
+			metric = validParameter.validFile(parameters, "metric");				if (metric == "not found") { metric = "cscore"; }
 			
 			if ((metric != "cscore") && (metric != "checker") && (metric != "combo") && (metric != "vratio")) {
 				m->mothurOut("[ERROR]: " + metric + " is not a valid metric option for the cooccurrence command. Choices are cscore, checker, combo, vratio."); m->mothurOutEndLine(); abort = true; 
 			}
 			
-			matrix = validParameter.validFile(parameters, "matrixmodel", false);				if (matrix == "not found") { matrix = "sim2"; }
+			matrix = validParameter.valid(parameters, "matrixmodel");				if (matrix == "not found") { matrix = "sim2"; }
 			
 			if ((matrix != "sim1") && (matrix != "sim2") && (matrix != "sim3") && (matrix != "sim4") && (matrix != "sim5" ) && (matrix != "sim6" ) && (matrix != "sim7" ) && (matrix != "sim8" ) && (matrix != "sim9" )) {
 				m->mothurOut("[ERROR]: " + matrix + " is not a valid matrix option for the cooccurrence command. Choices are sim1, sim2, sim3, sim4, sim5, sim6, sim7, sim8, sim9."); m->mothurOutEndLine(); abort = true; 
 			}
             
-            groups = validParameter.validFile(parameters, "groups", false);			
+            groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = "";   }
 			else { 
-				m->splitAtDash(groups, Groups);	
-			}			
-			m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
+			}
             
-            string temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, runs); 
+            string temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, runs); 
 
 		}
 
@@ -181,10 +181,11 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 int CooccurrenceCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -193,9 +194,9 @@ int CooccurrenceCommand::execute(){
 
         ofstream out;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
 		string outputFileName = getOutputFileName("summary", variables);
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
         out << "metric\tlabel\tScore\tzScore\tstandardDeviation\tnp_Pvalue\n";
@@ -203,7 +204,7 @@ int CooccurrenceCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->getControl_pressed()) { delete lookup; out.close(); m->mothurRemove(outputFileName); return 0; }
+            if (m->getControl_pressed()) { delete lookup; out.close(); util.mothurRemove(outputFileName); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
@@ -215,7 +216,7 @@ int CooccurrenceCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
@@ -233,13 +234,13 @@ int CooccurrenceCommand::execute(){
 			lastLabel = lookup->getLabel();
 			delete lookup;
 			
-			if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); util.mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { out.close(); m->mothurRemove(outputFileName); return 0; }
+		if (m->getControl_pressed()) { out.close(); util.mothurRemove(outputFileName); return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -255,7 +256,7 @@ int CooccurrenceCommand::execute(){
 		}
 	
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
@@ -269,7 +270,7 @@ int CooccurrenceCommand::execute(){
         out.close(); 
         
 		//reset groups parameter
-        m->clearGroups(); 
+         
 
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -448,7 +449,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                     if (m->getControl_pressed()) { return 0; }
                 nextnum2:
                     previous = 0.0;
-                    randnum = m->getRandomDouble0to1();
+                    randnum = util.getRandomDouble0to1();
                     for(int i=0;i<nrows;i++) {
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
@@ -467,7 +468,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
             
             else if (matrix == "sim2") {
                 for(int i=0;i<nrows;i++) {
-                    m->mothurRandomShuffle(co_matrix[i]);
+                    util.mothurRandomShuffle(co_matrix[i]);
                 }
                 //do this for the scoring since those all have nullmatrix as a parameter
                 //nullmatrix gets cleared at the begining of each run
@@ -480,7 +481,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                     while(count < rowtotal[i]) {
                         previous = 0.0;
                         if (m->getControl_pressed()) { return 0; }
-                        randnum = m->getRandomDouble0to1();
+                        randnum = util.getRandomDouble0to1();
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
                             if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
@@ -501,7 +502,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
                     count = 0;
                     while(count < columntotal[j]) {
                         if (m->getControl_pressed()) { return 0; }
-                        randnum = m->getRandomDouble0to1();
+                        randnum = util.getRandomDouble0to1();
                         for(int i=0;i<nrows;i++) {
                             current = probabilityMatrix[ncols * i + j];
                             if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {

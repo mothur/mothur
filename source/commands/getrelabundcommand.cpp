@@ -106,51 +106,51 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 			outputTypes["relabund"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
 			}
 		
 			//get shared file
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "totalgroup"; }
+			scale = validParameter.valid(parameters, "scale");				if (scale == "not found") { scale = "totalgroup"; }
 			
 			if ((scale != "totalgroup") && (scale != "totalotu") && (scale != "averagegroup") && (scale != "averageotu")) {
 				m->mothurOut(scale + " is not a valid scaling option for the get.relabund command. Choices are totalgroup, totalotu, averagegroup, averageotu."); m->mothurOutEndLine(); abort = true; 
@@ -168,17 +168,18 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 int GetRelAbundCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
 		string outputFileName = getOutputFileName("relabund", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		input = new InputData(sharedfile, "sharedfile");
-		lookup = input->getSharedRAbundVectors();
+        InputData input(sharedfile, "sharedfile", Groups);
+		lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -188,25 +189,25 @@ int GetRelAbundCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-            if (m->getControl_pressed()) {  outputTypes.clear();  delete lookup; m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
+            if (m->getControl_pressed()) {  outputTypes.clear();  delete lookup;   out.close(); util.mothurRemove(outputFileName); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
+				lookup->printHeaders(out);
 				getRelAbundance(lookup, out);
 				
 				processedLabels.insert(lookup->getLabel());
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
-				lookup = input->getSharedRAbundVectors(lastLabel);
+				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				if (!m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
+				lookup->printHeaders(out);
 				getRelAbundance(lookup, out);
 				
 				processedLabels.insert(lookup->getLabel());
@@ -220,13 +221,13 @@ int GetRelAbundCommand::execute(){
 			//prevent memory leak
 			delete lookup;
 			
-			if (m->getControl_pressed()) {  outputTypes.clear();  m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear();   out.close(); util.mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
-			lookup = input->getSharedRAbundVectors();
+			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); m->clearGroups(); delete input;  out.close(); m->mothurRemove(outputFileName);  return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();   out.close(); util.mothurRemove(outputFileName);  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -242,23 +243,19 @@ int GetRelAbundCommand::execute(){
 		}
 	
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
             delete lookup;
-			lookup = input->getSharedRAbundVectors(lastLabel);
+			lookup = input.getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-			if (m->getPrintedSharedHeaders()) { lookup->printHeaders(out); }
+			lookup->printHeaders(out);
 			getRelAbundance(lookup, out);
 			
 			delete lookup;
 		}
-	
-		//reset groups parameter
-		m->clearGroups();  
-		delete input; 
 		out.close();
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0;}
+		if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outputFileName); return 0;    }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -266,10 +263,10 @@ int GetRelAbundCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set relabund file as new current relabundfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("relabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRelAbundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setRelAbundFile(currentName); }
 		}
 		
 		return 0;

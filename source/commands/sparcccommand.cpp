@@ -117,7 +117,7 @@ SparccCommand::SparccCommand(string option)  {
             outputTypes["sparccrelabund"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                  
@@ -125,7 +125,7 @@ SparccCommand::SparccCommand(string option)  {
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -133,50 +133,49 @@ SparccCommand::SparccCommand(string option)  {
                         
 			//check for parameters
             //get shared file, it is required
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile();
+				sharedfile = current->getSharedFile();
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){
-				outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
+				outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
 			}
             
-			normalizeMethod = validParameter.validFile(parameters, "method", false);
+			normalizeMethod = validParameter.valid(parameters, "method");
 			if (normalizeMethod == "not found") { normalizeMethod = "dirichlet"; }
 			if ((normalizeMethod == "dirichlet") || (normalizeMethod == "relabund")) { }
 			else { m->mothurOut(normalizeMethod + " is not a valid method.  Valid methods are dirichlet and relabund."); m->mothurOutEndLine(); abort = true; }
             
             
-            string temp = validParameter.validFile(parameters, "samplings", false);	if (temp == "not found"){	temp = "20";	}
-			m->mothurConvert(temp, numSamplings);
+            string temp = validParameter.valid(parameters, "samplings");	if (temp == "not found"){	temp = "20";	}
+			util.mothurConvert(temp, numSamplings);
             
             if(normalizeMethod == "relabund"){ numSamplings = 1; }
             
-            temp = validParameter.validFile(parameters, "iterations", false);	if (temp == "not found"){	temp = "10";	}
-			m->mothurConvert(temp, maxIterations);
+            temp = validParameter.valid(parameters, "iterations");	if (temp == "not found"){	temp = "10";	}
+			util.mothurConvert(temp, maxIterations);
             
-            temp = validParameter.validFile(parameters, "permutations", false);	if (temp == "not found"){	temp = "1000";	}
-			m->mothurConvert(temp, numPermutations);
+            temp = validParameter.valid(parameters, "permutations");	if (temp == "not found"){	temp = "1000";	}
+			util.mothurConvert(temp, numPermutations);
             
-            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
-    
-            string groups = validParameter.validFile(parameters, "groups", false);
+            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
+			    
+            string groups = validParameter.valid(parameters, "groups");
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); }
-			m->setGroups(Groups);
+			else { util.splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
+			
             
-            string label = validParameter.validFile(parameters, "label", false);
+            string label = validParameter.valid(parameters, "label");
 			if (label == "not found") { label = ""; }
 			else {
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 		}
@@ -191,13 +190,14 @@ SparccCommand::SparccCommand(string option)  {
 int SparccCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        int start = time(NULL);
+        long start = time(NULL);
         
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         string lastLabel = lookup->getLabel();
+        Groups = lookup->getNamesGroups();
         
         int numOTUs = lookup->getNumBins();
         if (numOTUs >= maxIterations) {  m->mothurOut("[WARNING]: The number of iterations is set higher than the number of OTUs, reducing to " + toString(numOTUs-1) + "\n"); maxIterations = numOTUs-1; }
@@ -209,7 +209,7 @@ int SparccCommand::execute(){
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }return 0; }
+            if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }return 0; }
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
@@ -221,7 +221,7 @@ int SparccCommand::execute(){
                 userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -247,7 +247,7 @@ int SparccCommand::execute(){
             lookup = input.getSharedRAbundVectors();
         }
         
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -263,7 +263,7 @@ int SparccCommand::execute(){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             
@@ -274,7 +274,7 @@ int SparccCommand::execute(){
             delete lookup;
         }
         
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to process.");
         m->mothurOutEndLine();
@@ -303,7 +303,7 @@ vector<vector<float> > SparccCommand::shuffleSharedVector(vector<vector<float> >
         
         for(int i=0;i<numGroups;i++){
             for(int j=0;j<numOTUs;j++){
-                shuffledVector[i][j] = sharedVector[m->getRandomIndex(numGroups-1)][j];
+                shuffledVector[i][j] = sharedVector[util.getRandomIndex(numGroups-1)][j];
             }
         }
         
@@ -321,7 +321,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         cout.setf(ios::showpoint);
         
         vector<vector<float> > sharedVector;
-        vector<string> otuNames = m->getCurrentSharedBinLabels();
+        vector<string> otuNames = shared->getOTUNames();
         vector<SharedRAbundVector*> data = shared->getSharedRAbundVectors();
         
         //fill sharedVector to pass to CalcSparcc
@@ -335,13 +335,13 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         int numGroups = data.size();
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = shared->getLabel();
         
 
         string relAbundFileName = getOutputFileName("sparccrelabund", variables);
         ofstream relAbundFile;
-        m->openOutputFile(relAbundFileName, relAbundFile);
+        util.openOutputFile(relAbundFileName, relAbundFile);
         outputNames.push_back(relAbundFileName);  outputTypes["sparccrelabund"].push_back(relAbundFileName);
         
         relAbundFile << "OTU\taveRelAbund\n";
@@ -361,7 +361,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         
         string correlationFileName = getOutputFileName("corr", variables);
         ofstream correlationFile;
-        m->openOutputFile(correlationFileName, correlationFile);
+        util.openOutputFile(correlationFileName, correlationFile);
         outputNames.push_back(correlationFileName);  outputTypes["corr"].push_back(correlationFileName);
         correlationFile.setf(ios::fixed, ios::floatfield);
         correlationFile.setf(ios::showpoint);
@@ -383,7 +383,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
             
             string pValueFileName = getOutputFileName("pvalue", variables);
             ofstream pValueFile;
-            m->openOutputFile(pValueFileName, pValueFile);
+            util.openOutputFile(pValueFileName, pValueFile);
             outputNames.push_back(pValueFileName);  outputTypes["pvalue"].push_back(pValueFileName);
             pValueFile.setf(ios::fixed, ios::floatfield);
             pValueFile.setf(ios::showpoint);
@@ -443,8 +443,8 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 					
 					//pass pvalues to parent
 					ofstream out;
-					string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
-					m->openOutputFile(tempFile, out);
+					string tempFile = toString(process) + ".pvalues.temp";
+					util.openOutputFile(tempFile, out);
 					
 					//pass values
 					for (int i = 0; i < pValues.size(); i++) {
@@ -468,7 +468,7 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
                     }
                     m->setControl_pressed(false);
                     for (int i=0;i<processIDS.size();i++) {
-                        m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
+                        util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
                     }
                     recalc = true;
                     break;
@@ -477,7 +477,7 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 			
             if (recalc) {
                 //test line, also set recalc to true.
-                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
                 
                 procIters.clear();
                 int numItersPerProcessor = numPermutations / processors;
@@ -504,8 +504,8 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
                         
                         //pass pvalues to parent
                         ofstream out;
-                        string tempFile = m->mothurGetpid(process) + ".pvalues.temp";
-                        m->openOutputFile(tempFile, out);
+                        string tempFile = toString(process) + ".pvalues.temp";
+                        util.openOutputFile(tempFile, out);
                         
                         //pass values
                         for (int i = 0; i < pValues.size(); i++) {
@@ -541,19 +541,19 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 			for (int i = 0; i < processIDS.size(); i++) {
 				ifstream in;
 				string tempFile =  toString(processIDS[i]) + ".pvalues.temp";
-				m->openInputFile(tempFile, in);
+				util.openInputFile(tempFile, in);
 				
 				////// to do ///////////
 				int numTemp; numTemp = 0;
 				
                 for (int j = 0; j < pValues.size(); j++) {
                     for (int k = 0; k < pValues.size(); k++) {
-                        in >> numTemp; m->gobble(in);
+                        in >> numTemp; util.gobble(in);
                         pValues[j][k] += numTemp;
                     }
-                    m->gobble(in);
+                    util.gobble(in);
 				}
-				in.close(); m->mothurRemove(tempFile);
+				in.close(); util.mothurRemove(tempFile);
 			}
 #else
             

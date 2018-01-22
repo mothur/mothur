@@ -83,15 +83,15 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			outputTypes["merge"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			
-			string fileList = validParameter.validFile(parameters, "input", false);			
+			string fileList = validParameter.valid(parameters, "input");
 			if(fileList == "not found") { m->mothurOut("you must enter two or more file names"); m->mothurOutEndLine();  abort=true;  }
-			else{ 	m->splitAtDash(fileList, fileNames);	}
+			else{ 	util.splitAtDash(fileList, fileNames);	}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found")	{	outputDir = "";		}
+			string outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found")	{	outputDir = "";		}
 			
 			
 			numInputFiles = fileNames.size();
@@ -103,19 +103,19 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			else{
 				for(int i=0;i<numInputFiles;i++){
 					if (inputDir != "") {
-						string path = m->hasPath(fileNames[i]);
+						string path = util.hasPath(fileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fileNames[i] = inputDir + fileNames[i];		}
 					}
 					
-					if(m->openInputFile(fileNames[i], testFile)){	abort = true;	}
+					if(util.openInputFile(fileNames[i], testFile)){	abort = true;	}
 					testFile.close();
 				}
 			}   
 			
-			outputFileName = validParameter.validFile(parameters, "output", false);			
+			outputFileName = validParameter.valid(parameters, "output");			
 			if (outputFileName == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
-			else if (outputDir != "") { outputFileName = outputDir + m->getSimpleName(outputFileName);  }
+			else if (outputDir != "") { outputFileName = outputDir + util.getSimpleName(outputFileName);  }
 		}
 			
 	}
@@ -128,12 +128,12 @@ MergeFileCommand::MergeFileCommand(string option)  {
 
 int MergeFileCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		m->mothurRemove(outputFileName);
-		for(int i=0;i<numInputFiles;i++){  m->appendFiles(fileNames[i], outputFileName);  }
+		util.mothurRemove(outputFileName);
+		for(int i=0;i<numInputFiles;i++){  util.appendFiles(fileNames[i], outputFileName);  }
 		
-		if (m->getControl_pressed()) {  m->mothurRemove(outputFileName); return 0;  }
+		if (m->getControl_pressed()) {  util.mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

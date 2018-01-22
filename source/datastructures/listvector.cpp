@@ -48,19 +48,22 @@ inline bool abundNamesSort2(listCt left, listCt right){
 
 /***********************************************************************/
 
-ListVector::ListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){}
+ListVector::ListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0), otuTag("Otu"), printListHeaders(true) {}
 
 /***********************************************************************/
 
-ListVector::ListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){}
+ListVector::ListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0), otuTag("Otu"), printListHeaders(true){}
 
 /***********************************************************************/
 
-ListVector::ListVector(string id, vector<string> lv) : DataVector(id), data(lv){
+ListVector::ListVector(string id, vector<string> lv, string& tag) : DataVector(id), data(lv){
 	try {
+        printListHeaders = true;
+        otuTag = tag;
+        Utils util;
 		for(int i=0;i<data.size();i++){
 			if(data[i] != ""){
-				int binSize = m->getNumNames(data[i]);
+				int binSize = util.getNumNames(data[i]);
 				numBins = i+1;
 				if(binSize > maxRank)	{	maxRank = binSize;	}
 				numSeqs += binSize;
@@ -75,34 +78,39 @@ ListVector::ListVector(string id, vector<string> lv) : DataVector(id), data(lv){
 
 /**********************************************************************/
 
-ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
+        printListHeaders = true;
 		int hold;
+        Utils util;
         
         //are we at the beginning of the file??
-		if (m->getSaveNextLabel() == "") {
+		if (readHeaders == "") {
 			f >> label;
             
 			//is this a shared file that has headers
 			if (label == "label") {
 				
 				//gets "numOtus"
-				f >> label; m->gobble(f);
+				f >> label; util.gobble(f);
 				
 				//eat rest of line
-				label = m->getline(f); m->gobble(f);
+				label = util.getline(f); util.gobble(f);
 				
 				//parse labels to save
 				istringstream iStringStream(label);
-                vector<string> fileLabels;
 				while(!iStringStream.eof()){
 					if (m->getControl_pressed()) { break; }
 					string temp;
-					iStringStream >> temp;  m->gobble(iStringStream);
+					iStringStream >> temp;  util.gobble(iStringStream);
                     
-					fileLabels.push_back(temp);
+					currentLabels.push_back(temp);
 				}
-				m->setListBinLabelsInFile(fileLabels);
+                if (currentLabels.size() != 0) {
+                    string binLabelTag = currentLabels[0];
+                    labelTag = "";
+                    for (int i = 0; i < binLabelTag.length(); i++) { if (isalpha(binLabelTag[i])){ labelTag += binLabelTag[i]; } }
+                }
 				f >> label >> hold;
 			}else {
                 //read in first row
@@ -110,40 +118,30 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
                 
                 //make binlabels because we don't have any
                 string snumBins = toString(hold);
-                vector<string> fileLabels;
-                
+                if (labelTag == "") { labelTag = "Otu"; }
                 for (int i = 0; i < hold; i++) {
                     //if there is a bin label use it otherwise make one
-                    string binLabel = "Otu";
+                    string binLabel = labelTag;
                     string sbinNumber = toString(i+1);
                     if (sbinNumber.length() < snumBins.length()) {
                         int diff = snumBins.length() - sbinNumber.length();
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
                     }
                     binLabel += sbinNumber;
-                    fileLabels.push_back(binLabel);
+                    currentLabels.push_back(binLabel);
                 }
-                m->setListBinLabelsInFile(fileLabels);
             }
-            m->setSaveNextLabel(label);
-		}else {
-            f >> label >> hold;
-            m->setSaveNextLabel(label);
-        }
-	
-        vector<string> fileLabels = m->getListBinLabelsInFile();
-        binLabels.assign(fileLabels.begin(), fileLabels.begin()+hold);
+		}else { f >> label >> hold; }
 		
 		data.assign(hold, "");
 		string inputData = "";
+        otuTag = labelTag;
 	
 		for(int i=0;i<hold;i++){
 			f >> inputData;
 			set(i, inputData);
 		}
-		m->gobble(f);
-        
-        if (f.eof()) { m->setSaveNextLabel(""); }
+		util.gobble(f);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "ListVector");
@@ -155,9 +153,10 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 
 void ListVector::set(int binNumber, string seqNames){
 	try {
-		int nNames_old = m->getNumNames(data[binNumber]);
+        Utils util;
+		int nNames_old = util.getNumNames(data[binNumber]);
 		data[binNumber] = seqNames;
-		int nNames_new = m->getNumNames(seqNames);
+		int nNames_new = util.getNumNames(seqNames);
 	
 		if(nNames_old == 0)			{	numBins++;				}
 		if(nNames_new == 0)			{	numBins--;				}
@@ -181,6 +180,7 @@ string ListVector::get(int index){
 void ListVector::setLabels(vector<string> labels){
 	try {
 		binLabels = labels;
+        getLabels();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "setLabels");
@@ -194,35 +194,8 @@ void ListVector::setLabels(vector<string> labels){
 //if you had a listfile that had been subsampled and then added to it, dup names would be possible.
 vector<string> ListVector::getLabels(){
     try {
-        
-        string tagHeader = "Otu";
-        if (m->getSharedHeaderMode() == "tax") { tagHeader = "PhyloType"; }
-        
-        if (binLabels.size() < data.size()) {
-            string snumBins = toString(numBins);
-            
-            for (int i = 0; i < numBins; i++) {
-                string binLabel = tagHeader;
-                
-                if (i < binLabels.size()) { //label exists, check leading zeros length
-                    string sbinNumber = m->getSimpleLabel(binLabels[i]);
-                    if (sbinNumber.length() < snumBins.length()) {
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                    }
-                    binLabel += sbinNumber;
-                    binLabels[i] = binLabel;
-                }else{
-                    string sbinNumber = toString(i+1);
-                    if (sbinNumber.length() < snumBins.length()) {
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                    }
-                    binLabel += sbinNumber;
-                    binLabels.push_back(binLabel);
-                }
-            }
-        }
+        Utils util;
+        util.getOTUNames(binLabels, numBins, otuTag);
         return binLabels;
     }
 	catch(exception& e) {
@@ -235,8 +208,9 @@ vector<string> ListVector::getLabels(){
 
 void ListVector::push_back(string seqNames){
 	try {
+        Utils util;
 		data.push_back(seqNames);
-		int nNames = m->getNumNames(seqNames);
+		int nNames = util.getNumNames(seqNames);
 	
 		numBins++;
 	
@@ -274,20 +248,19 @@ void ListVector::clear(){
 /***********************************************************************/
 void ListVector::printHeaders(ostream& output){
 	try {
-		string snumBins = toString(numBins);
-        string tagHeader = "Otu";
-        if (m->getSharedHeaderMode() == "tax") { tagHeader = "PhyloType"; }
-		output << "label\tnum" + tagHeader + "s";
-        
-        vector<string> theseLabels = getLabels();
-        
-        for(int i = 0; i < theseLabels.size(); i++) { //print original label for sorted by abundance otu
-            output  << '\t' << theseLabels[i];
+        if (printListHeaders) {
+            output << "label\tnum" + otuTag + "s";
+            
+            vector<string> theseLabels = getLabels();
+            
+            for(int i = 0; i < theseLabels.size(); i++) { //print original label for sorted by abundance otu
+                output  << '\t' << theseLabels[i];
+            }
+            
+            output << endl;
+            
+            printListHeaders = false;
         }
-					
-        output << endl;
-		
-		m->setPrintedListHeaders(true);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "printHeaders");
@@ -299,15 +272,16 @@ void ListVector::printHeaders(ostream& output){
 
 void ListVector::print(ostream& output, map<string, int>& ct){
 	try {
+        printHeaders(output);
 		output << label << '\t' << numBins;
 	
-        
+        Utils util;
         vector<listCt> hold;
         for (int i = 0; i < data.size(); i++) {
             if (data[i] != "") {
                 vector<string> binNames;
                 string bin = data[i];
-                m->splitAtComma(bin, binNames);
+                util.splitAtComma(bin, binNames);
                 int total = 0;
                 for (int j = 0; j < binNames.size(); j++) {
                     map<string, int>::iterator it = ct.find(binNames[j]);
@@ -339,6 +313,7 @@ void ListVector::print(ostream& output, map<string, int>& ct){
 
 void ListVector::print(ostream& output){
     try {
+        printHeaders(output);
         output << label << '\t' << numBins;
         
         vector<string> hold = data;
@@ -364,6 +339,7 @@ void ListVector::print(ostream& output){
 //no sort for subsampling and get.otus and remove.otus
 void ListVector::print(ostream& output, bool sortOtus){
     try {
+        printHeaders(output);
         output << label << '\t' << numBins;
         
         vector<string> hold = data;
@@ -391,9 +367,9 @@ void ListVector::print(ostream& output, bool sortOtus){
 RAbundVector ListVector::getRAbundVector(){
 	try {
 		RAbundVector rav;
-	
+        Utils util;
 		for(int i=0;i<data.size();i++){
-			int binSize = m->getNumNames(data[i]);
+			int binSize = util.getNumNames(data[i]);
 			rav.push_back(binSize);
 		}
 	
@@ -421,9 +397,9 @@ RAbundVector ListVector::getRAbundVector(){
 SAbundVector ListVector::getSAbundVector(){
 	try {
 		SAbundVector sav(maxRank+1);
-	
+        Utils util;
 		for(int i=0;i<data.size();i++){
-			int binSize = m->getNumNames(data[i]);	
+			int binSize = util.getNumNames(data[i]);	
 			sav.set(binSize, sav.get(binSize) + 1);	
 		}
 		sav.set(0, 0);
@@ -440,18 +416,18 @@ SAbundVector ListVector::getSAbundVector(){
 /***********************************************************************/
 
 OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
-	
 	try {
+        Utils util;
 		if(orderMap == NULL){
 			OrderVector ov;
 		
 			for(int i=0;i<data.size();i++){
-				int binSize = m->getNumNames(data[i]);		
+				int binSize = util.getNumNames(data[i]);		
 				for(int j=0;j<binSize;j++){
 					ov.push_back(i);
 				}
 			}
-			m->mothurRandomShuffle(ov);
+			util.mothurRandomShuffle(ov);
 			ov.setLabel(label);
 			ov.getNumBins();
 		

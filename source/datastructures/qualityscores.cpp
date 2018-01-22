@@ -44,18 +44,18 @@ QualityScores::QualityScores(ifstream& qFile){
 		m = MothurOut::getInstance();
 
 		int score;
-		seqName = getSequenceName(qFile); m->gobble(qFile);
+        seqName = getSequenceName(qFile); util.gobble(qFile); getCommentString(qFile);
 		
         if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
         
 		if (!m->getControl_pressed()) {
-            string qScoreString = m->getline(qFile); m->gobble(qFile);
+            string qScoreString = util.getline(qFile); util.gobble(qFile);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: scores = '" + qScoreString + "'\n.");  }
             
             while(qFile.peek() != '>' && qFile.peek() != EOF){
                 if (m->getControl_pressed()) { break; }
-                string temp = m->getline(qFile); m->gobble(qFile);
+                string temp = util.getline(qFile); util.gobble(qFile);
                 //if (m->getDebug()) { m->mothurOut("[DEBUG]: scores = '" + temp + "'\n.");  }
                 qScoreString +=  ' ' + temp;
             }
@@ -65,12 +65,12 @@ QualityScores::QualityScores(ifstream& qFile){
             while(!qScoreStringStream.eof()){
                 if (m->getControl_pressed()) { break; }
                 string temp;
-                qScoreStringStream >> temp;  m->gobble(qScoreStringStream);
+                qScoreStringStream >> temp;  util.gobble(qScoreStringStream);
                 
                 //if (m->getDebug()) { m->mothurOut("[DEBUG]: score " + toString(qScores.size()) + " = '" + temp + "'\n.");  }
                 
                 //check temp to make sure its a number
-                if (!m->isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
+                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
                 convert(temp, score);
                 
                 //cout << count << '\t' << score << endl;
@@ -97,18 +97,18 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
         m = MothurOut::getInstance();
         
         int score;
-        seqName = getSequenceName(qFile); m->gobble(qFile);
+        seqName = getSequenceName(qFile); util.gobble(qFile); getCommentString(qFile);
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
         
         if (!m->getControl_pressed()) {
-            string qScoreString = ""; std::getline(qFile, qScoreString); m->gobble(qFile);
+            string qScoreString = ""; std::getline(qFile, qScoreString); util.gobble(qFile);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: scores = '" + qScoreString + "'\n.");  }
             
             while(qFile.peek() != '>' && qFile.peek() != EOF){
                 if (m->getControl_pressed()) { break; }
-                string temp = ""; std::getline(qFile, temp); m->gobble(qFile);
+                string temp = ""; std::getline(qFile, temp); util.gobble(qFile);
                 //if (m->getDebug()) { m->mothurOut("[DEBUG]: scores = '" + temp + "'\n.");  }
                 qScoreString +=  ' ' + temp;
             }
@@ -118,12 +118,12 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
             while(!qScoreStringStream.eof()){
                 if (m->getControl_pressed()) { break; }
                 string temp;
-                qScoreStringStream >> temp;  m->gobble(qScoreStringStream);
+                qScoreStringStream >> temp;  util.gobble(qScoreStringStream);
                 
                 //if (m->getDebug()) { m->mothurOut("[DEBUG]: score " + toString(qScores.size()) + " = '" + temp + "'\n.");  }
                 
                 //check temp to make sure its a number
-                if (!m->isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
+                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
                 convert(temp, score);
                 
                 //cout << count << '\t' << score << endl;
@@ -148,18 +148,18 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
 int QualityScores::read(ifstream& qFile){
     try {
         int score;
-        seqName = getSequenceName(qFile); m->gobble(qFile);
+        seqName = getSequenceName(qFile); util.gobble(qFile); getCommentString(qFile);
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
         
         if (!m->getControl_pressed()) {
-            string qScoreString = m->getline(qFile); m->gobble(qFile);
+            string qScoreString = util.getline(qFile); util.gobble(qFile);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: scores = '" + qScoreString + "'\n.");  }
             
             while(qFile.peek() != '>' && qFile.peek() != EOF){
                 if (m->getControl_pressed()) { break; }
-                string temp = m->getline(qFile); m->gobble(qFile);
+                string temp = util.getline(qFile); util.gobble(qFile);
                 //if (m->getDebug()) { m->mothurOut("[DEBUG]: scores = '" + temp + "'\n.");  }
                 qScoreString +=  ' ' + temp;
             }
@@ -169,12 +169,12 @@ int QualityScores::read(ifstream& qFile){
             while(!qScoreStringStream.eof()){
                 if (m->getControl_pressed()) { break; }
                 string temp;
-                qScoreStringStream >> temp;  m->gobble(qScoreStringStream);
+                qScoreStringStream >> temp;  util.gobble(qScoreStringStream);
                 
                 //if (m->getDebug()) { m->mothurOut("[DEBUG]: score " + toString(qScores.size()) + " = '" + temp + "'\n.");  }
                 
                 //check temp to make sure its a number
-                if (!m->isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
+                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
                 convert(temp, score);
                 
                 //cout << count << '\t' << score << endl;
@@ -202,13 +202,13 @@ string QualityScores::getSequenceName(ifstream& qFile) {
 		string name = "";
 		
         qFile >> name;
-        m->getline(qFile);
+        //string rest = util.getline(qFile);
 		
 		if (name.length() != 0) { 
             
 			name = name.substr(1); 
             
-            m->checkName(name);
+            util.checkName(name);
             
         }else{ m->mothurOut("Error in reading your qfile, at position " + toString(qFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
         
@@ -226,13 +226,13 @@ string QualityScores::getSequenceName(boost::iostreams::filtering_istream& qFile
         string name = "";
         
         qFile >> name; string temp;
-        std::getline(qFile, temp);
+        //std::getline(qFile, temp);
         
         if (name.length() != 0) {
             
             name = name.substr(1);
             
-            m->checkName(name);
+            util.checkName(name);
             
         }else{ m->mothurOut("Error in reading your qfile, at position " + toString(qFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
         
@@ -245,10 +245,60 @@ string QualityScores::getSequenceName(boost::iostreams::filtering_istream& qFile
 }
 #endif
 //********************************************************************************************************************
+//comment can contain '>' so we need to account for that
+string QualityScores::getCommentString(ifstream& fastaFile) {
+    try {
+        char letter;
+        string temp = "";
+        
+        while(fastaFile){
+            letter=fastaFile.get();
+            if((letter == '\r') || (letter == '\n') || letter == -1){
+                util.gobble(fastaFile);  //in case its a \r\n situation
+                break;
+            }else {
+                temp += letter;
+            }
+        }
+        
+        return temp;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "QualityScores", "getCommentString");
+        exit(1);
+    }
+}
+//********************************************************************************************************************
+#ifdef USE_BOOST
+//comment can contain '>' so we need to account for that
+string QualityScores::getCommentString(boost::iostreams::filtering_istream& fastaFile) {
+    try {
+        char letter;
+        string temp = "";
+        
+        while(fastaFile){
+            letter=fastaFile.get();
+            if((letter == '\r') || (letter == '\n') || letter == -1){
+                util.gobble(fastaFile);  //in case its a \r\n situation
+                break;
+            }else {
+                temp += letter;
+            }
+        }
+        
+        return temp;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "QualityScores", "getCommentString");
+        exit(1);
+    }
+}
+#endif
+//********************************************************************************************************************
 void QualityScores::setName(string name) {
 	try {
       
-        m->checkName(name);   
+        util.checkName(name);   
         seqName = name;
 	}
 	catch(exception& e) {
@@ -268,7 +318,22 @@ string QualityScores::getName(){
 		exit(1);
 	}							
 }
-
+/**************************************************************************************************/
+void QualityScores::printQScores(OutputWriter* qFile){
+    try {
+        double aveQScore = calculateAverage(false);
+        
+        string outputQualString = ">";  outputQualString += seqName + '\t' + toString(aveQScore) + '\n';
+        
+        for(int i=0;i<seqLength;i++){ outputQualString += qScores[i] + ' '; } outputQualString += '\n';
+        
+        qFile->write(outputQualString);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "QualityScores", "printQScores");
+        exit(1);
+    }							
+}
 /**************************************************************************************************/
 
 void QualityScores::printQScores(ofstream& qFile){
@@ -278,11 +343,7 @@ void QualityScores::printQScores(ofstream& qFile){
 		
 		qFile << '>' << seqName << '\t' << aveQScore << endl;
 		
-		for(int i=0;i<seqLength;i++){
-			qFile << qScores[i] << ' ';
-		}
-		qFile << endl;
-				
+		for(int i=0;i<seqLength;i++){ qFile << qScores[i] << ' '; } qFile << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "QualityScores", "printQScores");

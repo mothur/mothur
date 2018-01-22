@@ -12,6 +12,7 @@
 #include "sharedrabundvector.hpp"
 #include "rabundvector.hpp"
 #include "sharedrabundfloatvector.hpp"
+#include "utils.hpp"
 
 /***********************************************************************/
 struct binCount {
@@ -41,7 +42,7 @@ inline bool comparebinFloatCounts(binCountFloat left, binCountFloat right){
 class HeatMap {
 	
 	public:
-		HeatMap(string, string, int, int, string, string);
+		HeatMap(string, string, int, int, string, string, vector<string>);
 		~HeatMap(){};
 	
 		string getPic(RAbundVector*);
@@ -57,7 +58,9 @@ class HeatMap {
 		string format, sorted, groupComb, scaler, outputDir, inputfile;
 		ofstream outsvg;
 		MothurOut* m;
+        Utils util;
 		int numOTU, fontSize;
+        vector<string> currentLabels;
 		
 		map<int, int> orderTopGroup(vector<SharedRAbundVector*>);
 		map<int, int> orderTopOtu(vector<SharedRAbundVector*>);

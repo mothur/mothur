@@ -121,14 +121,14 @@ HeatMapCommand::HeatMapCommand(string option) {
 			outputTypes["svg"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -136,7 +136,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 				it = parameters.find("rabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
 				}
@@ -144,7 +144,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 				it = parameters.find("sabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
 				}
@@ -152,7 +152,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -160,56 +160,56 @@ HeatMapCommand::HeatMapCommand(string option) {
 				it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else {  format = "list"; inputfile = listfile; m->setListFile(listfile); }
+			else {  format = "list"; inputfile = listfile; current->setListFile(listfile); }
 			
-			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			sabundfile = validParameter.validFile(parameters, "sabund");
 			if (sabundfile == "not open") {  abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
-			else {  format = "sabund"; inputfile = sabundfile; m->setSabundFile(sabundfile); }
+			else {  format = "sabund"; inputfile = sabundfile; current->setSabundFile(sabundfile); }
 			
-			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			rabundfile = validParameter.validFile(parameters, "rabund");
 			if (rabundfile == "not open") {  abort = true; }	
 			else if (rabundfile == "not found") { rabundfile = ""; }
-			else {  format = "rabund"; inputfile = rabundfile; m->setRabundFile(rabundfile); }
+			else {  format = "rabund"; inputfile = rabundfile; current->setRabundFile(rabundfile); }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "sharedfile"; inputfile = sharedfile; m->setSharedFile(sharedfile); }
+			else {  format = "sharedfile"; inputfile = sharedfile; current->setSharedFile(sharedfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") {  abort = true; }	
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else {  format = "relabund"; inputfile = relabundfile; m->setRelAbundFile(relabundfile); }
+			else {  format = "relabund"; inputfile = relabundfile; current->setRelAbundFile(relabundfile); }
 			
 			
 			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "") && (relabundfile == "")) { 
 				//is there are current file available for any of these?
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					listfile = m->getListFile(); 
+					listfile = current->getListFile(); 
 					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 					else { 
-						rabundfile = m->getRabundFile(); 
+						rabundfile = current->getRabundFile(); 
 						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
 						else { 
-							sabundfile = m->getSabundFile(); 
+							sabundfile = current->getSabundFile(); 
 							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
 							else { 
-								relabundfile = m->getRelAbundFile(); 
+								relabundfile = current->getRelAbundFile(); 
 								if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 								else { 
 									m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file."); m->mothurOutEndLine(); 
@@ -223,39 +223,39 @@ HeatMapCommand::HeatMapCommand(string option) {
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			string temp = validParameter.validFile(parameters, "numotu", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, numOTU);
+			string temp = validParameter.valid(parameters, "numotu");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, numOTU);
 			
-			temp = validParameter.validFile(parameters, "fontsize", false);				if (temp == "not found") { temp = "24"; }
-			m->mothurConvert(temp, fontSize);
+			temp = validParameter.valid(parameters, "fontsize");				if (temp == "not found") { temp = "24"; }
+			util.mothurConvert(temp, fontSize);
 			
-			sorted = validParameter.validFile(parameters, "sorted", false);				
+			sorted = validParameter.valid(parameters, "sorted");
 			if (sorted == "not found") { 
 				//if numOTU is used change default
 				if (numOTU != 0) { sorted = "topotu"; }
 				else { sorted = "shared"; }
 			}
 		 
-			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "log10"; }
+			scale = validParameter.valid(parameters, "scale");				if (scale == "not found") { scale = "log10"; }
 			
 			if ((sorted != "none") && (sorted != "shared") && (sorted != "topotu") && (sorted != "topgroup")) { m->mothurOut(sorted + " is not a valid sorting option. Sorted options are: none, shared, topotu, topgroup"); m->mothurOutEndLine(); abort=true;  }
 		}
@@ -271,18 +271,18 @@ HeatMapCommand::HeatMapCommand(string option) {
 int HeatMapCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		heatmap = new HeatMap(sorted, scale, numOTU, fontSize, outputDir, inputfile);
-
 		string lastLabel;
-		input = new InputData(inputfile, format);
+		input = new InputData(inputfile, format, Groups);
 		
+        vector<string> currentLabels;
 		if (format == "sharedfile") {
 			//you have groups
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup->getLabel();
-	
+            currentLabels = lookup->getOTUNames();
+            Groups = lookup->getNamesGroups();
 		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 			//you are using just a list file and have only one group
 			rabund = input->getRAbundVector();
@@ -291,8 +291,12 @@ int HeatMapCommand::execute(){
 			//you have groups
 			lookupFloat = input->getSharedRAbundFloatVectors();
 			lastLabel = lookupFloat->getLabel();
+            currentLabels = lookup->getOTUNames();
+            Groups = lookupFloat->getNamesGroups();
 		}
 		
+        heatmap = new HeatMap(sorted, scale, numOTU, fontSize, outputDir, inputfile, currentLabels);
+        
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -303,8 +307,8 @@ int HeatMapCommand::execute(){
 			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->getControl_pressed()) {
                     delete lookup;
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					m->clearGroups(); 
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
+					 
 					delete input; delete heatmap; return 0;
 				}
 		
@@ -320,7 +324,7 @@ int HeatMapCommand::execute(){
 					userLabels.erase(lookup->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup->getLabel();
                     delete lookup;
 			
@@ -349,8 +353,8 @@ int HeatMapCommand::execute(){
 			
 			
 			if (m->getControl_pressed()) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				m->clearGroups(); 
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
+				 
 				delete input; delete heatmap; return 0;
 			}
 
@@ -368,7 +372,7 @@ int HeatMapCommand::execute(){
 			}
 		
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				delete lookup;
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
@@ -382,13 +386,13 @@ int HeatMapCommand::execute(){
 			}
 		
 			//reset groups parameter
-			m->clearGroups();  
+			  
 			
 		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 	
 			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->getControl_pressed()) {   
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
 					delete rabund;  delete input; delete heatmap; return 0;	
 				}
 
@@ -402,7 +406,7 @@ int HeatMapCommand::execute(){
 					userLabels.erase(rabund->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = rabund->getLabel();
 					
 					delete rabund;
@@ -427,7 +431,7 @@ int HeatMapCommand::execute(){
 			}
 			
 			if (m->getControl_pressed()) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
 				delete input; delete heatmap; return 0;
 			}
 
@@ -445,7 +449,7 @@ int HeatMapCommand::execute(){
 			}
 		
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 		
 				if (rabund != NULL) {	delete rabund;	}
 				rabund = input->getRAbundVector(lastLabel);
@@ -462,8 +466,8 @@ int HeatMapCommand::execute(){
 			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->getControl_pressed()) {
                     delete lookupFloat;
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					m->clearGroups(); 
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
+					 
 					delete input; delete heatmap; return 0;
 				}
 		
@@ -479,7 +483,7 @@ int HeatMapCommand::execute(){
 					userLabels.erase(lookupFloat->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookupFloat->getLabel();
 				
 					delete lookupFloat;
@@ -508,8 +512,8 @@ int HeatMapCommand::execute(){
 			
 			
 			if (m->getControl_pressed()) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				m->clearGroups(); 
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
+				 
 				delete input; delete heatmap; return 0;
 			}
 
@@ -527,7 +531,7 @@ int HeatMapCommand::execute(){
 			}
 		
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
                 delete lookupFloat;
                 lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
                 m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
@@ -540,15 +544,13 @@ int HeatMapCommand::execute(){
 				delete lookupFloat;
 			}
 		
-			//reset groups parameter
-			m->clearGroups();  
-		}
+        }
 		
 		delete input; 
 		delete heatmap;
 		
 		if (m->getControl_pressed()) {
-			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear(); return 0;
+			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear(); return 0;
 		}
 		
 		m->mothurOutEndLine();

@@ -7,6 +7,7 @@
 //
 
 #include "randomforest.hpp" 
+#include "utils.hpp"
 
 /***********************************************************************/
 
@@ -109,7 +110,7 @@ int RandomForest::printConfusionMatrix(map<int, string> intToTreatmentMap) {
 int RandomForest::getMissclassifications(string filename, map<int, string> intToTreatmentMap, vector<string> names) {
     try {
         ofstream out;
-        m->openOutputFile(filename, out);
+        Utils util; util.openOutputFile(filename, out);
         out <<"Sample\tRF classification\tActual classification\n";
         for (map<int, vector<int> >::iterator it = globalOutOfBagEstimates.begin(); it != globalOutOfBagEstimates.end(); it++) {
             
@@ -139,27 +140,18 @@ int RandomForest::getMissclassifications(string filename, map<int, string> intTo
 /***********************************************************************/
 int RandomForest::calcForrestVariableImportance(string filename) {
     try {
-    
-        // follow the link: http://en.wikipedia.org/wiki/Dynamic_cast
-        //if you are going to dynamically cast, aren't you undoing the advantage of abstraction. Why abstract at all?
-        //could cause maintenance issues later if other types of Abstract decison trees are created that cannot be cast as a decision tree.
         for (int i = 0; i < decisionTrees.size(); i++) {
             if (m->getControl_pressed()) { return 0; }
             
             DecisionTree* decisionTree = dynamic_cast<DecisionTree*>(decisionTrees[i]);
             
-            for (int j = 0; j < numFeatures; j++) {
-                globalVariableImportanceList[j] += (double)decisionTree->variableImportanceList[j];
-            }
+            for (int j = 0; j < numFeatures; j++) { globalVariableImportanceList[j] += (double)decisionTree->variableImportanceList[j]; }
         }
         
-        for (int i = 0;  i < numFeatures; i++) {
-            globalVariableImportanceList[i] /= (double)numDecisionTrees;
-        }
+        for (int i = 0;  i < numFeatures; i++) { globalVariableImportanceList[i] /= (double)numDecisionTrees; }
         
         vector< pair<int, double> > globalVariableRanks;
         for (int i = 0; i < globalVariableImportanceList.size(); i++) {
-            //cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
             if (globalVariableImportanceList[i] > 0) {
                 pair<int, double> globalVariableRank(0, 0.0);
                 globalVariableRank.first = i;
@@ -177,12 +169,12 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
         
         ofstream out;
-        m->openOutputFile(filename, out);
+        Utils util; util.openOutputFile(filename, out);
         out <<"OTU\tMean decrease accuracy\n";
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
-        for (int i = 0; i < globalVariableRanks.size(); i++) {
-            out << currentLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
-        }
+        //vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        //for (int i = 0; i < globalVariableRanks.size(); i++) {
+          //  out << currentLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
+        //}
         out.close();
         return 0;
     }

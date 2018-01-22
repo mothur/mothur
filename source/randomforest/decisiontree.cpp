@@ -7,6 +7,7 @@
 //
 
 #include "decisiontree.hpp"
+#include "utils.hpp"
 
 DecisionTree::DecisionTree(vector< vector<int> >& baseDataSet,
                            vector<int> globalDiscardedFeatureIndices,
@@ -43,7 +44,7 @@ int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& tr
                 randomlySampledTestData[i][j] = bootstrappedTestSamples[i][j];
             }
         }
-        
+        Utils util;
         for (int i = 0; i < numFeatures; i++) {
             if (m->getControl_pressed()) { return 0; }
             
@@ -54,7 +55,7 @@ int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& tr
                 // we can save some time here by discarding that feature
                 
                 vector<int> featureVector = testSampleFeatureVectors[i];
-                if (m->getStandardDeviation(featureVector) > featureStandardDeviationThreshold) {
+                if (util.getStandardDeviation(featureVector) > featureStandardDeviationThreshold) {
                     // NOTE: only shuffle the features, never shuffle the output vector
                     // so i = 0 and i will be alwaays <= (numFeatures - 1) as the index at numFeatures will denote
                     // the feature vector
@@ -176,7 +177,7 @@ void DecisionTree::randomlyShuffleAttribute(const vector< vector<int> >& samples
             if (m->getControl_pressed()) { return; }
             featureVectors[j] = samples[j][featureIndex];
         }
-        m->mothurRandomShuffle(featureVectors);
+        util.mothurRandomShuffle(featureVectors);
         for (int j = 0; j < samples.size(); j++) {
             if (m->getControl_pressed()) { return; }
             shuffledSample[j][featureIndex] = featureVectors[j];
@@ -239,7 +240,7 @@ int DecisionTree::splitRecursively(RFTreeNode* rootNode) {
         
         int classifiedOutputClass;
         bool isAlreadyClassified = checkIfAlreadyClassified(rootNode, classifiedOutputClass);    
-        if (isAlreadyClassified == true){
+        if (isAlreadyClassified ){
             rootNode->setIsLeaf(true);
             rootNode->setOutputClass(classifiedOutputClass);
             return 0;
@@ -386,7 +387,7 @@ vector<int> DecisionTree::selectFeatureSubsetRandomly(vector<int> globalDiscarde
             
             if (m->getControl_pressed()) { return featureSubsetIndices; }
             
-            int randomIndex = m->getRandomIndex(numFeatures-1);
+            int randomIndex = util.getRandomIndex(numFeatures-1);
             vector<int>::iterator it = find(featureSubsetIndices.begin(), featureSubsetIndices.end(), randomIndex);
             if (it == featureSubsetIndices.end()){    // NOT FOUND
                 vector<int>::iterator it2 = find(combinedDiscardedFeatureIndices.begin(), combinedDiscardedFeatureIndices.end(), randomIndex);

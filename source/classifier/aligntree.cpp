@@ -21,14 +21,14 @@ AlignTree::AlignTree(string referenceFileName, string taxonomyFileName, int cuto
         readTaxonomy(taxonomyFileName);
      
         ifstream referenceFile;
-        m->openInputFile(referenceFileName, referenceFile);
+        util.openInputFile(referenceFileName, referenceFile);
         bool error = false;
         map<int, int> lengths;
         while(!referenceFile.eof()){
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(referenceFile);  m->gobble(referenceFile);
+            Sequence seq(referenceFile);  util.gobble(referenceFile);
             
             if (seq.getName() != "") {
                 map<string, string>::iterator it = taxonomy.find(seq.getName());
@@ -254,8 +254,9 @@ int AlignTree::sanityCheck(vector<vector<int> >& indices, vector<int>& maxIndice
 
 /**************************************************************************************************/
 
-string AlignTree::getTaxonomy(Sequence* seq){
+string AlignTree::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped){
     try {
+        simpleTax = "";
         string seqName = seq->getName(); string querySequence = seq->getAligned(); string taxonProbabilityString = "";
         if (querySequence.length() != length) {
             m->mothurOut("[ERROR]: " + seq->getName() + " has length " + toString(querySequence.length()) + ", reference sequences length is " + toString(length) + ". Are your sequences aligned? Sequences must be aligned to use the align search method.\n"); m->setControl_pressed(true); return "";
@@ -270,9 +271,7 @@ string AlignTree::getTaxonomy(Sequence* seq){
             indices[i].push_back(-1);
         }
         
-        
         for(int i=0;i<numTaxa;i++){
-            //		cout << i << '\t' << tree[i]->getName() << '\t' << tree[i]->getLevel() << '\t' << tree[i]->getPxGivenkj_D_j(querySequence) << endl;
             if (m->getControl_pressed()) { return taxonProbabilityString; }
             pXgivenKj_D_j[tree[i]->getLevel()].push_back(tree[i]->getPxGivenkj_D_j(querySequence));
             indices[tree[i]->getLevel()].push_back(i);
@@ -283,15 +282,10 @@ string AlignTree::getTaxonomy(Sequence* seq){
         vector<int> maxIndex(numLevels, 0);
         int maxPosteriorIndex;
         
-        
-        	//cout << "before best level" << endl;
-        
         //let's find the best level and taxa within that level
         for(int i=0;i<numLevels;i++){ //go across all j's - from the root to genus
             if (m->getControl_pressed()) { return taxonProbabilityString; }
             int numTaxaInLevel = (int)indices[i].size();
-            
-            		//cout << "numTaxaInLevel:\t" << numTaxaInLevel << endl;
             
             vector<double> posteriors(numTaxaInLevel, 0);		
             sumLikelihood[i] = getLogExpSum(pXgivenKj_D_j[i], maxPosteriorIndex);
@@ -312,24 +306,6 @@ string AlignTree::getTaxonomy(Sequence* seq){
             bestPosterior[i] = posteriors[maxIndex[i]];	
         }
         
-        //	vector<double> pX_level(numLevels, 0);
-        //	
-        //	for(int i=0;i<numLevels;i++){
-        //		pX_level[i] = pXgivenKj_D_j[i][maxIndex[i]] - tree[indices[i][maxIndex[i]]]->getNumSeqs();
-        //	}
-        //	
-        //	int max_pLevel_X_index = -1;
-        //	double pX_level_sum = getLogExpSum(pX_level, max_pLevel_X_index);
-        //	double max_pLevel_X = exp(pX_level[max_pLevel_X_index] - pX_level_sum);
-        //	
-        //	vector<double> pLevel_X(numLevels, 0);
-        //	for(int i=0;i<numLevels;i++){
-        //		pLevel_X[i] = exp(pX_level[i] - pX_level_sum);
-        //	}
-        
-        
-        
-        
         int saneDepth = sanityCheck(indices, maxIndex);
         
         simpleTax = "";
@@ -342,11 +318,9 @@ string AlignTree::getTaxonomy(Sequence* seq){
             if(indices[i][maxIndex[i]] != -1){
                 taxonProbabilityString += tree[indices[i][maxIndex[i]]]->getName() + '(' + toString(confidenceScore) + ");";
                 simpleTax += tree[indices[i][maxIndex[i]]]->getName() + ";";
-                //			levelProbabilityOutput << tree[indices[i][maxIndex[i]]]->getName() << '(' << setprecision(6) << pLevel_X[i] << ");";
             }
             else{
                 taxonProbabilityString + "unclassified" + '(' + toString(confidenceScore) + ");";
-                //			levelProbabilityOutput << "unclassified" << '(' << setprecision(6) << pLevel_X[i] << ");";
                 simpleTax += "unclassified;";
             }
             }else { break; }

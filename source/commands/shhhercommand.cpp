@@ -16,7 +16,6 @@ vector<string> ShhherCommand::setParameters(){
 		CommandParameter pfile("file", "InputTypes", "", "", "none", "fileflow", "none","fasta-name-group-counts-qfile",false,false,true); parameters.push_back(pfile);
 		CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(plookup);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pmaxiter("maxiter", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(pmaxiter);
         CommandParameter plarge("large", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter psigma("sigma", "Number", "", "60", "", "", "","",false,false); parameters.push_back(psigma);
@@ -127,14 +126,14 @@ ShhherCommand::ShhherCommand(string option) {
 
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("flow");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
 				}
@@ -142,7 +141,7 @@ ShhherCommand::ShhherCommand(string option) {
 				it = parameters.find("lookup");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["lookup"] = inputDir + it->second;		}
 				}
@@ -150,18 +149,18 @@ ShhherCommand::ShhherCommand(string option) {
 				it = parameters.find("file");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["file"] = inputDir + it->second;		}
 				}
 			}
             
             //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
             
 			//check for required parameters
-			flowFileName = validParameter.validFile(parameters, "flow", true);
-			flowFilesFileName = validParameter.validFile(parameters, "file", true);
+			flowFileName = validParameter.validFile(parameters, "flow");
+			flowFilesFileName = validParameter.validFile(parameters, "file");
 			if (flowFileName == "not found" && flowFilesFileName == "not found") {
 				m->mothurOut("values for either flow or file must be provided for the shhh.flows command.");
 				m->mothurOutEndLine();
@@ -177,21 +176,21 @@ ShhherCommand::ShhherCommand(string option) {
 				ofstream temp;
                 
                 string thisoutputDir = outputDir;
-                if (outputDir == "") {  thisoutputDir =  m->hasPath(flowFilesFileName); } //if user entered a file with a path then preserve it
+                if (outputDir == "") {  thisoutputDir =  util.hasPath(flowFilesFileName); } //if user entered a file with a path then preserve it
                 
 				//we want to rip off .files, and also .flow if its there
-                string fileroot = m->getRootName(m->getSimpleName(flowFilesFileName));
+                string fileroot = util.getRootName(util.getSimpleName(flowFilesFileName));
                 if (fileroot[fileroot.length()-1] == '.') {  fileroot = fileroot.substr(0, fileroot.length()-1); } //rip off dot
-                string extension = m->getExtension(fileroot);
-                if (extension == ".flow") { fileroot = m->getRootName(fileroot);  }
+                string extension = util.getExtension(fileroot);
+                if (extension == ".flow") { fileroot = util.getRootName(fileroot);  }
                 else { fileroot += "."; } //add back if needed
                 
 				compositeFASTAFileName = thisoutputDir + fileroot + "shhh.fasta";
-				m->openOutputFile(compositeFASTAFileName, temp);
+				util.openOutputFile(compositeFASTAFileName, temp);
 				temp.close();
 				
 				compositeNamesFileName = thisoutputDir + fileroot + "shhh.names";
-				m->openOutputFile(compositeNamesFileName, temp);
+				util.openOutputFile(compositeNamesFileName, temp);
 				temp.close();
 			}
             
@@ -199,31 +198,31 @@ ShhherCommand::ShhherCommand(string option) {
                 string fName;
                 
                 ifstream flowFilesFile;
-                m->openInputFile(flowFilesFileName, flowFilesFile);
+                util.openInputFile(flowFilesFileName, flowFilesFile);
                 while(flowFilesFile){
-                    fName = m->getline(flowFilesFile);
+                    fName = util.getline(flowFilesFile);
                     
                     //test if file is valid
                     ifstream in;
-                    bool ableToOpen = m->openInputFile(fName, in, "noerror");
+                    bool ableToOpen = util.openInputFile(fName, in, "noerror");
                     in.close();	
                     if (!ableToOpen) {
                         if (inputDir != "") { //default path is set
                             string tryPath = inputDir + fName;
                             m->mothurOut("Unable to open " + fName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
                             ifstream in2;
-                            ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+                            ableToOpen = util.openInputFile(tryPath, in2, "noerror");
                             in2.close();
                             fName = tryPath;
                         }
                     }
                     
                     if (!ableToOpen) {
-                        if (m->getDefaultPath() != "") { //default path is set
-                            string tryPath = m->getDefaultPath() + m->getSimpleName(fName);
+                        if (current->getDefaultPath() != "") { //default path is set
+                            string tryPath = current->getDefaultPath() + util.getSimpleName(fName);
                             m->mothurOut("Unable to open " + fName + ". Trying default " + tryPath); m->mothurOutEndLine();
                             ifstream in2;
-                            ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+                            ableToOpen = util.openInputFile(tryPath, in2, "noerror");
                             in2.close();
                             fName = tryPath;
                         }
@@ -231,37 +230,37 @@ ShhherCommand::ShhherCommand(string option) {
                     
                     //if you can't open it its not in current working directory or inputDir, try mothur excutable location
                     if (!ableToOpen) {
-                        string exepath = m->getProgramPath();
+                        string exepath = current->getProgramPath();
                         //string tempPath = exepath;
                         //for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
                         //exepath = exepath.substr(0, (tempPath.find_last_of('m')));
                         
-                        string tryPath = m->getFullPathName(exepath) + m->getSimpleName(fName);
+                        string tryPath = util.getFullPathName(exepath) + util.getSimpleName(fName);
                         m->mothurOut("Unable to open " + fName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
                         ifstream in2;
-                        ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+                        ableToOpen = util.openInputFile(tryPath, in2, "noerror");
                         in2.close();
                         fName = tryPath;
                     }
                     
                     if (!ableToOpen) {  m->mothurOut("Unable to open " + fName + ". Disregarding. "); m->mothurOutEndLine();  }
                     else { flowFileVector.push_back(fName); }
-                    m->gobble(flowFilesFile);
+                    util.gobble(flowFilesFile);
                 }
                 flowFilesFile.close();
                 if (flowFileVector.size() == 0) {  m->mothurOut("[ERROR]: no valid files."); m->mothurOutEndLine(); abort = true; }
             }
             else{
-                if (outputDir == "") { outputDir = m->hasPath(flowFileName); }
+                if (outputDir == "") { outputDir = util.hasPath(flowFileName); }
                 flowFileVector.push_back(flowFileName);
             }
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "lookup", true);
+			temp = validParameter.validFile(parameters, "lookup");
 			if (temp == "not found")	{	
-				string path = m->getProgramPath();
+				string path = current->getProgramPath();
                 //string tempPath = path;
                 //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
                 //path = path.substr(0, (tempPath.find_last_of('m')));
@@ -271,20 +270,20 @@ ShhherCommand::ShhherCommand(string option) {
 #else
                 path += "lookupFiles\\";
 #endif
-				lookupFileName = m->getFullPathName(path) + "LookUp_Titanium.pat";
+				lookupFileName = util.getFullPathName(path) + "LookUp_Titanium.pat";
 				
 				bool ableToOpen;
 				ifstream in;
-				ableToOpen = m->openInputFile(lookupFileName, in, "noerror");
+				ableToOpen = util.openInputFile(lookupFileName, in, "noerror");
 				in.close();	
 				
 				//if you can't open it, try input location
 				if (!ableToOpen) {
 					if (inputDir != "") { //default path is set
-						string tryPath = inputDir + m->getSimpleName(lookupFileName);
+						string tryPath = inputDir + util.getSimpleName(lookupFileName);
 						m->mothurOut("Unable to open " + lookupFileName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
 						ifstream in2;
-						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+						ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 						in2.close();
 						lookupFileName = tryPath;
 					}
@@ -292,11 +291,11 @@ ShhherCommand::ShhherCommand(string option) {
 				
 				//if you can't open it, try default location
 				if (!ableToOpen) {
-					if (m->getDefaultPath() != "") { //default path is set
-						string tryPath = m->getDefaultPath() + m->getSimpleName(lookupFileName);
+					if (current->getDefaultPath() != "") { //default path is set
+						string tryPath = current->getDefaultPath() + util.getSimpleName(lookupFileName);
 						m->mothurOut("Unable to open " + lookupFileName + ". Trying default " + tryPath); m->mothurOutEndLine();
 						ifstream in2;
-						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+						ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 						in2.close();
 						lookupFileName = tryPath;
 					}
@@ -304,15 +303,15 @@ ShhherCommand::ShhherCommand(string option) {
 				
 				//if you can't open it its not in current working directory or inputDir, try mothur excutable location
 				if (!ableToOpen) {
-					string exepath = m->getProgramPath();
+					string exepath = current->getProgramPath();
 					//string tempPath = exepath;
 					//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
 					//exepath = exepath.substr(0, (tempPath.find_last_of('m')));
 					
-					string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
+					string tryPath = util.getFullPathName(exepath) + util.getSimpleName(lookupFileName);
 					m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
 					ifstream in2;
-					ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+					ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 					in2.close();
 					lookupFileName = tryPath;
 				}
@@ -321,47 +320,43 @@ ShhherCommand::ShhherCommand(string option) {
 			}
 			else if(temp == "not open")	{	
 				
-				lookupFileName = validParameter.validFile(parameters, "lookup", false);
+				lookupFileName = validParameter.valid(parameters, "lookup");
 				
 				//if you can't open it its not inputDir, try mothur excutable location
-				string exepath = m->getProgramPath();
+				string exepath = current->getProgramPath();
 				//string tempPath = exepath;
 				//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
 				//exepath = exepath.substr(0, (tempPath.find_last_of('m')));
 					
-				string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
+				string tryPath = util.getFullPathName(exepath) + util.getSimpleName(lookupFileName);
 				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
 				ifstream in2;
-				bool ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+				bool ableToOpen = util.openInputFile(tryPath, in2, "noerror");
 				in2.close();
 				lookupFileName = tryPath;
 				
 				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
 			}else						{	lookupFileName = temp;	}
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
-
-			temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.01";		}
-			m->mothurConvert(temp, cutoff); 
+			temp = validParameter.valid(parameters, "cutoff");	if (temp == "not found"){	temp = "0.01";		}
+			util.mothurConvert(temp, cutoff); 
 			
-			temp = validParameter.validFile(parameters, "mindelta", false);	if (temp == "not found"){	temp = "0.000001";	}
-			m->mothurConvert(temp, minDelta); 
+			temp = validParameter.valid(parameters, "mindelta");	if (temp == "not found"){	temp = "0.000001";	}
+			util.mothurConvert(temp, minDelta); 
 
-			temp = validParameter.validFile(parameters, "maxiter", false);	if (temp == "not found"){	temp = "1000";		}
-			m->mothurConvert(temp, maxIters); 
+			temp = validParameter.valid(parameters, "maxiter");	if (temp == "not found"){	temp = "1000";		}
+			util.mothurConvert(temp, maxIters); 
             
-            temp = validParameter.validFile(parameters, "large", false);	if (temp == "not found"){	temp = "0";		}
-			m->mothurConvert(temp, largeSize); 
+            temp = validParameter.valid(parameters, "large");	if (temp == "not found"){	temp = "0";		}
+			util.mothurConvert(temp, largeSize); 
             if (largeSize != 0) { large = true; }
             else { large = false;  }
             if (largeSize < 0) {  m->mothurOut("The value of the large cannot be negative.\n"); }
 
-			temp = validParameter.validFile(parameters, "sigma", false);if (temp == "not found")	{	temp = "60";		}
-			m->mothurConvert(temp, sigma); 
+			temp = validParameter.valid(parameters, "sigma"); if (temp == "not found")	{	temp = "60";		}
+			util.mothurConvert(temp, sigma); 
 			
-			temp = validParameter.validFile(parameters, "order", false);  if (temp == "not found"){ 	temp = "A";	}
+			temp = validParameter.valid(parameters, "order");  if (temp == "not found"){ 	temp = "A";	}
             if (temp.length() > 1) {  m->mothurOut("[ERROR]: " + temp + " is not a valid option for order. order options are A, B, or I. A = TACG, B = TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC, and I = TACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGCTACGTACGTCTGAGCATCGATCGATGTACAGC.\n");  abort=true;
             }
             else {
@@ -388,22 +383,15 @@ ShhherCommand::ShhherCommand(string option) {
 
 int ShhherCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		getSingleLookUp();	if (m->getControl_pressed()) { return 0; }
 		getJointLookUp();	if (m->getControl_pressed()) { return 0; }
 		
         int numFiles = flowFileVector.size();
 		
-        if (numFiles < processors) { processors = numFiles; }
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        if (processors == 1) { driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName); }
-        else { createProcesses(flowFileVector); } //each processor processes one file
-#else
         driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName);
-#endif
-        
+
 		if(compositeFASTAFileName != ""){
 			outputNames.push_back(compositeFASTAFileName); outputTypes["fasta"].push_back(compositeFASTAFileName);
 			outputNames.push_back(compositeNamesFileName); outputTypes["name"].push_back(compositeNamesFileName);
@@ -457,250 +445,41 @@ inline bool compareFileSizes(string left, string right){
 } 
 /**************************************************************************************************/
 
-int ShhherCommand::createProcesses(vector<string> filenames){
-    try {
-        vector<int> processIDS;
-		int process = 1;
-		int num = 0;
-        bool recalc = false;
-		
-		//sanity check
-		if (filenames.size() < processors) { processors = filenames.size(); }
-        
-        //sort file names by size to divide load better
-        sort(filenames.begin(), filenames.end(), compareFileSizes);
-        
-        vector < vector <string> > dividedFiles; //dividedFiles[1] = vector of filenames for process 1...
-        dividedFiles.resize(processors);
-        
-        //for each file, figure out which process will complete it
-        //want to divide the load intelligently so the big files are spread between processes
-        for (int i = 0; i < filenames.size(); i++) { 
-            int processToAssign = (i+1) % processors; 
-            if (processToAssign == 0) { processToAssign = processors; }
-            
-            dividedFiles[(processToAssign-1)].push_back(filenames[i]);
-        }
-        
-        //now lets reverse the order of ever other process, so we balance big files running with little ones
-        for (int i = 0; i < processors; i++) {
-            int remainder = ((i+1) % processors);
-            if (remainder) {  reverse(dividedFiles[i].begin(), dividedFiles[i].end());  }
-        }
-        
-		
-        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				num = driver(dividedFiles[process], compositeFASTAFileName + m->mothurGetpid(process) + ".temp", compositeNamesFileName  + m->mothurGetpid(process) + ".temp");
-                
-                //pass numSeqs to parent
-				ofstream out;
-				string tempFile = compositeFASTAFileName + m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-                
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".num.temp"));
-                }
-                recalc = true;
-                break;
-
-			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(compositeNamesFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".temp"));m->mothurRemove(compositeFASTAFileName + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            dividedFiles.clear(); //dividedFiles[1] = vector of filenames for process 1...
-            dividedFiles.resize(processors);
-            
-            //for each file, figure out which process will complete it
-            //want to divide the load intelligently so the big files are spread between processes
-            for (int i = 0; i < filenames.size(); i++) {
-                int processToAssign = (i+1) % processors;
-                if (processToAssign == 0) { processToAssign = processors; }
-                
-                dividedFiles[(processToAssign-1)].push_back(filenames[i]);
-            }
-            
-            //now lets reverse the order of ever other process, so we balance big files running with little ones
-            for (int i = 0; i < processors; i++) {
-                int remainder = ((i+1) % processors);
-                if (remainder) {  reverse(dividedFiles[i].begin(), dividedFiles[i].end());  }
-            }
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    num = driver(dividedFiles[process], compositeFASTAFileName + m->mothurGetpid(process) + ".temp", compositeNamesFileName  + m->mothurGetpid(process) + ".temp");
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = compositeFASTAFileName + m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-		//do my part
-		driver(dividedFiles[0], compositeFASTAFileName, compositeNamesFileName);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-        
-        #else
-        
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-        
-        /////////////////////// NOT WORKING, ACCESS VIOLATION ON READ OF FLOWGRAMS IN THREAD /////////////////
-        
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the shhhFlowsData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*
-		vector<shhhFlowsData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-			// Allocate memory for thread data.
-			string extension = "";
-			if (i != 0) { extension = toString(i) + ".temp"; }
-			
-            shhhFlowsData* tempFlow = new shhhFlowsData(filenames, (compositeFASTAFileName + extension), (compositeNamesFileName + extension), outputDir, flowOrder, jointLookUp, singleLookUp, m, lines[i].start, lines[i].end, cutoff, sigma, minDelta, maxIters, i);
-			pDataArray.push_back(tempFlow);
-			processIDS.push_back(i);
-            
-			hThreadArray[i] = CreateThread(NULL, 0, ShhhFlowsThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-		//using the main process as a worker saves time and memory
-		//do my part
-		driver(filenames, compositeFASTAFileName, compositeNamesFileName, lines[processors-1].start, lines[processors-1].end);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			for(int j=0; j < pDataArray[i]->outputNames.size(); j++){ outputNames.push_back(pDataArray[i]->outputNames[j]); }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		*/
-        #endif
-        
-        for (int i=0;i<processIDS.size();i++) { 
-            ifstream in;
-			string tempFile =  compositeFASTAFileName + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
-			if (!in.eof()) { 
-                int tempNum = 0; 
-                in >> tempNum; 
-                if (tempNum != dividedFiles[i+1].size()) {
-                    m->mothurOut("[ERROR]: main process expected " + toString(processIDS[i]) + " to complete " + toString(dividedFiles[i+1].size()) + " files, and it only reported completing " + toString(tempNum) + ". This will cause file mismatches.  The flow files may be too large to process with multiple processors. \n");
-                }
-            }
-			in.close(); m->mothurRemove(tempFile);
-            
-            if (compositeFASTAFileName != "") {
-                m->appendFiles((compositeFASTAFileName + toString(processIDS[i]) + ".temp"), compositeFASTAFileName);
-                m->appendFiles((compositeNamesFileName + toString(processIDS[i]) + ".temp"), compositeNamesFileName);
-                m->mothurRemove((compositeFASTAFileName + toString(processIDS[i]) + ".temp"));
-                m->mothurRemove((compositeNamesFileName + toString(processIDS[i]) + ".temp"));
-            }
-        }
-        
-        return 0;
-        
-    }
-	catch(exception& e) {
-		m->errorOut(e, "ShhherCommand", "createProcesses");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-
 vector<string> ShhherCommand::parseFlowFiles(string filename){
     try {
         vector<string> files;
         int count = 0;
         
         ifstream in;
-        m->openInputFile(filename, in);
+        util.openInputFile(filename, in);
         
         int thisNumFLows = 0;
-        in >> thisNumFLows; m->gobble(in);
+        in >> thisNumFLows; util.gobble(in);
         
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
             ofstream out;
             string outputFileName = filename + toString(count) + ".temp";
-            m->openOutputFile(outputFileName, out);
+            util.openOutputFile(outputFileName, out);
             out << thisNumFLows << endl;
             files.push_back(outputFileName);
             
             int numLinesWrote = 0;
             for (int i = 0; i < largeSize; i++) {
                 if (in.eof()) { break; }
-                string line = m->getline(in); m->gobble(in);
+                string line = util.getline(in); util.gobble(in);
                 out << line << endl;
                 numLinesWrote++;
             }
             out.close();
             
-            if (numLinesWrote == 0) {  m->mothurRemove(outputFileName); files.pop_back();  }
+            if (numLinesWrote == 0) {  util.mothurRemove(outputFileName); files.pop_back();  }
             count++;
         }
         in.close();
         
-        if (m->getControl_pressed()) { for (int i = 0; i < files.size(); i++) { m->mothurRemove(files[i]); }  files.clear(); }
+        if (m->getControl_pressed()) { for (int i = 0; i < files.size(); i++) { util.mothurRemove(files[i]); }  files.clear(); }
         
         m->mothurOut("\nDivided " + filename + " into " + toString(files.size()) + " files.\n\n"); 
         
@@ -795,9 +574,9 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 
                 if (m->getControl_pressed()) { break; }
                 
-                m->mothurRemove(distFileName);
-                m->mothurRemove(namesFileName);
-                m->mothurRemove(listFileName);
+                util.mothurRemove(distFileName);
+                util.mothurRemove(namesFileName);
+                util.mothurRemove(listFileName);
                 
                 vector<double> dist;		//adDist - distance of sequences to centroids
                 vector<short> change;		//did the centroid sequence change? 0 = no; 1 = yes
@@ -897,14 +676,14 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 
                 if ((large) && (g == 0)) {  flowFileName = filenames[i]; theseFlowFileNames[0] = filenames[i]; }
                 string thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir = m->hasPath(flowFileName);  }
+                if (outputDir == "") {  thisOutputDir = util.hasPath(flowFileName);  }
                 map<string, string> variables; 
-                variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName));
+                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(flowFileName));
                 string qualityFileName = getOutputFileName("qfile",variables);
                 string fastaFileName = getOutputFileName("fasta",variables);
                 string nameFileName = getOutputFileName("name",variables);
                 string otuCountsFileName = getOutputFileName("counts",variables);
-                string fileRoot = m->getRootName(m->getSimpleName(flowFileName));
+                string fileRoot = util.getRootName(util.getSimpleName(flowFileName));
                 int pos = fileRoot.find_first_of('.');
                 string fileGroup = fileRoot;
                 if (pos != string::npos) {  fileGroup = fileRoot.substr(pos+1, (fileRoot.length()-1-(pos+1)));  }
@@ -919,19 +698,19 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 
                 if (large) {
                     if (g > 0) {
-                        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0]));
-                        m->appendFiles(qualityFileName, getOutputFileName("qfile",variables));
-                        m->mothurRemove(qualityFileName);
-                        m->appendFiles(fastaFileName, getOutputFileName("fasta",variables));
-                        m->mothurRemove(fastaFileName);
-                        m->appendFiles(nameFileName, getOutputFileName("name",variables));
-                        m->mothurRemove(nameFileName);
-                        m->appendFiles(otuCountsFileName, getOutputFileName("counts",variables));
-                        m->mothurRemove(otuCountsFileName);
-                        m->appendFiles(groupFileName, getOutputFileName("group",variables));
-                        m->mothurRemove(groupFileName);
+                        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(theseFlowFileNames[0]));
+                        util.appendFiles(qualityFileName, getOutputFileName("qfile",variables));
+                        util.mothurRemove(qualityFileName);
+                        util.appendFiles(fastaFileName, getOutputFileName("fasta",variables));
+                        util.mothurRemove(fastaFileName);
+                        util.appendFiles(nameFileName, getOutputFileName("name",variables));
+                        util.mothurRemove(nameFileName);
+                        util.appendFiles(otuCountsFileName, getOutputFileName("counts",variables));
+                        util.mothurRemove(otuCountsFileName);
+                        util.appendFiles(groupFileName, getOutputFileName("group",variables));
+                        util.mothurRemove(groupFileName);
                     }
-                    m->mothurRemove(theseFlowFileNames[g]);
+                    util.mothurRemove(theseFlowFileNames[g]);
                 }
 			}
             
@@ -939,7 +718,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
 			m->mothurOut("Total time to process " + fileNameForOutput + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
 		
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
         return numCompleted;
         
@@ -955,7 +734,7 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
        
 		ifstream flowFile;
        
-		m->openInputFile(filename, flowFile);
+		util.openInputFile(filename, flowFile);
 		
 		string seqName;
 		int currentNumFlowCells;
@@ -968,7 +747,7 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 		string numFlowTest;
         flowFile >> numFlowTest;
         
-        if (!m->isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?"); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?"); m->mothurOutEndLine(); exit(1); }
         else { convert(numFlowTest, numFlowCells); }
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: numFlowCells = " + toString(numFlowCells) + ".\n"); }
@@ -992,7 +771,7 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 				int intI = int(100 * intensity + 0.0001);
 				thisFlowDataIntI.push_back(intI);
 			}
-			m->gobble(flowFile);
+			util.gobble(flowFile);
 		}
 		flowFile.close();
 		
@@ -1186,7 +965,7 @@ int ShhherCommand::createNamesFile(int numSeqs, int numUniques, string filename,
 		}
 		
 		ofstream nameFile;
-		m->openOutputFile(filename, nameFile);
+		util.openOutputFile(filename, nameFile);
 		
 		for(int i=0;i<numUniques;i++){
 			
@@ -1240,7 +1019,7 @@ int ShhherCommand::cluster(string filename, string distFileName, string namesFil
 		list->setLabel(toString(cutoff));
 		
 		ofstream listFile;
-		m->openOutputFile(filename, listFile);
+		util.openOutputFile(filename, listFile);
 		list->print(listFile, true);
 		listFile.close();
 		
@@ -1264,13 +1043,11 @@ int ShhherCommand::getOTUData(int numSeqs, string fileName,  vector<int>& otuDat
                                vector<int>& seqIndex,
                                map<string, int>& nameMap){
 	try {
+        InputData input(fileName, "list", nullVector);
+        ListVector* list = input.getListVector();
         
-		ifstream listFile;
-		m->openInputFile(fileName, listFile);
-		string label;
-        int numOTUs;
-		
-		listFile >> label >> numOTUs;
+        string label = list->getLabel();
+        int numOTUs = list->getNumBins();
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: Getting OTU Data...\n"); }
         
@@ -1283,73 +1060,38 @@ int ShhherCommand::getOTUData(int numSeqs, string fileName,  vector<int>& otuDat
 		aaI.clear();
 		seqIndex.clear();
 		
-		string singleOTU = "";
-		
 		for(int i=0;i<numOTUs;i++){
 			
 			if (m->getControl_pressed()) { break; }
             if (m->getDebug()) { m->mothurOut("[DEBUG]: processing OTU " + toString(i) + ".\n"); }
             
-			listFile >> singleOTU;
+			string singleOTU = list->get(i);
 			
-			istringstream otuString(singleOTU);
+            vector<string> otuSeqs; util.splitAtComma(singleOTU, otuSeqs);
             
-			while(otuString){
+			for(int j=0;j<otuSeqs.size();j++){
 				
-				string seqName = "";
-				
-				for(int j=0;j<singleOTU.length();j++){
-					char letter = otuString.get();
-					
-					if(letter != ','){
-						seqName += letter;
-					}
-					else{
-						map<string,int>::iterator nmIt = nameMap.find(seqName);
-						int index = nmIt->second;
+                string seqName = otuSeqs[j];
+                map<string,int>::iterator nmIt = nameMap.find(seqName);
+                int index = nmIt->second;
 						
-						nameMap.erase(nmIt);
-						
-						otuData[index] = i;
-						nSeqsPerOTU[i]++;
-						aaP[i].push_back(index);
-						seqName = "";
-					}
-				}
-				
-				map<string,int>::iterator nmIt = nameMap.find(seqName);
-                
-				int index = nmIt->second;
-				nameMap.erase(nmIt);
-                
-				otuData[index] = i;
-				nSeqsPerOTU[i]++;
-				aaP[i].push_back(index);	
-				
-				otuString.get();
-			}
+                nameMap.erase(nmIt);
+                otuData[index] = i;
+                nSeqsPerOTU[i]++;
+                aaP[i].push_back(index);
+            }
 			
 			sort(aaP[i].begin(), aaP[i].end());
-			for(int j=0;j<nSeqsPerOTU[i];j++){
-				seqNumber.push_back(aaP[i][j]);
-			}
-			for(int j=nSeqsPerOTU[i];j<numSeqs;j++){
-				aaP[i].push_back(0);
-			}
-			
-			
+			for(int j=0;j<nSeqsPerOTU[i];j++)       { seqNumber.push_back(aaP[i][j]);   }
+			for(int j=nSeqsPerOTU[i];j<numSeqs;j++) { aaP[i].push_back(0);              }
 		}
 		
-		for(int i=1;i<numOTUs;i++){
-			cumNumSeqs[i] = cumNumSeqs[i-1] + nSeqsPerOTU[i-1];
-		}
+		for(int i=1;i<numOTUs;i++){ cumNumSeqs[i] = cumNumSeqs[i-1] + nSeqsPerOTU[i-1]; }
 		aaI = aaP;
 		seqIndex = seqNumber;
-		
-		listFile.close();	
-        
+        delete list;
+      
         return numOTUs;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "getOTUData");
@@ -1753,7 +1495,7 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string quality
 	try {
         
 		ofstream qualityFile;
-		m->openOutputFile(qualityFileName, qualityFile);
+		util.openOutputFile(qualityFileName, qualityFile);
         
 		qualityFile.setf(ios::fixed, ios::floatfield);
 		qualityFile.setf(ios::showpoint);
@@ -1853,7 +1595,7 @@ void ShhherCommand::writeSequences(string thisCompositeFASTAFileName, int numOTU
 	try {
 		
 		ofstream fastaFile;
-		m->openOutputFile(fastaFileName, fastaFile);
+		util.openOutputFile(fastaFileName, fastaFile);
 		
 		vector<string> names(numOTUs, "");
 		
@@ -1885,7 +1627,7 @@ void ShhherCommand::writeSequences(string thisCompositeFASTAFileName, int numOTU
 		outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
         
 		if(thisCompositeFASTAFileName != ""){
-			m->appendFiles(fastaFileName, thisCompositeFASTAFileName);
+			util.appendFiles(fastaFileName, thisCompositeFASTAFileName);
 		}
 	}
 	catch(exception& e) {
@@ -1900,7 +1642,7 @@ void ShhherCommand::writeNames(string thisCompositeNamesFileName, int numOTUs, s
 	try {
 		
 		ofstream nameFile;
-		m->openOutputFile(nameFileName, nameFile);
+		util.openOutputFile(nameFileName, nameFile);
 		
 		for(int i=0;i<numOTUs;i++){
 			
@@ -1921,7 +1663,7 @@ void ShhherCommand::writeNames(string thisCompositeNamesFileName, int numOTUs, s
 		
 		
 		if(thisCompositeNamesFileName != ""){
-			m->appendFiles(nameFileName, thisCompositeNamesFileName);
+			util.appendFiles(nameFileName, thisCompositeNamesFileName);
 		}		
 	}
 	catch(exception& e) {
@@ -1935,7 +1677,7 @@ void ShhherCommand::writeNames(string thisCompositeNamesFileName, int numOTUs, s
 void ShhherCommand::writeGroups(string groupFileName, string fileRoot, int numSeqs, vector<string>& seqNameVector){
 	try {
         ofstream groupFile;
-		m->openOutputFile(groupFileName, groupFile);
+		util.openOutputFile(groupFileName, groupFile);
 		
 		for(int i=0;i<numSeqs;i++){
 			if (m->getControl_pressed()) { break; }
@@ -1956,7 +1698,7 @@ void ShhherCommand::writeGroups(string groupFileName, string fileRoot, int numSe
 void ShhherCommand::writeClusters(string otuCountsFileName, int numOTUs, int numFlowCells, vector<int> otuCounts, vector<int>& centroids, vector<short>& uniqueFlowgrams, vector<string>& seqNameVector, vector<vector<int> >& aaI, vector<int>& nSeqsPerOTU, vector<int>& lengths, vector<short>& flowDataIntI){
 	try {
 		ofstream otuCountsFile;
-		m->openOutputFile(otuCountsFileName, otuCountsFile);
+		util.openOutputFile(otuCountsFileName, otuCountsFile);
 		
 		string bases = flowOrder;
 		
@@ -2019,7 +1761,7 @@ void ShhherCommand::getSingleLookUp(){
 		
 		int index = 0;
 		ifstream lookUpFile;
-		m->openInputFile(lookupFileName, lookUpFile);
+		util.openInputFile(lookupFileName, lookUpFile);
 		
 		for(int i=0;i<HOMOPS;i++){
 			

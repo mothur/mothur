@@ -13,12 +13,14 @@
 
 
 #include "engine.hpp"
+#include "mothur.h"
 
 /***********************************************************************/
 Engine::Engine(){
 	try {
 		cFactory = CommandFactory::getInstance();
 		mout = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
 	}
 	catch(exception& e) {
 		mout->errorOut(e, "Engine", "Engine");
@@ -35,18 +37,28 @@ InteractEngine::InteractEngine(string path){
 	string temppath = path.substr(0, (path.find_last_of("othur")-5));
 	
 	//this will happen if you set the path variable to contain mothur's exe location
-	if (temppath == "") { path = mout->findProgramPath("mothur"); }
+    Utils util;
+	if (temppath == "") { path = util.findProgramPath("mothur"); }
     else { path = temppath; }
 	
-	mout->setProgramPath(mout->getFullPathName(path));
-    mout->setBlastPath(mout->getProgramPath());
+	current->setProgramPath(util.getFullPathName(path));
+    current->setBlastPath(current->getProgramPath());
 
     //if you haven't set your own location
     #ifdef MOTHUR_FILES
     #else
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        if (mout->getProgramPath() != "") { mout->setDefaultPath(mout->getProgramPath()); }
+        if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
     #endif
+    
+    if (mout->getLogFileName() == "") {
+        time_t ltime = time(NULL); /* calendar time */
+        string outputPath = current->getOutputDir();
+        if (outputPath == "") { outputPath = current->getDefaultPath();  }
+        string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
+        mout->setLogFileName(logFileName, false);
+        mout->mothurOut("\n");
+    }
 }
 
 /***********************************************************************/
@@ -63,55 +75,39 @@ bool InteractEngine::getInput(){
 		string options = "";
 		int quitCommandCalled = 0;
 		
-		while(quitCommandCalled != 1){
-
-                    
-			if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
-                    
-			input = getCommand();	
-			
-			if (mout->getControl_pressed()) { input = "quit()"; }
-			
-			//allow user to omit the () on the quit command
-			if (input == "quit") { input = "quit()"; }
-
-			CommandOptionParser parser(input);
-			commandName = parser.getCommandString();
-	
-			options = parser.getOptionString();
-			
-			if (commandName != "") {
-					mout->setExecuting(true);
-
-					//executes valid command
-                    mout->setChangedSeqNames(false);
-					mout->setRunParse(true);
-					mout->clearGroups();
-					mout->clearAllGroups();
-                    vector<string> temp;
-					mout->setTreenames(temp);
-					mout->setSaveNextLabel("");
-                    mout->setCommandInputsConvertError(false);
-					mout->setPrintedSharedHeaders(false);
-					mout->setCurrentSharedBinLabels(temp);
-					mout->setSharedBinLabelsInFile(temp);
-                    mout->setPrintedListHeaders(false);
-                    mout->setListBinLabelsInFile(temp);
-							
-					Command* command = cFactory->getCommand(commandName, options);
-					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }
-					else { quitCommandCalled = command->execute(); }
-							
-					//if we aborted command
-					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
-
-					mout->setControl_pressed(false);
-					mout->setExecuting(false);
-										
-				}else {		
-					mout->mothurOut("Invalid.\n");
-				}
-		}	
+        while(quitCommandCalled != 1){
+            
+            input = getCommand();
+            
+            if (mout->getControl_pressed()) { input = "quit()"; }
+            
+            //allow user to omit the () on the quit command
+            if (input == "quit") { input = "quit()"; }
+            
+            CommandOptionParser parser(input);
+            commandName = parser.getCommandString();
+            
+            options = parser.getOptionString();
+            
+            if (commandName != "") {
+                mout->setExecuting(true);
+                
+                //executes valid command
+                mout->setChangedSeqNames(false);
+                
+                Command* command = cFactory->getCommand(commandName, options);
+                quitCommandCalled = command->execute();
+                
+                //if we aborted command
+                if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
+                
+                mout->setControl_pressed(false);
+                mout->setExecuting(false);
+                
+            }else {
+                mout->mothurOut("Invalid.\n");
+            }
+        }
 		return 1;
 	}
 	catch(exception& e) {
@@ -131,8 +127,8 @@ string Engine::getCommand()  {
 				if(nextCommand != NULL) {  add_history(nextCommand);  }	
 				else{ //^D causes null string and we want it to quit mothur
 					nextCommand = strdup("quit");
-					mout->mothurOut(nextCommand);
-                    mout->mothurOut("\n");
+					//mout->appendLogBuffer(nextCommand);
+                    //mout->appendLogBuffer("\n");
 				}	
 				
 				mout->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
@@ -168,23 +164,22 @@ string Engine::getCommand()  {
 //This function opens the batchfile to be used by BatchEngine::getInput.
 BatchEngine::BatchEngine(string path, string batchFileName){
 	try {
-	
-		openedBatch = mout->openInputFile(batchFileName, inputBatchFile);
+		openedBatch = util.openInputFile(batchFileName, inputBatchFile);
 		
 		string temppath = path.substr(0, (path.find_last_of("othur")-5));
 	
 		//this will happen if you set the path variable to contain mothur's exe location
-		if (temppath == "") { path = mout->findProgramPath("mothur"); }
+		if (temppath == "") { path = util.findProgramPath("mothur"); }
         else { path = temppath; }
 		
-        mout->setProgramPath(mout->getFullPathName(path));
-        mout->setBlastPath(mout->getProgramPath());
+        current->setProgramPath(util.getFullPathName(path));
+        current->setBlastPath(current->getProgramPath());
         
         //if you haven't set your own location
 #ifdef MOTHUR_FILES
 #else
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        if (mout->getProgramPath() != "") { mout->setDefaultPath(mout->getProgramPath()); }
+        if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
 #endif
 
 				
@@ -222,11 +217,8 @@ bool BatchEngine::getInput(){
 			count++;
 			
             if (input[0] != '#') {
-				if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
+				mout->appendLogBuffer("\nmothur > " + input + "\n");
 				
-				mout->mothurOut("\nmothur > " + input + "\n");
-				
-							
 				if (mout->getControl_pressed()) { input = "quit()"; }
 				
 				//allow user to omit the () on the quit command
@@ -241,22 +233,9 @@ bool BatchEngine::getInput(){
 					
 					//executes valid command
                     mout->setChangedSeqNames(false);
-					mout->setRunParse(true);
-					mout->clearGroups();
-					mout->clearAllGroups();
-					vector<string> temp;
-					mout->setTreenames(temp);
-					mout->setSaveNextLabel("");
-					mout->setCommandInputsConvertError(false);
-                    mout->setPrintedSharedHeaders(false);
-                    mout->setPrintedListHeaders(false);
-                    mout->setListBinLabelsInFile(temp);
-                    mout->setCurrentSharedBinLabels(temp);
-                    mout->setSharedBinLabelsInFile(temp);
 							
 					Command* command = cFactory->getCommand(commandName, options);
-					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }
-					else { quitCommandCalled = command->execute(); }
+					quitCommandCalled = command->execute();
 							
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
@@ -270,7 +249,7 @@ bool BatchEngine::getInput(){
 				}
 				
 			}
-			mout->gobble(inputBatchFile);
+			util.gobble(inputBatchFile);
 		}
 		
 		inputBatchFile.close();
@@ -288,7 +267,7 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
 		string nextcommand = "";
 		
 		if (inputBatchFile.eof()) { nextcommand = "quit()"; }
-		else { nextcommand = mout->getline(inputBatchFile); }
+		else { nextcommand = util.getline(inputBatchFile); }
 		
 		return nextcommand;
 	}
@@ -310,18 +289,18 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 		string temppath = path.substr(0, (path.find_last_of("othur")-5));
 
 		//this will happen if you set the path variable to contain mothur's exe location
-		if (temppath == "") { path = mout->findProgramPath("mothur"); }
+		if (temppath == "") { path = util.findProgramPath("mothur"); }
         else { path = temppath; }
 		
-        mout->setProgramPath(mout->getFullPathName(path));
-        mout->setBlastPath(mout->getProgramPath());
+        current->setProgramPath(util.getFullPathName(path));
+        current->setBlastPath(current->getProgramPath());
     
         //if you haven't set your own location
 #ifdef MOTHUR_FILES
 #else
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
         //string tempDefault = path.substr(0, (path.find_last_of('m')));
-        if (path != "") { mout->setDefaultPath(path); }
+        if (path != "") { current->setDefaultPath(path); }
 #endif
 
 				
@@ -354,17 +333,9 @@ bool ScriptEngine::getInput(){
 			input = getNextCommand(listOfCommands);	
 			
 			if (input == "") { input = "quit()"; }
-                    
-            if (mout->getChangedSeqNames()) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 			
-			if (mout->getGui()) {
-				if ((input.find("quit") != string::npos) || (input.find("set.logfile") != string::npos)) {}
-				else if ((input.find("get.current") != string::npos) && (!mout->hasCurrentFiles())) {}
-				else {  mout->mothurOut("\nmothur > " + input + "\n");  }
-			}else{
-				mout->mothurOut("\nmothur > " + input + "\n");
-			}
-			
+            mout->appendLogBuffer("\nmothur > " + input + "\n");
+        
             if (mout->getControl_pressed()) { input = "quit()"; }
 				
 			//allow user to omit the () on the quit command
@@ -375,39 +346,22 @@ bool ScriptEngine::getInput(){
 			options = parser.getOptionString();
 										
 			if (commandName != "") {
-					mout->setExecuting(true);
-					
-					//executes valid command
-                    mout->setChangedSeqNames(false);
-					mout->setRunParse(true);
-					mout->clearGroups();
-					mout->clearAllGroups();
-					vector<string> temp;
-					mout->setTreenames(temp);
-					mout->setSaveNextLabel("");
-                    mout->setCommandInputsConvertError(false);
-                    mout->setPrintedSharedHeaders(false);
-                    mout->setCurrentSharedBinLabels(temp);
-                    mout->setSharedBinLabelsInFile(temp);
-                    mout->setPrintedListHeaders(false);
-                    mout->setListBinLabelsInFile(temp);
-
-					Command* command = cFactory->getCommand(commandName, options);
-					if (mout->getCommandInputsConvertError()) { quitCommandCalled = 2; }
-					else { quitCommandCalled = command->execute(); }
-					
-					//if we aborted command
-					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
-					
-                    if (mout->getControl_pressed()) { break;  }
-                    mout->setControl_pressed(false);
-                    mout->setExecuting(false);
-									
-				}else {		
-					mout->mothurOut("Invalid.\n");
-				}
-
-			
+                mout->setExecuting(true);
+                
+                //executes valid command
+                mout->setChangedSeqNames(false);
+               
+                Command* command = cFactory->getCommand(commandName, options);
+                quitCommandCalled = command->execute();
+                
+                //if we aborted command
+                if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
+                
+                if (mout->getControl_pressed()) { break;  }
+                mout->setControl_pressed(false);
+                mout->setExecuting(false);
+                                
+            }else {	mout->mothurOut("Invalid.\n"); }
 		}
 		
 		return 1;

@@ -146,14 +146,14 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			outputTypes["matrixout"] = tempOutNames;
 
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -161,30 +161,30 @@ ClearcutCommand::ClearcutCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") { fastafile = ""; }	
-			else { inputFile = fastafile;  m->setFastaFile(fastafile); }
+			else { inputFile = fastafile;  current->setFastaFile(fastafile); }
 			
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }
-			else { inputFile = phylipfile;  m->setPhylipFile(phylipfile); }
+			else { inputFile = phylipfile;  current->setPhylipFile(phylipfile); }
 				
 			if ((phylipfile == "") && (fastafile == "")) {  
 				//is there are current file available for either of these?
 				//give priority to phylip, then fasta
-				phylipfile = m->getPhylipFile(); 
+				phylipfile = current->getPhylipFile(); 
 				if (phylipfile != "") {  inputFile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 
-					fastafile = m->getFastaFile(); 
+					fastafile = current->getFastaFile(); 
 					if (fastafile != "") { inputFile = fastafile;  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a phylip or fasta file before you can use the clearcut command."); m->mothurOutEndLine(); 
@@ -196,53 +196,53 @@ ClearcutCommand::ClearcutCommand(string option)  {
 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFile);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputFile);	}
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "version", false);		if (temp == "not found"){	temp = "F";			}
-			version = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "version");		if (temp == "not found"){	temp = "F";			}
+			version = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "verbose", false);		if (temp == "not found"){	temp = "F";			}
-			verbose = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "verbose");		if (temp == "not found"){	temp = "F";			}
+			verbose = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "quiet", false);		if (temp == "not found"){	temp = "F";			}
-			quiet = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "quiet");		if (temp == "not found"){	temp = "F";			}
+			quiet = util.isTrue(temp); 
 			
-			seed = validParameter.validFile(parameters, "rseed", false);			if (seed == "not found"){	seed = "*";			}
+			seed = validParameter.valid(parameters, "rseed");			if (seed == "not found"){	seed = "*";			}
 			
-			temp = validParameter.validFile(parameters, "norandom", false);		if (temp == "not found"){	temp = "F";			}
-			norandom = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "norandom");		if (temp == "not found"){	temp = "F";			}
+			norandom = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "shuffle", false);		if (temp == "not found"){	temp = "F";			}
-			shuffle = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "shuffle");		if (temp == "not found"){	temp = "F";			}
+			shuffle = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "neighbor", false);		if (temp == "not found"){	temp = "T";			}
-			neighbor = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "neighbor");		if (temp == "not found"){	temp = "T";			}
+			neighbor = util.isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "DNA", false);			if (temp == "not found"){	temp = "F";			}
-			DNA = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "DNA");			if (temp == "not found"){	temp = "F";			}
+			DNA = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "protein", false);		if (temp == "not found"){	temp = "F";			}
-			protein = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "protein");		if (temp == "not found"){	temp = "F";			}
+			protein = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "jukes", false);		if (temp == "not found"){	temp = "F";			}
-			jukes = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "jukes");		if (temp == "not found"){	temp = "F";			}
+			jukes = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "kimura", false);		if (temp == "not found"){	temp = "F";			}
-			kimura = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "kimura");		if (temp == "not found"){	temp = "F";			}
+			kimura = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "stdout", false);		if (temp == "not found"){	temp = "F";			}
-			stdoutWanted = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "stdout");		if (temp == "not found"){	temp = "F";			}
+			stdoutWanted = util.isTrue(temp); 
 			
-			matrixout = validParameter.validFile(parameters, "matrixout", false);	if (matrixout == "not found"){	matrixout = "";		}
+			matrixout = validParameter.valid(parameters, "matrixout");	if (matrixout == "not found"){	matrixout = "";		}
 			
-			ntrees = validParameter.validFile(parameters, "ntrees", false);		if (ntrees == "not found"){	ntrees = "1";		}
+			ntrees = validParameter.valid(parameters, "ntrees");		if (ntrees == "not found"){	ntrees = "1";		}
 			
-			temp = validParameter.validFile(parameters, "expblen", false);		if (temp == "not found"){	temp = "F";			}
-			expblen = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "expblen");		if (temp == "not found"){	temp = "F";			}
+			expblen = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "expdist", false);		if (temp == "not found"){	temp = "F";			}
-			expdist = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "expdist");		if (temp == "not found"){	temp = "F";			}
+			expdist = util.isTrue(temp);
 			
 			if ((fastafile != "") && ((!DNA) && (!protein))) { m->mothurOut("You must specify the type of sequences you are using: DNA or protein"); m->mothurOutEndLine(); abort=true; }
 		}
@@ -257,11 +257,11 @@ ClearcutCommand::ClearcutCommand(string option)  {
 int ClearcutCommand::execute() {	
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//prepare filename
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFile));
 		string outputName = getOutputFileName("tree", variables);
 		outputNames.push_back(outputName); outputTypes["tree"].push_back(outputName);
 		
@@ -347,7 +347,7 @@ int ClearcutCommand::execute() {
 			string currentTree = "";
 			itTypes = outputTypes.find("tree");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { currentTree = (itTypes->second)[0]; m->setTreeFile(currentTree); }
+				if ((itTypes->second).size() != 0) { currentTree = (itTypes->second)[0]; current->setTreeFile(currentTree); }
 			}
 			
 			m->mothurOutEndLine();

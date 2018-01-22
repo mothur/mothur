@@ -146,7 +146,7 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
 			}
 		}
         
-		m->mothurRandomShuffle(mins);  //randomize the order of the iterators in the mins vector
+		util.mothurRandomShuffle(mins);  //randomize the order of the iterators in the mins vector
         
         row = mins[0].row;
         ull col = mins[0].col;

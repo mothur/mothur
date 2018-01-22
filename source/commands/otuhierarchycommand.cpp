@@ -104,46 +104,46 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			outputTypes["otuheirarchy"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
 			}
 
-			listFile = validParameter.validFile(parameters, "list", true);
+			listFile = validParameter.validFile(parameters, "list");
 			if (listFile == "not found") { 
-				listFile = m->getListFile(); 
+				listFile = current->getListFile(); 
 				if (listFile != "") {  m->mothurOut("Using " + listFile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("No valid current list file. You must provide a list file."); m->mothurOutEndLine(); 
 					abort = true;
 				}
 			}else if (listFile == "not open") { abort = true; }	
-			else { m->setListFile(listFile); }
+			else { current->setListFile(listFile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(listFile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(listFile); //if user entered a file with a path then preserve it	
 			}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command."); m->mothurOutEndLine(); abort = true; }
 			else { 
-				m->splitAtDash(label, mylabels);
+				util.splitAtDash(label, mylabels);
 				if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels."); m->mothurOutEndLine(); abort = true; }
 			}	
 			
-			output = validParameter.validFile(parameters, "output", false);			if (output == "not found") { output = "name"; }
+			output = validParameter.valid(parameters, "output");			if (output == "not found") { output = "name"; }
 			
 			if ((output != "name") && (output != "otulabel")) { m->mothurOut("output options are name and otulabel. I will use name."); m->mothurOutEndLine(); output = "name"; }
 		}
@@ -159,7 +159,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 int OtuHierarchyCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
 		vector< vector<string> > lists = getListVectors();
@@ -191,27 +191,27 @@ int OtuHierarchyCommand::execute(){
 		
 			if (m->getControl_pressed()) {  return 0; }
 			string bin = lists[1][i];
-            vector<string> names; m->splitAtComma(bin, names);
+            vector<string> names; util.splitAtComma(bin, names);
 			for (int j = 0; j < names.size(); j++) { littleBins[names[j]] = i; }
         }
 		
 		ofstream out;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listFile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listFile));
         variables["[distance1]"] = list1Label;
         variables["[tag]"] = "-"; 
         variables["[distance2]"] = list2Label;
 		string outputFileName = getOutputFileName("otuheirarchy",variables);
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		//go through each bin in "big" otu and output the bins in "little" otu which created it
         vector<string> binLabels1 = lists[2];
 		for (int i = 0; i < lists[2].size(); i++) {
 		
-			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); util.mothurRemove(outputFileName); return 0; }
 			
 			string binnames = lists[3][i];
-            vector<string> names; m->splitAtComma(binnames, names);
+            vector<string> names; util.splitAtComma(binnames, names);
 			
 			//output column 1
 			if (output == "name")	{   out << binnames << '\t';	}
@@ -235,7 +235,7 @@ int OtuHierarchyCommand::execute(){
 		
 		out.close();
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outputFileName); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -281,7 +281,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 	try {
         vector< vector<string> > myList;
         
-		InputData input(listFile, "list");
+		InputData input(listFile, "list", nullVector);
 		ListVector* list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
@@ -300,7 +300,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -339,7 +339,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete list;
 			list = input.getListVector(lastLabel);
 		}

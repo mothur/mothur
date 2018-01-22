@@ -12,7 +12,7 @@
 #include "mothurout.h"
 #include "command.hpp"
 #include "inputdata.h"
-#include "sharedutilities.h"
+
 #include "phylosummary.h"
 
 /**************************************************************************************************/

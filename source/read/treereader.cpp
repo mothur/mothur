@@ -16,6 +16,7 @@ TreeReader::TreeReader(string tf, string cf) : treefile(tf), countfile(cf)  {
         m = MothurOut::getInstance();
         ct = new CountTable();
         ct->readTable(cf, true, false);
+        Tree t(tf, Treenames); //fills treenames
         
         //if no groupinfo in count file we need to add it
         if (!ct->hasGroupInfo()) {
@@ -38,15 +39,14 @@ TreeReader::TreeReader(string tf, string cf) : treefile(tf), countfile(cf)  {
 TreeReader::TreeReader(string tf, string gf, string nf) : treefile(tf),  groupfile(gf), namefile(nf)  { 
     try {
         m = MothurOut::getInstance();
+        Tree t(tf, Treenames); //fills treenames
         countfile = "";
         ct = new CountTable();
         if (namefile != "") { ct->createTable(namefile, groupfile, true); }
         else {
-            Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
             set<string> nameMap;
             map<string, string> groupMap;
             set<string> gps;
-            vector<string> Treenames = m->getTreenames();
             for (int i = 0; i < Treenames.size(); i++) { nameMap.insert(Treenames[i]);  }
             if (groupfile == "") { gps.insert("Group1"); for (int i = 0; i < Treenames.size(); i++) { groupMap[Treenames[i]] = "Group1"; } }
             else {
@@ -76,7 +76,7 @@ bool TreeReader::readTrees()  {
         int numUniquesInName = ct->getNumUniqueSeqs();
 		//if (namefile != "") { numUniquesInName = readNamesFile(); }
 		
-		ReadTree* read = new ReadNewickTree(treefile);
+		ReadTree* read = new ReadNewickTree(treefile, Treenames);
 		int readOk = read->read(ct); 
 		
 		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine();  delete read; m->setControl_pressed(true); return 0; }
@@ -88,7 +88,6 @@ bool TreeReader::readTrees()  {
 		//make sure all files match
 		//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
 		int numNamesInTree;
-        vector<string> Treenames = m->getTreenames();
 		if (namefile != "")  {  
 			if (numUniquesInName == Treenames.size()) {  numNamesInTree = ct->getNumSeqs();  }
 			else {   numNamesInTree = Treenames.size();  }

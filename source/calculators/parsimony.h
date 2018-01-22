@@ -19,23 +19,21 @@
 class Parsimony : public TreeCalculator  {
 	
 	public:
-		Parsimony() {};
+        Parsimony(vector<string> G) { Groups = G;};
 		~Parsimony() {};
 		EstOutput getValues(Tree*, int, string);
 		
 	private:
-		struct linePair {
-			int start;
-			int num;
-			linePair(int i, int j) : start(i), num(j) {}
-		};
 		vector<linePair> lines;
+        vector<string> Groups;
 	
 		EstOutput data;
 		int processors;
 		string outputDir;
+        Utils util;
+        vector<string> Treenames;
 	
-		EstOutput driver(Tree*, vector< vector<string> >, int, int, CountTable*); 
+		EstOutput driver(Tree*, vector< vector<string> >, int, int, CountTable*);
 		EstOutput createProcesses(Tree*, vector< vector<string> >, CountTable*);
 };
 /***********************************************************************/
@@ -47,6 +45,8 @@ struct parsData {
     vector< vector<string> > namesOfGroupCombos;
     Tree* t;
     CountTable* ct;
+    Utils util;
+    vector<string> Treenames;
     
 	parsData(){}
 	parsData(MothurOut* mout, int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count) {
@@ -56,6 +56,7 @@ struct parsData {
         namesOfGroupCombos = ngc;
         t = tree;
         ct = count;
+        Treenames = t->getTreeNames();
 	}
 };
 
@@ -69,7 +70,7 @@ static DWORD WINAPI MyParsimonyThreadFunction(LPVOID lpParam){
         
         pDataArray->results.resize(pDataArray->num);
 		
-		Tree* copyTree = new Tree(pDataArray->ct);
+		Tree* copyTree = new Tree(pDataArray->ct, pDataArray->Treenames);
 		int count = 0;
 		
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {

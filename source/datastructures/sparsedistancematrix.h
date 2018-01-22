@@ -11,6 +11,7 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 
 class ListVector;
@@ -45,6 +46,7 @@ private:
 	float smallDist, aboveCutoff;
     
 	MothurOut* m;
+    Utils util;
 
 };
 

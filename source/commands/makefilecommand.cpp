@@ -109,30 +109,30 @@ MakeFileCommand::MakeFileCommand(string option)  {
             outputTypes["file"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
-            inputDir = validParameter.validFile(parameters, "inputdir", false);
+            inputDir = validParameter.valid(parameters, "inputdir");
             if (inputDir == "not found"){	inputDir = "";	m->mothurOut("[ERROR]: The inputdir parameter is required, aborting."); m->mothurOutEndLine(); abort = true;	}
             else {
-                if (m->dirCheck(inputDir)) {} // all set
+                if (util.dirCheck(inputDir)) {} // all set
                 else { abort = true; }
             }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = inputDir;		}
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = inputDir;		}
             
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
-            typeFile = validParameter.validFile(parameters, "type", false);
+            typeFile = validParameter.valid(parameters, "type");
             if (typeFile == "not found"){	typeFile = "fastq";		}
             
             if ((typeFile != "fastq") && (typeFile != "gz")) { m->mothurOut(typeFile + " is not a valid type. Options are fastq or gz. I will use fastq."); m->mothurOutEndLine(); typeFile = "fastq"; }
             
-            string temp = validParameter.validFile(parameters, "numcols", false);		if(temp == "not found"){	temp = "3"; }
+            string temp = validParameter.valid(parameters, "numcols");		if(temp == "not found"){	temp = "3"; }
             if ((temp != "2") && (temp != "3")) { m->mothurOut(temp + " is not a valid numcols. Options are 2 or 3. I will use 3."); m->mothurOutEndLine(); temp = "3";  }
-            m->mothurConvert(temp, numCols);
+            util.mothurConvert(temp, numCols);
             
-            prefix = validParameter.validFile(parameters, "prefix", false);		if (prefix == "not found") { prefix = "stability"; }
+            prefix = validParameter.valid(parameters, "prefix");		if (prefix == "not found") { prefix = "stability"; }
             
-            delim = validParameter.validFile(parameters, "delim", false);			if (delim == "not found") { delim = "_"; }
+            delim = validParameter.valid(parameters, "delim");			if (delim == "not found") { delim = "_"; }
             
         }
     }
@@ -145,7 +145,7 @@ MakeFileCommand::MakeFileCommand(string option)  {
 
 int MakeFileCommand::execute(){
     try {
-        if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         //find all .fastq files
         string tempFile = inputDir + "fileList.temp";
@@ -153,8 +153,8 @@ int MakeFileCommand::execute(){
         
         //read in list of files
         vector<string> fastqFiles;
-        m->readAccnos(tempFile, fastqFiles, "no error");
-        m->mothurRemove(tempFile);
+        util.readAccnos(tempFile, fastqFiles, "no error");
+        util.mothurRemove(tempFile);
         
         if (m->getDebug()) {
             m->mothurOut("[DEBUG]: Found " + toString(fastqFiles.size()) + " files of type " + typeFile + ".\n");
@@ -178,8 +178,8 @@ int MakeFileCommand::execute(){
                 
                 if (m->getControl_pressed()) { break; }
                 
-                string simpleName1 = m->getRootName(m->getSimpleName(fastqFiles[i]));
-                string simpleName2 = m->getRootName(m->getSimpleName(fastqFiles[i+1]));
+                string simpleName1 = util.getRootName(util.getSimpleName(fastqFiles[i]));
+                string simpleName2 = util.getRootName(util.getSimpleName(fastqFiles[i+1]));
                 
                 //possible pair
                 if (simpleName1.length() == simpleName2.length()) {
@@ -188,19 +188,19 @@ int MakeFileCommand::execute(){
                         if (numDiffs > 1) { break; }
                         else if (simpleName1[j] != simpleName2[j]) { numDiffs++; }
                     }
-                    if (numDiffs > 1) { singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i]; }
+                    if (numDiffs > 1) { singles.push_back(util.getSimpleName(fastqFiles[i])); lastFile = fastqFiles[i]; }
                     else { //only one diff = paired files
                         vector<string> temp;
-                        temp.push_back(fastqFiles[i]); temp.push_back(fastqFiles[i+1]); lastFile = fastqFiles[i+1];
+                        temp.push_back(util.getSimpleName(fastqFiles[i])); temp.push_back(util.getSimpleName(fastqFiles[i+1])); lastFile = fastqFiles[i+1];
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: Pairing " + fastqFiles[i] + " with " + fastqFiles[i+1] + ".\n"); }
                         paired.push_back(temp);
                         i++;
                     }
                 }else{
-                    singles.push_back(fastqFiles[i]); lastFile = fastqFiles[i];
+                    singles.push_back(util.getSimpleName(fastqFiles[i])); lastFile = fastqFiles[i];
                 }
             }
-            if (lastFile != fastqFiles[fastqFiles.size()-1]) { singles.push_back(fastqFiles[fastqFiles.size()-1]); }
+            if (lastFile != fastqFiles[fastqFiles.size()-1]) { singles.push_back(util.getSimpleName(fastqFiles[fastqFiles.size()-1])); }
             
             if (singles.size() != 0) {
                 map<string, string> variables;
@@ -208,13 +208,11 @@ int MakeFileCommand::execute(){
                 if (paired.size() != 0) { variables["[tag]"] = "single"; }
                 string filename = getOutputFileName("file",variables);
                 ofstream out;
-                m->openOutputFile(filename, out);
+                util.openOutputFile(filename, out);
                 outputNames.push_back(filename); outputTypes["file"].push_back(filename);
-                m->setFileFile(filename);
+                current->setFileFile(filename);
                 
-                for (int i = 0; i < singles.size(); i++) {
-                    out << singles[i] << endl;
-                }
+                for (int i = 0; i < singles.size(); i++) { out << singles[i] << endl; }
                 out.close();
             }
             
@@ -227,9 +225,9 @@ int MakeFileCommand::execute(){
                 if (singles.size() != 0) { variables["[tag]"] = "paired"; }
                 string filename = getOutputFileName("file",variables);
                 ofstream out;
-                m->openOutputFile(filename, out);
+                util.openOutputFile(filename, out);
                 outputNames.push_back(filename); outputTypes["file"].push_back(filename);
-                m->setFileFile(filename);
+                current->setFileFile(filename);
                 
                 for (int i = 0; i < paired.size(); i++) {
                     for (int j = 0; j < paired[i].size(); j++) {
@@ -241,7 +239,7 @@ int MakeFileCommand::execute(){
             }
             
         }
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
         m->mothurOutEndLine();
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -276,7 +274,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
             for (int i = 0; i < paired.size(); i++) {
                 if (m->getControl_pressed()) { break; }
                 
-                string filename = m->getRootName(m->getSimpleName(paired[i][0]));
+                string filename = util.getRootName(util.getSimpleName(paired[i][0]));
                 
                 int pos = 0;
                 string individual = "";
@@ -297,7 +295,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
                         individual += filename[j];
                     }
                 }
-                if (!m->allSpaces(individual)) {
+                if (!util.allSpaces(individual)) {
                     words[i].push_back(individual);
                     map<int, set<string> >::iterator it = posToWord.find(pos);
                     if (it != posToWord.end()) { posToWord[pos].insert(individual); }
@@ -338,7 +336,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
             for (int i = 0; i < paired.size(); i++) {
                 
                 string groupName = "Group_" + toString(i);
-                string filename = m->getSimpleName(paired[i][0]);
+                string filename = util.getSimpleName(paired[i][0]);
                 int pos = filename.find(delim);
                 
                 if (pos != string::npos) { groupName = filename.substr(0, pos); }
@@ -381,23 +379,23 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         
         tempFile = tempFile.substr(1, tempFile.length()-2); //remove ""
         
-        m->openOutputFile(tempOut, out);
+        util.openOutputFile(tempOut, out);
         
-        m->openInputFile(tempFile, in);
+        util.openInputFile(tempFile, in);
         
         string junk, filename;
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
-            in >> junk; m->gobble(in);
-            in >> filename; m->gobble(in);
+            in >> junk; util.gobble(in);
+            in >> filename; util.gobble(in);
             
             out << filename << endl;
         }
         in.close();
         out.close();
         
-        m->mothurRemove(tempFile);
-        m->renameFile(tempOut, tempFile);
+        util.mothurRemove(tempFile);
+        util.renameFile(tempOut, tempFile);
         
 #endif
         

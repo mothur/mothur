@@ -8,7 +8,7 @@
  */
 
 #include "corraxescommand.h"
-#include "sharedutilities.h"
+
 #include "linearalgebra.h"
 
 //**********************************************************************************************************************
@@ -112,14 +112,14 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			outputTypes["corraxes"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("axes");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["axes"] = inputDir + it->second;		}
 				}
@@ -127,7 +127,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -135,7 +135,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 				it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
@@ -143,7 +143,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 				it = parameters.find("metadata");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["metadata"] = inputDir + it->second;		}
 				}
@@ -151,46 +151,46 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			
 			
 			//check for required parameters
-			axesfile = validParameter.validFile(parameters, "axes", true);
+			axesfile = validParameter.validFile(parameters, "axes");
 			if (axesfile == "not open") { abort = true; }
 			else if (axesfile == "not found") { axesfile = ""; m->mothurOut("axes is a required parameter for the corr.axes command."); m->mothurOutEndLine(); abort = true;  }	
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else { inputFileName = sharedfile; m->setSharedFile(sharedfile); }
+			else { inputFileName = sharedfile; current->setSharedFile(sharedfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") { abort = true; }
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else { inputFileName = relabundfile; m->setRelAbundFile(relabundfile); }
+			else { inputFileName = relabundfile; current->setRelAbundFile(relabundfile); }
 			
-			metadatafile = validParameter.validFile(parameters, "metadata", true);
+			metadatafile = validParameter.validFile(parameters, "metadata");
 			if (metadatafile == "not open") { abort = true; }
 			else if (metadatafile == "not found") { metadatafile = ""; }
 			else { inputFileName = metadatafile; }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = "";  pickedGroups = false;  }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);	
+				util.splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	
 			}			
-			m->setGroups(Groups);
 			
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFileName);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputFileName);	}
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
 			
 			if ((relabundfile == "") && (sharedfile == "") && (metadatafile == "")) { 
 				//is there are current file available for any of these?
 				//give priority to shared, then relabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					relabundfile = m->getRelAbundFile(); 
+					relabundfile = current->getRelAbundFile(); 
 					if (relabundfile != "") { inputFileName = relabundfile;  m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("You must provide either a shared, relabund, or metadata file."); m->mothurOutEndLine(); abort = true; 
@@ -204,10 +204,10 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 				if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared, relabund or metadata file."); m->mothurOutEndLine(); abort = true;  }
 			}
 			string temp;
-			temp = validParameter.validFile(parameters, "numaxes", false);		if (temp == "not found"){	temp = "3";				}
-			m->mothurConvert(temp, numaxes); 
+			temp = validParameter.valid(parameters, "numaxes");		if (temp == "not found"){	temp = "3";				}
+			util.mothurConvert(temp, numaxes); 
 			
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "pearson";		}
+			method = validParameter.valid(parameters, "method");		if (method == "not found"){	method = "pearson";		}
 			
 			if ((method != "pearson") && (method != "spearman") && (method != "kendall")) { m->mothurOut(method + " is not a valid method. Valid methods are pearson, spearman, and kendall."); m->mothurOutEndLine(); abort = true; }
 			
@@ -223,13 +223,13 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 int CorrAxesCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		/*************************************************************************************/
 		// use smart distancing to get right sharedRabund and convert to relabund if needed  //
 		/************************************************************************************/
 		if (sharedfile != "") {  
-			InputData* input = new InputData(sharedfile, "sharedfile");
+			InputData* input = new InputData(sharedfile, "sharedfile", Groups);
 			getSharedFloat(input); 
 			delete input;
 			
@@ -237,7 +237,7 @@ int CorrAxesCommand::execute(){
 			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
 		}else if (relabundfile != "") { 
-			InputData* input = new InputData(relabundfile, "relabund");
+			InputData* input = new InputData(relabundfile, "relabund", Groups);
 			getSharedFloat(input); 
 			delete input;
 			
@@ -281,12 +281,12 @@ int CorrAxesCommand::execute(){
 		// calc the r values																//
 		/************************************************************************************/
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[tag]"] = method;
 		string outputFileName = getOutputFileName("corraxes", variables);
 		outputNames.push_back(outputFileName); outputTypes["corraxes"].push_back(outputFileName);	
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		//output headings
@@ -336,7 +336,7 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   
 	   for (int i = 0; i < averageAxes.size(); i++) {  averageAxes[i] = averageAxes[i] / (float) axes.size(); }
 	   
-       vector<string> currentLabels = m->getCurrentSharedBinLabels();
+       vector<string> currentLabels = lookupFloat->getOTUNames();
 	   //for each otu
 	   for (int i = 0; i < lookupFloat->getNumBins(); i++) {
 		   
@@ -469,7 +469,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
             sf.push_back(sfTemp);
 		}
 		
-		vector<string> currentLabels = m->getCurrentSharedBinLabels();
+		vector<string> currentLabels = lookupFloat->getOTUNames();
         
 		//for each otu
 		for (int i = 0; i < lookupFloat->getNumBins(); i++) {
@@ -625,7 +625,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 			}
 		}
 		
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookupFloat->getOTUNames();
         
 		//for each otu
 		for (int i = 0; i < lookupFloat->getNumBins(); i++) {
@@ -748,7 +748,7 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookupFloat->getLabel();
 				
 				delete lookupFloat;
@@ -787,7 +787,7 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
             delete lookupFloat;
 			lookupFloat = input->getSharedRAbundFloatVectors();
 		}	
@@ -805,9 +805,9 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 		map<string, vector<float> > axes;
 		
 		ifstream in;
-		m->openInputFile(axesfile, in);
+		util.openInputFile(axesfile, in);
 		
-		string headerLine = m->getline(in); m->gobble(in);
+		string headerLine = util.getline(in); util.gobble(in);
 		
 		//count the number of axis you are reading
 		bool done = false;
@@ -827,7 +827,7 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 			if (m->getControl_pressed()) { in.close(); return axes; }
 			
 			string group = "";
-			in >> group; m->gobble(in);
+			in >> group; util.gobble(in);
 			
 			vector<float> thisGroupsAxes;
 			for (int i = 0; i < count; i++) {
@@ -849,7 +849,7 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 				}
 			}
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		
@@ -866,10 +866,10 @@ int CorrAxesCommand::getMetadata(){
 		vector<string> groupNames;
 		
 		ifstream in;
-		m->openInputFile(metadatafile, in);
+		util.openInputFile(metadatafile, in);
 		
-		string headerLine = m->getline(in); m->gobble(in);
-		vector<string> pieces = m->splitWhiteSpace(headerLine);
+		string headerLine = util.getline(in); util.gobble(in);
+		vector<string> pieces = util.splitWhiteSpace(headerLine);
 		
 		//save names of columns you are reading
 		for (int i = 1; i < pieces.size(); i++) {
@@ -884,7 +884,7 @@ int CorrAxesCommand::getMetadata(){
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			string group = "";
-			in >> group; m->gobble(in);
+			in >> group; util.gobble(in);
 			groupNames.push_back(group);
 				
 			SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
@@ -898,7 +898,7 @@ int CorrAxesCommand::getMetadata(){
 			}
             lookupFloat->push_back(tempLookup);
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		

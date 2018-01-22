@@ -43,7 +43,7 @@ SystemCommand::SystemCommand(string option)  {
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			string commandOption = validParameter.validFile(parameters, "command", false);			
+			string commandOption = validParameter.valid(parameters, "command");			
 			if (commandOption == "not found") { commandOption = ""; }
 			else { command = commandOption; }
 			
@@ -89,7 +89,7 @@ string SystemCommand::getHelpString(){
 int SystemCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if command contains a redirect don't add the redirect
 		bool usedRedirect = false;
@@ -103,7 +103,7 @@ int SystemCommand::execute(){
 		if (usedRedirect) {
 			ifstream in;
 			string filename = "./commandScreen.output";
-			m->openInputFile(filename, in, "no error");
+			util.openInputFile(filename, in, "no error");
 			
 			string output = "";
 			while(char c = in.get()){
@@ -113,7 +113,7 @@ int SystemCommand::execute(){
 			in.close();
 			
 			m->mothurOut(output); m->mothurOutEndLine();
-			m->mothurRemove(filename);
+			util.mothurRemove(filename);
 		}
 		
 		return 0;		

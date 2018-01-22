@@ -146,14 +146,14 @@ SummaryCommand::SummaryCommand(string option)  {
 			outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -161,7 +161,7 @@ SummaryCommand::SummaryCommand(string option)  {
 				it = parameters.find("rabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
 				}
@@ -169,7 +169,7 @@ SummaryCommand::SummaryCommand(string option)  {
 				it = parameters.find("sabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
 				}
@@ -177,47 +177,47 @@ SummaryCommand::SummaryCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else {  format = "list"; inputfile = listfile; m->setListFile(listfile); }
+			else {  format = "list"; inputfile = listfile; current->setListFile(listfile); }
 			
-			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			sabundfile = validParameter.validFile(parameters, "sabund");
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
-			else {  format = "sabund"; inputfile = sabundfile; m->setSabundFile(sabundfile); }
+			else {  format = "sabund"; inputfile = sabundfile; current->setSabundFile(sabundfile); }
 			
-			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			rabundfile = validParameter.validFile(parameters, "rabund");
 			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
 			else if (rabundfile == "not found") { rabundfile = ""; }
-			else {  format = "rabund"; inputfile = rabundfile; m->setRabundFile(rabundfile); }
+			else {  format = "rabund"; inputfile = rabundfile; current->setRabundFile(rabundfile); }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "sharedfile"; inputfile = sharedfile; m->setSharedFile(sharedfile); }
+			else {  format = "sharedfile"; inputfile = sharedfile; current->setSharedFile(sharedfile); }
 			
 			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
 				//is there are current file available for any of these?
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					listfile = m->getListFile(); 
+					listfile = current->getListFile(); 
 					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 					else { 
-						rabundfile = m->getRabundFile(); 
+						rabundfile = current->getRabundFile(); 
 						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
 						else { 
-							sabundfile = m->getSabundFile(); 
+							sabundfile = current->getSabundFile(); 
 							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
 							else { 
 								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); 
@@ -229,51 +229,51 @@ SummaryCommand::SummaryCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 				
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			else { 
 				 if (calc == "default")  {  calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
 
 			string temp;
-			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
-			m->mothurConvert(temp, abund); 
+			temp = validParameter.valid(parameters, "abund");		if (temp == "not found") { temp = "10"; }
+			util.mothurConvert(temp, abund); 
 			
-			temp = validParameter.validFile(parameters, "size", false);			if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, size); 
+			temp = validParameter.valid(parameters, "size");			if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, size); 
 			
-			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
-			groupMode = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "groupmode");		if (temp == "not found") { temp = "T"; }
+			groupMode = util.isTrue(temp);
 			
-            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters);
+            temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters);
             
-            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
-			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
+			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
             else {  
-                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
                 else { subsample = false; subsampleSize = -1; }
             }
             
-            temp = validParameter.validFile(parameters, "alpha", false);		if (temp == "not found") { temp = "1"; }
-			m->mothurConvert(temp, alpha);
+            temp = validParameter.valid(parameters, "alpha");		if (temp == "not found") { temp = "1"; }
+			util.mothurConvert(temp, alpha);
             
             if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2."); m->mothurOutEndLine(); abort=true; }
             
@@ -295,7 +295,7 @@ SummaryCommand::SummaryCommand(string option)  {
 int SummaryCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
 		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
@@ -312,7 +312,7 @@ int SummaryCommand::execute(){
 			numCols = 0;
 			
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
 			string fileNameRoot = getOutputFileName("summary",variables);
             variables["[tag]"] = "ave-std";
             string fileNameAve = getOutputFileName("summary",variables);
@@ -328,7 +328,7 @@ int SummaryCommand::execute(){
 			ValidCalculators validCalculator;
 			
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("summary", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("summary", Estimators[i]) ) { 
 					if(Estimators[i] == "sobs"){
 						sumCalculators.push_back(new Sobs());
 					}else if(Estimators[i] == "chao"){
@@ -388,15 +388,15 @@ int SummaryCommand::execute(){
 			}
 			
 			//if the users entered no valid calculators don't execute command
-			if (sumCalculators.size() == 0) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+			if (sumCalculators.size() == 0) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 			
 			ofstream outputFileHandle;
-			m->openOutputFile(fileNameRoot, outputFileHandle);
+			util.openOutputFile(fileNameRoot, outputFileHandle);
 			outputFileHandle << "label";
             
             ofstream outAve;
             if (subsample) {
-                m->openOutputFile(fileNameAve, outAve);
+                util.openOutputFile(fileNameAve, outAve);
                 outputNames.push_back(fileNameAve); outputTypes["summary"].push_back(fileNameAve);
                 outAve << "label\tmethod"; 
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
@@ -405,7 +405,7 @@ int SummaryCommand::execute(){
                 }
             }
 		
-			InputData input(inputFileNames[p], format);
+			InputData input(inputFileNames[p], format, nullVector);
 			sabund = input.getSAbundVector();
 			string lastLabel = sabund->getLabel();
 		
@@ -430,11 +430,11 @@ int SummaryCommand::execute(){
 			
             
             
-			if (m->getControl_pressed()) {  outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
+			if (m->getControl_pressed()) {  outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
 			
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
+				if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
 				
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 					
@@ -444,11 +444,11 @@ int SummaryCommand::execute(){
 					
                     process(sabund, outputFileHandle, outAve);
                     
-                    if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
+                    if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
 					numLines++;
 				}
 				
-				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = sabund->getLabel();
 					
 					delete sabund;
@@ -460,7 +460,7 @@ int SummaryCommand::execute(){
 					
                     process(sabund, outputFileHandle, outAve);
                     
-                    if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
+                    if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
 					numLines++;
 					
 					//restore real lastlabel to save below
@@ -473,7 +473,7 @@ int SummaryCommand::execute(){
 				sabund = input.getSAbundVector();
 			}
 			
-			if (m->getControl_pressed()) {  outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
+			if (m->getControl_pressed()) {  outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -489,14 +489,14 @@ int SummaryCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (sabund != NULL) {	delete sabund;	}
 				sabund = input.getSAbundVector(lastLabel);
 				
 				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
                 process(sabund, outputFileHandle, outAve);
                 
-                if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  return 0;  }
+                if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  return 0;  }
 				numLines++;
 				delete sabund;
 			}
@@ -504,17 +504,17 @@ int SummaryCommand::execute(){
 			outputFileHandle.close();
             if (subsample) { outAve.close(); }
 			
-			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
 			 
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		}
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0;  }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }  return 0;  }
 		
 		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
 		if ((sharedfile != "") && (groupMode)) {   vector<string> comboNames = createGroupSummaryFile(numLines, numCols, outputNames, groupIndex);  for (int i = 0; i < comboNames.size(); i++) { outputNames.push_back(comboNames[i]); } }
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0;  }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }  return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -639,7 +639,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
         map<string, string> files;
         map<string, string>::iterator it3;
         
-        InputData input(filename, "sharedfile");
+        InputData input(filename, "sharedfile", groups);
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 
         /******************************************************/
@@ -654,11 +654,11 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
         
         groups = lookup->getNamesGroups();
         //clears file before we start to write to it below
-        string sharedFileRoot = m->getRootName(filename);
+        string sharedFileRoot = util.getRootName(filename);
         for (int i=0; i<groups.size(); i++) {
             ofstream temp;
             string group = groups[i];
-            m->openOutputFile((sharedFileRoot + group + ".rabund"), temp);
+            util.openOutputFile((sharedFileRoot + group + ".rabund"), temp);
             filenames.push_back((sharedFileRoot + group + ".rabund"));
             files[group] = (sharedFileRoot + group + ".rabund");
         }
@@ -669,7 +669,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
             for (int i = 0; i < data.size(); i++) {
                 ofstream temp;
                 string group = data[i]->getGroup();
-                m->openOutputFileAppend(files[group], temp);
+                util.openOutputFileAppend(files[group], temp);
                 data[i]->getRAbundVector().print(temp);
                 temp.close();
                 delete data[i];
@@ -700,11 +700,11 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
 			vector<string> thisFilesLines;
             
 			ifstream temp;
-			m->openInputFile(outputNames[i], temp);
+			util.openInputFile(outputNames[i], temp);
 			
 			//read through first line - labels
-            string labelsLine = m->getline(temp);
-            vector<string> theseLabels = m->splitWhiteSpace(labelsLine);
+            string labelsLine = util.getline(temp);
+            vector<string> theseLabels = util.splitWhiteSpace(labelsLine);
             
             string newLabel = "";
             for (int j = 0; j < theseLabels.size(); j++) { 
@@ -713,7 +713,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
                 else{  newLabel += '\t' + theseLabels[j];	}
             }
 			
-			m->gobble(temp);
+			util.gobble(temp);
 			
             int stop = numLines;
             if (theseLabels.size() != numCols+1) {  stop = numLines*2; }
@@ -736,13 +736,13 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
 				
 				thisFilesLines.push_back(thisLine);
 					
-				m->gobble(temp);
+				util.gobble(temp);
 			}
             
-            string extension = m->getExtension(outputNames[i]);
+            string extension = util.getExtension(outputNames[i]);
             if (theseLabels.size() != numCols+1) { extension = ".ave-std" + extension;  }
-            string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
-			m->mothurRemove(combineFileName); //remove old file
+            string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
+			util.mothurRemove(combineFileName); //remove old file
             filesTypesLabels[extension] = newLabel;
             filesTypesNumLines[extension] = stop;
             
@@ -756,7 +756,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
             }
 			
 			temp.close();
-			m->mothurRemove(outputNames[i]);
+			util.mothurRemove(outputNames[i]);
 		}
 		
         
@@ -766,11 +766,11 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
             
             string extension = itFiles->first;
             map<string, vector<string> > thisType = itFiles->second;
-            string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
+            string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
             newComboNames.push_back(combineFileName);
             //open combined file
             ofstream out;
-            m->openOutputFile(combineFileName, out);
+            util.openOutputFile(combineFileName, out);
             
             //output label line to new file
             out <<  filesTypesLabels[extension] << endl;

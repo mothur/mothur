@@ -25,6 +25,7 @@ public:
 private:
 	ifstream fileHandle;
 	string filename;
+    Utils util;
 };
 
 /******************************************************/

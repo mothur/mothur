@@ -62,6 +62,7 @@ private:
 	map<string, int>::iterator it2;
 	void setNamesOfGroups(string); 
 	MothurOut* m;
+    Utils util;
 	
 	
 };

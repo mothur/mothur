@@ -91,14 +91,14 @@ MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
             }
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.validFile(parameters, "inputdir", false);
+            string inputDir = validParameter.valid(parameters, "inputdir");
             if (inputDir == "not found"){	inputDir = "";		}
             else {
                 string path;
                 it = parameters.find("xml");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["xml"] = inputDir + it->second;		}
                 }
@@ -108,15 +108,15 @@ MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
             outputTypes["source"] = tempOutNames;
             
             //check for required parameters
-            xmlFile = validParameter.validFile(parameters, "xml", true);
+            xmlFile = validParameter.validFile(parameters, "xml");
             if (xmlFile == "not open") { abort = true; }
             else if (xmlFile == "not found") {  xmlFile = ""; abort=true; m->mothurOut("You must provide an xml file. It is required."); m->mothurOutEndLine();  }
             
-            selectedPackage = validParameter.validFile(parameters, "package", false);
+            selectedPackage = validParameter.valid(parameters, "package");
             if (selectedPackage == "not found") { selectedPackage = "MIMARKS.survey."; }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(xmlFile);		}
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(xmlFile);		}
             
         }
         
@@ -131,11 +131,11 @@ MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
 int MimarksAttributesCommand::execute(){
     try {
         
-        if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         ifstream in;
-        m->openInputFile(xmlFile, in);
-        string header = m->getline(in); m->gobble(in);
+        util.openInputFile(xmlFile, in);
+        string header = util.getline(in); util.gobble(in);
         
         if (header != "<BioSampleAttributes>") { m->mothurOut("[ERROR]: " + header + " is not a bioSample attribute file.\n"); m->setControl_pressed(true); }
         
@@ -218,10 +218,10 @@ int MimarksAttributesCommand::execute(){
         
         ofstream out;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(xmlFile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(xmlFile));
         string outputFileName = getOutputFileName("source",variables);
         outputNames.push_back(outputFileName); outputTypes["source"].push_back(outputFileName);
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         
         //create outputs
         string requiredValues = requiredByALL; string nonRequiredValues = "";
@@ -321,7 +321,7 @@ int MimarksAttributesCommand::execute(){
         
         out << "vector<string> requiredFieldsForPackage;\n";
         vector<string> rAll;
-        m->splitAtChar(requiredByALL, rAll, '\t');
+        util.splitAtChar(requiredByALL, rAll, '\t');
         for (int i = 0; i < rAll.size(); i++) {
             out << "requiredFieldsForPackage.push_back(\"" + rAll[i].substr(1) + "\");\n";
         }
@@ -359,7 +359,7 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         
         
         //read <Attribute>
-        string header = m->getline(in); m->gobble(in);
+        string header = util.getline(in); util.gobble(in);
         
         if (header == "</BioSampleAttributes>") { Attribute temp; return temp; }
         
@@ -367,14 +367,14 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         
         //read name
         //<Name>wastewater type</Name>
-        m->gobble(in);
-        string name = m->getline(in); m->gobble(in);
+        util.gobble(in);
+        string name = util.getline(in); util.gobble(in);
         trimTags(name);
         
         //read hamonized name
         //<HarmonizedName>wastewater_type</HarmonizedName>
-        m->gobble(in);
-        string hname = m->getline(in); m->gobble(in);
+        util.gobble(in);
+        string hname = util.getline(in); util.gobble(in);
         trimTags(hname);
         
         //read description
@@ -383,13 +383,13 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         //</Description>
         string description = "";
         unsigned long long spot = in.tellg();
-        m->gobble(in);
+        util.gobble(in);
         char c = in.get(); c = in.get();
         if (c == 'D') { //description
             description += "<D";
             while (!in.eof()) {
-                m->gobble(in);
-                string thisLine = m->getline(in); m->gobble(in);
+                util.gobble(in);
+                string thisLine = util.getline(in); util.gobble(in);
                 description += thisLine;
                 if (thisLine.find("</Description>") != string::npos)  { break; }
             }
@@ -401,15 +401,15 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         //read format
         //<Format>{text}</Format>
         spot = in.tellg();
-        m->gobble(in);
+        util.gobble(in);
         c = in.get(); c = in.get();
         string format = "";
         if (c == 'F') { //format
-            format += "<F" + m->getline(in); m->gobble(in);
+            format += "<F" + util.getline(in); util.gobble(in);
             if (format.find("</Format>") == string::npos) { //format is not on oneline
                 while (!in.eof()) {
-                    m->gobble(in);
-                    string thisLine = m->getline(in); m->gobble(in);
+                    util.gobble(in);
+                    string thisLine = util.getline(in); util.gobble(in);
                     format += thisLine;
                     if (thisLine.find("</Format>") != string::npos) { break; }
                 }
@@ -426,11 +426,11 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         bool FirstTime = true;
         while (!in.eof()) {
             unsigned long long thisspot = in.tellg();
-            m->gobble(in);
+            util.gobble(in);
             char c = in.get(); c = in.get();
             if (c == 'S') { //synonym
                 FirstTime = false;
-                m->getline(in); m->gobble(in);
+                util.getline(in); util.gobble(in);
             }else { //package
                 if (FirstTime) { in.seekg(spot); }
                 else { in.seekg(thisspot); }
@@ -442,7 +442,7 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         //read packages - may be none
         //<Package use="optional" group_name="Air">MIGS.ba.air.4.0</Package>
         while (!in.eof()) {
-            string package = m->getline(in); m->gobble(in);
+            string package = util.getline(in); util.gobble(in);
             if (package == "</Attribute>") { break; }
             else {
                 Package thisPackage = parsePackage(package);

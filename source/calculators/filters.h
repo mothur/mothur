@@ -12,6 +12,7 @@
 
 #include "mothur.h"
 #include "sequence.hpp"
+#include "utils.hpp"
 
 
 /***********************************************************************/
@@ -19,7 +20,7 @@
 class Filters {
 
 public:
-	Filters() { m = MothurOut::getInstance(); };
+    Filters() { m = MothurOut::getInstance(); numSeqs = 0; };
 	~Filters(){};
 		
 	string getFilter()			{	return filter;		}
@@ -89,7 +90,7 @@ public:
 
 	void doHard(string hard) {
 		ifstream fileHandle;
-		m->openInputFile(hard, fileHandle);
+        Utils util; util.openInputFile(hard, fileHandle);
 	
 		fileHandle >> filter;
 	
@@ -100,7 +101,7 @@ public:
 
 	void getFreqs(Sequence seq) {
 	
-		string curAligned = seq.getAligned();
+        string curAligned = seq.getAligned(); numSeqs++;
 	
 		for(int j=0;j<alignmentLength;j++){
 			if(toupper(curAligned[j]) == 'A')										{	a[j]++;		}

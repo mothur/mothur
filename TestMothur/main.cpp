@@ -22,11 +22,7 @@ int main(int argc, char **argv) {
     if (pathname != "") {
         //add / to name if needed
         string lastChar = pathname.substr(pathname.length()-1);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        if (lastChar != "/") { pathname += "/TestMothur/TestFiles/"; }
-#else
-        if (lastChar != "\\") { pathname += "\\TestMothur\\TestFiles\\"; }
-#endif
+        if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
     }
     
     m->setTestFilePath(pathname);

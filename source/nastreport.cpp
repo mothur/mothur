@@ -49,7 +49,7 @@ string NastReport::getHeaders() {
 NastReport::NastReport(string candidateReportFName) {
 	try {
 		m = MothurOut::getInstance();
-		m->openOutputFile(candidateReportFName, candidateReportFile);
+        Utils util; util.openOutputFile(candidateReportFName, candidateReportFile);
 		
 		candidateReportFile << "QueryName\tQueryLength\tTemplateName\tTemplateLength\t";
 		candidateReportFile << "SearchMethod\tSearchScore\t";

@@ -12,6 +12,7 @@
 #include "listvector.hpp"
 #include "counttable.h"
 #include "fastqread.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 vector<string> GetSeqsCommand::setParameters(){	
@@ -145,17 +146,17 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("alignreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
@@ -163,7 +164,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -171,7 +172,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("accnos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
@@ -179,7 +180,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("accnos2");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos2"] = inputDir + it->second;		}
 				}
@@ -187,7 +188,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -195,7 +196,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -203,7 +204,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -211,7 +212,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -219,7 +220,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("qfile");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
@@ -227,7 +228,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -235,7 +236,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
                 it = parameters.find("fastq");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
 				}
@@ -243,65 +244,65 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 
 			
 			//check for required parameters
-			accnosfile = validParameter.validFile(parameters, "accnos", true);
+			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
-				accnosfile = m->getAccnosFile(); 
+				accnosfile = current->getAccnosFile(); 
 				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
 					abort = true;
 				} 
-			}else { m->setAccnosFile(accnosfile); }	
+			}else { current->setAccnosFile(accnosfile); }	
 			
 			if (accnosfile2 == "not found") { accnosfile2 = ""; }
 			
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
-			alignfile = validParameter.validFile(parameters, "alignreport", true);
+			alignfile = validParameter.validFile(parameters, "alignreport");
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
 			
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
-			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not open") { taxfile = ""; abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
-			else { m->setTaxonomyFile(taxfile); }
+			else { current->setTaxonomyFile(taxfile); }
 			
-			qualfile = validParameter.validFile(parameters, "qfile", true);
+			qualfile = validParameter.validFile(parameters, "qfile");
 			if (qualfile == "not open") { abort = true; }
 			else if (qualfile == "not found") {  qualfile = "";  }
-			else { m->setQualFile(qualfile); }
+			else { current->setQualFile(qualfile); }
             
-            fastqfile = validParameter.validFile(parameters, "fastq", true);
+            fastqfile = validParameter.validFile(parameters, "fastq");
 			if (fastqfile == "not open") { abort = true; }
 			else if (fastqfile == "not found") {  fastqfile = "";  }
 			
-			accnosfile2 = validParameter.validFile(parameters, "accnos2", true);
+			accnosfile2 = validParameter.validFile(parameters, "accnos2");
 			if (accnosfile2 == "not open") { abort = true; }
 			else if (accnosfile2 == "not found") {  accnosfile2 = "";  }
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
             if (countfile == "not open") { countfile = ""; abort = true; }
             else if (countfile == "not found") { countfile = "";  }	
-            else { m->setCountTableFile(countfile); }
+            else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -313,10 +314,10 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 
 			
 			string usedDups = "true";
-			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "true"; usedDups = ""; }
-			dups = m->isTrue(temp);
+			string temp = validParameter.valid(parameters, "dups");	if (temp == "not found") { temp = "true"; usedDups = ""; }
+			dups = util.isTrue(temp);
             
-            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "illumina1.8+";	}
+            format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
             
             if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
                 m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
@@ -328,7 +329,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
             if (countfile == "") {
                 if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
                     vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -344,10 +345,10 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 int GetSeqsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get names you want to keep
-		names = m->readAccnos(accnosfile);
+		names = util.readAccnos(accnosfile);
 		
 		if (m->getControl_pressed()) { return 0; }
         
@@ -371,7 +372,7 @@ int GetSeqsCommand::execute(){
         
         if (m->getDebug()) { runSanityCheck(); }
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
 		
 		if (outputNames.size() != 0) {
@@ -381,40 +382,40 @@ int GetSeqsCommand::execute(){
 			m->mothurOutEndLine();
 			
 			//set fasta file as new current fastafile
-			string current = "";
+			string currentName = "";
 			itTypes = outputTypes.find("fasta");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("name");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("group");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("list");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("taxonomy");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("qfile");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setQualFile(currentName); }
 			}
 			
             itTypes = outputTypes.find("count");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 			}
 		}
 		
@@ -433,25 +434,25 @@ int GetSeqsCommand::readFastq(){
 		int selectedCount = 0;
         
 		ifstream in;
-		m->openInputFile(fastqfile, in);
+		util.openInputFile(fastqfile, in);
 		
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastqfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
 		map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastqfile));
-        variables["[extension]"] = m->getExtension(fastqfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
+        variables["[extension]"] = util.getExtension(fastqfile);
 		string outputFileName = getOutputFileName("fastq", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 
         set<string> uniqueNames;
 		while(!in.eof()){
 			
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName); return 0; }
 			
 			//read sequence name
             bool ignore;
-            FastqRead fread(in, ignore, format); m->gobble(in);
+            FastqRead fread(in, ignore, format); util.gobble(in);
             
 			if (!ignore) {
                 string name = fread.getName();
@@ -468,7 +469,7 @@ int GetSeqsCommand::readFastq(){
                 }
             }
             
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -491,16 +492,16 @@ int GetSeqsCommand::readFastq(){
 int GetSeqsCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
 		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
-        variables["[extension]"] = m->getExtension(fastafile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -511,7 +512,7 @@ int GetSeqsCommand::readFasta(){
         set<string> uniqueNames;
 		while(!in.eof()){
 		
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -539,7 +540,7 @@ int GetSeqsCommand::readFasta(){
                     }
                 }
 			}
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -562,17 +563,17 @@ int GetSeqsCommand::readFasta(){
 int GetSeqsCommand::readQual(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(qualfile);  }
 		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
-        variables["[extension]"] = m->getExtension(qualfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
+        variables["[extension]"] = util.getExtension(qualfile);
 		string outputFileName = getOutputFileName("qfile", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		
 		ifstream in;
-		m->openInputFile(qualfile, in);
+		util.openInputFile(qualfile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -600,7 +601,7 @@ int GetSeqsCommand::readQual(){
 					if (c == 10 || c == 13 || c == -1){	break;	}
 					else { name += c; }	
 				} 
-				m->gobble(in);
+				util.gobble(in);
 			}
 			
 			while(in){
@@ -609,7 +610,7 @@ int GetSeqsCommand::readQual(){
 				else{ scores += letter; }
 			}
 			
-			m->gobble(in);
+			util.gobble(in);
 			
             if (names.count(saveName) != 0) {
                 if (uniqueNames.count(saveName) == 0) { //this name hasn't been seen yet
@@ -624,7 +625,7 @@ int GetSeqsCommand::readQual(){
                 }
             }
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -648,34 +649,34 @@ int GetSeqsCommand::readQual(){
 int GetSeqsCommand::readCount(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
-        variables["[extension]"] = m->getExtension(countfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(countfile, in);
+		util.openInputFile(countfile, in);
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
 		
-        string headers = m->getline(in); m->gobble(in);
+        string headers = util.getline(in); util.gobble(in);
         out << headers << endl;
-        string test = headers; vector<string> pieces = m->splitWhiteSpace(test);
+        string test = headers; vector<string> pieces = util.splitWhiteSpace(test);
         
         string name, rest; int thisTotal; rest = "";
         set<string> uniqueNames;
         while (!in.eof()) {
             
-            if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
             
-            in >> name; m->gobble(in); 
-            in >> thisTotal; m->gobble(in);
-            if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
+            in >> name; util.gobble(in); 
+            in >> thisTotal; util.gobble(in);
+            if (pieces.size() > 2) {  rest = util.getline(in); util.gobble(in);  }
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
             
             if (names.count(name) != 0) {
@@ -717,51 +718,46 @@ int GetSeqsCommand::readCount(){
 int GetSeqsCommand::readList(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[extension]"] = m->getExtension(listfile);
-		
-		ifstream in;
-		m->openInputFile(listfile, in);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[extension]"] = util.getExtension(listfile);
+        InputData input(listfile, "list", nullVector);
+        ListVector* list = input.getListVector();
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
         
         if (m->getDebug()) { set<string> temp; sanity["list"] = temp; }
 		
-        
-		while(!in.eof()){
+		while(list != NULL) {
 			
             set<string> uniqueNames;
 			selectedCount = 0;
 
-			//read in list vector
-			ListVector list(in);
-			
-			//make a new list vector
+            //make a new list vector
 			ListVector newList;
-			newList.setLabel(list.getLabel());
+			newList.setLabel(list->getLabel());
             
-            variables["[distance]"] = list.getLabel();
+            variables["[distance]"] = list->getLabel();
             string outputFileName = getOutputFileName("list", variables);
 			
 			ofstream out;
-			m->openOutputFile(outputFileName, out);
+			util.openOutputFile(outputFileName, out);
 			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
             
-            vector<string> binLabels = list.getLabels();
+            vector<string> binLabels = list->getLabels();
             vector<string> newBinLabels;
             
-            if (m->getControl_pressed()) { in.close(); out.close();  return 0; }
+            if (m->getControl_pressed()) { out.close();  return 0; }
 			
 			//for each bin
-			for (int i = 0; i < list.getNumBins(); i++) {
+			for (int i = 0; i < list->getNumBins(); i++) {
 			
 				//parse out names that are in accnos file
-				string binnames = list.get(i);
+				string binnames = list->get(i);
                 vector<string> bnames;
-                m->splitAtComma(binnames, bnames);
+                util.splitAtComma(binnames, bnames);
 				
 				string newNames = "";
                 for (int j = 0; j < bnames.size(); j++) {
@@ -796,10 +792,12 @@ int GetSeqsCommand::readList(){
 				newList.print(out, false);
 			}
 			
-			m->gobble(in);
+			
             out.close();
+            
+            delete list;
+            list = input.getListVector();
 		}
-		in.close();	
 		
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
@@ -818,17 +816,17 @@ int GetSeqsCommand::readList(){
 int GetSeqsCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
-        variables["[extension]"] = m->getExtension(namefile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+        variables["[extension]"] = util.getExtension(namefile);
 		string outputFileName = getOutputFileName("name", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 
 		ifstream in;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
@@ -840,16 +838,16 @@ int GetSeqsCommand::readName(){
         set<string> uniqueNames;
 		while(!in.eof()){
 		
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
 
-			in >> firstCol;			m->gobble(in);
+			in >> firstCol;			util.gobble(in);
 			in >> secondCol;
 			
 			string hold = "";
 			if (dups) { hold = secondCol; }
 			
 			vector<string> parsedNames;
-			m->splitAtComma(secondCol, parsedNames);
+			util.splitAtComma(secondCol, parsedNames);
 			
 			vector<string> validSecond; vector<string> parsedNames2;
             bool parsedError = false;
@@ -921,7 +919,7 @@ int GetSeqsCommand::readName(){
                     }
                 }
 			}
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -944,17 +942,17 @@ int GetSeqsCommand::readName(){
 int GetSeqsCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-        variables["[extension]"] = m->getExtension(groupfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+        variables["[extension]"] = util.getExtension(groupfile);
 		string outputFileName = getOutputFileName("group", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 
 		ifstream in;
-		m->openInputFile(groupfile, in);
+		util.openInputFile(groupfile, in);
 		string name, group;
 		
 		bool wroteSomething = false;
@@ -965,10 +963,10 @@ int GetSeqsCommand::readGroup(){
         set<string> uniqueNames;
 		while(!in.eof()){
 
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
 
 
-			in >> name;		m->gobble(in);		//read from first column
+			in >> name;		util.gobble(in);		//read from first column
 			in >> group;			//read from second column
             
 			
@@ -986,7 +984,7 @@ int GetSeqsCommand::readGroup(){
                 }
             }
 					
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -1009,16 +1007,16 @@ int GetSeqsCommand::readGroup(){
 int GetSeqsCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxfile));
-        variables["[extension]"] = m->getExtension(taxfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
+        variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(taxfile, in);
+		util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -1029,10 +1027,10 @@ int GetSeqsCommand::readTax(){
         set<string> uniqueNames;
 		while(!in.eof()){
 
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
 
-            in >> name; m->gobble(in);
-            tax = m->getline(in); m->gobble(in);
+            in >> name; util.gobble(in);
+            tax = util.getline(in); util.gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -1075,16 +1073,16 @@ int GetSeqsCommand::readTax(){
 int GetSeqsCommand::readAlign(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(alignfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(alignfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(alignfile));
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
 		string outputFileName = getOutputFileName("alignreport", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 
 		ifstream in;
-		m->openInputFile(alignfile, in);
+		util.openInputFile(alignfile, in);
 		string name, junk;
 		
 		bool wroteSomething = false;
@@ -1100,7 +1098,7 @@ int GetSeqsCommand::readAlign(){
         set<string> uniqueNames;
 		while(!in.eof()){
 		
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;				//read from first column
@@ -1137,7 +1135,7 @@ int GetSeqsCommand::readAlign(){
 				}
 			}
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -1160,11 +1158,11 @@ int GetSeqsCommand::readAlign(){
 int GetSeqsCommand::runSanityCheck(){
 	try {
         string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+        if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         string filename = outputDir + "get.seqs.debug.report";
         
         ofstream out;
-		m->openOutputFile(filename, out); 
+		util.openOutputFile(filename, out); 
 
        
         //compare fasta, name, qual and taxonomy if given to make sure they contain the same seqs
@@ -1209,7 +1207,7 @@ int GetSeqsCommand::runSanityCheck(){
         
         out.close();
         
-        if (m->isBlank(filename)) { m->mothurRemove(filename); }
+        if (util.isBlank(filename)) { util.mothurRemove(filename); }
         else { m->mothurOut("\n[DEBUG]: " + filename + " contains the file mismatches.\n");outputNames.push_back(filename); outputTypes["debug"].push_back(filename); }
         
         return 0;
@@ -1254,16 +1252,16 @@ int GetSeqsCommand::compareAccnos(){
 	try {
 		
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(accnosfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(accnosfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(accnosfile));
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(accnosfile));
 		string outputFileName = getOutputFileName("accnosreport", variables);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(accnosfile2, in);
+		util.openInputFile(accnosfile2, in);
 		string name;
 		
 		set<string> namesAccnos2;
@@ -1274,7 +1272,7 @@ int GetSeqsCommand::compareAccnos(){
 		
 		if (namefile != "") {
 			ifstream inName;
-			m->openInputFile(namefile, inName);
+			util.openInputFile(namefile, inName);
 			
 			
 			while(!inName.eof()){
@@ -1283,13 +1281,13 @@ int GetSeqsCommand::compareAccnos(){
 				
 				string thisname, repnames;
 				
-				inName >> thisname;		m->gobble(inName);		//read from first column
+				inName >> thisname;		util.gobble(inName);		//read from first column
 				inName >> repnames;			//read from second column
 				
-				int num = m->getNumNames(repnames);
+				int num = util.getNumNames(repnames);
 				nameCount[thisname] = num;
 				
-				m->gobble(inName);
+				util.gobble(inName);
 			}
 			inName.close();	
 		}
@@ -1312,7 +1310,7 @@ int GetSeqsCommand::compareAccnos(){
 				namesDups.insert(name);
 			}
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();	
 		

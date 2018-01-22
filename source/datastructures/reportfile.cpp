@@ -27,8 +27,8 @@ ReportFile::ReportFile(){
 
 int ReportFile::readHeaders(ifstream& repFile, string repFileName){
 	try {
-		m->openInputFile(repFileName, repFile);
-		m->getline(repFile);
+		util.openInputFile(repFileName, repFile);
+		util.getline(repFile);
         return 0;
 	}
 	catch(exception& e) {
@@ -70,7 +70,7 @@ int ReportFile::read(ifstream& repFile){
 			searchScore = 0;
 		}
 		
-		m->gobble(repFile);
+		util.gobble(repFile);
         return 0;
 	}
 	catch(exception& e) {

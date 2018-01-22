@@ -29,6 +29,7 @@ private:
 	MothurOut* m;
 	bool nseqs, sharedOtus;
 	int fontSize;
+    Utils util;
 };
 
 /***********************************************************************/

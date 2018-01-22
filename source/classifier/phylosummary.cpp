@@ -23,7 +23,7 @@ PhyloSummary::PhyloSummary(string refTfile, CountTable* c, bool r, int p){
         groupmap = NULL;
         
 		//check for necessary files
-		string taxFileNameTest = m->getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
+		string taxFileNameTest = util.getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
 		ifstream FileTest(taxFileNameTest.c_str());
 		
 		if (!FileTest) { 
@@ -78,7 +78,7 @@ PhyloSummary::PhyloSummary(string refTfile, GroupMap* g, bool r, int p){
         ct = NULL;
 				
 		//check for necessary files
-		string taxFileNameTest = m->getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
+		string taxFileNameTest = util.getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
 		ifstream FileTest(taxFileNameTest.c_str());
 		
 		if (!FileTest) { 
@@ -124,7 +124,7 @@ PhyloSummary::PhyloSummary(GroupMap* g, bool r, int p){
 int PhyloSummary::summarize(string userTfile){
 	try {
 		map<string, string> temp;
-        m->readTax(userTfile, temp, true);
+        util.readTax(userTfile, temp, true);
         
         for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
             addSeqToTree(itTemp->first, itTemp->second);
@@ -173,7 +173,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 		int level = 0;
 		
 		//are there confidence scores, if so remove them
-		if (seqTaxonomy.find_first_of('(') != -1) {  m->removeConfidences(seqTaxonomy);	}
+		if (seqTaxonomy.find_first_of('(') != -1) {  util.removeConfidences(seqTaxonomy);	}
 		
 		while (seqTaxonomy != "") {
 			
@@ -314,7 +314,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 		int level = 0;
 		
 		//are there confidence scores, if so remove them
-		if (seqTaxonomy.find_first_of('(') != -1) {  m->removeConfidences(seqTaxonomy);	}
+		if (seqTaxonomy.find_first_of('(') != -1) {  util.removeConfidences(seqTaxonomy);	}
 		
 		while (seqTaxonomy != "") {
 			
@@ -330,7 +330,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 			
 			if(childPointer != tree[currentNode].children.end()){	//if the node already exists, update count and move on
                 for (map<string, bool>::iterator itGroup = containsGroup.begin(); itGroup != containsGroup.end(); itGroup++) {
-                    if (itGroup->second == true) {
+                    if (itGroup->second ) {
                         tree[childPointer->second].groupCount[itGroup->first]++;
                     }
                 }
@@ -350,7 +350,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 					tree[currentNode].children[taxon] = index;
 						
                     for (map<string, bool>::iterator itGroup = containsGroup.begin(); itGroup != containsGroup.end(); itGroup++) {
-                        if (itGroup->second == true) {
+                        if (itGroup->second ) {
                             tree[index].groupCount[itGroup->first]++;
                         }
                     }
@@ -397,10 +397,10 @@ void PhyloSummary::assignRank(int index){
 string PhyloSummary::findTaxon(string rank){
     try {
         vector<string> pieces; vector<int> indexes;
-        m->splitAtChar(rank, pieces, '.');
+        util.splitAtChar(rank, pieces, '.');
         for (int i = 0; i < pieces.size(); i++) {
             int temp;
-            m->mothurConvert(pieces[i], temp);
+            util.mothurConvert(pieces[i], temp);
             indexes.push_back(temp);
         }
         string taxon = "";
@@ -736,28 +736,28 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 	try {
 	
 		//read version
-		string line = m->getline(in); m->gobble(in);
+		string line = util.getline(in); util.gobble(in);
 		
 		int num;
 		
-		in >> num; m->gobble(in);
+		in >> num; util.gobble(in);
 		
 		tree.resize(num);
 		
-		in >> maxLevel; m->gobble(in);
+		in >> maxLevel; util.gobble(in);
 	
 		//read the tree file
 		for (int i = 0; i < tree.size(); i++) {
 	
-			in >> tree[i].level >> num; m->gobble(in); //num contains the number of children tree[i] has
-            tree[i].name = m->getline(in); m->gobble(in);
+			in >> tree[i].level >> num; util.gobble(in); //num contains the number of children tree[i] has
+            tree[i].name = util.getline(in); util.gobble(in);
             
 			//set children
 			string childName;
 			int childIndex;
 			for (int j = 0; j < num; j++) {
-				in >> childIndex; m->gobble(in);
-                childName = m->getline(in); m->gobble(in);
+				in >> childIndex; util.gobble(in);
+                childName = util.getline(in); util.gobble(in);
 				tree[i].children[childName] = childIndex;
 			}
 			
@@ -776,7 +776,7 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 			
 			tree[i].total = 0;
 			
-			m->gobble(in);
+			util.gobble(in);
 			
 			//if (tree[i].level > maxLevel) {  maxLevel = tree[i].level;  }
 		}

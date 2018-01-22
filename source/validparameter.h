@@ -10,7 +10,7 @@
  *
  */
 
-#include "mothur.h"
+#include "currentfile.h"
 #include "mothurout.h"
 
 //This class contains a list of all valid parameters in Mothur.  
@@ -24,17 +24,20 @@ class ValidParameters {
 		ValidParameters();
 		ValidParameters(string);
 		~ValidParameters();
-		//bool isValidParameter(string, string, string) {return true;}
 		bool isValidParameter(string, vector<string>, string);
 		vector <string> addParameters(string[], int);
 		void initParameterRanges();
-		string validFile(map<string, string>&, string, bool); //container, parameter, isFile, commandName
+		string validFile(map<string, string>&, string, vector<string>); //container, parameter, isFile, locations
+        string validFile(map<string, string>&, string);
+        string valid(map<string, string>&, string);
 
 	private:
 		map<string, string>::iterator it;
 		map<string, vector<string> > parameterRanges;
 		MothurOut* m;
 		string commandName;
+        CurrentFile* current;
+        vector<string> locations;
 
 };
 

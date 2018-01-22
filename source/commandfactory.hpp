@@ -10,7 +10,6 @@
  *
  */
 
-#include "mothur.h"
 #include "mothurout.h"
 #include "currentfile.h"
 
@@ -22,31 +21,31 @@ public:
 	Command* getCommand(string, string, string);
 	Command* getCommand(string, string);
 	Command* getCommand(string);
-	//Command* getCommand();
+
 	bool isValidCommand(string);
 	bool isValidCommand(string, string);
 	void printCommands(ostream&);
     void printCommandsCategories(ostream&);
-	void setOutputDirectory(string o)		{	if(m->dirCheck(o) || (o == "")) {  outputDir = o; m->setOutputDir(o); }	}
-	void setInputDirectory(string i)		{	if(m->dirCheck(i) || (i == "")) {  inputDir = i;	}	}
-	void setLogfileName(string n, bool a)	{	logFileName = n;  append = a;		}
-	string getLogfileName()					{	return logFileName; 	}
-	bool getAppend()						{	return append;			}
-	string getOutputDir()					{	return outputDir;		}
-    string getInputDir()					{	return inputDir;		}
+	//void setOutputDirectory(string o)		{	if(util.dirCheck(o) || (o == "")) {   current->setOutputDir(o); }	}
+	//void setInputDirectory(string i)		{	if(util.dirCheck(i) || (i == "")) {    current->setInputDir(i);  }	}
+	//void setLogfileName(string n, bool a)	{	logFileName = n;  append = a;		}
+	//string getLogfileName()					{	return logFileName; 	}
+	//bool getAppend()						{	return append;			}
+	//string getOutputDir()					{	return outputDir;		}
+    //string getInputDir()					{	return inputDir;		}
 	map<string, string> getListCommands()	{	return commands;		}
 	
 private:
 	Command* command;
 	Command* shellcommand;
 	Command* pipecommand;
-	
 	MothurOut* m;
-	CurrentFile* currentFile;
+	CurrentFile* current;
+    Utils util;
 	
 	map<string, string> commands;
 	map<string, string>::iterator it;
-	string outputDir, inputDir, logFileName;
+	//string outputDir, inputDir, logFileName;
 	bool append;
 	
     int checkForRedirects(string);

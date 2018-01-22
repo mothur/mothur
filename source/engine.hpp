@@ -24,15 +24,16 @@ public:
 	virtual ~Engine(){}
 	virtual bool getInput() = 0;
 	virtual string getCommand();
-	virtual string getOutputDir()			{	return cFactory->getOutputDir();	}
-	virtual string getLogFileName()			{	return cFactory->getLogfileName(); 	}
-	virtual bool getAppend()				{	return cFactory->getAppend();		}
+	//virtual string getOutputDir()			{	return current->getOutputDir();         }
+	virtual string getLogFileName()			{	return mout->getLogFileName();          }
 
 	vector<string> getOptions()		{	return options;		}
 protected:
 	vector<string> options;
 	CommandFactory* cFactory;
 	MothurOut* mout;
+    CurrentFile* current;
+    Utils util;
 };
 
 

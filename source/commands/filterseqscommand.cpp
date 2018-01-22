@@ -117,14 +117,14 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			outputTypes["filter"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -132,33 +132,33 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 				it = parameters.find("hard");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["hard"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			fasta = validParameter.validFile(parameters, "fasta", false);
+			fasta = validParameter.valid(parameters, "fasta");
 			if (fasta == "not found") { 				
-				fasta = m->getFastaFile(); 
+				fasta = current->getFastaFile(); 
 				if (fasta != "") { 
                     fastafileNames.push_back(fasta);  
                     m->mothurOut("Using " + fasta + " as input file for the fasta parameter."); m->mothurOutEndLine();
-                    string simpleName = m->getSimpleName(fasta);
+                    string simpleName = util.getSimpleName(fasta);
                     filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
                 }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else { 
-				m->splitAtDash(fasta, fastafileNames);
+				util.splitAtDash(fasta, fastafileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastafileNames.size(); i++) {
 					
 					bool ignore = false;
 					if (fastafileNames[i] == "current") { 
-						fastafileNames[i] = m->getFastaFile(); 
+						fastafileNames[i] = current->getFastaFile(); 
 						if (fastafileNames[i] != "") {  m->mothurOut("Using " + fastafileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
@@ -168,55 +168,15 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 						}
 					}
 					
-					if (!ignore) {
-						if (inputDir != "") {
-							string path = m->hasPath(fastafileNames[i]);
-							//if the user has not given a path then, add inputdir. else leave path alone.
-							if (path == "") {	fastafileNames[i] = inputDir + fastafileNames[i];		}
-						}
-
-						ifstream in;
-						bool ableToOpen = m->openInputFile(fastafileNames[i], in, "noerror");
-					
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getDefaultPath() != "") { //default path is set
-								string tryPath = m->getDefaultPath() + m->getSimpleName(fastafileNames[i]);
-								m->mothurOut("Unable to open " + fastafileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastafileNames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (m->getOutputDir() != "") { //default path is set
-								string tryPath = m->getOutputDir() + m->getSimpleName(fastafileNames[i]);
-								m->mothurOut("Unable to open " + fastafileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								fastafileNames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) { 
-							m->mothurOut("Unable to open " + fastafileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							fastafileNames.erase(fastafileNames.begin()+i);
-							i--;
-						}else{  
-							string simpleName = m->getSimpleName(fastafileNames[i]);
-							filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
-							m->setFastaFile(fastafileNames[i]);
-						}
-						in.close();
-					}
-				}
+                    if (!ignore) {
+                        if (util.checkLocations(fastafileNames[i], current->getLocations())) {
+                            string simpleName = util.getSimpleName(fastafileNames[i]);
+                            filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
+                            current->setFastaFile(fastafileNames[i]);
+                        }
+                        else { fastafileNames.erase(fastafileNames.begin()+i); i--; } //erase from file list
+                    }
+                }
 				
 				//make sure there is at least one valid file left
 				if (fastafileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
@@ -224,29 +184,28 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			
 			if (!abort) {
 				//if the user changes the output directory command factory will send this info to us in the output parameter 
-				outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 					outputDir = "";	
-					outputDir += m->hasPath(fastafileNames[0]); //if user entered a file with a path then preserve it	
+					outputDir += util.hasPath(fastafileNames[0]); //if user entered a file with a path then preserve it	
 				}
 			}
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			
 			string temp;
-			hard = validParameter.validFile(parameters, "hard", true);				if (hard == "not found") { hard = ""; }
+			hard = validParameter.validFile(parameters, "hard");				if (hard == "not found") { hard = ""; }
 			else if (hard == "not open") { hard = ""; abort = true; }	
 
-			temp = validParameter.validFile(parameters, "trump", false);			if (temp == "not found") { temp = "*"; }
+			temp = validParameter.valid(parameters, "trump");			if (temp == "not found") { temp = "*"; }
 			trump = temp[0];
 			
-			temp = validParameter.validFile(parameters, "soft", false);				if (temp == "not found") { soft = 0; }
+			temp = validParameter.valid(parameters, "soft");				if (temp == "not found") { soft = 0; }
 			else {  soft = (float)atoi(temp.c_str()) / 100.0;  }
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp); 
 			
-			vertical = validParameter.validFile(parameters, "vertical", false);		
+			vertical = validParameter.valid(parameters, "vertical");		
 			if (vertical == "not found") { 
 				if ((hard == "") && (trump == '*') && (soft == 0)) { vertical = "T"; } //you have not given a hard file or set the trump char.
 				else { vertical = "F";  }
@@ -266,10 +225,10 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 int FilterSeqsCommand::execute() {	
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ifstream inFASTA;
-		m->openInputFile(fastafileNames[0], inFASTA);
+		util.openInputFile(fastafileNames[0], inFASTA);
 		
 		Sequence testSeq(inFASTA);
 		alignmentLength = testSeq.getAlignLength();
@@ -292,7 +251,7 @@ int FilterSeqsCommand::execute() {
 		if (fastafileNames.size() > 3) { variables["[filename]"] = outputDir + "merge."; }
 		string filterFile = getOutputFileName("filter", variables);  
 		
-		m->openOutputFile(filterFile, outFilter);
+		util.openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
 		outFilter.close();
 		outputNames.push_back(filterFile); outputTypes["filter"].push_back(filterFile);
@@ -310,7 +269,7 @@ int FilterSeqsCommand::execute() {
 			if(filter[i] == '1'){	filteredLength++;	}
 		}
 		
-		if (m->getControl_pressed()) {  outputTypes.clear(); for(int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->getControl_pressed()) {  outputTypes.clear(); for(int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
 
 		
 		m->mothurOutEndLine();
@@ -320,10 +279,10 @@ int FilterSeqsCommand::execute() {
 		m->mothurOut("Number of sequences used to construct filter: " + toString(numSeqs)); m->mothurOutEndLine();
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -347,65 +306,41 @@ int FilterSeqsCommand::filterSequences() {
 		
 		for (int s = 0; s < fastafileNames.size(); s++) {
 			
-				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-				
-                map<string, string> variables; 
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafileNames[s]));
-				string filteredFasta = getOutputFileName("fasta", variables);
+            map<string, string> variables;
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafileNames[s]));
+            string filteredFasta = getOutputFileName("fasta", variables);
             
             vector<unsigned long long> positions;
             if (savedPositions.size() != 0) { positions = savedPositions[s]; }
             else {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				positions = m->divideFile(fastafileNames[s], processors);
+            positions = util.divideFile(fastafileNames[s], processors);
 #else
-                if(processors != 1){
-                    int numFastaSeqs = 0;
-                    positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
-                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-                }
+            positions = util.setFilePosFasta(fastafileNames[s], numSeqs);
+            if (numSeqs < processors) { processors = numSeqs; }
 #endif
             }
+            
+            vector<linePair> lines;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			//vector<unsigned long long> positions = m->divideFile(fastafileNames[s], processors);
-			
-			for (int i = 0; i < (positions.size()-1); i++) {
-				lines.push_back(new linePair(positions[i], positions[(i+1)]));
-			}	
-			
-				if(processors == 1){
-					int numFastaSeqs = driverRunFilter(filter, filteredFasta, fastafileNames[s], lines[0]);
-					numSeqs += numFastaSeqs;
-				}else{
-					int numFastaSeqs = createProcessesRunFilter(filter, fastafileNames[s], filteredFasta); 
-					numSeqs += numFastaSeqs;
-				}
-				
-				if (m->getControl_pressed()) {  return 1; }
+			for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 		#else
-            if(processors == 1){
-                lines.push_back(new linePair(0, 1000));
-				int numFastaSeqs = driverRunFilter(filter, filteredFasta, fastafileNames[s], lines[0]);
-				numSeqs += numFastaSeqs;
-            }else {
-                int numFastaSeqs = positions.size()-1;
-                //positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
-                
-                //figure out how many sequences you have to process
-                int numSeqsPerProcessor = numFastaSeqs / processors;
-                for (int i = 0; i < processors; i++) {
-                    int startIndex =  i * numSeqsPerProcessor;
-                    if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-                    lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
-                }
-                
-                numFastaSeqs = createProcessesRunFilter(filter, fastafileNames[s], filteredFasta); 
-                numSeqs += numFastaSeqs;
+            
+            long long numFSeqs = positions.size()-1;
+            if (numFSeqs < processors) { processors = numFSeqs; }
+            
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = numFSeqs / processors;
+            for (int i = 0; i < processors; i++) {
+                long long startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numFSeqs - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
             }
 
-				if (m->getControl_pressed()) {  return 1; }
 		#endif
-
+            
+            long long numFastaSeqs = createProcessesRunFilter(filter, fastafileNames[s], filteredFasta, lines);
+            numSeqs += numFastaSeqs;
 			outputNames.push_back(filteredFasta); outputTypes["fasta"].push_back(filteredFasta);
 		}
 
@@ -417,225 +352,108 @@ int FilterSeqsCommand::filterSequences() {
 	}
 }
 /**************************************************************************************/
-int FilterSeqsCommand::driverRunFilter(string F, string outputFilename, string inputFilename, linePair* filePos) {	
+void driverRunFilter(filterRunData* params) {
 	try {
 		ofstream out;
-		m->openOutputFile(outputFilename, out);
+		params->util.openOutputFile(params->outputFilename, out);
 		
 		ifstream in;
-		m->openInputFile(inputFilename, in);
+		params->util.openInputFile(params->filename, in);
 				
-		in.seekg(filePos->start);
+		in.seekg(params->start);
         
         //adjust start if null strings
-        if (filePos->start == 0) {  m->zapGremlins(in); m->gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
 
 		bool done = false;
-		int count = 0;
+		params->count = 0;
 	
 		while (!done) {
 				
-				if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
+				if (params->m->getControl_pressed()) { break; }
 				
-				Sequence seq(in); m->gobble(in);
+				Sequence seq(in); params->util.gobble(in);
 				if (seq.getName() != "") {
 					string align = seq.getAligned();
 					string filterSeq = "";
-					
-					for(int j=0;j<alignmentLength;j++){
-						if(filter[j] == '1'){
-							filterSeq += align[j];
-						}
-					}
+                
+					for(int j=0;j<params->alignmentLength;j++){ if(params->filter[j] == '1'){ filterSeq += align[j]; } }
 					
 					out << '>' << seq.getName() << endl << filterSeq << endl;
-				count++;
-			}
-			
+                }
+				params->count++;
+        
+        
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = in.tellg();
-				if ((pos == -1) || (pos >= filePos->end)) { break; }
+				if ((pos == -1) || (pos >= params->end)) { break; }
 			#else
-				if (in.eof()) { break; }
+				if (params->count == params->end) { break; }
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 	}
-		}
+			if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
+        }
 		//report progress
-		if((count) % 100 != 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 		}
+		if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
 		
 		
 		out.close();
 		in.close();
 		
-		return count;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "driverRunFilter");
+		params->m->errorOut(e, "FilterSeqsCommand", "driverRunFilter");
 		exit(1);
 	}
 }
 /**************************************************************************************************/
 
-int FilterSeqsCommand::createProcessesRunFilter(string F, string filename, string filteredFastaName) {
+long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename, string filteredFastaName, vector<linePair> lines) {
 	try {
+        util.mothurRemove(filteredFastaName);
+        long long num = 0;
         
-        int process = 1;
-		int num = 0;
-		processIDS.clear();
-        bool recalc = false;
-        
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				string filteredFasta = filename + m->mothurGetpid(process) + ".temp";
-				num = driverRunFilter(F, filteredFasta, filename, lines[process]);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = filename +  m->mothurGetpid(process) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				out << num << endl;
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));
-                }
-                recalc = true;
-                break;
-			}
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-            vector<string> temp;
-					m->setSharedBinLabelsInFile(temp);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));m->mothurRemove(filename + (toString(processIDS[i]) + ".num.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<filterRunData*> data;
+    
+        time_t start, end;
+        time(&start);
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            filterRunData* dataBundle = new filterRunData(filter, filename, (filteredFastaName + extension), m, lines[i+1].start, lines[i+1].end, alignmentLength);
+            data.push_back(dataBundle);
             
-            //redo file divide
-            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-            vector<unsigned long long> positions = m->divideFile(filename, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(new linePair(positions[i], positions[(i+1)]));  }
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    string filteredFasta = filename + m->mothurGetpid(process) + ".temp";
-                    num = driverRunFilter(F, filteredFasta, filename, lines[process]);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = filename +  m->mothurGetpid(process) + ".num.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << num << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-
+            workerThreads.push_back(new thread(driverRunFilter, dataBundle));
         }
-		
-        num = driverRunFilter(F, filteredFastaName, filename, lines[0]);
         
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}	
-					
-		for (int i = 0; i < processIDS.size(); i++) {
-			ifstream in;
-			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); m->mothurRemove(tempFile);
+        filterRunData* dataBundle = new filterRunData(filter, filename, filteredFastaName, m, lines[0].start, lines[0].end, alignmentLength);
+        data.push_back(dataBundle);
+        driverRunFilter(dataBundle);
+        num = dataBundle->count;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
             
-            m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filteredFastaName);
-            m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
-		}
-               
-#else
-        
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the filterData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add info to F.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<filterRunData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++){
-			
-            string extension = "";
-			if (i != 0) { extension = toString(i) + ".temp"; }
+            num += data[i]->count;
             
-			filterRunData* tempFilter = new filterRunData(filter, filename, (filteredFastaName + extension), m, lines[i]->start, lines[i]->end, alignmentLength, i);
-			pDataArray.push_back(tempFilter);
-			processIDS.push_back(i);
-            
-			hThreadArray[i] = CreateThread(NULL, 0, MyRunFilterThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
+            delete data[i];
+            delete workerThreads[i];
+        }
         
-        num = driverRunFilter(F, (filteredFastaName + toString(processors-1) + ".temp"), filename, lines[processors-1]);
+        time(&end);
+        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to filter " + toString(num) + " sequences.\n");
         
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
-            }
-            CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-        
-        for (int i = 1; i < processors; i++) {
-            m->appendFiles((filteredFastaName + toString(i) + ".temp"), filteredFastaName);
-            m->mothurRemove((filteredFastaName + toString(i) + ".temp"));
-		}
-#endif	
-        
+        //append and remove temp files
+        for (int i=0;i<processors-1;i++) {
+            util.appendFiles((filteredFastaName + toString(i+1) + ".temp"), filteredFastaName);
+            util.mothurRemove((filteredFastaName + toString(i+1) + ".temp"));
+        }
+
         return num;
-        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FilterSeqsCommand", "createProcessesRunFilter");
@@ -653,67 +471,24 @@ string FilterSeqsCommand::createFilter() {
 		
 		F.setLength(alignmentLength);
 		
-		if(trump != '*' || m->isTrue(vertical) || soft != 0){
-			F.initialize();
-		}
+		if(trump != '*' || util.isTrue(vertical) || soft != 0){ F.initialize(); }
 		
 		if(hard.compare("") != 0)	{	F.doHard(hard);		}
 		else						{	F.setFilter(string(alignmentLength, '1'));	}
 		
 		numSeqs = 0;
-		if(trump != '*' || m->isTrue(vertical) || soft != 0){
+		if(trump != '*' || util.isTrue(vertical) || soft != 0){
 			for (int s = 0; s < fastafileNames.size(); s++) {
 			
-				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-			
-				
-                vector<unsigned long long> positions;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				positions = m->divideFile(fastafileNames[s], processors);
-				for (int i = 0; i < (positions.size()-1); i++) {
-					lines.push_back(new linePair(positions[i], positions[(i+1)]));
-				}	
-				
-				if(processors == 1){
-					int numFastaSeqs = driverCreateFilter(F, fastafileNames[s], lines[0]);
-					numSeqs += numFastaSeqs;
-				}else{
-					int numFastaSeqs = createProcessesCreateFilter(F, fastafileNames[s]); 
-					numSeqs += numFastaSeqs;
-				}
-		#else
-                if(processors == 1){
-                    lines.push_back(new linePair(0, 1000));
-                    int numFastaSeqs = driverCreateFilter(F, fastafileNames[s], lines[0]);
-                    numSeqs += numFastaSeqs;
-				}else {
-                    int numFastaSeqs = 0;
-                    positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
-                    if (numFastaSeqs < processors) { processors = numFastaSeqs; }
-                    
-                    //figure out how many sequences you have to process
-                    int numSeqsPerProcessor = numFastaSeqs / processors;
-                    for (int i = 0; i < processors; i++) {
-                        int startIndex =  i * numSeqsPerProcessor;
-                        if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-                        lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
-                    }
-                    
-                    numFastaSeqs = createProcessesCreateFilter(F, fastafileNames[s]); 
-					numSeqs += numFastaSeqs;
-                }
-		#endif
-                //save the file positions so we can reuse them in the runFilter function
-                if (!recalced) {  savedPositions[s] = positions; }
+                numSeqs += createProcessesCreateFilter(F, fastafileNames[s]);
                 
 				if (m->getControl_pressed()) {  return filterString; }
-			
 			}
 		}
 
 		F.setNumSeqs(numSeqs);
-		if(m->isTrue(vertical) == 1)	{	F.doVertical();	}
-		if(soft != 0)				{	F.doSoft();		}
+		if(util.isTrue(vertical) == 1)	{	F.doVertical();	}
+		if(soft != 0)                   {	F.doSoft();		}
 		filterString = F.getFilter();
         
 		return filterString;
@@ -724,260 +499,148 @@ string FilterSeqsCommand::createFilter() {
 	}
 }
 /**************************************************************************************/
-int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair* filePos) {	
+void driverCreateFilter(filterData* params) {
 	try {
-		
+        if (params->soft != 0)			{  params->F.setSoft(params->soft);		}
+        if (params->trump != '*')		{  params->F.setTrump(params->trump);	}
+        
+        params->F.setLength(params->alignmentLength);
+        
+        if(params->trump != '*' || params->vertical || params->soft != 0){ params->F.initialize(); }
+        
+        if(params->hard.compare("") != 0)	{	params->F.doHard(params->hard);                             }
+        else                                {	params->F.setFilter(string(params->alignmentLength, '1'));	}
+        
 		ifstream in;
-		m->openInputFile(filename, in);
+		params->util.openInputFile(params->filename, in);
 				
-		in.seekg(filePos->start);
+		in.seekg(params->start);
         
         //adjust start if null strings
-        if (filePos->start == 0) {  m->zapGremlins(in); m->gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
 
 		bool done = false;
-		int count = 0;
+		params->count = 0;
         bool error = false;
         
 		while (!done) {
 				
-			if (m->getControl_pressed()) { in.close(); return 1; }
+            if (params->m->getControl_pressed()) { break; }
 					
-			Sequence seq(in); m->gobble(in);
+			Sequence seq(in); params->util.gobble(in);
 			if (seq.getName() != "") {
-                    if (m->getDebug()) { m->mothurOutJustToScreen("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); }
-                if (seq.getAligned().length() != alignmentLength) { m->mothurOut("[ERROR]: Sequences are not all the same length, please correct.\n"); error = true; if (!m->getDebug()) { m->setControl_pressed(true); }else{ m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); } }
+                    if (params->m->getDebug()) { params->m->mothurOutJustToScreen("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); }
+                if (seq.getAligned().length() != params->alignmentLength) { params->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct.\n"); error = true; if (!params->m->getDebug()) { params->m->setControl_pressed(true); }else{ params->m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); } }
 					
-					if(trump != '*')			{	F.doTrump(seq);		}
-					if(m->isTrue(vertical) || soft != 0)	{	F.getFreqs(seq);	}
+					if(params->trump != '*')                    {	params->F.doTrump(seq);		}
+					if(params->vertical || params->soft != 0)	{	params->F.getFreqs(seq);	}
 					cout.flush();
-					count++;
-			}
+					params->count++;
+            }
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = in.tellg();
-				if ((pos == -1) || (pos >= filePos->end)) { break; }
+				if ((pos == -1) || (pos >= params->end)) { break; }
 			#else
-				if (in.eof()) { break; }
+				if (params->count == params->end) { break; }
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 		}
+			if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 	}
+		if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
 		in.close();
-		
-        if (error) { m->setControl_pressed(true); }
         
-		return count;
+        if (error) { params->m->setControl_pressed(true); }
+        
 	}
 	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "driverCreateFilter");
+		params->m->errorOut(e, "FilterSeqsCommand", "driverCreateFilter");
 		exit(1);
 	}
 }
 /**************************************************************************************************/
 
-int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) {
+long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) {
 	try {
-        int process = 1;
-		int num = 0;
-		processIDS.clear();
-        bool recalc = false;
-
+        vector<linePair> lines;
+        vector<unsigned long long> positions;
+        
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				//reset child's filter counts to 0;
-				F.a.clear(); F.a.resize(alignmentLength, 0);
-				F.t.clear(); F.t.resize(alignmentLength, 0);
-				F.g.clear(); F.g.resize(alignmentLength, 0);
-				F.c.clear(); F.c.resize(alignmentLength, 0);
-				F.gap.clear(); F.gap.resize(alignmentLength, 0);
-				
-				num = driverCreateFilter(F, filename, lines[process]);
-				
-				//write out filter counts to file
-				filename += m->mothurGetpid(process) + "filterValues.temp";
-				ofstream out;
-				m->openOutputFile(filename, out);
-				
-				out << num << endl;
-				out << F.getFilter() << endl;
-				for (int k = 0; k < alignmentLength; k++) {		out << F.a[k] << '\t'; }  out << endl;
-				for (int k = 0; k < alignmentLength; k++) {		out << F.t[k] << '\t'; }  out << endl;
-				for (int k = 0; k < alignmentLength; k++) {		out << F.g[k] << '\t'; }  out << endl;
-				for (int k = 0; k < alignmentLength; k++) {		out << F.c[k] << '\t'; }  out << endl;
-				for (int k = 0; k < alignmentLength; k++) {		out << F.gap[k] << '\t'; }  out << endl;
-
-				//cout << F.getFilter() << endl;
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(filename + (toString(processIDS[i]) + "filterValues.temp"));
-                }
-                recalc = true;
-                break;
-
-			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + "filterValues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //redo file divide
-            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-            vector<unsigned long long> positions = m->divideFile(filename, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {  lines.push_back(new linePair(positions[i], positions[(i+1)]));  }
-            
-            num = 0;
-            processIDS.resize(0);
-            process = 1;
-            recalced = true;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    //reset child's filter counts to 0;
-                    F.a.clear(); F.a.resize(alignmentLength, 0);
-                    F.t.clear(); F.t.resize(alignmentLength, 0);
-                    F.g.clear(); F.g.resize(alignmentLength, 0);
-                    F.c.clear(); F.c.resize(alignmentLength, 0);
-                    F.gap.clear(); F.gap.resize(alignmentLength, 0);
-                    
-                    num = driverCreateFilter(F, filename, lines[process]);
-                    
-                    //write out filter counts to file
-                    filename += m->mothurGetpid(process) + "filterValues.temp";
-                    ofstream out;
-                    m->openOutputFile(filename, out);
-                    
-                    out << num << endl;
-                    out << F.getFilter() << endl;
-                    for (int k = 0; k < alignmentLength; k++) {		out << F.a[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < alignmentLength; k++) {		out << F.t[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < alignmentLength; k++) {		out << F.g[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < alignmentLength; k++) {		out << F.c[k] << '\t'; }  out << endl;
-                    for (int k = 0; k < alignmentLength; k++) {		out << F.gap[k] << '\t'; }  out << endl;
-                    
-                    //cout << F.getFilter() << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-        
-		//parent do your part
-		num = driverCreateFilter(F, filename, lines[0]);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<(processors-1);i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//parent reads in and combines Filter info
-		for (int i = 0; i < processIDS.size(); i++) {
-			string tempFilename = filename + toString(processIDS[i]) + "filterValues.temp";
-			ifstream in;
-			m->openInputFile(tempFilename, in);
-			
-			int temp, tempNum;
-			string tempFilterString;
-
-			in >> tempNum; m->gobble(in); num += tempNum;
-
-			in >> tempFilterString;
-			F.mergeFilter(tempFilterString);
-
-			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.a[k] += temp; }		m->gobble(in);
-			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.t[k] += temp; }		m->gobble(in);
-			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.g[k] += temp; }		m->gobble(in);
-			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.c[k] += temp; }		m->gobble(in);
-			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.gap[k] += temp; }	m->gobble(in);
-				
-			in.close();
-			m->mothurRemove(tempFilename);
-		}
-		
-		
+        positions = util.divideFile(filename, processors);
+        for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else
+        long long numFastaSeqs = 0;
+        positions = util.setFilePosFasta(filename, numFastaSeqs);
+        if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the filterData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add info to F.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<filterData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors];
-		HANDLE  hThreadArray[processors]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors; i++ ){
-			
-			filterData* tempFilter = new filterData(filename, m, lines[i]->start, lines[i]->end, alignmentLength, trump, vertical, soft, hard, i);
-			pDataArray.push_back(tempFilter);
-			processIDS.push_back(i);
-            
-			hThreadArray[i] = CreateThread(NULL, 0, MyCreateFilterThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = numFastaSeqs / processors;
+        for (int i = 0; i < processors; i++) {
+            long long startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
+#endif
         
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
-            }
-            F.mergeFilter(pDataArray[i]->F.getFilter());
-            
-			for (int k = 0; k < alignmentLength; k++) {	 F.a[k] += pDataArray[i]->F.a[k];       }
-			for (int k = 0; k < alignmentLength; k++) {	 F.t[k] += pDataArray[i]->F.t[k];       }
-			for (int k = 0; k < alignmentLength; k++) {	 F.g[k] += pDataArray[i]->F.g[k];       }
-			for (int k = 0; k < alignmentLength; k++) {	 F.c[k] += pDataArray[i]->F.c[k];       }
-			for (int k = 0; k < alignmentLength; k++) {	 F.gap[k] += pDataArray[i]->F.gap[k];   }
+        //save the file positions so we can reuse them in the runFilter function
+        if (!recalced) {  savedPositions.push_back(positions); }
+        
+		long long num = 0;
+        bool doVertical = util.isTrue(vertical);
 
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		
-#endif	
-        return num;
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<filterData*> data;
         
+        time_t start, end;
+        time(&start);
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            filterData* dataBundle = new filterData(filename, m, lines[i+1].start, lines[i+1].end, alignmentLength, trump, doVertical, soft, hard, i+1);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverCreateFilter, dataBundle));
+        }
+        
+        filterData* dataBundle = new filterData(filename, m, lines[0].start, lines[0].end, alignmentLength, trump, doVertical, soft, hard, 0);
+        driverCreateFilter(dataBundle);
+        
+        num = dataBundle->count;
+        F.mergeFilter(dataBundle->F.getFilter());
+        
+        for (int k = 0; k < alignmentLength; k++) {	 F.a[k] += dataBundle->F.a[k];       }
+        for (int k = 0; k < alignmentLength; k++) {	 F.t[k] += dataBundle->F.t[k];       }
+        for (int k = 0; k < alignmentLength; k++) {	 F.g[k] += dataBundle->F.g[k];       }
+        for (int k = 0; k < alignmentLength; k++) {	 F.c[k] += dataBundle->F.c[k];       }
+        for (int k = 0; k < alignmentLength; k++) {	 F.gap[k] += dataBundle->F.gap[k];   }
+
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            num += data[i]->count;
+            F.mergeFilter(data[i]->F.getFilter());
+            
+            for (int k = 0; k < alignmentLength; k++) {	 F.a[k] += data[i]->F.a[k];       }
+            for (int k = 0; k < alignmentLength; k++) {	 F.t[k] += data[i]->F.t[k];       }
+            for (int k = 0; k < alignmentLength; k++) {	 F.g[k] += data[i]->F.g[k];       }
+            for (int k = 0; k < alignmentLength; k++) {	 F.c[k] += data[i]->F.c[k];       }
+            for (int k = 0; k < alignmentLength; k++) {	 F.gap[k] += data[i]->F.gap[k];   }
+            
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
+        time(&end);
+        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to create filter for " + toString(num) + " sequences.\n");
+        
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: filter = " + F.getFilter() + "\n\n");  }
+        
+        return num;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FilterSeqsCommand", "createProcessesCreateFilter");

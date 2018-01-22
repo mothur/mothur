@@ -14,33 +14,34 @@
 OptionParser::OptionParser(string option) {
 	try {
 		m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
 		if (option != "") {
 			
 			string key, value;		
 			//reads in parameters and values
 			while((option.find_first_of(',') != -1)) {  //while there are parameters
-				m->splitAtComma(value, option);
-				m->splitAtEquals(key, value);
+				util.splitAtComma(value, option);
+				util.splitAtEquals(key, value);
 				if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 				if (key == "template") { key = "reference"; }
-				key = m->splitWhiteSpace(key).front();
+				key = util.splitWhiteSpace(key).front();
                 //if value is wrapped in '' preserve spaces
                 if ((value[0] == '\'') && (value[(value.length()-1)] == '\'')) {  value = value.substr(1); value = value.substr(0, (value.length()-1)); }
                 else {
-                    value = m->splitWhiteSpace(value).front();
+                    value = util.splitWhiteSpace(value).front();
                 }
 				parameters[key] = value;
 			}
 			
 			//in case there is no comma and to get last parameter after comma
-			m->splitAtEquals(key, option);
+			util.splitAtEquals(key, option);
 			if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 			if (key == "template") { key = "reference"; }
-            key = m->splitWhiteSpace(key).front();
+            key = util.splitWhiteSpace(key).front();
             //if value is wrapped in '' preserve spaces
             if ((option[0] == '\'') && (option[(option.length()-1)] == '\'')) {  option = option.substr(1); option = option.substr(0, (option.length()-1)); }
             else {
-                option = m->splitWhiteSpace(option).front();
+                option = util.splitWhiteSpace(option).front();
             }
 			parameters[key] = option;
 		}
@@ -55,33 +56,34 @@ OptionParser::OptionParser(string option) {
 OptionParser::OptionParser(string option, map<string, string>& copy) {
 	try {
 		m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
 		if (option != "") {
 			
 			string key, value;		
 			//reads in parameters and values
 			while((option.find_first_of(',') != -1)) {  //while there are parameters
-				m->splitAtComma(value, option);
-				m->splitAtEquals(key, value);
+				util.splitAtComma(value, option);
+				util.splitAtEquals(key, value);
 				if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 				if (key == "template") { key = "reference"; }
-				key = m->splitWhiteSpace(key).front();
+				key = util.splitWhiteSpace(key).front();
                 //if value is wrapped in '' preserve spaces
                 if ((value[0] == '\'') && (value[(value.length()-1)] == '\'')) {  value = value.substr(1); value = value.substr(0, (value.length()-1)); }
                 else {
-                    value = m->splitWhiteSpace(value).front();
+                    value = util.splitWhiteSpace(value).front();
                 }
 				parameters[key] = value;
 			}
 			
 			//in case there is no comma and to get last parameter after comma
-			m->splitAtEquals(key, option);
+			util.splitAtEquals(key, option);
 			if ((key == "candidate") || (key == "query")) { key = "fasta"; }
 			if (key == "template") { key = "reference"; }
-			key = m->splitWhiteSpace(key).front();
+			key = util.splitWhiteSpace(key).front();
             //if value is wrapped in '' preserve spaces
             if ((option[0] == '\'') && (option[(option.length()-1)] == '\'')) {  option = option.substr(1); option = option.substr(0, (option.length()-1)); }
             else {
-                option = m->splitWhiteSpace(option).front();
+                option = util.splitWhiteSpace(option).front();
             }
 			parameters[key] = option;
 		}
@@ -109,57 +111,57 @@ map<string, string> OptionParser::getParameters() {
                     
                     //look for file types
                     if (it->first == "fasta") {
-                        it->second = m->getFastaFile();
+                        it->second = current->getFastaFile();
                     }else if (it->first == "qfile") {
-                        it->second = m->getQualFile();
+                        it->second = current->getQualFile();
                     }else if (it->first == "phylip") {
-                        it->second = m->getPhylipFile();
+                        it->second = current->getPhylipFile();
                     }else if (it->first == "column") {
-                        it->second = m->getColumnFile();
+                        it->second = current->getColumnFile();
                     }else if (it->first == "list") {
-                        it->second = m->getListFile();
+                        it->second = current->getListFile();
                     }else if (it->first == "rabund") {
-                        it->second = m->getRabundFile();
+                        it->second = current->getRabundFile();
                     }else if (it->first == "sabund") {
-                        it->second = m->getSabundFile();
+                        it->second = current->getSabundFile();
                     }else if (it->first == "name") {
-                        it->second = m->getNameFile();
+                        it->second = current->getNameFile();
                     }else if (it->first == "group") {
-                        it->second = m->getGroupFile();
+                        it->second = current->getGroupFile();
                     }else if (it->first == "order") {
-                        it->second = m->getOrderFile();
+                        it->second = current->getOrderFile();
                     }else if (it->first == "ordergroup") {
-                        it->second = m->getOrderGroupFile();
+                        it->second = current->getOrderGroupFile();
                     }else if (it->first == "tree") {
-                        it->second = m->getTreeFile();
+                        it->second = current->getTreeFile();
                     }else if (it->first == "shared") {
-                        it->second = m->getSharedFile();
+                        it->second = current->getSharedFile();
                     }else if (it->first == "relabund") {
-                        it->second = m->getRelAbundFile();
+                        it->second = current->getRelAbundFile();
                     }else if (it->first == "design") {
-                        it->second = m->getDesignFile();
+                        it->second = current->getDesignFile();
                     }else if (it->first == "sff") {
-                        it->second = m->getSFFFile();
+                        it->second = current->getSFFFile();
                     }else if (it->first == "flow") {
-                            it->second = m->getFlowFile();
+                            it->second = current->getFlowFile();
                     }else if (it->first == "oligos") {
-                        it->second = m->getOligosFile();
+                        it->second = current->getOligosFile();
                     }else if (it->first == "accnos") {
-                        it->second = m->getAccnosFile();
+                        it->second = current->getAccnosFile();
                     }else if (it->first == "taxonomy") {
-                        it->second = m->getTaxonomyFile();
+                        it->second = current->getTaxonomyFile();
                     }else if (it->first == "constaxonomy") {
-                        it->second = m->getConsTaxonomyFile();
+                        it->second = current->getConsTaxonomyFile();
                     }else if (it->first == "contigsreport") {
-                            it->second = m->getContigsReportFile();
+                            it->second = current->getContigsReportFile();
                     }else if (it->first == "biom") {
-                        it->second = m->getBiomFile();
+                        it->second = current->getBiomFile();
                     }else if (it->first == "count") {
-                            it->second = m->getCountTableFile();
+                            it->second = current->getCountFile();
                     }else if (it->first == "summary") {
-                            it->second = m->getSummaryFile();
+                            it->second = current->getSummaryFile();
                     }else if (it->first == "file") {
-                            it->second = m->getFileFile();
+                            it->second = current->getFileFile();
                     }else {
                         m->mothurOut("[ERROR]: mothur does not save a current file for " + it->first); m->mothurOutEndLine();
                     }
@@ -187,20 +189,20 @@ map<string, string> OptionParser::getParameters() {
 //this function will look at each one, if the rootnames match, mothur will warn 
 //the user that they may have neglected to provide a namefile.
 //stops when it finds a match.
-bool OptionParser::getNameFile(vector<string> files) {	
+bool OptionParser::getNameFile(vector<string> files) {
 	try {
-		string namefile = m->getNameFile();
+		string namefile = current->getNameFile();
 		bool match = false;
 		
-		if ((namefile != "")&&(!m->getMothurCalling())) {
-			string temp = m->getRootName(m->getSimpleName(namefile));
+		if (namefile != "") {
+			string temp = util.getRootName(util.getSimpleName(namefile));
 			vector<string> rootName;
-			m->splitAtChar(temp, rootName, '.');
+			util.splitAtChar(temp, rootName, '.');
 			
 			for (int i = 0; i < files.size(); i++) {
-				temp = m->getRootName(m->getSimpleName(files[i]));
+				temp = util.getRootName(util.getSimpleName(files[i]));
 				vector<string> root;
-				m->splitAtChar(temp, root, '.');
+				util.splitAtChar(temp, root, '.');
 				
 				int smallest = rootName.size();
 				if (root.size() < smallest) { smallest = root.size(); }
@@ -219,9 +221,7 @@ bool OptionParser::getNameFile(vector<string> files) {
 					}
 				}
 			}
-			
 		}
-		
 		
 		return match;
 	}

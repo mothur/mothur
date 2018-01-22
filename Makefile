@@ -19,6 +19,7 @@
 OPTIMIZE ?= yes
 USEREADLINE ?= yes
 USEBOOST ?= yes
+LOGFILE_NAME ?= no
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
@@ -29,7 +30,11 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
     CXXFLAGS += -DBIT_VERSION
 endif
 
-# Fastest
+# Set a static logfile name
+ifeq  ($(strip $(LOGFILE_NAME)),yes)
+    LOGFILE_NAME="\"mothur.logfile\""
+endif
+
 ifeq  ($(strip $(OPTIMIZE)),yes)
     CXXFLAGS += -O3
 endif

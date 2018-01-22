@@ -47,7 +47,7 @@ private:
 	string label, calc, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
 	vector<string> inputFileNames, outputNames;
-	vector<string> groups;
+	vector<string> Groups;
 	string outputDir;
 	
 	vector<string> parseSharedFile(string, map<string, set<int> >&);

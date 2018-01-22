@@ -109,14 +109,14 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -124,7 +124,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -132,7 +132,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -145,49 +145,49 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			outputTypes["sabund"] = tempOutNames;
 		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { 
-				phylipfile = m->getPhylipFile(); 
+				phylipfile = current->getPhylipFile(); 
 				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("You need to provide a phylip file with the cluster.classic command."); m->mothurOutEndLine(); 
 					abort = true; 
 				}	
-			}else { m->setPhylipFile(phylipfile); }	
+			}else { current->setPhylipFile(phylipfile); }	
 
 		
 			//check for optional parameter and set defaults
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; namefile = ""; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.classic command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
 			string temp;
-			temp = validParameter.validFile(parameters, "precision", false);
+			temp = validParameter.valid(parameters, "precision");
 			if (temp == "not found") { temp = "100"; }
 			//saves precision legnth for formatting below
 			length = temp.length();
-			m->mothurConvert(temp, precision); 
+			util.mothurConvert(temp, precision); 
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);
+			temp = validParameter.valid(parameters, "cutoff");
 			if (temp == "not found") { temp = "10"; }
-			m->mothurConvert(temp, cutoff);
+			util.mothurConvert(temp, cutoff);
 			
-			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
-			sim = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "sim");				if (temp == "not found") { temp = "F"; }
+			sim = util.isTrue(temp); 
 			
-			method = validParameter.validFile(parameters, "method", false);
+			method = validParameter.valid(parameters, "method");
 			if (method == "not found") { method = "average"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { 
@@ -208,7 +208,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 int ClusterDoturCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         
         ClusterClassic* cluster = new ClusterClassic(cutoff, method, sim);
@@ -237,25 +237,25 @@ int ClusterDoturCommand::execute(){
 		list = cluster->getListVector();
 		rabund = cluster->getRAbundVector();
 								
-		if (outputDir == "") { outputDir += m->hasPath(phylipfile); }
-		fileroot = outputDir + m->getRootName(m->getSimpleName(phylipfile));
+		if (outputDir == "") { outputDir += util.hasPath(phylipfile); }
+		fileroot = outputDir + util.getRootName(util.getSimpleName(phylipfile));
 			
         map<string, string> variables; 
         variables["[filename]"] = fileroot;
         variables["[clustertag]"] = tag;
         string sabundFileName = getOutputFileName("sabund", variables);
         string rabundFileName = getOutputFileName("rabund", variables);
-        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        //if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         string listFileName = getOutputFileName("list", variables);
         
         if (countfile == "") {
-            m->openOutputFile(sabundFileName,	sabundFile);
-            m->openOutputFile(rabundFileName,	rabundFile);
+            util.openOutputFile(sabundFileName,	sabundFile);
+            util.openOutputFile(rabundFileName,	rabundFile);
             outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
         }
-		m->openOutputFile(listFileName,	listFile);
+		util.openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
         list->printHeaders(listFile);
 		
@@ -269,13 +269,13 @@ int ClusterDoturCommand::execute(){
 		int estart = time(NULL);
 	
 		while ((cluster->getSmallDist() < cutoff) && (cluster->getNSeqs() > 1)){
-			if (m->getControl_pressed()) { delete cluster; delete list; delete rabund; if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
-                listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear();  return 0;  }
+			if (m->getControl_pressed()) { delete cluster; delete list; delete rabund; if(countfile == "") {rabundFile.close(); sabundFile.close();  util.mothurRemove((fileroot+ tag + ".rabund")); util.mothurRemove((fileroot+ tag + ".sabund")); }
+                listFile.close(); util.mothurRemove((fileroot+ tag + ".list")); outputTypes.clear();  return 0;  }
 		
 			cluster->update(cutoff);
 	
 			float dist = cluster->getSmallDist();
-			float rndDist = m->ceilDist(dist, precision);
+			float rndDist = util.ceilDist(dist, precision);
 
 			if(previousDist <= 0.0000 && dist != previousDist){
 				printData("unique", counts);
@@ -306,23 +306,17 @@ int ClusterDoturCommand::execute(){
 		delete cluster;  delete list; delete rabund;
 		
 		//set list file as new current listfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("list");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
-		}
+		if (itTypes != outputTypes.end()) { if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); } }
 		
 		//set rabund file as new current rabundfile
 		itTypes = outputTypes.find("rabund");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
-		}
+		if (itTypes != outputTypes.end()) { if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setRabundFile(currentName); } }
 		
 		//set sabund file as new current sabundfile
 		itTypes = outputTypes.find("sabund");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
-		}
+		if (itTypes != outputTypes.end()) { if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSabundFile(currentName); } }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

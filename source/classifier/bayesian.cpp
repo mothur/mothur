@@ -21,10 +21,11 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
         shortcuts = sh;
 		string baseName = tempFile;
 		string baseTName = tfile;
+        Utils util;
 
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
-		string tfileroot = m->getFullPathName(baseTName.substr(0,baseTName.find_last_of(".")+1));
-		string tempfileroot = m->getRootName(m->getSimpleName(baseName));
+		string tfileroot = util.getFullPathName(baseTName.substr(0,baseTName.find_last_of(".")+1));
+		string tempfileroot = util.getRootName(util.getSimpleName(baseName));
 		string phyloTreeName = tfileroot + "tree.train";
 		string phyloTreeSumName = tfileroot + "tree.sum";
 		string probFileName = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.prob";
@@ -38,7 +39,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		ifstream probFileTest(probFileName.c_str());
 		ifstream probFileTest3(phyloTreeSumName.c_str());
 		
-		int start = time(NULL);
+		long start = time(NULL);
 		
 		//if they are there make sure they were created after this release date
 		bool FilesGood = false;
@@ -67,7 +68,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0);
 			
 			//prevents errors caused by creating shortcut files if you had an error in the sanity check.
-			if (m->getControl_pressed()) {  m->mothurRemove(phyloTreeName);  m->mothurRemove(probFileName); m->mothurRemove(probFileName2); }
+			if (m->getControl_pressed()) {  util.mothurRemove(phyloTreeName);  util.mothurRemove(probFileName); util.mothurRemove(probFileName2); }
 			else{ 
 				genusNodes = phyloTree->getGenusNodes(); 
 				genusTotals = phyloTree->getGenusTotals();
@@ -91,20 +92,18 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				ofstream out2;
 
                 if (shortcuts) { 
-                    m->openOutputFile(probFileName, out); 
+                    util.openOutputFile(probFileName, out); 
 				
                     //output mothur version
-                    out << "#" << m->getVersion() << endl;
+                    out << "#" << current->getVersion() << endl;
 				
                     out << numKmers << endl;
 				
-                    m->openOutputFile(probFileName2, out2);
+                    util.openOutputFile(probFileName2, out2);
 				
                     //output mothur version
-                    out2 << "#" << m->getVersion() << endl;
+                    out2 << "#" << current->getVersion() << endl;
                 }
-				
-				
 
 				//for each word
 				for (int i = 0; i < numKmers; i++) {
@@ -187,9 +186,10 @@ Bayesian::~Bayesian() {
 }
 
 /**************************************************************************************************/
-string Bayesian::getTaxonomy(Sequence* seq) {
+string Bayesian::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped) {
 	try {
 		string tax = "";
+        simpleTax = "";
 		Kmer kmer(kmerSize);
 		flipped = false;
 		
@@ -232,7 +232,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 	
         if (m->getDebug()) {  m->mothurOut(seq->getName() + "\t"); }
         
-		tax = bootstrapResults(queryKmers, index, numToSelect);
+		tax = bootstrapResults(queryKmers, index, numToSelect, simpleTax);
         
         if (m->getDebug()) {  m->mothurOut("\n"); }
 		
@@ -244,7 +244,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 	}
 }
 /**************************************************************************************************/
-string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
+string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect, string& simpleTax) {
 	try {
 				
 		map<int, int> confidenceScores; 
@@ -269,7 +269,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 			
 			vector<int> temp;
 			for (int j = 0; j < numToSelect; j++) {
-				int index = m->getRandomIndex(kmers.size()-1);
+				int index = util.getRandomIndex(kmers.size()-1);
 				
 				//add word to temp
 				temp.push_back(kmers[index]);
@@ -402,11 +402,11 @@ int Bayesian::generateWordPairDiffArr(){
 /**************************************************************************************************/
 void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string inNumName) {
 	try{
-		
+		Utils util;
         //read version
-        string line = m->getline(in); m->gobble(in);
+        string line = util.getline(in); util.gobble(in);
         
-        in >> numKmers; m->gobble(in);
+        in >> numKmers; util.gobble(in);
         //initialze probabilities
         wordGenusProb.resize(numKmers);
         
@@ -419,14 +419,14 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
         for (int j = 0; j < numKmers; j++) {  diffPair tempDiffPair; WordPairDiffArr.push_back(tempDiffPair); }
         
         //read version
-        string line2 = m->getline(inNum); m->gobble(inNum);
+        string line2 = util.getline(inNum); util.gobble(inNum);
         float probTemp;
         
         while (inNum) {
             inNum >> zeroCountProb[count] >> num[count] >> probTemp;
             WordPairDiffArr[count].prob = probTemp;
             count++;
-            m->gobble(inNum);
+            util.gobble(inNum);
             
         }
         inNum.close();
@@ -445,7 +445,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
                 wordGenusProb[kmer][name] = prob;
             }
             
-            m->gobble(in);
+            util.gobble(in);
         }
         in.close();
         
@@ -463,10 +463,11 @@ bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file
 		bool good = true;
 		
 		vector<string> lines;
-		lines.push_back(m->getline(file1));  
-		lines.push_back(m->getline(file2)); 
-		lines.push_back(m->getline(file3)); 
-		lines.push_back(m->getline(file4)); 
+        Utils util;
+		lines.push_back(util.getline(file1));  
+		lines.push_back(util.getline(file2)); 
+		lines.push_back(util.getline(file3)); 
+		lines.push_back(util.getline(file4)); 
 
 		//before we added this check
 		if ((lines[0][0] != '#') || (lines[1][0] != '#') || (lines[2][0] != '#') || (lines[3][0] != '#')) {  good = false;  }
@@ -475,15 +476,15 @@ bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file
 			for (int i = 0; i < lines.size(); i++) { lines[i] = lines[i].substr(1);  }
 			
 			//get mothurs current version
-			string version = m->getVersion();
+			string version = current->getVersion();
 			
 			vector<string> versionVector;
-			m->splitAtChar(version, versionVector, '.');
+			util.splitAtChar(version, versionVector, '.');
 			
 			//check each files version
 			for (int i = 0; i < lines.size(); i++) { 
 				vector<string> linesVector;
-				m->splitAtChar(lines[i], linesVector, '.');
+				util.splitAtChar(lines[i], linesVector, '.');
 			
 				if (versionVector.size() != linesVector.size()) { good = false; break; }
 				else {

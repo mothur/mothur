@@ -171,14 +171,14 @@ int ChimeraSlayer::doPrep() {
 		}
 		string 	kmerDBNameLeft;
 		string 	kmerDBNameRight;
-	
+        Utils util;
 		//generate the kmerdb to pass to maligner
 		if (searchMethod == "kmer") { 
-			string templatePath = m->hasPath(templateFileName);
-			string rightTemplateFileName = templatePath + "right." + m->getRootName(m->getSimpleName(templateFileName));
+			string templatePath = util.hasPath(templateFileName);
+			string rightTemplateFileName = templatePath + "right." + util.getRootName(util.getSimpleName(templateFileName));
 			databaseRight = new KmerDB(rightTemplateFileName, kmerSize);
 				
-			string leftTemplateFileName = templatePath + "left." + m->getRootName(m->getSimpleName(templateFileName));
+			string leftTemplateFileName = templatePath + "left." + util.getRootName(util.getSimpleName(templateFileName));
 			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
 		
 			//leftside
@@ -187,7 +187,7 @@ int ChimeraSlayer::doPrep() {
 			bool needToGenerateLeft = true;
 			
 			if(kmerFileTestLeft){	
-				bool GoodFile = m->checkReleaseVersion(kmerFileTestLeft, m->getVersion());
+				bool GoodFile = util.checkReleaseVersion(kmerFileTestLeft, current->getVersion());
 				if (GoodFile) {  needToGenerateLeft = false;	}
 			}
 			
@@ -218,7 +218,7 @@ int ChimeraSlayer::doPrep() {
 			bool needToGenerateRight = true;
 			
 			if(kmerFileTestRight){	
-				bool GoodFile = m->checkReleaseVersion(kmerFileTestRight, m->getVersion());
+				bool GoodFile = util.checkReleaseVersion(kmerFileTestRight, current->getVersion());
 				if (GoodFile) {  needToGenerateRight = false;	}
 			}
 			
@@ -245,7 +245,7 @@ int ChimeraSlayer::doPrep() {
 		}else if (searchMethod == "blast") {
 		
 			//generate blastdb
-			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(fastafile)), -1.0, -1.0, 1, -3, blastlocation, threadID);
+			databaseLeft = new BlastDB(util.getRootName(util.getSimpleName(fastafile)), -1.0, -1.0, 1, -3, blastlocation, threadID);
 			
 			if (m->getControl_pressed()) { return 0; }
 
@@ -295,12 +295,13 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 		string 	kmerDBNameRight;
 		
 		//generate the kmerdb to pass to maligner
-		if (searchMethod == "kmer") { 
-			string templatePath = m->hasPath(templateFileName);
-			string rightTemplateFileName = templatePath + "right." + m->getRootName(m->getSimpleName(templateFileName));
+		if (searchMethod == "kmer") {
+            Utils util;
+			string templatePath = util.hasPath(templateFileName);
+			string rightTemplateFileName = templatePath + "right." + util.getRootName(util.getSimpleName(templateFileName));
 			databaseRight = new KmerDB(rightTemplateFileName, kmerSize);
 			
-			string leftTemplateFileName = templatePath + "left." + m->getRootName(m->getSimpleName(templateFileName));
+			string leftTemplateFileName = templatePath + "left." + util.getRootName(util.getSimpleName(templateFileName));
 			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
 			
 			
@@ -332,7 +333,8 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 		}else if (searchMethod == "blast") {
 			
 			//generate blastdb
-			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(templateFileName)), -1.0, -1.0, 1, -3, blastlocation, threadID);
+            Utils util;
+			databaseLeft = new BlastDB(util.getRootName(util.getSimpleName(templateFileName)), -1.0, -1.0, 1, -3, blastlocation, threadID);
 			
 			if (m->getControl_pressed()) { return userTemplate; }
 
@@ -817,6 +819,7 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 		Sequence* queryLeft = new Sequence(q.getName(), leftQuery);
 		Sequence* queryRight = new Sequence(q.getName(), rightQuery);
 		
+        
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1, minSim);
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1, minSim);
 				
@@ -914,8 +917,9 @@ vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, i
 		Sequence* queryLeft = new Sequence(q.getName(), leftQuery);
 		Sequence* queryRight = new Sequence(q.getName(), rightQuery);
 		
-		vector<int> tempIndexesLeft = databaseLeft->findClosestSequences(queryLeft, num);
-		vector<int> tempIndexesRight = databaseRight->findClosestSequences(queryRight, num);
+        vector<float> Scores;
+		vector<int> tempIndexesLeft = databaseLeft->findClosestSequences(queryLeft, num, Scores);
+		vector<int> tempIndexesRight = databaseRight->findClosestSequences(queryRight, num, Scores);
 		
 		//merge results		
 		map<int, int> seen;

@@ -8,6 +8,7 @@
  */
 
 #include "readphylipvector.h"
+#include "utils.hpp"
 
 /***********************************************************************/
 ReadPhylipVector::ReadPhylipVector(string d) {
@@ -26,7 +27,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 		vector<string> names;
 		
 		ifstream in;
-		m->openInputFile(distFile, in);
+        Utils util; util.openInputFile(distFile, in);
 		
 		//check whether matrix is square
 		char d;
@@ -37,7 +38,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 		string numTest;
 		in >> numTest >> name;
 		
-		if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, quitting."); m->mothurOutEndLine(); exit(1); }
+		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, quitting."); m->mothurOutEndLine(); exit(1); }
 		else { convert(numTest, numSeqs); }
 		
 		while((d=in.get()) != EOF){
@@ -59,7 +60,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 		
 		//reopen and read now that you know whether you are square
 		ifstream f;
-		m->openInputFile(distFile, f);
+		util.openInputFile(distFile, f);
 		
 		int rank;
 		f >> rank;
@@ -113,7 +114,7 @@ vector<string> ReadPhylipVector::read(vector<seqDist>& matrix) {
 		vector<string> names;
 		
 		ifstream in;
-		m->openInputFile(distFile, in);
+        Utils util; util.openInputFile(distFile, in);
 		
 		//check whether matrix is square
 		char d;
@@ -142,7 +143,7 @@ vector<string> ReadPhylipVector::read(vector<seqDist>& matrix) {
 		
 		//reopen and read now that you know whether you are square
 		ifstream f;
-		m->openInputFile(distFile, f);
+		util.openInputFile(distFile, f);
 		
 		int rank;
 		float temp;

@@ -14,7 +14,7 @@
 #include "weighted.h"
 #include "counttable.h"
 #include "progress.hpp"
-#include "sharedutilities.h"
+
 #include "fileoutput.h"
 #include "readtree.h"
 
@@ -85,9 +85,11 @@ struct weightedRandomData {
     Tree* t;
     CountTable* ct;
     bool includeRoot;
+    vector<string> Groups;
+    
 	
 	weightedRandomData(){}
-	weightedRandomData(MothurOut* mout, int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count, bool ir, vector< vector<double> > sc) {
+	weightedRandomData(MothurOut* mout, int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count, bool ir, vector< vector<double> > sc, vector<string> g) {
         m = mout;
 		start = st;
 		num = en;
@@ -96,6 +98,8 @@ struct weightedRandomData {
         ct = count;
         includeRoot = ir;
         scores = sc;
+        Groups = g;
+    
 	}
 };
 
@@ -106,10 +110,10 @@ static DWORD WINAPI MyWeightedRandomThreadFunction(LPVOID lpParam){
 	weightedRandomData* pDataArray;
 	pDataArray = (weightedRandomData*)lpParam;
 	try {
+        vector<string> Treenames = pDataArray->t->getTreeNames();
+        Tree* randT = new Tree(pDataArray->ct, Treenames);
         
-        Tree* randT = new Tree(pDataArray->ct);
-        
-        Weighted weighted(pDataArray->includeRoot);
+        Weighted weighted(pDataArray->includeRoot, pDataArray->Groups);
         
 		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {
             

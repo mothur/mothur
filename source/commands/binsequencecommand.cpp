@@ -109,14 +109,14 @@ BinSeqCommand::BinSeqCommand(string option) {
 			outputTypes["fasta"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -124,7 +124,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -132,7 +132,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -140,7 +140,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -148,7 +148,7 @@ BinSeqCommand::BinSeqCommand(string option) {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -156,55 +156,55 @@ BinSeqCommand::BinSeqCommand(string option) {
 
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				//if there is a current phylip file, use it
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found") { 			
-				listfile = m->getListFile(); 
+				listfile = current->getListFile(); 
 				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listfile == "not open") { listfile = ""; abort = true; }	
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
 				outputDir = "";	
-				outputDir += m->hasPath(listfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(listfile); //if user entered a file with a path then preserve it	
 			}
 			
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			namesfile = validParameter.validFile(parameters, "name", true);
+			namesfile = validParameter.validFile(parameters, "name");
 			if (namesfile == "not open") { namesfile = ""; abort = true; }	
 			else if (namesfile == "not found") { namesfile = ""; }
-			else {  m->setNameFile(namesfile); }
+			else {  current->setNameFile(namesfile); }
 
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
             if ((namesfile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -217,7 +217,7 @@ BinSeqCommand::BinSeqCommand(string option) {
             if (countfile == "") {
                 if (namesfile == ""){
                     vector<string> files; files.push_back(fastafile); 
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 			
@@ -235,7 +235,7 @@ BinSeqCommand::~BinSeqCommand(){}
 
 int BinSeqCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 	
 		int error = 0;
 		
@@ -252,7 +252,7 @@ int BinSeqCommand::execute(){
 		if (namesfile != "") {  readNamesFile();  }
         if (countfile != "") {  ct.readTable(countfile, true, false);  }
 		
-		input = new InputData(listfile, "list");
+		input = new InputData(listfile, "list", nullVector);
 		list = input->getListVector();
 		string lastLabel = list->getLabel();
 		
@@ -265,25 +265,25 @@ int BinSeqCommand::execute(){
 				
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if(m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+			if(m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 				
 				error = process(list);	
-				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }	
+				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }	
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
 				list = input->getListVector(lastLabel);
 				
 				error = process(list);	
-				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 													
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -298,7 +298,7 @@ int BinSeqCommand::execute(){
 			list = input->getListVector();
 		}
 		
-		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -314,12 +314,12 @@ int BinSeqCommand::execute(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (list != NULL) {		delete list;	}
 			list = input->getListVector(lastLabel);
 				
 			error = process(list);	
-			if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+			if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 			
 			delete list;  
 		}
@@ -328,13 +328,13 @@ int BinSeqCommand::execute(){
 		delete fasta; 
 		if (groupfile != "") {  delete groupMap;   } 
 		
-		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);		}  return 0; }	
+		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }	
         
         //set align file as new current fastafile
 		string currentFasta = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; m->setFastaFile(currentFasta); }
+			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; current->setFastaFile(currentFasta); }
 		}
 		
 		m->mothurOutEndLine();
@@ -355,7 +355,7 @@ int BinSeqCommand::execute(){
 void BinSeqCommand::readNamesFile() {
 	try {
 		vector<string> dupNames;
-		m->openInputFile(namesfile, inNames);
+		util.openInputFile(namesfile, inNames);
 		
 		string name, names, sequence;
 	
@@ -366,7 +366,7 @@ void BinSeqCommand::readNamesFile() {
 			dupNames.clear();
 			
 			//parse names into vector
-			m->splitAtComma(names, dupNames);
+			util.splitAtComma(names, dupNames);
 			
 			//store names in fasta map
 			sequence = fasta->getSequence(name);
@@ -374,7 +374,7 @@ void BinSeqCommand::readNamesFile() {
 				fasta->push_back(dupNames[i], sequence);
 			}
 		
-			m->gobble(inNames);
+			util.gobble(inNames);
 		}
 		inNames.close();
 
@@ -389,11 +389,11 @@ void BinSeqCommand::readNamesFile() {
 int BinSeqCommand::process(ListVector* list) {
 	try {
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = list->getLabel();
         string outputFileName = getOutputFileName("fasta", variables);
         
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
         
         m->mothurOut(list->getLabel()); m->mothurOutEndLine();
@@ -406,7 +406,7 @@ int BinSeqCommand::process(ListVector* list) {
             
             string binnames = list->get(i);
             vector<string> names;
-            m->splitAtComma(binnames, names);
+            util.splitAtComma(binnames, names);
             for (int j = 0; j < names.size(); j++) {
                 string name = names[j];
                 

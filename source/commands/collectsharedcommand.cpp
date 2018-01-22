@@ -29,7 +29,7 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-#include "sharedjackknife.h"
+//#include "sharedjackknife.h"
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
@@ -280,78 +280,78 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
 			}
 			
 			//get shared file
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking..
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			else { 
 				 if (calc == "default")  {  calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
-			m->setGroups(Groups);
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, freq); 
+			temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, freq); 
 			
-			temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
-			all = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "all");				if (temp == "not found") { temp = "false"; }
+			all = util.isTrue(temp);
 						
-			if (abort == false) {
+			if (!abort) {
 				
-				string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+				string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(sharedfile));
 				map<string, string> variables; 
                 variables["[filename]"] = fileNameRoot;
                 
 				ValidCalculators validCalculator;
 				
 				for (int i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("shared", Estimators[i]) == true) { 
+					if (validCalculator.isValidCalculator("shared", Estimators[i]) ) { 
 						if (Estimators[i] == "sharedchao") { 
 							cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(getOutputFileName("sharedchao", variables))));
 							outputNames.push_back(getOutputFileName("sharedchao", variables)); outputTypes["sharedchao"].push_back(getOutputFileName("sharedchao", variables));
@@ -496,35 +496,27 @@ CollectSharedCommand::~CollectSharedCommand(){}
 int CollectSharedCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }
 		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}	
 	
-		input = new InputData(sharedfile, "sharedfile");
+		input = new InputData(sharedfile, "sharedfile", Groups);
 		order = input->getSharedOrderVector();
 		string lastLabel = order->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-			
-		//set users groups
-		SharedUtil* util = new SharedUtil();
-		Groups = m->getGroups();
-		vector<string> allGroups = m->getAllGroups();
-		util->setGroups(Groups, allGroups, "collect");
-		m->setGroups(Groups);
-		m->setAllGroups(allGroups);
-		delete util;
+        Groups = order->getGroups();
 
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->getControl_pressed()) { 
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					delete order; delete input;
-					m->clearGroups();
+					
 					return 0;
 			}
 
@@ -541,7 +533,7 @@ int CollectSharedCommand::execute(){
 			}
 			
 			//you have a label the user want that is smaller than this label and the last label has not already been processed
-			if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = order->getLabel();
 				
 				delete order;
@@ -569,9 +561,9 @@ int CollectSharedCommand::execute(){
 		}
 		
 		if (m->getControl_pressed()) { 
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}   outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}   outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					m->clearGroups();
+					
 					delete input;
 					return 0;
 		}
@@ -590,7 +582,7 @@ int CollectSharedCommand::execute(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (order != NULL) {  delete order;  }
 			order = input->getSharedOrderVector(lastLabel);
 			
@@ -600,11 +592,11 @@ int CollectSharedCommand::execute(){
 			delete cCurve;
 			
 			if (m->getControl_pressed()) { 
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  outputTypes.clear();
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				delete order; 
 				delete input;
-				m->clearGroups();
+				
 				return 0;
 			}
 
@@ -614,7 +606,7 @@ int CollectSharedCommand::execute(){
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
 		
 		//reset groups parameter
-		m->clearGroups(); 
+		 
 		delete input;
 		
 		m->mothurOutEndLine();

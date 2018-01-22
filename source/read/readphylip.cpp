@@ -14,7 +14,7 @@
 
 ReadPhylipMatrix::ReadPhylipMatrix(string distFile){
         
-        successOpen = m->openInputFile(distFile, fileHandle);
+        successOpen = util.openInputFile(distFile, fileHandle);
 		sim=false;
         
 }
@@ -22,7 +22,7 @@ ReadPhylipMatrix::ReadPhylipMatrix(string distFile){
 
 ReadPhylipMatrix::ReadPhylipMatrix(string distFile, bool s){
 	
-	successOpen = m->openInputFile(distFile, fileHandle);
+	successOpen = util.openInputFile(distFile, fileHandle);
 	sim=s;
 }
 
@@ -40,7 +40,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 						string numTest;
 						fileHandle >> numTest >> name;
 			
-						if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+						if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
 						else { convert(numTest, nseqs); }
 			
                         matrixNames.push_back(name);
@@ -213,7 +213,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
         string numTest;
         fileHandle >> numTest >> name;
         
-        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
         
         matrixNames.push_back(name);

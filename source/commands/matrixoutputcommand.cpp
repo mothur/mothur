@@ -119,180 +119,84 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			outputTypes["phylip"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
 			}
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not found") { 			
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else if (sharedfile == "not open") { sharedfile = ""; abort = true; }
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(sharedfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(sharedfile); //if user entered a file with a path then preserve it	
 			}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "lt"; }
+			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "lt"; }
 			if ((output != "lt") && (output != "square") && (output != "column")) { m->mothurOut(output + " is not a valid output form. Options are lt, column and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
             
-            mode = validParameter.validFile(parameters, "mode", false);		if(mode == "not found"){	mode = "average"; }
+            mode = validParameter.valid(parameters, "mode");		if(mode == "not found"){	mode = "average"; }
 			if ((mode != "average") && (mode != "median")) { m->mothurOut(mode + " is not a valid mode. Options are average and medina. I will use average."); m->mothurOutEndLine(); output = "average"; }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
-			}
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
+            }
 			
-			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 				
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "jclass-thetayc";  }
 			else { 
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
             
-            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+            temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters); 
             
-            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
-			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
+			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
             else {  
-                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
                 else { subsample = false; }
             }
             
             if (subsample == false) { iters = 0; }
             
-			if (abort == false) {
-			
-				ValidCalculators validCalculator;
-				
-				int i;
-				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("matrix", Estimators[i]) == true) { 
-						if (Estimators[i] == "sharedsobs") { 
-							matrixCalculators.push_back(new SharedSobsCS());
-						}else if (Estimators[i] == "sharedchao") { 
-							matrixCalculators.push_back(new SharedChao1());
-						}else if (Estimators[i] == "sharedace") { 
-							matrixCalculators.push_back(new SharedAce());
-						}else if (Estimators[i] == "jabund") { 	
-							matrixCalculators.push_back(new JAbund());
-						}else if (Estimators[i] == "sorabund") { 
-							matrixCalculators.push_back(new SorAbund());
-						}else if (Estimators[i] == "jclass") { 
-							matrixCalculators.push_back(new Jclass());
-						}else if (Estimators[i] == "sorclass") { 
-							matrixCalculators.push_back(new SorClass());
-						}else if (Estimators[i] == "jest") { 
-							matrixCalculators.push_back(new Jest());
-						}else if (Estimators[i] == "sorest") { 
-							matrixCalculators.push_back(new SorEst());
-						}else if (Estimators[i] == "thetayc") { 
-							matrixCalculators.push_back(new ThetaYC());
-						}else if (Estimators[i] == "thetan") { 
-							matrixCalculators.push_back(new ThetaN());
-						}else if (Estimators[i] == "kstest") { 
-							matrixCalculators.push_back(new KSTest());
-						}else if (Estimators[i] == "sharednseqs") { 
-							matrixCalculators.push_back(new SharedNSeqs());
-						}else if (Estimators[i] == "ochiai") { 
-							matrixCalculators.push_back(new Ochiai());
-						}else if (Estimators[i] == "anderberg") { 
-							matrixCalculators.push_back(new Anderberg());
-						}else if (Estimators[i] == "kulczynski") { 
-							matrixCalculators.push_back(new Kulczynski());
-						}else if (Estimators[i] == "kulczynskicody") { 
-							matrixCalculators.push_back(new KulczynskiCody());
-						}else if (Estimators[i] == "lennon") { 
-							matrixCalculators.push_back(new Lennon());
-						}else if (Estimators[i] == "morisitahorn") { 
-							matrixCalculators.push_back(new MorHorn());
-						}else if (Estimators[i] == "braycurtis") { 
-							matrixCalculators.push_back(new BrayCurtis());
-						}else if (Estimators[i] == "whittaker") { 
-							matrixCalculators.push_back(new Whittaker());
-						}else if (Estimators[i] == "odum") { 
-							matrixCalculators.push_back(new Odum());
-						}else if (Estimators[i] == "canberra") { 
-							matrixCalculators.push_back(new Canberra());
-						}else if (Estimators[i] == "structeuclidean") { 
-							matrixCalculators.push_back(new StructEuclidean());
-						}else if (Estimators[i] == "structchord") { 
-							matrixCalculators.push_back(new StructChord());
-						}else if (Estimators[i] == "hellinger") { 
-							matrixCalculators.push_back(new Hellinger());
-						}else if (Estimators[i] == "manhattan") { 
-							matrixCalculators.push_back(new Manhattan());
-						}else if (Estimators[i] == "structpearson") { 
-							matrixCalculators.push_back(new StructPearson());
-						}else if (Estimators[i] == "soergel") { 
-							matrixCalculators.push_back(new Soergel());
-						}else if (Estimators[i] == "spearman") { 
-							matrixCalculators.push_back(new Spearman());
-						}else if (Estimators[i] == "structkulczynski") { 
-							matrixCalculators.push_back(new StructKulczynski());
-						}else if (Estimators[i] == "speciesprofile") { 
-							matrixCalculators.push_back(new SpeciesProfile());
-						}else if (Estimators[i] == "hamming") { 
-							matrixCalculators.push_back(new Hamming());
-						}else if (Estimators[i] == "structchi2") { 
-							matrixCalculators.push_back(new StructChi2());
-						}else if (Estimators[i] == "gower") { 
-							matrixCalculators.push_back(new Gower());
-						}else if (Estimators[i] == "memchi2") { 
-							matrixCalculators.push_back(new MemChi2());
-						}else if (Estimators[i] == "memchord") { 
-							matrixCalculators.push_back(new MemChord());
-						}else if (Estimators[i] == "memeuclidean") { 
-							matrixCalculators.push_back(new MemEuclidean());
-						}else if (Estimators[i] == "mempearson") { 
-							matrixCalculators.push_back(new MemPearson());
-                        }else if (Estimators[i] == "jsd") {
-                                matrixCalculators.push_back(new JSD());
-                        }else if (Estimators[i] == "rjsd") {
-                            matrixCalculators.push_back(new RJSD());
-						}
-					}
-				}
-				
-			}
-		}
-		
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MatrixOutputCommand", "MatrixOutputCommand");
@@ -309,12 +213,9 @@ MatrixOutputCommand::~MatrixOutputCommand(){}
 int MatrixOutputCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-			
-		//if the users entered no valid calculators don't execute command
-		if (matrixCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine();  return 0; }
-			
-		InputData input(sharedfile, "sharedfile");
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
+	
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         vector<string> lookupGroups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
@@ -329,46 +230,37 @@ int MatrixOutputCommand::execute(){
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
                 subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
-                m->clearGroups();
-                Groups.clear();
                 lookup->removeGroups(subsampleSize);
                 Groups = lookup->getNamesGroups();
-                m->setGroups(Groups);
             }
             
             if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
         }
-        
 		numGroups = lookup->size();
-        lines.resize(processors);
-		for (int i = 0; i < processors; i++) {
-			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
-			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
-		}	
         
-        if (m->getControl_pressed()) { delete lookup; m->clearGroups(); return 0;  }
+        if (m->getControl_pressed()) { delete lookup;  return 0;  }
 				
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-			if (m->getControl_pressed()) { outputTypes.clear(); delete lookup;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
+			if (m->getControl_pressed()) { outputTypes.clear(); delete lookup;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				process(lookup);
+				createProcesses(lookup);
 				
 				processedLabels.insert(lookup->getLabel());
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				process(lookup);
+				createProcesses(lookup);
 				
 				processedLabels.insert(lookup->getLabel());
 				userLabels.erase(lookup->getLabel());
@@ -384,7 +276,7 @@ int MatrixOutputCommand::execute(){
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -399,28 +291,28 @@ int MatrixOutputCommand::execute(){
 			}
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 
 			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-			process(lookup);
+			createProcesses(lookup);
 			delete lookup;
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
+		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 		
 		//reset groups parameter
-		m->clearGroups();  
+		  
 		
 		//set phylip file as new current phylipfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("phylip");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; if (!subsample) { m->setPhylipFile(current); } }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; if (!subsample) { current->setPhylipFile(currentName); } }
 		}
 		
 		m->mothurOutEndLine();
@@ -438,262 +330,208 @@ int MatrixOutputCommand::execute(){
 }
 /***********************************************************/
 void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
-	try {
-		
-		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-				
-		if (output == "lt") {
+    try {
+        
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        if (output == "lt") {
             out << simMatrix.size() << endl;
-			for (int b = 0; b < simMatrix.size(); b++)	{
-				out << groupNames[b];
-				for (int n = 0; n < b; n++)	{
-					out  << '\t' << simMatrix[b][n];
-				}
-				out << endl;
-			}
+            for (int b = 0; b < simMatrix.size(); b++)	{
+                out << groupNames[b];
+                for (int n = 0; n < b; n++)	{
+                    out  << '\t' << simMatrix[b][n];
+                }
+                out << endl;
+            }
         }else if (output == "column") {
             for (int b = 0; b < simMatrix.size(); b++)	{
                 for (int n = 0; n < b; n++)	{
                     out << groupNames[b] << '\t' << groupNames[n] << '\t' << simMatrix[b][n] << endl;
                 }
             }
-		}else{
+        }else{
             out << simMatrix.size() << endl;
-			for (int b = 0; b < simMatrix.size(); b++)	{
-				out << groupNames[b];
-				for (int n = 0; n < simMatrix[b].size(); n++)	{
-					out << '\t' << simMatrix[b][n];
-				}
-				out << endl;
-			}
-		}
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "printSims");
-		exit(1);
-	}
+            for (int b = 0; b < simMatrix.size(); b++)	{
+                out << groupNames[b];
+                for (int n = 0; n < simMatrix[b].size(); n++)	{
+                    out << '\t' << simMatrix[b][n];
+                }
+                out << endl;
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MatrixOutputCommand", "printSims");
+        exit(1);
+    }
 }
-/***********************************************************/
-int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
-	try {
-		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
-        vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
-                  
-        for (int thisIter = 0; thisIter < iters+1; thisIter++) {
-            map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-            variables["[distance]"] = thisLookup->getLabel();
-            variables["[tag2]"] = "";
+/**************************************************************************************************/
+int driver(vector<SharedRAbundVector*>& thisLookup, vector< vector<seqDist> >& calcDists, vector<Calculator*> matrixCalculators, MothurOut* m) {
+    try {
+        vector<SharedRAbundVector*> subset;
+        
+        for (int k = 0; k < thisLookup.size(); k++) { // pass cdd each set of groups to compare
             
-            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
+            for (int l = 0; l < k; l++) {
+                
+                if (k != l) { //we dont need to similarity of a groups to itself
+                    subset.clear(); //clear out old pair of sharedrabunds
+                    //add new pair of sharedrabunds
+                    subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]);
+                    
+                    for(int i=0;i<matrixCalculators.size();i++) {
+                        
+                        //if this calc needs all groups to calculate the pair load all groups
+                        if (matrixCalculators[i]->getNeedsAll()) {
+                            //load subset with rest of lookup for those calcs that need everyone to calc for a pair
+                            for (int w = 0; w < thisLookup.size(); w++) {
+                                if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
+                            }
+                        }
+                        
+                        vector<double> tempdata = matrixCalculators[i]->getValues(subset); //saves the calculator outputs
+                        
+                        if (m->getControl_pressed()) { return 1; }
+                        
+                        seqDist temp(l, k, tempdata[0]);
+                        calcDists[i].push_back(temp);
+                    }
+                }
+            }
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MatrixOutputCommand", "driver");
+        exit(1);
+    }
+}
+
+/***********************************************************/
+int process(distSharedData* params){
+	try {
+        vector<Calculator*> matrixCalculators;
+        ValidCalculators validCalculator;
+        for (int i=0; i<params->Estimators.size(); i++) {
+            if (validCalculator.isValidCalculator("matrix", params->Estimators[i]) ) {
+                if (params->Estimators[i] == "sharedsobs") {
+                    matrixCalculators.push_back(new SharedSobsCS());
+                }else if (params->Estimators[i] == "sharedchao") {
+                    matrixCalculators.push_back(new SharedChao1());
+                }else if (params->Estimators[i] == "sharedace") {
+                    matrixCalculators.push_back(new SharedAce());
+                }else if (params->Estimators[i] == "jabund") {
+                    matrixCalculators.push_back(new JAbund());
+                }else if (params->Estimators[i] == "sorabund") {
+                    matrixCalculators.push_back(new SorAbund());
+                }else if (params->Estimators[i] == "jclass") {
+                    matrixCalculators.push_back(new Jclass());
+                }else if (params->Estimators[i] == "sorclass") {
+                    matrixCalculators.push_back(new SorClass());
+                }else if (params->Estimators[i] == "jest") {
+                    matrixCalculators.push_back(new Jest());
+                }else if (params->Estimators[i] == "sorest") {
+                    matrixCalculators.push_back(new SorEst());
+                }else if (params->Estimators[i] == "thetayc") {
+                    matrixCalculators.push_back(new ThetaYC());
+                }else if (params->Estimators[i] == "thetan") {
+                    matrixCalculators.push_back(new ThetaN());
+                }else if (params->Estimators[i] == "kstest") {
+                    matrixCalculators.push_back(new KSTest());
+                }else if (params->Estimators[i] == "sharednseqs") {
+                    matrixCalculators.push_back(new SharedNSeqs());
+                }else if (params->Estimators[i] == "ochiai") {
+                    matrixCalculators.push_back(new Ochiai());
+                }else if (params->Estimators[i] == "anderberg") {
+                    matrixCalculators.push_back(new Anderberg());
+                }else if (params->Estimators[i] == "kulczynski") {
+                    matrixCalculators.push_back(new Kulczynski());
+                }else if (params->Estimators[i] == "kulczynskicody") {
+                    matrixCalculators.push_back(new KulczynskiCody());
+                }else if (params->Estimators[i] == "lennon") {
+                    matrixCalculators.push_back(new Lennon());
+                }else if (params->Estimators[i] == "morisitahorn") {
+                    matrixCalculators.push_back(new MorHorn());
+                }else if (params->Estimators[i] == "braycurtis") {
+                    matrixCalculators.push_back(new BrayCurtis());
+                }else if (params->Estimators[i] == "whittaker") {
+                    matrixCalculators.push_back(new Whittaker());
+                }else if (params->Estimators[i] == "odum") {
+                    matrixCalculators.push_back(new Odum());
+                }else if (params->Estimators[i] == "canberra") {
+                    matrixCalculators.push_back(new Canberra());
+                }else if (params->Estimators[i] == "structeuclidean") {
+                    matrixCalculators.push_back(new StructEuclidean());
+                }else if (params->Estimators[i] == "structchord") {
+                    matrixCalculators.push_back(new StructChord());
+                }else if (params->Estimators[i] == "hellinger") {
+                    matrixCalculators.push_back(new Hellinger());
+                }else if (params->Estimators[i] == "manhattan") {
+                    matrixCalculators.push_back(new Manhattan());
+                }else if (params->Estimators[i] == "structpearson") {
+                    matrixCalculators.push_back(new StructPearson());
+                }else if (params->Estimators[i] == "soergel") {
+                    matrixCalculators.push_back(new Soergel());
+                }else if (params->Estimators[i] == "spearman") {
+                    matrixCalculators.push_back(new Spearman());
+                }else if (params->Estimators[i] == "structkulczynski") {
+                    matrixCalculators.push_back(new StructKulczynski());
+                }else if (params->Estimators[i] == "speciesprofile") {
+                    matrixCalculators.push_back(new SpeciesProfile());
+                }else if (params->Estimators[i] == "hamming") {
+                    matrixCalculators.push_back(new Hamming());
+                }else if (params->Estimators[i] == "structchi2") {
+                    matrixCalculators.push_back(new StructChi2());
+                }else if (params->Estimators[i] == "gower") {
+                    matrixCalculators.push_back(new Gower());
+                }else if (params->Estimators[i] == "memchi2") {
+                    matrixCalculators.push_back(new MemChi2());
+                }else if (params->Estimators[i] == "memchord") {
+                    matrixCalculators.push_back(new MemChord());
+                }else if (params->Estimators[i] == "memeuclidean") {
+                    matrixCalculators.push_back(new MemEuclidean());
+                }else if (params->Estimators[i] == "mempearson") {
+                    matrixCalculators.push_back(new MemPearson());
+                }else if (params->Estimators[i] == "jsd") {
+                    matrixCalculators.push_back(new JSD());
+                }else if (params->Estimators[i] == "rjsd") {
+                    matrixCalculators.push_back(new RJSD());
+                }
+            }
+        }
+        
+        //if the users entered no valid calculators don't execute command
+        if (matrixCalculators.size() == 0) { params->m->mothurOut("No valid calculators."); params->m->mothurOutEndLine();  return 0; }
+        params->Estimators.clear();
+        for (int i=0; i<matrixCalculators.size(); i++) { params->Estimators.push_back(matrixCalculators[i]->getName()); }
+        
+        vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
+        SubSample sample;
+        for (int thisIter = 0; thisIter < params->numIters; thisIter++) {
+            
+            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if (subsample && (thisIter != 0)) {
-                SubSample sample;
-                vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
-                
-                tempLabels = sample.getSample(thisItersLookup, subsampleSize);
-            }
+            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) { sample.getSample(thisItersLookup, params->subsampleSize); }
             
             vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
-            vector<string> thisItersGroupNames = thisLookup->getNamesGroups();
-            
-            if(processors == 1){
-                driver(thisItersRabunds, 0, numGroups, calcDists);
-            }else{
-                int process = 1;
-                vector<int> processIDS;
-                bool recalc = false;
-                
-                #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-                //loop through and create all the processes you want
-                while (process != processors) {
-                    pid_t pid = fork();
-                    
-                    if (pid > 0) {
-                        processIDS.push_back(pid); 
-                        process++;
-                    }else if (pid == 0){
-                        
-                        driver(thisItersRabunds, lines[process].start, lines[process].end, calcDists);
-                        
-                        string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist";
-                        ofstream outtemp;
-                        m->openOutputFile(tempdistFileName, outtemp);
-                            
-                        for (int i = 0; i < calcDists.size(); i++) {
-                            outtemp << calcDists[i].size() << endl;
-                                
-                            for (int j = 0; j < calcDists[i].size(); j++) {
-                                outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
-                            }
-                        }
-                        outtemp.close();
-                                        
-                        exit(0);
-                    }else { 
-                        m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                        //wait to die
-                        for (int i=0;i<processIDS.size();i++) {
-                            int temp = processIDS[i];
-                            wait(&temp);
-                        }
-                        m->setControl_pressed(false);
+            vector<string> thisItersGroupNames = params->thisLookup->getNamesGroups();
 
-                        for (int i=0;i<processIDS.size();i++) {
-                            m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist");
-                        }
-                        recalc = true;
-                        break;
-                    }
-                }
-                
-                if (recalc) {
-                    //test line, also set recalc to true.
-                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					 for (int i=0;i<processIDS.size();i++) {m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-                    
-                    
-                    lines.clear();
-                    lines.resize(processors);
-                    for (int i = 0; i < processors; i++) {
-                        lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
-                        lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
-                    }
-                    
-                    processIDS.resize(0);
-                    process = 1;
-                    
-                    //loop through and create all the processes you want
-                    while (process != processors) {
-                        pid_t pid = fork();
-                        
-                        if (pid > 0) {
-                            processIDS.push_back(pid);
-                            process++;
-                        }else if (pid == 0){
-                            
-                            driver(thisItersRabunds, lines[process].start, lines[process].end, calcDists);
-                            
-                            string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist";
-                            ofstream outtemp;
-                            m->openOutputFile(tempdistFileName, outtemp);
-                            
-                            for (int i = 0; i < calcDists.size(); i++) {
-                                outtemp << calcDists[i].size() << endl;
-                                
-                                for (int j = 0; j < calcDists[i].size(); j++) {
-                                    outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
-                                }
-                            }
-                            outtemp.close();
-                            
-                            exit(0);
-                        }else {
-                            m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                            for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                            exit(0);
-                        }
-                    }
-                }
-
-                
-                //parent do your part
-                driver(thisItersRabunds, lines[0].start, lines[0].end, calcDists);
-                            
-                //force parent to wait until all the processes are done
-                for (int i = 0; i < processIDS.size(); i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                
-                for (int i = 0; i < processIDS.size(); i++) {
-                    string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(processIDS[i]) +  ".dist";
-                    ifstream intemp;
-                    m->openInputFile(tempdistFileName, intemp);
-                        
-                    for (int k = 0; k < calcDists.size(); k++) {
-                        int size = 0;
-                        intemp >> size; m->gobble(intemp);
-                            
-                        for (int j = 0; j < size; j++) {
-                            int seq1 = 0;
-                            int seq2 = 0;
-                            float dist = 1.0;
-                                
-                            intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
-                                
-                            seqDist tempDist(seq1, seq2, dist);
-                            calcDists[k].push_back(tempDist);
-                        }
-                    }
-                    intemp.close();
-                    m->mothurRemove(tempdistFileName);
-                }
-                #else
-                //////////////////////////////////////////////////////////////////////////////////////////////////////
-                //Windows version shared memory, so be careful when passing variables through the distSharedData struct. 
-                //Above fork() will clone, so memory is separate, but that's not the case with windows, 
-                //Taking advantage of shared memory to pass results vectors.
-                //////////////////////////////////////////////////////////////////////////////////////////////////////
-                
-                vector<distSharedData*> pDataArray; 
-                DWORD   dwThreadIdArray[processors-1];
-                HANDLE  hThreadArray[processors-1]; 
-                
-                //Create processor worker threads.
-                for( int i=1; i<processors; i++ ){
-                    
-                    //make copy of lookup so we don't get access violations
-                    vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
-                    
-                    // Allocate memory for thread data.
-                    distSharedData* tempSum = new distSharedData(m, lines[i].start, lines[i].end, Estimators, thisItersRabunds);
-                    pDataArray.push_back(tempSum);
-                    processIDS.push_back(i);
-                    
-                    hThreadArray[i-1] = CreateThread(NULL, 0, MyDistSharedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
-                }
-                
-                //parent do your part
-                driver(thisItersRabunds, lines[0].start, lines[0].end, calcDists);   
-                           
-                //Wait until all threads have terminated.
-                WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-                
-                //Close all thread handles and free memory allocations.
-                for(int i=0; i < pDataArray.size(); i++){
-                    if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
-                    }
-                    for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
-                    
-                    for (int k = 0; k < calcDists.size(); k++) {
-                        int size = pDataArray[i]->calcDists[k].size();
-                        for (int j = 0; j < size; j++) {    calcDists[k].push_back(pDataArray[i]->calcDists[k][j]);    }
-                    }
-                    
-                    CloseHandle(hThreadArray[i]);
-                    delete pDataArray[i];
-                }
-
-                #endif
-            }
+            driver(thisItersRabunds, calcDists, matrixCalculators, params->m);
             
             for (int i = 0; i < thisItersRabunds.size(); i++) { delete thisItersRabunds[i]; }
-            
-            if (subsample && (thisIter != 0)) {  
-                if((thisIter) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter)+"\n"); 		}
-                calcDistsTotals.push_back(calcDists);
+            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ){
+                if((thisIter+1) % 100 == 0){	params->m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
+                params->calcDistsTotals.push_back(calcDists);
                 for (int i = 0; i < calcDists.size(); i++) {
                     for (int j = 0; j < calcDists[i].size(); j++) {
-                        if (m->getDebug()) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisItersGroupNames[calcDists[i][j].seq1] + " - " + thisItersGroupNames[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
+                        if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisItersGroupNames[calcDists[i][j].seq1] + " - " + thisItersGroupNames[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
                     } 
                 }
             }else { //print results for whole dataset
                 for (int i = 0; i < calcDists.size(); i++) {
-                    if (m->getControl_pressed()) { break; }
+                    if (params->m->getControl_pressed()) { break; }
                     
                     //initialize matrix
                     vector< vector<double> > matrix; //square matrix to represent the distance
@@ -708,34 +546,103 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                         matrix[row][column] = dist;
                         matrix[column][row] = dist;
                     }
-                    
-                    variables["[outputtag]"] = output;
-                    variables["[calc]"] = matrixCalculators[i]->getName();
-                    string distFileName = getOutputFileName("phylip",variables);
-                    outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
-                    
-                    ofstream outDist;
-                    m->openOutputFile(distFileName, outDist);
-                    outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
-                    
-                    printSims(outDist, matrix, thisItersGroupNames);
-                    
-                    outDist.close();
+                    params->matrices.push_back(matrix);
                 }
             }
             for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             delete thisItersLookup;
 		}
-		
+		if((params->numIters) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->numIters)+"\n"); 		}
+        
+		return 0;
+	}
+	catch(exception& e) {
+		params->m->errorOut(e, "MatrixOutputCommand", "process");
+		exit(1);
+	}
+}
+/***********************************************************/
+int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
+    try {
+        
+        vector<string> groupNames = thisLookup->getNamesGroups();
+        
+        vector<int> lines;
+        if (processors > (iters+1)) { processors = iters+1; }
+        
+        //figure out how many sequences you have to process
+        int numItersPerProcessor = (iters+1) / processors;
+        for (int i = 0; i < processors; i++) {
+            if(i == (processors - 1)){	numItersPerProcessor = (iters+1) - i * numItersPerProcessor; 	}
+            lines.push_back(numItersPerProcessor);
+        }
+        
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<distSharedData*> data;
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            
+            //make copy of lookup so we don't get access violations
+            SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
+            distSharedData* dataBundle = new distSharedData(lines[i+1], false, subsample, subsampleSize, Estimators, newLookup);
+            
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(process, dataBundle));
+        }
+        
+        //make copy of lookup so we don't get access violations
+        SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
+        distSharedData* dataBundle = new distSharedData(lines[0], true, subsample, subsampleSize, Estimators, newLookup);
+        process(dataBundle);
+        delete newLookup;
+        
+        Estimators.clear(); Estimators = dataBundle->Estimators;
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[distance]"] = thisLookup->getLabel();
+        variables["[tag2]"] = "";
+        variables["[outputtag]"] = output;
+        
+        /// fix to print out matrices for each calc - only main does this
+        for (int i = 0; i < Estimators.size(); i++) {
+            variables["[calc]"] = Estimators[i];
+            string distFileName = getOutputFileName("phylip",variables);
+            outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+            
+            ofstream outDist; util.openOutputFile(distFileName, outDist);
+            outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+            
+            printSims(outDist, dataBundle->matrices[i], groupNames); outDist.close();
+        }
+
+        vector< vector< vector<seqDist> > > calcDistsTotals = dataBundle->calcDistsTotals;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            //get calcDistsTotal info - one entry per iter
+            for (int j = 0; j < data[i]->calcDistsTotals.size(); j++) { calcDistsTotals.push_back(data[i]->calcDistsTotals[j]); }
+            
+            delete data[i]->thisLookup;
+            delete data[i];
+            delete workerThreads[i];
+        }
+    
+        //main thread finds averages
         if (iters != 0) {
             //we need to find the average distance and standard deviation for each groups distance
-            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals, mode);
+            vector< vector<seqDist>  > calcAverages = util.getAverages(calcDistsTotals, mode);
             
             //find standard deviation
-            vector< vector<seqDist>  > stdDev = m->getStandardDeviation(calcDistsTotals, calcAverages);
+            vector< vector<seqDist>  > stdDev = util.getStandardDeviation(calcDistsTotals, calcAverages);
             
             //print results
-            for (int i = 0; i < calcDists.size(); i++) {
+            for (int i = 0; i < Estimators.size(); i++) {
                 vector< vector<double> > matrix; //square matrix to represent the distance
                 matrix.resize(thisLookup->size());
                 for (int k = 0; k < thisLookup->size(); k++) {  matrix[k].resize(thisLookup->size(), 0.0); }
@@ -743,8 +650,8 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                 vector< vector<double> > stdmatrix; //square matrix to represent the stdDev
                 stdmatrix.resize(thisLookup->size());
                 for (int k = 0; k < thisLookup->size(); k++) {  stdmatrix[k].resize(thisLookup->size(), 0.0); }
-
-            
+                
+                
                 for (int j = 0; j < calcAverages[i].size(); j++) {
                     int row = calcAverages[i][j].seq1;
                     int column = calcAverages[i][j].seq2;
@@ -757,21 +664,21 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                     stdmatrix[column][row] = stdDist;
                 }
                 
-                map<string, string> variables; 
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+                map<string, string> variables;
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[outputtag]"] = output;
                 variables["[tag2]"] = "ave";
-                variables["[calc]"] = matrixCalculators[i]->getName();
+                variables["[calc]"] = Estimators[i];
                 string distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 //set current phylip file to average distance matrix
-                m->setPhylipFile(distFileName);
+                current->setPhylipFile(distFileName);
                 ofstream outAve;
-                m->openOutputFile(distFileName, outAve);
+                util.openOutputFile(distFileName, outAve);
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
                 
-                printSims(outAve, matrix, thisLookup->getNamesGroups());
+                printSims(outAve, matrix, groupNames);
                 
                 outAve.close();
                 
@@ -779,64 +686,22 @@ int MatrixOutputCommand::process(SharedRAbundVectors*& thisLookup){
                 distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
-                m->openOutputFile(distFileName, outSTD);
+                util.openOutputFile(distFileName, outSTD);
                 outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
                 
                 printSims(outSTD, stdmatrix, thisLookup->getNamesGroups());
                 
                 outSTD.close();
-
             }
         }
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "process");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int MatrixOutputCommand::driver(vector<SharedRAbundVector*>& thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) {
-	try {
-		vector<SharedRAbundVector*> subset;
         
-		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
-			
-			for (int l = 0; l < k; l++) {
-				
-				if (k != l) { //we dont need to similarity of a groups to itself
-					subset.clear(); //clear out old pair of sharedrabunds
-					//add new pair of sharedrabunds
-					subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
-					
-					for(int i=0;i<matrixCalculators.size();i++) {
-						
-						//if this calc needs all groups to calculate the pair load all groups
-						if (matrixCalculators[i]->getNeedsAll()) { 
-							//load subset with rest of lookup for those calcs that need everyone to calc for a pair
-							for (int w = 0; w < thisLookup.size(); w++) {
-								if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
-							}
-						}
-						
-						vector<double> tempdata = matrixCalculators[i]->getValues(subset); //saves the calculator outputs
-						
-						if (m->getControl_pressed()) { return 1; }
+        return 0;
         
-						seqDist temp(l, k, tempdata[0]);
-						calcDists[i].push_back(temp);
-					}
-				}
-			}
-		}
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "driver");
-		exit(1);
-	}
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MatrixOutputCommand", "createProcesses");
+        exit(1);
+    }
 }
 /***********************************************************/
 

@@ -3,6 +3,7 @@
 
 #include "mothur.h"
 #include "listvector.hpp"
+#include "utils.hpp"
 
 class NameAssignment : public map<string,int> {
 public:
@@ -20,6 +21,7 @@ private:
 	ListVector list;
 	map<int, string> reverse;
 	MothurOut* m;
+    Utils util;
 };
 
 

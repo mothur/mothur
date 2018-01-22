@@ -130,14 +130,14 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -145,7 +145,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -153,50 +153,50 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (fastafile == "not open") { fastafile = ""; abort = true; }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile); 	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(fastafile); 	}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { namefile = ""; abort = true; }	
-			else {  readNameFile(); m->setNameFile(namefile); }
+			else {  readNameFile(); current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { ct.readTable(countfile, true, false); m->setCountTableFile(countfile); }
+			else { ct.readTable(countfile, true, false); current->setCountFile(countfile); }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.fragments command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "diffs", false);		if (temp == "not found"){	temp = "0";				}
-			m->mothurConvert(temp, diffs); 
+			temp = validParameter.valid(parameters, "diffs");		if (temp == "not found"){	temp = "0";				}
+			util.mothurConvert(temp, diffs); 
 			
-			temp = validParameter.validFile(parameters, "percent", false);		if (temp == "not found"){	temp = "0";				}
-			m->mothurConvert(temp, percent);
+			temp = validParameter.valid(parameters, "percent");		if (temp == "not found"){	temp = "0";				}
+			util.mothurConvert(temp, percent);
 			
 			if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 			
@@ -212,9 +212,9 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 int ClusterFragmentsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		int start = time(NULL);
+		long start = time(NULL);
 		
 		//reads fasta file and return number of seqs
 		int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
@@ -269,7 +269,7 @@ int ClusterFragmentsCommand::execute(){
 		if(numSeqs % 100 != 0)	{ m->mothurOutJustToScreen(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");	}
 	
 		
-		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		string fileroot = outputDir + util.getRootName(util.getSimpleName(fastafile));
         map<string, string> variables; 
         variables["[filename]"] = fileroot;
 		string newFastaFile = getOutputFileName("fasta", variables);
@@ -286,7 +286,7 @@ int ClusterFragmentsCommand::execute(){
 		
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); 
 		
-		if (m->getControl_pressed()) { m->mothurRemove(newFastaFile); m->mothurRemove(newNamesFile); return 0; }
+		if (m->getControl_pressed()) { util.mothurRemove(newFastaFile); util.mothurRemove(newNamesFile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -296,20 +296,20 @@ int ClusterFragmentsCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 		}
         
         itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 
 		return 0;
@@ -382,13 +382,13 @@ int ClusterFragmentsCommand::readFASTA(){
 	try {
 	
 		ifstream inFasta;
-		m->openInputFile(fastafile, inFasta);
+		util.openInputFile(fastafile, inFasta);
 		
 		while (!inFasta.eof()) {
 			
 			if (m->getControl_pressed()) { inFasta.close(); return 0; }
 			
-			Sequence seq(inFasta);  m->gobble(inFasta);
+			Sequence seq(inFasta);  util.gobble(inFasta);
 			
 			if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
 				if (namefile != "") {
@@ -424,8 +424,8 @@ void ClusterFragmentsCommand::printData(string newfasta, string newname){
 		ofstream outFasta;
 		ofstream outNames;
 		
-		m->openOutputFile(newfasta, outFasta);
-		if (countfile == "") {  m->openOutputFile(newname, outNames); }
+		util.openOutputFile(newfasta, outFasta);
+		if (countfile == "") {  util.openOutputFile(newname, outNames); }
 		
 		for (int i = 0; i < alignSeqs.size(); i++) {
 			if (alignSeqs[i].numIdentical != 0) {
@@ -448,11 +448,11 @@ void ClusterFragmentsCommand::printData(string newfasta, string newname){
 void ClusterFragmentsCommand::readNameFile(){
 	try {
 		ifstream in;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		string firstCol, secondCol;
 				
 		while (!in.eof()) {
-			in >> firstCol >> secondCol; m->gobble(in);
+			in >> firstCol >> secondCol; util.gobble(in);
 			names[firstCol] = secondCol;
 			int size = 1;
 

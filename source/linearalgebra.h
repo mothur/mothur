@@ -11,6 +11,7 @@
  */
 
 #include "mothurout.h"
+#include "utils.hpp"
 
 
 class LinearAlgebra {
@@ -52,6 +53,7 @@ public:
     int svd(vector< vector<double> >& a, vector<double>& w, vector< vector<double> >& v); //Singular value decomposition
 private:
 	MothurOut* m;
+    Utils util;
 	
 	double pythag(double, double);
     double betacf(const double, const double, const double);

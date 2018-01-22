@@ -123,14 +123,14 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			
 						
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);	
+			string inputDir = validParameter.valid(parameters, "inputdir");	
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -138,7 +138,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -146,7 +146,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -154,7 +154,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -162,48 +162,48 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			
 			
 			//check for parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") { 			
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setFastaFile(fastafile); }	
+			}else { current->setFastaFile(fastafile); }	
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { listfile = "";  }	
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			string temp = validParameter.validFile(parameters, "cutoff", false);  if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, cutoff); 
+			string temp = validParameter.valid(parameters, "cutoff");  if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, cutoff); 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(fastafile);	}
 			
             if (countfile == "") {
                 if (namefile == ""){
                     vector<string> files; files.push_back(fastafile); 
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -218,9 +218,9 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 int ConsensusSeqsCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        int start = time(NULL);
+        long start = time(NULL);
         
 		readFasta();
 		
@@ -236,9 +236,9 @@ int ConsensusSeqsCommand::execute(){
 			
 			ofstream outSummary;
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 			string outputSummaryFile = getOutputFileName("summary", variables);
-			m->openOutputFile(outputSummaryFile, outSummary);
+			util.openOutputFile(outputSummaryFile, outSummary);
 			outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
 			outputNames.push_back(outputSummaryFile); outputTypes["summary"].push_back(outputSummaryFile);
 			
@@ -246,7 +246,7 @@ int ConsensusSeqsCommand::execute(){
 			
 			ofstream outFasta;
 			string outputFastaFile = getOutputFileName("fasta", variables);
-			m->openOutputFile(outputFastaFile, outFasta);
+			util.openOutputFile(outputFastaFile, outFasta);
 			outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
         
 			vector< vector<float> > percentages; percentages.resize(5);
@@ -257,7 +257,7 @@ int ConsensusSeqsCommand::execute(){
 			//get counts
 			for (int j = 0; j < seqLength; j++) {
 				
-				if (m->getControl_pressed()) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+				if (m->getControl_pressed()) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 				
 				vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
 				int numDots = 0;
@@ -309,12 +309,12 @@ int ConsensusSeqsCommand::execute(){
 			
 			outSummary.close(); outFasta.close();
             
-			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 		
 		}else {
 			
             
-			InputData* input = new InputData(listfile, "list");
+			InputData* input = new InputData(listfile, "list", nullVector);
 			ListVector* list = input->getListVector();
 			
 			string lastLabel = list->getLabel();
@@ -324,7 +324,7 @@ int ConsensusSeqsCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } delete list; delete input;  return 0;  }
+				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } delete list; delete input;  return 0;  }
 				
 				if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 					
@@ -336,7 +336,7 @@ int ConsensusSeqsCommand::execute(){
 					userLabels.erase(list->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
 					delete list; 
@@ -362,7 +362,7 @@ int ConsensusSeqsCommand::execute(){
 			}
 			
 			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } if (list != NULL) { delete list; } delete input; return 0;  }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } if (list != NULL) { delete list; } delete input; return 0;  }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -378,7 +378,7 @@ int ConsensusSeqsCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (list != NULL) { delete list; }
 				
 				list = input->getListVector(lastLabel);
@@ -417,21 +417,21 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 		
 		ofstream outSummary;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[tag]"] = list->getLabel();
 		string outputSummaryFile = getOutputFileName("summary", variables);
-		m->openOutputFile(outputSummaryFile, outSummary);
+		util.openOutputFile(outputSummaryFile, outSummary);
 		outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
 		outputNames.push_back(outputSummaryFile); outputTypes["summary"].push_back(outputSummaryFile);
 		
 		ofstream outName;
 		string outputNameFile = getOutputFileName("name",variables);
-		m->openOutputFile(outputNameFile, outName);
+		util.openOutputFile(outputNameFile, outName);
 		outputNames.push_back(outputNameFile); outputTypes["name"].push_back(outputNameFile);
 		
 		ofstream outFasta;
 		string outputFastaFile = getOutputFileName("fasta",variables);
-		m->openOutputFile(outputFastaFile, outFasta);
+		util.openOutputFile(outputFastaFile, outFasta);
 		outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
 		
 		outSummary << "OTU#\tPositioninAlignment\tA\tT\tG\tC\tGap\tNumberofSeqs\tConsensusBase" << endl;
@@ -469,7 +469,7 @@ string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, int bi
         int totalSize=0;
 				
 		vector<string> binNames;
-		m->splitAtComma(bin, binNames);
+		util.splitAtComma(bin, binNames);
         
         vector< vector<float> > percentages; percentages.resize(5);
 		for (int j = 0; j < percentages.size(); j++) { percentages[j].resize(seqLength, 0.0); }
@@ -703,14 +703,14 @@ int ConsensusSeqsCommand::readFasta(){
 	try{
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		seqLength = 0;
         
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence seq(in); m->gobble(in);
+			Sequence seq(in); util.gobble(in);
 			string name = seq.getName();
 			
 			if (name != "") {
@@ -741,7 +741,7 @@ int ConsensusSeqsCommand::readNames(){
          map<string, string>::iterator it;
          bool error = false;
          
-         m->readNames(namefile, temp); //use central buffered read
+         util.readNames(namefile, temp); //use central buffered read
          
          for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end(); itTemp++) {
              string thisname, repnames;
@@ -750,10 +750,10 @@ int ConsensusSeqsCommand::readNames(){
              
              it = nameMap.find(thisname);
 			 if (it != nameMap.end()) { //then this sequence was in the fastafile
-				 nameFileMap[thisname] = m->getNumNames(repnames);	//for later when outputting the new namesFile if the list file is unique
+				 nameFileMap[thisname] = util.getNumNames(repnames);	//for later when outputting the new namesFile if the list file is unique
                  
 				 vector<string> splitRepNames;
-				 m->splitAtComma(repnames, splitRepNames);
+				 util.splitAtComma(repnames, splitRepNames);
 				 
 				 for (int i = 0; i < splitRepNames.size(); i++) { nameMap[splitRepNames[i]] = thisname; }
 				 

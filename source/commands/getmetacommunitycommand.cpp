@@ -24,7 +24,6 @@ vector<string> GetMetaCommunityCommand::setParameters(){
         CommandParameter pminpartitions("minpartitions", "Number", "", "5", "", "", "","",false,false,true); parameters.push_back(pminpartitions);
         CommandParameter pmaxpartitions("maxpartitions", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pmaxpartitions);
         CommandParameter poptimizegap("optimizegap", "Number", "", "3", "", "", "","",false,false,true); parameters.push_back(poptimizegap);
-        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
    		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -53,7 +52,6 @@ string GetMetaCommunityCommand::getHelpString(){
 		helpString += "The minpartitions parameter is used to .... Default=5.\n";
         helpString += "The maxpartitions parameter is used to .... Default=10.\n";
         helpString += "The optimizegap parameter is used to .... Default=3.\n";
-        helpString += "The processors parameter allows you to specify number of processors to use.  The default is 1.\n";
 		helpString += "The get.communitytype command should be in the following format: get.communitytype(shared=yourSharedFile).\n";
 		return helpString;
 	}
@@ -133,86 +131,78 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
 			outputTypes["summary"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 string path;
                 it = parameters.find("shared");
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
             }
                        
             //get shared file, it is required
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile();
+				sharedfile = current->getSharedFile();
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){
-				outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
+				outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
 			}
             
-            string temp = validParameter.validFile(parameters, "minpartitions", false);	if (temp == "not found"){	temp = "5";      }
-			m->mothurConvert(temp, minpartitions);
+            string temp = validParameter.valid(parameters, "minpartitions");	if (temp == "not found"){	temp = "5";      }
+			util.mothurConvert(temp, minpartitions);
             
-            temp = validParameter.validFile(parameters, "maxpartitions", false);        if (temp == "not found"){	temp = "10";	 }
-			m->mothurConvert(temp, maxpartitions);
+            temp = validParameter.valid(parameters, "maxpartitions");        if (temp == "not found"){	temp = "10";	 }
+			util.mothurConvert(temp, maxpartitions);
             
-            temp = validParameter.validFile(parameters, "optimizegap", false);          if (temp == "not found"){	temp = "3";	 }
-			m->mothurConvert(temp, optimizegap);
+            temp = validParameter.valid(parameters, "optimizegap");          if (temp == "not found"){	temp = "3";	 }
+			util.mothurConvert(temp, optimizegap);
             
-            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			//set processors to 1 until we figure out whats going on with this command.
-            temp = "1";
-            //m->setProcessors(temp);
-            m->mothurOut("Using 1 processor\n");
-			m->mothurConvert(temp, processors);
-            
-            string groups = validParameter.validFile(parameters, "groups", false);
+            string groups = validParameter.valid(parameters, "groups");
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); }
-			m->setGroups(Groups);
+			else { util.splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
             
-            string label = validParameter.validFile(parameters, "label", false);
+            string label = validParameter.valid(parameters, "label");
 			if (label == "not found") { label = ""; }
 			else {
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
             
-            method = validParameter.validFile(parameters, "method", false);
+            method = validParameter.valid(parameters, "method");
 			if (method == "not found") { method = "dmm"; }
 			
 			if ((method == "dmm") || (method == "kmeans") || (method == "pam")) { }
 			else { m->mothurOut("[ERROR]: " + method + " is not a valid method.  Valid algorithms are dmm, kmeans and pam."); m->mothurOutEndLine(); abort = true; }
             
-            calc = validParameter.validFile(parameters, "calc", false);
+            calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "rjsd";  }
 			else {
                 if (calc == "default")  {  calc = "rjsd";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) {
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) {
 				ValidCalculators validCalc; validCalc.printCitations(Estimators);
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
             if (Estimators.size() != 1) { abort = true; m->mothurOut("[ERROR]: only one calculator is allowed.\n"); }
             
-            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters);
+            temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters);
             
-            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
-			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
+			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
             else {
-                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later
+                if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later
                 else { subsample = false; }
             }
             
@@ -230,10 +220,11 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
 int GetMetaCommunityCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
         string lastLabel = lookup->getLabel();
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -245,7 +236,7 @@ int GetMetaCommunityCommand::execute(){
                 subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
                 lookup->removeGroups(subsampleSize);
-                Groups = m->getGroups();
+                Groups = lookup->getNamesGroups();
             }
             
             if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
@@ -267,7 +258,7 @@ int GetMetaCommunityCommand::execute(){
                 userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -309,7 +300,7 @@ int GetMetaCommunityCommand::execute(){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             
@@ -335,23 +326,8 @@ int GetMetaCommunityCommand::execute(){
 //**********************************************************************************************************************
 int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
 	try {
-        
-        //#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-       // #else
-        //until bug is resolved
-        processors=1; //qFinderDMM not thread safe
-        //#endif
-        
-        vector<int> processIDS;
-		int process = 1;
-		int num = 0;
-        int minPartition = 0;
-		
-		//sanity check
-		if (maxpartitions < processors) { processors = maxpartitions; }
-        
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = thislookup->getLabel();
         variables["[method]"] = method;
 		string outputFileName = getOutputFileName("fit", variables);
@@ -361,154 +337,13 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
 		vector< vector<int> > dividedPartitions;
         vector< vector<string> > rels, matrix;
         vector<string> doneFlags;
-        dividedPartitions.resize(processors);
-        rels.resize(processors);
-        matrix.resize(processors);
+        dividedPartitions.resize(1);
+        rels.resize(1);
+        matrix.resize(1);
+        int minPartition = 0;
         
-        //for each file group figure out which process will complete it
-        //want to divide the load intelligently so the big files are spread between processes
-        for (int i=1; i<=maxpartitions; i++) {
-            //cout << i << endl;
-            int processToAssign = (i+1) % processors;
-            if (processToAssign == 0) { processToAssign = processors; }
-            
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: assigning " + toString(i) + " to process " + toString(processToAssign-1) + "\n"); }
-            dividedPartitions[(processToAssign-1)].push_back(i);
-            
-            variables["[tag]"] = toString(i);
-            string relName = getOutputFileName("relabund", variables);
-            string mName = getOutputFileName("matrix", variables);
-            rels[(processToAssign-1)].push_back(relName);
-            matrix[(processToAssign-1)].push_back(mName);
-        }
-        
-        for (int i = 0; i < processors; i++) { //read from everyone elses, just write to yours
-            string tempDoneFile = m->getRootName(m->getSimpleName(sharedfile)) + toString(i) + ".done.temp";
-            doneFlags.push_back(tempDoneFile);
-            ofstream out;
-            m->openOutputFile(tempDoneFile, out); //clear out 
-            out.close();
-        }
-        
-
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-                outputNames.clear();
-				num = processDriver(thislookup, dividedPartitions[process], (outputFileName + m->mothurGetpid(process)), rels[process], matrix[process], doneFlags, process);
-                
-                //pass numSeqs to parent
-				ofstream out;
-				string tempFile = m->mothurGetpid(process) + ".outputNames.temp";
-				m->openOutputFile(tempFile, out);
-                out << num << endl;
-                out << outputNames.size() << endl;
-				for (int i = 0; i < outputNames.size(); i++) { out << outputNames[i] << endl; }
-				out.close();
-                
-				exit(0);
-			}else {
-				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-				exit(0);
-			}
-		}
-		
-		//do my part
-        if (method == "dmm") {  m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");  }
-        else {
-            m->mothurOut("K\tCH");
-            vector<string> namesOfGroups = thislookup->getNamesGroups();
-            for (int i = 0; i < namesOfGroups.size(); i++) {  m->mothurOut('\t' + namesOfGroups[i]); }
-            m->mothurOut("\n");
-        }
-		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) {
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-        
-        vector<string> tempOutputNames = outputNames;
-        for (int i=0;i<processIDS.size();i++) {
-            ifstream in;
-			string tempFile = toString(processIDS[i]) + ".outputNames.temp";
-			m->openInputFile(tempFile, in);
-			if (!in.eof()) {
-                int tempNum = 0;
-                in >> tempNum; m->gobble(in);
-                if (tempNum < minPartition) { minPartition = tempNum; }
-                in >> tempNum; m->gobble(in);
-                for (int i = 0; i < tempNum; i++) {
-                    string tempName = "";
-                    in >> tempName; m->gobble(in);
-                    tempOutputNames.push_back(tempName);
-                }
-            }
-			in.close(); m->mothurRemove(tempFile);
-            
-            m->appendFilesWithoutHeaders(outputFileName + toString(processIDS[i]), outputFileName);
-            m->mothurRemove(outputFileName + toString(processIDS[i]));
-        }
-        
-        if (processors > 1) { 
-            outputNames.clear();
-            for (int i = 0; i < tempOutputNames.size(); i++) { //remove files if needed
-                string name = tempOutputNames[i];
-                vector<string> parts;
-                m->splitAtChar(name, parts, '.');
-                bool keep = true;
-                if (((parts[parts.size()-1] == "relabund") || (parts[parts.size()-1] == "posterior")) && (parts[parts.size()-2] == "mix")) {
-                    string tempNum = parts[parts.size()-3];
-                    int num;  m->mothurConvert(tempNum, num);
-                    //if (num > minPartition) {
-                     //   m->mothurRemove(tempOutputNames[i]);
-                    //    keep = false; if (m->getDebug()) { m->mothurOut("[DEBUG]: removing " + tempOutputNames[i] + ".\n"); }
-                    //}
-                }
-                if (keep) { outputNames.push_back(tempOutputNames[i]); }
-            }
-            
-            //reorder fit file
-            ifstream in;
-            m->openInputFile(outputFileName, in);
-            string headers = m->getline(in); m->gobble(in);
-            
-            map<int, string> file;
-            while (!in.eof()) {
-                string numString, line;
-                int num;
-                in >> numString; line = m->getline(in); m->gobble(in);
-                m->mothurConvert(numString, num);
-                file[num] = line;
-            }
-            in.close();
-            ofstream out;
-            m->openOutputFile(outputFileName, out);
-            out << headers << endl;
-            for (map<int, string>::iterator it = file.begin(); it != file.end(); it++) {
-                out << it->first << '\t' << it->second << endl;
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: printing: " + toString(it->first) + '\t' + it->second + ".\n"); }
-            }
-            out.close();
-        }
-        
-#else
         m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");
 		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
-#endif
-        for (int i = 0; i < processors; i++) { //read from everyone elses, just write to yours
-            string tempDoneFile = m->getRootName(m->getSimpleName(sharedfile)) + toString(i) + ".done.temp";
-            m->mothurRemove(tempDoneFile);
-        }
         
         if (m->getControl_pressed()) { return 0; }
         
@@ -520,7 +355,6 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
         if (method == "dmm") {  generateSummaryFile(minPartition, variables, piValues); } //pam doesn't make a relabund file
         
         return 0;
-
     }
 	catch(exception& e) {
 		m->errorOut(e, "GetMetaCommunityCommand", "createProcesses");
@@ -538,13 +372,13 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
         
 		ofstream fitData, silData;
         if (method == "dmm") {
-            m->openOutputFile(outputFileName, fitData);
+            util.openOutputFile(outputFileName, fitData);
             fitData.setf(ios::fixed, ios::floatfield);
             fitData.setf(ios::showpoint);
             fitData << "K\tNLE\tlogDet\tBIC\tAIC\tLaplace" << endl;
         }else if((method == "pam") || (method == "kmeans")) { //because ch is looking of maximal value
             minLaplace = 0;
-            m->openOutputFile(outputFileName, silData);
+            util.openOutputFile(outputFileName, silData);
             silData.setf(ios::fixed, ios::floatfield);
             silData.setf(ios::showpoint);
             silData << "K\tCH";
@@ -586,10 +420,10 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
             
             //check to see if anyone else is done
             for (int j = 0; j < doneFlags.size(); j++) {
-                if (!m->isBlank(doneFlags[j])) { //another process has finished
+                if (!util.isBlank(doneFlags[j])) { //another process has finished
                     //are they done at a lower partition?
                     ifstream in;
-                    m->openInputFile(doneFlags[j], in);
+                    util.openInputFile(doneFlags[j], in);
                     int tempNum;
                     in >> tempNum; in.close();
                     if (tempNum < numPartitions) { break; } //quit, because someone else has finished
@@ -631,14 +465,14 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
             if (method == "dmm") {
                 finder->printFitData(cout, minLaplace);
                 finder->printFitData(fitData);
-                vector<string> currentLabels = m->getCurrentSharedBinLabels();
+                vector<string> currentLabels = thislookup->getOTUNames();
                 finder->printRelAbund(relabund, currentLabels);
                 outputNames.push_back(relabund); outputTypes["relabund"].push_back(relabund);
             }else if ((method == "pam") || (method == "kmeans")) { //print silouettes and ch values
                 finder->printSilData(cout, chi, silhouettes);
                 finder->printSilData(silData, chi, silhouettes);
                 if (method == "kmeans") {
-                    vector<string> currentLabels = m->getCurrentSharedBinLabels();
+                    vector<string> currentLabels = thislookup->getOTUNames();
                     finder->printRelAbund(relabund, currentLabels);
                     outputNames.push_back(relabund); outputTypes["relabund"].push_back(relabund);
                 }
@@ -646,9 +480,9 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
             delete finder;
             
             if(optimizegap != -1 && (numPartitions - minPartition) >= optimizegap && numPartitions >= minpartitions){
-                string tempDoneFile = m->getRootName(m->getSimpleName(sharedfile)) + toString(processID) + ".done.temp";
+                string tempDoneFile = util.getRootName(util.getSimpleName(sharedfile)) + toString(processID) + ".done.temp";
                 ofstream outDone;
-                m->openOutputFile(tempDoneFile, outDone);
+                util.openOutputFile(tempDoneFile, outDone);
                 outDone << minPartition << endl;
                 outDone.close();
                 break;
@@ -674,11 +508,11 @@ vector<double> GetMetaCommunityCommand::generateDesignFile(int numPartitions, ma
         ifstream postFile;
         variables["[tag]"] = toString(numPartitions);
         string input = getOutputFileName("matrix", variables);
-        m->openInputFile(input, postFile);//((fileRoot + toString(numPartitions) + "mix.posterior").c_str()); //matrix file
+        util.openInputFile(input, postFile);//((fileRoot + toString(numPartitions) + "mix.posterior").c_str()); //matrix file
         variables.erase("[tag]");
 		string outputFileName = getOutputFileName("design", variables);
         ofstream designFile;
-        m->openOutputFile(outputFileName, designFile);
+        util.openOutputFile(outputFileName, designFile);
         outputNames.push_back(outputFileName); outputTypes["design"].push_back(outputFileName);
         
         
@@ -713,7 +547,7 @@ vector<double> GetMetaCommunityCommand::generateDesignFile(int numPartitions, ma
             designFile << sampleName << '\t' << titles[maxPartition] << endl;
             
             numSamples++;
-            m->gobble(postFile);
+            util.gobble(postFile);
         }
         for(int i=0;i<numPartitions;i++){
             piValues[i] /= (double)numSamples;
@@ -754,14 +588,14 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         variables["[method]"] = method;
         variables["[tag]"] = "1";
         string reference = getOutputFileName("relabund", variables);
-        m->openInputFile(reference, referenceFile); //((fileRoot + label + ".1mix.relabund").c_str());
+        util.openInputFile(reference, referenceFile); //((fileRoot + label + ".1mix.relabund").c_str());
         variables["[tag]"] = toString(numPartitions);
         string partFile = getOutputFileName("relabund", variables);
         ifstream partitionFile;
-        m->openInputFile(partFile, partitionFile); //((fileRoot + toString(numPartitions) + "mix.relabund").c_str());
+        util.openInputFile(partFile, partitionFile); //((fileRoot + toString(numPartitions) + "mix.relabund").c_str());
         
-        header = m->getline(referenceFile);
-        header = m->getline(partitionFile);
+        header = util.getline(referenceFile);
+        header = util.getline(partitionFile);
         stringstream head(header);
         string dummy, label;
         head >> dummy;
@@ -799,8 +633,8 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
             tempData.difference = difference;
             summary.push_back(tempData);
             
-            m->gobble(referenceFile);
-            m->gobble(partitionFile);
+            util.gobble(referenceFile);
+            util.gobble(partitionFile);
         }
         referenceFile.close();
         partitionFile.close();
@@ -816,7 +650,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         outputNames.push_back(outputFileName); outputTypes["parameters"].push_back(outputFileName);
         
         ofstream parameterFile;
-        m->openOutputFile(outputFileName, parameterFile); //((fileRoot + "mix.parameters").c_str());
+        util.openOutputFile(outputFileName, parameterFile); //((fileRoot + "mix.parameters").c_str());
         parameterFile.setf(ios::fixed, ios::floatfield);
         parameterFile.setf(ios::showpoint);
         
@@ -835,7 +669,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         outputNames.push_back(summaryFileName); outputTypes["summary"].push_back(summaryFileName);
         
         ofstream summaryFile;
-        m->openOutputFile(summaryFileName, summaryFile); //((fileRoot + "mix.summary").c_str());
+        util.openOutputFile(summaryFileName, summaryFile); //((fileRoot + "mix.summary").c_str());
         summaryFile.setf(ios::fixed, ios::floatfield);
         summaryFile.setf(ios::showpoint);
         
@@ -878,7 +712,7 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
         ValidCalculators validCalculator;
         int i = 0;
         
-        if (validCalculator.isValidCalculator("matrix", Estimators[i]) == true) {
+        if (validCalculator.isValidCalculator("matrix", Estimators[i]) ) {
             if (Estimators[i] == "sharedsobs") {
                 matrixCalculator = new SharedSobsCS();
             }else if (Estimators[i] == "sharedchao") {
@@ -970,17 +804,13 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
         vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist> > calcDists; calcDists.resize(1);
         
+        SubSample sample;
         for (int thisIter = 0; thisIter < iters+1; thisIter++) {
  
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if (subsample && (thisIter != 0)) {
-                SubSample sample;
-                vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
-                
-                tempLabels = sample.getSample(thisItersLookup, subsampleSize);
-            }
+            if (subsample && (thisIter != 0)) { sample.getSample(thisItersLookup, subsampleSize);  }
             
             driver(thisItersLookup, calcDists, matrixCalculator);
             
@@ -1016,7 +846,7 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
 		
         if (iters != 0) {
             //we need to find the average distance and standard deviation for each groups distance
-            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals, "average");
+            vector< vector<seqDist>  > calcAverages = util.getAverages(calcDistsTotals, "average");
             
             //print results
             for (int i = 0; i < calcDists.size(); i++) {

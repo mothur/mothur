@@ -28,7 +28,6 @@ vector<string> TreeGroupCommand::setParameters(){
 		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson-jsd-rjsd", "jclass-thetayc", "", "", "","",true,false,true); parameters.push_back(pcalc);
 		
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-//CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -130,14 +129,14 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			outputTypes["tree"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -145,7 +144,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -153,7 +152,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -161,48 +160,48 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  inputfile = phylipfile;  format = "phylip"; m->setPhylipFile(phylipfile);	}
+			else {  inputfile = phylipfile;  format = "phylip"; current->setPhylipFile(phylipfile);	}
 			
-			columnfile = validParameter.validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not open") { columnfile = ""; abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  inputfile = columnfile; format = "column";	m->setColumnFile(columnfile); }
+			else {  inputfile = columnfile; format = "column";	current->setColumnFile(columnfile); }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  inputfile = sharedfile; format = "sharedfile";	m->setSharedFile(sharedfile); }
+			else {  inputfile = sharedfile; format = "sharedfile";	current->setSharedFile(sharedfile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
 			if ((phylipfile == "") && (columnfile == "") && (sharedfile == "")) { 
 				//is there are current file available for either of these?
 				//give priority to shared, then column, then phylip
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") {  inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					columnfile = m->getColumnFile(); 
+					columnfile = current->getColumnFile(); 
 					if (columnfile != "") { inputfile = columnfile; format = "column";  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
 					else { 
-						phylipfile = m->getPhylipFile(); 
+						phylipfile = current->getPhylipFile(); 
 						if (phylipfile != "") { inputfile = phylipfile;  format = "phylip";  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 						else { 
 							m->mothurOut("No valid current files. You must provide a shared, phylip or column file."); m->mothurOutEndLine(); 
@@ -215,10 +214,10 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			
 			if (columnfile != "") {
 				if ((namefile == "") && (countfile == "")){ 
-					namefile = m->getNameFile(); 
+					namefile = current->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
-						countfile = m->getCountTableFile();
+						countfile = current->getCountFile();
                         if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                         else { 
                             m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
@@ -231,51 +230,50 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 				
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "jclass-thetayc";  }
 			else { 
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
 
 			string temp;
-			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, precision); 
+			temp = validParameter.valid(parameters, "precision");			if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, precision); 
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
-			m->mothurConvert(temp, cutoff); 
+			temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "10"; }
+			util.mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 			
-            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
+            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
             
-            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			m->mothurConvert(temp, iters); 
+            temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+			util.mothurConvert(temp, iters); 
             
-            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
-			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
+			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
             else {  
-                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
                 else { subsample = false; }
             }
             
@@ -284,9 +282,9 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
             if (subsample && (format != "sharedfile")) { m->mothurOut("[ERROR]: the subsample parameter can only be used with a shared file.\n"); abort=true; }
             
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(inputfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(inputfile); //if user entered a file with a path then preserve it	
 			}
 		}
 
@@ -298,149 +296,44 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-TreeGroupCommand::~TreeGroupCommand(){
-	if (abort == false) {
-		if (format == "sharedfile") {  delete input; }
-		else { delete list; }
-		delete ct;  
-	}
-	
-}
+TreeGroupCommand::~TreeGroupCommand(){}
 
 //**********************************************************************************************************************
 
 int TreeGroupCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (format == "sharedfile") {
-			
-			ValidCalculators validCalculator;
-		
-			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("treegroup", Estimators[i]) == true) { 
-					if (Estimators[i] == "sharedsobs") { 
-						treeCalculators.push_back(new SharedSobsCS());
-					}else if (Estimators[i] == "sharedchao") { 
-						treeCalculators.push_back(new SharedChao1());
-					}else if (Estimators[i] == "sharedace") { 
-						treeCalculators.push_back(new SharedAce());
-					}else if (Estimators[i] == "jabund") { 	
-						treeCalculators.push_back(new JAbund());
-					}else if (Estimators[i] == "sorabund") { 
-						treeCalculators.push_back(new SorAbund());
-					}else if (Estimators[i] == "jclass") { 
-						treeCalculators.push_back(new Jclass());
-					}else if (Estimators[i] == "sorclass") { 
-						treeCalculators.push_back(new SorClass());
-					}else if (Estimators[i] == "jest") { 
-						treeCalculators.push_back(new Jest());
-					}else if (Estimators[i] == "sorest") { 
-						treeCalculators.push_back(new SorEst());
-					}else if (Estimators[i] == "thetayc") { 
-						treeCalculators.push_back(new ThetaYC());
-					}else if (Estimators[i] == "thetan") { 
-						treeCalculators.push_back(new ThetaN());
-					}else if (Estimators[i] == "kstest") { 
-						treeCalculators.push_back(new KSTest());
-					}else if (Estimators[i] == "sharednseqs") { 
-						treeCalculators.push_back(new SharedNSeqs());
-					}else if (Estimators[i] == "ochiai") { 
-						treeCalculators.push_back(new Ochiai());
-					}else if (Estimators[i] == "anderberg") { 
-						treeCalculators.push_back(new Anderberg());
-					}else if (Estimators[i] == "kulczynski") { 
-						treeCalculators.push_back(new Kulczynski());
-					}else if (Estimators[i] == "kulczynskicody") { 
-						treeCalculators.push_back(new KulczynskiCody());
-					}else if (Estimators[i] == "lennon") { 
-						treeCalculators.push_back(new Lennon());
-					}else if (Estimators[i] == "morisitahorn") { 
-						treeCalculators.push_back(new MorHorn());
-					}else if (Estimators[i] == "braycurtis") { 
-						treeCalculators.push_back(new BrayCurtis());
-					}else if (Estimators[i] == "whittaker") { 
-						treeCalculators.push_back(new Whittaker());
-					}else if (Estimators[i] == "odum") { 
-						treeCalculators.push_back(new Odum());
-					}else if (Estimators[i] == "canberra") { 
-						treeCalculators.push_back(new Canberra());
-					}else if (Estimators[i] == "structeuclidean") { 
-						treeCalculators.push_back(new StructEuclidean());
-					}else if (Estimators[i] == "structchord") { 
-						treeCalculators.push_back(new StructChord());
-					}else if (Estimators[i] == "hellinger") { 
-						treeCalculators.push_back(new Hellinger());
-					}else if (Estimators[i] == "manhattan") { 
-						treeCalculators.push_back(new Manhattan());
-					}else if (Estimators[i] == "structpearson") { 
-						treeCalculators.push_back(new StructPearson());
-					}else if (Estimators[i] == "soergel") { 
-						treeCalculators.push_back(new Soergel());
-					}else if (Estimators[i] == "spearman") { 
-						treeCalculators.push_back(new Spearman());
-					}else if (Estimators[i] == "structkulczynski") { 
-						treeCalculators.push_back(new StructKulczynski());
-					}else if (Estimators[i] == "speciesprofile") { 
-						treeCalculators.push_back(new SpeciesProfile());
-					}else if (Estimators[i] == "hamming") { 
-						treeCalculators.push_back(new Hamming());
-					}else if (Estimators[i] == "structchi2") { 
-						treeCalculators.push_back(new StructChi2());
-					}else if (Estimators[i] == "gower") { 
-						treeCalculators.push_back(new Gower());
-					}else if (Estimators[i] == "memchi2") { 
-						treeCalculators.push_back(new MemChi2());
-					}else if (Estimators[i] == "memchord") { 
-						treeCalculators.push_back(new MemChord());
-					}else if (Estimators[i] == "memeuclidean") { 
-						treeCalculators.push_back(new MemEuclidean());
-					}else if (Estimators[i] == "mempearson") { 
-						treeCalculators.push_back(new MemPearson());
-                    }else if (Estimators[i] == "jsd") {
-                        treeCalculators.push_back(new JSD());
-                    }else if (Estimators[i] == "rjsd") {
-                        treeCalculators.push_back(new RJSD());
-                    }
-
-				}
-			}
-			
-			//if the users entered no valid calculators don't execute command
-			if (treeCalculators.size() == 0) { m->mothurOut("You have given no valid calculators."); m->mothurOutEndLine(); return 0; }
-			
-			input = new InputData(sharedfile, "sharedfile");
-			SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
+			InputData input(sharedfile, "sharedfile", Groups);
+			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 			lastLabel = lookup->getLabel();
+            Groups = lookup->getNamesGroups();
 			
             if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine();  return 0; }
 			
-			//used in tree constructor 
-			m->setRunParse(false);
-			
 			//create treemap class from groupmap for tree class to use
-			ct = new CountTable();
+			CountTable ct;
             set<string> nameMap;
             map<string, string> groupMap;
             set<string> gps;
-            for (int i = 0; i < m->getAllGroups().size(); i++) { 
-                nameMap.insert(m->getAllGroups()[i]); 
-                gps.insert(m->getAllGroups()[i]); 
-                groupMap[m->getAllGroups()[i]] = m->getAllGroups()[i];
+            for (int i = 0; i < Groups.size(); i++) {
+                nameMap.insert(Groups[i]);
+                gps.insert(Groups[i]);
+                groupMap[Groups[i]] = Groups[i];
             }
-            ct->createTable(nameMap, groupMap, gps);
+            ct.createTable(nameMap, groupMap, gps);
 			
-						
 			//fills tree names with shared files groups
-			m->setTreenames(lookup->getNamesGroups());
+			Treenames = lookup->getNamesGroups();
             
 			if (m->getControl_pressed()) { return 0; }
 			
 			//create tree file
-			makeSimsShared(lookup);
+			makeSimsShared(input, lookup, ct);
 			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }  return 0; }
 		}else{
 			//read in dist file
 			filename = inputfile;
@@ -451,29 +344,26 @@ int TreeGroupCommand::execute(){
 				
 			readMatrix->setCutoff(cutoff);
 	
-            ct = NULL;
-            nameMap = NULL;
+            ListVector* list;
             if(namefile != ""){	
-                nameMap = new NameAssignment(namefile);
+                NameAssignment* nameMap = new NameAssignment(namefile);
                 nameMap->readMap();
                 readMatrix->read(nameMap);
+                list = readMatrix->getListVector();
+                delete nameMap;
             }else if (countfile != "") {
-                ct = new CountTable();
+                CountTable* ct = new CountTable();
                 ct->readTable(countfile, true, false);
                 readMatrix->read(ct);
-            }else {
-                readMatrix->read(nameMap);
-            }
+                list = readMatrix->getListVector();
+                delete ct;
+            }else { NameAssignment* nameMap = NULL; readMatrix->read(nameMap); list = readMatrix->getListVector(); }
 
-			list = readMatrix->getListVector();
 			SparseDistanceMatrix* dMatrix = readMatrix->getDMatrix();
-            
-            //clear globaldatas old tree names if any
-			vector<string> Treenames;
+			Treenames.clear();
             
 			//make treemap
-            if (ct != NULL) { delete ct; }
-			ct = new CountTable();
+			CountTable ct;
             set<string> nameMap;
             map<string, string> groupMap;
             set<string> gps;
@@ -484,18 +374,12 @@ int TreeGroupCommand::execute(){
                 groupMap[bin] = bin;
                 Treenames.push_back(bin);
             }
-            m->setTreenames(Treenames);
-            ct->createTable(nameMap, groupMap, gps);
-			
-			vector<string> namesGroups = ct->getNamesOfGroups();
-			m->setGroups(namesGroups);
-			
-			//used in tree constructor 
-			m->setRunParse(false);
+            ct.createTable(nameMap, groupMap, gps);
+			vector<string> namesGroups = ct.getNamesOfGroups();
 			
 			if (m->getControl_pressed()) { return 0; }
 			
-			vector< vector<double> > matrix = makeSimsDist(dMatrix);
+			vector< vector<double> > matrix = makeSimsDist(dMatrix, list->getNumBins());
             delete readMatrix;
             delete dMatrix;
 			
@@ -503,28 +387,24 @@ int TreeGroupCommand::execute(){
 
 			//create a new filename
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
 			string outputFile = getOutputFileName("tree",variables);	
 			outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 				
-			Tree* newTree = createTree(matrix);
-            
-            if (newTree != NULL) {  writeTree(outputFile, newTree); delete newTree; }
+            Tree* newTree = new Tree(&ct, matrix, Treenames);
+            if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
+            else { newTree->assembleTree(); }
+ 
+            if (newTree != NULL) {  newTree->createNewickFile(outputFile);  delete newTree; }
 			
-			if (m->getControl_pressed()) { return 0; }
-
-			m->mothurOut("Tree complete. "); m->mothurOutEndLine();
-			
+			if (m->getControl_pressed()) { return 0; } m->mothurOut("Tree complete.\n");
 		}
 				
-		//reset groups parameter
-		m->clearGroups(); 
-		
 		//set tree file as new current treefile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("tree");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTreeFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTreeFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -539,66 +419,30 @@ int TreeGroupCommand::execute(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-Tree* TreeGroupCommand::createTree(vector< vector<double> >& simMatrix){
-	try {
-		//create tree
-		t = new Tree(ct, simMatrix);
+/***********************************************************/
+void TreeGroupCommand::printSims(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
+    try {
         
-        if (m->getControl_pressed()) { delete t; t = NULL; return t; }
-		
-        //assemble tree
-		t->assembleTree();
-
-		return t;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "createTree");
-		exit(1);
-	}
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        out << simMatrix.size() << endl;
+        for (int b = 0; b < simMatrix.size(); b++)	{
+            out << groupNames[b];
+            for (int n = 0; n < b; n++)	{
+                out  << '\t' << simMatrix[b][n];
+            }
+            out << endl;
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TreeGroupCommand", "printSims");
+        exit(1);
+    }
 }
 /***********************************************************/
-int TreeGroupCommand::writeTree(string out, Tree* T) {
+vector< vector<double> > TreeGroupCommand::makeSimsDist(SparseDistanceMatrix* matrix, int numGroups) {
 	try {
-		
-        //print newick file
-		t->createNewickFile(out);
-		
-        if (m->getControl_pressed()) { m->mothurRemove(out); outputNames.pop_back(); return 1; }
-        
-        return 0;
-        
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "printSims");
-		exit(1);
-	}
-}
-
-/***********************************************************/
-void TreeGroupCommand::printSims(ostream& out, vector< vector<double> >& simMatrix) {
-	try {
-		
-        for (int m = 0; m < simMatrix.size(); m++)	{
-			//out << lookup[m]->getGroup() << '\t';
-			for (int n = 0; n < simMatrix.size(); n++)	{
-				out << simMatrix[m][n] << '\t'; 
-			}
-			out << endl;
-		}
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "printSims");
-		exit(1);
-	}
-}
-/***********************************************************/
-vector< vector<double> > TreeGroupCommand::makeSimsDist(SparseDistanceMatrix* matrix) {
-	try {
-		numGroups = list->size();
-		
 		//initialize simMatrix
 		vector< vector<double> > simMatrix;
 		simMatrix.resize(numGroups);
@@ -630,9 +474,51 @@ vector< vector<double> > TreeGroupCommand::makeSimsDist(SparseDistanceMatrix* ma
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+int driverTreeShared(vector<SharedRAbundVector*>& thisLookup, vector< vector<seqDist> >& calcDists, vector<Calculator*> treeCalculators, MothurOut* m) {
+    try {
+        vector<SharedRAbundVector*> subset;
+        
+        for (int k = 0; k < thisLookup.size(); k++) { // pass cdd each set of groups to compare
+            
+            for (int l = 0; l < k; l++) {
+                
+                if (k != l) { //we dont need to similarity of a groups to itself
+                    subset.clear(); //clear out old pair of sharedrabunds
+                    //add new pair of sharedrabunds
+                    subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]);
+                    
+                    for(int i=0;i<treeCalculators.size();i++) {
+                        
+                        //if this calc needs all groups to calculate the pair load all groups
+                        if (treeCalculators[i]->getNeedsAll()) {
+                            //load subset with rest of lookup for those calcs that need everyone to calc for a pair
+                            for (int w = 0; w < thisLookup.size(); w++) {
+                                if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
+                            }
+                        }
+                        
+                        vector<double> tempdata = treeCalculators[i]->getValues(subset); //saves the calculator outputs
+                        
+                        if (m->getControl_pressed()) { return 1; }
+                        
+                        seqDist temp(l, k, tempdata[0]);
+                        calcDists[i].push_back(temp);
+                    }
+                }
+            }
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MatrixOutputCommand", "driver");
+        exit(1);
+    }
+}
 
 /***********************************************************/
-int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
+int TreeGroupCommand::makeSimsShared(InputData& input, SharedRAbundVectors*& lookup, CountTable& ct) {
 	try {
         
         if (subsample) { 
@@ -640,53 +526,37 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
                 subsampleSize = lookup->getNumSeqsSmallestGroup();
             }else {
                 lookup->removeGroups(subsampleSize);
-                Groups = m->getGroups();
-                m->setTreenames(Groups);
+                Groups = lookup->getNamesGroups();
+                Treenames = Groups;
             }
             
             if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
         }
         numGroups = lookup->size();
         
-        //sanity check to make sure processors < numComparisions
-        int numDists = 0;
-        for(int i=0;i<numGroups;i++){
-            for(int j=0;j<i;j++){
-                numDists++;
-                if (numDists > processors) { break; }
-            }
-        }
-        if (numDists < processors) { processors = numDists; }
-        
-		lines.resize(processors);
-		for (int i = 0; i < processors; i++) {
-			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
-			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
-		}	
-        
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            if (m->getControl_pressed()) { delete lookup; for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
+            if (m->getControl_pressed()) { delete lookup;  return 1; }
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				process(lookup);
+				m->mothurOut(lookup->getLabel()+"\n");
+				createProcesses(lookup, ct);
 				
 				processedLabels.insert(lookup->getLabel());
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 			
 				delete lookup;
-				lookup = input->getSharedRAbundVectors(lastLabel);
+				lookup = input.getSharedRAbundVectors(lastLabel);
 
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				process(lookup);
+				m->mothurOut(lookup->getLabel()+"\n");
+				createProcesses(lookup, ct);
 					
 				processedLabels.insert(lookup->getLabel());
 				userLabels.erase(lookup->getLabel());
@@ -699,10 +569,10 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
 			
 			//get next line to process
 			delete lookup;
-			lookup = input->getSharedRAbundVectors();
+			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) { for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
+		if (m->getControl_pressed()) {  return 1; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -710,25 +580,21 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + ".\n");
 				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+			}else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
-			lookup = input->getSharedRAbundVectors(lastLabel);
+			lookup = input.getSharedRAbundVectors(lastLabel);
 
-			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-			process(lookup);
+			m->mothurOut(lookup->getLabel()+"\n");
+			createProcesses(lookup, ct);
 			delete lookup;
 		}
-		
-		for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; }
-		
+
 		return 0;
 	}
 	catch(exception& e) {
@@ -736,229 +602,247 @@ int TreeGroupCommand::makeSimsShared(SharedRAbundVectors*& lookup) {
 		exit(1);
 	}
 }
-
+/**************************************************************************************************/
+struct treeSharedData {
+    SharedRAbundVectors* thisLookup;
+    vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
+    vector< vector< vector<double> > > matrices; //for each calculator a square matrix to represent the distances, only filled by main thread
+    vector<string>  Estimators;
+    long long numIters;
+    MothurOut* m;
+    int count, subsampleSize;
+    bool mainThread, subsample;
+    
+    treeSharedData(){}
+    treeSharedData(long long st, bool mt, bool su, int subsize, vector<string> est, SharedRAbundVectors* lu) {
+        m = MothurOut::getInstance();
+        numIters = st;
+        Estimators = est;
+        thisLookup = lu;
+        count = 0;
+        mainThread = mt;
+        subsample = su;
+        subsampleSize = subsize;
+    }
+};
 /***********************************************************/
-int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
-	try{
-		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
-        vector< vector<seqDist>  > calcDists; calcDists.resize(treeCalculators.size()); 		
+int process(treeSharedData* params) {
+    try{
         
-        for (int thisIter = 0; thisIter < iters; thisIter++) {
+        ValidCalculators validCalculator;
+        vector<Calculator*> treeCalculators;
+        for (int i=0; i<params->Estimators.size(); i++) {
+            if (validCalculator.isValidCalculator("treegroup", params->Estimators[i]) ) {
+                if (params->Estimators[i] == "sharedsobs") {
+                    treeCalculators.push_back(new SharedSobsCS());
+                }else if (params->Estimators[i] == "sharedchao") {
+                    treeCalculators.push_back(new SharedChao1());
+                }else if (params->Estimators[i] == "sharedace") {
+                    treeCalculators.push_back(new SharedAce());
+                }else if (params->Estimators[i] == "jabund") {
+                    treeCalculators.push_back(new JAbund());
+                }else if (params->Estimators[i] == "sorabund") {
+                    treeCalculators.push_back(new SorAbund());
+                }else if (params->Estimators[i] == "jclass") {
+                    treeCalculators.push_back(new Jclass());
+                }else if (params->Estimators[i] == "sorclass") {
+                    treeCalculators.push_back(new SorClass());
+                }else if (params->Estimators[i] == "jest") {
+                    treeCalculators.push_back(new Jest());
+                }else if (params->Estimators[i] == "sorest") {
+                    treeCalculators.push_back(new SorEst());
+                }else if (params->Estimators[i] == "thetayc") {
+                    treeCalculators.push_back(new ThetaYC());
+                }else if (params->Estimators[i] == "thetan") {
+                    treeCalculators.push_back(new ThetaN());
+                }else if (params->Estimators[i] == "kstest") {
+                    treeCalculators.push_back(new KSTest());
+                }else if (params->Estimators[i] == "sharednseqs") {
+                    treeCalculators.push_back(new SharedNSeqs());
+                }else if (params->Estimators[i] == "ochiai") {
+                    treeCalculators.push_back(new Ochiai());
+                }else if (params->Estimators[i] == "anderberg") {
+                    treeCalculators.push_back(new Anderberg());
+                }else if (params->Estimators[i] == "kulczynski") {
+                    treeCalculators.push_back(new Kulczynski());
+                }else if (params->Estimators[i] == "kulczynskicody") {
+                    treeCalculators.push_back(new KulczynskiCody());
+                }else if (params->Estimators[i] == "lennon") {
+                    treeCalculators.push_back(new Lennon());
+                }else if (params->Estimators[i] == "morisitahorn") {
+                    treeCalculators.push_back(new MorHorn());
+                }else if (params->Estimators[i] == "braycurtis") {
+                    treeCalculators.push_back(new BrayCurtis());
+                }else if (params->Estimators[i] == "whittaker") {
+                    treeCalculators.push_back(new Whittaker());
+                }else if (params->Estimators[i] == "odum") {
+                    treeCalculators.push_back(new Odum());
+                }else if (params->Estimators[i] == "canberra") {
+                    treeCalculators.push_back(new Canberra());
+                }else if (params->Estimators[i] == "structeuclidean") {
+                    treeCalculators.push_back(new StructEuclidean());
+                }else if (params->Estimators[i] == "structchord") {
+                    treeCalculators.push_back(new StructChord());
+                }else if (params->Estimators[i] == "hellinger") {
+                    treeCalculators.push_back(new Hellinger());
+                }else if (params->Estimators[i] == "manhattan") {
+                    treeCalculators.push_back(new Manhattan());
+                }else if (params->Estimators[i] == "structpearson") {
+                    treeCalculators.push_back(new StructPearson());
+                }else if (params->Estimators[i] == "soergel") {
+                    treeCalculators.push_back(new Soergel());
+                }else if (params->Estimators[i] == "spearman") {
+                    treeCalculators.push_back(new Spearman());
+                }else if (params->Estimators[i] == "structkulczynski") {
+                    treeCalculators.push_back(new StructKulczynski());
+                }else if (params->Estimators[i] == "speciesprofile") {
+                    treeCalculators.push_back(new SpeciesProfile());
+                }else if (params->Estimators[i] == "hamming") {
+                    treeCalculators.push_back(new Hamming());
+                }else if (params->Estimators[i] == "structchi2") {
+                    treeCalculators.push_back(new StructChi2());
+                }else if (params->Estimators[i] == "gower") {
+                    treeCalculators.push_back(new Gower());
+                }else if (params->Estimators[i] == "memchi2") {
+                    treeCalculators.push_back(new MemChi2());
+                }else if (params->Estimators[i] == "memchord") {
+                    treeCalculators.push_back(new MemChord());
+                }else if (params->Estimators[i] == "memeuclidean") {
+                    treeCalculators.push_back(new MemEuclidean());
+                }else if (params->Estimators[i] == "mempearson") {
+                    treeCalculators.push_back(new MemPearson());
+                }else if (params->Estimators[i] == "jsd") {
+                    treeCalculators.push_back(new JSD());
+                }else if (params->Estimators[i] == "rjsd") {
+                    treeCalculators.push_back(new RJSD());
+                }
+            }
+        }
+        
+        //if the users entered no valid calculators don't execute command
+        if (treeCalculators.size() == 0) { params->m->mothurOut("You have given no valid calculators.\n");  return 0; }
+        
+        params->Estimators.clear();
+        for (int i=0; i<treeCalculators.size(); i++) { params->Estimators.push_back(treeCalculators[i]->getName()); }
+        
+        vector< vector<seqDist>  > calcDists; calcDists.resize(treeCalculators.size());
+        SubSample sample; 
+        for (int thisIter = 0; thisIter < params->numIters; thisIter++) {
             
-            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
+            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if (subsample && (thisIter != 0)) {
-                SubSample sample;
-                vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
-                
-                tempLabels = sample.getSample(thisItersLookup, subsampleSize);
+            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) { sample.getSample(thisItersLookup, params->subsampleSize); }
+            
+            vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
+            vector<string> thisItersGroupNames = params->thisLookup->getNamesGroups();
+            
+            driverTreeShared(thisItersRabunds, calcDists, treeCalculators, params->m);
+            
+            for (int i = 0; i < thisItersRabunds.size(); i++) { delete thisItersRabunds[i]; }
+            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ){
+                if((thisIter+1) % 100 == 0){	params->m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
+                params->calcDistsTotals.push_back(calcDists);
+                for (int i = 0; i < calcDists.size(); i++) {
+                    for (int j = 0; j < calcDists[i].size(); j++) {
+                        if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisItersGroupNames[calcDists[i][j].seq1] + " - " + thisItersGroupNames[calcDists[i][j].seq2] + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
+                    }
+                }
+            }else { //print results for whole dataset
+                for (int i = 0; i < calcDists.size(); i++) {
+                    if (params->m->getControl_pressed()) { break; }
+                    
+                    //initialize matrix
+                    vector< vector<double> > matrix; //square matrix to represent the distance
+                    matrix.resize(thisItersLookup->size());
+                    for (int k = 0; k < thisItersLookup->size(); k++) {  matrix[k].resize(thisItersLookup->size(), 0.0); }
+                    
+                    for (int j = 0; j < calcDists[i].size(); j++) {
+                        int row = calcDists[i][j].seq1;
+                        int column = calcDists[i][j].seq2;
+                        double dist = calcDists[i][j].dist;
+                        
+                        matrix[row][column] = dist;
+                        matrix[column][row] = dist;
+                    }
+                    params->matrices.push_back(matrix);
+                }
             }
-            
-            if(processors == 1){
-                driver(thisItersLookup, 0, numGroups, calcDists);
-            }else{
-                int process = 1;
-                vector<int> processIDS;
-                bool recalc = false;
-                
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-                //loop through and create all the processes you want
-                while (process != processors) {
-                    pid_t pid = fork();
-                    
-                    if (pid > 0) {
-                        processIDS.push_back(pid); 
-                        process++;
-                    }else if (pid == 0){
-                        
-                        driver(thisItersLookup, lines[process].start, lines[process].end, calcDists);   
-                        
-                        string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist";
-                        ofstream outtemp;
-                        m->openOutputFile(tempdistFileName, outtemp);
-                        
-                        for (int i = 0; i < calcDists.size(); i++) {
-                            outtemp << calcDists[i].size() << endl;
-                            
-                            for (int j = 0; j < calcDists[i].size(); j++) {
-                                outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
-                            }
-                        }
-                        outtemp.close();
-                        
-                        exit(0);
-                    }else { 
-                        m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                        //wait to die
-                        for (int i=0;i<processIDS.size();i++) {
-                            int temp = processIDS[i];
-                            wait(&temp);
-                        }
-                        m->setControl_pressed(false);
-                        for (int i=0;i<processIDS.size();i++) {
-                            m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + (toString(processIDS[i]) + ".dist"));
-                        }
-                        recalc = true;
-                        break;
-                    }
-                }
-                
-                if (recalc) {
-                    //test line, also set recalc to true.
-                    //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(m->getRootName(m->getSimpleName(sharedfile)) + (toString(processIDS[i]) + ".dist"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-                    
-                    /******************************************************/
-                    //comparison breakup to be used by different processes later
-                    lines.clear();
-                    numGroups = thisLookup->size();
-                    lines.resize(processors);
-                    for (int i = 0; i < processors; i++) {
-                        lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
-                        lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
-                    }
-                    /******************************************************/
-                    
-                    calcDists.clear(); calcDists.resize(treeCalculators.size());
-                    processIDS.resize(0);
-                    process = 1;
-                    
-                    //loop through and create all the processes you want
-                    while (process != processors) {
-                        pid_t pid = fork();
-                        
-                        if (pid > 0) {
-                            processIDS.push_back(pid);
-                            process++;
-                        }else if (pid == 0){
-                            
-                            driver(thisItersLookup, lines[process].start, lines[process].end, calcDists);
-                            
-                            string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + m->mothurGetpid(process) + ".dist";
-                            ofstream outtemp;
-                            m->openOutputFile(tempdistFileName, outtemp);
-                            
-                            for (int i = 0; i < calcDists.size(); i++) {
-                                outtemp << calcDists[i].size() << endl;
-                                
-                                for (int j = 0; j < calcDists[i].size(); j++) {
-                                    outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
-                                }
-                            }
-                            outtemp.close();
-                            
-                            exit(0);
-                        }else {
-                            m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                            for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                            exit(0);
-                        }
-                    }                    
-                }
-
-                //parent do your part
-                driver(thisItersLookup, lines[0].start, lines[0].end, calcDists);   
-                
-                //force parent to wait until all the processes are done
-                for (int i = 0; i < processIDS.size(); i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                
-                for (int i = 0; i < processIDS.size(); i++) {
-                    string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(processIDS[i]) +  ".dist";
-                    ifstream intemp;
-                    m->openInputFile(tempdistFileName, intemp);
-                    
-                    for (int k = 0; k < calcDists.size(); k++) {
-                        int size = 0;
-                        intemp >> size; m->gobble(intemp);
-                        
-                        for (int j = 0; j < size; j++) {
-                            int seq1 = 0;
-                            int seq2 = 0;
-                            float dist = 1.0;
-                            
-                            intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
-                            
-                            seqDist tempDist(seq1, seq2, dist);
-                            calcDists[k].push_back(tempDist);
-                        }
-                    }
-                    intemp.close();
-                    m->mothurRemove(tempdistFileName);
-                }
-#else
-                //////////////////////////////////////////////////////////////////////////////////////////////////////
-                //Windows version shared memory, so be careful when passing variables through the treeSharedData struct. 
-                //Above fork() will clone, so memory is separate, but that's not the case with windows, 
-                //Taking advantage of shared memory to pass results vectors.
-                //////////////////////////////////////////////////////////////////////////////////////////////////////
-                
-                vector<treeSharedData*> pDataArray; 
-                DWORD   dwThreadIdArray[processors-1];
-                HANDLE  hThreadArray[processors-1]; 
-                
-                //Create processor worker threads.
-                for( int i=1; i<processors; i++ ){
-                    
-                    //make copy of lookup so we don't get access violations
-                    vector<SharedRAbundVector*> newLookup = thisItersLookup->getSharedRAbundVectors();
-                    // Allocate memory for thread data.
-                    treeSharedData* tempSum = new treeSharedData(m, lines[i].start, lines[i].end, Estimators, newLookup);
-                    pDataArray.push_back(tempSum);
-                    processIDS.push_back(i);
-                    
-                    hThreadArray[i-1] = CreateThread(NULL, 0, MyTreeSharedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
-                }
-                
-                //parent do your part
-                driver(thisItersLookup, lines[0].start, lines[0].end, calcDists);   
-                
-                //Wait until all threads have terminated.
-                WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-                
-                //Close all thread handles and free memory allocations.
-                for(int i=0; i < pDataArray.size(); i++){
-                    if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
-                    }
-                    for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
-                    
-                    for (int k = 0; k < calcDists.size(); k++) {
-                        int size = pDataArray[i]->calcDists[k].size();
-                        for (int j = 0; j < size; j++) {    calcDists[k].push_back(pDataArray[i]->calcDists[k][j]);    }
-                    }
-                    
-                    CloseHandle(hThreadArray[i]);
-                    delete pDataArray[i];
-                }
-                
-#endif
-            }
-            
-            calcDistsTotals.push_back(calcDists);
-            
-            if (subsample) {
-                //clean up memory
-                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); } }
-            
+            for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             delete thisItersLookup;
-            if (m->getDebug()) {  m->mothurOut("[DEBUG]: iter = " + toString(thisIter) + ".\n"); }
-		}
+        }
+        if((params->numIters) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->numIters)+"\n"); 		}
+        for (int i=0; i<treeCalculators.size(); i++) { delete treeCalculators[i]; }
         
-		if (m->getDebug()) {  m->mothurOut("[DEBUG]: done with iters.\n"); }
+        return 0;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "TreeGroupCommand", "process");
+        exit(1);
+    }
+}
+/***********************************************************/
+int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTable& ct){
+    try {
+        
+        vector<string> groupNames = thisLookup->getNamesGroups();
+        Treenames = groupNames; //may have changed if subsample eliminated groups
+        
+        vector<int> lines;
+        if (processors > (iters+1)) { processors = iters+1; }
+        
+        //figure out how many sequences you have to process
+        int numItersPerProcessor = (iters+1) / processors;
+        for (int i = 0; i < processors; i++) {
+            if(i == (processors - 1)){	numItersPerProcessor = (iters+1) - i * numItersPerProcessor; 	}
+            lines.push_back(numItersPerProcessor);
+        }
+        
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<treeSharedData*> data;
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
             
+            //make copy of lookup so we don't get access violations
+            SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
+            treeSharedData* dataBundle = new treeSharedData(lines[i+1], false, subsample, subsampleSize, Estimators, newLookup);
+            
+            data.push_back(dataBundle);
+            workerThreads.push_back(new thread(process, dataBundle));
+        }
+        
+        //make copy of lookup so we don't get access violations
+        SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
+        treeSharedData* dataBundle = new treeSharedData(lines[0], true, subsample, subsampleSize, Estimators, newLookup);
+        process(dataBundle);
+        delete newLookup;
+        
+        Estimators.clear(); Estimators = dataBundle->Estimators;
+        vector< vector< vector<seqDist> > > calcDistsTotals = dataBundle->calcDistsTotals;
+        vector< vector< vector<double> > > matrices = dataBundle->matrices;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            //get calcDistsTotal info - one entry per iter
+            for (int j = 0; j < data[i]->calcDistsTotals.size(); j++) { calcDistsTotals.push_back(data[i]->calcDistsTotals[j]); }
+            
+            delete data[i]->thisLookup;
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
         if (iters != 1) {
             //we need to find the average distance and standard deviation for each groups distance
-            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals);  
+            vector< vector<seqDist>  > calcAverages = util.getAverages(calcDistsTotals);
             
             if (m->getDebug()) {  m->mothurOut("[DEBUG]: found averages.\n"); }
             
             //create average tree for each calc
-            for (int i = 0; i < calcDists.size(); i++) {
+            for (int i = 0; i < Estimators.size(); i++) {
                 vector< vector<double> > matrix; //square matrix to represent the distance
                 matrix.resize(thisLookup->size());
                 for (int k = 0; k < thisLookup->size(); k++) {  matrix[k].resize(thisLookup->size(), 0.0); }
@@ -973,39 +857,41 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 }
                 
                 //create a new filename
-                map<string, string> variables; 
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
-                variables["[calc]"] = treeCalculators[i]->getName();
+                map<string, string> variables;
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+                variables["[calc]"] = Estimators[i];
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "ave";
-                string outputFile = getOutputFileName("tree",variables);				
-                outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
+                string outputFile = getOutputFileName("tree",variables);
+                outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
                 
                 //creates tree from similarity matrix and write out file
-                Tree* newTree = createTree(matrix);
-                if (newTree != NULL) { writeTree(outputFile, newTree); }                
+                Tree* newTree = new Tree(&ct, matrix, Treenames);
+                if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
+                else { newTree->assembleTree(); }
+                if (newTree != NULL) { newTree->createNewickFile(outputFile);  delete newTree; }
             }
             
             if (m->getDebug()) {  m->mothurOut("[DEBUG]: done averages trees.\n"); }
             
             //create all trees for each calc and find their consensus tree
-            for (int i = 0; i < calcDists.size(); i++) {
+            for (int i = 0; i < Estimators.size(); i++) {
                 if (m->getControl_pressed()) { break; }
                 
                 //create a new filename
                 //create a new filename
-                map<string, string> variables; 
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
-                variables["[calc]"] = treeCalculators[i]->getName();
+                map<string, string> variables;
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+                variables["[calc]"] = Estimators[i];
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "all";
-                string outputFile = getOutputFileName("tree",variables);				
-                outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
+                string outputFile = getOutputFileName("tree",variables);
+                outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
                 
                 ofstream outAll;
-                m->openOutputFile(outputFile, outAll);
+                util.openOutputFile(outputFile, outAll);
                 
-                vector<Tree*> trees; 
+                vector<Tree*> trees;
                 for (int myIter = 0; myIter < iters; myIter++) {
                     
                     if(m->getControl_pressed()) { break; }
@@ -1019,14 +905,16 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                         int row = calcDistsTotals[myIter][i][j].seq1;
                         int column = calcDistsTotals[myIter][i][j].seq2;
                         double dist = calcDistsTotals[myIter][i][j].dist;
-                       
+                        
                         matrix[row][column] = dist;
                         matrix[column][row] = dist;
                     }
                     
                     //creates tree from similarity matrix and write out file
-                    Tree* newTree = createTree(matrix);
-                    if (newTree != NULL) { 
+                    Tree* newTree = new Tree(&ct, matrix, Treenames);
+                    if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
+                    else { newTree->assembleTree(); }
+                    if (newTree != NULL) {
                         newTree->print(outAll);
                         trees.push_back(newTree);
                     }
@@ -1037,106 +925,51 @@ int TreeGroupCommand::process(SharedRAbundVectors*& thisLookup) {
                 if (m->getDebug()) {  m->mothurOut("[DEBUG]: done all trees.\n"); }
                 
                 Consensus consensus;
-                //clear old tree names if any
-                m->setTreenames(m->getGroups()); //may have changed if subsample eliminated groups
                 Tree* conTree = consensus.getTree(trees);
                 
                 if (m->getDebug()) {  m->mothurOut("[DEBUG]: done cons tree.\n"); }
                 
                 //create a new filename
                 variables["[tag]"] = "cons";
-                string conFile = getOutputFileName("tree",variables);				
-                outputNames.push_back(conFile); outputTypes["tree"].push_back(conFile); 
+                string conFile = getOutputFileName("tree",variables);
+            
+                outputNames.push_back(conFile); outputTypes["tree"].push_back(conFile);
                 ofstream outTree;
-                m->openOutputFile(conFile, outTree);
+                util.openOutputFile(conFile, outTree);
                 
                 if (conTree != NULL) { conTree->print(outTree, "boot"); delete conTree; }
             }
-
         }else {
-            
-            for (int i = 0; i < calcDists.size(); i++) {
+            for (int i = 0; i < matrices.size(); i++) {
                 if (m->getControl_pressed()) { break; }
                 
                 //initialize matrix
-                vector< vector<double> > matrix; //square matrix to represent the distance
-                matrix.resize(thisLookup->size());
-                for (int k = 0; k < thisLookup->size(); k++) {  matrix[k].resize(thisLookup->size(), 0.0); }
-                
-                for (int j = 0; j < calcDists[i].size(); j++) {
-                    int row = calcDists[i][j].seq1;
-                    int column = calcDists[i][j].seq2;
-                    double dist = calcDists[i][j].dist;
-                    
-                    matrix[row][column] = dist;
-                    matrix[column][row] = dist;
-                }
+                vector< vector<double> > matrix = matrices[i]; //square matrix to represent the distance
                 
                 //create a new filename
-                map<string, string> variables; 
-                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
-                variables["[calc]"] = treeCalculators[i]->getName();
+                map<string, string> variables;
+                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+                variables["[calc]"] = Estimators[i];
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "";
-                string outputFile = getOutputFileName("tree",variables);					
-                outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
+                string outputFile = getOutputFileName("tree",variables);
+                outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
                 
                 //creates tree from similarity matrix and write out file
-                Tree* newTree = createTree(matrix);
-                if (newTree != NULL) { writeTree(outputFile, newTree); delete newTree; }
+                Tree* newTree = new Tree(&ct, matrix, Treenames);
+                if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
+                else { newTree->assembleTree(); }
+                if (newTree != NULL) { newTree->createNewickFile(outputFile);  delete newTree; }
             }
         }
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "process");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int TreeGroupCommand::driver(SharedRAbundVectors*& thislookup, int start, int end, vector< vector<seqDist> >& calcDists) {
-	try {
-		vector<SharedRAbundVector*> subset;
-        vector<SharedRAbundVector*> thisLookup = thislookup->getSharedRAbundVectors();
-		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
-			
-			for (int l = 0; l < k; l++) {
-				
-				if (k != l) { //we dont need to similiarity of a groups to itself
-					subset.clear(); //clear out old pair of sharedrabunds
-					//add new pair of sharedrabunds
-					subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
-					
-					for(int i=0;i<treeCalculators.size();i++) {
-						
-						//if this calc needs all groups to calculate the pair load all groups
-						if (treeCalculators[i]->getNeedsAll()) { 
-							//load subset with rest of lookup for those calcs that need everyone to calc for a pair
-							for (int w = 0; w < thisLookup.size(); w++) {
-								if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
-							}
-						}
-						
-						vector<double> tempdata = treeCalculators[i]->getValues(subset); //saves the calculator outputs
-						
-                        if (m->getControl_pressed()) { for (int i = 0; i < thisLookup.size(); i++) { delete thisLookup[i];  } return 1; }
-						
-						seqDist temp(l, k, -(tempdata[0]-1.0));
-						calcDists[i].push_back(temp);
-					}
-				}
-			}
-		}
-		
-        for (int i = 0; i < thisLookup.size(); i++) { delete thisLookup[i];  }
         
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "driver");
-		exit(1);
-	}
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TreeGroupCommand", "createProcesses");
+        exit(1);
+    }
 }
 /***********************************************************/
 

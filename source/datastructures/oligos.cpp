@@ -7,6 +7,7 @@
 //
 
 #include "oligos.h"
+#include "utils.hpp"
 
 /**************************************************************************************************/
 
@@ -90,7 +91,7 @@ int Oligos::read(string o, bool reverse){
 int Oligos::readOligos(){
 	try {
 		ifstream inOligos;
-		m->openInputFile(oligosfile, inOligos);
+        Utils util; util.openInputFile(oligosfile, inOligos);
 		
 		string type, oligo, roligo, group;
         bool pfUsesNone = false; bool prUsesNone = false; bool bfUsesNone = false; bool brUsesNone = false;
@@ -103,10 +104,10 @@ int Oligos::readOligos(){
             
 			if(type[0] == '#'){
 				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				m->gobble(inOligos);
+				util.gobble(inOligos);
 			}
 			else{
-				m->gobble(inOligos);
+				util.gobble(inOligos);
 				//make type case insensitive
 				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
 				
@@ -141,7 +142,7 @@ int Oligos::readOligos(){
                     }
 				}
                 else if (type == "PRIMER"){
-                    m->gobble(inOligos);
+                    util.gobble(inOligos);
 					
                     inOligos >> roligo;
                     
@@ -245,7 +246,7 @@ int Oligos::readOligos(){
 				}
 				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); }
 			}
-			m->gobble(inOligos);
+			util.gobble(inOligos);
 		}
 		inOligos.close();
 		

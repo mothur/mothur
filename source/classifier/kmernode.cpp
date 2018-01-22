@@ -174,7 +174,7 @@ double KmerNode::getSimToConsensus(vector<int>& queryKmerProfile){
             }
         }	
         
-        return present / double(queryKmerProfile.size() - kmerSize + 1);
+        return (present / double(queryKmerProfile.size() - kmerSize + 1));
     }
 	catch(exception& e) {
 		m->errorOut(e, "KmerNode", "getSimToConsensus");

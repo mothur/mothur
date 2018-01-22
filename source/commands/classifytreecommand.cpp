@@ -112,14 +112,14 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 			outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("tree");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
 				}
@@ -127,7 +127,7 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -135,7 +135,7 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -143,7 +143,7 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -151,45 +151,45 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 			
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
             
 			//check for required parameters
-			treefile = validParameter.validFile(parameters, "tree", true);
+			treefile = validParameter.validFile(parameters, "tree");
 			if (treefile == "not open") { treefile = ""; abort = true; }
 			else if (treefile == "not found") { treefile = ""; 
-                treefile = m->getTreeFile(); 
+                treefile = current->getTreeFile(); 
                 if (treefile != "") {  m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
                 else { m->mothurOut("No valid current files. You must provide a tree file."); m->mothurOutEndLine(); abort = true; }
-            }else { m->setTreeFile(treefile); }	
+            }else { current->setTreeFile(treefile); }	
             
-            taxonomyfile = validParameter.validFile(parameters, "taxonomy", true);
+            taxonomyfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomyfile == "not open") { taxonomyfile = ""; abort = true; }
 			else if (taxonomyfile == "not found") { taxonomyfile = ""; 
-                taxonomyfile = m->getTaxonomyFile(); 
+                taxonomyfile = current->getTaxonomyFile(); 
                 if (taxonomyfile != "") {  m->mothurOut("Using " + taxonomyfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
                 else { m->mothurOut("No valid current files. You must provide a taxonomy file."); m->mothurOutEndLine(); abort = true; }
-            }else { m->setTaxonomyFile(taxonomyfile); }	
+            }else { current->setTaxonomyFile(taxonomyfile); }	
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -199,12 +199,12 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
             }
             
-            string temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "51"; }
-			m->mothurConvert(temp, cutoff); 
+            string temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "51"; }
+			util.mothurConvert(temp, cutoff); 
 			
 			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100."); m->mothurOutEndLine(); abort = true;  }
             
-            output = validParameter.validFile(parameters, "output", false);
+            output = validParameter.valid(parameters, "output");
             if (output == "not found") { output = "node"; }
             
             if ((output == "node") || (output == "taxon")) {
@@ -213,7 +213,7 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(treefile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
 			}
 		}
@@ -228,16 +228,16 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 int ClassifyTreeCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
-		int start = time(NULL);
+		long start = time(NULL);
         
 		/***************************************************/
 		//    reading tree info							   //
 		/***************************************************/
-        m->setTreeFile(treefile);
+        current->setTreeFile(treefile);
         
         TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
         vector<Tree*> T = reader->getTrees();
@@ -245,11 +245,11 @@ int ClassifyTreeCommand::execute(){
         Tree* outputTree = T[0];
         delete reader;
 
-        if (namefile != "") { m->readNames(namefile, nameMap, nameCount); }
+        if (namefile != "") { util.readNames(namefile, nameMap, nameCount); }
                         
         if (m->getControl_pressed()) { delete tmap;  delete outputTree;  return 0; }
 		
-        m->readTax(taxonomyfile, taxMap, true);
+        util.readTax(taxonomyfile, taxMap, true);
         
         /***************************************************/
         //		get concensus taxonomies                    //
@@ -257,14 +257,14 @@ int ClassifyTreeCommand::execute(){
         getClassifications(outputTree);
         delete outputTree; delete tmap;
 			
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0; }
 		
 		//set tree file as new current treefile
 		if (treefile != "") {
-			string current = "";
+			string currentName = "";
 			itTypes = outputTypes.find("tree");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTreeFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTreeFile(currentName); }
 			}
 		}
 		
@@ -289,14 +289,14 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 	try {
 		
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(treefile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(treefile);  }
         map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(treefile));
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(treefile));
 		string outputFileName = getOutputFileName("summary", variables);
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		//print headings
@@ -305,8 +305,8 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
         out << "NumRep\tTaxonomy" << endl; 
 		
 		string treeOutputDir = outputDir;
-		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
-        variables["[filename]"] = treeOutputDir + m->getRootName(m->getSimpleName(treefile));
+		if (outputDir == "") {  treeOutputDir += util.hasPath(treefile);  }
+        variables["[filename]"] = treeOutputDir + util.getRootName(util.getSimpleName(treefile));
 		string outputTreeFileName = getOutputFileName("tree", variables);
 		
 		//create a map from tree node index to names of descendants, save time later
@@ -340,7 +340,7 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
             if (output == "node") {  T->tree[i].setLabel(toString(i+1));  }
             else {
                 string cleanedTax = tax;
-                m->removeConfidences(cleanedTax);
+                util.removeConfidences(cleanedTax);
                 for (int j = 0; j < cleanedTax.length(); j++) {
                     //special chars to trees -  , ) ( ; [ ] :
                     if ((cleanedTax[j] == ',') || (cleanedTax[j] == '(') || (cleanedTax[j] == ')') || (cleanedTax[j] == ';') || (cleanedTax[j] == ':') || (cleanedTax[j] == ']') || (cleanedTax[j] == '[')) {
@@ -355,7 +355,7 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		out.close();
         
 		ofstream outTree;
-		m->openOutputFile(outputTreeFileName, outTree);
+		util.openOutputFile(outputTreeFileName, outTree);
 		outputNames.push_back(outputTreeFileName); outputTypes["tree"].push_back(outputTreeFileName);
 		T->print(outTree, "both");
 		outTree.close();

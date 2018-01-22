@@ -125,7 +125,7 @@ NewCommand::NewCommand(string option)  {
 			
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 
@@ -139,7 +139,7 @@ NewCommand::NewCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -147,7 +147,7 @@ NewCommand::NewCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -155,7 +155,7 @@ NewCommand::NewCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -163,7 +163,7 @@ NewCommand::NewCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -171,7 +171,7 @@ NewCommand::NewCommand(string option)  {
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -194,35 +194,35 @@ NewCommand::NewCommand(string option)  {
             
             
 			//check for parameters
-            phylipfile = validParameter.validFile(parameters, "phylip", true);
+            phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else { 	m->setPhylipFile(phylipfile); }
+			else { 	current->setPhylipFile(phylipfile); }
 			
-			columnfile = validParameter.validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not open") { columnfile = ""; abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {   m->setColumnFile(columnfile);	}
+			else {   current->setColumnFile(columnfile);	}
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
             //get fastafile - it is not required
-            fastafile = validParameter.validFile(parameters, "fasta", true);
+            fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort=true;  }
 			else if (fastafile == "not found") {  fastafile = "";  }
-			if (fastafile != "") { m->setFastaFile(fastafile); }
+			if (fastafile != "") { current->setFastaFile(fastafile); }
 
 			
 			if ((phylipfile == "") && (columnfile == "")) { 
 				//is there are current file available for either of these?
 				//give priority to column, then phylip
-				columnfile = m->getColumnFile(); 
+				columnfile = current->getColumnFile(); 
 				if (columnfile != "") {   m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
 				else { 
-					phylipfile = m->getPhylipFile(); 
+					phylipfile = current->getPhylipFile(); 
 					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the cluster command."); m->mothurOutEndLine(); 
@@ -234,7 +234,7 @@ NewCommand::NewCommand(string option)  {
 			
 			if (columnfile != "") {
 				if (namefile == "") { 
-					namefile = m->getNameFile(); 
+					namefile = current->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
@@ -244,18 +244,18 @@ NewCommand::NewCommand(string option)  {
 			}
             
             //get shared file, it is required
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
+				outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it	
 			}
 
 			
@@ -264,41 +264,42 @@ NewCommand::NewCommand(string option)  {
 //////////////////////////////////////////////////////////////////////
             
 			//use only one Mutliple type
-			method = validParameter.validFile(parameters, "method", false);
+			method = validParameter.valid(parameters, "method");
 			if (method == "not found") { method = "average"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted."); m->mothurOutEndLine(); abort = true; }
             
             //use more than one multiple type. do not check to make sure the entry is valid.
-            string calc = validParameter.validFile(parameters, "calc", false);			
+            string calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			else { 
                 if (calc == "default")  {  calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			}
-			m->splitAtDash(calc, Estimators);
+			util.splitAtDash(calc, Estimators);
             
             //Boolean type - m->isTrue looks for t, true, f or false and is case insensitive
-			string timing = validParameter.validFile(parameters, "timing", false);
+			string timing = validParameter.valid(parameters, "timing");
 			if (timing == "not found") { timing = "F"; }
-            useTiming = m->isTrue(timing);
+            useTiming = util.isTrue(timing);
 			
             //Number type - mothurConvert makes sure the convert can happen to avoid a crash.
-            string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+            string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
             
             //Groups must be checked later to make sure they are valid. SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.  If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you, kinda nice, huh?
-            string groups = validParameter.validFile(parameters, "groups", false);			
+            string groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
-			else { m->splitAtDash(groups, Groups); }
-			m->setGroups(Groups);
+			else {
+                util.splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
+            }
             
             //Commonly used to process list, rabund, sabund, shared and relabund files.  Look at "smart distancing" examples below in the execute function.
-            string label = validParameter.validFile(parameters, "label", false);			
+            string label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
             
@@ -309,7 +310,7 @@ NewCommand::NewCommand(string option)  {
             if (countfile == "") { 
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 
@@ -327,7 +328,7 @@ NewCommand::NewCommand(string option)  {
 int NewCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         // reading and processing a shared file code example
         // Note: As long as you set groups and labels as shown in the constructor, you can use this code without modification other than adding your function call which is passed the lookup vector.
@@ -362,7 +363,7 @@ int NewCommand::execute(){
          userLabels.erase(lookup[0]->getLabel());
          }
          
-         if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+         if ((util.anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
          string saveLabel = lookup[0]->getLabel();
          
          for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
@@ -407,7 +408,7 @@ int NewCommand::execute(){
          }
          
          //run last label if you need to
-         if (needToRun == true)  {
+         if (needToRun )  {
          for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
          lookup = input.getSharedRAbundVectors(lastLabel);
          
@@ -428,7 +429,7 @@ int NewCommand::execute(){
 		string currentFasta = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; m->setFastaFile(currentFasta); }
+			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; current->setFastaFile(currentFasta); }
 		}
 		
         //output files created by command

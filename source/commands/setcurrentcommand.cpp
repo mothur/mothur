@@ -129,14 +129,14 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
             outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -144,7 +144,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -152,7 +152,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -160,7 +160,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -168,7 +168,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("rabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
 				}
@@ -176,7 +176,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("sabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
 				}
@@ -184,7 +184,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -192,7 +192,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -200,7 +200,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
@@ -208,7 +208,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("order");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["order"] = inputDir + it->second;		}
 				}
@@ -216,7 +216,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("tree");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
 				}
@@ -224,7 +224,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -232,7 +232,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("ordergroup");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["ordergroup"] = inputDir + it->second;		}
 				}
@@ -240,7 +240,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -248,7 +248,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
@@ -256,7 +256,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -264,7 +264,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("qfile");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
@@ -272,7 +272,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("sff");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sff"] = inputDir + it->second;		}
 				}
@@ -280,7 +280,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("oligos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
 				}
@@ -288,7 +288,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("accnos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
@@ -296,7 +296,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -304,7 +304,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                 it = parameters.find("constaxonomy");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
                 }
@@ -312,7 +312,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                 it = parameters.find("contigsreport");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["contigsreport"] = inputDir + it->second;		}
                 }
@@ -320,7 +320,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 				it = parameters.find("flow");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
 				}
@@ -328,7 +328,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                 it = parameters.find("biom");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["biom"] = inputDir + it->second;		}
 				}
@@ -336,7 +336,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                 it = parameters.find("summary");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["summary"] = inputDir + it->second;		}
 				}
@@ -344,7 +344,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                 it = parameters.find("file");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["file"] = inputDir + it->second;		}
                 }
@@ -352,158 +352,158 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                 it = parameters.find("current");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["current"] = inputDir + it->second;		}
                 }
 			}
             
-            currentFile = validParameter.validFile(parameters, "current", true);
+            currentFile = validParameter.validFile(parameters, "current");
             if (currentFile == "not open") { m->mothurOut("Ignoring: " + parameters["current"]); m->mothurOutEndLine(); currentFile = ""; }
             else if (currentFile == "not found") {  currentFile = "";  }
             if (currentFile != "") { readCurrentFiles(); } //setting variables overwrites the settings in the file.
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){  outputDir = ""; }
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){  outputDir = ""; }
 			
 			//check for parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { m->mothurOut("Ignoring: " + parameters["phylip"]); m->mothurOutEndLine(); phylipfile = ""; }
 			else if (phylipfile == "not found") {  phylipfile = "";  }	
-			if (phylipfile != "") { m->setPhylipFile(phylipfile); }
+			if (phylipfile != "") { current->setPhylipFile(phylipfile); }
 			
-			columnfile = validParameter.validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not open") { m->mothurOut("Ignoring: " + parameters["column"]); m->mothurOutEndLine(); columnfile = ""; }
 			else if (columnfile == "not found") {  columnfile = "";  }	
-			if (columnfile != "") { m->setColumnFile(columnfile); }
+			if (columnfile != "") { current->setColumnFile(columnfile); }
 			
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { m->mothurOut("Ignoring: " + parameters["list"]); m->mothurOutEndLine(); listfile = ""; }
 			else if (listfile == "not found") {  listfile = "";  }	
-			if (listfile != "") { m->setListFile(listfile); }
+			if (listfile != "") { current->setListFile(listfile); }
 			
-			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			rabundfile = validParameter.validFile(parameters, "rabund");
 			if (rabundfile == "not open") { m->mothurOut("Ignoring: " + parameters["rabund"]); m->mothurOutEndLine(); rabundfile = ""; }
 			else if (rabundfile == "not found") {  rabundfile = "";  }	
-			if (rabundfile != "") { m->setRabundFile(rabundfile); }
+			if (rabundfile != "") { current->setRabundFile(rabundfile); }
 			
-			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			sabundfile = validParameter.validFile(parameters, "sabund");
 			if (sabundfile == "not open") { m->mothurOut("Ignoring: " + parameters["sabund"]); m->mothurOutEndLine(); sabundfile = ""; }
 			else if (sabundfile == "not found") {  sabundfile = "";  }	
-			if (sabundfile != "") { m->setSabundFile(sabundfile); }
+			if (sabundfile != "") { current->setSabundFile(sabundfile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { m->mothurOut("Ignoring: " + parameters["name"]); m->mothurOutEndLine(); namefile = ""; }
 			else if (namefile == "not found") {  namefile = "";  }	
-			if (namefile != "") { m->setNameFile(namefile); }
+			if (namefile != "") { current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { m->mothurOut("Ignoring: " + parameters["group"]); m->mothurOutEndLine(); groupfile = ""; }
 			else if (groupfile == "not found") {  groupfile = "";  }
-			if (groupfile != "") { m->setGroupFile(groupfile); }
+			if (groupfile != "") { current->setGroupFile(groupfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { m->mothurOut("Ignoring: " + parameters["count"]); m->mothurOutEndLine(); countfile = ""; }
 			else if (countfile == "not found") {  countfile = "";  }
-			if (countfile != "") { m->setCountTableFile(countfile); }
+			if (countfile != "") { current->setCountFile(countfile); }
 			
-			designfile = validParameter.validFile(parameters, "design", true);
+			designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { m->mothurOut("Ignoring: " + parameters["design"]); m->mothurOutEndLine(); designfile = ""; }
 			else if (designfile == "not found") {  designfile = "";  }	
-			if (designfile != "") { m->setDesignFile(designfile); }
+			if (designfile != "") { current->setDesignFile(designfile); }
 			
-			orderfile = validParameter.validFile(parameters, "order", true);
+			orderfile = validParameter.validFile(parameters, "order");
 			if (orderfile == "not open") { m->mothurOut("Ignoring: " + parameters["order"]); m->mothurOutEndLine(); orderfile = ""; }
 			else if (orderfile == "not found") {  orderfile = "";  }
-			if (orderfile != "") { m->setOrderFile(orderfile); }
+			if (orderfile != "") { current->setOrderFile(orderfile); }
 			
-			treefile = validParameter.validFile(parameters, "tree", true);
+			treefile = validParameter.validFile(parameters, "tree");
 			if (treefile == "not open") { m->mothurOut("Ignoring: " + parameters["tree"]); m->mothurOutEndLine(); treefile = ""; }
 			else if (treefile == "not found") {  treefile = "";  }	
-			if (treefile != "") { m->setTreeFile(treefile); }
+			if (treefile != "") { current->setTreeFile(treefile); }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { m->mothurOut("Ignoring: " + parameters["shared"]); m->mothurOutEndLine(); sharedfile = ""; }
 			else if (sharedfile == "not found") {  sharedfile = "";  }	
-			if (sharedfile != "") { m->setSharedFile(sharedfile); }
+			if (sharedfile != "") { current->setSharedFile(sharedfile); }
 			
-			ordergroupfile = validParameter.validFile(parameters, "ordergroup", true);
+			ordergroupfile = validParameter.validFile(parameters, "ordergroup");
 			if (ordergroupfile == "not open") { m->mothurOut("Ignoring: " + parameters["ordergroup"]); m->mothurOutEndLine(); ordergroupfile = ""; }
 			else if (ordergroupfile == "not found") {  ordergroupfile = "";  }	
-			if (ordergroupfile != "") { m->setOrderGroupFile(ordergroupfile); }
+			if (ordergroupfile != "") { current->setOrderGroupFile(ordergroupfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") { m->mothurOut("Ignoring: " + parameters["relabund"]); m->mothurOutEndLine(); relabundfile = ""; }
 			else if (relabundfile == "not found") {  relabundfile = "";  }	
-			if (relabundfile != "") { m->setRelAbundFile(relabundfile); }
+			if (relabundfile != "") { current->setRelAbundFile(relabundfile); }
 			
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { m->mothurOut("Ignoring: " + parameters["fasta"]); m->mothurOutEndLine(); fastafile = ""; }
 			else if (fastafile == "not found") {  fastafile = "";  }
-			if (fastafile != "") { m->setFastaFile(fastafile); }
+			if (fastafile != "") { current->setFastaFile(fastafile); }
 			
-			qualfile = validParameter.validFile(parameters, "qfile", true);
+			qualfile = validParameter.validFile(parameters, "qfile");
 			if (qualfile == "not open") { m->mothurOut("Ignoring: " + parameters["qfile"]); m->mothurOutEndLine(); qualfile = ""; }
 			else if (qualfile == "not found") {  qualfile = "";  }	
-			if (qualfile != "") { m->setQualFile(qualfile); }
+			if (qualfile != "") { current->setQualFile(qualfile); }
 			
-			sfffile = validParameter.validFile(parameters, "sff", true);
+			sfffile = validParameter.validFile(parameters, "sff");
 			if (sfffile == "not open") { m->mothurOut("Ignoring: " + parameters["sff"]); m->mothurOutEndLine(); sfffile = ""; }
 			else if (sfffile == "not found") {  sfffile = "";  }	
-			if (sfffile != "") { m->setSFFFile(sfffile); }
+			if (sfffile != "") { current->setSFFFile(sfffile); }
 			
-			oligosfile = validParameter.validFile(parameters, "oligos", true);
+			oligosfile = validParameter.validFile(parameters, "oligos");
 			if (oligosfile == "not open") { m->mothurOut("Ignoring: " + parameters["oligos"]); m->mothurOutEndLine(); oligosfile = ""; }
 			else if (oligosfile == "not found") {  oligosfile = "";  }	
-			if (oligosfile != "") { m->setOligosFile(oligosfile); }
+			if (oligosfile != "") { current->setOligosFile(oligosfile); }
 			
-			accnosfile = validParameter.validFile(parameters, "accnos", true);
+			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { m->mothurOut("Ignoring: " + parameters["accnos"]); m->mothurOutEndLine(); accnosfile = ""; }
 			else if (accnosfile == "not found") {  accnosfile = "";  }	
-			if (accnosfile != "") { m->setAccnosFile(accnosfile); }
+			if (accnosfile != "") { current->setAccnosFile(accnosfile); }
 			
-			taxonomyfile = validParameter.validFile(parameters, "taxonomy", true);
+			taxonomyfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomyfile == "not open") { m->mothurOut("Ignoring: " + parameters["taxonomy"]); m->mothurOutEndLine(); taxonomyfile = ""; }
 			else if (taxonomyfile == "not found") {  taxonomyfile = "";  }	
-			if (taxonomyfile != "") { m->setTaxonomyFile(taxonomyfile); }
+			if (taxonomyfile != "") { current->setTaxonomyFile(taxonomyfile); }
             
-            contigsreportfile = validParameter.validFile(parameters, "contigsreport", true);
+            contigsreportfile = validParameter.validFile(parameters, "contigsreport");
             if (contigsreportfile == "not open") { m->mothurOut("Ignoring: " + parameters["contigsreport"]); m->mothurOutEndLine(); contigsreportfile = ""; }
             else if (contigsreportfile == "not found") {  contigsreportfile = "";  }
-            if (contigsreportfile != "") { m->setContigsReportFile(contigsreportfile); }
+            if (contigsreportfile != "") { current->setContigsReportFile(contigsreportfile); }
             
-            constaxonomyfile = validParameter.validFile(parameters, "constaxonomy", true);
+            constaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
             if (constaxonomyfile == "not open") { m->mothurOut("Ignoring: " + parameters["constaxonomy"]); m->mothurOutEndLine(); constaxonomyfile = ""; }
             else if (constaxonomyfile == "not found") {  constaxonomyfile = "";  }
-            if (constaxonomyfile != "") { m->setConsTaxonomyFile(constaxonomyfile); }
+            if (constaxonomyfile != "") { current->setConsTaxonomyFile(constaxonomyfile); }
 			
-			flowfile = validParameter.validFile(parameters, "flow", true);
+			flowfile = validParameter.validFile(parameters, "flow");
 			if (flowfile == "not open") { m->mothurOut("Ignoring: " + parameters["flow"]); m->mothurOutEndLine(); flowfile = ""; }
 			else if (flowfile == "not found") {  flowfile = "";  }	
-			if (flowfile != "") { m->setFlowFile(flowfile); }
+			if (flowfile != "") { current->setFlowFile(flowfile); }
             
-            biomfile = validParameter.validFile(parameters, "biom", true);
+            biomfile = validParameter.validFile(parameters, "biom");
 			if (biomfile == "not open") { m->mothurOut("Ignoring: " + parameters["biom"]); m->mothurOutEndLine(); biomfile = ""; }
 			else if (biomfile == "not found") {  biomfile = "";  }	
-			if (biomfile != "") { m->setBiomFile(biomfile); }
+			if (biomfile != "") { current->setBiomFile(biomfile); }
             
-            summaryfile = validParameter.validFile(parameters, "summary", true);
+            summaryfile = validParameter.validFile(parameters, "summary");
 			if (summaryfile == "not open") { m->mothurOut("Ignoring: " + parameters["summary"]); m->mothurOutEndLine(); summaryfile = ""; }
 			else if (summaryfile == "not found") {  summaryfile = "";  }
-			if (summaryfile != "") { m->setSummaryFile(summaryfile); }
+			if (summaryfile != "") { current->setSummaryFile(summaryfile); }
             
-            filefile = validParameter.validFile(parameters, "file", true);
+            filefile = validParameter.validFile(parameters, "file");
             if (filefile == "not open") { m->mothurOut("Ignoring: " + parameters["file"]); m->mothurOutEndLine(); filefile = ""; }
             else if (filefile == "not found") {  filefile = "";  }
-            if (filefile != "") { m->setFileFile(filefile); }
+            if (filefile != "") { current->setFileFile(filefile); }
 
-			string temp = validParameter.validFile(parameters, "processors", false);
-			if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
+			string temp = validParameter.valid(parameters, "processors");
+			if (temp == "not found"){	temp = current->getProcessors();	}
+			current->setProcessors(temp);
 			
-			clearTypes = validParameter.validFile(parameters, "clear", false);			
+			clearTypes = validParameter.valid(parameters, "clear");
 			if (clearTypes == "not found") { clearTypes = ""; }
-			else { m->splitAtDash(clearTypes, types);	}
+			else { util.splitAtDash(clearTypes, types);	}
 		}
 		
 	}
@@ -517,7 +517,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 int SetCurrentCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
 		//user wants to clear a type
 		if (types.size() != 0) {
@@ -527,75 +527,75 @@ int SetCurrentCommand::execute(){
 				
 				//look for file types
 				if (types[i] == "fasta") {
-					m->setFastaFile("");
+					current->setFastaFile("");
 				}else if (types[i] == "qfile") {
-					m->setQualFile("");
+					current->setQualFile("");
 				}else if (types[i] == "phylip") {
-					m->setPhylipFile("");
+					current->setPhylipFile("");
 				}else if (types[i] == "column") {
-					m->setColumnFile("");
+					current->setColumnFile("");
 				}else if (types[i] == "list") {
-					m->setListFile("");
+					current->setListFile("");
 				}else if (types[i] == "rabund") {
-					m->setRabundFile("");
+					current->setRabundFile("");
 				}else if (types[i] == "sabund") {
-					m->setSabundFile("");
+					current->setSabundFile("");
 				}else if (types[i] == "name") {
-					m->setNameFile("");
+					current->setNameFile("");
 				}else if (types[i] == "group") {
-					m->setGroupFile("");
+					current->setGroupFile("");
 				}else if (types[i] == "order") {
-					m->setOrderFile("");
+					current->setOrderFile("");
 				}else if (types[i] == "ordergroup") {
-					m->setOrderGroupFile("");
+					current->setOrderGroupFile("");
 				}else if (types[i] == "tree") {
-					m->setTreeFile("");
+					current->setTreeFile("");
 				}else if (types[i] == "shared") {
-					m->setSharedFile("");
+					current->setSharedFile("");
 				}else if (types[i] == "relabund") {
-					m->setRelAbundFile("");
+					current->setRelAbundFile("");
 				}else if (types[i] == "design") {
-					m->setDesignFile("");
+					current->setDesignFile("");
 				}else if (types[i] == "sff") {
-					m->setSFFFile("");
+					current->setSFFFile("");
 				}else if (types[i] == "oligos") {
-					m->setOligosFile("");
+					current->setOligosFile("");
 				}else if (types[i] == "accnos") {
-					m->setAccnosFile("");
+					current->setAccnosFile("");
 				}else if (types[i] == "taxonomy") {
-					m->setTaxonomyFile("");
+					current->setTaxonomyFile("");
                 }else if (types[i] == "constaxonomy") {
-                    m->setConsTaxonomyFile("");
+                    current->setConsTaxonomyFile("");
                 }else if (types[i] == "contigsreport") {
-                    m->setContigsReportFile("");
+                    current->setContigsReportFile("");
 				}else if (types[i] == "flow") {
-					m->setFlowFile("");
+					current->setFlowFile("");
                 }else if (types[i] == "biom") {
-					m->setBiomFile("");
+					current->setBiomFile("");
                 }else if (types[i] == "count") {
-					m->setCountTableFile("");
+					current->setCountFile("");
                 }else if (types[i] == "summary") {
-					m->setSummaryFile("");
+					current->setSummaryFile("");
                 }else if (types[i] == "file") {
-                    m->setFileFile("");
+                    current->setFileFile("");
 				}else if (types[i] == "processors") {
-					m->setProcessors("1");
+					current->setProcessors("1");
 				}else if (types[i] == "all") {
-					m->clearCurrentFiles();
+					current->clearCurrentFiles();
 				}else {
-					m->mothurOut("[ERROR]: mothur does not save a current file for " + types[i]); m->mothurOutEndLine();
+					m->mothurOut("[ERROR]: mothur does not save a current file for " + types[i] + "\n");
 				}
 			}
 		}
         
 		m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
         
-        if (m->hasCurrentFiles()) {
+        if (current->hasCurrentFiles()) {
             map<string, string> variables;
-            variables["[filename]"] = m->getFullPathName(outputDir);
+            variables["[filename]"] = util.getFullPathName(outputDir);
             string filename = getOutputFileName("summary", variables);
             
-            m->printCurrentFiles(filename);
+            current->printCurrentFiles(filename);
             outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
             
             m->mothurOutEndLine();
@@ -618,73 +618,73 @@ int SetCurrentCommand::readCurrentFiles(){
     try{
         
         ifstream in;
-        m->openInputFile(currentFile, in);
+        util.openInputFile(currentFile, in);
         
         
         while(!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
-            string line = m->getline(in); m->gobble(in);
+            string line = util.getline(in); util.gobble(in);
             
             vector<string> pieces;
-            m->splitAtChar(line, pieces, '=');
+            util.splitAtChar(line, pieces, '=');
             
-            if (pieces.size() != 2) { m->mothurOut("[ERROR]: " + m->getStringFromVector(pieces, ",") + " line is not in the correct format.  Did you edit the file? Mothur expects tag=filename.  Example: fasta=final.fasta\n"); m->setControl_pressed(true);  }
+            if (pieces.size() != 2) { m->mothurOut("[ERROR]: " + util.getStringFromVector(pieces, ",") + " line is not in the correct format.  Did you edit the file? Mothur expects tag=filename.  Example: fasta=final.fasta\n"); m->setControl_pressed(true);  }
             else{
                    //look for file types
                 if (pieces[0] == "fasta") {
-                    m->setFastaFile(m->getFullPathName(pieces[1]));
+                    current->setFastaFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "qfile") {
-                    m->setQualFile(m->getFullPathName(pieces[1]));
+                    current->setQualFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "phylip") {
-                    m->setPhylipFile(m->getFullPathName(pieces[1]));
+                    current->setPhylipFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "column") {
-                    m->setColumnFile(m->getFullPathName(pieces[1]));
+                    current->setColumnFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "list") {
-                    m->setListFile(m->getFullPathName(pieces[1]));
+                    current->setListFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "rabund") {
-                    m->setRabundFile(m->getFullPathName(pieces[1]));
+                    current->setRabundFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "sabund") {
-                    m->setSabundFile(m->getFullPathName(pieces[1]));
+                    current->setSabundFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "name") {
-                    m->setNameFile(m->getFullPathName(pieces[1]));
+                    current->setNameFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "group") {
-                    m->setGroupFile(m->getFullPathName(pieces[1]));
+                    current->setGroupFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "order") {
-                    m->setOrderFile(m->getFullPathName(pieces[1]));
+                    current->setOrderFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "ordergroup") {
-                    m->setOrderGroupFile(m->getFullPathName(pieces[1]));
+                    current->setOrderGroupFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "tree") {
-                    m->setTreeFile(m->getFullPathName(pieces[1]));
+                    current->setTreeFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "shared") {
-                    m->setSharedFile(m->getFullPathName(pieces[1]));
+                    current->setSharedFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "relabund") {
-                    m->setRelAbundFile(m->getFullPathName(pieces[1]));
+                    current->setRelAbundFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "design") {
-                    m->setDesignFile(m->getFullPathName(pieces[1]));
+                    current->setDesignFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "sff") {
-                    m->setSFFFile(m->getFullPathName(pieces[1]));
+                    current->setSFFFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "oligos") {
-                    m->setOligosFile(m->getFullPathName(pieces[1]));
+                    current->setOligosFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "accnos") {
-                    m->setAccnosFile(m->getFullPathName(pieces[1]));
+                    current->setAccnosFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "taxonomy") {
-                    m->setTaxonomyFile(m->getFullPathName(pieces[1]));
+                    current->setTaxonomyFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "flow") {
-                    m->setFlowFile(m->getFullPathName(pieces[1]));
+                    current->setFlowFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "biom") {
-                    m->setBiomFile(m->getFullPathName(pieces[1]));
+                    current->setBiomFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "count") {
-                    m->setCountTableFile(m->getFullPathName(pieces[1]));
+                    current->setCountFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "summary") {
-                    m->setSummaryFile(m->getFullPathName(pieces[1]));
+                    current->setSummaryFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "file") {
-                    m->setFileFile(m->getFullPathName(pieces[1]));
+                    current->setFileFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "processors") {
-                    m->setProcessors(pieces[1]);
+                    current->setProcessors(pieces[1]);
                 }else {
-                    m->mothurOut("[ERROR]: mothur does not save a current file for " + m->getFullPathName(pieces[1])); m->mothurOutEndLine();
+                    m->mothurOut("[ERROR]: mothur does not save a current file for " + util.getFullPathName(pieces[1])); m->mothurOutEndLine();
                 }
             }
         }

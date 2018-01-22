@@ -59,11 +59,12 @@ VsearchFileParser::VsearchFileParser(string f, string nameOrCount, string forma)
 /***********************************************************************/
 string VsearchFileParser::getVsearchFile() {
     try {
+        Utils util;
         if (fastafile == "") { m->mothurOut("[ERROR]: no fasta file given, cannot continue.\n"); m->setControl_pressed(true);  }
         
         //Run unique.seqs on the data if a name or count file is not given
-        if ((namefile == "") && (countfile == ""))  {  getNamesFile(fastafile);                }
-        else if (namefile != "")                    {  counts = m->readNames(namefile);        }
+        if ((namefile == "") && (countfile == ""))  {  getNamesFile(fastafile);                  }
+        else if (namefile != "")                    {  counts = util.readNames(namefile);        }
         
         if (countfile != "") { CountTable countTable; countTable.readTable(countfile, false, false);  counts = countTable.getNameMap(); }
         
@@ -86,19 +87,20 @@ string VsearchFileParser::getVsearchFile() {
 
 string VsearchFileParser::createVsearchFasta(string inputFile){
     try {
-        string vsearchFasta = m->getSimpleName(fastafile) + ".sorted.fasta.temp";
+        Utils util;
+        string vsearchFasta = util.getSimpleName(fastafile) + ".sorted.fasta.temp";
         
         vector<seqPriorityNode> seqs;
         map<string, int>::iterator it;
         
         ifstream in;
-        m->openInputFile(inputFile, in);
+        util.openInputFile(inputFile, in);
         
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { in.close(); return vsearchFasta; }
             
-            Sequence seq(in); m->gobble(in);
+            Sequence seq(in); util.gobble(in);
             
             it = counts.find(seq.getName());
             if (it == counts.end()) {
@@ -111,7 +113,7 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
         }
         in.close();
         
-        m->printVsearchFile(seqs, vsearchFasta, ";size=", ";");
+        util.printVsearchFile(seqs, vsearchFasta, ";size=", ";");
         
         return vsearchFasta;
     }
@@ -125,21 +127,19 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
 string VsearchFileParser::getNamesFile(string& inputFile){
     try {
         
-        m->mothurOutEndLine(); m->mothurOut("No namesfile given, running unique.seqs command to generate one."); m->mothurOutEndLine(); m->mothurOutEndLine();
+        m->mothurOut("\nNo namesfile given, running unique.seqs command to generate one.\n\n");
         
         //use unique.seqs to create new name and fastafile
         string inputString = "fasta=" + inputFile + ", format=count";
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-        m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine();
-        m->setMothurCalling(true);
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
         Command* uniqueCommand = new DeconvoluteCommand(inputString);
         uniqueCommand->execute();
         
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
         
         delete uniqueCommand;
-        m->setMothurCalling(false);
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("/******************************************/\n");
         
         countfile = filenames["count"][0];
         fastafile = filenames["fasta"][0];
@@ -155,11 +155,12 @@ string VsearchFileParser::getNamesFile(string& inputFile){
 //S	1	275	*	*	*	*	*	GQY1XT001C44N8/ab=3677/	*
 int VsearchFileParser::createListFile(string inputFile, string listFile, string sabundFile, string rabundFile, int numBins, string label){
     try {
+        Utils util;
         map<string, string>::iterator itName;
-        if (format == "name") { counts.clear(); m->readNames(namefile, nameMap); }
+        if (format == "name") { counts.clear(); util.readNames(namefile, nameMap); }
         
         ifstream in;
-        m->openInputFile(inputFile, in);
+        util.openInputFile(inputFile, in);
         
         ListVector list(numBins); list.setLabel(label);
         
@@ -169,7 +170,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
         while(!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            in >> recordType >> clusterNumber >> length >> percentIdentity >> strand >> notUsed1 >> notUsed2 >> compressedAlignment >> seqName >> repSequence; m->gobble(in);
+            in >> recordType >> clusterNumber >> length >> percentIdentity >> strand >> notUsed1 >> notUsed2 >> compressedAlignment >> seqName >> repSequence; util.gobble(in);
             
             if (recordType != "S") {
                 
@@ -192,7 +193,7 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
         in.close();
         
         ofstream out;
-        m->openOutputFile(listFile,	out);
+        util.openOutputFile(listFile,	out);
         list.printHeaders(out);
         
         if (countfile != "") {
@@ -203,8 +204,8 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
             if ((sabundFile != "") && (rabundFile != "")){
                 //print sabund and rabund
                 ofstream sabund, rabund;
-                m->openOutputFile(sabundFile, sabund);
-                m->openOutputFile(rabundFile, rabund);
+                util.openOutputFile(sabundFile, sabund);
+                util.openOutputFile(rabundFile, rabund);
             
                 list.getRAbundVector().print(rabund);  rabund.close();
                 list.getSAbundVector().print(sabund);  sabund.close();
@@ -242,18 +243,18 @@ int VsearchFileParser::getNumBins(string logfile){
         int numBins = 0;
         
         ifstream in;
-        m->openInputFile(logfile, in);
+        Utils util; util.openInputFile(logfile, in);
         
         string line;
         while(!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            line = m->getline(in); m->gobble(in);
+            line = util.getline(in); util.gobble(in);
             
             int pos = line.find("Clusters:");
             if (pos != string::npos) {
-                vector<string> pieces = m->splitWhiteSpace(line);
-                if (pieces.size() > 1) { m->mothurConvert(pieces[1], numBins);  }
+                vector<string> pieces = util.splitWhiteSpace(line);
+                if (pieces.size() > 1) { util.mothurConvert(pieces[1], numBins);  }
                 break;
             }
         }

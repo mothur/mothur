@@ -50,7 +50,7 @@ private:
 	RAbundVector* rabund;
 	ListVector* list;
 	vector< vector<float> > dMatrix;	
-	//vector<colDist> rowSmallDists;
+    Utils util;
 	
 	int smallRow;
 	int smallCol, nseqs;

@@ -14,10 +14,10 @@
  TreeMap::TreeMap(string filename) {
 	m = MothurOut::getInstance();
     ofstream out2;
-    m->openOutputFileAppend(filename, out2);
+    util.openOutputFileAppend(filename, out2);
     out2 << endl; out2.close();
 	groupFileName = filename;
-	m->openInputFile(filename, fileHandle);
+	util.openInputFile(filename, fileHandle);
 }
 
 /************************************************************/
@@ -26,11 +26,11 @@
 int TreeMap::readMap(string gf) {
     try {
         ofstream out2;
-        m->openOutputFileAppend(gf, out2);
+        util.openOutputFileAppend(gf, out2);
         out2 << endl; out2.close();
         
         groupFileName = gf;
-        m->openInputFile(gf, fileHandle);
+        util.openInputFile(gf, fileHandle);
         
         string seqName, seqGroup;
         int error = 0;
@@ -44,7 +44,7 @@ int TreeMap::readMap(string gf) {
             if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
-            vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
+            vector<string> pieces = util.splitWhiteSpace(rest, buffer, fileHandle.gcount());
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
@@ -73,7 +73,7 @@ int TreeMap::readMap(string gf) {
         fileHandle.close();
         
         if (rest != "") {
-            vector<string> pieces = m->splitWhiteSpace(rest);
+            vector<string> pieces = util.splitWhiteSpace(rest);
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
@@ -123,7 +123,7 @@ int TreeMap::readMap() {
             if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
             fileHandle.read(buffer, 4096);
-            vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
+            vector<string> pieces = util.splitWhiteSpace(rest, buffer, fileHandle.gcount());
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
@@ -152,7 +152,7 @@ int TreeMap::readMap() {
         fileHandle.close();
         
         if (rest != "") {
-            vector<string> pieces = m->splitWhiteSpace(rest);
+            vector<string> pieces = util.splitWhiteSpace(rest);
             
             for (int i = 0; i < pieces.size(); i++) {
                 if (columnOne) {  seqName = pieces[i]; columnOne=false; }
@@ -383,7 +383,7 @@ vector<string> TreeMap::getNamesSeqs(vector<string> picked){
 		
 		for(it = treemap.begin(); it != treemap.end(); it++){
 			//if you are belong to one the the groups in the picked vector add you
-			if (m->inUsersGroups(it->second.groupname, picked)) {
+			if (util.inUsersGroups(it->second.groupname, picked)) {
 				names.push_back(it->first);
 			}
 		}

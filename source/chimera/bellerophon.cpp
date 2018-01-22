@@ -15,14 +15,13 @@
 
 /***************************************************************************************************************/
 
-Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc, int p, string o) : MothurChimera() {
+Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc, string o) : MothurChimera() {
 	try {
 		fastafile = name;
 		correction = c;
 		outputDir = o;
 		window = win;
 		increment = inc;
-		processors = p;
 		
 		//read in sequences
 		seqs = readSeqs(fastafile);
@@ -140,38 +139,10 @@ int Bellerophon::getChimeras() {
 		//create breaking points
 		vector<int> midpoints;   midpoints.resize(iters, window);
 		for (int i = 1; i < iters; i++) {  midpoints[i] = midpoints[i-1] + increment;  }
-	
 		
-		//divide breakpoints between processors
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			if(processors == 1){ 
-				lines.push_back(linePair(0, iters));	
-				
-				//fill pref with scores
-				driverChimeras(midpoints, lines[0]);
-	
-			}else{
-			
-				int numSeqsPerProcessor = iters / processors;
-				
-				for (int i = 0; i < processors; i++) {
-					unsigned long long startPos = i * numSeqsPerProcessor;
-					if(i == processors - 1){
-						numSeqsPerProcessor = iters - i * numSeqsPerProcessor;
-					}
-					lines.push_back(linePair(startPos, numSeqsPerProcessor));
-				}
-				
-				createProcesses(midpoints);
-			}
-		#else
-			lines.push_back(linePair(0, iters));	
-			
-			///fill pref with scores
-			driverChimeras(midpoints, lines[0]);
-		#endif
-	
-		
+        //fill pref with scores
+        driverChimeras(midpoints);
+
 		return 0;
 		
 	}
@@ -180,106 +151,11 @@ int Bellerophon::getChimeras() {
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-
-int Bellerophon::createProcesses(vector<int> mid) {
-	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 0;
-		int exitCommand = 1;
-		vector<int> processIDS;
-        bool recalc = false;
-				
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				exitCommand = driverChimeras(mid, lines[process]);
-				string tempOut = outputDir + toString(m->mothurGetpid(process)) + ".temp";
-				writePrefs(tempOut, lines[process]);
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                m->setControl_pressed(false);
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                recalc = true;
-                break;
-            }
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); }  m->setControl_pressed(false);
-					 processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            lines.clear();
-            int numSeqsPerProcessor = iters / processors;
-            
-            for (int i = 0; i < processors; i++) {
-                unsigned long long startPos = i * numSeqsPerProcessor;
-                if(i == processors - 1){
-                    numSeqsPerProcessor = iters - i * numSeqsPerProcessor;
-                }
-                lines.push_back(linePair(startPos, numSeqsPerProcessor));
-            }
-
-            processIDS.clear();
-            process = 0;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    exitCommand = driverChimeras(mid, lines[process]);
-                    string tempOut = outputDir + toString(m->mothurGetpid(process)) + ".temp";
-                    writePrefs(tempOut, lines[process]);
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) {
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//get info that other processes created
-		for (int i = 0; i < processIDS.size(); i++) {
-			string tempIn = outputDir + toString(processIDS[i]) + ".temp";
-			readPrefs(tempIn);
-		}
-		
-		return exitCommand;
-#endif		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "createProcesses");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
-int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
+int Bellerophon::driverChimeras(vector<int> midpoints) {
 	try {
 		
-		for (int h = line.start; h < (line.start + line.num); h++) {
+		for (int h = 0; h < iters; h++) {
 			count = h;
 			int midpoint = midpoints[h];
 		
@@ -298,22 +174,19 @@ int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
 				
 				if (m->getControl_pressed()) { return 0; }
 				
-				//cout << "midpoint = " << midpoint << "\twindow = " << window << endl;
-				//cout << "whole = " << seqs[i]->getAligned().length() << endl;
-				//save left side
+                //save left side
 				string seqLeft = seqs[i]->getAligned().substr(midpoint-window, window);
 				Sequence tempLeft;
 				tempLeft.setName(seqs[i]->getName());
 				tempLeft.setAligned(seqLeft);
 				left.push_back(tempLeft);
-				//cout << "left = " << tempLeft.getAligned().length() << endl;			
+				
 				//save right side
 				string seqRight = seqs[i]->getAligned().substr(midpoint, window);
 				Sequence tempRight;
 				tempRight.setName(seqs[i]->getName());
 				tempRight.setAligned(seqRight);
 				right.push_back(tempRight);
-				//cout << "right = " << seqRight.length() << endl;	
 			}
 			
 			//this should be parallelized
@@ -342,17 +215,15 @@ int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
 			// via the index of a sequence in the distance matrix
 			distMapRight = vector<SeqMap>(numSeqs); 
 			distMapLeft = vector<SeqMap>(numSeqs); 
-			//cout << "left" << endl << endl;
+			
 			for (MatData currentCell = SparseLeft->begin(); currentCell != SparseLeft->end(); currentCell++) {
 				distMapLeft[currentCell->row][currentCell->column] = currentCell->dist;
 				if (m->getControl_pressed()) { delete SparseLeft; delete SparseRight; return 0; }
-				//cout << " i = " << currentCell->row << " j = " << currentCell->column << " dist = " << currentCell->dist << endl;
-			}
-			//cout << "right" << endl << endl;
+            }
+			
 			for (MatData currentCell = SparseRight->begin(); currentCell != SparseRight->end(); currentCell++) {
 				distMapRight[currentCell->row][currentCell->column] = currentCell->dist;
 				if (m->getControl_pressed()) { delete SparseLeft; delete SparseRight; return 0; }
-				//cout << " i = " << currentCell->row << " j = " << currentCell->column << " dist = " << currentCell->dist << endl;
 			}
 			
 			delete SparseLeft;
@@ -369,7 +240,7 @@ int Bellerophon::driverChimeras(vector<int> midpoints, linePair line) {
 		}
 		
 		//report progress
-		if((line.start + line.num) % 10 != 0){  m->mothurOutJustToScreen("Processing sliding window: " + toString(line.start + line.num) + "\n") ;		}
+		if((iters) % 10 != 0){  m->mothurOutJustToScreen("Processing sliding window: " + toString(iters) + "\n") ;		}
 
 		return 0;
 		
@@ -390,8 +261,7 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 				
 				if (m->getControl_pressed()) { return 0; }
 			
-				distCalculator->calcDist(s[i], s[j]);
-				float dist = distCalculator->getDist();
+				double dist = distCalculator->calcDist(s[i], s[j]);
 			
 				PCell temp(i, j, dist);
 				sparse->addCell(temp);
@@ -525,20 +395,21 @@ vector<Preference> Bellerophon::getBestPref() {
 	}
 }
 /**************************************************************************************************/
-int Bellerophon::writePrefs(string file, linePair tempLine) {
+int Bellerophon::writePrefs(string file) {
 	try {
 	
 		ofstream outTemp;
-		m->openOutputFile(file, outTemp);
+        Utils util;
+		util.openOutputFile(file, outTemp);
 		
 		//lets you know what part of the pref matrix you are writing
-		outTemp << tempLine.start << '\t' << tempLine.num << endl;
+		outTemp << 0 << '\t' << iters << endl;
 		
-		for (int i = tempLine.start; i < (tempLine.start + tempLine.num); i++) {
+		for (int i = 0; i < iters; i++) {
 			
 			for (int j = 0; j < numSeqs; j++) {
 				
-				if (m->getControl_pressed()) { outTemp.close(); m->mothurRemove(file); return 0; }
+				if (m->getControl_pressed()) { outTemp.close(); util.mothurRemove(file); return 0; }
 				
 				outTemp << pref[i][j].name << '\t' << pref[i][j].leftParent << '\t' << pref[i][j].rightParent << '\t';
 				outTemp << pref[i][j].score << '\t' << pref[i][j].closestLeft << '\t' << pref[i][j].closestRight << '\t' << pref[i][j].midpoint <<  endl;
@@ -559,28 +430,29 @@ int Bellerophon::readPrefs(string file) {
 	try {
 	
 		ifstream inTemp;
-		m->openInputFile(file, inTemp);
+        Utils util;
+		util.openInputFile(file, inTemp);
 		
 		int start, num;
 		
 		//lets you know what part of the pref matrix you are writing
-		inTemp >> start >> num;  m->gobble(inTemp);
+		inTemp >> start >> num;  util.gobble(inTemp);
 		
 		for (int i = start; i < num; i++) {
 			
 			for (int j = 0; j < numSeqs; j++) {
 				
-				if (m->getControl_pressed()) { inTemp.close(); m->mothurRemove(file); return 0; }
+				if (m->getControl_pressed()) { inTemp.close(); util.mothurRemove(file); return 0; }
 			
 				inTemp >> pref[i][j].name >> pref[i][j].leftParent >> pref[i][j].rightParent;
 				inTemp >> pref[i][j].score >> pref[i][j].closestLeft >> pref[i][j].closestRight >> pref[i][j].midpoint;
-				m->gobble(inTemp);
+				util.gobble(inTemp);
 			}
 		}
 		
 		inTemp.close();
 		
-		m->mothurRemove(file);
+		util.mothurRemove(file);
 		
 		return 0;
 	}
@@ -590,7 +462,7 @@ int Bellerophon::readPrefs(string file) {
 	}
 }
 /**************************************************************************************************/
-vector<string> Bellerophon::getBestWindow(linePair line) {
+vector<string> Bellerophon::getBestWindow() {
 	try {
 	
 		vector<string> best;
@@ -599,16 +471,12 @@ vector<string> Bellerophon::getBestWindow(linePair line) {
 		for (int i = 0; i < numSeqs; i++) {
 			
 			//set best pref score to first one
-			Preference temp = pref[line.start][i];
+			Preference temp = pref[0][i];
 			
 			if (m->getControl_pressed()) { return best;  }
 			
-			//for each window
-			for (int j = (line.start+1); j < (line.start+line.num); j++) {
-				
-				//is this a better score
-				if (pref[j][i].score > temp.score) {	temp = pref[j][i];		}
-			}
+			//for each window - is this a better score
+			for (int j = 1; j < iters; j++) { if (pref[j][i].score > temp.score) {	temp = pref[j][i];		} }
 			
 			string tempString = temp.name + '\t' + temp.leftParent + '\t' + temp.rightParent + '\t' + toString(temp.score);
 			best.push_back(tempString);
@@ -622,31 +490,5 @@ vector<string> Bellerophon::getBestWindow(linePair line) {
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-int Bellerophon::fillPref(int process, vector<string>& best) {
-	try {
-		//figure out where you start so you can put the best scores there
-		int numSeqsPerProcessor = iters / processors;
-		int start = process * numSeqsPerProcessor;
-		
-		for (int i = 0; i < best.size(); i++) {
-		
-			if (m->getControl_pressed()) { return 0;  }
-			
-			istringstream iss (best[i],istringstream::in);
-			
-			string tempScore;
-			iss >> pref[start][i].name >> pref[start][i].leftParent >> pref[start][i].rightParent >> tempScore;
-			convert(tempScore, pref[start][i].score); 
-		}
-
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Bellerophon", "fillPref");
-		exit(1);
-	}
-}
-
 /**************************************************************************************************/
 

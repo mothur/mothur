@@ -24,28 +24,35 @@ inline bool compareRAbundFloats(SharedRAbundFloatVector* left, SharedRAbundFloat
 class SharedRAbundFloatVectors : public DataVector {
     
 public:
-    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0; }
-    SharedRAbundFloatVectors(ifstream&);
-    SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins) {
+    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu"; printSharedHeaders = true; }
+    SharedRAbundFloatVectors(ifstream&, vector<string>&, string&, string&);
+    SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
         vector<SharedRAbundFloatVector*> data = bv.getSharedRAbundFloatVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
-        eliminateZeroOTUS();
         setLabels(bv.getLabel());
+        printSharedHeaders = true;
+        setOTUNames(bv.getOTUNames());
+        eliminateZeroOTUS();
     }
     ~SharedRAbundFloatVectors() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); }
     
+    void setLabels(string l);
     float getOTUTotal(int bin);
     vector<float> getOTU(int bin);
-    void setLabels(string l);
     float removeOTU(int bin);
     float get(int bin, string group);
     void set(int bin, float binSize, string group);
+    void setOTUNames(vector<string> names);
+    vector<string> getOTUNames();
+    string getOTUName(int);
+    void setOTUName(int, string);
+
     
     int push_back(SharedRAbundFloatVector*);
     void removeGroups(vector<string> g);
     int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize
     void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundFloatVectors.\n"); }
-    void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; }
+    void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; currentLabels.clear(); }
     int size() { return lookup.size();  }
     int getNumGroups() { return lookup.size(); }
     int getNumBins() { return numBins; }
@@ -66,8 +73,11 @@ public:
     
 private:
     vector<SharedRAbundFloatVector*> lookup;
+    vector<string> currentLabels;
     map<string, int> groupNames;
     int numBins;
+    string otuTag;
+    bool printSharedHeaders;
 
 };
 

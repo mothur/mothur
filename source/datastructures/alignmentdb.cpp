@@ -16,23 +16,24 @@
 AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int tid, bool writeShortcut){		//	This assumes that the template database is in fasta format, may
 	try {											//	need to alter this in the future?
 		m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
 		longest = 0;
 		method = s;
 		bool needToGenerate = true;
-		bool silent = false;
 		threadID = tid;
-		
-        int start = time(NULL);
+		Utils util;
+        
+        long start = time(NULL);
         m->mothurOutEndLine();
         m->mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
         //bool aligned = false;
         int tempLength = 0;
         
         ifstream fastaFile;
-        m->openInputFile(fastaFileName, fastaFile);
+        util.openInputFile(fastaFileName, fastaFile);
         
         while (!fastaFile.eof()) {
-            Sequence temp(fastaFile);  m->gobble(fastaFile);
+            Sequence temp(fastaFile);  util.gobble(fastaFile);
             
             if (m->getControl_pressed()) {  templateSequences.clear(); break;  }
             
@@ -73,9 +74,9 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
             ifstream kmerFileTest(kmerDBName.c_str());
 				
             if(kmerFileTest){
-                bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
-                int shortcutTimeStamp = m->getTimeStamp(kmerDBName);
-                int referenceTimeStamp = m->getTimeStamp(fastaFileName);
+                bool GoodFile = util.checkReleaseVersion(kmerFileTest, current->getVersion());
+                int shortcutTimeStamp = util.getTimeStamp(kmerDBName);
+                int referenceTimeStamp = util.getTimeStamp(fastaFileName);
                 
                 //if the shortcut file is older then the reference file, remake shortcut file
                 if (shortcutTimeStamp < referenceTimeStamp) {  GoodFile = false;  }
@@ -149,10 +150,11 @@ AlignmentDB::~AlignmentDB() {  delete search;	}
 Sequence AlignmentDB::findClosestSequence(Sequence* seq, float& searchScore) {
 	try{
         lock_guard<std::mutex> guard(mutex);
-		vector<int> spot = search->findClosestSequences(seq, 1);
+        vector<float> scores;
+		vector<int> spot = search->findClosestSequences(seq, 1, scores);
 	
-		if (spot.size() != 0)	{	searchScore	= search->getSearchScore(); return templateSequences[spot[0]];	}
-        else					{	searchScore = 0.0; 	return emptySequence;                                   }
+        if (spot.size() != 0)	{	searchScore = scores[0]; return templateSequences[spot[0]];	}
+        else					{ 	searchScore = 0; return emptySequence;                      }
 		
 	}
 	catch(exception& e) {

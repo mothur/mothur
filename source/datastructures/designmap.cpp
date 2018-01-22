@@ -24,20 +24,20 @@ DesignMap::DesignMap(string file) {
 int DesignMap::read(string file) {
     try {
         ifstream in;
-        m->openInputFile(file, in);
+        util.openInputFile(file, in);
         
         string temp = "";
-        in >> temp; m->gobble(in);
+        in >> temp; util.gobble(in);
         
         vector<string> columnHeaders;
         vector<string> tempColumnHeaders;
         if (temp == "group") {
-            string headers = m->getline(in); m->gobble(in);
-            columnHeaders = m->splitWhiteSpace(headers);
+            string headers = util.getline(in); util.gobble(in);
+            columnHeaders = util.splitWhiteSpace(headers);
             columnHeaders.insert(columnHeaders.begin(), "group");
         }else {
-            string headers = m->getline(in); m->gobble(in);
-            tempColumnHeaders = m->splitWhiteSpace(headers);
+            string headers = util.getline(in); util.gobble(in);
+            tempColumnHeaders = util.splitWhiteSpace(headers);
             int num = tempColumnHeaders.size();
             columnHeaders.push_back("group");
             for (int i = 0; i < num; i++) { columnHeaders.push_back("value" + toString(i)); }
@@ -67,7 +67,7 @@ int DesignMap::read(string file) {
         //file without headers, fix it
         if (temp != "group") {
             group = temp;
-            m->checkGroupName(group);
+            util.checkGroupName(group);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
             
             //if group info, then read it
@@ -75,7 +75,7 @@ int DesignMap::read(string file) {
             for (int i = 0; i < numCategories; i++) {
                 int thisIndex = indexCategoryMap[originalGroupIndexes[i]]; //find index of this category because we sort the values.
                 string temp = tempColumnHeaders[i];
-                m->checkGroupName(temp);
+                util.checkGroupName(temp);
                 categoryValues[thisIndex] = temp;
             
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
@@ -103,8 +103,8 @@ int DesignMap::read(string file) {
             
             if (m->getControl_pressed()) { break; }
             
-            in >> group; m->gobble(in);
-            m->checkGroupName(group);
+            in >> group; util.gobble(in);
+            util.checkGroupName(group);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
             
             //if group info, then read it
@@ -112,8 +112,8 @@ int DesignMap::read(string file) {
             for (int i = 0; i < numCategories; i++) {
                 int thisIndex = indexCategoryMap[originalGroupIndexes[i]]; //find index of this category because we sort the values.
                 string temp = "not found";
-                in >> temp; categoryValues[thisIndex] = temp; m->gobble(in);
-                m->checkGroupName(temp);
+                in >> temp; categoryValues[thisIndex] = temp; util.gobble(in);
+                util.checkGroupName(temp);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
                 
@@ -235,7 +235,7 @@ string DesignMap::get(string groupName, string categoryName) {
 //add group, assumes order is correct
 int DesignMap::push_back(string group, vector<string> values) {
     try {
-        m->checkGroupName(group);
+        util.checkGroupName(group);
         map<string, int>::iterator it = indexGroupNameMap.find(group);
         if (it == indexGroupNameMap.end()) {
             if (values.size() != getNumCategories()) {  m->mothurOut("[ERROR]: Your design file has a " + toString(getNumCategories()) + " categories and " + group + " has " + toString(values.size()) + ", please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
@@ -301,7 +301,7 @@ int DesignMap::setValues(string group, map<string, string> values) {
 //set defaultclass
 void DesignMap::setDefaultClass(string dClass) {
     try {
-        if (m->inUsersGroups(dClass, namesOfCategories)) {
+        if (util.inUsersGroups(dClass, namesOfCategories)) {
             defaultClass = dClass;
         }else{
             m->mothurOut("[WARNING]: Your design file does not contain a category named " + dClass + ". Using default class " + defaultClass + " .\n\n");
@@ -333,7 +333,7 @@ int DesignMap::getNumUnique(map<string, vector<string> > selected) {
             bool hasAll = true; //innocent til proven guilty
             for (map<int, vector<string> >::iterator it = indexes.begin(); it != indexes.end(); it++) {
                //column number is it->first
-                if (!m->inUsersGroups(designMap[j][it->first], it->second)) { hasAll = false;  }
+                if (!util.inUsersGroups(designMap[j][it->first], it->second)) { hasAll = false;  }
             }
             if (hasAll) { num++; }
         }
@@ -366,7 +366,7 @@ int DesignMap::getNumShared(map<string, vector<string> > selected) {
             bool hasAny = false; //innocent til proven guilty
             for (map<int, vector<string> >::iterator it = indexes.begin(); it != indexes.end(); it++) {
                 //column number is it->first
-                if (m->inUsersGroups(designMap[j][it->first], it->second)) { hasAny = true;  }
+                if (util.inUsersGroups(designMap[j][it->first], it->second)) { hasAny = true;  }
             }
             if (hasAny) { num++; }
         }
@@ -406,7 +406,7 @@ vector<string> DesignMap::getNamesUnique(map<string, vector<string> > selected) 
             bool hasAll = true; //innocent til proven guilty
             for (map<int, vector<string> >::iterator it = indexes.begin(); it != indexes.end(); it++) {
                 //column number is it->first
-                if (!m->inUsersGroups(designMap[j][it->first], it->second)) { hasAll = false;  }
+                if (!util.inUsersGroups(designMap[j][it->first], it->second)) { hasAll = false;  }
             }
             if (hasAll) {
                 map<int, string>::iterator it = reverse.find(j);
@@ -450,7 +450,7 @@ vector<string> DesignMap::getNamesShared(map<string, vector<string> > selected) 
             bool hasAny = false; //innocent til proven guilty
             for (map<int, vector<string> >::iterator it = indexes.begin(); it != indexes.end(); it++) {
                 //column number is it->first
-                if (m->inUsersGroups(designMap[j][it->first], it->second)) { hasAny = true;  }
+                if (util.inUsersGroups(designMap[j][it->first], it->second)) { hasAny = true;  }
             }
 
             if (hasAny) {
@@ -568,7 +568,7 @@ int DesignMap::printCategories(ofstream& out, vector<string> cats) {
     try {
         
 		out << "group";
-        for (int i = 0; i < namesOfCategories.size(); i++) { if (m->inUsersGroups(namesOfCategories[i], cats)) { out  << '\t' << namesOfCategories[i]; } }
+        for (int i = 0; i < namesOfCategories.size(); i++) { if (util.inUsersGroups(namesOfCategories[i], cats)) { out  << '\t' << namesOfCategories[i]; } }
         out << endl;
         
         map<int, string> reverse; //use this to preserve order
@@ -581,7 +581,7 @@ int DesignMap::printCategories(ofstream& out, vector<string> cats) {
                 out << itR->second;
                 
                 for (int j = 0; j < namesOfCategories.size(); j++) {
-                    if (m->inUsersGroups(namesOfCategories[i], cats)) {
+                    if (util.inUsersGroups(namesOfCategories[i], cats)) {
                         out  << '\t' << designMap[i][j];
                     }
                 }
@@ -615,7 +615,7 @@ int DesignMap::printGroups(ofstream& out, vector<string> groups) {
             
             if (itR != reverse.end()) { //will equal end if groups were removed because remove just removes from indexNameMap
                 
-                if (m->inUsersGroups(itR->second, groups)) {
+                if (util.inUsersGroups(itR->second, groups)) {
                     out << itR->second;
                 
                     for (int j = 0; j < namesOfCategories.size(); j++) {

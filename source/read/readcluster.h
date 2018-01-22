@@ -14,6 +14,7 @@
 #include "nameassignment.hpp"
 #include "listvector.hpp"
 #include "counttable.h"
+#include "utils.hpp"
 
 
 /******************************************************/
@@ -36,6 +37,7 @@ private:
 	float cutoff;
 	MothurOut* m;
 	bool sortWanted;
+    Utils util;
 	
 	int convertPhylip2Column(NameAssignment*&);
     int convertPhylip2Column(CountTable*&);

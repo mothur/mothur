@@ -104,14 +104,14 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 			outputTypes["qfile"] = tempOutNames;
 
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -119,28 +119,28 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 				it = parameters.find("qfile");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			fastaFileName = validParameter.validFile(parameters, "fasta", true);
+			fastaFileName = validParameter.validFile(parameters, "fasta");
 			if (fastaFileName == "not open") { abort = true; }
 			else if (fastaFileName == "not found") { fastaFileName = "";}// m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
-			else { m->setFastaFile(fastaFileName); }
+			else { current->setFastaFile(fastaFileName); }
 			
-			qualFileName = validParameter.validFile(parameters, "qfile", true);
+			qualFileName = validParameter.validFile(parameters, "qfile");
 			if (qualFileName == "not open") { abort = true; }
 			else if (qualFileName == "not found") { qualFileName = ""; }//m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
-			else { m->setQualFile(qualFileName); }
+			else { current->setQualFile(qualFileName); }
 			
 			if((fastaFileName == "") && (qualFileName == "")){
-				fastaFileName = m->getFastaFile(); 
+				fastaFileName = current->getFastaFile(); 
 				if (fastaFileName != "") {  m->mothurOut("Using " + fastaFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 
-					qualFileName = m->getQualFile(); 
+					qualFileName = current->getQualFile(); 
 					if (qualFileName != "") {  m->mothurOut("Using " + qualFileName + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("You have no current files for fasta or qfile, and fasta or qfile is a required parameter for the reverse.seqs command."); m->mothurOutEndLine();
@@ -150,7 +150,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
 			}
 
@@ -167,27 +167,27 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 int ReverseSeqsCommand::execute(){
 	try{
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		string fastaReverseFileName;
 		
 		if(fastaFileName != ""){
 			ifstream inFASTA;
-			m->openInputFile(fastaFileName, inFASTA);
+			util.openInputFile(fastaFileName, inFASTA);
 			
 			ofstream outFASTA;
 			string tempOutputDir = outputDir;
-			if (outputDir == "") { tempOutputDir += m->hasPath(fastaFileName); } //if user entered a file with a path then preserve it
+			if (outputDir == "") { tempOutputDir += util.hasPath(fastaFileName); } //if user entered a file with a path then preserve it
             map<string, string> variables; 
-            variables["[filename]"] = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileName));
-            variables["[extension]"] = m->getExtension(fastaFileName);
+            variables["[filename]"] = tempOutputDir + util.getRootName(util.getSimpleName(fastaFileName));
+            variables["[extension]"] = util.getExtension(fastaFileName);
 			fastaReverseFileName = getOutputFileName("fasta", variables);
-			m->openOutputFile(fastaReverseFileName, outFASTA);
+			util.openOutputFile(fastaReverseFileName, outFASTA);
 			
 			while(!inFASTA.eof()){
-				if (m->getControl_pressed()) {  inFASTA.close();  outFASTA.close(); m->mothurRemove(fastaReverseFileName); return 0; }
+				if (m->getControl_pressed()) {  inFASTA.close();  outFASTA.close(); util.mothurRemove(fastaReverseFileName); return 0; }
 				 
-				Sequence currSeq(inFASTA);  m->gobble(inFASTA);
+				Sequence currSeq(inFASTA);  util.gobble(inFASTA);
 				if (currSeq.getName() != "") {
 					currSeq.reverseComplement();
 					currSeq.printSequence(outFASTA);
@@ -204,20 +204,20 @@ int ReverseSeqsCommand::execute(){
 			QualityScores currQual;
 
 			ifstream inQual;
-			m->openInputFile(qualFileName, inQual);
+			util.openInputFile(qualFileName, inQual);
 			
 			ofstream outQual;
 			string tempOutputDir = outputDir;
-			if (outputDir == "") { tempOutputDir += m->hasPath(qualFileName); } //if user entered a file with a path then preserve it
+			if (outputDir == "") { tempOutputDir += util.hasPath(qualFileName); } //if user entered a file with a path then preserve it
             map<string, string> variables; 
-            variables["[filename]"] = tempOutputDir + m->getRootName(m->getSimpleName(qualFileName));
-            variables["[extension]"] = m->getExtension(qualFileName);
+            variables["[filename]"] = tempOutputDir + util.getRootName(util.getSimpleName(qualFileName));
+            variables["[extension]"] = util.getExtension(qualFileName);
 			string qualReverseFileName = getOutputFileName("qfile", variables);
-            m->openOutputFile(qualReverseFileName, outQual);
+            util.openOutputFile(qualReverseFileName, outQual);
 
 			while(!inQual.eof()){
-				if (m->getControl_pressed()) {  inQual.close();  outQual.close(); m->mothurRemove(qualReverseFileName); return 0; }
-				currQual = QualityScores(inQual);  m->gobble(inQual);
+				if (m->getControl_pressed()) {  inQual.close();  outQual.close(); util.mothurRemove(qualReverseFileName); return 0; }
+				currQual = QualityScores(inQual);  util.gobble(inQual);
 				currQual.flipQScores();	
 				currQual.printQScores(outQual);
 			}
@@ -226,18 +226,18 @@ int ReverseSeqsCommand::execute(){
 			outputNames.push_back(qualReverseFileName); outputTypes["qfile"].push_back(qualReverseFileName);
 		}
 		
-		if (m->getControl_pressed()) {  m->mothurRemove(qualReverseFileName); m->mothurRemove(fastaReverseFileName); return 0; }
+		if (m->getControl_pressed()) {  util.mothurRemove(qualReverseFileName); util.mothurRemove(fastaReverseFileName); return 0; }
 		
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("qfile");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setQualFile(currentName); }
 		}
 		
 		

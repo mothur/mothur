@@ -134,14 +134,14 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
             outputTypes["qfile"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -149,7 +149,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
                 it = parameters.find("qfile");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
                 }
@@ -157,7 +157,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
                 it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -165,7 +165,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
                 it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -173,40 +173,40 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  				//if there is a current fasta file, use it
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setFastaFile(fastafile); } 	
+			}else { current->setFastaFile(fastafile); } 	
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
-            qualfile = validParameter.validFile(parameters, "qfile", true);
+            qualfile = validParameter.validFile(parameters, "qfile");
             if (qualfile == "not open") { qualfile = ""; abort = true; }
             else if (qualfile == "not found") { qualfile = ""; }
-            else { m->setQualFile(qualfile); }
+            else { current->setQualFile(qualfile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
             			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -217,27 +217,26 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
             }
 
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
-			string temp = validParameter.validFile(parameters, "numbases", false);	if (temp == "not found") { temp = "0"; } 
-			m->mothurConvert(temp, numbases);   
+			string temp = validParameter.valid(parameters, "numbases");	if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, numbases);   
 			
-            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
             
-			temp = validParameter.validFile(parameters, "countgaps", false);	if (temp == "not found") { temp = "f"; } 
-			countGaps = m->isTrue(temp);  
+			temp = validParameter.valid(parameters, "countgaps");	if (temp == "not found") { temp = "f"; }
+			countGaps = util.isTrue(temp);  
 			
-			temp = validParameter.validFile(parameters, "short", false);	if (temp == "not found") { temp = "f"; } 
-			Short = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "short");	if (temp == "not found") { temp = "f"; }
+			Short = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "keepn", false);	if (temp == "not found") { if (qualfile!= "") { temp = "t"; }else { temp = "f"; } }
-            keepN = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "keepn");	if (temp == "not found") { if (qualfile!= "") { temp = "t"; }else { temp = "f"; } }
+            keepN = util.isTrue(temp);
             
             if (((!keepN) && (qualfile != "")) || ((countGaps) && (qualfile != ""))){ m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file, or set countgaps to true."); m->mothurOutEndLine(); abort = true;  }
 		
-			keep = validParameter.validFile(parameters, "keep", false);		if (keep == "not found") { keep = "front"; } 
+			keep = validParameter.valid(parameters, "keep");		if (keep == "not found") { keep = "front"; } 
 				
 			if (numbases == 0)  { m->mothurOut("You must provide the number of bases you want to keep for the chops.seqs command."); m->mothurOutEndLine(); abort = true;  }
 		}
@@ -253,12 +252,12 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 int ChopSeqsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> variables;
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("fasta", variables);
         outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
         string outputFileNameAccnos = getOutputFileName("accnos", variables);
@@ -266,43 +265,21 @@ int ChopSeqsCommand::execute(){
         string fastafileTemp = "";
         if (qualfile != "") {  fastafileTemp = outputFileName + ".qualFile.Positions.temp"; }
         
-        vector<unsigned long long> positions; 
-        vector<linePair> lines;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        positions = m->divideFile(fastafile, processors);
-        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
-#else
-        int numSeqs = 0;
-        positions = m->setFilePosFasta(fastafile, numSeqs); 
-        if (numSeqs < processors) { processors = numSeqs; }
-		
-        //figure out how many sequences you have to process
-        int numSeqsPerProcessor = numSeqs / processors;
-        for (int i = 0; i < processors; i++) {
-            int startIndex =  i * numSeqsPerProcessor;
-            if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
-            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
-        }
-#endif
-        
-        bool wroteAccnos = false;
-        if(processors == 1) {   wroteAccnos = driver(lines[0], fastafile, outputFileName, outputFileNameAccnos, fastafileTemp);        }
-        else                {   wroteAccnos = createProcesses(lines, fastafile, outputFileName, outputFileNameAccnos, fastafileTemp);  }
-        
+        bool wroteAccnos = createProcesses(fastafile, outputFileName, outputFileNameAccnos, fastafileTemp);
         if (m->getControl_pressed()) {  return 0; }
         
         if (qualfile != "") {
             thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
-            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
+            if (outputDir == "") {  thisOutputDir += util.hasPath(qualfile);  }
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
             string outputQualFileName = getOutputFileName("qfile", variables);
             outputNames.push_back(outputQualFileName); outputTypes["qfile"].push_back(outputQualFileName);
             
             processQual(outputQualFileName, fastafileTemp);
-            m->mothurRemove(fastafileTemp);
+            util.mothurRemove(fastafileTemp);
         }
 		
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
         if (wroteAccnos) {
             outputNames.push_back(outputFileNameAccnos); outputTypes["accnos"].push_back(outputFileNameAccnos);
@@ -319,7 +296,7 @@ int ChopSeqsCommand::execute(){
                 
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
-                m->setMothurCalling(true);
+                current->setMothurCalling(true);
                 
                 Command* removeCommand = new RemoveSeqsCommand(inputString);
                 removeCommand->execute();
@@ -327,67 +304,67 @@ int ChopSeqsCommand::execute(){
                 map<string, vector<string> > filenames = removeCommand->getOutputFiles();
                 
                 delete removeCommand;
-                m->setMothurCalling(false);
+                current->setMothurCalling(false);
                 m->mothurOut("/******************************************/"); m->mothurOutEndLine();
                 
                 if (groupfile != "") {
                     thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-                    variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+                    if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+                    variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
                     string outGroup = getOutputFileName("group", variables);
-                    m->renameFile(filenames["group"][0], outGroup);
+                    util.renameFile(filenames["group"][0], outGroup);
                     outputNames.push_back(outGroup); outputTypes["group"].push_back(outGroup);
                 }
                 
                 if (namefile != "") {
                     thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-                    variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
+                    if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+                    variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
                     string outName = getOutputFileName("name", variables);
-                    m->renameFile(filenames["name"][0], outName);
+                    util.renameFile(filenames["name"][0], outName);
                     outputNames.push_back(outName); outputTypes["name"].push_back(outName);
                 }
                 
                 if (countfile != "") {
                     thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
-                    variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+                    if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                    variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
                     string outCount = getOutputFileName("count", variables);
-                    m->renameFile(filenames["count"][0], outCount);
+                    util.renameFile(filenames["count"][0], outCount);
                     outputNames.push_back(outCount); outputTypes["count"].push_back(outCount);
                 }
             }
         }
-		else {  m->mothurRemove(outputFileNameAccnos);  }
+		else {  util.mothurRemove(outputFileNameAccnos);  }
 		
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
         
 		if (wroteAccnos) { //set accnos file as new current accnosfile
 			itTypes = outputTypes.find("accnos");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 			}
             
             itTypes = outputTypes.find("name");
             if (itTypes != outputTypes.end()) {
-                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
             }
             
             itTypes = outputTypes.find("group");
             if (itTypes != outputTypes.end()) {
-                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
             }
             
             itTypes = outputTypes.find("count");
             if (itTypes != outputTypes.end()) {
-                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
             }
 		}
         
@@ -407,410 +384,336 @@ int ChopSeqsCommand::execute(){
 	}
 }
 /**************************************************************************************************/
-bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, string outFasta, string outAccnos, string fastafileTemp) {
-	try {
-		int process = 1;
-		bool wroteAccnos = false;
-		vector<int> processIDS;
-        vector<string> nonBlankAccnosFiles;
-        bool recalc = false;
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-                string fastafileTempThisProcess = fastafileTemp;
-                if (fastafileTempThisProcess != "") { fastafileTempThisProcess = fastafileTempThisProcess + m->mothurGetpid(process) + ".temp"; }
-				wroteAccnos = driver(lines[process], filename, outFasta + m->mothurGetpid(process) + ".temp", outAccnos + m->mothurGetpid(process) + ".temp", fastafileTempThisProcess);
-				
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = fastafile + m->mothurGetpid(process) + ".bool.temp";
-				m->openOutputFile(tempFile, out);
-				out << wroteAccnos << endl;				
-				out.close();
-				
-				exit(0);
-            }else {
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
-            }
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            lines.clear();
-            vector<unsigned long long> positions = m->divideFile(filename, processors);
-            for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
-            processIDS.resize(0);
-            process = 1;
-            
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    string fastafileTempThisProcess = fastafileTemp;
-                    if (fastafileTempThisProcess != "") { fastafileTempThisProcess = fastafileTempThisProcess + m->mothurGetpid(process) + ".temp"; }
-                    wroteAccnos = driver(lines[process], filename, outFasta + m->mothurGetpid(process) + ".temp", outAccnos + m->mothurGetpid(process) + ".temp", fastafileTempThisProcess);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = fastafile + m->mothurGetpid(process) + ".bool.temp";
-                    m->openOutputFile(tempFile, out);
-                    out << wroteAccnos << endl;				
-                    out.close();
-                    
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
+//custom data structure for threads to use.
+// This is passed by void pointer so it can be any data type
+// that can be passed using a single void pointer (LPVOID).
+struct chopData {
+    string filename, keep, qualValues, qualFileOutput;
+    int count;
+    unsigned long long start;
+    unsigned long long end;
+    OutputWriter* threadWriterAccnos;
+    OutputWriter* threadWriterOutput;
+    MothurOut* m;
+    Utils util;
+    
+    int numbases;
+    bool countGaps, Short, wroteAccnos, keepN;
+    Sequence thisSeq;
+    
+    chopData(){}
+    chopData(string f, unsigned long long st, unsigned long long en, OutputWriter* wo, OutputWriter* wa, string qv) { //InputReader* i
+        m = MothurOut::getInstance();
+        filename = f;
+        threadWriterOutput = wo;
+        threadWriterAccnos = wa;
+        qualFileOutput = qv;
+        start = st;
+        end = en;
+        count = 0;
+        qualValues = "";
+        keep = "front";
+        countGaps = false;
+        Short = false;
+        keepN = false; if (qv!="") { keepN = true; }
+        wroteAccnos = false;
         
-		//do your part
-		wroteAccnos = driver(lines[0], filename, outFasta, outAccnos, fastafileTemp);
-        
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-        
-		if (wroteAccnos) { nonBlankAccnosFiles.push_back(outAccnos); }
-		else { m->mothurRemove(outAccnos); } //remove so other files can be renamed to it
-        
-		//parent reads in and combine Filter info
-		for (int i = 0; i < processIDS.size(); i++) {
-			string tempFilename = fastafile + toString(processIDS[i]) + ".bool.temp";
-			ifstream in;
-			m->openInputFile(tempFilename, in);
-			
-			bool temp;
-			in >> temp; m->gobble(in); 
-            if (temp) { wroteAccnos = temp; nonBlankAccnosFiles.push_back(outAccnos + toString(processIDS[i]) + ".temp");  }
-			else { m->mothurRemove((outAccnos + toString(processIDS[i]) + ".temp"));  }
-            
-			in.close();
-			m->mothurRemove(tempFilename);
-		}
-#else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the seqSumData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add info to vectors.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<chopData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-            
-            string extension = "";
-            if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
-			// Allocate memory for thread data.
-            string fastafileTempThisProcess = fastafileTemp;
-            if (fastafileTempThisProcess != "") { fastafileTempThisProcess = fastafileTempThisProcess + extension; }
-			chopData* tempChop = new chopData(filename, (outFasta+extension), (outAccnos+extension), m, lines[i].start, lines[i].end, keep, countGaps, numbases, Short, keepN, qualfile, fastafileTempThisProcess);
-			pDataArray.push_back(tempChop);
-			
-			//MyChopThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MyChopThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-        //do your part
-        string fastafileTempThisProcess = fastafileTemp;
-        if (fastafileTempThisProcess != "") { fastafileTempThisProcess = fastafileTempThisProcess + toString(processors-1) + ".temp"; }
-		wroteAccnos = driver(lines[processors-1], filename, (outFasta + toString(processors-1) + ".temp"), (outAccnos + toString(processors-1) + ".temp"), fastafileTempThisProcess);
-        processIDS.push_back(processors-1);
-        
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-        if (wroteAccnos) { nonBlankAccnosFiles.push_back(outAccnos); }
-		else { m->mothurRemove(outAccnos); } //remove so other files can be renamed to it
-
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            if (pDataArray[i]->wroteAccnos) { wroteAccnos = pDataArray[i]->wroteAccnos; nonBlankAccnosFiles.push_back(outAccnos + toString(processIDS[i]) + ".temp");  }
-			else { m->mothurRemove((outAccnos + toString(processIDS[i]) + ".temp"));  }
-            //check to make sure the process finished
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
-            }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-#endif		
-                
-		for (int i = 0; i < processIDS.size(); i++) {
-            if (fastafileTemp != "") {
-                m->appendFiles((fastafileTemp + toString(processIDS[i]) + ".temp"), fastafileTemp);
-                m->mothurRemove((fastafileTemp + toString(processIDS[i]) + ".temp"));
-            }
-			m->appendFiles((outFasta + toString(processIDS[i]) + ".temp"), outFasta);
-			m->mothurRemove((outFasta + toString(processIDS[i]) + ".temp"));
-		}
-		
-        if (nonBlankAccnosFiles.size() != 0) { 
-			m->renameFile(nonBlankAccnosFiles[0], outAccnos);
-			
-			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-				m->appendFiles(nonBlankAccnosFiles[h], outAccnos);
-				m->mothurRemove(nonBlankAccnosFiles[h]);
-			}
-		}else { //recreate the accnosfile if needed
-			ofstream out;
-			m->openOutputFile(outAccnos, out);
-			out.close();
-		}
-
-		return wroteAccnos;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "createProcesses");
-		exit(1);
-	}
-}
-/**************************************************************************************/
-bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta, string outAccnos, string fastaFileTemp) {
-	try {
-		
-		ofstream out;
-		m->openOutputFile(outFasta, out);
-        
-        ofstream outAcc;
-		m->openOutputFile(outAccnos, outAcc);
-        
-        ofstream outfTemp;
-        if (fastaFileTemp != "") { m->openOutputFile(fastaFileTemp, outfTemp); }
-        
-		ifstream in;
-		m->openInputFile(filename, in);
-        
-		in.seekg(filePos.start);
-        
-        //adjust
-        if (filePos.start == 0) {
-            m->zapGremlins(in); m->gobble(in);
-        }
-        
-		bool done = false;
-        bool wroteAccnos = false;
-		int count = 0;
-        
-		while (!done) {
-            
-			if (m->getControl_pressed()) { in.close(); out.close(); return 1; }
-            
-			Sequence seq(in); m->gobble(in);
-			
-			if (m->getControl_pressed()) {  in.close(); out.close(); outAcc.close(); m->mothurRemove(outFasta); m->mothurRemove(outAccnos); if (fastaFileTemp != "") { outfTemp.close(); m->mothurRemove(fastaFileTemp); } return 0;  }
-			
-			if (seq.getName() != "") {
-                string qualValues = "";
-				string newSeqString = getChopped(seq, qualValues);
-				
-				//output trimmed sequence
-				if (newSeqString != "") {
-					out << ">" << seq.getName() << endl << newSeqString << endl;
-				}else{
-					outAcc << seq.getName() << endl;
-					wroteAccnos = true;
-				}
-                if (fastaFileTemp != "") {  outfTemp << qualValues << endl;  }
-                count++;
-			}
-			
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            unsigned long long pos = in.tellg();
-            if ((pos == -1) || (pos >= filePos.end)) { break; }
-#else
-            if (in.eof()) { break; }
-#endif
-            //report progress
-			if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-			
-		}
-		//report progress
-		if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-
-		
-		in.close();
-        out.close();
-        outAcc.close();
-        if (fastaFileTemp != "") { outfTemp.close(); }
-		
-		return wroteAccnos;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "driver");
-		exit(1);
-	}
-}
+    }
+    void setVariables(string k, bool cGaps, int nbases, bool S, bool kn) {
+        keep = k;
+        countGaps = cGaps;
+        numbases = nbases;
+        Short = S;
+        keepN = kn;
+    }
+    void setChopped(Sequence s) { thisSeq = s; }
+};
 //**********************************************************************************************************************
-string ChopSeqsCommand::getChopped(Sequence seq, string& qualValues) {
-	try {
-		string temp = seq.getAligned();
-		string tempUnaligned = seq.getUnaligned();
-		
-		if (countGaps) {
-			//if needed trim sequence
-			if (keep == "front") {//you want to keep the beginning
-				int tempLength = temp.length();
-
-				if (tempLength > numbases) { //you have enough bases to remove some
-				
-					int stopSpot = 0;
-					int numBasesCounted = 0;
-					
-					for (int i = 0; i < temp.length(); i++) {
-						//eliminate N's
-                        if (!keepN) { if (toupper(temp[i]) == 'N') { temp[i] = '.'; } }
-						
-						numBasesCounted++; 
-						
-						if (numBasesCounted >= numbases) { stopSpot = i; break; }
-					}
-					
-					if (stopSpot == 0) { temp = ""; }
-					else {  temp = temp.substr(0, stopSpot+1);  }
-							
-				}else { 
-					if (!Short) { temp = ""; } //sequence too short
-				}
-			}else { //you are keeping the back
-				int tempLength = temp.length();
-				if (tempLength > numbases) { //you have enough bases to remove some
-					
-					int stopSpot = 0;
-					int numBasesCounted = 0;
-					
-					for (int i = (temp.length()-1); i >= 0; i--) {
-						//eliminate N's
-                        if (!keepN) { if (toupper(temp[i]) == 'N') { temp[i] = '.'; } }
-						
-						numBasesCounted++; 
-
-						if (numBasesCounted >= numbases) { stopSpot = i; break; }
-					}
-				
-					if (stopSpot == 0) { temp = ""; }
-					else {  temp = temp.substr(stopSpot+1);  }
-				}else { 
-					if (!Short) { temp = ""; } //sequence too short
-				}
-			}
-
-		}else{
-				
-			//if needed trim sequence
-			if (keep == "front") {//you want to keep the beginning
-				int tempLength = tempUnaligned.length();
-
-				if (tempLength > numbases) { //you have enough bases to remove some
-					
-					int stopSpot = 0;
-					int numBasesCounted = 0;
-					
-					for (int i = 0; i < temp.length(); i++) {
-						//eliminate N's
-                        if (!keepN) {
+string getChopped(chopData* params) {
+    try {
+        string temp = params->thisSeq.getAligned();
+        string tempUnaligned = params->thisSeq.getUnaligned();
+        
+        if (params->countGaps) {
+            //if needed trim sequence
+            if (params->keep == "front") {//you want to keep the beginning
+                int tempLength = temp.length();
+                
+                if (tempLength > params->numbases) { //you have enough bases to remove some
+                    
+                    int stopSpot = 0;
+                    int numBasesCounted = 0;
+                    
+                    for (int i = 0; i < temp.length(); i++) {
+                        //eliminate N's
+                        if (!params->keepN) { if (toupper(temp[i]) == 'N') { temp[i] = '.'; } }
+                        
+                        numBasesCounted++;
+                        
+                        if (numBasesCounted >= params->numbases) { stopSpot = i; break; }
+                    }
+                    
+                    if (stopSpot == 0) { temp = ""; }
+                    else {  temp = temp.substr(0, stopSpot+1);  }
+                    
+                }else {
+                    if (!params->Short) { temp = ""; } //sequence too short
+                }
+            }else { //you are keeping the back
+                int tempLength = temp.length();
+                if (tempLength > params->numbases) { //you have enough bases to remove some
+                    
+                    int stopSpot = 0;
+                    int numBasesCounted = 0;
+                    
+                    for (int i = (temp.length()-1); i >= 0; i--) {
+                        //eliminate N's
+                        if (!params->keepN) { if (toupper(temp[i]) == 'N') { temp[i] = '.'; } }
+                        
+                        numBasesCounted++;
+                        
+                        if (numBasesCounted >= params->numbases) { stopSpot = i; break; }
+                    }
+                    
+                    if (stopSpot == 0) { temp = ""; }
+                    else {  temp = temp.substr(stopSpot+1);  }
+                }else {
+                    if (!params->Short) { temp = ""; } //sequence too short
+                }
+            }
+            
+        }else{
+            
+            //if needed trim sequence
+            if (params->keep == "front") {//you want to keep the beginning
+                int tempLength = tempUnaligned.length();
+                
+                if (tempLength > params->numbases) { //you have enough bases to remove some
+                    
+                    int stopSpot = 0;
+                    int numBasesCounted = 0;
+                    
+                    for (int i = 0; i < temp.length(); i++) {
+                        //eliminate N's
+                        if (!params->keepN) {
                             if (toupper(temp[i]) == 'N') {
                                 temp[i] = '.';
                                 tempLength--;
-                                if (tempLength < numbases) { stopSpot = 0; break; }
+                                if (tempLength < params->numbases) { stopSpot = 0; break; }
                             }
                         }
-						if(isalpha(temp[i])) { numBasesCounted++; }
-						
-						if (numBasesCounted >= numbases) { stopSpot = i; break; }
-					}
-					
-					if (stopSpot == 0) { temp = ""; }
-					else {  temp = temp.substr(0, stopSpot+1);  }
+                        if(isalpha(temp[i])) { numBasesCounted++; }
+                        
+                        if (numBasesCounted >= params->numbases) { stopSpot = i; break; }
+                    }
                     
-					qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(stopSpot+1) + '\n';
+                    if (stopSpot == 0) { temp = ""; }
+                    else {  temp = temp.substr(0, stopSpot+1);  }
                     
-				}else { 
-					if (!Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
-                    else { qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
-				}				
-			}else { //you are keeping the back
-				int tempLength = tempUnaligned.length();
-				if (tempLength > numbases) { //you have enough bases to remove some
-					
-					int stopSpot = 0;
-					int numBasesCounted = 0;
-					
-					for (int i = (temp.length()-1); i >= 0; i--) {
-                        if (!keepN) {
+                    params->qualValues = params->thisSeq.getName() +'\t' + toString(0) + '\t' + toString(stopSpot+1) + '\n';
+                    
+                }else {
+                    if (!params->Short) { temp = ""; params->qualValues = params->thisSeq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
+                    else { params->qualValues = params->thisSeq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
+                }
+            }else { //you are keeping the back
+                int tempLength = tempUnaligned.length();
+                if (tempLength > params->numbases) { //you have enough bases to remove some
+                    
+                    int stopSpot = 0;
+                    int numBasesCounted = 0;
+                    
+                    for (int i = (temp.length()-1); i >= 0; i--) {
+                        if (!params->keepN) {
                             //eliminate N's
                             if (toupper(temp[i]) == 'N') {
                                 temp[i] = '.';
                                 tempLength--;
-                                if (tempLength < numbases) { stopSpot = 0; break; }
+                                if (tempLength < params->numbases) { stopSpot = 0; break; }
                             }
                         }
-						if(isalpha(temp[i])) { numBasesCounted++; }
+                        if(isalpha(temp[i])) { numBasesCounted++; }
+                        
+                        if (numBasesCounted >= params->numbases) { stopSpot = i; break; }
+                    }
+                    
+                    if (stopSpot == 0) { temp = ""; }
+                    else {  temp = temp.substr(stopSpot);  }
+                    
+                    params->qualValues = params->thisSeq.getName() +'\t' + toString(stopSpot) + '\t' + toString(temp.length()-1) + '\n';
+                    
+                }else { 
+                    if (!params->Short) { temp = ""; params->qualValues = params->thisSeq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
+                    else { params->qualValues = params->thisSeq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
+                }
+            }
+        }
+        
+        return temp;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "ChopSeqsCommand", "getChopped");
+        exit(1);
+    }
+}
 
-						if (numBasesCounted >= numbases) { stopSpot = i; break; }
-					}
-				
-					if (stopSpot == 0) { temp = ""; }
-					else {  temp = temp.substr(stopSpot);  }
-                    
-                    qualValues = seq.getName() +'\t' + toString(stopSpot) + '\t' + toString(temp.length()-1) + '\n';
-                    
-				}else { 
-					if (!Short) { temp = ""; qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(0) + '\n'; } //sequence too short
-                    else { qualValues = seq.getName() +'\t' + toString(0) + '\t' + toString(tempLength) + '\n'; }
-				}
-			}
-		}
+/**************************************************************************************/
+void driverChop(chopData* params) {
+	try {
+		ifstream in;
+		params->util.openInputFile(params->filename, in);
+        
+		in.seekg(params->start);
+        
+        //adjust
+        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in); }
+        
+        ofstream outfTemp;
+        if (params->qualFileOutput != "") { params->util.openOutputFile(params->qualFileOutput, outfTemp); }
 		
-		return temp;
+        bool wroteAccnos = false;
+		while (!in.eof()) {
+            
+            if (params->m->getControl_pressed()) {  break;  }
+            
+			Sequence seq(in); params->util.gobble(in);
+
+			if (seq.getName() != "") {
+                params->qualValues = "";
+                params->thisSeq = seq;
+                
+				string newSeqString = getChopped(params);
+				
+				//output trimmed sequence
+                if (newSeqString != "") { params->threadWriterOutput->write(">"+seq.getName()+"\n"+newSeqString+"\n");  }
+				else{
+                    params->threadWriterAccnos->write(seq.getName()+"\n");
+					wroteAccnos = true;
+				}
+                if (params->qualFileOutput != "") {  outfTemp << params->qualValues << endl;  }
+                params->count++;
+			}
+			
+#if defined NON_WINDOWS
+            unsigned long long pos = in.tellg();
+            if ((pos == -1) || (pos >= params->end)) { break; }
+#else
+            if (params->count == params->end) { break; }
+#endif
+            //report progress
+			if((params->count) % 10000 == 0){	params->m->mothurOut(toString(params->count)+"\n"); 		}
+			
+		}
+		//report progress
+		if((params->count) % 10000 != 0){	params->m->mothurOut(toString(params->count)+"\n"); 		}
+		
+		in.close();
+        if (params->qualFileOutput != "") { outfTemp.close(); }
+        
+		params->wroteAccnos = wroteAccnos;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "getChopped");
+		params->m->errorOut(e, "ChopSeqsCommand", "driver");
 		exit(1);
 	}
+}
+/**************************************************************************************************/
+bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string outAccnos, string fastafileTemp) {
+    try {
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<chopData*> data;
+        vector<linePair> lines;
+        
+        long long num = 0;
+        vector<unsigned long long> positions;
+#if defined NON_WINDOWS
+        positions = util.divideFile(filename, processors);
+        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
+#else
+        if (processors == 1) { lines.push_back(linePair(0, -1)); }//forces it to read whole file
+        else {
+            positions = util.setFilePosFasta(filename, num);
+            if (num < processors) { processors = num; }
+            
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = num / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+            }
+        }
+#endif
+        
+        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(outFasta);
+        auto synchronizedAccnosFile = std::make_shared<SynchronizedOutputFile>(outAccnos);
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
+            OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedAccnosFile);
+            
+            chopData* dataBundle = new chopData(filename, lines[i+1].start, lines[i+1].end, threadOutputWriter, threadAccnosWriter, fastafileTemp+extension);
+            dataBundle->setVariables(keep, countGaps, numbases, Short, keepN);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverChop, dataBundle));
+        }
+        
+        OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
+        OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedAccnosFile);
+    
+        chopData* dataBundle = new chopData(filename, lines[0].start, lines[0].end, threadOutputWriter, threadAccnosWriter, fastafileTemp);
+        dataBundle->setVariables(keep, countGaps, numbases, Short, keepN);
+        driverChop(dataBundle);
+        num = dataBundle->count;
+        bool wroteAccnos = dataBundle->wroteAccnos;
+        delete threadOutputWriter;
+        delete threadAccnosWriter;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            num += data[i]->count;
+            
+            delete data[i]->threadWriterOutput;
+            delete data[i]->threadWriterAccnos;
+            if (data[i]->wroteAccnos) { wroteAccnos = true; }
+            
+            #if defined NON_WINDOWS
+            #else
+            if (data[i]->count != data[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i+1) + " only processed " + toString(data[i]->count) + " of " + toString(data[i]->end) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true);
+            }
+            #endif
+            if (fastafileTemp != "") {
+                util.appendFiles(data[i]->qualFileOutput, fastafileTemp);
+                util.mothurRemove(data[i]->qualFileOutput);
+            }
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
+        return wroteAccnos;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChopSeqsCommand", "createProcesses");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
     try {
         ofstream out;
-        m->openOutputFile(outputFile, out);
+        util.openOutputFile(outputFile, out);
         
         ifstream in;
-        m->openInputFile(inputFile, in);
+        util.openInputFile(inputFile, in);
         
         ifstream inQual;
-        m->openInputFile(qualfile, inQual);
+        util.openInputFile(qualfile, inQual);
 
         m->mothurOut("Processing the quality file.\n");
         
@@ -823,7 +726,7 @@ int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
             
             string name = "";
             int start = 0; int end = 0;
-            in >> name >> start >> end; m->gobble(in);
+            in >> name >> start >> end; util.gobble(in);
             
             if (qual.getName() != "") {
                 if (qual.getName() != name) { start = 0; end = 0; }

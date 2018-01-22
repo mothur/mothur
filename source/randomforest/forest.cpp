@@ -7,6 +7,7 @@
 //
 
 #include "forest.h"
+#include "utils.hpp"
 
 /***********************************************************************/
 Forest::Forest(const std::vector < std::vector<int> > dataSet,
@@ -41,8 +42,7 @@ Forest::Forest(const std::vector < std::vector<int> > dataSet,
 
 vector<int> Forest::getGlobalDiscardedFeatureIndices() {
     try {
-        //vector<int> globalDiscardedFeatureIndices;
-        //globalDiscardedFeatureIndices.push_back(1);
+        Utils util;
         
         // calculate feature vectors
         vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0) );
@@ -53,7 +53,7 @@ vector<int> Forest::getGlobalDiscardedFeatureIndices() {
         
         for (int i = 0; i < featureVectors.size(); i++) {
             if (m->getControl_pressed()) { return globalDiscardedFeatureIndices; }
-            double standardDeviation = m->getStandardDeviation(featureVectors[i]);
+            double standardDeviation = util.getStandardDeviation(featureVectors[i]);
             if (standardDeviation <= featureStandardDeviationThreshold){ globalDiscardedFeatureIndices.push_back(i); }
         }
         

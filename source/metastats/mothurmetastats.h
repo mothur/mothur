@@ -12,6 +12,7 @@
 
 
 #include "mothurout.h"
+#include "utils.hpp"
 
 class MothurMetastats {
 	
@@ -19,12 +20,13 @@ class MothurMetastats {
 		MothurMetastats(double, int); //threshold, numPermutations
 		~MothurMetastats();
 	
-		int runMetastats(string, vector< vector<double> >&, int); //outputFileName, data, secondGroupingStart
+		int runMetastats(string, vector< vector<double> >&, int, vector<string>); //outputFileName, data, secondGroupingStart, otuNames
 	
 	private:
 		MothurOut* m;
 		int row, column, numPermutations, secondGroupingStart;
 		double threshold;
+        Utils util;
         
         vector<double> permuted_pvalues(vector< vector<double> >&, vector<double>&, vector< vector<double> >&);
         vector<double> permute_and_calc_ts(vector< vector<double> >&);

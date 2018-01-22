@@ -81,15 +81,15 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
 			outputTypes["taxsummary"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			
-			string fileList = validParameter.validFile(parameters, "input", false);			
+			string fileList = validParameter.valid(parameters, "input");
 			if(fileList == "not found") { m->mothurOut("you must enter two or more file names"); m->mothurOutEndLine();  abort=true;  }
-			else{ 	m->splitAtDash(fileList, fileNames);	}
+			else{ 	util.splitAtDash(fileList, fileNames);	}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found")	{	outputDir = "";		}
+			string outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found")	{	outputDir = "";		}
 			
 			
 			numInputFiles = fileNames.size();
@@ -101,23 +101,23 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
 			else{
 				for(int i=0;i<numInputFiles;i++){
 					if (inputDir != "") {
-                        string path = m->hasPath(fileNames[i]);
+                        string path = util.hasPath(fileNames[i]);
                         //if the user has not given a path then, add inputdir. else leave path alone.
                         if (path == "") {	fileNames[i] = inputDir + fileNames[i];		}
                     }
                     
                     bool ableToOpen;
                     ifstream in;
-                    ableToOpen = m->openInputFile(fileNames[i], in, "noerror");
+                    ableToOpen = util.openInputFile(fileNames[i], in, "noerror");
                     in.close();	
                     
                     //if you can't open it, try default location
                     if (!ableToOpen) {
-                        if (m->getDefaultPath() != "") { //default path is set
-                            string tryPath = m->getDefaultPath() + m->getSimpleName(fileNames[i]);
+                        if (current->getDefaultPath() != "") { //default path is set
+                            string tryPath = current->getDefaultPath() + util.getSimpleName(fileNames[i]);
                             m->mothurOut("Unable to open " + fileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
                             ifstream in2;
-                            ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+                            ableToOpen = util.openInputFile(tryPath, in2, "noerror");
                             in2.close();
                             fileNames[i] = tryPath;
                         }
@@ -125,11 +125,11 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
                     
                     //if you can't open it, try output location
                     if (!ableToOpen) {
-                        if (m->getOutputDir() != "") { //default path is set
-                            string tryPath = m->getOutputDir() + m->getSimpleName(fileNames[i]);
+                        if (current->getOutputDir() != "") { //default path is set
+                            string tryPath = current->getOutputDir() + util.getSimpleName(fileNames[i]);
                             m->mothurOut("Unable to open " + fileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
                             ifstream in2;
-                            ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+                            ableToOpen = util.openInputFile(tryPath, in2, "noerror");
                             in2.close();
                             fileNames[i] = tryPath;
                         }
@@ -146,9 +146,9 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
 				}
 			}   
 			
-			outputFileName = validParameter.validFile(parameters, "output", false);			
+			outputFileName = validParameter.valid(parameters, "output");
 			if (outputFileName == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
-			else if (outputDir != "") { outputFileName = outputDir + m->getSimpleName(outputFileName);   }
+			else if (outputDir != "") { outputFileName = outputDir + util.getSimpleName(outputFileName);   }
             
 		}
         
@@ -162,10 +162,10 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
 
 int MergeTaxSummaryCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        outputFileName = m->getFullPathName(outputFileName);
-		m->mothurRemove(outputFileName);
+        outputFileName = util.getFullPathName(outputFileName);
+		util.mothurRemove(outputFileName);
         
         vector<rawTaxNode> tree;
         tree.push_back(rawTaxNode("Root"));
@@ -176,9 +176,9 @@ int MergeTaxSummaryCommand::execute(){
         for (int i = 0; i < fileNames.size(); i++) {
             
             ifstream in;
-            m->openInputFile(fileNames[i], in);
-            string temp = m->getline(in);
-            vector<string> headers = m->splitWhiteSpace(temp);
+            util.openInputFile(fileNames[i], in);
+            string temp = util.getline(in);
+            vector<string> headers = util.splitWhiteSpace(temp);
             
             vector<string> thisFilesGroups;
             if (headers.size() == 5) { hasGroups = false; }
@@ -193,23 +193,23 @@ int MergeTaxSummaryCommand::execute(){
                 
                 if (m->getControl_pressed()) {   return 0;  }
                 
-                in >> level >> rankId; m->gobble(in);
-                string rest = m->getline(in); m->gobble(in);
-                vector<string> pieces = m->splitWhiteSpaceWithQuotes(rest);
+                in >> level >> rankId; util.gobble(in);
+                string rest = util.getline(in); util.gobble(in);
+                vector<string> pieces = util.splitWhiteSpaceWithQuotes(rest);
                 
                 map<string, int> groupCounts;
                 int pcount = pieces.size()-1;
                 if (thisFilesGroups.size() != 0) {
                     for (int j = thisFilesGroups.size()-1; j >= 0; j--) {
                         int tempNum;
-                        m->mothurConvert(pieces[pcount], tempNum);
+                        util.mothurConvert(pieces[pcount], tempNum);
                         groupCounts[thisFilesGroups[j]] = tempNum;
                         pcount--;
                     }
                 }
                 
                 //column 5
-                m->mothurConvert(pieces[pcount], totalFloat); pcount--;
+                util.mothurConvert(pieces[pcount], totalFloat); pcount--;
                 
                 if ((totalFloat < 1) && (totalFloat > 0)) {
                     m->mothurOut("[ERROR]: cannot merge tax.summary files with relative abundances.\n"); m->setControl_pressed(true); in.close(); return 0;
@@ -218,7 +218,7 @@ int MergeTaxSummaryCommand::execute(){
                 }
                 
                 //column 4
-                m->mothurConvert(pieces[pcount], daugterLevels);
+                util.mothurConvert(pieces[pcount], daugterLevels);
                 
                 //assemble tax - this is done in case taxonomy contains spaces
                 tax = "";
@@ -240,10 +240,10 @@ int MergeTaxSummaryCommand::execute(){
         if (!hasGroups && (groups.size() != 0)) { groups.clear();  m->mothurOut("[WARNING]: not all files contain group breakdown, ignoring group counts.\n");  }
         
         ofstream out;
-        m->openOutputFile(outputFileName, out);
+        util.openOutputFile(outputFileName, out);
         print(out, tree, groups);
         		
-		if (m->getControl_pressed()) {  m->mothurRemove(outputFileName); return 0;  }
+		if (m->getControl_pressed()) {  util.mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

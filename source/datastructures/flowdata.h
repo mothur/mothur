@@ -10,7 +10,7 @@
  *
  */
 
-#include "mothur.h"
+#include "utils.hpp"
 #include "mothurout.h"
 #include "sequence.hpp"
 
@@ -32,6 +32,7 @@ public:
 	void printFlows(ofstream&, string);
 private:
 	MothurOut* m;
+    Utils util;
 	
 	void updateEndFlow();
 	void translateFlow();

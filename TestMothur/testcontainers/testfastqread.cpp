@@ -18,7 +18,7 @@ TestFastqRead::TestFastqRead() {  //setup
 }
 /**************************************************************************************************/
 TestFastqRead::~TestFastqRead() {
-    for (int i = 0; i < filenames.size(); i++) { m->mothurRemove(filenames[i]); }
+    for (int i = 0; i < filenames.size(); i++) { util.mothurRemove(filenames[i]); }
      //teardown
 }
 /**************************************************************************************************/
@@ -48,7 +48,7 @@ TEST_CASE("Testing FastqRead Class") {
         INFO("Using first first read in F8D0") // Only appears on a FAIL
         
         ifstream in; bool ignore; string format = "illumina1.8+";
-        testFastq.m->openInputFile(testFastq.filenames[0], in);
+        testFastq.util.openInputFile(testFastq.filenames[0], in);
         
         FastqRead read(in, ignore, format);
         

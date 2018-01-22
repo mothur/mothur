@@ -216,14 +216,14 @@ CollectCommand::CollectCommand(string option)  {
 			outputTypes["shen"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -231,7 +231,7 @@ CollectCommand::CollectCommand(string option)  {
 				it = parameters.find("rabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
 				}
@@ -239,7 +239,7 @@ CollectCommand::CollectCommand(string option)  {
 				it = parameters.find("sabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
 				}
@@ -247,51 +247,51 @@ CollectCommand::CollectCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else {  format = "list"; inputfile = listfile; m->setListFile(listfile); }
+			else {  format = "list"; inputfile = listfile; current->setListFile(listfile); }
 			
-			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			sabundfile = validParameter.validFile(parameters, "sabund");
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
-			else {  format = "sabund"; inputfile = sabundfile; m->setSabundFile(sabundfile); }
+			else {  format = "sabund"; inputfile = sabundfile; current->setSabundFile(sabundfile); }
 			
-			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			rabundfile = validParameter.validFile(parameters, "rabund");
 			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
 			else if (rabundfile == "not found") { rabundfile = ""; }
-			else {  format = "rabund"; inputfile = rabundfile; m->setRabundFile(rabundfile); }
+			else {  format = "rabund"; inputfile = rabundfile; current->setRabundFile(rabundfile); }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "sharedfile"; inputfile = sharedfile; m->setSharedFile(sharedfile); }
+			else {  format = "sharedfile"; inputfile = sharedfile; current->setSharedFile(sharedfile); }
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
 				//is there are current file available for any of these?
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					listfile = m->getListFile(); 
+					listfile = current->getListFile(); 
 					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 					else { 
-						rabundfile = m->getRabundFile(); 
+						rabundfile = current->getRabundFile();
 						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
 						else { 
-							sabundfile = m->getSabundFile(); 
+							sabundfile = current->getSabundFile(); 
 							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
 							else { 
 								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); 
@@ -304,40 +304,40 @@ CollectCommand::CollectCommand(string option)  {
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
 			//NOTE: if you add new calc options, don't forget to add them to the parameter initialize in setParameters or the gui won't be able to use them
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			else { 
 				 if (calc == "default")  {  calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			}
-			m->splitAtDash(calc, Estimators);
-			if (m->inUsersGroups("citation", Estimators)) { 
+			util.splitAtDash(calc, Estimators);
+			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
 
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, freq);
+			temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, freq);
             
-            temp = validParameter.validFile(parameters, "alpha", false);		if (temp == "not found") { temp = "1"; }
-			m->mothurConvert(temp, alpha);
+            temp = validParameter.valid(parameters, "alpha");		if (temp == "not found") { temp = "1"; }
+			util.mothurConvert(temp, alpha);
             
             if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2."); m->mothurOutEndLine(); abort=true; }
 			
-			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
-			m->mothurConvert(temp, abund); 
+			temp = validParameter.valid(parameters, "abund");		if (temp == "not found") { temp = "10"; }
+			util.mothurConvert(temp, abund); 
 			
-			temp = validParameter.validFile(parameters, "size", false);			if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, size); 
+			temp = validParameter.valid(parameters, "size");			if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, size); 
 		}
 		
 	}
@@ -351,17 +351,17 @@ CollectCommand::CollectCommand(string option)  {
 int CollectCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 	
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
 		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
+			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}    return 0; }
 			
-			if (outputDir == "") { outputDir += m->hasPath(inputFileNames[p]); }
-			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
+			if (outputDir == "") { outputDir += util.hasPath(inputFileNames[p]); }
+			string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
             map<string, string> variables; 
             variables["[filename]"] = fileNameRoot;
 			//globaldata->inputFileName = inputFileNames[p];
@@ -373,7 +373,7 @@ int CollectCommand::execute(){
 			ValidCalculators validCalculator;
 			
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("single", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("single", Estimators[i]) ) { 
 					if (Estimators[i] == "sobs") { 
 						cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(getOutputFileName("sobs", variables))));
 						outputNames.push_back(getOutputFileName("sobs", variables)); outputTypes["sobs"].push_back(getOutputFileName("sobs", variables));
@@ -459,7 +459,7 @@ int CollectCommand::execute(){
 			//if the users entered no valid calculators don't execute command
 			if (cDisplays.size() == 0) { return 0; }
 			
-			input = new InputData(inputFileNames[p], format);
+			input = new InputData(inputFileNames[p], format, nullVector);
 			order = input->getOrderVector();
 			string lastLabel = order->getLabel();
 			
@@ -469,10 +469,10 @@ int CollectCommand::execute(){
 			
 			if (m->getControl_pressed()) {  
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
+				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 				delete input;  
 				delete order; 
-				m->clearGroups();
+				
 				return 0;
 			}
 
@@ -481,10 +481,10 @@ int CollectCommand::execute(){
 			
 				if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
+					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					delete order; 
-					m->clearGroups();
+					
 					return 0;
 				}
 
@@ -502,7 +502,7 @@ int CollectCommand::execute(){
 					
 				}
 				//you have a label the user want that is smaller than this label and the last label has not already been processed 
-				if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = order->getLabel();
 					
 					delete order;
@@ -530,9 +530,9 @@ int CollectCommand::execute(){
 			
 			if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
+					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
-					m->clearGroups();
+					
 					return 0;
 			}
 				
@@ -550,7 +550,7 @@ int CollectCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				if (order != NULL) {	delete order;	}
 				order = (input->getOrderVector(lastLabel));
 				
@@ -562,10 +562,10 @@ int CollectCommand::execute(){
 				
 				if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
+					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					delete order;
-					m->clearGroups();
+					
 					return 0;
 				}
 				delete order;
@@ -576,7 +576,7 @@ int CollectCommand::execute(){
 			delete input;  
 		}
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 				
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -600,17 +600,17 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		map<string, string> files;
 		map<string, string>::iterator it3;
 					
-		input = new InputData(filename, "sharedfile");
+		input = new InputData(filename, "sharedfile", groups);
 		SharedRAbundVectors* shared = input->getSharedRAbundVectors();
 		
-		string sharedFileRoot = m->getRootName(filename);
+		string sharedFileRoot = util.getRootName(filename);
         groups = shared->getNamesGroups();
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<groups.size(); i++) {
             ofstream temp;
             string group = groups[i];
-			m->openOutputFile((sharedFileRoot + group + ".rabund"), temp);
+			util.openOutputFile((sharedFileRoot + group + ".rabund"), temp);
             temp.close();
 			filenames.push_back((sharedFileRoot + group + ".rabund"));
             files[group] = (sharedFileRoot + group + ".rabund");
@@ -622,7 +622,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 			for (int i = 0; i < lookup.size(); i++) {
                 ofstream temp;
                 string group = groups[i];
-				m->openOutputFileAppend(files[group], temp);
+				util.openOutputFileAppend(files[group], temp);
 				lookup[i]->getRAbundVector().print(temp);
 				temp.close();
 			}

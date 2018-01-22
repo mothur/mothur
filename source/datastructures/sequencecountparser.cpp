@@ -7,7 +7,7 @@
 //
 
 #include "sequencecountparser.h"
-#include "sharedutilities.h"
+
 
 /************************************************************/
 SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vector<string> groupsSelected) {
@@ -25,7 +25,6 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
             namesOfGroups = countTable.getNamesOfGroups();
             for (int i = 0; i < allNames.size(); i++) { indexes.push_back(i); }
         }else{
-            SharedUtil util;  util.setGroups(groupsSelected, allNames);
             namesOfGroups = groupsSelected;
             map<string, int> temp;
             for (int i = 0; i < allNames.size(); i++) {
@@ -69,7 +68,6 @@ SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTabl
                 namesOfGroups = countTable.getNamesOfGroups();
                 for (int i = 0; i < allNames.size(); i++) { indexes.push_back(i); }
             }else{
-                SharedUtil util;  util.setGroups(groupsSelected, allNames);
                 namesOfGroups = groupsSelected;
                 map<string, int> temp;
                 for (int i = 0; i < allNames.size(); i++) {
@@ -104,17 +102,14 @@ SequenceCountParser::SequenceCountParser(string fastafile, CountTable& countTabl
 /************************************************************/
 int SequenceCountParser::readFasta(string fastafile, CountTable& countTable) {
     try {
-        
-        
         ifstream in;
-        m->openInputFile(fastafile, in);
+        Utils util; util.openInputFile(fastafile, in);
         
-       
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(in); m->gobble(in);
+            Sequence seq(in); util.gobble(in);
             
             if (seq.getName() != "") {
                 
@@ -216,7 +211,7 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
 		}else {
 
 			ofstream out;
-			m->openOutputFile(filename, out);
+            Utils util; util.openOutputFile(filename, out);
 			
 			seqForThisGroup = it->second;
             
@@ -243,7 +238,7 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
 					}
 				}
 				
-				if (error == 1) { out.close(); m->mothurRemove(filename); return 1; }
+				if (error == 1) { out.close(); util.mothurRemove(filename); return 1; }
 				
 				//sort by num represented
 				sort(nameVector.begin(), nameVector.end(), compareSeqPriorityNodes);
@@ -251,7 +246,7 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
 				//print new file in order of
 				for (int i = 0; i < nameVector.size(); i++) {
 					
-					if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
+					if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
 					
 					out << ">" << nameVector[i].name << tag << nameVector[i].numIdentical << tag2 << endl << nameVector[i].seq << endl; //
 				}
@@ -260,7 +255,7 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
                 //m->mothurOut("Group " + g +  " contains " + toString(seqForThisGroup.size()) + " unique seqs.\n");
 				for (int i = 0; i < seqForThisGroup.size(); i++) {
 					
-					if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
+					if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
 					
 					seqForThisGroup[i].printSequence(out);	
 				}
@@ -300,6 +295,7 @@ map<string, int> SequenceCountParser::getCountTable(string g){
 /************************************************************/
 int SequenceCountParser::getCountTable(string g, string filename){ 
 	try {
+        Utils util;
 		map<string, map<string, int> >::iterator it;
 		map<string, int> countForThisGroup;
 		
@@ -310,12 +306,12 @@ int SequenceCountParser::getCountTable(string g, string filename){
 			countForThisGroup = it->second;
 			
 			ofstream out;
-			m->openOutputFile(filename, out);
+			util.openOutputFile(filename, out);
             out << "Representative_Sequence\ttotal\t" << g << endl;
             
 			for (map<string, int>::iterator itFile = countForThisGroup.begin(); itFile != countForThisGroup.end(); itFile++) {
 				
-				if(m->getControl_pressed()) { out.close(); m->mothurRemove(filename); return 1; }
+				if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
 				
 				out << itFile->first << '\t' << itFile->second << '\t' << itFile->second << endl;
 			}

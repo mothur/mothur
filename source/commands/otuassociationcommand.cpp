@@ -111,14 +111,14 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			outputTypes["otucorr"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -126,7 +126,7 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 				it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
@@ -134,7 +134,7 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
                 it = parameters.find("metadata");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["metadata"] = inputDir + it->second;		}
 				}
@@ -142,34 +142,34 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			
 			
 			//check for required parameters			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else { inputFileName = sharedfile; m->setSharedFile(sharedfile); }
+			else { inputFileName = sharedfile; current->setSharedFile(sharedfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") { abort = true; }
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else { inputFileName = relabundfile; m->setRelAbundFile(relabundfile); }
+			else { inputFileName = relabundfile; current->setRelAbundFile(relabundfile); }
 			
-            metadatafile = validParameter.validFile(parameters, "metadata", true);
+            metadatafile = validParameter.valid(parameters, "metadata");
 			if (metadatafile == "not open") { abort = true; metadatafile = ""; }
 			else if (metadatafile == "not found") { metadatafile = ""; }
             
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = "";  pickedGroups = false;  }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);	
-			}			
-			m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
+			}
 			
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFileName);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputFileName);	}
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -177,10 +177,10 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 				//is there are current file available for any of these?
 				//give priority to shared, then relabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					relabundfile = m->getRelAbundFile(); 
+					relabundfile = current->getRelAbundFile(); 
 					if (relabundfile != "") { inputFileName = relabundfile;  m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("You must provide either a shared or relabund file."); m->mothurOutEndLine(); abort = true; 
@@ -191,11 +191,11 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			
 			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared or relabund file."); m->mothurOutEndLine(); abort = true;  }
 			
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "pearson";		}
+			method = validParameter.valid(parameters, "method");		if (method == "not found"){	method = "pearson";		}
 			
-            string temp = validParameter.validFile(parameters, "cutoff", false);
+            string temp = validParameter.valid(parameters, "cutoff");
 			if (temp == "not found") { temp = "10"; }
-			m->mothurConvert(temp, cutoff); 
+			util.mothurConvert(temp, cutoff); 
             
 			if ((method != "pearson") && (method != "spearman") && (method != "kendall")) { m->mothurOut(method + " is not a valid method. Valid methods are pearson, spearman, and kendall."); m->mothurOutEndLine(); abort = true; }
 			
@@ -211,7 +211,7 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 int OTUAssociationCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         if (metadatafile != "") {  readMetadata(); }
 		
@@ -219,7 +219,7 @@ int OTUAssociationCommand::execute(){
 		if (sharedfile != "")			{  processShared();		} 
 		else if (relabundfile != "")	{  processRelabund();	}
 				
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -236,8 +236,9 @@ int OTUAssociationCommand::execute(){
 //**********************************************************************************************************************
 int OTUAssociationCommand::processShared(){
 	try {
-		InputData* input = new InputData(sharedfile, "sharedfile");
+		InputData* input = new InputData(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
         
         if (metadatafile != "") {
@@ -265,7 +266,7 @@ int OTUAssociationCommand::processShared(){
 				process(lookup);
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				delete lookup;
@@ -306,7 +307,7 @@ int OTUAssociationCommand::processShared(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input->getSharedRAbundVectors(lastLabel);
 			
@@ -327,14 +328,14 @@ int OTUAssociationCommand::processShared(){
 int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
 	try {
 		map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         variables["[tag]"] = method;
 		string outputFileName = getOutputFileName("otucorr",variables);
 		outputNames.push_back(outputFileName); outputTypes["otucorr"].push_back(outputFileName);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		//column headings
@@ -350,7 +351,7 @@ int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
         }
 		
 		LinearAlgebra linear;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         if (metadatafile == "") {//compare otus
             for (int i = 0; i < xy.size(); i++) {
                 
@@ -401,8 +402,9 @@ int OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
 //**********************************************************************************************************************
 int OTUAssociationCommand::processRelabund(){
 	try {
-		InputData* input = new InputData(relabundfile, "relabund");
+		InputData* input = new InputData(relabundfile, "relabund", Groups);
 		SharedRAbundFloatVectors* lookup = input->getSharedRAbundFloatVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
         
         if (metadatafile != "") {
@@ -430,7 +432,7 @@ int OTUAssociationCommand::processRelabund(){
 				process(lookup);
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				delete lookup;
@@ -471,7 +473,7 @@ int OTUAssociationCommand::processRelabund(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input->getSharedRAbundFloatVectors(lastLabel);
 			
@@ -494,14 +496,14 @@ int OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
 	try {
 		
 		map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         variables["[tag]"] = method;
         string outputFileName = getOutputFileName("otucorr",variables);
 		outputNames.push_back(outputFileName); outputTypes["otucorr"].push_back(outputFileName);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		//column headings
@@ -515,7 +517,7 @@ int OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
         }
 		
 		LinearAlgebra linear;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        vector<string> currentLabels = lookup->getOTUNames();
         if (metadatafile == "") {//compare otus
             for (int i = 0; i < xy.size(); i++) {
                 
@@ -567,27 +569,25 @@ int OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
 int OTUAssociationCommand::readMetadata(){
 	try {
 		ifstream in;
-		m->openInputFile(metadatafile, in);
+		util.openInputFile(metadatafile, in);
 		
-		string headerLine = m->getline(in); m->gobble(in);
+		string headerLine = util.getline(in); util.gobble(in);
 		istringstream iss (headerLine,istringstream::in);
 		
 		//read the first label, because it refers to the groups
 		string columnLabel;
-		iss >> columnLabel; m->gobble(iss); 
+		iss >> columnLabel; util.gobble(iss); 
 		
 		//save names of columns you are reading
 		while (!iss.eof()) {
-			iss >> columnLabel; m->gobble(iss);
+			iss >> columnLabel; util.gobble(iss);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata column Label = " + columnLabel + "\n"); }
 			metadataLabels.push_back(columnLabel);
 		}
-        vector<string> savedLabels = m->getCurrentSharedBinLabels();
+        
 		int count = metadataLabels.size();
         SharedRAbundFloatVectors* metadataLookup = new SharedRAbundFloatVectors();
         metadataLookup->setLabels("1");
-        
-        vector<string> mGroups = m->getGroups();
         
 		//read rest of file
 		while (!in.eof()) {
@@ -595,7 +595,7 @@ int OTUAssociationCommand::readMetadata(){
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
 			string group = "";
-			in >> group; m->gobble(in);
+			in >> group; util.gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata group = " + group + "\n"); }
             
             SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
@@ -609,17 +609,14 @@ int OTUAssociationCommand::readMetadata(){
 				tempLookup->push_back(temp);
 			}
 			
-            if (m->inUsersGroups(group, mGroups)) {  metadataLookup->push_back(tempLookup);  }
+            if (util.inUsersGroups(group, Groups)) {  metadataLookup->push_back(tempLookup);  }
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
         
-        //elimnatezeros remove zero otus, we want to remove the extra labels from metaLabels
-        m->setCurrentSharedBinLabels(metadataLabels);
+        metadataLookup->setOTUNames(metadataLabels);
         metadataLookup->eliminateZeroOTUS();
-        metadataLabels = m->getCurrentSharedBinLabels();
-        m->setCurrentSharedBinLabels(savedLabels);
         
         metadata.resize(metadataLookup->getNumBins());
         vector<string> sampleNames = metadataLookup->getNamesGroups();

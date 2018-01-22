@@ -12,7 +12,7 @@
 #include "readcolumn.h"
 #include "formatphylip.h"
 #include "formatcolumn.h"
-#include "sharedutilities.h"
+
 
 
 //********************************************************************************************************************
@@ -161,14 +161,14 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -176,7 +176,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -184,7 +184,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -192,7 +192,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -200,7 +200,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -208,7 +208,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -216,7 +216,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -224,54 +224,54 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { fastafile = ""; }
 			else if (fastafile == "not open") { abort = true; }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 		
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found") { 			
-				listfile = m->getListFile(); 
+				listfile = current->getListFile(); 
 				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not found") { phylipfile = "";  }
 			else if (phylipfile == "not open") { abort = true; }	
-			else { distFile = phylipfile; format = "phylip"; m->setPhylipFile(phylipfile);   }
+			else { distFile = phylipfile; format = "phylip"; current->setPhylipFile(phylipfile);   }
 			
-			columnfile = validParameter.validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not found") { columnfile = ""; }
 			else if (columnfile == "not open") { abort = true; }	
-			else { distFile = columnfile; format = "column";  m->setColumnFile(columnfile); }
+			else { distFile = columnfile; format = "column";  current->setColumnFile(columnfile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
             hasGroups = false;
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not found") { countfile =  "";   }
 			else if (countfile == "not open") { abort = true; countfile =  ""; }	
 			else {   
-                m->setCountTableFile(countfile); 
+                current->setCountFile(countfile); 
                 ct.readTable(countfile, true, false);
                 if (ct.hasGroupInfo()) { hasGroups = true; }
             }
             
-            groupfile = validParameter.validFile(parameters, "group", true);
+            groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
-            method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "distance";	}
+            method = validParameter.valid(parameters, "method");		if (method == "not found"){	method = "distance";	}
 			if ((method != "distance") && (method != "abundance")) {
 				m->mothurOut(method + " is not a valid option for the method parameter. The only options are: distance and abundance, aborting."); m->mothurOutEndLine(); abort = true;
 			}
@@ -279,10 +279,10 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
             if (method == "distance") {
                 if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
                     //give priority to column, then phylip
-                    columnfile = m->getColumnFile();
+                    columnfile = current->getColumnFile();
                     if (columnfile != "") {  distFile = columnfile; format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
                     else {
-                        phylipfile = m->getPhylipFile();
+                        phylipfile = current->getPhylipFile();
                         if (phylipfile != "") {  distFile = phylipfile; format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
                         else {
                             m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the get.oturep command."); m->mothurOutEndLine();
@@ -293,10 +293,10 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
                 
                 if (columnfile != "") {
                     if ((namefile == "") && (countfile == "")) {
-                        namefile = m->getNameFile();
+                        namefile = current->getNameFile();
                         if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
                         else {
-                            countfile = m->getCountTableFile();
+                            countfile = current->getCountFile();
                             if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                             else {
                                 m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine();
@@ -307,10 +307,10 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
                 }
             }else if (method == "abundance") {
                 if ((namefile == "") && (countfile == "")) {
-					namefile = m->getNameFile();
+					namefile = current->getNameFile();
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else {
-						countfile = m->getCountTableFile();
+						countfile = current->getCountFile();
                         if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                         else {
                             m->mothurOut("You need to provide a namefile or countfile if you are going to use the abundance method."); m->mothurOutEndLine();
@@ -335,15 +335,15 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
         
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; allLines = 1;  }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
 						
-			sorted = validParameter.validFile(parameters, "sorted", false);		if (sorted == "not found"){	sorted = "";	}
+			sorted = validParameter.valid(parameters, "sorted");		if (sorted == "not found"){	sorted = "";	}
 			if (sorted == "none") { sorted=""; }
 			if ((sorted != "") && (sorted != "name") && (sorted != "bin") && (sorted != "size") && (sorted != "group")) {
 				m->mothurOut(sorted + " is not a valid option for the sorted parameter. The only options are: name, bin, size and group. I will not sort."); m->mothurOutEndLine();
@@ -357,31 +357,31 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				sorted = "";
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				if ((groupfile == "") && (!hasGroups)) {
 					m->mothurOut("You must provide a groupfile to use groups."); m->mothurOutEndLine();
 					abort = true;
 				}else { 
-					m->splitAtDash(groups, Groups);
+					util.splitAtDash(groups, Groups);
+                    if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 				}
 			}
-			m->setGroups(Groups);
 			
-			string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
-			large = m->isTrue(temp);
+			string temp = validParameter.valid(parameters, "large");		if (temp == "not found") {	temp = "F";	}
+			large = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "weighted", false);		if (temp == "not found") {	 temp = "f"; 	}
-			weighted = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "weighted");		if (temp == "not found") {	 temp = "f"; 	}
+			weighted = util.isTrue(temp);
 			
 			if ((weighted) && (namefile == "")) { m->mothurOut("You cannot set weighted to true unless you provide a namesfile."); m->mothurOutEndLine(); abort = true; }
 			
-			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, precision); 
+			temp = validParameter.valid(parameters, "precision");			if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, precision); 
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10.0"; }
-			m->mothurConvert(temp, cutoff); 
+			temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "10.0"; }
+			util.mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 		}
 	}
@@ -396,7 +396,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 int GetOTURepCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		int error;
 		list = NULL;
 		
@@ -405,35 +405,22 @@ int GetOTURepCommand::execute(){
             if ((!weighted) && (namefile != "")) { readNamesFile(weighted); }
         }else {
             //map name -> abundance for use if findRepAbund
-            if (namefile != "") { nameToIndex = m->readNames(namefile); }
+            if (namefile != "") { nameToIndex = util.readNames(namefile); }
         }
         
-        if (m->getControl_pressed()) { if (method=="distance") { if (large) {  inRow.close(); m->mothurRemove(distFile);  } }return 0; }
+        if (m->getControl_pressed()) { if (method=="distance") { if (large) {  inRow.close(); util.mothurRemove(distFile);  } }return 0; }
         
         if (groupfile != "") {
             //read in group map info.
             groupMap = new GroupMap(groupfile);
             int error = groupMap->readMap();
             if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile."); m->mothurOutEndLine(); groupfile = "";  }
-            
-            if (Groups.size() != 0) {
-                SharedUtil util;
-                vector<string> gNamesOfGroups = groupMap->getNamesOfGroups();
-                util.setGroups(Groups, gNamesOfGroups, "getoturep");
-                groupMap->setNamesOfGroups(gNamesOfGroups);
-            }
-        }else if (hasGroups) {
-            if (Groups.size() != 0) {
-                SharedUtil util;
-                vector<string> gNamesOfGroups = ct.getNamesOfGroups();
-                util.setGroups(Groups, gNamesOfGroups, "getoturep");
-            }
         }
         
         //done with listvector from matrix
         if (list != NULL) { delete list; }
         
-        InputData input(listfile, "list");
+        InputData input(listfile, "list", Groups);
         list = input.getListVector();
         string lastLabel = list->getLabel();
         
@@ -441,7 +428,7 @@ int GetOTURepCommand::execute(){
         set<string> processedLabels;
         set<string> userLabels = labels;
         
-        if (m->getControl_pressed()) { if (method=="distance") {  if (large) {  inRow.close(); m->mothurRemove(distFile);  } }  delete list; return 0; }
+        if (m->getControl_pressed()) { if (method=="distance") {  if (large) {  inRow.close(); util.mothurRemove(distFile);  } }  delete list; return 0; }
         
         while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             
@@ -451,8 +438,8 @@ int GetOTURepCommand::execute(){
                 if (error == 1) { return 0; } //there is an error in hte input files, abort command
                 
                 if (m->getControl_pressed()) {
-                    if (method=="distance") { if (large) {  inRow.close(); m->mothurRemove(distFile);  } }
-                    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear();
+                    if (method=="distance") { if (large) {  inRow.close(); util.mothurRemove(distFile);  } }
+                    for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear();
                     delete list; return 0;
                 }
                 
@@ -460,7 +447,7 @@ int GetOTURepCommand::execute(){
                 userLabels.erase(list->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = list->getLabel();
                 
                 delete list;
@@ -470,8 +457,8 @@ int GetOTURepCommand::execute(){
                 if (error == 1) { return 0; } //there is an error in hte input files, abort command
                 
                 if (m->getControl_pressed()) {
-                    if (method=="distance") { if (large) {  inRow.close(); m->mothurRemove(distFile);  } }
-                    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear();
+                    if (method=="distance") { if (large) {  inRow.close(); util.mothurRemove(distFile);  } }
+                    for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear();
                     delete list; return 0;
                 }
                 
@@ -501,7 +488,7 @@ int GetOTURepCommand::execute(){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             if (list != NULL) {	delete list;	}
             list = input.getListVector(lastLabel);
             m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
@@ -510,14 +497,14 @@ int GetOTURepCommand::execute(){
             if (error == 1) { return 0; } //there is an error in hte input files, abort command
             
             if (m->getControl_pressed()) {
-                if (method=="distance") { if (large) {  inRow.close(); m->mothurRemove(distFile);  } }
-                for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear();
+                if (method=="distance") { if (large) {  inRow.close(); util.mothurRemove(distFile);  } }
+                for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear();
                 delete list; return 0;
             }
         }
         
         //close and remove formatted matrix file
-        if (method=="distance") { if (large) { inRow.close(); m->mothurRemove(distFile); } if (!weighted) { nameFileMap.clear(); } }
+        if (method=="distance") { if (large) { inRow.close(); util.mothurRemove(distFile); } if (!weighted) { nameFileMap.clear(); } }
          
         if (fastafile != "") {
             //read fastafile
@@ -547,20 +534,20 @@ int GetOTURepCommand::execute(){
 		if (m->getControl_pressed()) {  return 0; }
 		
 		//set fasta file as new current fastafile - use first one??
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 		}
         
         itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -657,9 +644,9 @@ int GetOTURepCommand::readDist() {
 			delete nameMap;
 			
 			//openfile for getMap to use
-			m->openInputFile(distFile, inRow);
+			util.openInputFile(distFile, inRow);
 			
-			if (m->getControl_pressed()) { inRow.close(); m->mothurRemove(distFile); return 0; }
+			if (m->getControl_pressed()) { inRow.close(); util.mothurRemove(distFile); return 0; }
 		}
 		
 		
@@ -672,7 +659,7 @@ int GetOTURepCommand::readDist() {
 				names.clear();
 				binnames = list->get(i);
 				
-				m->splitAtComma(binnames, names);
+				util.splitAtComma(binnames, names);
 				
 				for (int j = 0; j < names.size(); j++) {
 					nameToIndex[names[j]] = i;
@@ -680,7 +667,7 @@ int GetOTURepCommand::readDist() {
 			}
 		} else { m->mothurOut("error, no listvector."); m->mothurOutEndLine(); }
 
-        if (m->getControl_pressed()) { if (large) {  inRow.close(); m->mothurRemove(distFile);  }return 0; }
+        if (m->getControl_pressed()) { if (large) {  inRow.close(); util.mothurRemove(distFile);  }return 0; }
         
         return 0;
     }
@@ -694,7 +681,7 @@ void GetOTURepCommand::readNamesFile(FastaMap*& fasta) {
 	try {
 		ifstream in;
 		vector<string> dupNames;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		
 		string name, names, sequence;
 	
@@ -705,7 +692,7 @@ void GetOTURepCommand::readNamesFile(FastaMap*& fasta) {
 			dupNames.clear();
 			
 			//parse names into vector
-			m->splitAtComma(names, dupNames);
+			util.splitAtComma(names, dupNames);
 			
 			//store names in fasta map
 			sequence = fasta->getSequence(name);
@@ -713,7 +700,7 @@ void GetOTURepCommand::readNamesFile(FastaMap*& fasta) {
 				fasta->push_back(dupNames[i], sequence);
 			}
 		
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 
@@ -729,24 +716,24 @@ void GetOTURepCommand::readNamesFile(bool w) {
 	try {
 		ifstream in;
 		vector<string> dupNames;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		
 		string name, names, sequence;
 		
 		while(!in.eof()){
-			in >> name;	m->gobble(in);		//read from first column  A
+			in >> name;	util.gobble(in);		//read from first column  A
 			in >> names;							//read from second column  A,B,C,D
 			
 			dupNames.clear();
 			
 			//parse names into vector
-			m->splitAtComma(names, dupNames);
+			util.splitAtComma(names, dupNames);
 			
 			for (int i = 0; i < dupNames.size(); i++) {
 				nameFileMap[dupNames[i]] = name;
 			}
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		
@@ -802,7 +789,7 @@ string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
             if (reps.size() == 0) { m->mothurOut("[ERROR]: no rep found, file mismatch?? Quitting.\n"); m->setControl_pressed(true); }
             else if (reps.size() == 1) { rep = reps[0]; }
             else { //tie
-                int index = m->getRandomIndex(reps.size()-1);
+                int index = util.getRandomIndex(reps.size()-1);
                 rep = reps[index];
             }
         }
@@ -938,14 +925,14 @@ int GetOTURepCommand::process(ListVector* processList) {
 		string nameRep;
 
 		//create output file
-		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		if (outputDir == "") { outputDir += util.hasPath(listfile); }
 				
 		ofstream newNamesOutput;
 		string outputNamesFile;
 		map<string, string> files; //group -> filenameAW
 		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
         
 		if (Groups.size() == 0) { //you don't want to use groups
             variables["[tag]"] = processList->getLabel();
@@ -957,13 +944,13 @@ int GetOTURepCommand::process(ListVector* processList) {
                 outputNames.push_back(outputNamesFile); outputTypes["count"].push_back(outputNamesFile); 
             }
 			outputNameFiles[outputNamesFile] = processList->getLabel();
-            m->openOutputFile(outputNamesFile, newNamesOutput);
+            util.openOutputFile(outputNamesFile, newNamesOutput);
             newNamesOutput << "noGroup" << endl;
 		}else{ //you want to use groups
 			for (int i=0; i<Groups.size(); i++) {
                 variables["[tag]"] = processList->getLabel();
                 variables["[group]"] = Groups[i];
-				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".";
+				outputNamesFile = outputDir + util.getRootName(util.getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".";
                 if (countfile == "") { 
                     outputNamesFile = getOutputFileName("name", variables);
                     outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
@@ -973,7 +960,7 @@ int GetOTURepCommand::process(ListVector* processList) {
                 }
 				files[Groups[i]] = outputNamesFile;
                 ofstream temp;
-				m->openOutputFile(outputNamesFile, temp);
+				util.openOutputFile(outputNamesFile, temp);
                 temp << Groups[i] << endl; temp.close();
 				outputNameFiles[outputNamesFile] = processList->getLabel() + "." + Groups[i];
 			}
@@ -987,7 +974,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			
 			string temp = processList->get(i);
 			vector<string> namesInBin;
-			m->splitAtComma(temp, namesInBin);
+			util.splitAtComma(temp, namesInBin);
 			
 			if (Groups.size() == 0) {
 				nameRep = findRep(namesInBin, "");
@@ -1018,11 +1005,11 @@ int GetOTURepCommand::process(ListVector* processList) {
                         if (thisgroup == "not found") { m->mothurOut(namesInBin[j] + " is not in your groupfile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                         
                         //add this name to correct group
-                        if (m->inUsersGroups(thisgroup, Groups)) { NamesInGroup[thisgroup].push_back(namesInBin[j]);  }
+                        if (util.inUsersGroups(thisgroup, Groups)) { NamesInGroup[thisgroup].push_back(namesInBin[j]);  }
                     }else {
                         vector<string> thisSeqsGroups = ct.getGroups(namesInBin[j]);
                         for (int k = 0; k < thisSeqsGroups.size(); k++) {
-                            if (m->inUsersGroups(thisSeqsGroups[k], Groups)) { NamesInGroup[thisSeqsGroups[k]].push_back(namesInBin[j]);  }
+                            if (util.inUsersGroups(thisSeqsGroups[k], Groups)) { NamesInGroup[thisSeqsGroups[k]].push_back(namesInBin[j]);  }
                         }
                     }
 				}
@@ -1035,7 +1022,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 						
 						//output group rep and other members of this group
                         ofstream outGroup;
-                        m->openOutputFileAppend(files[Groups[j]], outGroup);
+                        util.openOutputFileAppend(files[Groups[j]], outGroup);
 						outGroup << binLabels[i] << '\t' << nameRep << '\t';
 						
                         //put rep at first position in names line
@@ -1072,24 +1059,24 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 	try{
 
 		//create output file
-		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		if (outputDir == "") { outputDir += util.hasPath(listfile); }
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[tag]"] = label;
 		string outputFileName = getOutputFileName("fasta",variables);
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
 		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
 		
 		ofstream out2;
 		string tempNameFile = filename + ".temp";
-		m->openOutputFile(tempNameFile, out2);
+		util.openOutputFile(tempNameFile, out2);
             
 		ifstream in;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		
         string tempGroup = "";
-        in >> tempGroup; m->gobble(in);
+        in >> tempGroup; util.gobble(in);
         
         CountTable thisCt;
         if (countfile != "") {
@@ -1100,10 +1087,10 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
         int thistotal = 0;
 		while (!in.eof()) {
 			string rep, binnames, binLabel;
-			in >> binLabel >> rep >> binnames; m->gobble(in);
+			in >> binLabel >> rep >> binnames; util.gobble(in);
 			
 			vector<string> names;
-			m->splitAtComma(binnames, names);
+			util.splitAtComma(binnames, names);
 			int binsize = names.size();
             
             if (countfile == "") { out2 << rep << '\t' << binnames << endl; }
@@ -1174,7 +1161,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 					out << sequence << endl;
 				}else { //save them
                     int simpleLabel;
-                    m->mothurConvert(m->getSimpleLabel(binLabel), simpleLabel);
+                    util.mothurConvert(util.getSimpleLabel(binLabel), simpleLabel);
 					repStruct newRep(rep, binLabel, simpleLabel, binsize, group);
 					reps.push_back(newRep);
 				}
@@ -1207,7 +1194,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 		out.close();
 		out2.close();
         	
-		m->mothurRemove(filename);
+		util.mothurRemove(filename);
 		rename(tempNameFile.c_str(), filename.c_str());
         
         if ((countfile != "") && (tempGroup == "noGroup")) { thisCt.printTable(filename); } 
@@ -1225,19 +1212,19 @@ int GetOTURepCommand::processNames(string filename, string label) {
 	try{
 		
 		//create output file
-		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		if (outputDir == "") { outputDir += util.hasPath(listfile); }
 		
 		ofstream out2;
 		string tempNameFile = filename + ".temp";
-		m->openOutputFile(tempNameFile, out2);
+		util.openOutputFile(tempNameFile, out2);
 		
 		ifstream in;
-		m->openInputFile(filename, in);
+		util.openInputFile(filename, in);
 		
 		string rep, binnames;
         
         string tempGroup = "";
-        in >> tempGroup; m->gobble(in);
+        in >> tempGroup; util.gobble(in);
         
         CountTable thisCt;
         if (countfile != "") {
@@ -1248,12 +1235,12 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		while (!in.eof()) {
 			if (m->getControl_pressed()) { break; }
             string binLabel;
-			in >> binLabel >> rep >> binnames; m->gobble(in);
+			in >> binLabel >> rep >> binnames; util.gobble(in);
             
 			if (countfile == "") { out2 << rep << '\t' << binnames << endl; }
             else {
                 vector<string> names;
-                m->splitAtComma(binnames, names);
+                util.splitAtComma(binnames, names);
                 if (tempGroup == "noGroup") {
                     for (int j = 0; j < names.size(); j++) {
                         if (names[j] != rep) { thisCt.mergeCounts(rep, names[j]); }
@@ -1269,7 +1256,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		in.close();
 		out2.close();
 		
-		m->mothurRemove(filename);
+		util.mothurRemove(filename);
 		rename(tempNameFile.c_str(), filename.c_str());
 		
         if ((countfile != "") && (tempGroup == "noGroup")) { thisCt.printTable(filename); } 

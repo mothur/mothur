@@ -82,6 +82,7 @@ struct primerDesignData {
     set<int> otusToRemove;
     vector<Sequence> consSeqs;
     int numBinsProcessed;
+    Utils util;
 	
 	primerDesignData(){}
 	primerDesignData(string sf, MothurOut* mout, int st, int en, vector<double> min, vector<double> max, set<string> pri, vector<Sequence> seqs, int d, int otun, int l, int tid) {
@@ -110,7 +111,7 @@ static DWORD WINAPI MyPrimerThreadFunction(LPVOID lpParam){
 	
 	try {
 		ofstream outSum;
-        pDataArray->m->openOutputFileAppend(pDataArray->summaryFileName, outSum);
+        pDataArray->util.openOutputFileAppend(pDataArray->summaryFileName, outSum);
         
         for (int i = pDataArray->start; i < pDataArray->end; i++) {
             

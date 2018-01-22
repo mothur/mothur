@@ -26,7 +26,7 @@ private:
 	vector<Display*> displays;
 	int numSeqs, numGroupComb, totalNumSeq;
 	string label, groupLabel;
-	void getGroupComb();
+	void getGroupComb(vector<string>);
 	vector<string> groupComb;
 	bool validGroup(vector<string>, string);
 	MothurOut* m;

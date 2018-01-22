@@ -7,6 +7,7 @@
 //
 
 #include "rftreenode.hpp"
+#include "utils.hpp"
 
 /***********************************************************************/
 RFTreeNode::RFTreeNode(vector< vector<int> > bootstrappedTrainingSamples,
@@ -55,13 +56,13 @@ RFTreeNode::RFTreeNode(vector< vector<int> > bootstrappedTrainingSamples,
 /***********************************************************************/
 int RFTreeNode::createLocalDiscardedFeatureList(){
     try {
-        
+        Utils util;
         for (int i = 0; i < numFeatures; i++) {
                 // TODO: need to check if bootstrappedFeatureVectors == numFeatures, in python code we are using bootstrappedFeatureVectors instead of numFeatures
             if (m->getControl_pressed()) { return 0; } 
             vector<int>::iterator it = find(globalDiscardedFeatureIndices.begin(), globalDiscardedFeatureIndices.end(), i);
             if (it == globalDiscardedFeatureIndices.end()) {                           // NOT FOUND
-                double standardDeviation = m->getStandardDeviation(bootstrappedFeatureVectors[i]);  
+                double standardDeviation = util.getStandardDeviation(bootstrappedFeatureVectors[i]);  
                 if (standardDeviation <= featureStandardDeviationThreshold) { localDiscardedFeatureIndices.push_back(i); }
             }
         }

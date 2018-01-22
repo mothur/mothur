@@ -120,14 +120,14 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 			outputTypes["map"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -135,7 +135,7 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -143,52 +143,51 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { 			
-				namefile = m->getNameFile(); 
+				namefile = current->getNameFile(); 
 				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current namefile and the name parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (namefile == "not open") { namefile =  ""; abort = true; }	
-			else {  m->setNameFile(namefile); }
+			else {  current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not found") { groupfile =  "";   }
 			else if (groupfile == "not open") { abort = true; groupfile =  ""; }	
-			else {   m->setGroupFile(groupfile);  }
+			else {   current->setGroupFile(groupfile);  }
 			
-			string temp	= validParameter.validFile(parameters, "sigma", false);		if(temp == "not found"){	temp = "0.01"; }
-			m->mothurConvert(temp, sigma); 
+			string temp	= validParameter.valid(parameters, "sigma");		if(temp == "not found"){	temp = "0.01"; }
+			util.mothurConvert(temp, sigma); 
 			sigma = 1/sigma;
             
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
-			
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
+                    
 			if (namefile == "") {
 				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
+				if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
 			}
 		}
 	}
@@ -198,37 +197,170 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 	}
 }
 //**********************************************************************************************************************
+int driver(seqNoise& noise,
+           vector<string>& sequences,
+           vector<string>& uniqueNames,
+           vector<string>& redundantNames,
+           vector<int>& seqFreq,
+           string distFileName, string outputFileName, string nameFileName, string mapFileName, MothurOut* m, int sigma) {
+    try {
+        Utils util;
+        double cutOff = 0.08;
+        int minIter = 10;
+        int maxIter = 1000;
+        double minDelta = 1e-6;
+        int numIters = 0;
+        double maxDelta = 1e6;
+        int numSeqs = sequences.size();
+        
+        //run cluster command
+        string inputString = "phylip=" + distFileName + ", method=furthest, cutoff=0.08";
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("Running command: cluster(" + inputString + ")\n");
+        
+        Command* clusterCommand = new ClusterCommand(inputString);
+        clusterCommand->execute();
+        
+        map<string, vector<string> > filenames = clusterCommand->getOutputFiles();
+        string listFileName = filenames["list"][0];
+        string rabundFileName = filenames["rabund"][0]; util.mothurRemove(rabundFileName);
+        string sabundFileName = filenames["sabund"][0]; util.mothurRemove(sabundFileName);
+        
+        delete clusterCommand;
+        m->mothurOut("/******************************************/\n");
+        
+        if (m->getControl_pressed()) { util.mothurRemove(distFileName); util.mothurRemove(listFileName); return 0; }
+        
+        vector<double> distances(numSeqs * numSeqs);
+        noise.getDistanceData(distFileName, distances);
+        util.mothurRemove(distFileName);
+        if (m->getControl_pressed()) { util.mothurRemove(listFileName); return 0; }
+        
+        vector<int> otuData(numSeqs);
+        vector<int> otuFreq;
+        vector<vector<int> > otuBySeqLookUp;
+        noise.getListData(listFileName, cutOff, otuData, otuFreq, otuBySeqLookUp);
+        util.mothurRemove(listFileName);
+        if (m->getControl_pressed()) { return 0; }
+        
+        int numOTUs = otuFreq.size();
+        vector<double> weights(numOTUs, 0);
+        vector<int> change(numOTUs, 1);
+        vector<int> centroids(numOTUs, -1);
+        vector<int> cumCount(numOTUs, 0);
+        
+        vector<double> tau(numSeqs, 1);
+        vector<int> anP(numSeqs, 0);
+        vector<int> anI(numSeqs, 0);
+        vector<int> anN(numSeqs, 0);
+        vector<vector<int> > aanI = otuBySeqLookUp;
+        
+        while(numIters < minIter || ((maxDelta > minDelta) && (numIters < maxIter))){
+            
+            if (m->getControl_pressed()) { return 0; }
+            
+            noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount); if (m->getControl_pressed()) { return 0; }
+            maxDelta = noise.calcNewWeights(weights, seqFreq, anI, cumCount, anP, otuFreq, tau);  if (m->getControl_pressed()) { return 0; }
+            
+            noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (m->getControl_pressed()) { return 0; }
+            noise.checkCentroids(weights, centroids); if (m->getControl_pressed()) { return 0; }
+            
+            otuFreq.assign(numOTUs, 0);
+            
+            int total = 0;
+            
+            for(int i=0;i<numSeqs;i++){
+                if (m->getControl_pressed()) { return 0; }
+                
+                double offset = 1e6;
+                double norm = 0.0000;
+                double minWeight = 0.1;
+                vector<double> currentTau(numOTUs);
+                
+                for(int j=0;j<numOTUs;j++){
+                    if (m->getControl_pressed()) { return 0; }
+                    if(weights[j] > minWeight && distances[i * numSeqs+centroids[j]] < offset){
+                        offset = distances[i * numSeqs+centroids[j]];
+                    }
+                }
+                
+                for(int j=0;j<numOTUs;j++){
+                    if (m->getControl_pressed()) { return 0; }
+                    if(weights[j] > minWeight){
+                        currentTau[j] = exp(sigma * (-distances[(i * numSeqs + centroids[j])] + offset)) * weights[j];
+                        norm += currentTau[j];
+                    }
+                    else{ currentTau[j] = 0.0000; }
+                }
+                
+                for(int j=0;j<numOTUs;j++){ currentTau[j] /= norm; }
+                
+                for(int j=0;j<numOTUs;j++){
+                    if (m->getControl_pressed()) { return 0; }
+                    
+                    if(currentTau[j] > 1.0e-4){
+                        int oldTotal = total;
+                        total++;
+                        
+                        tau.resize(oldTotal+1);
+                        tau[oldTotal] = currentTau[j];
+                        otuBySeqLookUp[j][otuFreq[j]] = oldTotal;
+                        aanI[j][otuFreq[j]] = i;
+                        otuFreq[j]++;
+                        
+                    }
+                }
+                
+                anP.resize(total);
+                anI.resize(total);
+            }
+            
+            numIters++;
+        }
+        
+        noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount);  if (m->getControl_pressed()) { return 0; }
+        
+        vector<double> percentage(numSeqs);
+        noise.setUpOTUData(otuData, percentage, cumCount, tau, otuFreq, anP, anI);  if (m->getControl_pressed()) { return 0; }
+        noise.finishOTUData(otuData, otuFreq, anP, anI, cumCount, otuBySeqLookUp, aanI, tau);  if (m->getControl_pressed()) { return 0; }
+        
+        change.assign(numOTUs, 1);
+        noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (m->getControl_pressed()) { return 0; }
+        
+        
+        vector<int> finalTau(numOTUs, 0);
+        for(int i=0;i<numSeqs;i++){
+            if (m->getControl_pressed()) { return 0; }
+            finalTau[otuData[i]] += int(seqFreq[i]);
+        }
+        
+        noise.writeOutput(outputFileName, nameFileName, mapFileName, finalTau, centroids, otuData, sequences, uniqueNames, redundantNames, seqFreq, distances);
+        
+        return 0;
+        
+    }catch(exception& e) {
+        m->errorOut(e, "ShhhSeqsCommand", "driver");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 int ShhhSeqsCommand::execute() {
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (outputDir == "") { outputDir = m->hasPath(fastafile);  }//if user entered a file with a path then preserve it		
+		if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it		
 		
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFileName = getOutputFileName("fasta",variables);
 		string nameFileName = getOutputFileName("name",variables);
 		string mapFileName = getOutputFileName("map",variables);
 		
 		if (groupfile != "") {
-			//Parse sequences by group
-            vector<string> temp;
-			SequenceParser parser(groupfile, fastafile, namefile, temp);
-			vector<string> groups = parser.getNamesOfGroups();
-			
-			if (m->getControl_pressed()) {  return 0; }
-			
-			//clears files
-			ofstream out, out1, out2;
-			m->openOutputFile(outputFileName, out); out.close(); 
-			m->openOutputFile(nameFileName, out1); out1.close();
-			mapFileName = outputDir + m->getRootName(m->getSimpleName(fastafile))  + "shhh.";
-			
-			vector<string> mapFileNames;
-			if(processors == 1)	{	mapFileNames = driverGroups(parser, outputFileName, nameFileName, mapFileName, 0, groups.size(), groups);	}
-			else				{	mapFileNames = createProcessesGroups(parser, outputFileName, nameFileName, mapFileName, groups);			}
-			
+            mapFileName = outputDir + util.getRootName(util.getSimpleName(fastafile))  + "shhh.";
+			vector<string> mapFileNames = createProcessesGroups(outputFileName, nameFileName, mapFileName);
+
 			if (m->getControl_pressed()) {    return 0;	}	
 			
 			for (int j = 0; j < mapFileNames.size(); j++) { outputNames.push_back(mapFileNames[j]); outputTypes["map"].push_back(mapFileNames[j]); }
@@ -252,17 +384,17 @@ int ShhhSeqsCommand::execute() {
 			if (m->getControl_pressed()) { return 0; }
 			
 			//calc distances for cluster
-			string distFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "shhh.dist";
+			string distFileName = outputDir + util.getRootName(util.getSimpleName(fastafile)) + "shhh.dist";
 			correct->execute(distFileName);
 			delete correct;
 			
-			if (m->getControl_pressed()) { m->mothurRemove(distFileName); return 0; }
+			if (m->getControl_pressed()) { util.mothurRemove(distFileName); return 0; }
 			
-			driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, outputFileName, nameFileName, mapFileName); 
+			driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, outputFileName, nameFileName, mapFileName, m, sigma);
 			outputNames.push_back(mapFileName); outputTypes["map"].push_back(mapFileName);
 		}
 		
-		if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
+		if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
 		
 		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
 		outputNames.push_back(nameFileName); outputTypes["name"].push_back(nameFileName);
@@ -273,15 +405,15 @@ int ShhhSeqsCommand::execute() {
 		m->mothurOutEndLine();
 		
 		//set accnos file as new current accnosfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 		}
 		
 		
@@ -297,17 +429,17 @@ int ShhhSeqsCommand::readData(correctDist* correct, seqNoise& noise, vector<stri
 	try {
 		map<string, string> nameMap; 
 		map<string, string>::iterator it;
-		m->readNames(namefile, nameMap);
+		util.readNames(namefile, nameMap);
 		bool error = false;
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-			Sequence seq(in); m->gobble(in);
+			Sequence seq(in); util.gobble(in);
 			
 			if (seq.getName() != "") {
 				correct->addSeq(seq.getName(), seq.getAligned());
@@ -334,7 +466,7 @@ int ShhhSeqsCommand::readData(correctDist* correct, seqNoise& noise, vector<stri
 	}
 }
 //**********************************************************************************************************************
-int ShhhSeqsCommand::loadData(correctDist* correct, seqNoise& noise, vector<string>& seqs, vector<string>& uNames, vector<string>& rNames, vector<int>& freq, map<string, string>& nameMap, vector<Sequence>& sequences) {
+int loadData(MothurOut* m, correctDist* correct, seqNoise& noise, vector<string>& seqs, vector<string>& uNames, vector<string>& rNames, vector<int>& freq, map<string, string>& nameMap, vector<Sequence>& sequences) {
 	try {
 		bool error = false;
 		map<string, string>::iterator it;
@@ -367,232 +499,57 @@ int ShhhSeqsCommand::loadData(correctDist* correct, seqNoise& noise, vector<stri
 	}
 }
 /**************************************************************************************************/
-vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, string newFName, string newNName, string newMName, vector<string> groups) {
-	try {
-		
-		vector<int> processIDS;
-		int process = 1;
-		vector<string> mapfileNames;
-        bool recalc = false;
-		
-		//sanity check
-		if (groups.size() < processors) { processors = groups.size(); }
-		
-		//divide the groups between the processors
-		vector<linePair> lines;
-		int remainingPairs = groups.size();
-        int startIndex = 0;
-        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-            int numPairs = remainingPairs; //case for last processor
-            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-            lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
-            startIndex = startIndex + numPairs;
-            remainingPairs = remainingPairs - numPairs;
-        }
-
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				mapfileNames = driverGroups(parser, newFName + m->mothurGetpid(process) + ".temp", newNName + m->mothurGetpid(process) + ".temp", newMName, lines[process].start, lines[process].end, groups);
-				
-				//pass filenames to parent
-				ofstream out;
-				string tempFile = newMName + m->mothurGetpid(process) + ".temp";
-				m->openOutputFile(tempFile, out);
-				out << mapfileNames.size() << endl;
-				for (int i = 0; i < mapfileNames.size(); i++) {
-					out << mapfileNames[i] << endl;
-				}
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(newFName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(newNName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(newMName + (toString(processIDS[i]) + ".temp"));
-                }
-                recalc = true;
-                break;
-			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            lines.clear();
-            int remainingPairs = groups.size();
-            int startIndex = 0;
-            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-                int numPairs = remainingPairs; //case for last processor
-                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-                lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
-                startIndex = startIndex + numPairs;
-                remainingPairs = remainingPairs - numPairs;
-            }
-            
-            mapfileNames.clear();
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    mapfileNames = driverGroups(parser, newFName + m->mothurGetpid(process) + ".temp", newNName + m->mothurGetpid(process) + ".temp", newMName, lines[process].start, lines[process].end, groups);
-                    
-                    //pass filenames to parent
-                    ofstream out;
-                    string tempFile = newMName + m->mothurGetpid(process) + ".temp";
-                    m->openOutputFile(tempFile, out);
-                    out << mapfileNames.size() << endl;
-                    for (int i = 0; i < mapfileNames.size(); i++) {
-                        out << mapfileNames[i] << endl;
-                    }
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-
-        
-		//do my part
-		mapfileNames = driverGroups(parser, newFName, newNName, newMName, lines[0].start, lines[0].end, groups);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//append output files
-		for(int i=0;i<processIDS.size();i++){
-			ifstream in;
-			string tempFile =  newMName + toString(processIDS[i]) + ".temp";
-			m->openInputFile(tempFile, in);
-			if (!in.eof()) { 
-				int tempNum = 0; in >> tempNum;  m->gobble(in);
-				for (int j = 0; j < tempNum; j++) {
-					string filename;
-					in >> filename; m->gobble(in);
-					mapfileNames.push_back(filename);
-				}
-			}
-			in.close(); m->mothurRemove(tempFile);
-			
-		}
-#else
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the shhhseqsData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<shhhseqsData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=1; i<processors; i++ ){
-			// Allocate memory for thread data.
-			string extension = toString(i) + ".temp";
-
-			shhhseqsData* tempShhhseqs = new shhhseqsData(fastafile, namefile, groupfile, (newFName+extension), (newNName+extension), newMName, groups, m, lines[i].start, lines[i].end, sigma, i);
-			pDataArray.push_back(tempShhhseqs);
-			processIDS.push_back(i);
-			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i-1] = CreateThread(NULL, 0, MyShhhSeqsThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
-		}
-		
-		
-		//using the main process as a worker saves time and memory
-		mapfileNames = driverGroups(parser, newFName, newNName, newMName, lines[0].start, lines[0].end, groups);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->setControl_pressed(true); 
-            }
-			for (int j = 0; j < pDataArray[i]->mapfileNames.size(); j++) {
-				mapfileNames.push_back(pDataArray[i]->mapfileNames[j]);
-			}
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		
-#endif		
-		
-		//append output files
-		for(int i=0;i<processIDS.size();i++){
-			m->appendFiles((newFName + toString(processIDS[i]) + ".temp"), newFName);
-			m->mothurRemove((newFName + toString(processIDS[i]) + ".temp"));
-			
-			m->appendFiles((newNName + toString(processIDS[i]) + ".temp"), newNName);
-			m->mothurRemove((newNName + toString(processIDS[i]) + ".temp"));
-		}
-		
-		return mapfileNames;	
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ShhhSeqsCommand", "createProcessesGroups");
-		exit(1);
-	}
-}
+//custom data structure for threads to use.
+// This is passed by void pointer so it can be any data type
+// that can be passed using a single void pointer (LPVOID).
+struct shhhseqsData {
+    string fastafile;
+    string namefile;
+    string groupfile;
+    string newFFile, newNFile, newMFile, outputDir, extension;
+    MothurOut* m;
+    int sigma, count;
+    vector<string> groups;
+    vector<string> mapfileNames;
+    Utils util;
+    
+    shhhseqsData(){}
+    shhhseqsData(string opd, string f, string n, string g, string nff,  string nnf, string nmf, vector<string> gr, int s, string ex) {
+        outputDir = opd;
+        fastafile = f;
+        namefile = n;
+        groupfile = g;
+        newFFile = nff;
+        newNFile = nnf;
+        newMFile = nmf;
+        m = MothurOut::getInstance();
+        sigma = s;
+        groups = gr;
+        extension = ex;
+        count=0;
+    }
+};
 /**************************************************************************************************/
-vector<string> ShhhSeqsCommand::driverGroups(SequenceParser& parser, string newFFile, string newNFile, string newMFile, int start, int end, vector<string> groups){
-	try {
-		
-		vector<string> mapFileNames;
-		
-		for (int i = start; i < end; i++) {
-			
-			start = time(NULL);
-			
-			if (m->getControl_pressed()) {  return mapFileNames; }
+void driverShhSeqsGroups(shhhseqsData* params){
+    try {
+        //Parse sequences by group
+        SequenceParser parser(params->groupfile, params->fastafile, params->namefile, params->groups); //only stores seqs in groups
+        params->groups = parser.getNamesOfGroups();
+        string fileroot = params->outputDir + params->util.getRootName(params->util.getSimpleName(params->fastafile));
+        
+        for (int i = 0; i < params->groups.size(); i++) {
+            if (params->m->getControl_pressed()) {  break; }
             
-            string lowerCaseName = groups[i];
+            int start = time(NULL);
+            string lowerCaseName = params->groups[i];
             for (int j = 0; j < lowerCaseName.length(); j++) { lowerCaseName[j] = tolower(lowerCaseName[j]);    }
             
             if (lowerCaseName == "ignore") {   }
             else {
+                params->m->mothurOut("\nProcessing group " + params->groups[i] + ":\n");
                 
-                m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[i] + ":"); m->mothurOutEndLine();
-                
-                map<string, string> thisNameMap;
-                thisNameMap = parser.getNameMap(groups[i]);
-                vector<Sequence> thisSeqs = parser.getSeqs(groups[i]);
+                map<string, string> thisNameMap = parser.getNameMap(params->groups[i]);
+                vector<Sequence> thisSeqs       = parser.getSeqs(params->groups[i]);
                 
                 vector<string> sequences;
                 vector<string> uniqueNames;
@@ -603,187 +560,91 @@ vector<string> ShhhSeqsCommand::driverGroups(SequenceParser& parser, string newF
                 correctDist* correct = new correctDist(1); //we use one processor since we already split up the work load.
                 
                 //load this groups info in order
-                loadData(correct, noise, sequences, uniqueNames, redundantNames, seqFreq, thisNameMap, thisSeqs);
-                if (m->getControl_pressed()) { return mapFileNames; }
+                loadData(params->m, correct, noise, sequences, uniqueNames, redundantNames, seqFreq, thisNameMap, thisSeqs);
+                if (params->m->getControl_pressed()) { break; }
                 
                 //calc distances for cluster
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + groups[i] + ".shhh.dist";
+                string distFileName = fileroot + params->groups[i] + ".shhh.dist";
                 correct->execute(distFileName);
                 delete correct;
                 
-                if (m->getControl_pressed()) { m->mothurRemove(distFileName); return mapFileNames; }
+                if (params->m->getControl_pressed()) { params->util.mothurRemove(distFileName); break; }
                 
-                driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, newFFile+groups[i], newNFile+groups[i], newMFile+groups[i]+".map");
+                driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, params->newFFile+params->groups[i], params->newNFile+params->groups[i], params->newMFile+params->groups[i]+".map", params->m, params->sigma);
                 
-                if (m->getControl_pressed()) { return mapFileNames; }
+                if (params->m->getControl_pressed()) { break; }
                 
-                m->appendFiles(newFFile+groups[i], newFFile); m->mothurRemove(newFFile+groups[i]);
-                m->appendFiles(newNFile+groups[i], newNFile); m->mothurRemove(newNFile+groups[i]);
-                mapFileNames.push_back(newMFile+groups[i]+".map");
+                params->util.appendFiles(params->newFFile+params->groups[i], params->newFFile+params->extension); params->util.mothurRemove(params->newFFile+params->groups[i]);
+                params->util.appendFiles(params->newNFile+params->groups[i], params->newNFile+params->extension); params->util.mothurRemove(params->newNFile+params->groups[i]);
+                params->mapfileNames.push_back(params->newMFile+params->groups[i]+".map");
                 
-                m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + groups[i] + "."); m->mothurOutEndLine();
+                params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + params->groups[i] + ".\n");
             }
-		}
+        }
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "ShhhSeqsCommand", "driverShhSeqsGroups");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+vector<string> ShhhSeqsCommand::createProcessesGroups(string newFName, string newNName, string newMName) {
+	try {
+        GroupMap groupMap(groupfile); groupMap.readMap();vector<string> groups = groupMap.getNamesOfGroups();
+		if (groups.size() < processors) { processors = groups.size(); m->mothurOut("Reducing processors to " + toString(groups.size()) + ".\n"); }
 		
-		return mapFileNames;
+		//divide the groups between the processors
+		vector<vector<string> > dividedGroupNames;
+		int remainingPairs = groups.size();
+        int startIndex = 0;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+            int numPairs = remainingPairs; //case for last processor
+            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+            vector<string> thisProcessorsGroups;
+            for (int i = startIndex; i < (startIndex+numPairs); i++) { thisProcessorsGroups.push_back(groups[i]);  }
+            dividedGroupNames.push_back(thisProcessorsGroups); 
+            startIndex = startIndex + numPairs;
+            remainingPairs = remainingPairs - numPairs;
+        }
+        
+        vector<thread*> workerThreads;
+        vector<shhhseqsData*> data;
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            util.mothurRemove(newFName+extension);
+            util.mothurRemove(newNName+extension);
+            shhhseqsData* dataBundle = new shhhseqsData(outputDir, fastafile, namefile, groupfile, newFName, newNName, newMName, dividedGroupNames[i+1], sigma, extension);
+            data.push_back(dataBundle);
+            
+            thread* thisThread = new thread(driverShhSeqsGroups, dataBundle);
+            workerThreads.push_back(thisThread);
+        }
+        
+        util.mothurRemove(newFName);
+        util.mothurRemove(newNName);
+        shhhseqsData* dataBundle = new shhhseqsData(outputDir, fastafile, namefile, groupfile, newFName, newNName, newMName, dividedGroupNames[0], sigma, "");
+        driverShhSeqsGroups(dataBundle);
+        vector<string> mapFileNames = dataBundle->mapfileNames;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            mapFileNames.insert(mapFileNames.end(), data[i]->mapfileNames.begin(), data[i]->mapfileNames.end());
+            util.appendFiles(data[i]->newFFile+data[i]->extension, newFName); util.mothurRemove(data[i]->newFFile+data[i]->extension);
+            util.appendFiles(data[i]->newNFile+data[i]->extension, newNName); util.mothurRemove(data[i]->newNFile+data[i]->extension);
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+		
+		return mapFileNames;	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ShhhSeqsCommand", "driverGroups");
+		m->errorOut(e, "ShhhSeqsCommand", "createProcessesGroups");
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-int ShhhSeqsCommand::driver(seqNoise& noise, 
-							vector<string>& sequences, 
-							vector<string>& uniqueNames, 
-							vector<string>& redundantNames, 
-							vector<int>& seqFreq, 
-							string distFileName, string outputFileName, string nameFileName, string mapFileName) {
-	try {
-		double cutOff = 0.08;
-		int minIter = 10;
-		int maxIter = 1000;
-		double minDelta = 1e-6;
-		int numIters = 0;
-		double maxDelta = 1e6;
-		int numSeqs = sequences.size();
-				
-		//run cluster command
-		string inputString = "phylip=" + distFileName + ", method=furthest, cutoff=0.08";
-		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-		m->mothurOut("Running command: cluster(" + inputString + ")"); m->mothurOutEndLine(); 
-		
-		Command* clusterCommand = new ClusterCommand(inputString);
-		clusterCommand->execute();
-		
-		map<string, vector<string> > filenames = clusterCommand->getOutputFiles();
-		string listFileName = filenames["list"][0];
-		string rabundFileName = filenames["rabund"][0]; m->mothurRemove(rabundFileName);
-		string sabundFileName = filenames["sabund"][0]; m->mothurRemove(sabundFileName);
-	
-		delete clusterCommand;
-		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-		
-		if (m->getControl_pressed()) { m->mothurRemove(distFileName); m->mothurRemove(listFileName); return 0; }
-		
-		vector<double> distances(numSeqs * numSeqs);
-		noise.getDistanceData(distFileName, distances);
-		m->mothurRemove(distFileName); 
-		if (m->getControl_pressed()) { m->mothurRemove(listFileName); return 0; }
-		
-		vector<int> otuData(numSeqs);
-		vector<int> otuFreq;
-		vector<vector<int> > otuBySeqLookUp;
-		noise.getListData(listFileName, cutOff, otuData, otuFreq, otuBySeqLookUp);
-		m->mothurRemove(listFileName);
-		if (m->getControl_pressed()) { return 0; }
-		
-		int numOTUs = otuFreq.size();
-		
-		vector<double> weights(numOTUs, 0);
-		vector<int> change(numOTUs, 1);
-		vector<int> centroids(numOTUs, -1);
-		vector<int> cumCount(numOTUs, 0);
-		
-		vector<double> tau(numSeqs, 1);
-		vector<int> anP(numSeqs, 0);
-		vector<int> anI(numSeqs, 0);
-		vector<int> anN(numSeqs, 0);
-		vector<vector<int> > aanI = otuBySeqLookUp;
-		
-		while(numIters < minIter || ((maxDelta > minDelta) && (numIters < maxIter))){
-			
-			if (m->getControl_pressed()) { return 0; }
-			
-			noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount); if (m->getControl_pressed()) { return 0; }
-			maxDelta = noise.calcNewWeights(weights, seqFreq, anI, cumCount, anP, otuFreq, tau);  if (m->getControl_pressed()) { return 0; }
-			
-			noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (m->getControl_pressed()) { return 0; }
-			noise.checkCentroids(weights, centroids); if (m->getControl_pressed()) { return 0; }
-			 
-			otuFreq.assign(numOTUs, 0);
-			
-			int total = 0;
-			
-			for(int i=0;i<numSeqs;i++){
-				if (m->getControl_pressed()) { return 0; }
-				
-				double offset = 1e6;
-				double norm = 0.0000;
-				double minWeight = 0.1;
-				vector<double> currentTau(numOTUs);
-				
-				for(int j=0;j<numOTUs;j++){
-					if (m->getControl_pressed()) { return 0; }
-					if(weights[j] > minWeight && distances[i * numSeqs+centroids[j]] < offset){
-						offset = distances[i * numSeqs+centroids[j]];
-					}
-				}
-				
-				for(int j=0;j<numOTUs;j++){
-					if (m->getControl_pressed()) { return 0; }
-					if(weights[j] > minWeight){
-						currentTau[j] = exp(sigma * (-distances[(i * numSeqs + centroids[j])] + offset)) * weights[j];
-						norm += currentTau[j];
-					}
-					else{
-						currentTau[j] = 0.0000;
-					}
-				}			
-				
-				for(int j=0;j<numOTUs;j++){
-					if (m->getControl_pressed()) { return 0; }
-					currentTau[j] /= norm;
-				}
-				
-				for(int j=0;j<numOTUs;j++){
-					if (m->getControl_pressed()) { return 0; }
-					
-					if(currentTau[j] > 1.0e-4){
-						int oldTotal = total;
-						total++;
-						
-						tau.resize(oldTotal+1);
-						tau[oldTotal] = currentTau[j];
-						otuBySeqLookUp[j][otuFreq[j]] = oldTotal;
-						aanI[j][otuFreq[j]] = i;
-						otuFreq[j]++;
-						
-					}
-				}
-				
-				anP.resize(total);
-				anI.resize(total);
-			}
-			
-			numIters++;
-		}
-		
-		noise.updateOTUCountData(otuFreq, otuBySeqLookUp, aanI, anP, anI, cumCount);  if (m->getControl_pressed()) { return 0; }
-		
-		vector<double> percentage(numSeqs);
-		noise.setUpOTUData(otuData, percentage, cumCount, tau, otuFreq, anP, anI);  if (m->getControl_pressed()) { return 0; }
-		noise.finishOTUData(otuData, otuFreq, anP, anI, cumCount, otuBySeqLookUp, aanI, tau);  if (m->getControl_pressed()) { return 0; }
-		
-		change.assign(numOTUs, 1);
-		noise.calcCentroids(anI, anP, change, centroids, cumCount, distances, seqFreq, otuFreq, tau); if (m->getControl_pressed()) { return 0; }
-		
-		
-		vector<int> finalTau(numOTUs, 0);
-		for(int i=0;i<numSeqs;i++){
-			if (m->getControl_pressed()) { return 0; }
-			finalTau[otuData[i]] += int(seqFreq[i]);
-		}
-		
-		noise.writeOutput(outputFileName, nameFileName, mapFileName, finalTau, centroids, otuData, sequences, uniqueNames, redundantNames, seqFreq, distances);
-		
-		return 0;
-		
-	}catch(exception& e) {
-		m->errorOut(e, "ShhhSeqsCommand", "driver");
-		exit(1);
-	}
-}	
 //**********************************************************************************************************************
 int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 	try {
@@ -793,7 +654,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		string inputString = "fasta=" + fastaFile + ", name=" + nameFile;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-		m->setMothurCalling(true);
+		current->setMothurCalling(true);
         
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
 		uniqueCommand->execute();
@@ -801,14 +662,14 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 		
 		delete uniqueCommand;
-		m->setMothurCalling(false);
+		current->setMothurCalling(false);
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
 		string newnameFile = filenames["name"][0];
 		string newfastaFile = filenames["fasta"][0];
 		
-		m->mothurRemove(fastaFile); rename(newfastaFile.c_str(), fastaFile.c_str()); 
-		if (nameFile != newnameFile) { m->mothurRemove(nameFile); rename(newnameFile.c_str(), nameFile.c_str()); }
+		util.mothurRemove(fastaFile); rename(newfastaFile.c_str(), fastaFile.c_str()); 
+		if (nameFile != newnameFile) { util.mothurRemove(nameFile); rename(newnameFile.c_str(), nameFile.c_str()); }
 		
 		return 0;
 	}

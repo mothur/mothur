@@ -112,14 +112,14 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			outputTypes["shared"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -127,31 +127,31 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 				it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
 			}
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "sharedfile"; inputfile = sharedfile; m->setSharedFile(sharedfile); }
+			else {  format = "sharedfile"; inputfile = sharedfile; current->setSharedFile(sharedfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") { relabundfile = ""; abort = true; }	
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else {  format = "relabund"; inputfile = relabundfile; m->setRelAbundFile(relabundfile); }
+			else {  format = "relabund"; inputfile = relabundfile; current->setRelAbundFile(relabundfile); }
 			
 			
 			if ((sharedfile == "") && (relabundfile == "")) { 
 				//is there are current file available for any of these?
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					relabundfile = m->getRelAbundFile(); 
+					relabundfile = current->getRelAbundFile(); 
 					if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 					else { 
 						m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file."); m->mothurOutEndLine(); 
@@ -162,40 +162,40 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile);		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
 			
 			
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			method = validParameter.validFile(parameters, "method", false);				if (method == "not found") { method = "totalgroup"; }
+			method = validParameter.valid(parameters, "method");				if (method == "not found") { method = "totalgroup"; }
 			if ((method != "totalgroup") && (method != "zscore")) {  m->mothurOut(method + " is not a valid scaling option for the normalize.shared command. The options are totalgroup and zscore. We hope to add more ways to normalize in the future, suggestions are welcome!"); m->mothurOutEndLine(); abort = true; }
 		
-			string temp = validParameter.validFile(parameters, "norm", false);				
+			string temp = validParameter.valid(parameters, "norm");
 			if (temp == "not found") {  
 				norm = 0;  //once you have read, set norm to smallest group number
 			}else { 
-				m->mothurConvert(temp, norm);
+				util.mothurConvert(temp, norm);
 				if (norm < 0) { m->mothurOut("norm must be positive."); m->mothurOutEndLine(); abort=true; }
 			}
 			
-			temp = validParameter.validFile(parameters, "makerelabund", false);	if (temp == "") { temp = "f"; }
-			makeRelabund = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "makerelabund");	if (temp == "") { temp = "f"; }
+			makeRelabund = util.isTrue(temp);
 		}
 
 	}
@@ -209,9 +209,9 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 int NormalizeSharedCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		InputData input(inputfile, format);
+		InputData input(inputfile, format, Groups);
         
 		//you are reading a sharedfile and you do not want to make relabund
 		if ((format == "sharedfile") && (!makeRelabund)) {
@@ -219,11 +219,9 @@ int NormalizeSharedCommand::execute(){
 			string lastLabel = lookup->getLabel();
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
-			if (norm != 0) { 
-				m->clearGroups();
+			if (norm != 0) {
                 lookup->removeGroups(norm);
-                vector<string> mGroups = lookup->getNamesGroups();
-				m->setGroups(mGroups);
+                Groups = lookup->getNamesGroups();
 			}
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -241,7 +239,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookup; m->clearGroups();   return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookup;    return 0; }
 				
 				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 					
@@ -252,7 +250,7 @@ int NormalizeSharedCommand::execute(){
 					userLabels.erase(lookup->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup->getLabel();
 					
 					delete lookup;
@@ -272,13 +270,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				delete lookup;
 				
-				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();  return 0; }
+				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();   return 0; }
 				
 				//get next line to process
 				lookup = input.getSharedRAbundVectors();
 			}
 			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -294,7 +292,7 @@ int NormalizeSharedCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
@@ -312,18 +310,8 @@ int NormalizeSharedCommand::execute(){
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
 			if (norm != 0) { 
-                m->clearGroups();
-                vector<string> mGroups;
-                vector<string> temp;
-                vector<string> lookupGroups = lookupFloat->getNamesGroups();
-                for (int i = 0; i < lookupGroups.size(); i++) {
-                    if (lookupFloat->getNumSeqs(lookupGroups[i]) < norm) {
-                        m->mothurOut(lookupGroups[i] + " contains " + toString(lookupFloat->getNumSeqs(lookupGroups[i])) + ". Eliminating."); m->mothurOutEndLine();
-                        temp.push_back(lookupGroups[i]);
-                    }else { Groups.push_back(lookupGroups[i]); }
-                }
-                lookupFloat->removeGroups(temp);
-                m->setGroups(mGroups);
+                lookupFloat->removeGroups(norm);
+                Groups = lookupFloat->getNamesGroups();
 			}
 			
 			//set norm to smallest group number
@@ -342,7 +330,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookupFloat; m->clearGroups();  return 0; }
+                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookupFloat;   return 0; }
 				
 				if(allLines == 1 || labels.count(lookupFloat->getLabel()) == 1){
 					
@@ -354,7 +342,7 @@ int NormalizeSharedCommand::execute(){
 					userLabels.erase(lookupFloat->getLabel());
 				}
 				
-				if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookupFloat->getLabel();
 					
 					delete lookupFloat;
@@ -375,13 +363,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				delete lookupFloat;
 				
-				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
 				
 				//get next line to process
 				lookupFloat = input.getSharedRAbundFloatVectors();
 			}
 			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); m->clearGroups();   return 0; }
+			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -397,7 +385,7 @@ int NormalizeSharedCommand::execute(){
 			}
 			
 			//run last label if you need to
-			if (needToRun == true)  {
+			if (needToRun )  {
 				delete lookupFloat;
 				lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 				
@@ -410,9 +398,9 @@ int NormalizeSharedCommand::execute(){
 			
 		}
 		//reset groups parameter
-		m->clearGroups();
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;}
+		
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -421,10 +409,10 @@ int NormalizeSharedCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set shared file as new current sharedfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("shared");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSharedFile(currentName); }
 		}
 		
 		return 0;
@@ -438,17 +426,14 @@ int NormalizeSharedCommand::execute(){
 
 int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 	try {
-		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
-		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
         variables["[distance]"] = thisLookUp->getLabel();
 		string outputFileName = getOutputFileName("shared",variables);
         
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
 				
 		if (method == "totalgroup") { 
@@ -512,8 +497,6 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
         thisLookUp->print(out);
 		out.close();
 		
-		m->setCurrentSharedBinLabels(saveBinLabels);
-		
 		return 0;
 	}
 	catch(exception& e) {
@@ -525,17 +508,13 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 
 int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 	try {
-		
-		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
-		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
         variables["[distance]"] = thisLookUp->getLabel();
 		string outputFileName = getOutputFileName("shared",variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
 		
 		if (method == "totalgroup") { 
@@ -592,9 +571,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
         thisLookUp->printHeaders(out);
         thisLookUp->print(out);
         out.close();
-		
-		m->setCurrentSharedBinLabels(saveBinLabels);
-		
+	
 		return 0;
 	}
 	catch(exception& e) {

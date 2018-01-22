@@ -19,7 +19,7 @@ public:
 	KmerTree(string, string, int, int);
 	~KmerTree();
 	
-    string getTaxonomy(Sequence*);
+    string getTaxonomy(Sequence*, string&, bool&);
 
 private:
     int addTaxonomyToTree(string, string, vector<int>&);

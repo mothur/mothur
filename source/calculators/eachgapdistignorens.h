@@ -18,7 +18,7 @@
 class eachGapDistIgnoreNs : public DistCalc {
 	
 public:
-	void calcDist(Sequence A, Sequence B){		
+	double calcDist(Sequence A, Sequence B){
 		int diff = 0;
 		int length = 0;
 		int start = 0;
@@ -50,6 +50,8 @@ public:
 		
 		if(length == 0)	{	dist = 1.0000;								}
 		else			{	dist = ((double)diff  / (double)length);	}
+        
+        return dist;
 	}
 };
 

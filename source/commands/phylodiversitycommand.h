@@ -12,7 +12,7 @@
 
 #include "command.hpp"
 #include "counttable.h"
-#include "sharedutilities.h"
+
 #include "tree.h"
 
 
@@ -65,10 +65,12 @@ struct phylodivData {
     Tree* t;
     CountTable* ct;
     bool includeRoot, subsample;
+    Utils util;
+    vector<string> mGroups;
 	
    
 	phylodivData(){}
-	phylodivData(MothurOut* mout, int ni,  map< string, vector<float> > cd, map< string, vector<float> > csd, Tree* tree, CountTable* count, int incre, vector<int> crl, set<int> nsl, map<string, int> rfg, bool su, int suS) {
+    phylodivData(MothurOut* mout, int ni,  map< string, vector<float> > cd, map< string, vector<float> > csd, Tree* tree, CountTable* count, int incre, vector<int> crl, set<int> nsl, map<string, int> rfg, bool su, int suS, vector<string> gps) {
         m = mout;
         t = tree;
         ct = count;
@@ -81,6 +83,7 @@ struct phylodivData {
         rootForGroup = rfg;
         subsample = su;
         subsampleSize = suS;
+        mGroups = gps;
 	}
 };
 
@@ -92,10 +95,10 @@ static DWORD WINAPI MyPhyloDivThreadFunction(LPVOID lpParam){
 	pDataArray = (phylodivData*)lpParam;
 	try {
         int numLeafNodes = pDataArray->randomLeaf.size();
-		vector<string> mGroups = pDataArray->m->getGroups();
+		vector<string> mGroups = pDataArray->mGroups;
         
 		for (int l = 0; l < pDataArray->numIters; l++) {
-            pDataArray->m->mothurRandomShuffle(pDataArray->randomLeaf);
+            pDataArray->util.mothurRandomShuffle(pDataArray->randomLeaf);
             
             //initialize counts
             map<string, int> counts;
@@ -158,7 +161,7 @@ static DWORD WINAPI MyPhyloDivThreadFunction(LPVOID lpParam){
                 
                 for (int j = 0; j < groups.size(); j++) {
                     
-                    if (pDataArray->m->inUsersGroups(groups[j], mGroups)) {
+                    if (pDataArray->util.inUsersGroups(groups[j], mGroups)) {
                         int numSeqsInGroupJ = 0;
                         map<string, int>::iterator it;
                         it = pDataArray->t->tree[pDataArray->randomLeaf[k]].pcount.find(groups[j]);

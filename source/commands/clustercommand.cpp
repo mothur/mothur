@@ -161,16 +161,16 @@ ClusterCommand::ClusterCommand(string option)  {
             outputTypes["steps"] = tempOutNames;
 		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
-			inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -178,7 +178,7 @@ ClusterCommand::ClusterCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -186,7 +186,7 @@ ClusterCommand::ClusterCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -194,7 +194,7 @@ ClusterCommand::ClusterCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -202,39 +202,39 @@ ClusterCommand::ClusterCommand(string option)  {
                 it = parameters.find("fasta");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
                 }
 			}
 			
 			//check for required parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  distfile = phylipfile;  format = "phylip"; 	m->setPhylipFile(phylipfile); }
+			else {  distfile = phylipfile;  format = "phylip"; 	current->setPhylipFile(phylipfile); }
 			
-			columnfile = validParameter.validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not open") { columnfile = ""; abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  distfile = columnfile; format = "column"; m->setColumnFile(columnfile);	}
+			else {  distfile = columnfile; format = "column"; current->setColumnFile(columnfile);	}
 			
-            fastafile = validParameter.validFile(parameters, "fasta", true);
+            fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not open") { abort = true; }
             else if (fastafile == "not found") { fastafile = ""; }
-            else { distfile = fastafile;  format = "fasta"; m->setFastaFile(fastafile); }
+            else { distfile = fastafile;  format = "fasta"; current->setFastaFile(fastafile); }
             
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
-            method = validParameter.validFile(parameters, "method", false);
+            method = validParameter.valid(parameters, "method");
             if (method == "not found") {  method = "opti";}
             
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti") || (method == "unique")) { }
@@ -244,13 +244,13 @@ ClusterCommand::ClusterCommand(string option)  {
                 if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) {
                     //is there are current file available for either of these?
                     //give priority to column, then phylip
-                    columnfile = m->getColumnFile();
+                    columnfile = current->getColumnFile();
                     if (columnfile != "") {  distfile = columnfile; format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
                     else {
-                        phylipfile = m->getPhylipFile();
+                        phylipfile = current->getPhylipFile();
                         if (phylipfile != "") { distfile = phylipfile;  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
                         else {
-                            fastafile = m->getFastaFile();
+                            fastafile = current->getFastaFile();
                             if (fastafile != "") {  distfile = fastafile; format = "fasta"; m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
                             else {
                                 m->mothurOut("No valid current files. You must provide a phylip, column or fasta file before you can use the cluster command, unless using the unique method."); m->mothurOutEndLine();
@@ -263,10 +263,10 @@ ClusterCommand::ClusterCommand(string option)  {
                 
                 if (columnfile != "") {
                     if ((namefile == "") && (countfile == "")){
-                        namefile = m->getNameFile();
+                        namefile = current->getNameFile();
                         if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
                         else {
-                            countfile = m->getCountTableFile();
+                            countfile = current->getCountFile();
                             if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                             else { 
                                 m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
@@ -282,10 +282,10 @@ ClusterCommand::ClusterCommand(string option)  {
                 }
             }else {
                 if ((countfile == "") && (namefile == "")) {
-                    countfile = m->getCountTableFile();
+                    countfile = current->getCountFile();
                     if (countfile != "") { distfile = countfile;  format = "count"; m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                     else {
-                        namefile = m->getNameFile();
+                        namefile = current->getNameFile();
                         if (namefile != "") {  distfile = namefile; format = "name"; m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
                         else {
                             m->mothurOut("No valid current files. You must provide a count or name file before you can use the cluster command with the unique method."); m->mothurOutEndLine();
@@ -303,37 +303,36 @@ ClusterCommand::ClusterCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			//get user cutoff and precision or use defaults
 			string temp;
-			temp = validParameter.validFile(parameters, "precision", false);
+			temp = validParameter.valid(parameters, "precision");
 			if (temp == "not found") { temp = "100"; }
 			//saves precision legnth for formatting below
 			length = temp.length();
-			m->mothurConvert(temp, precision);
+			util.mothurConvert(temp, precision);
 			
-			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
-			sim = m->isTrue(temp); 
+			temp = validParameter.valid(parameters, "sim");				if (temp == "not found") { temp = "F"; }
+			sim = util.isTrue(temp); 
 			
-            temp = validParameter.validFile(parameters, "delta", false);		if (temp == "not found")  { temp = "0.0001"; }
-            m->mothurConvert(temp, stableMetric);
+            temp = validParameter.valid(parameters, "delta");		if (temp == "not found")  { temp = "0.0001"; }
+            util.mothurConvert(temp, stableMetric);
             
-            metricName = validParameter.validFile(parameters, "metric", false);		if (metricName == "not found") { metricName = "mcc"; }
+            metricName = validParameter.valid(parameters, "metric");		if (metricName == "not found") { metricName = "mcc"; }
             
             if ((metricName == "mcc") || (metricName == "sens") || (metricName == "spec") || (metricName == "tptn") || (metricName == "tp") || (metricName == "tn") || (metricName == "fp") || (metricName == "fn") || (metricName == "f1score") || (metricName == "accuracy") || (metricName == "ppv") || (metricName == "npv") || (metricName == "fdr") || (metricName == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
             
-            initialize = validParameter.validFile(parameters, "initialize", false);		if (initialize == "not found") { initialize = "singleton"; }
+            initialize = validParameter.valid(parameters, "initialize");		if (initialize == "not found") { initialize = "singleton"; }
             
             if ((initialize == "singleton") || (initialize == "oneotu")){ }
             else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
 
-            temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found")  { temp = "100"; }
-            m->mothurConvert(temp, maxIters);
+            temp = validParameter.valid(parameters, "iters");		if (temp == "not found")  { temp = "100"; }
+            util.mothurConvert(temp, maxIters);
             
             adjust=-1.0;
 			
             bool setProcessors = true;
-            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){ setProcessors=false;	temp = m->getProcessors();	}
-            m->setProcessors(temp);
-            m->mothurConvert(temp, processors);
+            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){ setProcessors=false;	temp = current->getProcessors();	}
+            processors = current->setProcessors(temp);
             
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
@@ -342,15 +341,15 @@ ClusterCommand::ClusterCommand(string option)  {
             }
             
             cutOffSet = false;
-            temp = validParameter.validFile(parameters, "cutoff", false);
+            temp = validParameter.valid(parameters, "cutoff");
             if (temp == "not found") { if ((method == "opti") || (method == "agc") || (method == "dgc")) { temp = "0.03"; }else { temp = "0.15"; } }
             else { cutOffSet = true; }
-            m->mothurConvert(temp, cutoff);
+            util.mothurConvert(temp, cutoff);
             
-			showabund = validParameter.validFile(parameters, "showabund", false);
+			showabund = validParameter.valid(parameters, "showabund");
 			if (showabund == "not found") { showabund = "T"; }
 
-			timing = validParameter.validFile(parameters, "timing", false);
+			timing = validParameter.valid(parameters, "timing");
 			if (timing == "not found") { timing = "F"; }
 		}
 	}
@@ -366,7 +365,7 @@ ClusterCommand::~ClusterCommand(){}
 int ClusterCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//phylip file given and cutoff not given - use cluster.classic because it uses less memory and is faster
 		if ((format == "phylip") && (!cutOffSet) && (method != "opti")) {
@@ -402,27 +401,27 @@ int ClusterCommand::execute(){
         else if (method == "unique")    {   runUniqueCluster();     }
         else                            {   runMothurCluster();     }
         
-		if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
+		if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
         
         m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
         
 		//set list file as new current listfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("list");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 		}
 		
 		//set rabund file as new current rabundfile
 		itTypes = outputTypes.find("rabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setRabundFile(currentName); }
 		}
 		
 		//set sabund file as new current sabundfile
 		itTypes = outputTypes.find("sabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSabundFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -442,41 +441,30 @@ int ClusterCommand::execute(){
 int ClusterCommand::runVsearchCluster(){
     try {
         //look for vsearch exe
-        string path = m->getProgramPath();
-        string vsearchCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
+        string path = current->getProgramPath();
+        string vsearchCommand = path + PATH_SEPARATOR + "vsearch" + EXECUTABLE_EXT;
+#if defined NON_WINDOWS
         if (m->getDebug()) {
             m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
             Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
-            newCommand->execute();
-            delete newCommand;
+            newCommand->execute(); delete newCommand;
             m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
             newCommand = new SystemCommand("which mothur"); m->mothurOutEndLine();
-            newCommand->execute();
-            delete newCommand;
+            newCommand->execute(); delete newCommand;
         }
-#else
-        vsearchCommand = path + "\\vsearch.exe";
 #endif
         
         //test to make sure vsearch exists
         ifstream in;
-        vsearchCommand = m->getFullPathName(vsearchCommand);
-        bool ableToOpen = m->openInputFile(vsearchCommand, in, "no error"); in.close();
+        vsearchCommand = util.getFullPathName(vsearchCommand);
+        bool ableToOpen = util.openInputFile(vsearchCommand, in, "no error"); in.close();
         if(!ableToOpen) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-            //check to see if vsearch is in the path??
 
             ifstream in2;
-            string uLocation = "";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            uLocation = m->findProgramPath("vsearch");
-            ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
-#else
-            uLocation = m->findProgramPath("vsearch.exe");
-            ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
-#endif
+            string programName = "vsearch"; programName += EXECUTABLE_EXT;
+            string uLocation = util.findProgramPath(programName);
+            ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
             
             if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
             else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
@@ -484,7 +472,7 @@ int ClusterCommand::runVsearchCluster(){
         
         if (m->getControl_pressed()) {  return 0; }
         
-        vsearchLocation = m->getFullPathName(vsearchLocation);
+        vsearchLocation = util.getFullPathName(vsearchLocation);
         
         string vsearchFastafile = ""; VsearchFileParser* vParse;
         if ((namefile == "") && (countfile == ""))  { vParse = new VsearchFileParser(fastafile);                        }
@@ -499,14 +487,14 @@ int ClusterCommand::runVsearchCluster(){
         if (cutoff > 1.0) {  m->mothurOut("You did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
         
         //Run vsearch
-        string ucVsearchFile = m->getSimpleName(vsearchFastafile) + ".clustered.uc";
-        string logfile = m->getSimpleName(vsearchFastafile) + ".clustered.log";
+        string ucVsearchFile = util.getSimpleName(vsearchFastafile) + ".clustered.uc";
+        string logfile = util.getSimpleName(vsearchFastafile) + ".clustered.log";
         vsearchDriver(vsearchFastafile, ucVsearchFile, logfile);
         
-        if (m->getControl_pressed()) { m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile); return 0; }
+        if (m->getControl_pressed()) { util.mothurRemove(ucVsearchFile); util.mothurRemove(logfile);  util.mothurRemove(vsearchFastafile); return 0; }
         
-        if (outputDir == "") { outputDir += m->hasPath(distfile); }
-        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        if (outputDir == "") { outputDir += util.hasPath(distfile); }
+        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
         tag = method;
         
         map<string, string> variables;
@@ -514,7 +502,7 @@ int ClusterCommand::runVsearchCluster(){
         variables["[clustertag]"] = tag;
         string sabundFileName = getOutputFileName("sabund", variables);
         string rabundFileName = getOutputFileName("rabund", variables);
-        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        //if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         string listFileName = getOutputFileName("list", variables);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
         if (countfile == "") {
@@ -526,9 +514,9 @@ int ClusterCommand::runVsearchCluster(){
         vParse->createListFile(ucVsearchFile, listFileName, sabundFileName, rabundFileName, vParse->getNumBins(logfile), toString(1.0-cutoff));  delete vParse;
         
         //remove temp files
-        m->mothurRemove(ucVsearchFile); m->mothurRemove(logfile);  m->mothurRemove(vsearchFastafile);
+        util.mothurRemove(ucVsearchFile); util.mothurRemove(logfile);  util.mothurRemove(vsearchFastafile);
         
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
         return 0;
     }
@@ -547,9 +535,9 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         
         //no sizeorder for dgc
         
-        ucClusteredFile = m->getFullPathName(ucClusteredFile);
-        inputFile = m->getFullPathName(inputFile);
-        logfile = m->getFullPathName(logfile);
+        ucClusteredFile = util.getFullPathName(ucClusteredFile);
+        inputFile = util.getFullPathName(inputFile);
+        logfile = util.getFullPathName(logfile);
         
         //to allow for spaces in the path
         ucClusteredFile = "\"" + ucClusteredFile + "\"";
@@ -690,8 +678,8 @@ int ClusterCommand::runMothurCluster(){
         delete read;
         
         if (m->getControl_pressed()) { //clean up
-            delete list; delete matrix; delete rabund; if(countfile == ""){rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
-            listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
+            delete list; delete matrix; delete rabund; if(countfile == ""){rabundFile.close(); sabundFile.close();  util.mothurRemove((fileroot+ tag + ".rabund")); util.mothurRemove((fileroot+ tag + ".sabund")); }
+            listFile.close(); util.mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
         }
         
         //create cluster
@@ -701,25 +689,25 @@ int ClusterCommand::runMothurCluster(){
         else if(method == "weighted"){	cluster = new WeightedLinkage(rabund, list, matrix, cutoff, method, adjust);	}
         tag = cluster->getTag();
         
-        if (outputDir == "") { outputDir += m->hasPath(distfile); }
-        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        if (outputDir == "") { outputDir += util.hasPath(distfile); }
+        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
         
         map<string, string> variables;
         variables["[filename]"] = fileroot;
         variables["[clustertag]"] = tag;
         string sabundFileName = getOutputFileName("sabund", variables);
         string rabundFileName = getOutputFileName("rabund", variables);
-        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        //if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         string listFileName = getOutputFileName("list", variables);
         
         if (countfile == "") {
-            m->openOutputFile(sabundFileName,	sabundFile);
-            m->openOutputFile(rabundFileName,	rabundFile);
+            util.openOutputFile(sabundFileName,	sabundFile);
+            util.openOutputFile(rabundFileName,	rabundFile);
             outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
         }
-        m->openOutputFile(listFileName,	listFile);
+        util.openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
         list->printHeaders(listFile);
         
@@ -738,13 +726,13 @@ int ClusterCommand::runMothurCluster(){
             
             if (m->getControl_pressed()) { //clean up
                 delete list; delete matrix; delete rabund; delete cluster;
-                if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
-                listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
+                if(countfile == "") {rabundFile.close(); sabundFile.close();  util.mothurRemove((fileroot+ tag + ".rabund")); util.mothurRemove((fileroot+ tag + ".sabund")); }
+                listFile.close(); util.mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
             }
             
-            if (print_start && m->isTrue(timing)) {
+            if (print_start && util.isTrue(timing)) {
                 m->mothurOut("Clustering (" + tag + ") dist " + toString(matrix->getSmallDist()) + "/"
-                             + toString(m->roundDist(matrix->getSmallDist(), precision))
+                             + toString(util.roundDist(matrix->getSmallDist(), precision))
                              + "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
                 cout.flush();
                 print_start = false;
@@ -755,7 +743,7 @@ int ClusterCommand::runMothurCluster(){
             cluster->update(cutoff);
             
             float dist = matrix->getSmallDist();
-            float rndDist = m->ceilDist(dist, precision);
+            float rndDist = util.ceilDist(dist, precision);
             
             if(previousDist <= 0.0000 && dist != previousDist){
                 printData("unique", counts);
@@ -770,7 +758,7 @@ int ClusterCommand::runMothurCluster(){
             oldList = *list;
         }
         
-        if (print_start && m->isTrue(timing)) {
+        if (print_start && util.isTrue(timing)) {
             m->mothurOut("Clustering (" + tag + ") for distance " + toString(previousDist) + "/" + toString(rndPreviousDist)
                          + "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
             cout.flush();
@@ -795,7 +783,7 @@ int ClusterCommand::runMothurCluster(){
         listFile.close();
         
         if (saveCutoff != cutoff) {
-            saveCutoff = m->ceilDist(saveCutoff, precision);
+            saveCutoff = util.ceilDist(saveCutoff, precision);
             m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
         }
 
@@ -810,7 +798,7 @@ int ClusterCommand::runMothurCluster(){
 
 void ClusterCommand::printData(string label, map<string, int>& counts){
 	try {
-		if (m->isTrue(timing)) {
+		if (util.isTrue(timing)) {
 			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
 		     + "\tclusters. Updates: " + toString(loops)); m->mothurOutEndLine();
 		}
@@ -824,7 +812,7 @@ void ClusterCommand::printData(string label, map<string, int>& counts){
             oldRAbund.getSAbundVector().print(sabundFile);
         }
        
-        if (m->isTrue(showabund)) {
+        if (util.isTrue(showabund)) {
             oldRAbund.getSAbundVector().print(cout);
         }
         
@@ -851,7 +839,7 @@ int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVecto
             if (m->getControl_pressed()) { break; }
             vector<string> binNames;
             string bin = list->get(i);
-            m->splitAtComma(bin, binNames);
+            util.splitAtComma(bin, binNames);
             int total = 0;
             for (int j = 0; j < binNames.size(); j++) { total += ct->getNumSeqs(binNames[j]);  }
             rabund->push_back(total);   
@@ -904,13 +892,13 @@ int ClusterCommand::runOptiCluster(){
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
         
-        if (outputDir == "") { outputDir += m->hasPath(distfile); }
-        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        if (outputDir == "") { outputDir += util.hasPath(distfile); }
+        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
         
         string listFileName = fileroot+ tag + ".list";
         
         ofstream listFile;
-        m->openOutputFile(listFileName,	listFile);
+        util.openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
         
         map<string, string> variables;
@@ -919,7 +907,7 @@ int ClusterCommand::runOptiCluster(){
         string outputName = getOutputFileName("steps", variables);
         outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
         ofstream outStep;
-        m->openOutputFile(outputName, outStep);
+        util.openOutputFile(outputName, outStep);
         
         int iters = 0;
         double listVectorMetric = 0; //worst state
@@ -940,7 +928,7 @@ int ClusterCommand::runOptiCluster(){
         
         while ((delta > stableMetric) && (iters < maxIters)) {
             
-            int start = time(NULL);
+            long start = time(NULL);
             
             if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
@@ -965,7 +953,6 @@ int ClusterCommand::runOptiCluster(){
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(cutoff));
-        if (!m->getPrintedListHeaders()) { vector<string> temp; m->setListBinLabelsInFile(temp); list->printHeaders(listFile); }
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
         listFile.close();
@@ -976,8 +963,8 @@ int ClusterCommand::runOptiCluster(){
         string rabundFileName = getOutputFileName("rabund", variables);
         
         if (countfile == "") {
-            m->openOutputFile(sabundFileName,	sabundFile);
-            m->openOutputFile(rabundFileName,	rabundFile);
+            util.openOutputFile(sabundFileName,	sabundFile);
+            util.openOutputFile(rabundFileName,	rabundFile);
             outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
@@ -993,7 +980,7 @@ int ClusterCommand::runOptiCluster(){
         
         string sensspecFilename = fileroot+ tag + ".sensspec";
         ofstream sensFile;
-        m->openOutputFile(sensspecFilename,	sensFile);
+        util.openOutputFile(sensspecFilename,	sensFile);
         outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
         
         
@@ -1037,24 +1024,23 @@ int ClusterCommand::runUniqueCluster(){
             }
         }else {
             map<string, string> nameMap;
-            m->readNames(namefile, nameMap);
+            util.readNames(namefile, nameMap);
             for (map<string, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
                 if (m->getControl_pressed()) { return 0; }
                 list.push_back(it->second);
             }
         }
         
-        if (outputDir == "") { outputDir += m->hasPath(distfile); }
-        fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
+        if (outputDir == "") { outputDir += util.hasPath(distfile); }
+        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
         
         tag = "unique";
         string listFileName = fileroot+ tag + ".list";
         
         ofstream listFile;
-        m->openOutputFile(listFileName,	listFile);
+        util.openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 
-        if (!m->getPrintedListHeaders()) { vector<string> temp; m->setListBinLabelsInFile(temp); list.printHeaders(listFile); }
         if(countfile != "") { list.print(listFile, counts); }
         else { list.print(listFile); }
         listFile.close();
@@ -1066,8 +1052,8 @@ int ClusterCommand::runUniqueCluster(){
         string rabundFileName = getOutputFileName("rabund", variables);
         
         if (countfile == "") {
-            m->openOutputFile(sabundFileName,	sabundFile);
-            m->openOutputFile(rabundFileName,	rabundFile);
+            util.openOutputFile(sabundFileName,	sabundFile);
+            util.openOutputFile(rabundFileName,	rabundFile);
             outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             

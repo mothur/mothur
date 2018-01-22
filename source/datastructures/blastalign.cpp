@@ -22,12 +22,13 @@ BlastAlignment::BlastAlignment(float go, float ge, float ma, float mm) :
 			match(ma),				//	This is the score to award for two nucleotides matching (match >= 0)
 			mismatch(mm)			//	This is the penalty to assess for a mismatch (mismatch <= 0)
 {
-	path = m->getBlastPath();
+	path = current->getBlastPath();
 	
 	gapOpen = abs(go);				//	This is the penalty to assess for opening a gap (gapOpen >= 0)
 	gapExtend = abs(ge);				//	This is the penalty to assess for extending a gap (gapExtend >= 0)
-		
-	int randNumber = m->getRandomNumber();
+    
+    Utils util;
+	int randNumber = util.getRandomNumber();
 	candidateFileName = toString(randNumber) + ".candidate";
 	templateFileName = toString(randNumber) + ".template";
 	blastFileName = toString(randNumber) + ".pairwise";
@@ -35,10 +36,11 @@ BlastAlignment::BlastAlignment(float go, float ge, float ma, float mm) :
 
 //**************************************************************************************************/
 
-BlastAlignment::~BlastAlignment(){		//	The desctructor should clean up by removing the temporary 
-	m->mothurRemove(candidateFileName);	//	files used to run bl2seq
-	m->mothurRemove(templateFileName);
-	m->mothurRemove(blastFileName);
+BlastAlignment::~BlastAlignment(){		//	The desctructor should clean up by removing the temporary
+    Utils util;
+	util.mothurRemove(candidateFileName);	//	files used to run bl2seq
+	util.mothurRemove(templateFileName);
+	util.mothurRemove(blastFileName);
 }
 
 //**************************************************************************************************/
@@ -70,7 +72,8 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 															//	to the pairwise entry in the Sequence class for the 
 															//	candidate and template Sequence objects
 	ifstream blastFile;
-	m->openInputFile(blastFileName, blastFile);
+    Utils util;
+	util.openInputFile(blastFileName, blastFile);
 	
 	seqAaln = "";
 	seqBaln = "";

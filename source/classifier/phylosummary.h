@@ -14,6 +14,7 @@
 #include "mothurout.h"
 #include "groupmap.h"
 #include "counttable.h"
+#include "utils.hpp"
 
 /**************************************************************************************************/
 
@@ -62,6 +63,7 @@ private:
 	int numSeqs;
 	int maxLevel;
 	MothurOut* m;
+    Utils util;
 };
 
 /**************************************************************************************************/

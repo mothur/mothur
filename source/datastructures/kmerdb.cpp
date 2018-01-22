@@ -55,13 +55,13 @@ KmerDB::~KmerDB(){}
 
 /**************************************************************************************************/
 
-vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
+vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num, vector<float>& Scores){
 	try {
 		if (num > numSeqs) { m->mothurOut("[WARNING]: you requested " + toString(num) + " closest sequences, but the template only contains " + toString(numSeqs) + ", adjusting."); m->mothurOutEndLine(); num = numSeqs; }
 		
 		vector<int> topMatches;
 		Kmer kmer(kmerSize);
-		searchScore = 0;
+		float searchScore = 0;
 		Scores.clear();
 		
 		vector<int> matches(numSeqs, 0);						//	a record of the sequences with shared kmers
@@ -91,7 +91,8 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 			
 			searchScore = seqMatches[0].match;
 			searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
-		
+            Scores.push_back(searchScore);
+            
 			//save top matches
 			for (int i = 0; i < num; i++) {
 				topMatches.push_back(seqMatches[i].seq);
@@ -128,10 +129,10 @@ void KmerDB::generateDB(){
 	try {
 		
 		ofstream kmerFile;										//	once we have the kmerLocations folder print it out
-		m->openOutputFile(kmerDBName, kmerFile);					//	to a file
+		util.openOutputFile(kmerDBName, kmerFile);					//	to a file
 		
 		//output version
-		kmerFile << "#" << m->getVersion() << endl;
+		kmerFile << "#" << current->getVersion() << endl;
 		
 		for(int i=0;i<maxKmer;i++){								//	step through all of the possible kmer numbers
 			kmerFile << i << ' ' << kmerLocations[i].size();	//	print the kmer number and the number of sequences with
@@ -181,7 +182,7 @@ void KmerDB::readKmerDB(ifstream& kmerDBFile){
 		kmerDBFile.seekg(0);									//	start at the beginning of the file
 		
 		//read version
-		string line = m->getline(kmerDBFile); m->gobble(kmerDBFile);
+		string line = util.getline(kmerDBFile); util.gobble(kmerDBFile);
 		
 		string seqName;
 		int seqNumber;

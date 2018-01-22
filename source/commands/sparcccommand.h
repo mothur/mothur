@@ -58,7 +58,8 @@ struct sparccData {
     vector<vector<float> > pValues;
     int numSamplings, maxIterations, numPermutations;
     string normalizeMethod;
-	
+    Utils util;
+    
 	sparccData(){}
 	sparccData(MothurOut* mout, int it, vector< vector<float> > cs, vector< vector<float> > co, int ns, int mi, int np, string nm) {
 		m = mout;
@@ -95,7 +96,7 @@ static DWORD WINAPI MySparccThreadFunction(LPVOID lpParam){
             
             for(int k=0;k<numGroups;k++){
                 for(int j=0;j<numOTUs;j++){
-                    sharedShuffled[k][j] = pDataArray->sharedVector[pDataArray->m->getRandomIndex(numGroups-1)][j];
+                    sharedShuffled[k][j] = pDataArray->sharedVector[pDataArray->util.getRandomIndex(numGroups-1)][j];
                 }
             }
             /////////////////////////////////////////////////////////

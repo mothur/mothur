@@ -108,14 +108,14 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
             outputTypes["lefse"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 string path;
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -123,7 +123,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 				it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
@@ -131,7 +131,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 				it = parameters.find("constaxonomy");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
 				}
@@ -139,50 +139,47 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
                 it = parameters.find("relabund");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
             }
                     
 			//check for parameters
-			designfile = validParameter.validFile(parameters, "design", true);
+			designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { abort = true; }
 			else if (designfile == "not found") { designfile = ""; }
-			else { m->setDesignFile(designfile); }
+			else { current->setDesignFile(designfile); }
             
-            sharedfile = validParameter.validFile(parameters, "shared", true);
+            sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  m->setSharedFile(sharedfile); }
+			else {  current->setSharedFile(sharedfile); }
 			
-			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			relabundfile = validParameter.validFile(parameters, "relabund");
 			if (relabundfile == "not open") { abort = true; }
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else {  m->setRelAbundFile(relabundfile); }
+			else {  current->setRelAbundFile(relabundfile); }
             
-            constaxonomyfile = validParameter.validFile(parameters, "constaxonomy", true);
+            constaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
 			if (constaxonomyfile == "not open") { constaxonomyfile = ""; abort = true; }
 			else if (constaxonomyfile == "not found") {  constaxonomyfile = "";  }
 			
-			label = validParameter.validFile(parameters, "label", false);
+			label = validParameter.valid(parameters, "label");
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
             
-            string groups = validParameter.validFile(parameters, "groups", false);
+            string groups = validParameter.valid(parameters, "groups");
 			if (groups == "not found") { groups = "";  }
-			else {
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
-			}
+			else { util.splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } } }
 
 
             if ((relabundfile == "") && (sharedfile == "")) {
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
-				sharedfile = m->getSharedFile();
+				sharedfile = current->getSharedFile();
 				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else {
-					relabundfile = m->getRelAbundFile();
+					relabundfile = current->getRelAbundFile();
 					if (relabundfile != "") {   m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 					else {
 						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine();
@@ -194,10 +191,10 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("[ERROR]: You may not use both a shared and relabund file."); m->mothurOutEndLine(); abort = true;  }
 			
             //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
 				outputDir = ""; 			}
             
-            scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "totalgroup"; }
+            scale = validParameter.valid(parameters, "scale");				if (scale == "not found") { scale = "totalgroup"; }
 			
 			if ((scale != "totalgroup") && (scale != "totalotu") && (scale != "averagegroup") && (scale != "averageotu")) {
 				m->mothurOut(scale + " is not a valid scaling option for the get.relabund command. Choices are totalgroup, totalotu, averagegroup, averageotu."); m->mothurOutEndLine(); abort = true;
@@ -215,10 +212,10 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 int MakeLefseCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
       
         map<int, consTax2> consTax;
-        if (constaxonomyfile != "") {  m->readConsTax(constaxonomyfile, consTax);  }
+        if (constaxonomyfile != "") {  util.readConsTax(constaxonomyfile, consTax);  }
         
         if (m->getControl_pressed()) { return 0; }
         
@@ -232,7 +229,7 @@ int MakeLefseCommand::execute(){
             runRelabund(consTax, lookup);
         }
         
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 		
         //output files created by command
 		m->mothurOutEndLine();
@@ -250,15 +247,15 @@ int MakeLefseCommand::execute(){
 //**********************************************************************************************************************
 int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloatVectors*& lookup){
 	try {
-        if (outputDir == "") { outputDir = m->hasPath(inputFile); }
+        if (outputDir == "") { outputDir = util.hasPath(inputFile); }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFile));
         variables["[distance]"] = lookup->getLabel();
 		string outputFile = getOutputFileName("lefse",variables);
 		outputNames.push_back(outputFile); outputTypes["lefse"].push_back(outputFile);
         
         ofstream out;
-        m->openOutputFile(outputFile, out);
+        util.openOutputFile(outputFile, out);
 
         DesignMap* designMap = NULL;
         vector<string> namesOfGroups = lookup->getNamesGroups();
@@ -289,26 +286,25 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
         for (int i = 0; i < namesOfGroups.size(); i++) {  out  << '\t' << namesOfGroups[i]; }
         out << endl;
         
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < lookup->getNumBins(); i++) { //process each otu
             if (m->getControl_pressed()) { break; }
-            string nameOfOtu = m->getCurrentSharedBinLabels()[i];
+            string nameOfOtu = lookup->getOTUName(i);
             
             if (constaxonomyfile != "") { //try to find the otuName in consTax to replace with consensus taxonomy
                 int simpleLabel;
-                m->mothurConvert(m->getSimpleLabel(nameOfOtu), simpleLabel);
+                util.mothurConvert(util.getSimpleLabel(nameOfOtu), simpleLabel);
                 map<int, consTax2>::iterator it = consTax.find(simpleLabel);
                 if (it != consTax.end()) {
                     nameOfOtu = it->second.taxonomy;
                     //add sanity check abundances here??
                     string fixedName = "";
                     //remove confidences and change ; to |
-                    m->removeConfidences(nameOfOtu);
+                    util.removeConfidences(nameOfOtu);
                     for (int j = 0; j < nameOfOtu.length(); j++) {
                         if (nameOfOtu[j] == ';') { fixedName += '|'; }
                         else { fixedName += nameOfOtu[j]; }
                     }
-                    nameOfOtu = fixedName + currentLabels[i] + "|";
+                    nameOfOtu = fixedName + lookup->getOTUName(i) + "|";
                 }else {
                     m->mothurOut("[ERROR]: can't find " + nameOfOtu + " in constaxonomy file. Do the distances match, did you forget to use the label parameter?\n"); m->setControl_pressed(true);
                 }
@@ -334,8 +330,9 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
 //**********************************************************************************************************************
 SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 	try {
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* templookup = input.getSharedRAbundVectors();
+        Groups = templookup->getNamesGroups();
 		string lastLabel = templookup->getLabel();
         
 		if (label == "") { label = lastLabel;  }
@@ -355,7 +352,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
                     break;
                 }
                 
-                if ((m->anyLabelsToProcess(templookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                if ((util.anyLabelsToProcess(templookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                     string saveLabel = templookup->getLabel();
                     
                     delete templookup;
@@ -394,7 +391,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             }
             
             //run last label if you need to
-            if (needToRun == true)  {
+            if (needToRun )  {
                 delete templookup;
                 templookup = input.getSharedRAbundVectors(lastLabel);
             }
@@ -454,9 +451,10 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 //**********************************************************************************************************************
 SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 	try {
-		InputData input(relabundfile, "relabund");
+		InputData input(relabundfile, "relabund", Groups);
 		SharedRAbundFloatVectors* lookupFloat = input.getSharedRAbundFloatVectors();
 		string lastLabel = lookupFloat->getLabel();
+        Groups = lookupFloat->getNamesGroups();
 		
 		if (label == "") { label = lastLabel; return lookupFloat; }
 		
@@ -476,7 +474,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookupFloat->getLabel();
 				
                 delete lookupFloat;
@@ -515,7 +513,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookupFloat;
 			lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
 		}

@@ -161,7 +161,10 @@ int SharedRAbundVector::remove(int bin){
         data.erase(data.begin()+bin);
         numBins--;
         
-        if(abund == maxRank){ maxRank = m->max(data); }
+        if(abund == maxRank){
+            vector<int>::iterator it = max_element(data.begin(), data.end());
+            maxRank = *it;
+        }
         
         numSeqs -= abund;
         

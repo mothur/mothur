@@ -122,93 +122,93 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 			outputTypes["shared"] = tempOutNames;
 			            
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
             }
 					
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
 			
             //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);	}
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
             bool setSomething = false;
-			string temp = validParameter.validFile(parameters, "minabund", false);		
+			string temp = validParameter.valid(parameters, "minabund");
             if (temp == "not found"){	temp = "-1";		}
             else { setSomething = true; }
-			m->mothurConvert(temp, minAbund);  
+			util.mothurConvert(temp, minAbund);  
             
-            temp = validParameter.validFile(parameters, "mintotal", false);		
+            temp = validParameter.valid(parameters, "mintotal");
             if (temp == "not found"){	temp = "-1";		}
             else { setSomething = true; }
-			m->mothurConvert(temp, minTotal);
+			util.mothurConvert(temp, minTotal);
             
-            temp = validParameter.validFile(parameters, "minnumsamples", false);		
+            temp = validParameter.valid(parameters, "minnumsamples");
             if (temp == "not found"){	temp = "-1";		}
             else { setSomething = true; }
-			m->mothurConvert(temp, minSamples);
+			util.mothurConvert(temp, minSamples);
             
-            temp = validParameter.validFile(parameters, "minpercent", false);		
+            temp = validParameter.valid(parameters, "minpercent");
             if (temp == "not found"){	temp = "-1";		}
             else { setSomething = true; }
             
-			m->mothurConvert(temp, minPercent);
+			util.mothurConvert(temp, minPercent);
             if (minPercent < 1) {} //already in percent form
             else {  minPercent = minPercent / 100.0; } //user gave us a whole number version so convert to %
             
-            temp = validParameter.validFile(parameters, "rarepercent", false);
+            temp = validParameter.valid(parameters, "rarepercent");
             if (temp == "not found"){	temp = "-1";		}
             else { setSomething = true; }
             
-			m->mothurConvert(temp, rarePercent);
+			util.mothurConvert(temp, rarePercent);
             if (rarePercent < 1) {} //already in percent form
             else {  rarePercent = rarePercent / 100.0; } //user gave us a whole number version so convert to %
             
-            temp = validParameter.validFile(parameters, "minpercentsamples", false);		
+            temp = validParameter.valid(parameters, "minpercentsamples");
             if (temp == "not found"){	temp = "-1";		}
             else { setSomething = true; }
             
-			m->mothurConvert(temp, minPercentSamples);
+			util.mothurConvert(temp, minPercentSamples);
             if (minPercentSamples < 1) {} //already in percent form
             else {  minPercentSamples = minPercentSamples / 100.0; } //user gave us a whole number version so convert to %
 			
-			temp = validParameter.validFile(parameters, "makerare", false);		if (temp == "not found"){	temp = "T";		}
-			makeRare = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "makerare");		if (temp == "not found"){	temp = "T";		}
+			makeRare = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "keepties", false);		if (temp == "not found"){	temp = "T";		}
-			keepties = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "keepties");		if (temp == "not found"){	temp = "T";		}
+			keepties = util.isTrue(temp);
             
             if (!setSomething) { m->mothurOut("\nYou did not set any parameters. I will filter using minabund=1.\n\n"); minAbund = 1; }
         }
@@ -224,10 +224,11 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 int FilterSharedCommand::execute(){
 	try {
         
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -236,7 +237,7 @@ int FilterSharedCommand::execute(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            if (m->getControl_pressed()) {   delete lookup; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;  }
+            if (m->getControl_pressed()) {   delete lookup; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
@@ -248,7 +249,7 @@ int FilterSharedCommand::execute(){
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
 				delete lookup;
@@ -290,7 +291,7 @@ int FilterSharedCommand::execute(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
@@ -302,10 +303,10 @@ int FilterSharedCommand::execute(){
 		}
         
 		//set shared file as new current sharedfile
-		string current = "";
+		string currentName = "";
         itTypes = outputTypes.find("shared");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSharedFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -323,13 +324,9 @@ int FilterSharedCommand::execute(){
 //**********************************************************************************************************************
 int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
 	try {
-		
-		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->getCurrentSharedBinLabels();
-		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[extension]"] = m->getExtension(sharedfile);
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[extension]"] = util.getExtension(sharedfile);
         variables["[distance]"] = sharedLookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        
         
@@ -339,7 +336,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         vector<string> filteredLabels;
         
         vector<SharedRAbundVector*> data = sharedLookup->getSharedRAbundVectors();
-        vector<int> rareCounts; rareCounts.resize(m->getGroups().size(), 0);
+        vector<int> rareCounts; rareCounts.resize(Groups.size(), 0);
         
         //you want to remove a percentage of OTUs
         set<string> removeLabels;
@@ -351,7 +348,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                 for (int j = 0; j < data.size(); j++) {
                     otuTotal += data[j]->get(i);
                 }
-                spearmanRank temp(saveBinLabels[i], otuTotal);
+                spearmanRank temp(sharedLookup->getOTUName(i), otuTotal);
                 otus.push_back(temp);
             }
             
@@ -432,15 +429,15 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             }
             
             if (okay && (rarePercent != -0.01)) {
-                if (removeLabels.count(saveBinLabels[i]) != 0) { //are we on the 'bad' list
+                if (removeLabels.count(sharedLookup->getOTUName(i)) != 0) { //are we on the 'bad' list
                     okay = false;
                 }
             }
             
             //did this OTU pass the filter criteria
             if (okay) {
-                filteredLabels.push_back(saveBinLabels[i]);
-                labelsForRare[m->getSimpleLabel(saveBinLabels[i])] = i;
+                //filteredLabels.push_back(saveBinLabels[i]);
+                //labelsForRare[util.getSimpleLabel(saveBinLabels[i])] = i;
                 ++i;
             }else { //if not, do we want to save the counts
                 filteredSomething = true;
@@ -465,8 +462,8 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                 if (filteredLabels[filteredLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
                 
                 string tempLabel = filteredLabels[filteredLabels.size()-1];
-                string simpleLastLabel = m->getSimpleLabel(tempLabel);
-                m->mothurConvert(simpleLastLabel, otuNum); otuNum++;
+                string simpleLastLabel = util.getSimpleLabel(tempLabel);
+                util.mothurConvert(simpleLastLabel, otuNum); otuNum++;
                 while (notDone) {
                     if (m->getControl_pressed()) { notDone = false; break; }
                     
@@ -482,28 +479,21 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                     otuNum++;
                 }
                 sharedLookup->push_back(rareCounts, "rareOTUs" + toString(otuNum));
-                filteredLabels.push_back("rareOTUs" + toString(otuNum));
+                //filteredLabels.push_back("rareOTUs" + toString(otuNum));
             }
         }
         
         ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
-        m->setCurrentSharedBinLabels(filteredLabels);
         
 		sharedLookup->printHeaders(out);
         sharedLookup->print(out);
 		out.close();
         
-        
-        //save mothurOut's binLabels to restore for next label
-		m->setCurrentSharedBinLabels(saveBinLabels);
-        
         m->mothurOut("\nRemoved " + toString(numRemoved) + " OTUs.\n");
         
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FilterSharedCommand", "processShared");

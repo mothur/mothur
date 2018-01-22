@@ -11,6 +11,7 @@
 
 #include "formatmatrix.h"
 
+
 /******************************************************/
 
 class FormatColumnMatrix : public FormatMatrix {
@@ -24,6 +25,7 @@ public:
 private:
 	ifstream fileHandle;
 	string filename;
+    Utils util;
 	
 };
 

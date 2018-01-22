@@ -8,7 +8,7 @@
 
 #include "lefsecommand.h"
 #include "linearalgebra.h"
-#include "sharedutilities.h"
+
 
 //**********************************************************************************************************************
 vector<string> LefseCommand::setParameters(){
@@ -142,7 +142,7 @@ LefseCommand::LefseCommand(string option)  {
             outputTypes["summary"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);
+			string inputDir = validParameter.valid(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
                 
@@ -150,7 +150,7 @@ LefseCommand::LefseCommand(string option)  {
 				it = parameters.find("design");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["desing"] = inputDir + it->second;		}
 				}
@@ -158,106 +158,106 @@ LefseCommand::LefseCommand(string option)  {
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
             }
                     
             //get shared file, it is required
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile();
+				sharedfile = current->getSharedFile();
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
+			}else { current->setSharedFile(sharedfile); }
             
             //get shared file, it is required
-			designfile = validParameter.validFile(parameters, "design", true);
+			designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { designfile = ""; abort = true; }
 			else if (designfile == "not found") {
 				//if there is a current shared file, use it
-				designfile = m->getDesignFile();
+				designfile = current->getDesignFile();
 				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setDesignFile(designfile); }
+			}else { current->setDesignFile(designfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){
-				outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
+				outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
 			}
             
-            string label = validParameter.validFile(parameters, "label", false);
+            string label = validParameter.valid(parameters, "label");
 			if (label == "not found") { label = ""; }
 			else {
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
             
-            mclass = validParameter.validFile(parameters, "class", false);
+            mclass = validParameter.valid(parameters, "class");
 			if (mclass == "not found") { mclass = ""; }
 			
-            subclass = validParameter.validFile(parameters, "subclass", false);
+            subclass = validParameter.valid(parameters, "subclass");
 			if (subclass == "not found") { subclass = mclass; }
             
-            string temp = validParameter.validFile(parameters, "aalpha", false);
+            string temp = validParameter.valid(parameters, "aalpha");
 			if (temp == "not found") { temp = "0.05"; }
-			m->mothurConvert(temp, anovaAlpha);
+			util.mothurConvert(temp, anovaAlpha);
             
-            temp = validParameter.validFile(parameters, "walpha", false);
+            temp = validParameter.valid(parameters, "walpha");
 			if (temp == "not found") { temp = "0.05"; }
-			m->mothurConvert(temp, wilcoxonAlpha);
+			util.mothurConvert(temp, wilcoxonAlpha);
             
-            temp = validParameter.validFile(parameters, "wilc", false);
+            temp = validParameter.valid(parameters, "wilc");
 			if (temp == "not found") { temp = "T"; }
-			wilc = m->isTrue(temp);
+			wilc = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "norm", false);
+            temp = validParameter.valid(parameters, "norm");
 			if (temp == "not found") { temp = "T"; }
-			normMillion = m->isTrue(temp);
+			normMillion = util.isTrue(temp);
             
             //temp = validParameter.validFile(parameters, "subject", false);
 			//if (temp == "not found") { temp = "F"; }
-			//subject = m->isTrue(temp);
+			//subject = util.isTrue(temp);
 
-            temp = validParameter.validFile(parameters, "lda", false);
+            temp = validParameter.valid(parameters, "lda");
 			if (temp == "not found") { temp = "2.0"; }
-			m->mothurConvert(temp, ldaThreshold);
+			util.mothurConvert(temp, ldaThreshold);
             
-            temp = validParameter.validFile(parameters, "iters", false);
+            temp = validParameter.valid(parameters, "iters");
 			if (temp == "not found") { temp = "30"; }
-			m->mothurConvert(temp, iters);
+			util.mothurConvert(temp, iters);
             
-            temp = validParameter.validFile(parameters, "fboots", false);
+            temp = validParameter.valid(parameters, "fboots");
 			if (temp == "not found") { temp = "0.67"; }
-			m->mothurConvert(temp, fBoots);
+			util.mothurConvert(temp, fBoots);
             
             //temp = validParameter.validFile(parameters, "wilcsamename", false);
 			//if (temp == "not found") { temp = "F"; }
-			//wilcsamename = m->isTrue(temp);
+			//wilcsamename = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "curv", false);
+            temp = validParameter.valid(parameters, "curv");
 			if (temp == "not found") { temp = "F"; }
-			curv = m->isTrue(temp);
+			curv = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "strict", false);
+            temp = validParameter.valid(parameters, "strict");
             if (temp == "not found"){	temp = "0";		}
 			if ((temp != "0") && (temp != "1") && (temp != "2")) { m->mothurOut("Invalid strict option: choices are 0, 1 or 2."); m->mothurOutEndLine(); abort=true; }
-            else {  m->mothurConvert(temp, strict); }
+            else {  util.mothurConvert(temp, strict); }
             
-            temp = validParameter.validFile(parameters, "minc", false);
+            temp = validParameter.valid(parameters, "minc");
 			if (temp == "not found") { temp = "10"; }
-			m->mothurConvert(temp, minC);
+			util.mothurConvert(temp, minC);
             
-            sets = validParameter.validFile(parameters, "sets", false);
+            sets = validParameter.valid(parameters, "sets");
             if (sets == "not found") { sets = ""; }
             else {
-                m->splitAtDash(sets, Sets);
+                util.splitAtDash(sets, Sets);
             }
             
-            multiClassStrat = validParameter.validFile(parameters, "multiclass", false);
+            multiClassStrat = validParameter.valid(parameters, "multiclass");
             if (multiClassStrat == "not found"){	multiClassStrat = "onevall";		}
 			if ((multiClassStrat != "onevall") && (multiClassStrat != "onevone")) { m->mothurOut("Invalid multiclass option: choices are onevone or onevall."); m->mothurOutEndLine(); abort=true; }
 		}
@@ -273,31 +273,23 @@ LefseCommand::LefseCommand(string option)  {
 int LefseCommand::execute(){
 	try {
         m->setRandomSeed(1982);
-        //for reading lefse formatted file and running in mothur for testing - pass number of rows used for design file
-        if (false) {  makeShared(1); exit(1); }
-		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         DesignMap designMap(designfile);
         
         //if user did not select class use first column
         if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); if (subclass == "") { subclass = mclass; } }
         
+        vector<string> Groups;
         if (Sets.size() != 0) { //user has picked sets find groups to include from lookup
-            //make sure sets are all in designMap
-            SharedUtil* util = new SharedUtil();
-            vector<string> dGroups = designMap.getCategory(mclass);
-            util->setGroups(Sets, dGroups);
-            delete util;
-            
             designMap.setDefaultClass(mclass);
-            vector<string> groupsToSelect = designMap.getNamesGroups(Sets);
-            m->setGroups(groupsToSelect);
+            Groups = designMap.getNamesGroups(Sets);
         }
         
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
         SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
         string lastLabel = lookup->getLabel();
+        Groups = lookup->getNamesGroups();
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
@@ -318,7 +310,7 @@ int LefseCommand::execute(){
                 userLabels.erase(lookup->getLabel());
             }
             
-            if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -360,7 +352,7 @@ int LefseCommand::execute(){
         }
         
         //run last label if you need to
-        if (needToRun == true)  {
+        if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
             
@@ -460,7 +452,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, DesignMap& designMa
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: completed lda\n"); } 
         
-        printResults(means, significantOtuLabels, sigOTUSLDA, lookup->getLabel(), classes);
+        printResults(means, significantOtuLabels, sigOTUSLDA, lookup->getLabel(), classes, lookup->getOTUNames());
         
         return 0;
     }
@@ -620,8 +612,8 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                         bool medComp = false; // are there enough samples per subclass
                         if ((xIndexes.size() < minC) || (yIndexes.size() < minC)) { medComp = true; }
                         
-                        double sx = m->median(x);
-                        double sy = m->median(y);
+                        double sx = util.median(x);
+                        double sy = util.median(y);
                        
                         //if cl1[0] == cl2[0] and len(set(cl1)) == 1 and  len(set(cl2)) == 1:
                         //tres, first = False, False
@@ -805,7 +797,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
                 save = h;
                 rand_s.clear();
                 
-                for (int k = 0; k < fractionNumGroups; k++) {  int index = m->getRandomIndex(numGroups-1); rand_s.push_back(index); }
+                for (int k = 0; k < fractionNumGroups; k++) {  int index = util.getRandomIndex(numGroups-1); rand_s.push_back(index); }
                 if (!contastWithinClassesOrFewPerClass(adjustedLookup, rand_s, minCl, class2GroupIndex, indexToClass)) { h+=1000; save += 1000; } //break out of loop
             }
             
@@ -980,7 +972,7 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
         
         for (int i = 0; i < rands.size(); i++) { //fill cls with the classes represented in the random selection
             for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it != class2GroupIndex.end(); it++) {
-                if (m->inUsersGroups(rands[i], (it->second))) {
+                if (util.inUsersGroups(rands[i], (it->second))) {
                     map<string, int>::iterator itClass = cls.find(it->first);
                     if (itClass != cls.end()) { itClass->second++; }
                     else { cls[it->first] = 1;  }
@@ -1024,21 +1016,21 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
     }
 }
 //**********************************************************************************************************************
-int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes) {
+int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels) {
     try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = label;
         string outputFileName = getOutputFileName("summary",variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
         
         //output headers
         out << "OTU\tLogMaxMean\tClass\tLDA\tpValue\n";
         
         string temp = "";
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        
         for (int i = 0; i < means.size(); i++) { //[numOTUs][classes]
             //find max mean of classes
             double maxMean = -1.0; string maxClass = "none";
@@ -1050,7 +1042,7 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
             logMaxMean = log10(logMaxMean);
             
             out << currentLabels[i] << '\t' << logMaxMean << '\t';
-            if (m->getDebug()) { temp = m->getCurrentSharedBinLabels()[i] + '\t' + toString(logMaxMean) + '\t'; }
+            if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMaxMean) + '\t'; }
             
             map<int, double>::iterator it = sigLDA.find(i);
             if (it != sigLDA.end()) {
@@ -1070,14 +1062,13 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
 }
 //**********************************************************************************************************************
 //printToCoutForRTesting(adjustedLookup, rand_s, class2GroupIndex, numBins);
-bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<string, vector<int> >& class2GroupIndex, map<int, double> bins, map<string, vector<int> >& subClass2GroupIndex, vector<string> groups) {
+bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<string, vector<int> >& class2GroupIndex, map<int, double> bins, map<string, vector<int> >& subClass2GroupIndex, vector<string> groups, vector<string> currentLabels) {
     try {
         cout << "rand_s = ";
         for (int h = 0; h < rand_s.size(); h++) { cout << rand_s[h] << '\t'; } cout << endl;
         
         //print otu data
         int count = 0;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
             if (m->getControl_pressed()) { break; }
             
@@ -1091,7 +1082,7 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         for (int h = 0; h < rand_s.size(); h++) {
             //find class this index is in
             for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it!= class2GroupIndex.end(); it++) {
-                if (m->inUsersGroups(rand_s[h], (it->second)) ) {   cout << (h+1) << " <- c(\"" +it->first + "\")\n" ; }
+                if (util.inUsersGroups(rand_s[h], (it->second)) ) {   cout << (h+1) << " <- c(\"" +it->first + "\")\n" ; }
             }
         }*/
         
@@ -1100,7 +1091,7 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         for (int h = 0; h < rand_s.size(); h++) {
             //find class this index is in
             for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it!= class2GroupIndex.end(); it++) {
-                if (m->inUsersGroups(rand_s[h], (it->second)) ) {   tempOutput += "\"" +it->first + "\"" + ","; } //"\"" +it->first + "\""
+                if (util.inUsersGroups(rand_s[h], (it->second)) ) {   tempOutput += "\"" +it->first + "\"" + ","; } //"\"" +it->first + "\""
             }
         }
         tempOutput = tempOutput.substr(0, tempOutput.length()-1);
@@ -1113,7 +1104,7 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
             for (int h = 0; h < rand_s.size(); h++) {
                 //find class this index is in
                 for (map<string, vector<int> >::iterator it = subClass2GroupIndex.begin(); it!= subClass2GroupIndex.end(); it++) {
-                    if (m->inUsersGroups(rand_s[h], (it->second)) ) {   tempOutput += "\"" +it->first + "\"" + ','; }
+                    if (util.inUsersGroups(rand_s[h], (it->second)) ) {   tempOutput += "\"" +it->first + "\"" + ','; }
                 }
             }
             tempOutput = tempOutput.substr(0, tempOutput.length()-1);
@@ -1173,87 +1164,10 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         exit(1);
     }
 }
-/**********************************************************************************************************************
-int LefseCommand::makeShared(int numDesignLines) {
-    try {
-        ifstream in;
-        m->openInputFile(sharedfile, in);
-        vector< vector<string> > lines;
-        for(int i = 0; i < numDesignLines; i++) {
-            if (m->getControl_pressed()) { return 0; }
-            
-            string line = m->getline(in);
-            cout << line << endl;
-            vector<string> pieces = m->splitWhiteSpace(line);
-            lines.push_back(pieces);
-        }
-        
-        ofstream out;
-        m->openOutputFile(sharedfile+".design", out); out << "group";
-        for (int j = 0; j < lines.size(); j++) { out  << '\t' << lines[j][0]; } out << endl;
-        for (int j = 1; j < lines[0].size(); j++) {
-            out <<(j-1);
-            for (int i = 0; i < lines.size(); i++) {
-                 out  << '\t' << lines[i][j];
-            }
-            out << endl;
-        }
-        out.close();
-        DesignMap design(sharedfile+".design");
-        
-        SharedRAbundFloatVectors* lookup;
-        for (int k = 0; k < lines[0].size()-1; k++) {
-            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-            temp->setLabel("0.03");
-            temp->setGroup(toString(k));
-            lookup.push_back(temp);
-        }
-        
-        m->currentSharedBinLabels.clear();
-        int count = 0;
-        while (!in.eof()) {
-            if (m->getControl_pressed()) { return 0; }
-            
-            string line = m->getline(in);
-            vector<string> pieces = m->splitWhiteSpace(line);
-            
-            float sum = 0.0;
-            for (int i = 1; i < pieces.size(); i++) {
-                float value; m->mothurConvert(pieces[i], value);
-                sum += value;
-            }
-            
-            if (sum != 0.0) {
-                //cout << count << '\t';
-                for (int i = 1; i < pieces.size(); i++) {
-                    float value; m->mothurConvert(pieces[i], value);
-                    lookup[i-1]->push_back(value, toString(i-1));
-                    //cout << pieces[i] << '\t';
-                }
-                m->currentSharedBinLabels.push_back(toString(count));
-                //m->currentBinLabels.push_back(pieces[0]);
-                //cout << line<< endl;
-                //cout << endl;
-            }
-            count++;
-        }
-        in.close();
-        
-        for (int k = 0; k < lookup.size(); k++) {
-            //cout << "0.03" << '\t' << toString(k) << endl; lookup[k]->print(cout);
-        }
-        
-        process(lookup, design);
-        
-        return 0;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "LefseCommand", "printToCoutForRTesting");
-        exit(1);
-    }
-}
+/******************************************/
 
-//**********************************************************************************************************************/
+
+
 
 
 

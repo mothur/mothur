@@ -6,6 +6,7 @@
 #include "sharedrabundvector.hpp"
 #include "sequence.hpp"
 #include "mothurout.h"
+#include "utils.hpp"
 
 /* The calculator class is the parent class for all the different estimators implemented in mothur except the tree calculators.
 It has 2 pure functions EstOutput getValues(SAbundVector*), which works on a single group, and 
@@ -81,8 +82,7 @@ public:
     DistCalc(){ dist = 0; m = MothurOut::getInstance(); }
     DistCalc(const DistCalc& d) : dist(d.dist) { m = MothurOut::getInstance(); }
     virtual ~DistCalc() {}
-    virtual void calcDist(Sequence, Sequence) = 0;
-    double getDist()	{	return dist;	}
+    virtual double calcDist(Sequence, Sequence) = 0;
     
 protected:
     double dist;

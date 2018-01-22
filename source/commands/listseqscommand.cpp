@@ -111,17 +111,17 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			outputTypes["accnos"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("alignreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
@@ -129,7 +129,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -137,7 +137,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -145,7 +145,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -153,7 +153,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -161,7 +161,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -169,7 +169,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -177,55 +177,55 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
                 it = parameters.find("fastq");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
-			alignfile = validParameter.validFile(parameters, "alignreport", true);
+			alignfile = validParameter.validFile(parameters, "alignreport");
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
 			
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
-			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
-			else { m->setTaxonomyFile(taxfile); }
+			else { current->setTaxonomyFile(taxfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; }
 			else if (countfile == "not found") {  countfile = "";  }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
-            fastqfile = validParameter.validFile(parameters, "fastq", true);
+            fastqfile = validParameter.validFile(parameters, "fastq");
 			if (fastqfile == "not open") { abort = true; }
 			else if (fastqfile == "not found") {  fastqfile = "";  }
 			
 			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
             
             bool formatFound = true;
-            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	formatFound = false; format = "illumina1.8+";	}
+            format = validParameter.valid(parameters, "format");		if (format == "not found"){	formatFound = false; format = "illumina1.8+";	}
             
             if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
                 m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
@@ -251,7 +251,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 int ListSeqsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read functions fill names vector
 		if (fastafile != "")		{	inputFileName = fastafile;	readFasta();	}
@@ -268,28 +268,28 @@ int ListSeqsCommand::execute(){
 		//sort in alphabetical order
 		sort(names.begin(), names.end());
 		
-		if (outputDir == "") {  outputDir += m->hasPath(inputFileName);  }
+		if (outputDir == "") {  outputDir += util.hasPath(inputFileName);  }
 		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
 		string outputFileName = getOutputFileName("accnos", variables);
 
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
 		
 		//output to .accnos file
 		for (int i = 0; i < names.size(); i++) {
 			
-			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); util.mothurRemove(outputFileName); return 0; }
 			
 			out << names[i] << endl;
 		}
 		out.close();
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  m->mothurRemove(outputFileName); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  util.mothurRemove(outputFileName); return 0; }
 		
-		m->setAccnosFile(outputFileName);
+		current->setAccnosFile(outputFileName);
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -297,10 +297,10 @@ int ListSeqsCommand::execute(){
 		m->mothurOutEndLine();
 		
 		//set accnos file as new current accnosfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("accnos");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 		}
 		
 		return 0;		
@@ -316,7 +316,7 @@ int ListSeqsCommand::readFastq(){
 	try {
 		
 		ifstream in;
-		m->openInputFile(fastqfile, in);
+		util.openInputFile(fastqfile, in);
 		string name;
 		
 		int count = 1;
@@ -325,7 +325,7 @@ int ListSeqsCommand::readFastq(){
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
             bool ignore;
-            FastqRead fread(in, ignore, format); m->gobble(in);
+            FastqRead fread(in, ignore, format); util.gobble(in);
             
             if (!ignore) { names.push_back(fread.getName()); }
 			
@@ -347,12 +347,12 @@ int ListSeqsCommand::readFasta(){
 	try {
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		string name;
 		
 		//ofstream out;
-		//string newFastaName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "numsAdded.fasta";
-		//m->openOutputFile(newFastaName, out);
+		//string newFastaName = outputDir + util.getRootName(util.getSimpleName(fastafile)) + "numsAdded.fasta";
+		//util.openOutputFile(newFastaName, out);
 		int count = 1;
 		//string lastName = "";
 		
@@ -365,7 +365,7 @@ int ListSeqsCommand::readFasta(){
 			
 			if (name != "") {  names.push_back(name);  }
 			
-			m->gobble(in);
+			util.gobble(in);
 			if (m->getDebug()) { count++; cout << "[DEBUG]: count = " + toString(count) + ", name = " + currSeq.getName() + "\n"; }
 		}
 		in.close();	
@@ -383,11 +383,13 @@ int ListSeqsCommand::readFasta(){
 int ListSeqsCommand::readList(){
 	try {
 		ifstream in;
-		m->openInputFile(listfile, in);
+		util.openInputFile(listfile, in);
+        string otuTag = util.getTag(listfile); //looks at filename to determine if OTU labels should be "Otu" or "Phylotype"
+        string readHeaders = ""; //Tells mothur to try and read headers from the file
 		
 		if(!in.eof()){
 			//read in list vector
-			ListVector list(in);
+			ListVector list(in, readHeaders, otuTag);
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
@@ -395,7 +397,7 @@ int ListSeqsCommand::readList(){
 				
 				if (m->getControl_pressed()) { in.close(); return 0; }
 				
-				m->splitAtComma(binnames, names);
+				util.splitAtComma(binnames, names);
 			}
 		}
 		in.close();	
@@ -414,20 +416,20 @@ int ListSeqsCommand::readName(){
 	try {
 		
 		ifstream in;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		while(!in.eof()){
 		
 			if (m->getControl_pressed()) { in.close(); return 0; }
 
-			in >> firstCol;	m->gobble(in);
+			in >> firstCol;	util.gobble(in);
 			in >> secondCol;			
 			
 			//parse second column saving each name
-			m->splitAtComma(secondCol, names);
+			util.splitAtComma(secondCol, names);
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		return 0;
@@ -444,19 +446,19 @@ int ListSeqsCommand::readGroup(){
 	try {
 	
 		ifstream in;
-		m->openInputFile(groupfile, in);
+		util.openInputFile(groupfile, in);
 		string name, group;
 		
 		while(!in.eof()){
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-			in >> name;	m->gobble(in);			//read from first column
+			in >> name;	util.gobble(in);			//read from first column
 			in >> group;			//read from second column
 			
 			names.push_back(name);
 					
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		return 0;
@@ -491,7 +493,7 @@ int ListSeqsCommand::readAlign(){
 	try {
 	
 		ifstream in;
-		m->openInputFile(alignfile, in);
+		util.openInputFile(alignfile, in);
 		string name, junk;
 		
 		//read column headers
@@ -499,14 +501,14 @@ int ListSeqsCommand::readAlign(){
 			if (!in.eof())	{	in >> junk;		}
 			else			{	break;			}
 		}
-		//m->getline(in);
+		//util.getline(in);
 		
 		while(!in.eof()){
 		
 			if (m->getControl_pressed()) { in.close(); return 0; }
 
 			in >> name;				//read from first column
-			//m->getline(in);
+			//util.getline(in);
 			//read rest
 			for (int i = 0; i < 15; i++) {  
 				if (!in.eof())	{	in >> junk;		}
@@ -515,7 +517,7 @@ int ListSeqsCommand::readAlign(){
 			
 			names.push_back(name);
 					
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		
@@ -533,15 +535,15 @@ int ListSeqsCommand::readTax(){
 	try {
 		
 		ifstream in;
-		m->openInputFile(taxfile, in);
+		util.openInputFile(taxfile, in);
 		string name, firstCol, secondCol;
 		
 		while(!in.eof()){
 		
 			if (m->getControl_pressed()) { in.close(); return 0; }
 
-            in >> firstCol; m->gobble(in);
-            secondCol = m->getline(in); m->gobble(in);
+            in >> firstCol; util.gobble(in);
+            secondCol = util.getline(in); util.gobble(in);
 			
 			names.push_back(firstCol);
 		}

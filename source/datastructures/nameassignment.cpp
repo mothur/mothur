@@ -6,7 +6,7 @@
 
 NameAssignment::NameAssignment(string nameMapFile){
 	m = MothurOut::getInstance();
-	m->openInputFile(nameMapFile, fileHandle);
+	util.openInputFile(nameMapFile, fileHandle);
 	
 }
 //**********************************************************************************************************************
@@ -23,7 +23,7 @@ void NameAssignment::readMap(){
 		int rowIndex = 0;
 		
 		while(fileHandle){
-			fileHandle >> firstCol;	m->gobble(fileHandle);			//read from first column
+			fileHandle >> firstCol;	util.gobble(fileHandle);			//read from first column
 			fileHandle >> secondCol;			//read from second column
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: firstCol = " + firstCol + ", secondCol= " + secondCol + "\n"); }
@@ -37,7 +37,7 @@ void NameAssignment::readMap(){
 				
 			}else{	m->mothurOut(firstCol + " is already in namesfile. I will use first definition."); m->mothurOutEndLine();  }
 			
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 		}
 		fileHandle.close();
 	

@@ -14,7 +14,7 @@
 #include "listvector.hpp"
 #include "nameassignment.hpp"
 #include "counttable.h"
-
+#include "utils.hpp"
 
 //**********************************************************************************************************************
 //  This class takes a distance matrix file and converts it to a file where each row contains all distances below the cutoff

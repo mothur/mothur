@@ -18,7 +18,7 @@ class AlignTree : public Classify {
 public:
 	AlignTree(string, string, int);
 	~AlignTree();
-	string getTaxonomy(Sequence*);
+	string getTaxonomy(Sequence*, string&, bool&);
 	
 private:
     int addTaxonomyToTree(string, string&, string&);

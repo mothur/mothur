@@ -63,13 +63,13 @@ SetSeedCommand::SetSeedCommand(string option)  {
             }
             
             bool seed = false;
-            string temp = validParameter.validFile(parameters, "seed", false);
+            string temp = validParameter.valid(parameters, "seed");
             if (temp == "not found") { random = 0;  m->mothurOut("[ERROR]: You must provide a seed value or set seed to clear."); m->mothurOutEndLine(); abort = true;}
             else if (temp == "clear") {
                 random = time(NULL);
                 seed = true;
             }else {
-                if (m->isInteger(temp)) { m->mothurConvert(temp, random); seed = true; }
+                if (util.isInteger(temp)) { util.mothurConvert(temp, random); seed = true; }
                 else { m->mothurOut("[ERROR]: Seed must be an integer for the set.dir command."); m->mothurOutEndLine(); abort = true; }
             }
         }
@@ -84,7 +84,7 @@ SetSeedCommand::SetSeedCommand(string option)  {
 int SetSeedCommand::execute(){
     try {
         
-        if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         m->setRandomSeed(random);
         m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");

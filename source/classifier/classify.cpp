@@ -17,6 +17,10 @@
 /**************************************************************************************************/
 void Classify::generateDatabaseAndNames(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch)  {		
 	try {
+        m = MothurOut::getInstance();
+        current = CurrentFile::getInstance();
+        Utils util;
+        
         maxLevel = 0;
 		taxFile = tfile;
 		
@@ -24,15 +28,15 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 
         templateFile = tempFile;
         
-        int start = time(NULL);
+        long start = time(NULL);
         
         m->mothurOut("Generating search database...    "); cout.flush();
         
         //need to know number of template seqs for suffixdb
         if (method == "suffix") {
             ifstream inFASTA;
-            m->openInputFile(tempFile, inFASTA);
-            m->getNumSeqs(inFASTA, numSeqs);
+            util.openInputFile(tempFile, inFASTA);
+            util.getNumSeqs(inFASTA, numSeqs);
             inFASTA.close();
         }
         
@@ -44,9 +48,9 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
             kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
             ifstream kmerFileTest(kmerDBName.c_str());
             if(kmerFileTest){
-                bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
-                int shortcutTimeStamp = m->getTimeStamp(kmerDBName);
-                int referenceTimeStamp = m->getTimeStamp(tempFile);
+                bool GoodFile = util.checkReleaseVersion(kmerFileTest, current->getVersion());
+                int shortcutTimeStamp = util.getTimeStamp(kmerDBName);
+                int referenceTimeStamp = util.getTimeStamp(tempFile);
                 
                 //if the shortcut file is older then the reference file, remake shortcut file
                 if (shortcutTimeStamp < referenceTimeStamp) {  GoodFile = false;  }
@@ -65,11 +69,11 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
         
         if (needToGenerate) {
             ifstream fastaFile;
-            m->openInputFile(tempFile, fastaFile);
+            util.openInputFile(tempFile, fastaFile);
             
             while (!fastaFile.eof()) {
                 Sequence temp(fastaFile);
-                m->gobble(fastaFile);
+                util.gobble(fastaFile);
                 
                 names.push_back(temp.getName());
                 
@@ -85,11 +89,11 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
             database->readKmerDB(kmerFileTest);
             
             ifstream fastaFile;
-            m->openInputFile(tempFile, fastaFile);
+            util.openInputFile(tempFile, fastaFile);
             
             while (!fastaFile.eof()) {
                 Sequence temp(fastaFile);
-                m->gobble(fastaFile);
+                util.gobble(fastaFile);
                 
                 names.push_back(temp.getName());
             }
@@ -114,7 +118,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 	}
 }
 /**************************************************************************************************/
-Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree=NULL; flipped=false;  maxLevel = 0; }
+Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree=NULL;   maxLevel = 0; }
 /**************************************************************************************************/
 
 int Classify::readTaxonomy(string file) {
@@ -127,7 +131,7 @@ int Classify::readTaxonomy(string file) {
         if (m->getDebug()) { m->mothurOut("[DEBUG]: Taxonomies read in...\n"); }
         
         taxonomy.clear(); 
-        m->readTax(file, taxonomy, true);
+        Utils util; util.readTax(file, taxonomy, true);
         
         for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {
             phyloTree->addSeqToTree(itTax->first, itTax->second);
@@ -156,7 +160,7 @@ int Classify::readTaxonomy(string file) {
 vector<string> Classify::parseTax(string tax) {
 	try {
 		vector<string> taxons;
-		m->splitAtChar(tax, taxons, ';');
+		Utils util; util.splitAtChar(tax, taxons, ';');
         return taxons;
 	}
 	catch(exception& e) {

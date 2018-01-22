@@ -13,6 +13,8 @@
 #include "mothur.h"
 #include "sequence.hpp"
 #include "database.hpp"
+#include "utils.hpp"
+#include "currentfile.h"
 
 /**************************************************************************************************/
 
@@ -36,6 +38,8 @@ private:
 	vector<Sequence> templateSequences;
 	Sequence emptySequence;
 	MothurOut* m;
+    CurrentFile* current;
+    
 };
 
 /**************************************************************************************************/

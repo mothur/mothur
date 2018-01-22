@@ -94,12 +94,12 @@ GetCurrentCommand::GetCurrentCommand(string option)  {
             vector<string> tempOutNames;
             outputTypes["summary"] = tempOutNames;
             
-			clearTypes = validParameter.validFile(parameters, "clear", false);			
+			clearTypes = validParameter.valid(parameters, "clear");
 			if (clearTypes == "not found") { clearTypes = ""; }
-			else { m->splitAtDash(clearTypes, types);	}
+			else { util.splitAtDash(clearTypes, types);	}
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){  outputDir = ""; }
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){  outputDir = ""; }
 		}
 		
 	}
@@ -113,7 +113,7 @@ GetCurrentCommand::GetCurrentCommand(string option)  {
 int GetCurrentCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
 		cFactory = CommandFactory::getInstance();
         
@@ -125,61 +125,61 @@ int GetCurrentCommand::execute(){
 				
 				//look for file types
 				if (types[i] == "fasta") {
-					m->setFastaFile("");
+					current->setFastaFile("");
 				}else if (types[i] == "qfile") {
-					m->setQualFile("");
+					current->setQualFile("");
 				}else if (types[i] == "phylip") {
-					m->setPhylipFile("");
+					current->setPhylipFile("");
 				}else if (types[i] == "column") {
-					m->setColumnFile("");
+					current->setColumnFile("");
 				}else if (types[i] == "list") {
-					m->setListFile("");
+					current->setListFile("");
 				}else if (types[i] == "rabund") {
-					m->setRabundFile("");
+					current->setRabundFile("");
 				}else if (types[i] == "sabund") {
-					m->setSabundFile("");
+					current->setSabundFile("");
 				}else if (types[i] == "name") {
-					m->setNameFile("");
+					current->setNameFile("");
 				}else if (types[i] == "group") {
-					m->setGroupFile("");
+					current->setGroupFile("");
 				}else if (types[i] == "order") {
-					m->setOrderFile("");
+					current->setOrderFile("");
 				}else if (types[i] == "ordergroup") {
-					m->setOrderGroupFile("");
+					current->setOrderGroupFile("");
 				}else if (types[i] == "tree") {
-					m->setTreeFile("");
+					current->setTreeFile("");
 				}else if (types[i] == "shared") {
-					m->setSharedFile("");
+					current->setSharedFile("");
 				}else if (types[i] == "relabund") {
-					m->setRelAbundFile("");
+					current->setRelAbundFile("");
 				}else if (types[i] == "design") {
-					m->setDesignFile("");
+					current->setDesignFile("");
 				}else if (types[i] == "sff") {
-					m->setSFFFile("");
+					current->setSFFFile("");
 				}else if (types[i] == "oligos") {
-					m->setOligosFile("");
+					current->setOligosFile("");
 				}else if (types[i] == "accnos") {
-					m->setAccnosFile("");
+					current->setAccnosFile("");
 				}else if (types[i] == "taxonomy") {
-					m->setTaxonomyFile("");
+					current->setTaxonomyFile("");
                 }else if (types[i] == "constaxonomy") {
-                    m->setConsTaxonomyFile("");
+                    current->setConsTaxonomyFile("");
                 }else if (types[i] == "contigsreport") {
-                    m->setContigsReportFile("");
+                    current->setContigsReportFile("");
 				}else if (types[i] == "flow") {
-					m->setFlowFile("");
+					current->setFlowFile("");
                 }else if (types[i] == "biom") {
-					m->setBiomFile("");
+					current->setBiomFile("");
                 }else if (types[i] == "count") {
-					m->setCountTableFile("");
+					current->setCountFile("");
                 }else if (types[i] == "summary") {
-					m->setSummaryFile("");
+					current->setSummaryFile("");
                 }else if (types[i] == "file") {
-                    m->setFileFile("");
+                    current->setFileFile("");
 				}else if (types[i] == "processors") {
-					m->setProcessors("1");
+					current->setProcessors("1");
 				}else if (types[i] == "all") {
-					m->clearCurrentFiles();
+					current->clearCurrentFiles();
 				}else {
 					m->mothurOut("[ERROR]: mothur does not save a current file for " + types[i]); m->mothurOutEndLine();
 				}
@@ -187,43 +187,40 @@ int GetCurrentCommand::execute(){
 		}
 		
         unsigned long long ramUsed, total;
-        ramUsed = m->getRAMUsed(); total = m->getTotalRAM();
+        ramUsed = util.getRAMUsed(); total = util.getTotalRAM();
         m->mothurOut("\nCurrent RAM usage: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n");
         
-		if (m->hasCurrentFiles()) {
+		if (current->hasCurrentFiles()) {
             map<string, string> variables;
-            variables["[filename]"] = m->getFullPathName(outputDir);
+            variables["[filename]"] = util.getFullPathName(outputDir);
             string filename = getOutputFileName("summary", variables);
             
 			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
-			m->printCurrentFiles(filename);
+			current->printCurrentFiles(filename);
             outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
 		}
         
-        string inputDir = cFactory->getInputDir();
+        string inputDir = current->getInputDir();
         if (inputDir != "") {
             m->mothurOutEndLine(); m->mothurOut("Current input directory saved by mothur: " + inputDir); m->mothurOutEndLine();
         }
         
-        string outputDir = cFactory->getOutputDir();
+        string outputDir = current->getOutputDir();
         if (outputDir != "") {
             m->mothurOutEndLine(); m->mothurOut("Current output directory saved by mothur: " + outputDir); m->mothurOutEndLine();
         }
-        string defaultPath = m->getDefaultPath();
+        string defaultPath = current->getDefaultPath();
         if (defaultPath != "") {
             m->mothurOutEndLine(); m->mothurOut("Current default directory saved by mothur: " + defaultPath); m->mothurOutEndLine();
         }
         
         
-        string temp = "./";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-            temp = ".\\";
-#endif
-        temp = m->getFullPathName(temp);
+        string temp = "."; temp += PATH_SEPARATOR;
+
+        temp = util.getFullPathName(temp);
         m->mothurOutEndLine(); m->mothurOut("Current working directory: " + temp); m->mothurOutEndLine();
         
-        if (m->hasCurrentFiles()) {
+        if (current->hasCurrentFiles()) {
             m->mothurOutEndLine();
             m->mothurOut("Output File Names: "); m->mothurOutEndLine();
             for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }

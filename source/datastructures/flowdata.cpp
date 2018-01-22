@@ -55,7 +55,7 @@ bool FlowData::getNext(ifstream& flowFile){
             if (m->getDebug()) {  m->mothurOut("\n"); }
             updateEndFlow(); 
             translateFlow();
-            m->gobble(flowFile);
+            util.gobble(flowFile);
 		}
            
 		if(flowFile){	return 1;	}
@@ -74,9 +74,8 @@ string FlowData::getSequenceName(ifstream& flowFile) {
 		
         flowFile >> name;
 		
-		if (name.length() != 0) { 
-            m->checkName(name);
-        }else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        if (name.length() != 0) {  util.checkName(name); }
+        else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name.\n"); m->setControl_pressed(true);  }
         
 		return name;
 	}

@@ -13,7 +13,7 @@
 #include "command.hpp"
 #include "unweighted.h"
 #include "counttable.h"
-#include "sharedutilities.h"
+
 #include "fileoutput.h"
 #include "readtree.h"
 

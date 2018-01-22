@@ -20,8 +20,9 @@ Tree* Consensus::getTree(vector<Tree*>& t){
 		getSets(t);	
 		
 		if (m->getControl_pressed()) { return 0; }
-		
-		consensusTree = new Tree(t[0]->getCountTable());
+        
+        vector<string> Treenames = t[0]->getTreeNames();
+		consensusTree = new Tree(t[0]->getCountTable(), Treenames);
 		
 		it2 = nodePairs.find(treeSet);
 		
@@ -56,7 +57,7 @@ int Consensus::printSetsInfo() {
         //open file for pairing not included in the tree
 		string notIncluded = "cons.pairs";  
 		ofstream out2;
-        m->openOutputFile(notIncluded, out2);
+        Utils util; util.openOutputFile(notIncluded, out2);
 
         //output species in order
 		out2 << "Species in Order: " << endl << endl;
@@ -313,7 +314,7 @@ int Consensus::getSubgroupRating(vector<string> group) {
 		//go through the sets
 		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
 			//are you a subset of bigset, then save in possiblePairings
-			if (isSubset(group, it2->first) == true) {  possiblePairing[it2->first] = it2->second;  }
+			if (isSubset(group, it2->first) ) {  possiblePairing[it2->first] = it2->second;  }
 		}		
 	
 		map< vector< vector<string> > , int > rating;

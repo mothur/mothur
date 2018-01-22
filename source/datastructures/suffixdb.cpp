@@ -34,7 +34,7 @@ SuffixDB::SuffixDB() : Database() {
 
 /**************************************************************************************************/
 //assumes sequences have been added using addSequence
-vector<int> SuffixDB::findClosestSequences(Sequence* candidateSeq, int num){
+vector<int> SuffixDB::findClosestSequences(Sequence* candidateSeq, int num, vector<float>& Scores){
 	try {
 		vector<int> topMatches;
 		string processedSeq = candidateSeq->convert2ints();		//	the candidate sequence needs to be a string of ints
@@ -49,8 +49,9 @@ vector<int> SuffixDB::findClosestSequences(Sequence* candidateSeq, int num){
 		//sorts putting smallest matches first
 		sort(seqMatches.begin(), seqMatches.end(), compareSeqMatchesReverse);
 		
-		searchScore = seqMatches[0].match;
+		float searchScore = seqMatches[0].match;
 		searchScore = 100 * (1. - searchScore / (float)processedSeq.length());
+        Scores.push_back(searchScore);
 		
 		//save top matches
 		for (int i = 0; i < num; i++) {

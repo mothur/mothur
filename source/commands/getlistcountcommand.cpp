@@ -106,42 +106,42 @@ GetListCountCommand::GetListCountCommand(string option)  {
 			outputTypes["otu"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
 			}
 
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found")  { 				
-				listfile = m->getListFile(); 
+				listfile = current->getListFile(); 
 				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			sort = validParameter.validFile(parameters, "sort", false);	  if (sort == "not found") { sort = "otu"; }
+			sort = validParameter.valid(parameters, "sort");	  if (sort == "not found") { sort = "otu"; }
 			if ((sort != "otu") && (sort != "name")) { m->mothurOut( sort + " is not a valid sort option. Options are otu and name. I will use otu."); m->mothurOutEndLine(); sort = "otu"; }
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 		}
@@ -155,9 +155,9 @@ GetListCountCommand::GetListCountCommand(string option)  {
 
 int GetListCountCommand::execute(){
 	try {
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		input = new InputData(listfile, "list");
+		input = new InputData(listfile, "list", nullVector);
 		list = input->getListVector();
 		string lastLabel = list->getLabel();
 
@@ -165,7 +165,7 @@ int GetListCountCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
+		if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -173,13 +173,13 @@ int GetListCountCommand::execute(){
 			
 				process(list);
 				
-				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
+				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -187,7 +187,7 @@ int GetListCountCommand::execute(){
 				
 				process(list);
 				
-				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
+				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
 
 													
 				processedLabels.insert(list->getLabel());
@@ -218,13 +218,13 @@ int GetListCountCommand::execute(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			if (list != NULL) {		delete list;	}
 			list = input->getListVector(lastLabel);
 				
 			process(list);	
 			
-			if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
+			if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
 			
 			delete list;  
 		}
@@ -249,13 +249,13 @@ int GetListCountCommand::execute(){
 void GetListCountCommand::process(ListVector* list) {
 	try {
 		string binnames;
-		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		if (outputDir == "") { outputDir += util.hasPath(listfile); }
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[tag]"] = list->getLabel();
 		string outputFileName = getOutputFileName("otu", variables);
 		
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["otu"].push_back(outputFileName);
 		
 		m->mothurOut(list->getLabel()); m->mothurOutEndLine();
@@ -271,7 +271,7 @@ void GetListCountCommand::process(ListVector* list) {
 				out << binLabels[i] << '\t' << binnames << endl;
 			}else{ //sort = name
 				vector<string> names;
-				m->splitAtComma(binnames, names);
+				util.splitAtComma(binnames, names);
 				
 				for (int j = 0; j < names.size(); j++) {
 					out << names[j] << '\t' << binLabels[i] << endl;

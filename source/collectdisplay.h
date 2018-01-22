@@ -21,7 +21,7 @@ public:
 		output->output(nSeqs, data);	
 	};
 	
-    void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroups){
+    void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroups, vector<string> mGroups){
         timesCalled++;
         data = estimate->getValues(shared);  //passes estimators a shared vector from each group to be compared
         
@@ -29,7 +29,6 @@ public:
         //because we randomizes the order we need to put the results in the correct column in the output file
         int group1Index, group2Index, pos;
         
-        vector<string> mGroups = m->getGroups();
         for (int i = 0; i < mGroups.size(); i++) {
             if (shared[0]->getGroup() == mGroups[i]) { group1Index = i; }
             if (shared[1]->getGroup() == mGroups[i]) { group2Index = i; }
@@ -49,7 +48,7 @@ public:
 			n++;
 		}
 			
-		if ((estimate->getMultiple() == true) && all) { 
+		if ((estimate->getMultiple() ) && all) { 
 			numGroupComb++; 
 			groupData.resize((numGroupComb*data.size()), 0);
 			//is this the time its called with all values

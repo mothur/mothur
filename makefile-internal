@@ -1,12 +1,17 @@
 64BIT_VERSION ?= yes
 USEREADLINE ?= no
 USEBOOST ?= no
+LOGFILE_NAME ?= yes
 RELEASE_DATE = "\"3/20/2017\""
 VERSION = "\"1.39.5\""
 
 # Optimize to level 3:
-    CXXFLAGS += -O3 -std=c++0x
-    LDFLAGS += -std=c++0x
+    CXXFLAGS += -O3 -std=c++0x 
+    LDFLAGS += -std=c++0x -pthreads
+
+ifeq  ($(strip $(LOGFILE_NAME)),yes)
+    LOGFILE_NAME="\"mothur.logfile\""
+endif
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     #if you are a mac user use the following line
@@ -43,6 +48,7 @@ ifeq  ($(strip $(USEBOOST)),yes)
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
 
     LIBS += ${BOOST_LIBRARY_DIR}/libboost_iostreams.a
+    LIBS += ${BOOST_LIBRARY_DIR}/libboost_filesystem.a
 
     #if mac
     LIBS += -lz

@@ -726,7 +726,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     for (int i = 0; i < minFGroup.size(); i++) {
                         for (int j = 0; j < minFGroup[i].size(); j++) {
                             for (int k = 0; k < minRGroup.size(); k++) {
-                                if (m->inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
+                                if (util.inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
                             }
                         }
                     }
@@ -986,7 +986,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     for (int i = 0; i < minFGroup.size(); i++) {
                         for (int j = 0; j < minFGroup[i].size(); j++) {
                             for (int k = 0; k < minRGroup.size(); k++) {
-                                if (m->inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
+                                if (util.inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
                             }
                         }
                     }
@@ -1259,7 +1259,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                     for (int i = 0; i < minFGroup.size(); i++) {
                         for (int j = 0; j < minFGroup[i].size(); j++) {
                             for (int k = 0; k < minRGroup.size(); k++) {
-                                if (m->inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
+                                if (util.inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
                             }
                         }
                     }
@@ -1554,7 +1554,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
                     for (int i = 0; i < minFGroup.size(); i++) {
                         for (int j = 0; j < minFGroup[i].size(); j++) {
                             for (int k = 0; k < minRGroup.size(); k++) {
-                                if (m->inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
+                                if (util.inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
                             }
                         }
                     }
@@ -1821,7 +1821,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                     for (int i = 0; i < minFGroup.size(); i++) {
                         for (int j = 0; j < minFGroup[i].size(); j++) {
                             for (int k = 0; k < minRGroup.size(); k++) {
-                                if (m->inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
+                                if (util.inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
                             }
                         }
                     }
@@ -2076,7 +2076,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                     for (int i = 0; i < minFGroup.size(); i++) {
                         for (int j = 0; j < minFGroup[i].size(); j++) {
                             for (int k = 0; k < minRGroup.size(); k++) {
-                                if (m->inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
+                                if (util.inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
                             }
                         }
                     }

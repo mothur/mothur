@@ -125,7 +125,7 @@ void SAbundVector::quicksort(){
 /***********************************************************************/
 
 int SAbundVector::sum(){
-	return m->sum(data);
+	return util.sum(data);
 }
 
 /***********************************************************************/
@@ -236,7 +236,7 @@ OrderVector SAbundVector::getOrderVector(map<string,int>* hold){
 			}
 		}
 	
-		m->mothurRandomShuffle(ov);
+		util.mothurRandomShuffle(ov);
 
 		ov.setLabel(label);
 		ov.getNumBins();

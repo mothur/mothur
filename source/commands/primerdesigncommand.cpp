@@ -125,14 +125,14 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
             outputTypes["list"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
  				string path;
 				it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -140,7 +140,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -148,7 +148,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -156,40 +156,40 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
                 it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
             }
                         
 			//check for parameters
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
             //get fastafile - it is required
-            fastafile = validParameter.validFile(parameters, "fasta", true);
+            fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort=true;  }
 			else if (fastafile == "not found") {  
-                fastafile = m->getFastaFile(); 
+                fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-            }else  { m->setFastaFile(fastafile); }
+            }else  { current->setFastaFile(fastafile); }
             
             //get listfile - it is required
-            listfile = validParameter.validFile(parameters, "list", true);
+            listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort=true;  }
 			else if (listfile == "not found") {  
-                listfile = m->getListFile(); 
+                listfile = current->getListFile(); 
 				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current listfile and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
-            }else  { m->setListFile(listfile); }
+            }else  { current->setListFile(listfile); }
 
             
 			if ((namefile != "") && (countfile != "")) {
@@ -198,39 +198,38 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 			
             
             //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = m->hasPath(listfile); //if user entered a file with a path then preserve it	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
+				outputDir = util.hasPath(listfile); //if user entered a file with a path then preserve it	
 			}
             
-            string temp = validParameter.validFile(parameters, "cutoff", false);  if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, cutoff); 
+            string temp = validParameter.valid(parameters, "cutoff");  if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, cutoff); 
             
-            temp = validParameter.validFile(parameters, "pdiffs", false);  if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, pdiffs); 
+            temp = validParameter.valid(parameters, "pdiffs");  if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, pdiffs); 
             
-            temp = validParameter.validFile(parameters, "length", false);  if (temp == "not found") { temp = "18"; }
-			m->mothurConvert(temp, length); 
+            temp = validParameter.valid(parameters, "length");  if (temp == "not found") { temp = "18"; }
+			util.mothurConvert(temp, length); 
             
-            temp = validParameter.validFile(parameters, "mintm", false);  if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, minTM); 
+            temp = validParameter.valid(parameters, "mintm");  if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, minTM); 
             
-            temp = validParameter.validFile(parameters, "maxtm", false);  if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, maxTM); 
+            temp = validParameter.valid(parameters, "maxtm");  if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, maxTM); 
             
-            otulabel = validParameter.validFile(parameters, "otulabel", false);  if (otulabel == "not found") { otulabel = ""; }
+            otulabel = validParameter.valid(parameters, "otulabel");  if (otulabel == "not found") { otulabel = ""; }
             if (otulabel == "") {  m->mothurOut("[ERROR]: You must provide an OTU label, aborting.\n"); abort = true; }
             
-            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
             
-            label = validParameter.validFile(parameters, "label", false);			
+            label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
         
             if (countfile == "") { 
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -244,9 +243,9 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 int PrimerDesignCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        int start = time(NULL);
+        long start = time(NULL);
         //////////////////////////////////////////////////////////////////////////////
         //              get file inputs                                             //
         //////////////////////////////////////////////////////////////////////////////
@@ -261,7 +260,7 @@ int PrimerDesignCommand::execute(){
         unsigned long int numSeqs;  //used to sanity check the files. numSeqs = total seqs for namefile and uniques for count.
                                     //list file should have all seqs if namefile was used to create it and only uniques in count file was used.
         
-        if (namefile != "")         {  nameMap = m->readNames(namefile, numSeqs);       }
+        if (namefile != "")         {  nameMap = util.readNames(namefile, numSeqs);       }
         else if (countfile != "")   {  nameMap = readCount(numSeqs);                    }
         else { numSeqs = list->getNumSeqs();  }
         
@@ -284,12 +283,12 @@ int PrimerDesignCommand::execute(){
         vector<Sequence> conSeqs = createProcessesConSeqs(nameMap, numSeqs);
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = list->getLabel();
         string consFastaFile = getOutputFileName("fasta", variables);
         outputNames.push_back(consFastaFile); outputTypes["fasta"].push_back(consFastaFile);
         ofstream out;
-        m->openOutputFile(consFastaFile, out);
+        util.openOutputFile(consFastaFile, out);
         for (int i = 0; i < conSeqs.size(); i++) {  conSeqs[i].printSequence(out);  }
         out.close();
         
@@ -297,12 +296,12 @@ int PrimerDesignCommand::execute(){
         
         set<string> primers = getPrimer(conSeqs[binIndex]);
         
-        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
         string consSummaryFile = getOutputFileName("summary", variables);
         outputNames.push_back(consSummaryFile); outputTypes["summary"].push_back(consSummaryFile);
         ofstream outSum;
-        m->openOutputFile(consSummaryFile, outSum);
+        util.openOutputFile(consSummaryFile, outSum);
         
         outSum << "PrimerOtu: " << otulabel << " Members: " << list->get(binIndex) << endl << "Primers\tminTm\tmaxTm" << endl;
         
@@ -343,15 +342,15 @@ int PrimerDesignCommand::execute(){
         //check each otu's conseq for each primer in otunumber
         set<int> otuToRemove = createProcesses(consSummaryFile, minTms, maxTms, primers, conSeqs, binIndex);
         
-        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
         //print new list file
         map<string, string> mvariables; 
-        mvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
-        mvariables["[extension]"] = m->getExtension(listfile);
+        mvariables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+        mvariables["[extension]"] = util.getExtension(listfile);
         string newListFile = getOutputFileName("list", mvariables);
         ofstream outListTemp;
-        m->openOutputFile(newListFile+".temp", outListTemp);
+        util.openOutputFile(newListFile+".temp", outListTemp);
         
         outListTemp << list->getLabel() << '\t' << (list->getNumBins()-otuToRemove.size());
         string headers = "label\tnumOtus";
@@ -367,14 +366,14 @@ int PrimerDesignCommand::execute(){
         outListTemp.close();
         
         ofstream outList;
-        m->openOutputFile(newListFile, outList);
+        util.openOutputFile(newListFile, outList);
         outList << headers << endl;
         outList.close();
-        m->appendFiles(newListFile+".temp", newListFile);
-        m->mothurRemove(newListFile+".temp");
+        util.appendFiles(newListFile+".temp", newListFile);
+        util.mothurRemove(newListFile+".temp");
         outputNames.push_back(newListFile); outputTypes["list"].push_back(newListFile);
         
-        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
         delete list;
         
@@ -569,13 +568,13 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 				process++;
 			}else if (pid == 0){
                 //clear old file because we append in driver
-                m->mothurRemove(newSummaryFile + m->mothurGetpid(process) + ".temp");
+                util.mothurRemove(newSummaryFile + toString(process) + ".temp");
                 
-				otusToRemove = driver(newSummaryFile + m->mothurGetpid(process) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
+				otusToRemove = driver(newSummaryFile + toString(process) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
                 
-                string tempFile = m->mothurGetpid(process) + ".otus2Remove.temp";
+                string tempFile = toString(process) + ".otus2Remove.temp";
                 ofstream outTemp;
-                m->openOutputFile(tempFile, outTemp);
+                util.openOutputFile(tempFile, outTemp);
                 
                 outTemp << numBinsProcessed << endl;
                 outTemp << otusToRemove.size() << endl;
@@ -593,7 +592,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));
+                    util.mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));
                 }
                 recalc = true;
                 break;
@@ -602,7 +601,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) { m->mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) { util.mothurRemove((toString(processIDS[i]) + ".otus2Remove.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             lines.clear();
             int numOtusPerProcessor = numBins / processors;
@@ -627,13 +626,13 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
                     process++;
                 }else if (pid == 0){
                     //clear old file because we append in driver
-                    m->mothurRemove(newSummaryFile + m->mothurGetpid(process) + ".temp");
+                    util.mothurRemove(newSummaryFile + toString(process) + ".temp");
                     
-                    otusToRemove = driver(newSummaryFile + m->mothurGetpid(process) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
+                    otusToRemove = driver(newSummaryFile + toString(process) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
                     
-                    string tempFile = m->mothurGetpid(process) + ".otus2Remove.temp";
+                    string tempFile = toString(process) + ".otus2Remove.temp";
                     ofstream outTemp;
-                    m->openOutputFile(tempFile, outTemp);
+                    util.openOutputFile(tempFile, outTemp);
                     
                     outTemp << numBinsProcessed << endl;
                     outTemp << otusToRemove.size() << endl;
@@ -661,19 +660,19 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
         for (int i = 0; i < processIDS.size(); i++) {
             string tempFile = toString(processIDS[i]) +  ".otus2Remove.temp";
             ifstream intemp;
-            m->openInputFile(tempFile, intemp);
+            util.openInputFile(tempFile, intemp);
             
             int num;
-            intemp >> num; m->gobble(intemp);
+            intemp >> num; util.gobble(intemp);
             if (num != (lines[i+1].end - lines[i+1].start)) { m->mothurOut("[ERROR]: process " + toString(processIDS[i]) + " did not complete processing all OTUs assigned to it, quitting.\n"); m->setControl_pressed(true); }
-            intemp >> num; m->gobble(intemp);
+            intemp >> num; util.gobble(intemp);
             for (int k = 0; k < num; k++) {
                 int otu;
-                intemp >> otu; m->gobble(intemp);
+                intemp >> otu; util.gobble(intemp);
                 otusToRemove.insert(otu); 
             }
             intemp.close();
-            m->mothurRemove(tempFile);
+            util.mothurRemove(tempFile);
         }
 
         
@@ -692,7 +691,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 		for( int i=1; i<processors; i++ ){
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
-			m->mothurRemove(newSummaryFile+extension);
+			util.mothurRemove(newSummaryFile+extension);
             
 			primerDesignData* tempPrimer = new primerDesignData((newSummaryFile+extension), m, lines[i].start, lines[i].end, minTms, maxTms, primers, conSeqs, pdiffs, binIndex, length, i);
 			pDataArray.push_back(tempPrimer);
@@ -725,8 +724,8 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 		
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
-			m->appendFiles((newSummaryFile + toString(processIDS[i]) + ".temp"), newSummaryFile);
-			m->mothurRemove((newSummaryFile + toString(processIDS[i]) + ".temp"));
+			util.appendFiles((newSummaryFile + toString(processIDS[i]) + ".temp"), newSummaryFile);
+			util.mothurRemove((newSummaryFile + toString(processIDS[i]) + ".temp"));
 		}
 		
 		return otusToRemove;	
@@ -743,7 +742,7 @@ set<int> PrimerDesignCommand::driver(string summaryFileName, vector<double>& min
         set<int> otuToRemove;
         
         ofstream outSum;
-        m->openOutputFileAppend(summaryFileName, outSum);
+        util.openOutputFileAppend(summaryFileName, outSum);
         
         for (int i = start; i < end; i++) {
         
@@ -788,12 +787,12 @@ vector< vector< vector<unsigned int> > > PrimerDesignCommand::driverGetCounts(ma
         alignedLength = 0;
         
         ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
         
 		in.seekg(start);
         
         //adjust start if null strings
-        if (start == 0) {  m->zapGremlins(in); m->gobble(in);  }
+        if (start == 0) {  util.zapGremlins(in); util.gobble(in);  }
         
 		bool done = false;
 		fastaCount = 0;
@@ -801,7 +800,7 @@ vector< vector< vector<unsigned int> > > PrimerDesignCommand::driverGetCounts(ma
 		while (!done) {
             if (m->getControl_pressed()) { in.close(); return counts; }
             
-			Sequence seq(in); m->gobble(in);
+			Sequence seq(in); util.gobble(in);
             
 			if (seq.getName() != "") {
                 if (fastaCount == 0) { alignedLength = seq.getAligned().length(); initializeCounts(counts, alignedLength, seq2Bin, nameMap, otuCounts); }
@@ -879,7 +878,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
 		
         vector<unsigned long long> positions; 
         vector<fastaLinePair> lines;
-        positions = m->divideFile(fastafile, processors);
+        positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(fastaLinePair(positions[i], positions[(i+1)]));	}
 
 		//loop through and create all the processes you want
@@ -892,9 +891,9 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
 			}else if (pid == 0){
  				counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[process].start, lines[process].end);
                 
-                string tempFile = m->mothurGetpid(process) + ".cons_counts.temp";
+                string tempFile = toString(process) + ".cons_counts.temp";
                 ofstream outTemp;
-                m->openOutputFile(tempFile, outTemp);
+                util.openOutputFile(tempFile, outTemp);
                 
                 outTemp << fastaCount << endl;
                 //pass counts
@@ -923,7 +922,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));
+                    util.mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));
                 }
                 recalc = true;
                 break;
@@ -933,10 +932,10 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
         
         if (recalc) {
             //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {m->mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);  for (int i=0;i<processIDS.size();i++) {util.mothurRemove((toString(processIDS[i]) + ".cons_counts.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             positions.clear(); lines.clear();
-            positions = m->divideFile(fastafile, processors);
+            positions = util.divideFile(fastafile, processors);
             for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(fastaLinePair(positions[i], positions[(i+1)]));	}
             
             counts.clear(); otuCounts.clear(); processIDS.clear();
@@ -952,9 +951,9 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
                 }else if (pid == 0){
                     counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[process].start, lines[process].end);
                     
-                    string tempFile = m->mothurGetpid(process) + ".cons_counts.temp";
+                    string tempFile = toString(process) + ".cons_counts.temp";
                     ofstream outTemp;
-                    m->openOutputFile(tempFile, outTemp);
+                    util.openOutputFile(tempFile, outTemp);
                     
                     outTemp << fastaCount << endl;
                     //pass counts
@@ -993,33 +992,33 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
         for (int i = 0; i < processIDS.size(); i++) {
             string tempFile = toString(processIDS[i]) +  ".cons_counts.temp";
             ifstream intemp;
-            m->openInputFile(tempFile, intemp);
+            util.openInputFile(tempFile, intemp);
             
             unsigned long int num;
-            intemp >> num; m->gobble(intemp); fastaCount += num;
-            intemp >> num; m->gobble(intemp);
+            intemp >> num; util.gobble(intemp); fastaCount += num;
+            intemp >> num; util.gobble(intemp);
             if (num != counts.size()) { m->mothurOut("[ERROR]: " + tempFile + " was not built correctly by the child process, quitting.\n"); m->setControl_pressed(true); }
             else {
                 //read counts
                 for (int k = 0; k < num; k++) {
                     int alength;
-                    intemp >> alength; m->gobble(intemp);
+                    intemp >> alength; util.gobble(intemp);
                     if (alength != alignedLength) {  m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned."); m->mothurOutEndLine(); m->setControl_pressed(true); }
                     else {
                         for (int j = 0; j < alength; j++) {
-                            for (int l = 0; l < 5; l++) {  unsigned int numTemp; intemp >> numTemp; m->gobble(intemp); counts[k][j][l] += numTemp;  }
+                            for (int l = 0; l < 5; l++) {  unsigned int numTemp; intemp >> numTemp; util.gobble(intemp); counts[k][j][l] += numTemp;  }
                         }
                     }
                 }
                 //read otuCounts
-                intemp >> num; m->gobble(intemp);
+                intemp >> num; util.gobble(intemp);
                 for (int k = 0; k < num; k++) {  
-                    unsigned int numTemp; intemp >> numTemp; m->gobble(intemp); 
+                    unsigned int numTemp; intemp >> numTemp; util.gobble(intemp); 
                     otuCounts[k] += numTemp; 
                 }
             }
             intemp.close();
-            m->mothurRemove(tempFile);
+            util.mothurRemove(tempFile);
         }
         
         
@@ -1187,7 +1186,7 @@ int PrimerDesignCommand::initializeCounts(vector< vector< vector<unsigned int> >
         for (int i = 0; i < list->getNumBins(); i++) {
             string binNames = list->get(i);
             vector<string> names;
-            m->splitAtComma(binNames, names);
+            util.splitAtComma(binNames, names);
             otuCounts.push_back(0);
             
             //lets be smart and only map the unique names if a name or count file was given to save search time and memory
@@ -1243,7 +1242,7 @@ map<string, int> PrimerDesignCommand::readCount(unsigned long int& numSeqs){
 //**********************************************************************************************************************
 int PrimerDesignCommand::getListVector(){
 	try {
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
@@ -1264,7 +1263,7 @@ int PrimerDesignCommand::getListVector(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -1303,7 +1302,7 @@ int PrimerDesignCommand::getListVector(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete list; 
 			list = input.getListVector(lastLabel);
 		}	
@@ -1376,7 +1375,7 @@ int PrimerDesignCommand::findIndex(string binLabel, vector<string> binLabels){
         int index = -1;
         for (int i = 0; i < binLabels.size(); i++){
             if (m->getControl_pressed()) { return index; }
-            if (m->isLabelEquivalent(binLabel, binLabels[i])) { index = i; break; }
+            if (util.isLabelEquivalent(binLabel, binLabels[i])) { index = i; break; }
         }
         return index;
     }

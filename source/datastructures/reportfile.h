@@ -11,6 +11,7 @@
  */
 
 
+#include "utils.hpp"
 
 /**************************************************************************************************/
 
@@ -44,6 +45,7 @@ public:
 private:
 	
 	MothurOut* m;
+    Utils util;
 		
 	string queryName, templateName, searchMethod, alignmentMethod, dummySearchScore;
 	int queryLength, templateLength, queryStart, queryEnd, templateStart, templateEnd, pairwiseAlignmentLength, gapsInQuery, gapsInTemplate, longestInsert;

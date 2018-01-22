@@ -96,9 +96,23 @@ using namespace std;
 #define isnan(x) ((x) != (x))
 #define isinf(x) (fabs(x) == std::numeric_limits<double>::infinity())
 #define GIG 1073741824
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#define PATH_SEPARATOR "/"
+#define EXECUTABLE_EXT ""
+#define NON_WINDOWS
+#undef WINDOWS
+
+#else
+#define PATH_SEPARATOR "\\"
+#define EXECUTABLE_EXT ".exe"
+#define WINDOWS
+#undef NON_WINDOWS
+
+#endif
 
 typedef unsigned long ull;
 typedef unsigned short intDist;
+const vector<string> nullVector; //used to pass blank vector
 
 struct IntNode {
 	int lvalue;

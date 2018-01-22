@@ -49,7 +49,7 @@ public:
 	SharedOrderVector(const SharedOrderVector& ov)	: DataVector(ov.label), data(ov.data), maxRank(ov.maxRank), numBins(ov.numBins), numSeqs(ov.numSeqs), needToUpdate(ov.needToUpdate) {if(needToUpdate == 1){	updateStats();}};
 
 	SharedOrderVector(string, vector<individual>);
-	SharedOrderVector(ifstream&);
+	SharedOrderVector(ifstream&, vector<string>&, string&);
 	~SharedOrderVector(){};
 	
 	
@@ -66,6 +66,8 @@ public:
 	int getNumBins();
 	int getNumSeqs();
 	int getMaxRank();
+    
+    vector<string> getGroups() { sort(allGroups.begin(), allGroups.end()); return allGroups; }
 		
 	RAbundVector getRAbundVector();
 	SAbundVector getSAbundVector();
@@ -76,13 +78,16 @@ public:
 	
 private:
 	GroupMap* groupmap;
-	vector<individual>  data; 
+    vector<string> currentLabels;
+	vector<individual>  data;
+    vector<string> allGroups;
 	map< int, vector<individual> >::iterator it;
 	int maxRank;
 	int numBins;
 	int numSeqs;
 	bool needToUpdate;
 	void set(int, int, int, string);	//index, OTU, abundance, group
+    void setNamesOfGroups(string seqGroup);
 	
 };
 

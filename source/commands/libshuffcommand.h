@@ -36,8 +36,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	vector<string> groupNames;
-	
 	void setGroups();
 	int printCoverageFile();
 	int printSummaryFile();

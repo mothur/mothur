@@ -119,14 +119,14 @@ DistanceCommand::DistanceCommand(string option) {
 			outputTypes["column"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it2 = parameters.find("fasta");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = m->hasPath(it2->second);
+					path = util.hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it2->second;		}
 				}
@@ -134,7 +134,7 @@ DistanceCommand::DistanceCommand(string option) {
 				it2 = parameters.find("oldfasta");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = m->hasPath(it2->second);
+					path = util.hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oldfasta"] = inputDir + it2->second;		}
 				}
@@ -142,70 +142,69 @@ DistanceCommand::DistanceCommand(string option) {
 				it2 = parameters.find("column");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = m->hasPath(it2->second);
+					path = util.hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it2->second;		}
 				}
 			}
 
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
+				fastafile = current->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); 
 					ifstream inFASTA;
-					m->openInputFile(fastafile, inFASTA);
+					util.openInputFile(fastafile, inFASTA);
 					alignDB = SequenceDB(inFASTA); 
 					inFASTA.close();
 				}else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else if (fastafile == "not open") { abort = true; }	
 			else{
 				ifstream inFASTA;
-				m->openInputFile(fastafile, inFASTA);
+				util.openInputFile(fastafile, inFASTA);
 				alignDB = SequenceDB(inFASTA); 
 				inFASTA.close();
-				m->setFastaFile(fastafile);
+				current->setFastaFile(fastafile);
 			}
 			
-			oldfastafile = validParameter.validFile(parameters, "oldfasta", true);
+			oldfastafile = validParameter.validFile(parameters, "oldfasta");
 			if (oldfastafile == "not found") { oldfastafile = ""; }
 			else if (oldfastafile == "not open") { abort = true; }	
 			
-			column = validParameter.validFile(parameters, "column", true);
+			column = validParameter.validFile(parameters, "column");
 			if (column == "not found") { column = ""; }
 			else if (column == "not open") { abort = true; }	
-			else { m->setColumnFile(column); }
+			else { current->setColumnFile(column); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			calc = validParameter.validFile(parameters, "calc", false);			
+			calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "onegap";  }
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
 			}
-			m->splitAtDash(calc, Estimators);
+			util.splitAtDash(calc, Estimators);
 
 			string temp;
-			temp = validParameter.validFile(parameters, "countends", false);	if(temp == "not found"){	temp = "T";	}
-			convert(temp, countends); 
+			temp = validParameter.valid(parameters, "countends");	if(temp == "not found"){	temp = "T";	}
+            countends = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
-			m->mothurConvert(temp, cutoff); 
+			temp = validParameter.valid(parameters, "cutoff");		if(temp == "not found"){	temp = "1.0"; }
+			util.mothurConvert(temp, cutoff); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
-			temp = validParameter.validFile(parameters, "compress", false);		if(temp == "not found"){  temp = "F"; }
+			temp = validParameter.valid(parameters, "compress");		if(temp == "not found"){  temp = "F"; }
 			convert(temp, compress);
 
-			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output == "phylip") { output = "lt";  }
 			
 			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both."); m->mothurOutEndLine(); abort=true; }
@@ -227,7 +226,7 @@ DistanceCommand::DistanceCommand(string option) {
 int DistanceCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int startTime = time(NULL);
 		
@@ -239,19 +238,18 @@ int DistanceCommand::execute(){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		int numSeqs = alignDB.getNumSeqs();
-		//cutoff += 0.005;
+		numSeqs = alignDB.getNumSeqs();
 		
 		if (!alignDB.sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting."); m->mothurOutEndLine(); return 0; }
 		
 		string outputFile;
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
             variables["[outputtag]"] = "phylip";
 			outputFile = getOutputFileName("phylip", variables);
-			m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
+			util.mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
@@ -264,28 +262,24 @@ int DistanceCommand::execute(){
 				rename(column.c_str(), tempcolumn.c_str());
 			}
 			
-			m->mothurRemove(outputFile);
+			util.mothurRemove(outputFile);
 		}else { //assume square
 			variables["[outputtag]"] = "square";
 			outputFile = getOutputFileName("phylip", variables);
-			m->mothurRemove(outputFile);
+			util.mothurRemove(outputFile);
 			outputTypes["phylip"].push_back(outputFile);
 		}
+        
+        m->mothurOut("\nSequence\tTime\tNum_Dists_Below_Cutoff\n");
 
-		//if you don't need to fork anything
-		if(processors == 1){
-			if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
-			else { driver(0, numSeqs, outputFile, "square");  }
-		}else{ //you have multiple processors
-			createProcesses(outputFile, numSeqs);
-		}
-
-		if (m->getControl_pressed()) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
+        createProcesses(outputFile);
+		
+		if (m->getControl_pressed()) { outputTypes.clear();  util.mothurRemove(outputFile); return 0; }
 		
 		ifstream fileHandle;
 		fileHandle.open(outputFile.c_str());
 		if(fileHandle) {
-			m->gobble(fileHandle);
+			util.gobble(fileHandle);
 			if (fileHandle.eof()) { m->mothurOut(outputFile + " is blank. This can result if there are no distances below your cutoff.");  m->mothurOutEndLine(); }
 		}
 		
@@ -294,35 +288,35 @@ int DistanceCommand::execute(){
 			//we had to rename the column file so we didnt overwrite above, but we want to keep old name
 			if (outputFile == column) { 
 				string tempcolumn = column + ".old";
-				m->appendFiles(tempcolumn, outputFile);
-				m->mothurRemove(tempcolumn);
+				util.appendFiles(tempcolumn, outputFile);
+				util.mothurRemove(tempcolumn);
 			}else{
-				m->appendFiles(outputFile, column);
-				m->mothurRemove(outputFile);
+				util.appendFiles(outputFile, column);
+				util.mothurRemove(outputFile);
 				outputFile = column;
 			}
 			
 			if (outputDir != "") { 
-				string newOutputName = outputDir + m->getSimpleName(outputFile);
+				string newOutputName = outputDir + util.getSimpleName(outputFile);
 				rename(outputFile.c_str(), newOutputName.c_str());
-				m->mothurRemove(outputFile);
+				util.mothurRemove(outputFile);
 				outputFile = newOutputName;
 			}
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
+		if (m->getControl_pressed()) { outputTypes.clear();  util.mothurRemove(outputFile); return 0; }
 		
 		//set phylip file as new current phylipfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("phylip");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName); }
 		}
 		
 		//set column file as new current columnfile
 		itTypes = outputTypes.find("column");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setColumnFile(currentName); }
 		}
 		
 		m->mothurOutEndLine();
@@ -332,7 +326,7 @@ int DistanceCommand::execute(){
 		m->mothurOut("It took " + toString(time(NULL) - startTime) + " seconds to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 
 
-		if (m->isTrue(compress)) {
+		if (util.isTrue(compress)) {
 			m->mothurOut("Compressing..."); m->mothurOutEndLine();
 			m->mothurOut("(Replacing " + outputFile + " with " + outputFile + ".gz)"); m->mothurOutEndLine();
 			system(("gzip -v " + outputFile).c_str());
@@ -348,25 +342,208 @@ int DistanceCommand::execute(){
 	}
 }
 /**************************************************************************************************/
-void DistanceCommand::createProcesses(string filename, int numSeqs) {
-	try {
-        unsigned long long numDists = 0;
-        
-        if (output == "square") {
-            numDists = numSeqs * numSeqs;
+/////// need to fix to work with calcs and sequencedb
+void driverColumn(distanceData* params){
+    try {
+        ValidCalculators validCalculator;
+        DistCalc* distCalculator;
+        if (params->countends) {
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
         }else {
-            for(int i=0;i<numSeqs;i++){
-                for(int j=0;j<i;j++){
-                    numDists++;
-                    if (numDists > processors) { break; }
-                }
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
             }
         }
         
+        int startTime = time(NULL);
+        
+        params->count = 0;
+        for(int i=params->startLine;i<params->endLine;i++){
+            
+            Sequence seqI = params->alignDB.get(i);
+            for(int j=0;j<i;j++){
+                
+                if (params->m->getControl_pressed()) { break;  }
+                
+                if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
+                
+                Sequence seqJ = params->alignDB.get(j);
+                double dist = distCalculator->calcDist(seqI, seqJ);
+                
+                if(dist <= params->cutoff){
+                    params->threadWriter->write(seqI.getName() + " " + seqJ.getName() + " " + toString(dist) + "\n");
+                    params->count++;
+                }
+            }
+            
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+            
+        }
+        params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
+        
+        delete distCalculator;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "DistanceCommand", "driverColumn");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+/////// need to fix to work with calcs and sequencedb
+void driverLt(distanceData* params){
+    try {
+        ValidCalculators validCalculator;
+        DistCalc* distCalculator;
+        if (params->countends) {
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+        
+        int startTime = time(NULL);
+        long long numSeqs = params->alignDB.getNumSeqs();
+        
+        //column file
+        ofstream outFile;
+        params->util.openOutputFile(params->outputFileName, outFile);
+        outFile.setf(ios::fixed, ios::showpoint);
+        outFile << setprecision(4);
+        
+        if(params->startLine == 0){	outFile << numSeqs << endl;	}
+        
+        
+        params->count = 0;
+        for(int i=params->startLine;i<params->endLine;i++){
+            
+            string name = params->alignDB.get(i).getName();
+            if (name.length() < 10) {  while (name.length() < 10) {  name += " ";  } }
+            outFile << name;
+            
+            for(int j=0;j<i;j++){
+                
+                if (params->m->getControl_pressed()) { break;  }
+                
+                if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
+                
+                double dist = distCalculator->calcDist(params->alignDB.get(i), params->alignDB.get(j));
+                
+                if(dist <= params->cutoff){ params->count++; }
+                outFile  << '\t' << dist;
+            }
+            
+            outFile << endl;
+            
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+            
+        }
+        params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
+        
+        outFile.close();
+        delete distCalculator;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "DistanceCommand", "driverLt");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+/////// need to fix to work with calcs and sequencedb
+void driverSquare(distanceData* params){
+    try {
+        ValidCalculators validCalculator;
+        DistCalc* distCalculator;
+        if (params->countends) {
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
+                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+        int startTime = time(NULL);
+        
+        //column file
+        ofstream outFile;
+        params->util.openOutputFile(params->outputFileName, outFile);
+        outFile.setf(ios::fixed, ios::showpoint);
+        outFile << setprecision(4);
+        
+        long long numSeqs = params->alignDB.getNumSeqs();
+        if(params->startLine == 0){	outFile << numSeqs << endl;	}
+        
+        params->count = 0;
+        for(int i=params->startLine;i<params->endLine;i++){
+            
+            string name = params->alignDB.get(i).getName();
+            //pad with spaces to make compatible
+            if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
+            
+            outFile << name << '\t';
+            
+            for(int j=0;j<numSeqs;j++){
+                
+                if (params->m->getControl_pressed()) { break; }
+                
+                double dist = distCalculator->calcDist(params->alignDB.get(i), params->alignDB.get(j));
+                
+                if(dist <= params->cutoff){ params->count++; }
+                
+                outFile << dist << '\t'; 
+            }
+            
+            outFile << endl; 
+            
+            if(i % 100 == 0){
+                params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n");
+            }
+        }
+        params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
+        
+        
+        outFile.close();
+        delete distCalculator;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "DistanceCommand", "driverSquare");
+        exit(1);
+    }
+}
+
+/**************************************************************************************************/
+void DistanceCommand::createProcesses(string filename) {
+	try {
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<distanceData*> data;
+        long long num = alignDB.getNumSeqs();
+        unsigned long long numDists = 0;
+        
+        if (output == "square") { numDists = numSeqs * numSeqs; }
+        else { for(int i=0;i<numSeqs;i++){ for(int j=0;j<i;j++){ numDists++; if (numDists > processors) { break; } } } }
         if (numDists < processors) { processors = numDists; }
         
+        vector<linePair> lines;
         for (int i = 0; i < processors; i++) {
-            distlinePair tempLine;
+            linePair tempLine;
             lines.push_back(tempLine);
             if (output != "square") {
                 lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
@@ -375,298 +552,67 @@ void DistanceCommand::createProcesses(string filename, int numSeqs) {
                 lines[i].start = int ((float(i)/float(processors)) * numSeqs);
                 lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
             }
-            
         }
-
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
-		processIDS.clear();
-        bool recalc = false;
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-                processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                process++;
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: parent process is saving child pid " + toString(pid) + ".\n"); }
-            }else if (pid == 0){
-				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
-				else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));
-                }
-                m->setControl_pressed(false);
-                recalc = true;
-                break;
-			}
-		}
+    
+        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(filename);
+        synchronizedOutputFile->setFixedShowPoint();
+        synchronizedOutputFile->setPrecision(4);
         
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } for (int i=0;i<processIDS.size();i++) {m->mothurRemove(filename + (toString(processIDS[i]) + ".temp"));}m->setControl_pressed(false);
-					  processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+        time_t start, end;
+        time(&start);
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            OutputWriter* threadWriter = NULL;
+            distanceData* dataBundle = NULL;
+            string extension = toString(i+1) + ".temp";
+            if (output == "column") {
+                threadWriter = new OutputWriter(synchronizedOutputFile);
+                dataBundle = new distanceData(threadWriter);
+            }else { dataBundle = new distanceData(filename+extension); }
+            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, cutoff, alignDB, Estimators[0], numNewFasta, countends);
+            data.push_back(dataBundle);
             
-            processIDS.resize(0);
-            process = 1;
-            lines.clear();
-            
-            for (int i = 0; i < processors; i++) {
-                distlinePair tempLine;
-                lines.push_back(tempLine);
-                if (output != "square") {
-                    lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
-                    lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
-                }else{
-                    lines[i].start = int ((float(i)/float(processors)) * numSeqs);
-                    lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
-                }
-            }
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: parent process is saving child pid " + toString(pid) + ".\n"); }
-                }else if (pid == 0){
-                    if (output != "square") {  driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", cutoff); }
-                    else { driver(lines[process].start, lines[process].end, filename + m->mothurGetpid(process) + ".temp", "square"); }
-                    exit(0);
-                }else {
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes. Error code: " + toString(pid)); m->mothurOutEndLine();
-                    perror(" : ");
-                    for (int i=0;i<processIDS.size();i++) {  int temp = processIDS[i]; kill (temp, SIGINT); }
-                    exit(0);
-                }
-            }
+            thread* thisThread = NULL;
+            if (output == "column")     { thisThread = new thread(driverColumn, dataBundle);        }
+            else if (output == "lt")    { thisThread = new thread(driverLt, dataBundle);            }
+            else                        { thisThread = new thread(driverSquare, dataBundle);        }
+            workerThreads.push_back(thisThread);
         }
-		
-		//parent does its part
-		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
-		else { driver(lines[0].start, lines[0].end, filename, "square"); }
-		
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-#else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the distanceData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//that's why the distance calculator was moved inside of the driver to make separate copies.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<distanceData*> pDataArray; //[processors-1];
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor-1 worker threads.
-		for( int i=0; i<processors-1; i++ ){
-			
-			// Allocate memory for thread data.
-			distanceData* tempDist = new distanceData(lines[i+1].start, lines[i+1].end, (filename + toString(i) + ".temp"), cutoff, alignDB, Estimators, m, output, numNewFasta, countends);
-			pDataArray.push_back(tempDist);
-			processIDS.push_back(i);
-			
-			//MyDistThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MyDistThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-		//do your part
-		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
-		else { driver(lines[0].start, lines[0].end, filename, "square"); }
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            if (pDataArray[i]->count != (pDataArray[i]->endLine-pDataArray[i]->startLine)) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->endLine-pDataArray[i]->startLine) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true); 
+        
+        OutputWriter* threadWriter = NULL;
+        distanceData* dataBundle = NULL;
+        if (output == "column") {
+            threadWriter = new OutputWriter(synchronizedOutputFile);
+            dataBundle = new distanceData(threadWriter);
+        }else { dataBundle = new distanceData(filename); }
+        dataBundle->setVariables(lines[0].start, lines[0].end, cutoff, alignDB, Estimators[0], numNewFasta, countends);
+        
+        if (output == "column")     { driverColumn(dataBundle);   delete threadWriter;     }
+        else if (output == "lt")    { driverLt(dataBundle);            }
+        else                        { driverSquare(dataBundle);        }
+        long long distsBelowCutoff = dataBundle->count;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            distsBelowCutoff += data[i]->count;
+            if (output == "column") {  delete data[i]->threadWriter; }
+            else {
+                string extension = toString(i+1) + ".temp";
+                util.appendFiles((filename+extension), filename);
+                util.mothurRemove(filename+extension);
             }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-#endif
-		
-		//append and remove temp files
-		for (int i=0;i<processIDS.size();i++) {
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: parent process is appending child pid " + toString(processIDS[i]) + ".\n"); }
-			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
-			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
-		}
-		
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
+        
+        time(&end);
+        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to find distances for " + toString(num) + " sequences. " + toString(distsBelowCutoff) + " distances below cutoff " + toString(cutoff) + ".\n\n");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "createProcesses");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-/////// need to fix to work with calcs and sequencedb
-int DistanceCommand::driver(int startLine, int endLine, string dFileName, float cutoff){
-	try {
-		ValidCalculators validCalculator;
-		DistCalc* distCalculator;
-		if (m->isTrue(countends) == true) {
-			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
-					if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-					else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
-					else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
-				}
-			}
-		}else {
-			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
-					if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-					else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-					else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
-				}
-			}
-		}
-		
-		int startTime = time(NULL);
-		
-		//column file
-		ofstream outFile(dFileName.c_str(), ios::trunc);
-		outFile.setf(ios::fixed, ios::showpoint);
-		outFile << setprecision(4);
-		
-		if((output == "lt") && startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
-		
-        long long distsBelowCutoff = 0;
-		for(int i=startLine;i<endLine;i++){
-			if(output == "lt")	{	
-				string name = alignDB.get(i).getName();
-				if (name.length() < 10) { //pad with spaces to make compatible
-					while (name.length() < 10) {  name += " ";  }
-				}
-				outFile << name;
-			}
-			for(int j=0;j<i;j++){
-				
-				if (m->getControl_pressed()) { delete distCalculator; outFile.close(); return 0;  }
-                
-				//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
-				//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
-				if ((i >= numNewFasta) && (j >= numNewFasta)) { break; }
-				
-				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
-				double dist = distCalculator->getDist();
-				
-				if(dist <= cutoff){
-					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
-                    distsBelowCutoff++;
-				}
-                if (output == "lt") {  outFile  << '\t' << dist; }
-			}
-			
-			if (output == "lt") { outFile << endl; }
-            
-            if(i % 100 == 0){
-				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(distsBelowCutoff) +"\n");
-			}
-			
-		}
-		m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
-		
-		outFile.close();
-		delete distCalculator;
-		
-		return 1;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "driver");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-/////// need to fix to work with calcs and sequencedb
-int DistanceCommand::driver(int startLine, int endLine, string dFileName, string square){
-	try {
-		ValidCalculators validCalculator;
-		DistCalc* distCalculator;
-		if (m->isTrue(countends) == true) {
-			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
-					if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-					else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
-					else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
-				}
-			}
-		}else {
-			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
-					if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-					else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-					else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
-				}
-			}
-		}
-		
-		int startTime = time(NULL);
-		
-		//column file
-		ofstream outFile(dFileName.c_str(), ios::trunc);
-		outFile.setf(ios::fixed, ios::showpoint);
-		outFile << setprecision(4);
-		
-		if(startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
-		
-        long long distsBelowCutoff = 0;
-		for(int i=startLine;i<endLine;i++){
-				
-			string name = alignDB.get(i).getName();
-			//pad with spaces to make compatible
-			if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
-				
-			outFile << name << '\t';	
-			
-			for(int j=0;j<alignDB.getNumSeqs();j++){
-				
-				if (m->getControl_pressed()) { delete distCalculator; outFile.close(); return 0;  }
-				
-				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
-				double dist = distCalculator->getDist();
-                
-                if(dist <= cutoff){ distsBelowCutoff++; }
-
-				outFile << dist << '\t'; 
-			}
-			
-			outFile << endl; 
-			
-            if(i % 100 == 0){
-                m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(distsBelowCutoff) +"\n");
-            }
-        }
-        m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(distsBelowCutoff) +"\n");
-        
-		
-		outFile.close();
-		delete distCalculator;
-		
-		return 1;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "driver");
 		exit(1);
 	}
 }
@@ -680,7 +626,7 @@ bool DistanceCommand::sanityCheck() {
 		
 		//make sure the 2 fasta files have the same alignment length
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		int fastaAlignLength = 0;
 		if (in) { 
 			Sequence tempIn(in);
@@ -689,7 +635,7 @@ bool DistanceCommand::sanityCheck() {
 		in.close();
 		
 		ifstream in2;
-		m->openInputFile(oldfastafile, in2);
+		util.openInputFile(oldfastafile, in2);
 		int oldfastaAlignLength = 0;
 		if (in2) { 
 			Sequence tempIn2(in2);
@@ -703,7 +649,7 @@ bool DistanceCommand::sanityCheck() {
 		set<string> namesOldFasta;
 		
 		ifstream inFasta;
-		m->openInputFile(oldfastafile, inFasta);
+		util.openInputFile(oldfastafile, inFasta);
 		
 		while (!inFasta.eof()) {
 			if (m->getControl_pressed()) {  inFasta.close(); return good;  }
@@ -715,43 +661,39 @@ bool DistanceCommand::sanityCheck() {
 				alignDB.push_back(temp);  //add to DB
 			}
 			
-			m->gobble(inFasta);
+			util.gobble(inFasta);
 		}
 		
 		inFasta.close();
 		
 		//read through the column file checking names and removing distances above the cutoff
 		ifstream inDist;
-		m->openInputFile(column, inDist);
+		util.openInputFile(column, inDist);
 		
 		ofstream outDist;
 		string outputFile = column + ".temp";
-		m->openOutputFile(outputFile, outDist);
+		util.openOutputFile(outputFile, outDist);
 		
 		string name1, name2;
 		float dist;
 		while (!inDist.eof()) {
-			if (m->getControl_pressed()) {  inDist.close(); outDist.close(); m->mothurRemove(outputFile); return good;  }
+			if (m->getControl_pressed()) {  inDist.close(); outDist.close(); util.mothurRemove(outputFile); return good;  }
 		
-			inDist >> name1 >> name2 >> dist; m->gobble(inDist);
+			inDist >> name1 >> name2 >> dist; util.gobble(inDist);
 			
 			//both names are in fasta file and distance is below cutoff
 			if ((namesOldFasta.count(name1) == 0) || (namesOldFasta.count(name2) == 0)) {  good = false; break;  }
-			else{
-				if (dist <= cutoff) {
-					outDist << name1 << '\t' << name2 << '\t' << dist << endl;
-				}
-			}
+			else{ if (dist <= cutoff) { outDist << name1 << '\t' << name2 << '\t' << dist << endl; } }
 		}
 		
 		inDist.close();
 		outDist.close();
 		
 		if (good) {
-			m->mothurRemove(column);
+			util.mothurRemove(column);
 			rename(outputFile.c_str(), column.c_str());
 		}else{
-			m->mothurRemove(outputFile); //temp file is bad because file mismatch above
+			util.mothurRemove(outputFile); //temp file is bad because file mismatch above
 		}
 		
 		return good;

@@ -9,6 +9,7 @@
 
 #include "clusterclassic.h"
 #include "progress.hpp"
+#include "utils.hpp"
 
 /***********************************************************************/
 ClusterClassic::ClusterClassic(float c, string f, bool s) : method(f), smallDist(1e6), nseqs(0), sim(s) {
@@ -38,12 +39,12 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		vector<string> matrixNames;
 		
 		ifstream fileHandle;
-		m->openInputFile(filename, fileHandle);
+        Utils util; util.openInputFile(filename, fileHandle);
 		
         string numTest;
 		fileHandle >> numTest >> name;
         
-        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
 
 
@@ -241,12 +242,12 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
 		vector<string> matrixNames;
 		
 		ifstream fileHandle;
-		m->openInputFile(filename, fileHandle);
+		Utils util; util.openInputFile(filename, fileHandle);
 		
         string numTest;
 		fileHandle >> numTest >> name;
         
-        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
         
         
@@ -415,7 +416,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
             if (m->getControl_pressed()) { break; }
             vector<string> binNames;
             string bin = list->get(i);
-            m->splitAtComma(bin, binNames);
+            util.splitAtComma(bin, binNames);
             int total = 0;
             for (int j = 0; j < binNames.size(); j++) { total += countTable->getNumSeqs(binNames[j]);  }
             rabund->push_back(total);   
@@ -461,7 +462,7 @@ double ClusterClassic::getSmallCell() {
 			int zrand = 0;
 			if (mins.size() > 1) {
 				//pick random number between 0 and mins.size()
-				zrand = m->getRandomIndex(mins.size()-1);
+				zrand = util.getRandomIndex(mins.size()-1);
 			}
 			
 			smallRow = mins[zrand].row;
@@ -591,6 +592,7 @@ void ClusterClassic::update(double& cutOFF){
 void ClusterClassic::setMapWanted(bool f)  {  
 	try {
 		mapWanted = f;
+        Utils util;
 		
 		//initialize map
 		for (int i = 0; i < list->getNumBins(); i++) {
@@ -598,7 +600,7 @@ void ClusterClassic::setMapWanted(bool f)  {
 			//parse bin 
 			string names = list->get(i);
 			vector<string> binnames;
-            m->splitAtComma(names, binnames);
+            util.splitAtComma(names, binnames);
             for (int j = 0; j < binnames.size(); j++) {
 				//save name and bin number
 				seq2Bin[binnames[j]] = i;
@@ -617,7 +619,7 @@ try {
 		//update location of seqs in smallRow since they move to smallCol now
         string names = list->get(smallRow);
         vector<string> binnames;
-        m->splitAtComma(names, binnames);
+        Utils util; util.splitAtComma(names, binnames);
         for (int j = 0; j < binnames.size(); j++) {
             //save name and bin number
             seq2Bin[binnames[j]] = smallCol;

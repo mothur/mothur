@@ -112,14 +112,14 @@ NMDSCommand::NMDSCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -127,7 +127,7 @@ NMDSCommand::NMDSCommand(string option)  {
 				it = parameters.find("axes");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["axes"] = inputDir + it->second;		}
 				}
@@ -140,39 +140,39 @@ NMDSCommand::NMDSCommand(string option)  {
 			outputTypes["stress"] = tempOutNames;
 			
 			//required parameters
-			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { 				
 				//if there is a current phylip file, use it
-				phylipfile = m->getPhylipFile(); 
+				phylipfile = current->getPhylipFile(); 
 				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setPhylipFile(phylipfile); }	
+			}else { current->setPhylipFile(phylipfile); }	
 			
-			axesfile = validParameter.validFile(parameters, "axes", true);
+			axesfile = validParameter.validFile(parameters, "axes");
 			if (axesfile == "not open") { axesfile = ""; abort = true; }
 			else if (axesfile == "not found") { axesfile = "";  }				
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(phylipfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(phylipfile); //if user entered a file with a path then preserve it	
 			}
 			
-			string temp = validParameter.validFile(parameters, "mindim", false);	if (temp == "not found") {	temp = "2";	}
-			m->mothurConvert(temp, mindim);
+			string temp = validParameter.valid(parameters, "mindim");	if (temp == "not found") {	temp = "2";	}
+			util.mothurConvert(temp, mindim);
 			
-			temp = validParameter.validFile(parameters, "maxiters", false);	if (temp == "not found") {	temp = "500";	}
-			m->mothurConvert(temp, maxIters);
+			temp = validParameter.valid(parameters, "maxiters");	if (temp == "not found") {	temp = "500";	}
+			util.mothurConvert(temp, maxIters);
 			
-			temp = validParameter.validFile(parameters, "iters", false);	if (temp == "not found") {	temp = "10";	}
-			m->mothurConvert(temp, iters);
+			temp = validParameter.valid(parameters, "iters");	if (temp == "not found") {	temp = "10";	}
+			util.mothurConvert(temp, iters);
 			
-			temp = validParameter.validFile(parameters, "maxdim", false);	if (temp == "not found") {	temp = "2";	}
-			m->mothurConvert(temp, maxdim);
+			temp = validParameter.valid(parameters, "maxdim");	if (temp == "not found") {	temp = "2";	}
+			util.mothurConvert(temp, maxdim);
 			
-			temp = validParameter.validFile(parameters, "epsilon", false);	if (temp == "not found") {	temp = "0.000000000001";	}
-			m->mothurConvert(temp, epsilon); 
+			temp = validParameter.valid(parameters, "epsilon");	if (temp == "not found") {	temp = "0.000000000001";	}
+			util.mothurConvert(temp, epsilon); 
 			
 			if (mindim < 1) { m->mothurOut("mindim must be at least 1."); m->mothurOutEndLine(); abort = true; }
 			if (maxdim < mindim) { maxdim = mindim; }
@@ -188,7 +188,7 @@ NMDSCommand::NMDSCommand(string option)  {
 int NMDSCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		cout.setf(ios::fixed, ios::floatfield);
 		cout.setf(ios::showpoint);
@@ -206,15 +206,15 @@ int NMDSCommand::execute(){
 		if (axesfile != "") {  axes = readAxes(names);		}
 		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipfile));
 		string outputFileName = getOutputFileName("iters",variables);
 		string stressFileName = getOutputFileName("stress",variables);
 		outputNames.push_back(outputFileName); outputTypes["iters"].push_back(outputFileName);
 		outputNames.push_back(stressFileName); outputTypes["stress"].push_back(stressFileName);
 		
 		ofstream out, out2;
-		m->openOutputFile(outputFileName, out);
-		m->openOutputFile(stressFileName, out2);
+		util.openOutputFile(outputFileName, out);
+		util.openOutputFile(stressFileName, out2);
 		
 		out2.setf(ios::fixed, ios::floatfield);
 		out2.setf(ios::showpoint);
@@ -238,21 +238,21 @@ int NMDSCommand::execute(){
 				vector< vector<double> > thisConfig;
 				if (axesfile == "") {	thisConfig = generateStartingConfiguration(names.size(), i);		}
 				else				{	thisConfig = getConfiguration(axes, i);								}
-				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	util.mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc nmds for this dimension
 				double stress;
 				vector< vector<double> > endConfig = nmdsCalc(matrix, thisConfig, stress);
-				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	util.mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc euclid distances for new config
 				vector< vector<double> > newEuclid = linearCalc.calculateEuclidianDistance(endConfig);
-				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	util.mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc correlation between original distances and euclidean distances from this config
 				double rsquared = linearCalc.calcPearson(newEuclid, matrix);
 				rsquared *= rsquared;
-				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	util.mothurRemove(outputNames[k]);	} return 0; }
 				
 				//output results
 				out << "Config" << (j+1);
@@ -270,7 +270,7 @@ int NMDSCommand::execute(){
 					bestConfig = endConfig;
 				}
 				
-				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
+				if (m->getControl_pressed()) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	util.mothurRemove(outputNames[k]);	} return 0; }
 			}
 		}
 		
@@ -285,7 +285,7 @@ int NMDSCommand::execute(){
 		m->mothurOut("R-squared for configuration:\t" + toString(bestR2) + "\n");
 		
 		ofstream outBest;
-		m->openOutputFile(BestFileName, outBest);
+		util.openOutputFile(BestFileName, outBest);
 		outBest.setf(ios::fixed, ios::floatfield);
 		outBest.setf(ios::showpoint);
 		
@@ -297,7 +297,7 @@ int NMDSCommand::execute(){
 		
 		outBest.close();
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -388,10 +388,10 @@ vector< vector<double> > NMDSCommand::generateStartingConfiguration(int numNames
 				if (m->getControl_pressed()) { return axes; }
 				
 				//generate random int between 0 and 99999
-                int myrand = m->getRandomIndex(99999);
+                int myrand = util.getRandomIndex(99999);
                 
 				//generate random sign
-				int mysign = m->getRandomIndex(99999);
+				int mysign = util.getRandomIndex(99999);
 				
 				//if mysign is even then sign = positive, else sign = negative
 				if ((mysign % 2) == 0) { mysign = 1.0; }
@@ -520,9 +520,9 @@ int NMDSCommand::output(vector< vector<double> >& config, vector<string>& names,
 vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 	try {
 		ifstream in;
-		m->openInputFile(axesfile, in);
+		util.openInputFile(axesfile, in);
 		
-		string headerLine = m->getline(in); m->gobble(in);
+		string headerLine = util.getline(in); util.gobble(in);
 		
 		//count the number of axis you are reading
 		bool done = false;
@@ -552,10 +552,10 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 			if (m->getControl_pressed()) { in.close(); return axes; }
 			
 			string group = "";
-			in >> group; m->gobble(in);
+			in >> group; util.gobble(in);
 			
 			bool ignore = false;
-			if (!m->inUsersGroups(group, names)) { ignore = true; m->mothurOut(group + " is in your axes file and not in your distance file, ignoring."); m->mothurOutEndLine(); }
+			if (!util.inUsersGroups(group, names)) { ignore = true; m->mothurOut(group + " is in your axes file and not in your distance file, ignoring."); m->mothurOutEndLine(); }
 			
 			vector<double> thisGroupsAxes;
 			for (int i = 0; i < count; i++) {
@@ -568,7 +568,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 			
 			if (!ignore) {	orderedAxes[group] = thisGroupsAxes; }
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 				

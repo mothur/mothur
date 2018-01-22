@@ -26,30 +26,34 @@ class Classify {
 public:
 	Classify();
 	virtual ~Classify(){};
-	virtual string getTaxonomy(Sequence*) = 0;
-	virtual string getSimpleTax()  { return simpleTax;	}
-	virtual bool getFlipped()  { return flipped;	}
-	virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float);
-	virtual void setDistName(string s) {} //for knn, so if distance method is selected with knn you can create the smallest distance file in the right place.
+    
+	virtual string getTaxonomy(Sequence*, string&, bool&) = 0;
     int getMaxLevel() { return maxLevel; }
 	
+	virtual void setDistName(string s) {} //for knn, so if distance method is selected with knn you can create the smallest distance file in the right place.
+    
+	
 protected:
-
+    
+    CurrentFile* current;
 	map<string, string> taxonomy;  //name maps to taxonomy
 	map<string, int>::iterator itTax;
 	map<string, string>::iterator it;
 	Database* database;
 	PhyloTree* phyloTree;
 	
-	string taxFile, templateFile, simpleTax;
+	string taxFile, templateFile;
 	vector<string> names;
 	int threadID, numLevels, numTaxa, maxLevel;
-	bool flip, flipped, shortcuts;
+	bool flip, shortcuts;
+    MothurOut* m;
+    Utils util;
 	
 	int readTaxonomy(string);
 	vector<string> parseTax(string);
     double getLogExpSum(vector<double>, int&);
-	MothurOut* m;
+    virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float);
+
 	
 };
 

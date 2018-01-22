@@ -177,14 +177,14 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -192,7 +192,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 				it = parameters.find("oligos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
 				}
@@ -200,7 +200,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 				it = parameters.find("qfile");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
@@ -208,7 +208,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -216,7 +216,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -225,123 +225,120 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 
 			
 			//check for required parameters
-			fastaFile = validParameter.validFile(parameters, "fasta", true);
+			fastaFile = validParameter.validFile(parameters, "fasta");
 			if (fastaFile == "not found") { 				
-				fastaFile = m->getFastaFile(); 
+				fastaFile = current->getFastaFile(); 
 				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else if (fastaFile == "not open") { abort = true; }	
-			else { m->setFastaFile(fastaFile); }
+			else { current->setFastaFile(fastaFile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(fastaFile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(fastaFile); //if user entered a file with a path then preserve it	
 			}
 		
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			string temp;
-			temp = validParameter.validFile(parameters, "flip", false);
+			string temp = validParameter.valid(parameters, "flip");
 			if (temp == "not found")    {	flip = 0;	}
-			else {  flip = m->isTrue(temp);		}
+			else {  flip = util.isTrue(temp);		}
 		
-			temp = validParameter.validFile(parameters, "oligos", true);
+			temp = validParameter.validFile(parameters, "oligos");
 			if (temp == "not found"){	oligoFile = "";		}
 			else if(temp == "not open"){	abort = true;	} 
-			else					{	oligoFile = temp; m->setOligosFile(oligoFile);		}
+			else					{	oligoFile = temp; current->setOligosFile(oligoFile);		}
 			
 			
-			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, maxAmbig);  
+			temp = validParameter.valid(parameters, "maxambig");		if (temp == "not found") { temp = "-1"; }
+			util.mothurConvert(temp, maxAmbig);  
 
-			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, maxHomoP);  
+			temp = validParameter.valid(parameters, "maxhomop");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, maxHomoP);  
 
-			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "1"; }
-			m->mothurConvert(temp, minLength); 
+			temp = validParameter.valid(parameters, "minlength");	if (temp == "not found") { temp = "1"; }
+			util.mothurConvert(temp, minLength); 
 			
-			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, maxLength);
+			temp = validParameter.valid(parameters, "maxlength");	if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, maxLength);
 			
-			temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, bdiffs);
+			temp = validParameter.valid(parameters, "bdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, bdiffs);
 			
-			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, pdiffs);
+			temp = validParameter.valid(parameters, "pdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, pdiffs);
             
-            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, ldiffs);
+            temp = validParameter.valid(parameters, "ldiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, ldiffs);
             
-            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, sdiffs);
+            temp = validParameter.valid(parameters, "sdiffs");		if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, sdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
-			m->mothurConvert(temp, tdiffs);
+			temp = validParameter.valid(parameters, "tdiffs");		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
+			util.mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
 			
-			temp = validParameter.validFile(parameters, "qfile", true);	
+			temp = validParameter.validFile(parameters, "qfile");	
 			if (temp == "not found")	{	qFileName = "";		}
 			else if(temp == "not open")	{	abort = true;		}
-			else						{	qFileName = temp;	m->setQualFile(qFileName); }
+			else						{	qFileName = temp;	current->setQualFile(qFileName); }
 			
-			temp = validParameter.validFile(parameters, "name", true);	
+			temp = validParameter.validFile(parameters, "name");	
 			if (temp == "not found")	{	nameFile = "";		}
 			else if(temp == "not open")	{	nameFile = "";	abort = true;		}
-			else						{	nameFile = temp;	m->setNameFile(nameFile); }
+			else						{	nameFile = temp;	current->setNameFile(nameFile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
             if ((countfile != "") && (nameFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
-			temp = validParameter.validFile(parameters, "qthreshold", false);	if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, qThreshold);
+			temp = validParameter.valid(parameters, "qthreshold");	if (temp == "not found") { temp = "0"; }
+			util.mothurConvert(temp, qThreshold);
 			
-			temp = validParameter.validFile(parameters, "qtrim", false);		if (temp == "not found") { temp = "t"; }
-			qtrim = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "qtrim");		if (temp == "not found") { temp = "t"; }
+			qtrim = util.isTrue(temp);
 
-			temp = validParameter.validFile(parameters, "rollaverage", false);	if (temp == "not found") { temp = "0"; }
+			temp = validParameter.valid(parameters, "rollaverage");	if (temp == "not found") { temp = "0"; }
 			convert(temp, qRollAverage);
 
-			temp = validParameter.validFile(parameters, "qwindowaverage", false);if (temp == "not found") { temp = "0"; }
+			temp = validParameter.valid(parameters, "qwindowaverage");if (temp == "not found") { temp = "0"; }
 			convert(temp, qWindowAverage);
 
-			temp = validParameter.validFile(parameters, "qwindowsize", false);	if (temp == "not found") { temp = "50"; }
+			temp = validParameter.valid(parameters, "qwindowsize");	if (temp == "not found") { temp = "50"; }
 			convert(temp, qWindowSize);
 
-			temp = validParameter.validFile(parameters, "qstepsize", false);	if (temp == "not found") { temp = "1"; }
+			temp = validParameter.valid(parameters, "qstepsize");	if (temp == "not found") { temp = "1"; }
 			convert(temp, qWindowStep);
 
-			temp = validParameter.validFile(parameters, "qaverage", false);		if (temp == "not found") { temp = "0"; }
+			temp = validParameter.valid(parameters, "qaverage");		if (temp == "not found") { temp = "0"; }
 			convert(temp, qAverage);
 
-			temp = validParameter.validFile(parameters, "keepfirst", false);	if (temp == "not found") { temp = "0"; }
+			temp = validParameter.valid(parameters, "keepfirst");	if (temp == "not found") { temp = "0"; }
 			convert(temp, keepFirst);
 
-			temp = validParameter.validFile(parameters, "removelast", false);	if (temp == "not found") { temp = "0"; }
+			temp = validParameter.valid(parameters, "removelast");	if (temp == "not found") { temp = "0"; }
 			convert(temp, removeLast);
 			
-			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
-			allFiles = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "allfiles");		if (temp == "not found") { temp = "F"; }
+			allFiles = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "keepforward", false);		if (temp == "not found") { temp = "F"; }
-			keepforward = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "keepforward");		if (temp == "not found") { temp = "F"; }
+			keepforward = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "logtransform", false);		if (temp == "not found") { temp = "F"; }
-			logtransform = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "logtransform");		if (temp == "not found") { temp = "F"; }
+			logtransform = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
-			reorient = m->isTrue(temp);
+            temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "F"; }
+			reorient = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors); 
-			
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
 			
 			if(allFiles && (oligoFile == "")){
 				m->mothurOut("You selected allfiles, but didn't enter an oligos.  Ignoring the allfiles request."); m->mothurOutEndLine();
@@ -359,7 +356,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
             if (countfile == "") {
                 if (nameFile == "") {
                     vector<string> files; files.push_back(fastaFile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 		}
@@ -375,7 +372,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 int TrimSeqsCommand::execute(){
 	try{
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         pairedOligos = false;
 		numFPrimers = 0;  //this needs to be initialized
@@ -383,12 +380,9 @@ int TrimSeqsCommand::execute(){
         numSpacers = 0;
         numLinkers = 0;
 		createGroup = false;
-		vector<vector<string> > fastaFileNames;
-		vector<vector<string> > qualFileNames;
-		vector<vector<string> > nameFileNames;
-		
+        
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFile));
         variables["[tag]"] = "trim";
 		string trimSeqFile = getOutputFileName("fasta",variables);
         string trimQualFile = getOutputFileName("qfile",variables);
@@ -406,21 +400,21 @@ int TrimSeqsCommand::execute(){
 			outputTypes["qfile"].push_back(scrapQualFile); 
 		}
 		
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(nameFile));
         variables["[tag]"] = "trim";
 		string trimNameFile = getOutputFileName("name",variables);
         variables["[tag]"] = "scrap";
 		string scrapNameFile = getOutputFileName("name",variables);
 		
 		if (nameFile != "") {
-			m->readNames(nameFile, nameMap);
+			util.readNames(nameFile, nameMap);
 			outputNames.push_back(trimNameFile);
 			outputNames.push_back(scrapNameFile);
 			outputTypes["name"].push_back(trimNameFile);
 			outputTypes["name"].push_back(scrapNameFile); 
 		}
         
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(countfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
         variables["[tag]"] = "trim";
         string trimCountFile = getOutputFileName("count",variables);
         variables["[tag]"] = "scrap";
@@ -436,15 +430,14 @@ int TrimSeqsCommand::execute(){
 			outputTypes["count"].push_back(scrapCountFile); 
 		}
 
-		
 		if (m->getControl_pressed()) { return 0; }
 		
 		string outputGroupFileName;
 		if(oligoFile != ""){
-			createGroup = getOligos(fastaFileNames, qualFileNames, nameFileNames);
+			createGroup = getOligos();
 			if ((createGroup) && (countfile == "")){
                 map<string, string> myvariables; 
-                myvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
+                myvariables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFile));
 				outputGroupFileName = getOutputFileName("group",myvariables);
 				outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
 			}
@@ -452,116 +445,13 @@ int TrimSeqsCommand::execute(){
         
         if (m->getControl_pressed()) { return 0; }
             
-        //fills lines and qlines
-		setLines(fastaFile, qFileName);
+        int startTime = time(NULL);
+        
+        int numSeqs = createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, trimCountFile, scrapCountFile, outputGroupFileName);
+        
+        m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to trim " + toString(numSeqs) + " sequences.\n");
 		
-        if(processors == 1){
-            driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, trimCountFile, scrapCountFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
-        }else{
-            createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, trimCountFile, scrapCountFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames); 
-        }	
-		
-		
-		if (m->getControl_pressed()) {  return 0; }			
- 	
-		if(allFiles){
-			map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
-			map<string, string>::iterator it;
-			set<string> namesToRemove;
-			for(int i=0;i<fastaFileNames.size();i++){
-				for(int j=0;j<fastaFileNames[0].size();j++){
-					if (fastaFileNames[i][j] != "") {
-						if (namesToRemove.count(fastaFileNames[i][j]) == 0) {
-							if(m->isBlank(fastaFileNames[i][j])){
-								m->mothurRemove(fastaFileNames[i][j]);
-								namesToRemove.insert(fastaFileNames[i][j]);
-							
-								if(qFileName != ""){
-									m->mothurRemove(qualFileNames[i][j]);
-									namesToRemove.insert(qualFileNames[i][j]);
-								}
-								
-								if(nameFile != ""){
-									m->mothurRemove(nameFileNames[i][j]);
-									namesToRemove.insert(nameFileNames[i][j]);
-								}
-							}else{	
-								it = uniqueFastaNames.find(fastaFileNames[i][j]);
-								if (it == uniqueFastaNames.end()) {	
-									uniqueFastaNames[fastaFileNames[i][j]] = barcodeNameVector[i];	
-								}	
-							}
-						}
-					}
-				}
-			}
-			
-			//remove names for outputFileNames, just cleans up the output
-			vector<string> outputNames2;
-			for(int i = 0; i < outputNames.size(); i++) { if (namesToRemove.count(outputNames[i]) == 0) { outputNames2.push_back(outputNames[i]); } }
-			outputNames = outputNames2;
-			
-            for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
-                ifstream in;
-                m->openInputFile(it->first, in);
-                
-                ofstream out;
-                map<string, string> myvariables; 
-                myvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(it->first));
-                string thisGroupName = "";
-                if (countfile == "") { thisGroupName = getOutputFileName("group",myvariables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); }
-                else {  thisGroupName = getOutputFileName("count",myvariables); outputNames.push_back(thisGroupName); outputTypes["count"].push_back(thisGroupName);  }
-                m->openOutputFile(thisGroupName, out);
-                
-                if (countfile != "") {  out << "Representative_Sequence\ttotal\t" << it->second << endl;  }
-                
-                while (!in.eof()){
-                    if (m->getControl_pressed()) { break; }
-                    
-                    Sequence currSeq(in); m->gobble(in);
-                    if (countfile == "") {  
-                        out << currSeq.getName() << '\t' << it->second << endl;  
-                        
-                        if (nameFile != "") {
-                            map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-                            if (itName != nameMap.end()) { 
-                                vector<string> thisSeqsNames; 
-                                m->splitAtChar(itName->second, thisSeqsNames, ',');
-                                for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
-                                    out << thisSeqsNames[k] << '\t' << it->second << endl;
-                                }
-                            }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }							
-                        }
-                    }else { 
-                        map<string, int>::iterator itTotalReps = nameCount.find(currSeq.getName());
-                        if (itTotalReps != nameCount.end()) { out << currSeq.getName() << '\t' << itTotalReps->second << '\t' << itTotalReps->second << endl; }
-                        else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); m->mothurOutEndLine(); }
-                    }
-                }
-                in.close();
-                out.close();
-            }
-            
-            if (countfile != "") { //create countfile with group info included
-                CountTable* ct = new CountTable();
-                ct->readTable(trimCountFile, true, false);
-                map<string, int> justTrimmedNames = ct->getNameMap();
-                delete ct;
-                
-                CountTable newCt;
-                for (map<string, int>::iterator itCount = groupCounts.begin(); itCount != groupCounts.end(); itCount++) { newCt.addGroup(itCount->first); }
-                vector<int> tempCounts; tempCounts.resize(groupCounts.size(), 0);
-                for (map<string, int>::iterator itNames = justTrimmedNames.begin(); itNames != justTrimmedNames.end(); itNames++) {
-                    newCt.push_back(itNames->first, tempCounts); //add it to the table with no abundance so we can set the groups abundance
-                    map<string, string>::iterator it2 = groupMap.find(itNames->first);
-                    if (it2 != groupMap.end()) { newCt.setAbund(itNames->first, it2->second, itNames->second); }
-                    else { m->mothurOut("[ERROR]: missing group info for " + itNames->first + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-                }
-                newCt.printTable(trimCountFile);
-            }
-		}
-		
-		if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
+		if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0;	}
 
 		//output group counts
 		m->mothurOutEndLine();
@@ -572,33 +462,33 @@ int TrimSeqsCommand::execute(){
 		}
 		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
 		
-		if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
+		if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0;	}
 
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("qfile");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setQualFile(currentName); }
 		}
 		
 		itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 		}
         
         itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 
 		m->mothurOutEndLine();
@@ -614,138 +504,228 @@ int TrimSeqsCommand::execute(){
 		exit(1);
 	}
 }
-		
+//***************************************************************************************************************
+
+bool keepFirstTrim(Sequence& sequence, QualityScores& qscores, int keepFirst){
+    bool success = 1;
+    if(qscores.getName() != ""){ qscores.trimQScores(-1, keepFirst); }
+        
+    sequence.trim(keepFirst);
+        
+    return success;
+}
+//***************************************************************************************************************
+
+bool removeLastTrim(Sequence& sequence, QualityScores& qscores, int removeLast){
+    bool success = 0;
+        
+    int length = sequence.getNumBases() - removeLast;
+        
+    if(length > 0){
+        if(qscores.getName() != ""){ qscores.trimQScores(-1, length); }
+        sequence.trim(length);
+        success = 1;
+    }
+    else{ success = 0; }
+        
+    return success;
+}
+//***************************************************************************************************************
+bool cullLength(Sequence& seq, int minLength, int maxLength){
+    int length = seq.getNumBases();
+    bool success = 0;	//guilty until proven innocent
+        
+    if(length >= minLength && maxLength == 0)			{	success = 1;	}
+    else if(length >= minLength && length <= maxLength)	{	success = 1;	}
+    else												{	success = 0;	}
+        
+    return success;
+}
+//***************************************************************************************************************
+bool cullHomoP(Sequence& seq, int maxHomoP){
+    int longHomoP = seq.getLongHomoPolymer();
+    bool success = 0;	//guilty until proven innocent
+        
+    if(longHomoP <= maxHomoP){	success = 1;	}
+    else					{	success = 0;	}
+        
+    return success;
+}
+//***************************************************************************************************************
+bool cullAmbigs(Sequence& seq, int maxAmbig){
+    int numNs = seq.getAmbigBases();
+    bool success = 0;	//guilty until proven innocent
+        
+    if(numNs <= maxAmbig)	{	success = 1;	}
+    else					{	success = 0;	}
+        
+    return success;
+}
+/**************************************************************************************************/
+struct trimData {
+    unsigned long long start, end;
+    MothurOut* m;
+    string filename, qFileName;
+    OutputWriter* trimFileName;
+    OutputWriter* scrapFileName;
+    OutputWriter* trimQFileName;
+    OutputWriter* scrapQFileName;
+    set<string> badNames;
+    unsigned long long lineStart, lineEnd, qlineStart, qlineEnd;
+    bool flip, allFiles, qtrim, keepforward, createGroup, pairedOligos, reorient, logtransform;
+    int maxAmbig, maxHomoP, minLength, maxLength, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
+    int qWindowSize, qWindowStep, keepFirst, removeLast, count;
+    double qRollAverage, qThreshold, qWindowAverage, qAverage;
+    vector<string> revPrimer;
+    map<string, int> barcodes;
+    map<string, int> primers;
+    map<string, int> nameCount;
+    vector<string>  linker;
+    vector<string>  spacer;
+    map<string, int> combos;
+    vector<string> primerNameVector;
+    vector<string> barcodeNameVector;
+    map<string, int> groupCounts;
+    map<string, string> nameMap;
+    map<string, string> groupMap;
+    map<int, oligosPair> pairedBarcodes;
+    map<int, oligosPair> pairedPrimers;
+    Utils util;
+    
+    trimData(){}
+    trimData(string fn, string qn, OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend, map<string, string> nm, map<string, int> ncount) {
+        filename = fn;
+        qFileName = qn;
+        trimFileName = tn;
+        scrapFileName = sn;
+        trimQFileName = tqn;
+        scrapQFileName = sqn;
+        lineStart = lstart;
+        lineEnd = lend;
+        qlineStart = qstart;
+        qlineEnd = qend;
+        m = MothurOut::getInstance();
+        nameCount = ncount;
+        nameMap = nm;
+
+    }
+    void setOligosOptions(int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, map<int, oligosPair> pbr, map<int, oligosPair> ppr, bool po,
+                          vector<string> priNameVector, vector<string> barNameVector, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
+                          int WindowStep, int WindowSize, int WindowAverage, bool trim, double Threshold, double Average, double RollAverage, bool lt,
+                          int minL, int maxA, int maxH, int maxL, bool fli, bool reo) {
+        pdiffs = pd;
+        bdiffs = bd;
+        ldiffs = ld;
+        sdiffs = sd;
+        tdiffs = td;
+        barcodes = bar;
+        pairedPrimers = ppr;
+        pairedBarcodes = pbr;
+        pairedOligos = po;
+        primers = pri;
+        revPrimer = revP;
+        linker = li;
+        spacer = spa;
+        primerNameVector = priNameVector;
+        barcodeNameVector = barNameVector;
+        
+        createGroup = cGroup;
+        allFiles = aFiles;
+        keepforward = keepF;
+        keepFirst = keepfi;
+        removeLast = removeL;
+        qWindowStep = WindowStep;
+        qWindowSize = WindowSize;
+        qWindowAverage = WindowAverage;
+        qtrim = trim;
+        qThreshold = Threshold;
+        qAverage = Average;
+        qRollAverage = RollAverage;
+        logtransform = lt;
+        minLength = minL;
+        maxAmbig = maxA;
+        maxHomoP = maxH;
+        maxLength = maxL;
+        flip = fli;
+        reorient = reo;
+        count = 0;
+    }
+};
 /**************************************************************************************/
-int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string trimFileName, string scrapFileName, string trimQFileName, string scrapQFileName, string trimNFileName, string scrapNFileName, string trimCFileName, string scrapCFileName, string groupFileName, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, vector<vector<string> > nameFileNames, linePair line, linePair qline) {	
+//string filename, string qFileName, string trimFileName, string scrapFileName, string trimQFileName, string scrapQFileName, string trimNFileName, string scrapNFileName, string trimCFileName, string scrapCFileName, string groupFileName, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, vector<vector<string> > nameFileNames, linePair line, linePair qline
+int driverTrim(trimData* params) {
 		
 	try {
-		
-		ofstream trimFASTAFile;
-		m->openOutputFile(trimFileName, trimFASTAFile);
-		
-		ofstream scrapFASTAFile;
-		m->openOutputFile(scrapFileName, scrapFASTAFile);
-		
-		ofstream trimQualFile;
-		ofstream scrapQualFile;
-		if(qFileName != ""){
-			m->openOutputFile(trimQFileName, trimQualFile);
-			m->openOutputFile(scrapQFileName, scrapQualFile);
-		}
-		
-		ofstream trimNameFile;
-		ofstream scrapNameFile;
-		if(nameFile != ""){
-			m->openOutputFile(trimNFileName, trimNameFile);
-			m->openOutputFile(scrapNFileName, scrapNameFile);
-		}
-		
-        ofstream trimCountFile;
-		ofstream scrapCountFile;
-		if(countfile != ""){
-			m->openOutputFile(trimCFileName, trimCountFile);
-			m->openOutputFile(scrapCFileName, scrapCountFile);
-            if (line.start == 0) { trimCountFile << "Representative_Sequence\ttotal" << endl; scrapCountFile << "Representative_Sequence\ttotal" << endl; }
-		}
-		
-		ofstream outGroupsFile;
-		if ((createGroup) && (countfile == "")){	m->openOutputFile(groupFileName, outGroupsFile);   }
-		if(allFiles){
-			for (int i = 0; i < fastaFileNames.size(); i++) { //clears old file
-				for (int j = 0; j < fastaFileNames[i].size(); j++) { //clears old file
-					if (fastaFileNames[i][j] != "") {
-						ofstream temp;
-						m->openOutputFile(fastaFileNames[i][j], temp);			temp.close();
-						if(qFileName != ""){
-							m->openOutputFile(qualFileNames[i][j], temp);			temp.close();
-						}
-						
-						if(nameFile != ""){
-							m->openOutputFile(nameFileNames[i][j], temp);			temp.close();
-						}
-					}
-				}
-			}
-		}
+        int numFPrimers, numRPrimers, numLinkers, numSpacers;
+        numFPrimers = params->primers.size();
+        numRPrimers = params->revPrimer.size();
+        numLinkers = params->linker.size();
+        numSpacers = params->spacer.size();
 		
 		ifstream inFASTA;
-		m->openInputFile(filename, inFASTA);
-		inFASTA.seekg(line.start);
+		params->util.openInputFile(params->filename, inFASTA);
+		inFASTA.seekg(params->lineStart);
 		
 		ifstream qFile;
-		if(qFileName != "")	{
-			m->openInputFile(qFileName, qFile);
-			qFile.seekg(qline.start);  
+		if(params->qFileName != "")	{
+			params->util.openInputFile(params->qFileName, qFile);
+			qFile.seekg(params->qlineStart);
 		}
 		
-		int count = 0;
 		bool moreSeqs = 1;
-        int numBarcodes = barcodes.size();
+        int numBarcodes = params->barcodes.size();
 		TrimOligos* trimOligos = NULL;
-        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes, false); numBarcodes = pairedBarcodes.size(); }
-        else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);  }
+        if (params->pairedOligos)   {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->pairedPrimers, params->pairedBarcodes, false); numBarcodes = params->pairedBarcodes.size(); }
+        else                {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, params->ldiffs, params->sdiffs, params->primers, params->barcodes, params->revPrimer, params->linker, params->spacer);  }
         
         TrimOligos* rtrimOligos = NULL;
-        if (reorient) {
+        if (params->reorient) {
             //create reoriented primer and barcode pairs
             map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
-            for (map<int, oligosPair>::iterator it = pairedPrimers.begin(); it != pairedPrimers.end(); it++) {
-                  oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
+            for (map<int, oligosPair>::iterator it = params->pairedPrimers.begin(); it != params->pairedPrimers.end(); it++) {
+                  oligosPair tempPair(params->util.reverseOligo((it->second).reverse), (params->util.reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
                 rpairedPrimers[it->first] = tempPair;
-                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << primerNameVector[it->first] << endl;
             }
-            for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
-                 oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
+            for (map<int, oligosPair>::iterator it = params->pairedBarcodes.begin(); it != params->pairedBarcodes.end(); it++) {
+                 oligosPair tempPair(params->util.reverseOligo((it->second).reverse), (params->util.reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
                 rpairedBarcodes[it->first] = tempPair;
-                 //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << barcodeNameVector[it->first] << endl;
             }
             int index = rpairedBarcodes.size();
-            for (map<string, int>::iterator it = barcodes.begin(); it != barcodes.end(); it++) {
-                oligosPair tempPair("", reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+            for (map<string, int>::iterator it = params->barcodes.begin(); it != params->barcodes.end(); it++) {
+                oligosPair tempPair("", params->util.reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
                 rpairedBarcodes[index] = tempPair; index++;
-                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << barcodeNameVector[it->first] << endl;
             }
             
             index = rpairedPrimers.size();
-            for (map<string, int>::iterator it = primers.begin(); it != primers.end(); it++) {
-                oligosPair tempPair("", reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+            for (map<string, int>::iterator it = params->primers.begin(); it != params->primers.end(); it++) {
+                oligosPair tempPair("", params->util.reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
                 rpairedPrimers[index] = tempPair; index++;
-                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << primerNameVector[it->first] << endl;
             }
 
-            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes, false); numBarcodes = rpairedBarcodes.size();
+            rtrimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes, false); numBarcodes = rpairedBarcodes.size();
         }
+        
+        if(numBarcodes == 0){ params->createGroup = false; }
         
 		while (moreSeqs) {
 				
             int obsBDiffs = 0;
             int obsPDiffs = 0;
             
-            
-			if (m->getControl_pressed()) {
-                delete trimOligos; if (reorient) { delete rtrimOligos; }
-				inFASTA.close(); trimFASTAFile.close(); scrapFASTAFile.close();
-				if ((createGroup) && (countfile == "")) {	 outGroupsFile.close();   }
-                if(qFileName != "")	{	qFile.close();	scrapQualFile.close(); trimQualFile.close();	}
-                if(nameFile != "")	{	scrapNameFile.close(); trimNameFile.close();	}
-                if(countfile != "")	{	scrapCountFile.close(); trimCountFile.close();	}
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;
-			}
+			if (params->m->getControl_pressed()) { break; }
 			
 			int success = 1;
 			string trashCode = "";
             string commentString = "";
 			int currentSeqsDiffs = 0;
 
-			Sequence currSeq(inFASTA); m->gobble(inFASTA);
-			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned() << endl;
+			Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
             Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
             
 			QualityScores currQual; QualityScores savedQual;
-			if(qFileName != ""){
-				currQual = QualityScores(qFile);  m->gobble(qFile);
+			if(params->qFileName != ""){
+				currQual = QualityScores(qFile);  params->util.gobble(qFile);
                 savedQual.setName(currQual.getName()); savedQual.setScores(currQual.getScores());
-                //cout << currQual.getName() << endl;
 			}
 			  
 			string origSeq = currSeq.getUnaligned();
@@ -753,72 +733,62 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				
 				int barcodeIndex = 0;
 				int primerIndex = 0;
-				
-                
-//                cout << currSeq.getName() << '\t'; cout.flush();
-                
+               
                 if(numLinkers != 0){
 					success = trimOligos->stripLinker(currSeq, currQual);
-					if(success > ldiffs)		{	trashCode += 'k';	}
+					if(success > params->ldiffs)		{	trashCode += 'k';	}
 					else{ currentSeqsDiffs += success;  }
 
 				}
                 
 				if(numBarcodes != 0){
 					vector<int> results = trimOligos->stripBarcode(currSeq, currQual, barcodeIndex);
-                    if (pairedOligos) {
+                    if (params->pairedOligos) {
                         success = results[0] + results[2];
-                        commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                        commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], params->bdiffs) + ") ";
                     }
                     else {
                         success = results[0];
-                        commentString += "bdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], bdiffs) + ") ";
+                        commentString += "bdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->bdiffs) + ") ";
                     }
-					if(success > bdiffs)		{  trashCode += 'b'; }
+					if(success > params->bdiffs)		{  trashCode += 'b'; }
 					else{ currentSeqsDiffs += success;  }
 				}
                 obsBDiffs = success;
                 
-//                cout << success << '\t'; cout.flush();
-                
-				//cout << currSeq.getName() << '\t' << currSeq.getUnaligned() << endl;
-                if(numSpacers != 0){
+               if(numSpacers != 0){
 					success = trimOligos->stripSpacer(currSeq, currQual);
-					if(success > sdiffs)		{	trashCode += 's';	}
+					if(success > params->sdiffs)		{	trashCode += 's';	}
 					else{ currentSeqsDiffs += success;  }
 
 				}
                 
 				if(numFPrimers != 0){
-					vector<int> results = trimOligos->stripForward(currSeq, currQual, primerIndex, keepforward);
-                    if (pairedOligos) {
+					vector<int> results = trimOligos->stripForward(currSeq, currQual, primerIndex, params->keepforward);
+                    if (params->pairedOligos) {
                         success = results[0] + results[2];
-                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], pdiffs) + ") ";
+                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], params->pdiffs) + ") ";
                     }
                     else {
                         success = results[0];
-                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + ") ";
+                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->pdiffs) + ") ";
                     }
-					if(success > pdiffs)		{  trashCode += 'f';  }
+					if(success > params->pdiffs)		{  trashCode += 'f';  }
 					else{ currentSeqsDiffs += success;  }
 				}
                 obsPDiffs = success;
                 
-//                cout << success << '\t'; cout.flush();
-				
-//                cout << currentSeqsDiffs << endl;
-                
 				if(numRPrimers != 0){
 					vector<int> results =  trimOligos->stripReverse(currSeq, currQual);
                     success = results[0];
-                    commentString += "rpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + ") ";
-                    if(success > pdiffs)		{	trashCode += 'r';	}
+                    commentString += "rpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->pdiffs) + ") ";
+                    if(success > params->pdiffs)		{	trashCode += 'r';	}
                     else{ currentSeqsDiffs += success;  }
 				}
                 
-                if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
+                if (currentSeqsDiffs > params->tdiffs)	{	trashCode += 't';   }
                 
-                if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+                if (params->reorient && (trashCode != "")) { //if you failed and want to check the reverse
                     int thisSuccess = 0;
                     string thisTrashCode = "";
                     string thiscommentString = "";
@@ -826,48 +796,39 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                     
                     int thisBarcodeIndex = 0;
                     int thisPrimerIndex = 0;
-                    //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
+                    
                     if(numBarcodes != 0){
                         vector<int> results =  rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
-                        if (pairedOligos) {
+                        if (params->pairedOligos) {
                             thisSuccess = results[0] + results[2];
-                            thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                            thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], params->bdiffs) + ") ";
                         }
                         else {
                             thisSuccess = results[0];
-                            thiscommentString += "bdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + ") ";
+                            thiscommentString += "bdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->bdiffs) + ") ";
                         }
-                        if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
+                        if(thisSuccess > params->bdiffs)		{ thisTrashCode += "b"; }
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
                     
                     int revBDiffs = thisSuccess;
                     
-//                    cout << thisSuccess << '\t'; cout.flush();
-
-                    
-                    //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                     if(numFPrimers != 0){
-                        vector<int> results =  rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, keepforward);
-                        if (pairedOligos) {
+                        vector<int> results =  rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, params->keepforward);
+                        if (params->pairedOligos) {
                             thisSuccess = results[0] + results[2];
-                            thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], pdiffs) + ") ";
+                            thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], params->pdiffs) + ") ";
                         }
                         else {
                             thisSuccess = results[0];
-                            thiscommentString += "pdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + ") ";
+                            thiscommentString += "pdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->pdiffs) + ") ";
                         }
-                        if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }
+                        if(thisSuccess > params->pdiffs)		{ thisTrashCode += "f"; }
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
                     int revPDiffs = thisSuccess;
 
-//                    cout << thisSuccess << '\t'; cout.flush();
-
-                    if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
-                    
-//                    cout << thisCurrentSeqsDiffs << endl;
-
+                    if (thisCurrentSeqsDiffs > params->tdiffs)	{	thisTrashCode += 't';   }
                     
                     if (thisTrashCode == "") {
                         obsPDiffs = revPDiffs;
@@ -881,75 +842,67 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                         primerIndex = thisPrimerIndex;
                         savedSeq.reverseComplement();
                         currSeq.setAligned(savedSeq.getAligned());
-                        if(qFileName != ""){
+                        if(params->qFileName != ""){
                             savedQual.flipQScores();
                             currQual.setScores(savedQual.getScores());
                         }
                     }else { trashCode += "(" + thisTrashCode + ")";  }
                 }
                 
-				if(keepFirst != 0){
-					success = keepFirstTrim(currSeq, currQual);
-				}
+				if(params->keepFirst != 0){ success = keepFirstTrim(currSeq, currQual, params->keepFirst); }
 				
-				if(removeLast != 0){
-					success = removeLastTrim(currSeq, currQual);
+				if(params->removeLast != 0){
+					success = removeLastTrim(currSeq, currQual, params->removeLast);
 					if(!success)				{	trashCode += 'l';	}
 				}
-
 				
-				if(qFileName != ""){
+				if(params->qFileName != ""){
 					int origLength = currSeq.getNumBases();
 					
-					if(qThreshold != 0)			{	success = currQual.stripQualThreshold(currSeq, qThreshold);			}
-					else if(qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, qAverage, logtransform);				}
-					else if(qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, qRollAverage, logtransform);	}
-					else if(qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, qWindowStep, qWindowSize, qWindowAverage, logtransform);	}
+					if(params->qThreshold != 0)			{	success = currQual.stripQualThreshold(currSeq, params->qThreshold);			}
+					else if(params->qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, params->qAverage, params->logtransform);				}
+					else if(params->qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, params->qRollAverage, params->logtransform);	}
+					else if(params->qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, params->qWindowStep, params->qWindowSize, params->qWindowAverage, params->logtransform);	}
 					else						{	success = 1;				}
 					
 					//you don't want to trim, if it fails above then scrap it
-					if ((!qtrim) && (origLength != currSeq.getNumBases())) {  success = 0; }
+					if ((!params->qtrim) && (origLength != currSeq.getNumBases())) {  success = 0; }
 					
 					if(!success)				{	trashCode += 'q';	}
 				}				
 		
-				if(minLength > 0 || maxLength > 0){
-					success = cullLength(currSeq);
+				if(params->minLength > 0 || params->maxLength > 0){
+					success = cullLength(currSeq, params->minLength, params->maxLength);
 					if(!success)				{	trashCode += 'l';	}
 				}
-				if(maxHomoP > 0){
-					success = cullHomoP(currSeq);
+				if(params->maxHomoP > 0){
+					success = cullHomoP(currSeq, params->maxHomoP);
 					if(!success)				{	trashCode += 'h';	}
 				}
-				if(maxAmbig != -1){
-					success = cullAmbigs(currSeq);
+				if(params->maxAmbig != -1){
+					success = cullAmbigs(currSeq, params->maxAmbig);
 					if(!success)				{	trashCode += 'n';	}
 				}
 				
-				if(flip){		// should go last			
+				if(params->flip){		// should go last
 					currSeq.reverseComplement();
-					if(qFileName != ""){
-						currQual.flipQScores();	
-					}
+					if(params->qFileName != ""){ currQual.flipQScores();	 }
 				}
 				
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + currSeq.getName() + ", trashcode= " + trashCode); if (trashCode.length() != 0) { m->mothurOutEndLine(); } }
+                if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + currSeq.getName() + ", trashcode= " + trashCode + "\n");  }
 
                 string seqComment = currSeq.getComment();
                 currSeq.setComment("\t" + commentString + "\t" + seqComment);
                 
 				if(trashCode.length() == 0){
                     string thisGroup = "";
-                    if (createGroup) {
+                    if (params->createGroup) {
 						if(numBarcodes != 0){
-							thisGroup = barcodeNameVector[barcodeIndex];
+							thisGroup = params->barcodeNameVector[barcodeIndex];
 							if (numFPrimers != 0) {
-								if (primerNameVector[primerIndex] != "") { 
-									if(thisGroup != "") {
-										thisGroup += "." + primerNameVector[primerIndex]; 
-									}else {
-										thisGroup = primerNameVector[primerIndex]; 
-									}
+								if (params->primerNameVector[primerIndex] != "") {
+									if(thisGroup != "") { thisGroup += "." + params->primerNameVector[primerIndex]; }
+									else                { thisGroup = params->primerNameVector[primerIndex];        }
 								} 
 							}
                         }
@@ -958,621 +911,259 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                     int pos = thisGroup.find("ignore");
                     if (pos == string::npos) {
                         currSeq.setAligned(currSeq.getUnaligned());
-                        currSeq.printSequence(trimFASTAFile);
+                        currSeq.printSequence(params->trimFileName);
                         
-                        if(qFileName != ""){
-                            currQual.printQScores(trimQualFile);
-                        }
-                        
-                        
-                        if(nameFile != ""){
-                            map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-                            if (itName != nameMap.end()) {  trimNameFile << itName->first << '\t' << itName->second << endl; }
-                            else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
-                        }
-                        
-                        int numRedundants = 0;
-                        if (countfile != "") {
-                            map<string, int>::iterator itCount = nameCount.find(currSeq.getName());
-                            if (itCount != nameCount.end()) { 
-                                trimCountFile << itCount->first << '\t' << itCount->second << endl;
-                                numRedundants = itCount->second-1;
-                            }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); m->mothurOutEndLine(); }
-                        }
-                        
-                        if (createGroup) {
-                            if(numBarcodes != 0){
-                                                                
-                                if (m->getDebug()) { m->mothurOut(", group= " + thisGroup + "\n"); }
-                                
-                                if (countfile == "") { outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl; }
-                                else {   groupMap[currSeq.getName()] = thisGroup; }
-                                
-                                if (nameFile != "") {
-                                    map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-                                    if (itName != nameMap.end()) { 
-                                        vector<string> thisSeqsNames; 
-                                        m->splitAtChar(itName->second, thisSeqsNames, ',');
-                                        numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
-                                        for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
-                                            outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
-                                        }
-                                    }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }							
-                                }
-                                
-                                map<string, int>::iterator it = groupCounts.find(thisGroup);
-                                if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1 + numRedundants; }
-                                else { groupCounts[it->first] += (1 + numRedundants); }
-								
-                            }
-                        }
-                        
-                        if(allFiles){
-                            ofstream output;
-                            m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
-                            currSeq.printSequence(output);
-                            output.close();
+                        if(params->qFileName != ""){ currQual.printQScores(params->trimQFileName); }
+         
+                        if (params->createGroup) {
+                            if (params->m->getDebug()) { params->m->mothurOut(", group= " + thisGroup + "\n"); }
+                            params->groupMap[currSeq.getName()] = thisGroup;
                             
-                            if(qFileName != ""){
-                                m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], output);
-                                currQual.printQScores(output);
-                                output.close();							
-                            }
-                            
-                            if(nameFile != ""){
-                                map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-                                if (itName != nameMap.end()) { 
-                                    m->openOutputFileAppend(nameFileNames[barcodeIndex][primerIndex], output);
-                                    output << itName->first << '\t' << itName->second << endl; 
-                                    output.close();
-                                }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
-                            }
+                            map<string, int>::iterator it = params->groupCounts.find(thisGroup);
+                            if (it == params->groupCounts.end()) {	params->groupCounts[thisGroup] = 1; }
+                            else { params->groupCounts[it->first] += 1; }
                         }
                     }
 				}
 				else{
-					if(nameFile != ""){ //needs to be before the currSeq name is changed
-						map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-						if (itName != nameMap.end()) {  scrapNameFile << itName->first << '\t' << itName->second << endl; }
-						else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
-					}
-                    if (countfile != "") {
-                        map<string, int>::iterator itCount = nameCount.find(currSeq.getName());
-                        if (itCount != nameCount.end()) { 
-                            trimCountFile << itCount->first << '\t' << itCount->second << endl;
-                        }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); m->mothurOutEndLine(); }
-                    }
-                    
-					currSeq.setName(currSeq.getName() + '|' + trashCode);
+                    params->badNames.insert(currSeq.getName());
+					currSeq.setName(currSeq.getName() + " | " + trashCode);
 					currSeq.setUnaligned(origSeq);
 					currSeq.setAligned(origSeq);
-					currSeq.printSequence(scrapFASTAFile);
-					if(qFileName != ""){
-						currQual.printQScores(scrapQualFile);
-					}
+					currSeq.printSequence(params->scrapFileName);
+					if(params->qFileName != ""){ currQual.printQScores(params->scrapQFileName); }
 				}
-				count++;
+				params->count++;
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = inFASTA.tellg();
-				if ((pos == -1) || (pos >= line.end)) { break; }
-			
+				if ((pos == -1) || (pos >= params->lineEnd)) { break; }
 			#else
-				if (inFASTA.eof()) { break; }
+				if ((params->count == params->lineEnd) || (inFASTA.eof())) { break; }
 			#endif
 			
 			//report progress
-			if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 		}
+			if((params->count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
 			
 		}
 		//report progress
-		if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count)+"\n");		}
+		if((params->count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n");		}
 		
 		delete trimOligos;
-        if (reorient) { delete rtrimOligos; }
+        if (params->reorient) { delete rtrimOligos; }
 		inFASTA.close();
-		trimFASTAFile.close();
-		scrapFASTAFile.close();
-		if (createGroup) {	 outGroupsFile.close();   }
-		if(qFileName != "")	{	qFile.close();	scrapQualFile.close(); trimQualFile.close();	}
-		if(nameFile != "")	{	scrapNameFile.close(); trimNameFile.close();	}
-        if(countfile != "")	{	scrapCountFile.close(); trimCountFile.close();	}
-		
-		return count;
-	}
+		if(params->qFileName != "")	{	qFile.close();		}
+    }
 	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "driverCreateTrim");
+		params->m->errorOut(e, "TrimSeqsCommand", "driverTrim");
 		exit(1);
 	}
 }
 
 /**************************************************************************************************/
-
-int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName, string groupFile, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, vector<vector<string> > nameFileNames) {
+int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName, string groupFile) {
 	try {
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<trimData*> data;
         
-        int process = 1;
-		int exitCommand = 1;
-		processIDS.clear();
-        bool recalc = false;
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				//loop through and create all the processes you want
-		while (process != processors) {
-			int pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				
-				vector<vector<string> > tempFASTAFileNames = fastaFileNames;
-				vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
-				vector<vector<string> > tempNameFileNames = nameFileNames;
-
-				if(allFiles){
-					ofstream temp;
-
-					for(int i=0;i<tempFASTAFileNames.size();i++){
-						for(int j=0;j<tempFASTAFileNames[i].size();j++){
-							if (tempFASTAFileNames[i][j] != "") {
-								tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
-								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
-
-								if(qFileName != ""){
-									tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
-									m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
-								}
-								if(nameFile != ""){
-									tempNameFileNames[i][j] += toString(getpid()) + ".temp";
-									m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
-								}
-							}
-						}
-					}
-				}
-							
-				driverCreateTrim(filename,
-								 qFileName,
-								 (trimFASTAFileName + toString(getpid()) + ".temp"),
-								 (scrapFASTAFileName + toString(getpid()) + ".temp"),
-								 (trimQualFileName + toString(getpid()) + ".temp"),
-								 (scrapQualFileName + toString(getpid()) + ".temp"),
-								 (trimNameFileName + toString(getpid()) + ".temp"),
-								 (scrapNameFileName + toString(getpid()) + ".temp"),
-                                 (trimCountFileName + toString(getpid()) + ".temp"),
-								 (scrapCountFileName + toString(getpid()) + ".temp"),
-								 (groupFile + toString(getpid()) + ".temp"),
-								 tempFASTAFileNames,
-								 tempPrimerQualFileNames,
-								 tempNameFileNames,
-								 lines[process],
-								 qLines[process]);
-                
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
-				
-				//pass groupCounts to parent
-				if(createGroup){
-					ofstream out;
-					string tempFile = filename + toString(getpid()) + ".num.temp";
-					m->openOutputFile(tempFile, out);
-					
-					out << groupCounts.size() << endl;
-					
-					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-						out << it->first << '\t' << it->second << endl;
-					}
-                    
-                    out << groupMap.size() << endl;
-                    for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {
-						out << it->first << '\t' << it->second << endl;
-					}
-					out.close();
-				}
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(trimFASTAFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(scrapFASTAFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(trimQualFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(scrapQualFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(trimNameFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(scrapNameFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(trimCountFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(scrapCountFileName + (toString(processIDS[i]) + ".temp"));
-                    m->mothurRemove(groupFile + (toString(processIDS[i]) + ".temp"));
-                    if (createGroup) {
-                        string tempFile = filename + (toString(processIDS[i])) + ".num.temp";
-                        m->mothurRemove(tempFile);
-                    }
-                    if(allFiles){
-                        for(int i=0;i<fastaFileNames.size();i++){
-                            for(int j=0;j<fastaFileNames[0].size();j++){
-                                if (fastaFileNames[i][j] != "") {
-                                    string tempFile = fastaFileNames[i][j] +(toString(processIDS[i])) + ".temp";
-                                    m->mothurRemove(tempFile);
-                                    
-                                    if(qFileName != ""){
-                                        string tempFile = qualFileNames[i][j] +(toString(processIDS[i])) + ".temp";
-                                        m->mothurRemove(tempFile);
-                                    }
-                                    if(nameFile != ""){
-                                        string tempFile = nameFileNames[i][j] +(toString(processIDS[i])) + ".temp";
-                                        m->mothurRemove(tempFile);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                recalc = true;
-                break;
-			}
-		}
-		
+        //fills lines and qlines
+        setLines(filename, qFileName);
         
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					for (int i=0;i<processIDS.size();i++) {}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //redo file divide
-            lines.clear();
-            setLines(fastaFile, qFileName);
-            
-            exitCommand = 1;
-            processIDS.resize(0);
-            process = 1;
-            
-            while (process != processors) {
-                int pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    
-                    vector<vector<string> > tempFASTAFileNames = fastaFileNames;
-                    vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
-                    vector<vector<string> > tempNameFileNames = nameFileNames;
-                    
-                    if(allFiles){
-                        ofstream temp;
-                        
-                        for(int i=0;i<tempFASTAFileNames.size();i++){
-                            for(int j=0;j<tempFASTAFileNames[i].size();j++){
-                                if (tempFASTAFileNames[i][j] != "") {
-                                    tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
-                                    m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
-                                    
-                                    if(qFileName != ""){
-                                        tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
-                                        m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
-                                    }
-                                    if(nameFile != ""){
-                                        tempNameFileNames[i][j] += toString(getpid()) + ".temp";
-                                        m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    driverCreateTrim(filename,
-                                     qFileName,
-                                     (trimFASTAFileName + toString(getpid()) + ".temp"),
-                                     (scrapFASTAFileName + toString(getpid()) + ".temp"),
-                                     (trimQualFileName + toString(getpid()) + ".temp"),
-                                     (scrapQualFileName + toString(getpid()) + ".temp"),
-                                     (trimNameFileName + toString(getpid()) + ".temp"),
-                                     (scrapNameFileName + toString(getpid()) + ".temp"),
-                                     (trimCountFileName + toString(getpid()) + ".temp"),
-                                     (scrapCountFileName + toString(getpid()) + ".temp"),
-                                     (groupFile + toString(getpid()) + ".temp"),
-                                     tempFASTAFileNames,
-                                     tempPrimerQualFileNames,
-                                     tempNameFileNames,
-                                     lines[process],
-                                     qLines[process]);
-                    
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
-                    
-                    //pass groupCounts to parent
-                    if(createGroup){
-                        ofstream out;
-                        string tempFile = filename + toString(getpid()) + ".num.temp";
-                        m->openOutputFile(tempFile, out);
-                        
-                        out << groupCounts.size() << endl;
-                        
-                        for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-                            out << it->first << '\t' << it->second << endl;
-                        }
-                        
-                        out << groupMap.size() << endl;
-                        for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {
-                            out << it->first << '\t' << it->second << endl;
-                        }
-                        out.close();
-                    }
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }            
-        }
-
+        auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(trimFASTAFileName);
+        auto synchronizedOutputFastaScrapFile = std::make_shared<SynchronizedOutputFile>(scrapFASTAFileName);
+        auto synchronizedOutputQTrimFile = std::make_shared<SynchronizedOutputFile>(trimQualFileName);
+        auto synchronizedOutputQScrapFile = std::make_shared<SynchronizedOutputFile>(scrapQualFileName);
         
-		//parent do my part
-		ofstream temp;
-		m->openOutputFile(trimFASTAFileName, temp);		temp.close();
-		m->openOutputFile(scrapFASTAFileName, temp);	temp.close();
-		if(qFileName != ""){
-			m->openOutputFile(trimQualFileName, temp);		temp.close();
-			m->openOutputFile(scrapQualFileName, temp);		temp.close();
-		}
-		if (nameFile != "") {
-			m->openOutputFile(trimNameFileName, temp);		temp.close();
-			m->openOutputFile(scrapNameFileName, temp);		temp.close();
-		}
-        if (countfile != "") {
-			m->openOutputFile(trimCountFileName, temp);		temp.close();
-			m->openOutputFile(scrapCountFileName, temp);		temp.close();
-		}
-
-		driverCreateTrim(filename, qFileName, trimFASTAFileName, scrapFASTAFileName, trimQualFileName, scrapQualFileName, trimNameFileName, scrapNameFileName, trimCountFileName, scrapCountFileName, groupFile, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-#else
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the trimData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		vector<trimData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int h=0; h<processors-1; h++){
-			
-            string extension = "";
-			if (h != 0) { extension = toString(h) + ".temp"; processIDS.push_back(h); }
-            vector<vector<string> > tempFASTAFileNames = fastaFileNames;
-            vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
-            vector<vector<string> > tempNameFileNames = nameFileNames;
-            
-            if(allFiles){
-                ofstream temp;
-                
-                for(int i=0;i<tempFASTAFileNames.size();i++){
-                    for(int j=0;j<tempFASTAFileNames[i].size();j++){
-                        if (tempFASTAFileNames[i][j] != "") {
-                            tempFASTAFileNames[i][j] += extension;
-                            m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
-                            
-                            if(qFileName != ""){
-                                tempPrimerQualFileNames[i][j] += extension;
-                                m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
-                            }
-                            if(nameFile != ""){
-                                tempNameFileNames[i][j] += extension;
-                                m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
-                            }
-                        }
-                    }
-                }
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            OutputWriter* threadFastaTrimWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
+            OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
+            OutputWriter* threadQTrimWriter = NULL;
+            OutputWriter* threadQScrapWriter = NULL;
+            if (qFileName != "") {
+                threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
+                threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
             }
-
+            //string fn, string qn, OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend, map<string, string> nm, map<string, int> ncoun
+            trimData* dataBundle = new trimData(filename, qFileName, threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, lines[i+1].start, lines[i+1].end, qLines[i+1].start, qLines[i+1].end, nameMap, nameCount);
+            dataBundle->setOligosOptions(pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
+                                           primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
+                                           qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage, logtransform,
+                                           minLength, maxAmbig, maxHomoP, maxLength, flip, reorient);
+            data.push_back(dataBundle);
             
-			trimData* tempTrim = new trimData(filename,
-                                              qFileName, nameFile, countfile,
-                                              (trimFASTAFileName+extension),
-                                              (scrapFASTAFileName+extension),
-                                              (trimQualFileName+extension),
-                                              (scrapQualFileName+extension),
-                                              (trimNameFileName+extension),
-                                              (scrapNameFileName+extension),
-                                              (trimCountFileName+extension),
-                                              (scrapCountFileName+extension),
-                                              (groupFile+extension),
-                                              tempFASTAFileNames,
-                                              tempPrimerQualFileNames,
-                                              tempNameFileNames,
-                                              lines[h].start, lines[h].end, qLines[h].start, qLines[h].end, m,
-                                              pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
-                                             primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
-                                              qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage, logtransform, 
-                                             minLength, maxAmbig, maxHomoP, maxLength, flip, reorient, nameMap, nameCount);
-			pDataArray.push_back(tempTrim);
-            
-			hThreadArray[h] = CreateThread(NULL, 0, MyTrimThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
-		}
-        
-        //parent do my part
-		ofstream temp;
-		m->openOutputFile(trimFASTAFileName, temp);		temp.close();
-		m->openOutputFile(scrapFASTAFileName, temp);	temp.close();
-		if(qFileName != ""){
-			m->openOutputFile(trimQualFileName, temp);		temp.close();
-			m->openOutputFile(scrapQualFileName, temp);		temp.close();
-		}
-		if (nameFile != "") {
-			m->openOutputFile(trimNameFileName, temp);		temp.close();
-			m->openOutputFile(scrapNameFileName, temp);		temp.close();
-		}
-        vector<vector<string> > tempFASTAFileNames = fastaFileNames;
-        vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
-        vector<vector<string> > tempNameFileNames = nameFileNames;
-        if(allFiles){
-            ofstream temp;
-            string extension = toString(processors-1) + ".temp";
-            for(int i=0;i<tempFASTAFileNames.size();i++){
-                for(int j=0;j<tempFASTAFileNames[i].size();j++){
-                    if (tempFASTAFileNames[i][j] != "") {
-                        tempFASTAFileNames[i][j] += extension;
-                        m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
-                        
-                        if(qFileName != ""){
-                            tempPrimerQualFileNames[i][j] += extension;
-                            m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
-                        }
-                        if(nameFile != ""){
-                            tempNameFileNames[i][j] += extension;
-                            m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
-                        }
-                    }
-                }
-            }
+            workerThreads.push_back(new thread(driverTrim, dataBundle));
         }
         
-		driverCreateTrim(filename, qFileName, (trimFASTAFileName + toString(processors-1) + ".temp"), (scrapFASTAFileName + toString(processors-1) + ".temp"), (trimQualFileName + toString(processors-1) + ".temp"), (scrapQualFileName + toString(processors-1) + ".temp"), (trimNameFileName + toString(processors-1) + ".temp"), (scrapNameFileName + toString(processors-1) + ".temp"), (trimCountFileName + toString(processors-1) + ".temp"), (scrapCountFileName + toString(processors-1) + ".temp"), (groupFile + toString(processors-1) + ".temp"), tempFASTAFileNames, tempPrimerQualFileNames, tempNameFileNames, lines[processors-1], qLines[processors-1]);
-        processIDS.push_back(processors-1);
+        OutputWriter* threadFastaTrimWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
+        OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
+        OutputWriter* threadQTrimWriter = NULL;
+        OutputWriter* threadQScrapWriter = NULL;
+        if (qFileName != "") {
+            threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
+            threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
+        }
+        //string fn, string qn, OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend, map<string, string> nm, map<string, int> ncoun
+        trimData* dataBundle = new trimData(filename, qFileName, threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, lines[0].start, lines[0].end, qLines[0].start, qLines[0].end, nameMap, nameCount);
+        dataBundle->setOligosOptions(pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
+                                     primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
+                                     qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage, logtransform,
+                                     minLength, maxAmbig, maxHomoP, maxLength, flip, reorient);
 
+        driverTrim(dataBundle);
+        long long num = dataBundle->count;
         
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            if (pDataArray[i]->count != pDataArray[i]->lineEnd) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->lineEnd) + " sequences assigned to it, quitting. \n"); m->setControl_pressed(true);
-            }
-			for (map<string, int>::iterator it = pDataArray[i]->groupCounts.begin(); it != pDataArray[i]->groupCounts.end(); it++) {
-                map<string, int>::iterator it2 = groupCounts.find(it->first);
-                if (it2 == groupCounts.end()) {	groupCounts[it->first] = it->second; }
-                else { groupCounts[it->first] += it->second; }
-            }
-            for (map<string, string>::iterator it = pDataArray[i]->groupMap.begin(); it != pDataArray[i]->groupMap.end(); it++) {
-                map<string, string>::iterator it2 = groupMap.find(it->first);
-                if (it2 == groupMap.end()) {	groupMap[it->first] = it->second; }
-                else { m->mothurOut("[ERROR]: " + it->first + " is in your fasta file more than once. Sequence names must be unique. please correct.\n");  }
-            }
-            CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
+        delete threadFastaTrimWriter;
+        delete threadFastaScrapWriter;
+        if (qFileName != "") {
+            delete threadQTrimWriter;
+            delete threadQScrapWriter;
+        }
+        set<string> badNames = dataBundle->badNames;
+        groupCounts = dataBundle->groupCounts;
+        groupMap = dataBundle->groupMap;
+        delete dataBundle;
         
-#endif		
-        
-        
-        //append files
-		for(int i=0;i<processIDS.size();i++){
-			
-			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
-			
-			m->appendFiles((trimFASTAFileName + toString(processIDS[i]) + ".temp"), trimFASTAFileName);
-			m->mothurRemove((trimFASTAFileName + toString(processIDS[i]) + ".temp"));
-			m->appendFiles((scrapFASTAFileName + toString(processIDS[i]) + ".temp"), scrapFASTAFileName);
-			m->mothurRemove((scrapFASTAFileName + toString(processIDS[i]) + ".temp"));
-			
-			if(qFileName != ""){
-				m->appendFiles((trimQualFileName + toString(processIDS[i]) + ".temp"), trimQualFileName);
-				m->mothurRemove((trimQualFileName + toString(processIDS[i]) + ".temp"));
-				m->appendFiles((scrapQualFileName + toString(processIDS[i]) + ".temp"), scrapQualFileName);
-				m->mothurRemove((scrapQualFileName + toString(processIDS[i]) + ".temp"));
-			}
-			
-			if(nameFile != ""){
-				m->appendFiles((trimNameFileName + toString(processIDS[i]) + ".temp"), trimNameFileName);
-				m->mothurRemove((trimNameFileName + toString(processIDS[i]) + ".temp"));
-				m->appendFiles((scrapNameFileName + toString(processIDS[i]) + ".temp"), scrapNameFileName);
-				m->mothurRemove((scrapNameFileName + toString(processIDS[i]) + ".temp"));
-			}
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            num += data[i]->count;
             
-            if(countfile != ""){
-				m->appendFiles((trimCountFileName + toString(processIDS[i]) + ".temp"), trimCountFileName);
-				m->mothurRemove((trimCountFileName + toString(processIDS[i]) + ".temp"));
-				m->appendFiles((scrapCountFileName + toString(processIDS[i]) + ".temp"), scrapCountFileName);
-				m->mothurRemove((scrapCountFileName + toString(processIDS[i]) + ".temp"));
-			}
-			
-			if((createGroup)&&(countfile == "")){
-				m->appendFiles((groupFile + toString(processIDS[i]) + ".temp"), groupFile);
-				m->mothurRemove((groupFile + toString(processIDS[i]) + ".temp"));
-			}
-			
-			
-			if(allFiles){
-				for(int j=0;j<fastaFileNames.size();j++){
-					for(int k=0;k<fastaFileNames[j].size();k++){
-						if (fastaFileNames[j][k] != "") {
-							m->appendFiles((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"), fastaFileNames[j][k]);
-							m->mothurRemove((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"));
-							
-							if(qFileName != ""){
-								m->appendFiles((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"), qualFileNames[j][k]);
-								m->mothurRemove((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"));
-							}
-							
-							if(nameFile != ""){
-								m->appendFiles((nameFileNames[j][k] + toString(processIDS[i]) + ".temp"), nameFileNames[j][k]);
-								m->mothurRemove((nameFileNames[j][k] + toString(processIDS[i]) + ".temp"));
-							}
-						}
-					}
-				}
-			}
-			
-            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			if(createGroup){
-				ifstream in;
-				string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
-				m->openInputFile(tempFile, in);
-				int tempNum;
-				string group;
-				
-				in >> tempNum; m->gobble(in);
-				
-				if (tempNum != 0) {
-					for (int i = 0; i < tempNum; i++) { 
-                        int groupNum;
-						in >> group >> groupNum; m->gobble(in);
-                        
-						map<string, int>::iterator it = groupCounts.find(group);
-						if (it == groupCounts.end()) {	groupCounts[group] = groupNum; }
-						else { groupCounts[it->first] += groupNum; }
-					}
-				}
-                in >> tempNum; m->gobble(in);
-                if (tempNum != 0) {
-					for (int i = 0; i < tempNum; i++) { 
-                        string group, seqName;
-						in >> seqName >> group; m->gobble(in);
-                        
-						map<string, string>::iterator it = groupMap.find(seqName);
-						if (it == groupMap.end()) {	groupMap[seqName] = group; }
-						else { m->mothurOut("[ERROR]: " + seqName + " is in your fasta file more than once. Sequence names must be unique. please correct.\n");  }
-					}
-				}
-                
-				in.close(); m->mothurRemove(tempFile);
-			}
-            #endif
-		}
-
-        return exitCommand;
+            delete data[i]->trimFileName;
+            delete data[i]->scrapFileName;
+            if (qFileName != "") {
+                delete data[i]->trimQFileName;
+                delete data[i]->scrapQFileName;
+            }
+            badNames.insert(data[i]->badNames.begin(), data[i]->badNames.end());
+            groupMap.insert(data[i]->groupMap.begin(), data[i]->groupMap.end());
+            //merge counts
+            for (map<string, int>::iterator it = data[i]->groupCounts.begin(); it != data[i]->groupCounts.end(); it++) {
+                map<string, int>::iterator itMine = groupCounts.find(it->first);
+                if (itMine != groupCounts.end()) { itMine->second += it->second; }
+                else { groupCounts[it->first] = it->second; }
+            }
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
+        
+        processNamesCountFiles(trimFASTAFileName, badNames, groupMap, trimNameFileName, scrapNameFileName, trimCountFileName, scrapCountFileName, groupFile);
+        
+        return num;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "createProcessesCreateTrim");
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNames, map<string, string> groupMap, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName, string groupFile) {
+    try {
+        
+        if(nameFile != ""){
+            ifstream inName;
+            util.openInputFile(nameFile, inName);
+            
+            ofstream outTrimName;
+            util.openOutputFile(trimNameFileName, outTrimName);
+            
+            ofstream outScrapName;
+            util.openOutputFile(scrapNameFileName, outScrapName);
+            
+            string repName, redundNames;
+            while (!inName.eof()) {
+                if (m->getControl_pressed()) { break; }
+                
+                inName >> repName; util.gobble(inName);
+                inName >> redundNames; util.gobble(inName);
+                
+                if (badNames.count(repName) == 0) { //good seq, put in trim
+                    outTrimName << repName << '\t' << redundNames << endl;
+                    int numRedunds = util.getNumNames(redundNames);
+                    if (numRedunds != 1) { //update groupCounts and add to groupMap
+                        map<string, string>::iterator itGroup = groupMap.find(repName);
+                        if (itGroup != groupMap.end()) {
+                            vector<string> seqNames; util.splitAtComma(redundNames, seqNames);
+                            for (int i = 1; i < seqNames.size(); i++) { groupMap[seqNames[i]] = itGroup->second; }
+                            groupCounts[itGroup->second] += (numRedunds - 1);
+                        }
+                    }
+                }else { //bad seq -> scrap file
+                    outScrapName << repName << '\t' << redundNames << endl;
+                }
+            }
+            outScrapName.close();
+            outTrimName.close();
+        }
+        
+        //print group or count file.
+        if (countfile == "") {
+            ofstream outGroup;
+            util.openOutputFile(groupFile, outGroup);
+            for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
+                outGroup << itGroup->first << '\t' << itGroup->second << endl;
+            }
+            outGroup.close();
+        }else {
+            map<string, int> justTrimmedNames;
+            map<string, int> justScrappedNames;
+            for (map<string, int>::iterator itCount = nameCount.begin(); itCount != nameCount.end(); itCount++) {
+                if (badNames.count(itCount->first) != 0) { justTrimmedNames[itCount->first] = itCount->second; }
+                else { justScrappedNames[itCount->first] = itCount->second; }
+            }
+            
+            CountTable newCt; //trimmed file
+            for (map<string, int>::iterator itCount = groupCounts.begin(); itCount != groupCounts.end(); itCount++) { newCt.addGroup(itCount->first); }
+            vector<int> tempCounts; tempCounts.resize(groupCounts.size(), 0);
+            for (map<string, int>::iterator itNames = justTrimmedNames.begin(); itNames != justTrimmedNames.end(); itNames++) {
+                newCt.push_back(itNames->first, tempCounts); //add it to the table with no abundance so we can set the groups abundance
+                map<string, string>::iterator it2 = groupMap.find(itNames->first);
+                if (it2 != groupMap.end()) { newCt.setAbund(itNames->first, it2->second, itNames->second); }
+                else { m->mothurOut("[ERROR]: missing group info for " + itNames->first + ".\n");  m->setControl_pressed(true); }
+            }
+            newCt.printTable(trimCountFileName);
+            
+            CountTable newScrapCt; //scrap file
+            newScrapCt.addGroup("scrap");
+            vector<int> myCounts; tempCounts.resize(1, 0);
+            for (map<string, int>::iterator itNames = justScrappedNames.begin(); itNames != justScrappedNames.end(); itNames++) {
+                newScrapCt.push_back(itNames->first, myCounts); //add it to the table with no abundance so we can set the groups abundance
+                newScrapCt.setAbund(itNames->first, "scrap", itNames->second);
+            }
+            newScrapCt.printTable(scrapCountFileName);
+        }
 
+        if(allFiles){
+            //run split.groups command
+            //use unique.seqs to create new name and fastafile
+            string inputString = "fasta=" + trimFasta;
+            if (nameFile != "")     { inputString += ", name=" + trimNameFileName;     }
+            if (countfile != "")    { inputString += ", count=" + trimCountFileName;   }
+            else {  inputString += ", group=" + groupFile; }
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Generating allfiles... Running command: split.groups(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* splitCommand = new SplitGroupCommand(inputString);
+            splitCommand->execute();
+            
+            map<string, vector<string> > filenames = splitCommand->getOutputFiles();
+            
+            delete splitCommand;
+            current->setMothurCalling(false);
+            m->mothurOut("/******************************************/\n");
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TrimSeqsCommand", "processNamesCountFiles");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 
 int TrimSeqsCommand::setLines(string filename, string qfilename) {
@@ -1583,17 +1174,17 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//set file positions for fasta file
-		fastaFilePos = m->divideFile(filename, processors);
+		fastaFilePos = util.divideFile(filename, processors);
 		
 		//get name of first sequence in each chunk
 		map<string, int> firstSeqNames;
 		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
 			ifstream in;
-			m->openInputFile(filename, in);
+			util.openInputFile(filename, in);
 			in.seekg(fastaFilePos[i]);
             
             //adjust start if null strings
-            if (i == 0) {  m->zapGremlins(in); m->gobble(in);  }
+            if (i == 0) {  util.zapGremlins(in); util.gobble(in);  }
 		
 			Sequence temp(in); 
 			firstSeqNames[temp.getName()] = i;
@@ -1604,11 +1195,11 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 		if(qfilename != "")	{
             //seach for filePos of each first name in the qfile and save in qfileFilePos
             ifstream inQual;
-            m->openInputFile(qfilename, inQual);
+            util.openInputFile(qfilename, inQual);
             
             string input;
             while(!inQual.eof()){	
-                input = m->getline(inQual);
+                input = util.getline(inQual);
                 
                 if (input.length() != 0) {
                     if(input[0] == '>'){ //this is a sequence name line
@@ -1617,7 +1208,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
                         string sname = "";  nameStream >> sname;
                         sname = sname.substr(1);
                         
-                        m->checkName(sname);
+                        util.checkName(sname);
                         
                         map<string, int>::iterator it = firstSeqNames.find(sname);
                         
@@ -1647,7 +1238,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             unsigned long long size;
             
             //get num bytes in file
-            qfilename = m->getFullPathName(qfilename);
+            qfilename = util.getFullPathName(qfilename);
             pFile = fopen (qfilename.c_str(),"rb");
             if (pFile==NULL) perror ("Error opening file");
             else{
@@ -1676,13 +1267,13 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             lines.push_back(linePair(0, 1000));
             if (qfilename != "") {  qLines.push_back(linePair(0, 1000)); }
         }else{
-            int numFastaSeqs = 0;
-            fastaFilePos = m->setFilePosFasta(filename, numFastaSeqs); 
+            long long numFastaSeqs = 0;
+            fastaFilePos = util.setFilePosFasta(filename, numFastaSeqs); 
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
         
             if (qfilename != "") { 
-                int numQualSeqs = 0;
-                qfileFilePos = m->setFilePosFasta(qfilename, numQualSeqs); 
+                long long numQualSeqs = 0;
+                qfileFilePos = util.setFilePosFasta(qfilename, numQualSeqs); 
                 
                 if (numFastaSeqs != numQualSeqs) {
                     m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file."); m->mothurOutEndLine(); m->setControl_pressed(true); 
@@ -1710,11 +1301,11 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 }
 
 //***************************************************************************************************************
-
-bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames, vector<vector<string> >& nameFileNames){
+bool TrimSeqsCommand::getOligos(){
 	try {
+        
 		ifstream inOligos;
-		m->openInputFile(oligoFile, inOligos);
+		util.openInputFile(oligoFile, inOligos);
 		
 		ofstream test;
 		
@@ -1727,6 +1318,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		int indexPairedBarcode = 0;
         set<string> uniquePrimers;
         set<string> uniqueBarcodes;
+        vector<string> tempAllFileNames; tempAllFileNames.resize(3, "");
 		
 		while(!inOligos.eof()){
 
@@ -1736,10 +1328,10 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
             
 			if(type[0] == '#'){
 				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				m->gobble(inOligos);
+				util.gobble(inOligos);
 			}
 			else{
-				m->gobble(inOligos);
+				util.gobble(inOligos);
 				//make type case insensitive
 				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
 				
@@ -1773,7 +1365,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					primerNameVector.push_back(group);
 				}
                 else if (type == "PRIMER"){
-                    m->gobble(inOligos);
+                    util.gobble(inOligos);
 					
                     inOligos >> roligo;
                     
@@ -1781,7 +1373,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
                         roligo[i] = toupper(roligo[i]);
                         if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
                     }
-                    roligo = reverseOligo(roligo);
+                    roligo = util.reverseOligo(roligo);
                     
                     group = "";
                     
@@ -1811,7 +1403,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 				else if(type == "REVERSE"){
 					//Sequence oligoRC("reverse", oligo);
 					//oligoRC.reverseComplement();
-                    string oligoRC = reverseOligo(oligo);
+                    string oligoRC = util.reverseOligo(oligo);
 					revPrimer.push_back(oligoRC);
 				}
 				else if(type == "BARCODE"){
@@ -1839,7 +1431,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
                             if(reverseBarcode[i] == 'U')	{	reverseBarcode[i] = 'T';	}
                         }
                         
-                        reverseBarcode = reverseOligo(reverseBarcode);
+                        reverseBarcode = util.reverseOligo(reverseBarcode);
                         oligosPair newPair(oligo, reverseBarcode);
                         
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
@@ -1866,7 +1458,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 				}
 				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); }
 			}
-			m->gobble(inOligos);
+			util.gobble(inOligos);
 		}	
 		inOligos.close();
 		
@@ -1875,7 +1467,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
             if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
         }
         
-		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = 0;	}
+		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = false;	}
         
 		//add in potential combos
 		if(barcodeNameVector.size() == 0){
@@ -1888,154 +1480,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 			primerNameVector.push_back("");			
 		}
 		
-		fastaFileNames.resize(barcodeNameVector.size());
-		for(int i=0;i<fastaFileNames.size();i++){
-			fastaFileNames[i].assign(primerNameVector.size(), "");
-		}
-		if(qFileName != "")	{	qualFileNames = fastaFileNames;	}
-		if(nameFile != "")	{	nameFileNames = fastaFileNames;	}
-		
-		if(allFiles){
-			set<string> uniqueNames; //used to cleanup outputFileNames
-            if (pairedOligos) {
-                for(map<int, oligosPair>::iterator itBar = pairedBarcodes.begin();itBar != pairedBarcodes.end();itBar++){
-                    for(map<int, oligosPair>::iterator itPrimer = pairedPrimers.begin();itPrimer != pairedPrimers.end(); itPrimer++){
-                        
-                        string primerName = primerNameVector[itPrimer->first];
-                        string barcodeName = barcodeNameVector[itBar->first];
-                        
-                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                        else {
-                            string comboGroupName = "";
-                            string fastaFileName = "";
-                            string qualFileName = "";
-                            string nameFileName = "";
-                            string countFileName = "";
-                            
-                            if(primerName == ""){
-                                comboGroupName = barcodeNameVector[itBar->first];
-                            }
-                            else{
-                                if(barcodeName == ""){
-                                    comboGroupName = primerNameVector[itPrimer->first];
-                                }
-                                else{
-                                    comboGroupName = barcodeNameVector[itBar->first] + "." + primerNameVector[itPrimer->first];
-                                }
-                            }
-                            
-                            
-                            ofstream temp;
-                            map<string, string> variables;
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
-                            variables["[tag]"] = comboGroupName;
-                            fastaFileName = getOutputFileName("fasta", variables);
-                            if (uniqueNames.count(fastaFileName) == 0) {
-                                outputNames.push_back(fastaFileName);
-                                outputTypes["fasta"].push_back(fastaFileName);
-                                uniqueNames.insert(fastaFileName);
-                            }
-                            
-                            fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
-                            m->openOutputFile(fastaFileName, temp);		temp.close();
-                            
-                            if(qFileName != ""){
-                                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qFileName));
-                                qualFileName = getOutputFileName("qfile", variables);
-                                if (uniqueNames.count(qualFileName) == 0) {
-                                    outputNames.push_back(qualFileName);
-                                    outputTypes["qfile"].push_back(qualFileName);
-                                }
-                                
-                                qualFileNames[itBar->first][itPrimer->first] = qualFileName;
-                                m->openOutputFile(qualFileName, temp);		temp.close();
-                            }
-                            
-                            if(nameFile != ""){
-                                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
-                                nameFileName = getOutputFileName("name", variables);
-                                if (uniqueNames.count(nameFileName) == 0) {
-                                    outputNames.push_back(nameFileName);
-                                    outputTypes["name"].push_back(nameFileName);
-                                }
-                                
-                                nameFileNames[itBar->first][itPrimer->first] = nameFileName;
-                                m->openOutputFile(nameFileName, temp);		temp.close();
-                            }
-                        }
-                    }
-                }
-            }else {
-                for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                    for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                        
-                        string primerName = primerNameVector[itPrimer->second];
-                        string barcodeName = barcodeNameVector[itBar->second];
-                        
-                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing 
-                        else {
-                            string comboGroupName = "";
-                            string fastaFileName = "";
-                            string qualFileName = "";
-                            string nameFileName = "";
-                            string countFileName = "";
-                            
-                            if(primerName == ""){
-                                comboGroupName = barcodeNameVector[itBar->second];
-                            }
-                            else{
-                                if(barcodeName == ""){
-                                    comboGroupName = primerNameVector[itPrimer->second];
-                                }
-                                else{
-                                    comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
-                                }
-                            }
-                            
-                            
-                            ofstream temp;
-                            map<string, string> variables; 
-                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
-                            variables["[tag]"] = comboGroupName;
-                            fastaFileName = getOutputFileName("fasta", variables);
-                            if (uniqueNames.count(fastaFileName) == 0) {
-                                outputNames.push_back(fastaFileName);
-                                outputTypes["fasta"].push_back(fastaFileName);
-                                uniqueNames.insert(fastaFileName);
-                            }
-                            
-                            fastaFileNames[itBar->second][itPrimer->second] = fastaFileName;
-                            m->openOutputFile(fastaFileName, temp);		temp.close();
-                            
-                            if(qFileName != ""){
-                                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qFileName));
-                                qualFileName = getOutputFileName("qfile", variables);
-                                if (uniqueNames.count(qualFileName) == 0) {
-                                    outputNames.push_back(qualFileName);
-                                    outputTypes["qfile"].push_back(qualFileName);
-                                }
-                                
-                                qualFileNames[itBar->second][itPrimer->second] = qualFileName;
-                                m->openOutputFile(qualFileName, temp);		temp.close();
-                            }
-                            
-                            if(nameFile != ""){
-                                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
-                                nameFileName = getOutputFileName("name", variables);
-                                if (uniqueNames.count(nameFileName) == 0) {
-                                    outputNames.push_back(nameFileName);
-                                    outputTypes["name"].push_back(nameFileName);
-                                }
-                                
-                                nameFileNames[itBar->second][itPrimer->second] = nameFileName;
-                                m->openOutputFile(nameFileName, temp);		temp.close();
-                            }
-                        }
-                    }
-                }
-            }
-		}
-		numFPrimers = primers.size();
+        numFPrimers = primers.size();
         if (pairedOligos) { numFPrimers  = pairedPrimers.size(); }
 		numRPrimers = revPrimer.size();
         numLinkers = linker.size();
@@ -2068,157 +1513,6 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		m->errorOut(e, "TrimSeqsCommand", "getOligos");
 		exit(1);
 	}
-}
-//***************************************************************************************************************
-
-bool TrimSeqsCommand::keepFirstTrim(Sequence& sequence, QualityScores& qscores){
-	try {
-		bool success = 1;
-		if(qscores.getName() != ""){
-			qscores.trimQScores(-1, keepFirst);
-		}
-
-//        sequence.printSequence(cout);cout << endl;
-        
-		sequence.trim(keepFirst);
-        
-//        sequence.printSequence(cout);cout << endl << endl;;
-
-		return success;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "keepFirstTrim", "countDiffs");
-		exit(1);
-	}
-	
-}	
-
-//***************************************************************************************************************
-
-bool TrimSeqsCommand::removeLastTrim(Sequence& sequence, QualityScores& qscores){
-	try {
-		bool success = 0;
-		
-		int length = sequence.getNumBases() - removeLast;
-		
-		if(length > 0){
-			if(qscores.getName() != ""){
-				qscores.trimQScores(-1, length);
-			}
-			sequence.trim(length);
-			success = 1;
-		}
-		else{
-			success = 0;
-		}
-
-		return success;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "removeLastTrim", "countDiffs");
-		exit(1);
-	}
-	
-}	
-
-//***************************************************************************************************************
-
-bool TrimSeqsCommand::cullLength(Sequence& seq){
-	try {
-	
-		int length = seq.getNumBases();
-		bool success = 0;	//guilty until proven innocent
-		
-		if(length >= minLength && maxLength == 0)			{	success = 1;	}
-		else if(length >= minLength && length <= maxLength)	{	success = 1;	}
-		else												{	success = 0;	}
-		
-		return success;
-	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "cullLength");
-		exit(1);
-	}
-	
-}
-
-//***************************************************************************************************************
-
-bool TrimSeqsCommand::cullHomoP(Sequence& seq){
-	try {
-		int longHomoP = seq.getLongHomoPolymer();
-		bool success = 0;	//guilty until proven innocent
-		
-		if(longHomoP <= maxHomoP){	success = 1;	}
-		else					{	success = 0;	}
-		
-		return success;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "cullHomoP");
-		exit(1);
-	}
-	
-}
-//********************************************************************/
-string TrimSeqsCommand::reverseOligo(string oligo){
-	try {
-        string reverse = "";
-        
-        for(int i=oligo.length()-1;i>=0;i--){
-            
-            if(oligo[i] == 'A')		{	reverse += 'T';	}
-            else if(oligo[i] == 'T'){	reverse += 'A';	}
-            else if(oligo[i] == 'U'){	reverse += 'A';	}
-            
-            else if(oligo[i] == 'G'){	reverse += 'C';	}
-            else if(oligo[i] == 'C'){	reverse += 'G';	}
-            
-            else if(oligo[i] == 'R'){	reverse += 'Y';	}
-            else if(oligo[i] == 'Y'){	reverse += 'R';	}
-            
-            else if(oligo[i] == 'M'){	reverse += 'K';	}
-            else if(oligo[i] == 'K'){	reverse += 'M';	}
-            
-            else if(oligo[i] == 'W'){	reverse += 'W';	}
-            else if(oligo[i] == 'S'){	reverse += 'S';	}
-            
-            else if(oligo[i] == 'B'){	reverse += 'V';	}
-            else if(oligo[i] == 'V'){	reverse += 'B';	}
-            
-            else if(oligo[i] == 'D'){	reverse += 'H';	}
-            else if(oligo[i] == 'H'){	reverse += 'D';	}
-            
-            else						{	reverse += 'N';	}
-        }
-        
-        
-        return reverse;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "reverseOligo");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-bool TrimSeqsCommand::cullAmbigs(Sequence& seq){
-	try {
-		int numNs = seq.getAmbigBases();
-		bool success = 0;	//guilty until proven innocent
-		
-		if(numNs <= maxAmbig)	{	success = 1;	}
-		else					{	success = 0;	}
-		
-		return success;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "cullAmbigs");
-		exit(1);
-	}
-	
 }
 //***************************************************************************************************************
 

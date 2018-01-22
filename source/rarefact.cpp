@@ -65,13 +65,11 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 			
 		for(int iter=0;iter<nIters;iter++){
 		
-			for(int i=0;i<displays.size();i++){
-				displays[i]->init(label);
-			}
+			for(int i=0;i<displays.size();i++){ displays[i]->init(label); }
 		
 			RAbundVector* lookup	= new RAbundVector(order.getNumBins());
 			SAbundVector* rank	= new SAbundVector(order.getMaxRank()+1);
-			m->mothurRandomShuffle(order);
+			util.mothurRandomShuffle(order);
 		
 			for(int i=0;i<numSeqs;i++){
 			
@@ -86,18 +84,12 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 				lookup->set(binNumber, abundance);
 				rank->set(abundance, rank->get(abundance)+1);
 
-				if((i == 0) || ((i+1) % increment == 0) || (ends.count(i+1) != 0)){
-					rcd->updateRankData(rank);
-				}
+				if((i == 0) || ((i+1) % increment == 0) || (ends.count(i+1) != 0)){ rcd->updateRankData(rank); }
 			}
 	
-			if((numSeqs % increment != 0) || (ends.count(numSeqs) != 0)){
-				rcd->updateRankData(rank);
-			}
+			if((numSeqs % increment != 0) || (ends.count(numSeqs) != 0)){ rcd->updateRankData(rank); }
 
-			for(int i=0;i<displays.size();i++){
-				displays[i]->reset();
-			}
+			for(int i=0;i<displays.size();i++){ displays[i]->reset(); }
 			
 			delete lookup;
 			delete rank;
@@ -117,8 +109,6 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		vector<int> processIDS;
-        bool recalc = false;
-		
 		EstOutput results;
 		
 		//loop through and create all the processes you want
@@ -133,71 +123,13 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 			
 				//pass numSeqs to parent
 				for(int i=0;i<displays.size();i++){
-					string tempFile = m->mothurGetpid(process) + toString(i) + ".rarefact.temp";
+					string tempFile = toString(process) + toString(i) + ".rarefact.temp";
 					displays[i]->outputTempFiles(tempFile);
 				}
 				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    for(int j=0;j<displays.size();j++){
-                        m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");
-                    }
-                }
-                recalc = true;
-                break;
 			}
 		}
 		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					 for (int i=0;i<processIDS.size();i++) {for(int j=0;j<displays.size();j++){m->mothurRemove(toString(processIDS[i]) + toString(j) + ".rarefact.temp");}}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            vector<int> procIters;
-            int numItersPerProcessor = nIters / processors;
-            //divide iters between processes
-            for (int i = 0; i < processors; i++) {
-                if(i == processors - 1){
-                    numItersPerProcessor = nIters - i * numItersPerProcessor;
-                }
-                procIters.push_back(numItersPerProcessor);
-            }
-
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    driver(rcd, increment, procIters[process]);
-                    
-                    //pass numSeqs to parent
-                    for(int i=0;i<displays.size();i++){
-                        string tempFile = m->mothurGetpid(process) + toString(i) + ".rarefact.temp";
-                        displays[i]->outputTempFiles(tempFile);
-                    }
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-        
 		driver(rcd, increment, procIters[0]);
 		
 		//force parent to wait until all the processes are done
@@ -211,7 +143,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 			for(int j=0;j<displays.size();j++){
 				string s = toString(processIDS[i]) + toString(j) + ".rarefact.temp";
 				displays[j]->inputTempFiles(s);
-				m->mothurRemove(s);
+				util.mothurRemove(s);
 			}
 		}
 		
@@ -237,7 +169,7 @@ try {
 		}
 		
 		//if jumble is false all iters will be the same
-		if (m->getJumble() == false)  {  nIters = 1;  }
+		if (!jumble)  {  nIters = 1;  }
 		
 		//convert freq percentage to number
 		int increment = 1;
@@ -251,7 +183,7 @@ try {
 			}
 			
             //randomize the groups
-			if (m->getJumble() == true)  { m->mothurRandomShuffle(lookup); }
+			if (jumble)  { util.mothurRandomShuffle(lookup); }
 			
 			//make merge the size of lookup[0]
 			SharedRAbundVector* merge = new SharedRAbundVector(lookup[0]->getNumBins());

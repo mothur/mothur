@@ -148,17 +148,17 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("alignreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
@@ -166,7 +166,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -174,7 +174,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -182,7 +182,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -190,7 +190,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -198,7 +198,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -206,7 +206,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -214,7 +214,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
                 it = parameters.find("constaxonomy");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
 				}
@@ -222,7 +222,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -230,57 +230,57 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 
 			
 			//check for required parameters			
-			fastafile = validParameter.validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }	
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
-			alignfile = validParameter.validFile(parameters, "alignreport", true);
+			alignfile = validParameter.validFile(parameters, "alignreport");
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
 			
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
-			else { m->setListFile(listfile); }
+			else { current->setListFile(listfile); }
 			
-			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not open") { taxfile = ""; abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";		}
-			else { m->setTaxonomyFile(taxfile); }
+			else { current->setTaxonomyFile(taxfile); }
             
-            sharedfile = validParameter.validFile(parameters, "shared", true);
+            sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {  sharedfile = "";		}
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
             
             
-            constaxonomy = validParameter.validFile(parameters, "constaxonomy", true);
+            constaxonomy = validParameter.validFile(parameters, "constaxonomy");
 			if (constaxonomy == "not open") { constaxonomy = ""; abort = true; }
 			else if (constaxonomy == "not found") {  constaxonomy = "";		}
             
             if ((constaxonomy == "") && (taxfile == "")) {
-                taxfile = m->getTaxonomyFile();
+                taxfile = current->getTaxonomyFile();
                 if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
                 else {
                     m->mothurOut("You have no current taxonomy file and did not provide a constaxonomy file. The taxonomy or constaxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
             if (countfile == "not open") { countfile = ""; abort = true; }
             else if (countfile == "not found") { countfile = "";  }	
-            else { m->setCountTableFile(countfile); }
+            else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -291,22 +291,22 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
             }
             
 			string usedDups = "true";
-			string temp = validParameter.validFile(parameters, "dups", false);	
+			string temp = validParameter.valid(parameters, "dups");
 			if (temp == "not found") { 
 				if (namefile != "") {  temp = "true";					}
 				else				{  temp = "false"; usedDups = "";	}
 			}
-			dups = m->isTrue(temp);
+			dups = util.isTrue(temp);
 			
-			taxons = validParameter.validFile(parameters, "taxon", false);	
+			taxons = validParameter.valid(parameters, "taxon");
 			if (taxons == "not found") { taxons = "";  m->mothurOut("No taxons given, please correct."); m->mothurOutEndLine();  abort = true;  }
 			else { 
 				//rip off quotes
 				if (taxons[0] == '\'') {  taxons = taxons.substr(1); }
 				if (taxons[(taxons.length()-1)] == '\'') {  taxons = taxons.substr(0, (taxons.length()-1)); }
 			}
-			m->splitAtChar(taxons, listOfTaxons, '-');
-            if (m->getDebug()) { string taxonString = m->getStringFromVector(listOfTaxons, ", "); m->mothurOut("[DEBUG]: " + taxonString + "\n."); }
+			util.splitAtChar(taxons, listOfTaxons, '-');
+            if (m->getDebug()) { string taxonString = util.getStringFromVector(listOfTaxons, ", "); m->mothurOut("[DEBUG]: " + taxonString + "\n."); }
 			
 			if ((fastafile == "") && (constaxonomy == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, constaxonomy, shared or listfile."); m->mothurOutEndLine(); abort = true; }
             
@@ -323,7 +323,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
             }
             
             if ((sharedfile != "") || (listfile != "")) {
-                label = validParameter.validFile(parameters, "label", false);
+                label = validParameter.valid(parameters, "label");
                 if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
             }
 
@@ -333,7 +333,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			if (countfile == "") {
                 if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
                     vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
 			
@@ -350,7 +350,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 int RemoveLineageCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (m->getControl_pressed()) { return 0; }
         
@@ -377,7 +377,7 @@ int RemoveLineageCommand::execute(){
         }
 		
 		
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -386,41 +386,41 @@ int RemoveLineageCommand::execute(){
 			m->mothurOutEndLine();
 			
 			//set fasta file as new current fastafile
-			string current = "";
+			string currentName = "";
 			itTypes = outputTypes.find("fasta");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("name");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("group");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("list");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 			}
 			
 			itTypes = outputTypes.find("taxonomy");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 			}
             
             itTypes = outputTypes.find("count");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 			}
             
             //set constaxonomy file as new current constaxonomyfile
             itTypes = outputTypes.find("constaxonomy");
             if (itTypes != outputTypes.end()) {
-                if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setConsTaxonomyFile(current); }
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setConsTaxonomyFile(currentName); }
             }
 		}
 		
@@ -437,22 +437,22 @@ int RemoveLineageCommand::execute(){
 int RemoveLineageCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
 		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
-        variables["[extension]"] = m->getExtension(fastafile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);	
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(fastafile, in);
+		util.openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -465,7 +465,7 @@ int RemoveLineageCommand::readFasta(){
 					currSeq.printSequence(out);
 				}
 			}
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -485,45 +485,41 @@ int RemoveLineageCommand::readFasta(){
 int RemoveLineageCommand::readList(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
 		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[extension]"] = m->getExtension(listfile);
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[extension]"] = util.getExtension(listfile);
+        InputData input(listfile, "list", nullVector);
+        ListVector* list = input.getListVector();
 		
-		ifstream in;
-		m->openInputFile(listfile, in);
+        bool wroteSomething = false;
 		
-		bool wroteSomething = false;
-		
-		while(!in.eof()){
+		 while(list != NULL) {
             
-			//read in list vector
-			ListVector list(in);
-			
-			//make a new list vector
+            //make a new list vector
 			ListVector newList;
-			newList.setLabel(list.getLabel());
+			newList.setLabel(list->getLabel());
             
-            variables["[distance]"] = list.getLabel();
+            variables["[distance]"] = list->getLabel();
             string outputFileName = getOutputFileName("list", variables);
 			
 			ofstream out;
-			m->openOutputFile(outputFileName, out);
+			util.openOutputFile(outputFileName, out);
 			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
             
-            if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
+            if (m->getControl_pressed()) { out.close(); return 0; }
             
-            vector<string> binLabels = list.getLabels();
+            vector<string> binLabels = list->getLabels();
             vector<string> newBinLabels;
 			
 			//for each bin
-			for (int i = 0; i < list.getNumBins(); i++) {
-				if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			for (int i = 0; i < list->getNumBins(); i++) {
+				if (m->getControl_pressed()) { out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
 				//parse out names that are in accnos file
-				string binnames = list.get(i);
+				string binnames = list->get(i);
                 vector<string> bnames;
-                m->splitAtComma(binnames, bnames);
+                util.splitAtComma(binnames, bnames);
 				
 				string newNames = "";
                 for (int j = 0; j < bnames.size(); j++) {
@@ -548,11 +544,11 @@ int RemoveLineageCommand::readList(){
 				newList.print(out);
 			}
 			
-			m->gobble(in);
             out.close();
+            
+            delete list;
+            list = input.getListVector();
 		}
-		in.close();	
-		
 		
 		if (wroteSomething == false) {  m->mothurOut("Your list file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
 				
@@ -568,28 +564,28 @@ int RemoveLineageCommand::readList(){
 int RemoveLineageCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
-        variables["[extension]"] = m->getExtension(namefile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+        variables["[extension]"] = util.getExtension(namefile);
 		string outputFileName = getOutputFileName("name", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 
 		ifstream in;
-		m->openInputFile(namefile, in);
+		util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;			
 
 			vector<string> parsedNames;
-			m->splitAtComma(secondCol, parsedNames);
+			util.splitAtComma(secondCol, parsedNames);
 			
 			vector<string> validSecond;  validSecond.clear();
 			for (int i = 0; i < parsedNames.size(); i++) {
@@ -628,7 +624,7 @@ int RemoveLineageCommand::readName(){
 					}
 				}
 			}
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -647,33 +643,33 @@ int RemoveLineageCommand::readName(){
 int RemoveLineageCommand::readCount(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
-        variables["[extension]"] = m->getExtension(countfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
 
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(countfile, in);
+		util.openInputFile(countfile, in);
 		
 		bool wroteSomething = false;
 		
-        string headers = m->getline(in); m->gobble(in);
+        string headers = util.getline(in); util.gobble(in);
         out << headers << endl;
-        string test = headers; vector<string> pieces = m->splitWhiteSpace(test);
+        string test = headers; vector<string> pieces = util.splitWhiteSpace(test);
         
         string name, rest; int thisTotal; rest = "";
         while (!in.eof()) {
             
-            if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
             
-            in >> name; m->gobble(in); 
-            in >> thisTotal; m->gobble(in);
-            if (pieces.size() > 2) {  rest = m->getline(in); m->gobble(in);  }
+            in >> name; util.gobble(in); 
+            in >> thisTotal; util.gobble(in);
+            if (pieces.size() > 2) {  rest = util.getline(in); util.gobble(in);  }
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
             
             if (names.count(name) == 0) {
@@ -729,21 +725,21 @@ int RemoveLineageCommand::readConsList(){
             }
             otuLabel += sbinNumber;
             
-            if (names.count(m->getSimpleLabel(otuLabel)) == 0) {
+            if (names.count(util.getSimpleLabel(otuLabel)) == 0) {
                 newList.push_back(list->get(i));
                 newBinLabels.push_back(binLabels[i]);
             }else { removedCount++; }
         }
         
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
         map<string, string> variables;
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[extension]"] = m->getExtension(listfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[extension]"] = util.getExtension(listfile);
         variables["[distance]"] = list->getLabel();
 		string outputFileName = getOutputFileName("list", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
         
 		delete list;
         //print new listvector
@@ -771,7 +767,7 @@ int RemoveLineageCommand::readConsList(){
 //**********************************************************************************************************************
 int RemoveLineageCommand::getListVector(){
 	try {
-		InputData input(listfile, "list");
+		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
@@ -792,7 +788,7 @@ int RemoveLineageCommand::getListVector(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -831,7 +827,7 @@ int RemoveLineageCommand::getListVector(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete list;
 			list = input.getListVector(lastLabel);
 		}
@@ -855,31 +851,27 @@ int RemoveLineageCommand::readShared(){
         vector<string> newLabels;
         bool wroteSomething = false;
         int numRemoved = 0;
-        vector<string> currentLabels = m->getCurrentSharedBinLabels();
         for (int i = 0; i < lookup->getNumBins();) {
             
             if (m->getControl_pressed()) { delete lookup; return 0; }
             
             //is this otu on the list
-            if (names.count(m->getSimpleLabel(currentLabels[i])) == 0) {
+            if (names.count(util.getSimpleLabel(lookup->getOTUNames()[i])) == 0) {
                 wroteSomething = true;
-                newLabels.push_back(currentLabels[i]);
                 ++i;
             }else { lookup->removeOTU(i); numRemoved++; }
         }
         
         string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables;
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[extension]"] = m->getExtension(sharedfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[extension]"] = util.getExtension(sharedfile);
         variables["[distance]"] = lookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);
         ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-    
-        m->setCurrentSharedBinLabels(newLabels);
         
 		lookup->printHeaders(out);
         lookup->print(out);
@@ -899,7 +891,7 @@ int RemoveLineageCommand::readShared(){
 //**********************************************************************************************************************
 SharedRAbundVectors* RemoveLineageCommand::getShared(){
 	try {
-		InputData input(sharedfile, "sharedfile");
+		InputData input(sharedfile, "sharedfile", nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
 		
@@ -920,7 +912,7 @@ SharedRAbundVectors* RemoveLineageCommand::getShared(){
 				break;
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup->getLabel();
 				
                 delete lookup;
@@ -959,7 +951,7 @@ SharedRAbundVectors* RemoveLineageCommand::getShared(){
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 		}
@@ -977,23 +969,23 @@ SharedRAbundVectors* RemoveLineageCommand::getShared(){
 int RemoveLineageCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-        variables["[extension]"] = m->getExtension(groupfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+        variables["[extension]"] = util.getExtension(groupfile);
 		string outputFileName = getOutputFileName("group", variables);
 	
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 
 		ifstream in;
-		m->openInputFile(groupfile, in);
+		util.openInputFile(groupfile, in);
 		string name, group;
 		
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
@@ -1004,7 +996,7 @@ int RemoveLineageCommand::readGroup(){
 				out << name << '\t' << group << endl;
 			}
 					
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();
@@ -1023,16 +1015,16 @@ int RemoveLineageCommand::readGroup(){
 int RemoveLineageCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxfile));
-        variables["[extension]"] = m->getExtension(taxfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
+        variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(taxfile, in);
+		util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -1048,21 +1040,21 @@ int RemoveLineageCommand::readTax(){
 				taxonsHasConfidence[i] = true; 
 				searchTaxons[i] = getTaxons(listOfTaxons[i]); 
 				noConfidenceTaxons[i] = listOfTaxons[i];
-				m->removeConfidences(noConfidenceTaxons[i]);
+				util.removeConfidences(noConfidenceTaxons[i]);
 			}
 		}
 		
 		
 		while(!in.eof()){
 
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
 
-            in >> name; m->gobble(in);
-            tax = m->getline(in); m->gobble(in);
+            in >> name; util.gobble(in);
+            tax = util.getline(in); util.gobble(in);
             
 			bool remove = false;
 			
-            string noQuotesTax = m->removeQuotes(tax);
+            string noQuotesTax = util.removeQuotes(tax);
             
 			for (int j = 0; j < listOfTaxons.size(); j++) {
 				string newtax = noQuotesTax;
@@ -1073,7 +1065,7 @@ int RemoveLineageCommand::readTax(){
 					int hasConfidences = noQuotesTax.find_first_of('(');
 					if (hasConfidences != string::npos) { 
 						newtax = noQuotesTax;
-						m->removeConfidences(newtax);
+						util.removeConfidences(newtax);
 					}
                     
 					int pos = newtax.find(noConfidenceTaxons[j]);
@@ -1106,7 +1098,7 @@ int RemoveLineageCommand::readTax(){
 						int hasConfidences = noQuotesTax.find_first_of('(');
 						if (hasConfidences != string::npos) { 
 							noNewTax = noQuotesTax;
-							m->removeConfidences(noNewTax);
+							util.removeConfidences(noNewTax);
 						}
 						int pos = noNewTax.find(noConfidenceTaxons[j]);
 						
@@ -1182,22 +1174,22 @@ int RemoveLineageCommand::readTax(){
 int RemoveLineageCommand::readConsTax(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(constaxonomy);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomy);  }
 		map<string, string> variables;
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(constaxonomy));
-        variables["[extension]"] = m->getExtension(constaxonomy);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomy));
+        variables["[extension]"] = util.getExtension(constaxonomy);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		m->openInputFile(constaxonomy, in);
+		util.openInputFile(constaxonomy, in);
 		string otuLabel, tax;
         int numReps;
         bool wroteSomething = false;
         
         //read headers
-        string headers = m->getline(in);
+        string headers = util.getline(in);
         out << headers << endl;
 		
 		//bool wroteSomething = false;
@@ -1212,22 +1204,22 @@ int RemoveLineageCommand::readConsTax(){
 				taxonsHasConfidence[i] = true;
 				searchTaxons[i] = getTaxons(listOfTaxons[i]);
 				noConfidenceTaxons[i] = listOfTaxons[i];
-				m->removeConfidences(noConfidenceTaxons[i]);
+				util.removeConfidences(noConfidenceTaxons[i]);
 			}
 		}
 		
         
 		while(!in.eof()){
             
-			if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
             
-			in >> otuLabel;	 		m->gobble(in);
-            in >> numReps;          m->gobble(in);
-			tax = m->getline(in);   m->gobble(in);
+			in >> otuLabel;	 		util.gobble(in);
+            in >> numReps;          util.gobble(in);
+			tax = util.getline(in);   util.gobble(in);
 			
             bool remove = false;
 			
-            string noQuotesTax = m->removeQuotes(tax);
+            string noQuotesTax = util.removeQuotes(tax);
             
 			for (int j = 0; j < listOfTaxons.size(); j++) {
 				string newtax = noQuotesTax;
@@ -1238,7 +1230,7 @@ int RemoveLineageCommand::readConsTax(){
 					int hasConfidences = noQuotesTax.find_first_of('(');
 					if (hasConfidences != string::npos) {
 						newtax = noQuotesTax;
-						m->removeConfidences(newtax);
+						util.removeConfidences(newtax);
 					}
 					
 					int pos = newtax.find(noConfidenceTaxons[j]);
@@ -1247,7 +1239,7 @@ int RemoveLineageCommand::readConsTax(){
 						//wroteSomething = true;
 						//out << name << '\t' << tax << endl;
 					}else{ //this sequence contains the taxon the user wants to remove
-						names.insert(m->getSimpleLabel(otuLabel));
+						names.insert(util.getSimpleLabel(otuLabel));
 						remove=true; break;
 					}
 					
@@ -1261,7 +1253,7 @@ int RemoveLineageCommand::readConsTax(){
 							//wroteSomething = true;
 							//out << name << '\t' << tax << endl;
 						}else{ //this sequence contains the taxon the user wants to remove
-							names.insert(m->getSimpleLabel(otuLabel));
+							names.insert(util.getSimpleLabel(otuLabel));
 							remove=true; break;
 						}
 					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
@@ -1271,7 +1263,7 @@ int RemoveLineageCommand::readConsTax(){
 						int hasConfidences = noQuotesTax.find_first_of('(');
 						if (hasConfidences != string::npos) {
 							noNewTax = noQuotesTax;
-							m->removeConfidences(noNewTax);
+							util.removeConfidences(noNewTax);
 						}
 						
 						int pos = noNewTax.find(noConfidenceTaxons[j]);
@@ -1314,7 +1306,7 @@ int RemoveLineageCommand::readConsTax(){
 							
 							//passed the test so remove you
 							if (remove) {
-								names.insert(m->getSimpleLabel(otuLabel));
+								names.insert(util.getSimpleLabel(otuLabel));
 								remove=true; break;
 							}else {
 								//wroteSomething = true;
@@ -1362,7 +1354,7 @@ vector< map<string, float> > RemoveLineageCommand::getTaxons(string tax) {
 				string newtaxon, confidence;
 				if ((openParen != string::npos) && (closeParen != string::npos)) {
                     string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
-                    if (m->isNumeric1(confidenceScore)) {  //its a confidence
+                    if (util.isNumeric1(confidenceScore)) {  //its a confidence
                         newtaxon = taxon.substr(0, openParen); //rip off confidence
                         confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
                     }else { //its part of the taxon
@@ -1398,17 +1390,17 @@ vector< map<string, float> > RemoveLineageCommand::getTaxons(string tax) {
 int RemoveLineageCommand::readAlign(){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(alignfile);  }
+		if (outputDir == "") {  thisOutputDir += util.hasPath(alignfile);  }
         map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(alignfile));
-        variables["[extension]"] = m->getExtension(alignfile);
+		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
+        variables["[extension]"] = util.getExtension(alignfile);
 		string outputFileName = getOutputFileName("alignreport", variables);
 		
 		ofstream out;
-		m->openOutputFile(outputFileName, out);
+		util.openOutputFile(outputFileName, out);
 
 		ifstream in;
-		m->openInputFile(alignfile, in);
+		util.openInputFile(alignfile, in);
 		string name, junk;
 		
 		bool wroteSomething = false;
@@ -1421,7 +1413,7 @@ int RemoveLineageCommand::readAlign(){
 		out << endl;
 		
 		while(!in.eof()){
-			if (m->getControl_pressed()) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			
@@ -1447,7 +1439,7 @@ int RemoveLineageCommand::readAlign(){
 				}
 			}
 			
-			m->gobble(in);
+			util.gobble(in);
 		}
 		in.close();
 		out.close();

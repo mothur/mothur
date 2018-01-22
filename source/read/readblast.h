@@ -40,6 +40,7 @@ private:
 	SparseDistanceMatrix* matrix;
 	vector<seqDist> overlap;
 	MothurOut* m;
+    Utils util;
 	
 	int readNames(NameAssignment*);
 };

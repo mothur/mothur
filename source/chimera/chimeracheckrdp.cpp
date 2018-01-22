@@ -20,7 +20,7 @@ ChimeraCheckRDP::ChimeraCheckRDP(string filename, string temp, string n, bool s,
 		kmerSize = k;
 		outputDir = o; 
 		
-		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0, m->getRandomNumber(), true);
+		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0, util.getRandomNumber(), true);
 		m->mothurOutEndLine();
 		
 		kmer = new Kmer(kmerSize);
@@ -216,10 +216,10 @@ void ChimeraCheckRDP::readName(string namefile) {
 		string name;
 
 		ifstream in;
-		m->openInputFile(namefile, in);
+        Utils util; util.openInputFile(namefile, in);
 				
 		while (!in.eof()) {
-			in >> name; m->gobble(in);
+			in >> name; util.gobble(in);
 			names[name] = name;
 		}
 		in.close();
@@ -274,7 +274,7 @@ void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
 		
 		string file = outputDir + querySeq->getName() + ".chimeracheck.svg";
 		ofstream outsvg;
-		m->openOutputFile(file, outsvg);
+		Utils util; util.openOutputFile(file, outsvg);
 		
 		int width = (info.size()*5) + 150;
 		

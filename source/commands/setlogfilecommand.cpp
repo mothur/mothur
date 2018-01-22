@@ -66,11 +66,11 @@ SetLogFileCommand::SetLogFileCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 		
-			name = validParameter.validFile(parameters, "name", false);			
+			name = validParameter.valid(parameters, "name");			
 			if (name == "not found") {  m->mothurOut("name is a required parameter for the set.logfile command."); abort = true; } 
 			
-			string temp = validParameter.validFile(parameters, "append", false);		if (temp == "not found") {  temp = "F";  }
-			append = m->isTrue(temp);
+			string temp = validParameter.valid(parameters, "append");		if (temp == "not found") {  temp = "F";  }
+			append = util.isTrue(temp);
 		}
 	}
 	catch(exception& e) {
@@ -84,15 +84,13 @@ SetLogFileCommand::SetLogFileCommand(string option)  {
 int SetLogFileCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        commandFactory = CommandFactory::getInstance();
-        
-        string directory = m->hasPath(name);
+        string directory = util.hasPath(name);
         if (directory == "") {
-            commandFactory->setLogfileName(name, append);
-        }else if (m->dirCheck(directory)) {
-            commandFactory->setLogfileName(name, append);
+            m->setLogFileName(name, append);
+        }else if (util.dirCheck(directory)) {
+            m->setLogFileName(name, append);
         }
 		
 		return 0;

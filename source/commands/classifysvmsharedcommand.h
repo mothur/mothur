@@ -35,7 +35,7 @@ public:
   void help() { m->mothurOut(getHelpString()); }
 
   void readSharedAndDesignFiles(const string&, const string&, LabeledObservationVector&, FeatureVector&);
-  void readSharedRAbundVectors(vector<SharedRAbundVector*>&, DesignMap&, LabeledObservationVector&, FeatureVector&);
+  void readSharedRAbundVectors(vector<SharedRAbundVector*>&, DesignMap&, LabeledObservationVector&, FeatureVector&, vector<string>);
 
   vector<double>& getSmocList() { return smocList; }
   const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
@@ -69,15 +69,15 @@ private:
     double stdthreshold;
 
 
-    void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
-    void trainSharedAndDesignData(vector<SharedRAbundVector*> lookup);
+    void processSharedAndDesignData(vector<SharedRAbundVector*> lookup, vector<string>);
+    void trainSharedAndDesignData(vector<SharedRAbundVector*> lookup, vector<string>);
 
     void getParameterValue(int& target, string pstring, int defaultvalue) {
         if (pstring == "not found" or pstring == "") {
             target = defaultvalue;
         }
         else {
-            m->mothurConvert(pstring, target);
+            util.mothurConvert(pstring, target);
         }
     }
 

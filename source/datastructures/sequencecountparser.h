@@ -13,6 +13,7 @@
 #include "mothurout.h"
 #include "sequence.hpp"
 #include "counttable.h"
+#include "utils.hpp"
 
 /* This class reads a fasta and count file and parses the data by group. The countfile must contain group information.
  
@@ -43,7 +44,7 @@ public:
     
     map<string, string> getAllSeqsMap(); //returns map where the key=sequenceName and the value=representativeSequence - helps us remove duplicates after group by group processing
 private:
-	
+    std::mutex token;
     CountTable countTable;
     MothurOut* m;
 	

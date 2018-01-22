@@ -8,7 +8,7 @@
  */
 
 #include "countgroupscommand.h"
-#include "sharedutilities.h"
+
 #include "inputdata.h"
 
 //**********************************************************************************************************************
@@ -103,17 +103,17 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("accnos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
@@ -121,7 +121,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -129,7 +129,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 				it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -137,7 +137,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -147,33 +147,33 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
             outputTypes["summary"] = tempOutNames;
 			
 			//check for required parameters
-			accnosfile = validParameter.validFile(parameters, "accnos", true);
+			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  accnosfile = ""; }
-			else { m->setAccnosFile(accnosfile); }
+			else { current->setAccnosFile(accnosfile); }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
 			else {
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {  sharedfile = "";  }
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") {  	groupfile = "";	}
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
             if (countfile == "not open") { countfile = ""; abort = true; }
             else if (countfile == "not found") { countfile = "";  }	
             else { 
-                m->setCountTableFile(countfile); 
+                current->setCountFile(countfile); 
                 CountTable ct;
                 if (!ct.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have any group information, aborting."); m->mothurOutEndLine(); abort=true; }
             }
@@ -185,13 +185,13 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 			
 			if ((sharedfile == "") && (groupfile == "") && (countfile == "")) { 
 				//give priority to shared, then group
-				sharedfile = m->getSharedFile(); 
+				sharedfile = current->getSharedFile(); 
 				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 
-					groupfile = m->getGroupFile(); 
+					groupfile = current->getGroupFile(); 
 					if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 					else { 
-						countfile = m->getCountTableFile(); 
+						countfile = current->getCountFile(); 
                         if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                         else { 
                             m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
@@ -199,8 +199,6 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 					}
 				}
 			}
-			
-			if ((accnosfile == "") && (Groups.size() == 0)) { Groups.push_back("all"); m->setGroups(Groups); }
 		}
 		
 	}
@@ -214,29 +212,26 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 int CountGroupsCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get groups you want to remove
-		if (accnosfile != "") { m->readAccnos(accnosfile, Groups); m->setGroups(Groups); }
+		if (accnosfile != "") { util.readAccnos(accnosfile, Groups);  }
 		
 		if (groupfile != "") {
             map<string, string> variables; 
             string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+            if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
             string outputFileName = getOutputFileName("summary", variables);
             outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
             ofstream out;
-            m->openOutputFile(outputFileName, out);
+            util.openOutputFile(outputFileName, out);
             
 			GroupMap groupMap(groupfile);
 			groupMap.readMap();
 			
-			//make sure groups are valid
-			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil util;
 			vector<string> nameGroups = groupMap.getNamesOfGroups();
-			util.setGroups(Groups, nameGroups);
+            if (Groups.size() == 0) { Groups = nameGroups;  }
 			
             int total = 0;
 			for (int i = 0; i < Groups.size(); i++) {
@@ -254,21 +249,18 @@ int CountGroupsCommand::execute(){
         if (countfile != "") {
             map<string, string> variables; 
             string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
-            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+            if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
             string outputFileName = getOutputFileName("summary", variables);
             outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
             ofstream out;
-            m->openOutputFile(outputFileName, out);
+            util.openOutputFile(outputFileName, out);
             
 			CountTable ct;
 			ct.readTable(countfile, true, false);
-            
-			//make sure groups are valid
-			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil util;
+        
 			vector<string> nameGroups = ct.getNamesOfGroups();
-			util.setGroups(Groups, nameGroups);
+			if (Groups.size() == 0) { Groups = nameGroups;  }
 			
             int total = 0;
 			for (int i = 0; i < Groups.size(); i++) {
@@ -285,17 +277,18 @@ int CountGroupsCommand::execute(){
 		if (m->getControl_pressed()) { return 0; }
 		
 		if (sharedfile != "")		{		
-			InputData input(sharedfile, "sharedfile");
+			InputData input(sharedfile, "sharedfile", Groups);
 			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+            Groups = lookup->getNamesGroups();
 			
             map<string, string> variables; 
             string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
+            if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
             string outputFileName = getOutputFileName("summary", variables);
             outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
             ofstream out;
-            m->openOutputFile(outputFileName, out);
+            util.openOutputFile(outputFileName, out);
             
             int total = 0;
             vector<string> groups = lookup->getNamesGroups();

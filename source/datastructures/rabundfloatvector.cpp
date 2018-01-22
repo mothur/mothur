@@ -206,9 +206,7 @@ float RAbundFloatVector::remove(int bin){
         data.erase(data.begin()+bin);
         numBins--;
         
-        if(abund == maxRank){
-            maxRank = m->max(data);
-        }
+        if(abund == maxRank){ maxRank = util.max(data); }
         
         numSeqs -= abund;
         
@@ -335,7 +333,7 @@ OrderVector RAbundFloatVector::getOrderVector(map<string,int>* nameMap = NULL) {
                 ov.push_back(i);
             }
         }
-        m->mothurRandomShuffle(ov);
+        util.mothurRandomShuffle(ov);
         ov.setLabel(label);	
         ov.getNumBins();
         

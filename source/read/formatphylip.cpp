@@ -12,7 +12,7 @@
 
 /***********************************************************************/
 FormatPhylipMatrix::FormatPhylipMatrix(string df) : filename(df) {
-        m->openInputFile(filename, fileHandle);
+        util.openInputFile(filename, fileHandle);
 }
 /***********************************************************************/
 //not using nameMap
@@ -27,7 +27,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 			string numTest;
 			fileHandle >> numTest >> name;
 			
-			if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+			if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
 			else { convert(numTest, nseqs); }
 		
             if(nameMap == NULL){
@@ -47,11 +47,11 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 					fileHandle.close();  //reset file
 					
 					//open and get through numSeqs, code below formats rest of file
-					m->openInputFile(filename, fileHandle);
-					fileHandle >> nseqs; m->gobble(fileHandle);
+					util.openInputFile(filename, fileHandle);
+					fileHandle >> nseqs; util.gobble(fileHandle);
 					
 					distFile = filename + ".rowFormatted";
-					m->openOutputFile(distFile, out);
+					util.openOutputFile(distFile, out);
 					break;
 				}
 				if(d == '\n'){
@@ -69,7 +69,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				
 				ofstream outTemp;
 				string tempFile = filename + ".temp";
-				m->openOutputFile(tempFile, outTemp);
+				util.openOutputFile(tempFile, outTemp);
                 
 				//convert to square column matrix
 				for(int i=1;i<nseqs;i++){
@@ -82,7 +82,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 					
 					for(int j=0;j<i;j++){
 					
-						if (m->getControl_pressed()) { outTemp.close(); m->mothurRemove(tempFile); fileHandle.close();  delete reading; return 0; }
+						if (m->getControl_pressed()) { outTemp.close(); util.mothurRemove(tempFile); fileHandle.close();  delete reading; return 0; }
 											
 						fileHandle >> distance;
 						
@@ -100,7 +100,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				
 				//format from square column to rowFormatted
 				//sort file by first column so the distances for each row are together
-				string outfile = m->getRootName(tempFile) + "sorted.dist.temp";
+				string outfile = util.getRootName(tempFile) + "sorted.dist.temp";
 				
 				//use the unix sort 
 				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -111,14 +111,14 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 					system(command.c_str());
 				#endif
 				
-				if (m->getControl_pressed()) { m->mothurRemove(tempFile); m->mothurRemove(outfile);  delete reading; return 0; }
+				if (m->getControl_pressed()) { util.mothurRemove(tempFile); util.mothurRemove(outfile);  delete reading; return 0; }
 
 				//output to new file distance for each row and save positions in file where new row begins
 				ifstream in;
-				m->openInputFile(outfile, in);
+				util.openInputFile(outfile, in);
 				
 				distFile = outfile + ".rowFormatted";
-				m->openOutputFile(distFile, out);
+				util.openOutputFile(distFile, out);
 				
 				rowPos.resize(nseqs, -1);
 				int currentRow;
@@ -135,9 +135,9 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				for(int k = 0; k < firstString.length(); k++)  {   in.putback(firstString[k]);  }
 				
 				while(!in.eof()) {
-					if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); m->mothurRemove(distFile); m->mothurRemove(outfile);  delete reading; return 0; }
+					if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); util.mothurRemove(distFile); util.mothurRemove(outfile);  delete reading; return 0; }
 
-					in >> first >> second >> dist; m->gobble(in);
+					in >> first >> second >> dist; util.gobble(in);
 					
 					if (first != currentRow) {
 						//save position in file of each new row
@@ -177,10 +177,10 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				in.close();
 				out.close();
 				
-				m->mothurRemove(tempFile);
-				m->mothurRemove(outfile);
+				util.mothurRemove(tempFile);
+				util.mothurRemove(outfile);
 				
-				if (m->getControl_pressed()) {  m->mothurRemove(distFile);   delete reading; return 0; }
+				if (m->getControl_pressed()) {  util.mothurRemove(distFile);   delete reading; return 0; }
 
 			}
 			else{ //square matrix convert directly to formatted row file
@@ -197,7 +197,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
                     }
 					
 					for(int j=0;j<nseqs;j++){
-						if (m->getControl_pressed()) {  fileHandle.close(); out.close(); m->mothurRemove(distFile);   delete reading; return 0; }
+						if (m->getControl_pressed()) {  fileHandle.close(); out.close(); util.mothurRemove(distFile);   delete reading; return 0; }
 						
 						fileHandle >> distance;
 					
@@ -210,7 +210,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 						reading->update(index);
 					}
 					
-					m->gobble(fileHandle);
+					util.gobble(fileHandle);
 			
 					//save position in file of each new row
 					rowPos[i] = out.tellp();
@@ -231,7 +231,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 			fileHandle.close();
 			out.close();
 			
-			if (m->getControl_pressed()) { m->mothurRemove(distFile);  return 0; }
+			if (m->getControl_pressed()) { util.mothurRemove(distFile);  return 0; }
 			
 			list->setLabel("0");
 			
@@ -257,7 +257,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
         string numTest;
         fileHandle >> numTest >> name;
         
-        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
         else { convert(numTest, nseqs); }
 		
         if(nameMap == NULL){
@@ -277,11 +277,11 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
                 fileHandle.close();  //reset file
                 
                 //open and get through numSeqs, code below formats rest of file
-                m->openInputFile(filename, fileHandle);
-                fileHandle >> nseqs; m->gobble(fileHandle);
+                util.openInputFile(filename, fileHandle);
+                fileHandle >> nseqs; util.gobble(fileHandle);
                 
                 distFile = filename + ".rowFormatted";
-                m->openOutputFile(distFile, out);
+                util.openOutputFile(distFile, out);
                 break;
             }
             if(d == '\n'){
@@ -299,7 +299,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
             
             ofstream outTemp;
             string tempFile = filename + ".temp";
-            m->openOutputFile(tempFile, outTemp);
+            util.openOutputFile(tempFile, outTemp);
             
             //convert to square column matrix
             for(int i=1;i<nseqs;i++){
@@ -312,7 +312,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
                 
                 for(int j=0;j<i;j++){
 					
-                    if (m->getControl_pressed()) { outTemp.close(); m->mothurRemove(tempFile); fileHandle.close();  delete reading; return 0; }
+                    if (m->getControl_pressed()) { outTemp.close(); util.mothurRemove(tempFile); fileHandle.close();  delete reading; return 0; }
                     
                     fileHandle >> distance;
                     
@@ -330,7 +330,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
             
             //format from square column to rowFormatted
             //sort file by first column so the distances for each row are together
-            string outfile = m->getRootName(tempFile) + "sorted.dist.temp";
+            string outfile = util.getRootName(tempFile) + "sorted.dist.temp";
             
             //use the unix sort 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -341,14 +341,14 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
             system(command.c_str());
 #endif
             
-            if (m->getControl_pressed()) { m->mothurRemove(tempFile); m->mothurRemove(outfile);  delete reading; return 0; }
+            if (m->getControl_pressed()) { util.mothurRemove(tempFile); util.mothurRemove(outfile);  delete reading; return 0; }
             
             //output to new file distance for each row and save positions in file where new row begins
             ifstream in;
-            m->openInputFile(outfile, in);
+            util.openInputFile(outfile, in);
             
             distFile = outfile + ".rowFormatted";
-            m->openOutputFile(distFile, out);
+            util.openOutputFile(distFile, out);
             
             rowPos.resize(nseqs, -1);
             int currentRow;
@@ -365,9 +365,9 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
             for(int k = 0; k < firstString.length(); k++)  {   in.putback(firstString[k]);  }
             
             while(!in.eof()) {
-                if (m->getControl_pressed()) { in.close(); out.close(); m->mothurRemove(tempFile); m->mothurRemove(distFile); m->mothurRemove(outfile);  delete reading; return 0; }
+                if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); util.mothurRemove(distFile); util.mothurRemove(outfile);  delete reading; return 0; }
                 
-                in >> first >> second >> dist; m->gobble(in);
+                in >> first >> second >> dist; util.gobble(in);
                 
                 if (first != currentRow) {
                     //save position in file of each new row
@@ -407,10 +407,10 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
             in.close();
             out.close();
             
-            m->mothurRemove(tempFile);
-            m->mothurRemove(outfile);
+            util.mothurRemove(tempFile);
+            util.mothurRemove(outfile);
             
-            if (m->getControl_pressed()) {  m->mothurRemove(distFile);   delete reading; return 0; }
+            if (m->getControl_pressed()) {  util.mothurRemove(distFile);   delete reading; return 0; }
             
         }
         else{ //square matrix convert directly to formatted row file
@@ -426,7 +426,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
                 else { nameMap->get(name); }
                 
                 for(int j=0;j<nseqs;j++){
-                    if (m->getControl_pressed()) {  fileHandle.close(); out.close(); m->mothurRemove(distFile);   delete reading; return 0; }
+                    if (m->getControl_pressed()) {  fileHandle.close(); out.close(); util.mothurRemove(distFile);   delete reading; return 0; }
                     
                     fileHandle >> distance;
 					
@@ -439,7 +439,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
                     reading->update(index);
                 }
                 
-                m->gobble(fileHandle);
+                util.gobble(fileHandle);
                 
                 //save position in file of each new row
                 rowPos[i] = out.tellp();
@@ -460,7 +460,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
         fileHandle.close();
         out.close();
         
-        if (m->getControl_pressed()) { m->mothurRemove(distFile);  return 0; }
+        if (m->getControl_pressed()) { util.mothurRemove(distFile);  return 0; }
         
         list->setLabel("0");
         

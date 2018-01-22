@@ -16,7 +16,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 		containsConfidence = false;
 		
 		ifstream inTax;
-		m->openInputFile(tfile, inTax);
+		util.openInputFile(tfile, inTax);
 	
 		highestLevel = getHighestLevel(inTax);
 		
@@ -32,11 +32,11 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			
 			inTax.close(); 
 			ifstream in; 
-			m->openInputFile(tfile, in);
+			util.openInputFile(tfile, in);
 			
 			ofstream out;
-			equalizedFile = outputDir + m->getRootName(m->getSimpleName(tfile)) + "equalized.taxonomy";
-			m->openOutputFile(equalizedFile, out);
+			equalizedFile = outputDir + util.getRootName(util.getSimpleName(tfile)) + "equalized.taxonomy";
+			util.openOutputFile(equalizedFile, out);
 			
 	
 			string name, tax;
@@ -44,10 +44,10 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			
 				if (m->getControl_pressed()) {  break; }
 				
-                in >> name;   m->gobble(in);
-                tax = m->getline(in); m->gobble(in);
+                in >> name;   util.gobble(in);
+                tax = util.getline(in); util.gobble(in);
 				
-				if (containsConfidence) {  m->removeConfidences(tax);	}
+				if (containsConfidence) {  util.removeConfidences(tax);	}
 				
 				//is this a taxonomy that needs to be extended?
 				if (seqLevels[name] < highestLevel) {
@@ -62,7 +62,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			in.close();
 			out.close();
 			
-			if (m->getControl_pressed()) { m->mothurRemove(equalizedFile);  }
+			if (m->getControl_pressed()) { util.mothurRemove(equalizedFile);  }
 		}else { inTax.close(); }
 		
 	}
@@ -79,8 +79,8 @@ int TaxEqualizer::getHighestLevel(ifstream& in) {
 		string name, tax;
 		
 		while (in) {
-            in >> name;   m->gobble(in);
-            tax = m->getline(in); m->gobble(in);
+            in >> name;   util.gobble(in);
+            tax = util.getline(in); util.gobble(in);
 		
 			//count levels in this taxonomy
 			int thisLevel = 0;
@@ -103,7 +103,7 @@ int TaxEqualizer::getHighestLevel(ifstream& in) {
         
         if ((openParen != string::npos) && (closeParen != string::npos)) {
             string confidenceScore = testTax.substr(openParen+1, (closeParen-(openParen+1)));
-            if (m->isNumeric1(confidenceScore)) {  //its a confidence
+            if (util.isNumeric1(confidenceScore)) {  //its a confidence
                 containsConfidence = true;
             }else { //its part of the taxon
                 containsConfidence = false;
@@ -131,7 +131,7 @@ void TaxEqualizer::extendTaxonomy(string name, string& tax, int desiredLevel) {
 		
 		//int currentLevel = seqLevels[name];
         
-        tax = m->addUnclassifieds(tax, desiredLevel, containsConfidence);
+        tax = util.addUnclassifieds(tax, desiredLevel, containsConfidence);
 		
 		//added last taxon until you get desired level
 		//for (int i = currentLevel; i < desiredLevel; i++) {

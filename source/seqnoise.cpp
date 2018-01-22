@@ -25,13 +25,13 @@ int seqNoise::getSequenceData(string sequenceFileName, vector<string>& sequences
 	try {
 		
 		ifstream sequenceFile;
-		m->openInputFile(sequenceFileName, sequenceFile);
+		util.openInputFile(sequenceFileName, sequenceFile);
 		
 		while(!sequenceFile.eof()){
 			
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence temp(sequenceFile); m->gobble(sequenceFile);
+			Sequence temp(sequenceFile); util.gobble(sequenceFile);
 			
 			if (temp.getName() != "") {
 				sequences.push_back(temp.getAligned());
@@ -63,16 +63,16 @@ int seqNoise::getRedundantNames(string namesFileName, vector<string>& uniqueName
 	try {
 		string unique, redundant;
 		ifstream namesFile;
-		m->openInputFile(namesFileName, namesFile);
+		util.openInputFile(namesFileName, namesFile);
 		
 		for(int i=0;i<redundantNames.size();i++){
 			
 			if (m->getControl_pressed()) { break; }
 			
-			namesFile >> uniqueNames[i]; m->gobble(namesFile);
-			namesFile >> redundantNames[i]; m->gobble(namesFile);
+			namesFile >> uniqueNames[i]; util.gobble(namesFile);
+			namesFile >> redundantNames[i]; util.gobble(namesFile);
 			
-			seqFreq[i] = m->getNumNames(redundantNames[i]);
+			seqFreq[i] = util.getNumNames(redundantNames[i]);
 		}
 		namesFile.close();
 		
@@ -89,7 +89,7 @@ int seqNoise::addRedundantName(string uniqueName, string redundantName, vector<s
 		
 		uniqueNames.push_back(uniqueName);
 		redundantNames.push_back(redundantName);
-		seqFreq.push_back(m->getNumNames(redundantName));
+		seqFreq.push_back(util.getNumNames(redundantName));
 		
 		return 0;
 	}
@@ -103,7 +103,7 @@ int seqNoise::getDistanceData(string distFileName, vector<double>& distances){
 	try {
 		
 		ifstream distFile;
-		m->openInputFile(distFileName, distFile);
+		util.openInputFile(distFileName, distFile);
 		
 		int numSeqs = 0;
 		string name = "";
@@ -139,14 +139,15 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 	try {
 		
 		ifstream listFile;
-		m->openInputFile(listFileName, listFile);
+		util.openInputFile(listFileName, listFile);
 		
 		bool adjustCutoff = true;
         string lastLabel = "";
+        string readLabels = "";
         
 		while(!listFile.eof()){
             
-            ListVector list(listFile); m->gobble(listFile); //10/18/13 - change to reading with listvector to accomodate changes to the listfiel format. ie. adding header labels.
+            ListVector list(listFile, readLabels, lastLabel); util.gobble(listFile); //10/18/13 - change to reading with listvector to accomodate changes to the listfiel format. ie. adding header labels.
             
             string thisLabel = list.getLabel();
             lastLabel = thisLabel;
@@ -154,7 +155,7 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
             if (thisLabel == "unique") {} //skip to next label in listfile
             else {
                 double threshold;
-                m->mothurConvert(thisLabel, threshold);
+                util.mothurConvert(thisLabel, threshold);
                 
                 if(threshold < cutOff){} //skip to next label in listfile
                 else{
@@ -214,7 +215,7 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 		//the listfile does not contain a threshold greater than the cutoff so use highest value
 		if (adjustCutoff) {
             
-            InputData input(listFileName, "list");
+            InputData input(listFileName, "list", nullVector);
             ListVector* list = input.getListVector(lastLabel);
             
             int numOTUs = list->getNumBins();

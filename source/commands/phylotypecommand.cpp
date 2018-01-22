@@ -118,14 +118,14 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			outputTypes["rabund"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -133,7 +133,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -141,56 +141,56 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 
-			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
+			taxonomyFileName = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomyFileName == "not found") { 
-				taxonomyFileName = m->getTaxonomyFile(); 
+				taxonomyFileName = current->getTaxonomyFile(); 
 				if (taxonomyFileName != "") {  m->mothurOut("Using " + taxonomyFileName + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
 				else { 
 					m->mothurOut("No valid current files. taxonomy is a required parameter."); m->mothurOutEndLine(); 
 					abort = true; 
 				}
 			}else if (taxonomyFileName == "not open") { taxonomyFileName = ""; abort = true; }	
-			else { m->setTaxonomyFile(taxonomyFileName); }
+			else { current->setTaxonomyFile(taxonomyFileName); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->readNames(namefile, namemap); m->setNameFile(namefile); }
+			else { util.readNames(namefile, namemap); current->setNameFile(namefile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }
 			else if (countfile == "not found") { countfile = ""; }
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
 			}
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
-			string temp = validParameter.validFile(parameters, "cutoff", false);
+			string temp = validParameter.valid(parameters, "cutoff");
 			if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, cutoff); 
+			util.mothurConvert(temp, cutoff); 
 			
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; allLines = 1; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(taxonomyFileName);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
 			}
 		}
@@ -205,7 +205,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 int PhylotypeCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//reads in taxonomy file and makes all the taxonomies the same length 
 		//by appending the last taxon to a given taxonomy as many times as needed to 
@@ -232,18 +232,18 @@ int PhylotypeCommand::execute(){
 		
 		ofstream outList, outRabund, outSabund;
         map<string, string> variables;
-        string fileroot = outputDir + m->getRootName(m->getSimpleName(taxonomyFileName));
+        string fileroot = outputDir + util.getRootName(util.getSimpleName(taxonomyFileName));
         variables["[filename]"] = fileroot;
         variables["[clustertag]"] = "tx";
         string sabundFileName = getOutputFileName("sabund", variables);
         string rabundFileName = getOutputFileName("rabund", variables);
-        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        //if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         string listFileName = getOutputFileName("list", variables);
         
         map<string, int> counts;
         if (countfile == "") {
-            m->openOutputFile(sabundFileName,	outSabund);
-            m->openOutputFile(rabundFileName,	outRabund);
+            util.openOutputFile(sabundFileName,	outSabund);
+            util.openOutputFile(rabundFileName,	outRabund);
             outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
@@ -252,7 +252,7 @@ int PhylotypeCommand::execute(){
             ct.readTable(countfile, false, false);
             counts = ct.getNameMap();
         }
-		m->openOutputFile(listFileName,	outList);
+		util.openOutputFile(listFileName,	outList);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 
         
@@ -265,7 +265,7 @@ int PhylotypeCommand::execute(){
 			
 			if (m->getControl_pressed()) { 
 				if (countfile == "") { outRabund.close(); outSabund.close(); } outList.close();
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
+				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }
 				delete tree; return 0; 
 			}
 			
@@ -310,7 +310,6 @@ int PhylotypeCommand::execute(){
 				}	
 				
 				//print listvector
-                if (!m->getPrintedListHeaders()) { list.printHeaders(outList); }
                 if (countfile == "") { list.print(outList);  }
                 else { list.print(outList, counts);  }
                 
@@ -348,27 +347,27 @@ int PhylotypeCommand::execute(){
 		delete tree;
 		
 		if (m->getControl_pressed()) { 
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
+			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }
 			return 0; 
 		}
 		
 		//set list file as new current listfile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("list");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
 		}
 		
 		//set rabund file as new current rabundfile
 		itTypes = outputTypes.find("rabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setRabundFile(currentName); }
 		}
 		
 		//set sabund file as new current sabundfile
 		itTypes = outputTypes.find("sabund");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSabundFile(currentName); }
 		}		
 		
 		m->mothurOutEndLine();

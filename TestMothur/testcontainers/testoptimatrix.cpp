@@ -21,7 +21,7 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
     string inputString = "fasta=" + filenames[0] + ", output=lt";
     m->mothurOut("/******************************************/"); m->mothurOutEndLine();
     m->mothurOut("Running command: dist.seqs(" + inputString + ")"); m->mothurOutEndLine();
-    m->setMothurCalling(true);
+    current->setMothurCalling(true);
     
     Command* dist2Command = new DistanceCommand(inputString);
     dist2Command->execute();
@@ -29,7 +29,7 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
     map<string, vector<string> > outputFilenames = dist2Command->getOutputFiles();
     
     delete dist2Command;
-    m->setMothurCalling(false);
+    current->setMothurCalling(false);
     
     phylipFile = outputFilenames["phylip"][0];
     m->mothurOut("/******************************************/"); m->mothurOutEndLine();
@@ -38,7 +38,7 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
 }
 /**************************************************************************************************/
 TestOptiMatrix::~TestOptiMatrix() {
-    m->mothurRemove(phylipFile);
+    util.mothurRemove(phylipFile);
 }
 /**************************************************************************************************
 TEST_CASE("Testing OptiMatrix Class") {
@@ -74,13 +74,13 @@ TEST_CASE("Testing OptiMatrix Class") {
         INFO("Sequences 0 and 1") // Only appears on a FAIL
         
         CAPTURE(matrix.isClose(0, 12));
-        CHECK(matrix.isClose(0, 12) == true);
+        CHECK(matrix.isClose(0, 12) );
         CAPTURE(matrix.isClose(0, 44));
-        CHECK(matrix.isClose(0, 44) == true);
+        CHECK(matrix.isClose(0, 44) );
         CAPTURE(matrix.isClose(1, 23));
-        CHECK(matrix.isClose(1, 23) == true);
+        CHECK(matrix.isClose(1, 23) );
         CAPTURE(matrix.isClose(1, 36));
-        CHECK(matrix.isClose(1, 36) == true);
+        CHECK(matrix.isClose(1, 36) );
     }
 }*/
 /**************************************************************************************************/

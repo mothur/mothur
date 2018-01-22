@@ -36,16 +36,11 @@ public:
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		
 private:
-	
-	vector<int> processIDS;   //processid
-	vector<linePair*> lines;
-	
-	int driver(linePair*, string, string, string);
-	int createProcesses(string, string, string);
-
+	int driver(string, string, string);
+    
 	bool abort, filter, save;
 	string fastafile, templatefile, consfile, quanfile, maskfile, outputDir, inputDir;
-	int processors, window, increment, numSeqs, templateSeqsLength;
+	int window, increment, numSeqs, templateSeqsLength;
 	MothurChimera* chimera;
 	vector<string> outputNames;
 	vector<string> fastaFileNames;

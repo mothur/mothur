@@ -8,7 +8,7 @@
  */
 
 #include "getsharedotucommand.h"
-#include "sharedutilities.h"
+
 
 //**********************************************************************************************************************
 vector<string> GetSharedOTUCommand::setParameters(){	
@@ -98,7 +98,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(){
 GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 	try {
 	
-		abort = false; calledHelp = false;   
+		abort = false; calledHelp = false;   userGroups = "";
 		unique = true;
 		allLines = 1;
 		
@@ -127,17 +127,17 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			outputTypes["sharedseqs"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -145,7 +145,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -153,7 +153,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
@@ -161,7 +161,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -169,7 +169,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
                 it = parameters.find("count");
                 //user has given a template file
                 if(it != parameters.end()){
-                    path = m->hasPath(it->second);
+                    path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["count"] = inputDir + it->second;		}
                 }
@@ -177,31 +177,31 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 
 			
 			//check for required parameters
-			listfile = validParameter.validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { listfile = "";			}
-            else {  format = "list"; 	m->setListFile(listfile); }
+            else {  format = "list"; 	current->setListFile(listfile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
             
-            sharedfile = validParameter.validFile(parameters, "shared", true);
+            sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else { m->setSharedFile(sharedfile); }
+			else { current->setSharedFile(sharedfile); }
             
-            fastafile = validParameter.validFile(parameters, "fasta", true);
+            fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }
-			else { m->setFastaFile(fastafile); }
+			else { current->setFastaFile(fastafile); }
 
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
             if (countfile == "not open") { countfile = ""; abort = true; }
             else if (countfile == "not found") { countfile = ""; }
             else {
-                m->setCountTableFile(countfile);
+                current->setCountFile(countfile);
                 CountTable temp;
                 if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting."); m->mothurOutEndLine(); abort=true; }
             }
@@ -209,10 +209,10 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
             if ((sharedfile == "") && (listfile == "")) { //look for currents
                 //is there are current file available for either of these?
 				//give priority to shared, then list
-				sharedfile = m->getSharedFile();
+				sharedfile = current->getSharedFile();
 				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else {
-					listfile = m->getListFile();
+					listfile = current->getListFile();
 					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 					else {
 						m->mothurOut("No valid current files. You must provide a shared or list file."); m->mothurOutEndLine();
@@ -225,10 +225,10 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			
             if (listfile != "") {
                 if ((groupfile == "") && (countfile == "")) {
-                    groupfile = m->getGroupFile();
+                    groupfile = current->getGroupFile();
                     if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
                     else {
-                        countfile = m->getCountTableFile();
+                        countfile = current->getCountFile();
                         if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                         else {
                             m->mothurOut("You need to provide a groupfile or countfile if you are going to use the list format."); m->mothurOutEndLine();
@@ -242,30 +242,32 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
+			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			output = validParameter.validFile(parameters, "output", false);			
+			output = validParameter.valid(parameters, "output");
 			if (output == "not found") { output = ""; }
 			else if (output == "default") { output = ""; }
 			
-			groups = validParameter.validFile(parameters, "uniquegroups", false);			
+			groups = validParameter.valid(parameters, "uniquegroups");
 			if (groups == "not found") { groups = ""; }
 			else { 
 				userGroups = "unique." + groups;
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
                 if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
 			}
 			
-			groups = validParameter.validFile(parameters, "sharedgroups", false);			
+			groups = validParameter.valid(parameters, "sharedgroups");
 			if (groups == "not found") { groups = "";  }
 			else { 
 				userGroups = groups;
-				m->splitAtDash(groups, Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
                 if (Groups.size() > 4) {  userGroups = "selected_groups"; } //if too many groups then the filename becomes too big.
 				unique = false;
 			}
@@ -283,18 +285,16 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 int GetSharedOTUCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         if ( sharedfile != "") { runShared(); }
         else {
-            m->setGroups(Groups);
             if (groupfile != "") {
                 groupMap = new GroupMap(groupfile);
                 
                 int groupError = groupMap->readMap();
                 if (groupError == 1) { delete groupMap; return 0; }
                 vector<string> allGroups = groupMap->getNamesOfGroups();
-                m->setAllGroups(allGroups);
             }else{
                 ct = new CountTable();
                 ct->readTable(countfile, true, false);
@@ -311,87 +311,70 @@ int GetSharedOTUCommand::execute(){
                 for(int i = 0; i < Groups.size(); i++) {  userGroups += Groups[i] + "-";  }
                 userGroups = userGroups.substr(0, userGroups.length()-1);
                 if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
-            }else{
-                //sanity check for group names
-                SharedUtil util;
-                vector<string> namesOfGroups;
-                if (groupfile != "") { namesOfGroups = groupMap->getNamesOfGroups(); }
-                else {  namesOfGroups = ct->getNamesOfGroups();  }
-                
-                util.setGroups(Groups, namesOfGroups);
-                
-                if (groupfile != "") { groupMap->setNamesOfGroups(namesOfGroups); }
-                else {  ct->setNamesOfGroups(namesOfGroups);  }
             }
         
             //put groups in map to find easier
-            for(int i = 0; i < Groups.size(); i++) {
-                groupFinder[Groups[i]] = Groups[i];
-            }
+            for(int i = 0; i < Groups.size(); i++) { groupFinder[Groups[i]] = Groups[i]; }
             
             if (fastafile != "") {
                 ifstream inFasta;
-                m->openInputFile(fastafile, inFasta);
+                util.openInputFile(fastafile, inFasta);
                 
                 while(!inFasta.eof()) {
                     if (m->getControl_pressed()) { outputTypes.clear(); inFasta.close(); delete groupMap; return 0; }
                     
-                    Sequence seq(inFasta); m->gobble(inFasta);
+                    Sequence seq(inFasta); util.gobble(inFasta);
                     if (seq.getName() != "") {  seqs.push_back(seq);   }
                 }
                 inFasta.close();
             }
             
-            ListVector* lastlist = NULL;
+            InputData input(listfile, "list", nullVector);
+            ListVector* list = input.getListVector();
             string lastLabel = "";
             
             //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
             set<string> processedLabels;
             set<string> userLabels = labels;
             
-            ifstream in;
-            m->openInputFile(listfile, in);
             
-            //as long as you are not at the end of the file or done wih the lines you want
-            while((!in.eof()) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
                 
-                if (m->getControl_pressed()) { 
-                    if (lastlist != NULL) {		delete lastlist;	}
-                    for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  outputTypes.clear();
+                if (m->getControl_pressed()) {
+                    for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  outputTypes.clear();
                     if (groupfile != "") { delete groupMap; }else { delete ct; } return 0;
                 }
                 
-                list = new ListVector(in);
-                
-                if(allLines == 1 || labels.count(list->getLabel()) == 1){			
-                    m->mothurOut(list->getLabel()); 
+                if(allLines == 1 || labels.count(list->getLabel()) == 1){
+                    m->mothurOut(list->getLabel());
                     process(list);
-                    
+                
                     processedLabels.insert(list->getLabel());
                     userLabels.erase(list->getLabel());
                 }
                 
-                if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-                        string saveLabel = list->getLabel();
-                        
-                        m->mothurOut(lastlist->getLabel()); 
-                        process(lastlist);
-                        
-                        processedLabels.insert(lastlist->getLabel());
-                        userLabels.erase(lastlist->getLabel());
-                        
-                        //restore real lastlabel to save below
-                        list->setLabel(saveLabel);
+                if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = list->getLabel();
+                    
+                    delete list;
+                    list = input.getListVector(lastLabel);
+                    
+                    m->mothurOut(list->getLabel());
+                    process(list);
+                    
+                    processedLabels.insert(list->getLabel());
+                    userLabels.erase(list->getLabel());
+                    
+                    //restore real lastlabel to save below
+                    list->setLabel(saveLabel);
                 }
-
-                lastLabel = list->getLabel();
                 
-                if (lastlist != NULL) {		delete lastlist;	}
-                lastlist = list;			
+                lastLabel = list->getLabel();			
+                
+                delete list;
+                list = input.getListVector();
             }
-            
-            in.close();
-            
+
             //output error messages about any remaining user labels
             set<string>::iterator it;
             bool needToRun = false;
@@ -406,33 +389,27 @@ int GetSharedOTUCommand::execute(){
             }
             
             //run last label if you need to
-            if (needToRun == true)  {
-                    m->mothurOut(lastlist->getLabel()); 
-                    process(lastlist);
-                        
-                    processedLabels.insert(lastlist->getLabel());
-                    userLabels.erase(lastlist->getLabel());
+            if (needToRun )  {
+                if (list != NULL) {		delete list;	}
+                list = input.getListVector(lastLabel);
+                
+                process(list);
+                delete list;
             }
             
-
-            //reset groups parameter
-            m->clearGroups();  
-            
-            if (lastlist != NULL) {		delete lastlist;	}
-            
-            if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  if (groupfile != "") { delete groupMap; }else { delete ct; } return 0; } 
+            if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  if (groupfile != "") { delete groupMap; }else { delete ct; } return 0; } 
 		}
 		//set fasta file as new current fastafile
-		string current = "";
+		string currentName = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
 		if (output == "accnos") {
 			itTypes = outputTypes.find("accnos");
 			if (itTypes != outputTypes.end()) {
-				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+				if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 			}
 		}
 		
@@ -459,15 +436,15 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		ofstream outNames;
 		string outputFileNames;
 		
-		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		if (outputDir == "") { outputDir += util.hasPath(listfile); }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = shared->getLabel();
         variables["[group]"] = userGroups;
 		if (output != "accnos") { outputFileNames = getOutputFileName("sharedseqs", variables); }
 		else { outputFileNames = getOutputFileName("accnos", variables); }
         
-		m->openOutputFile(outputFileNames, outNames);
+		util.openOutputFile(outputFileNames, outNames);
 		
 		bool wroteSomething = false;
 		int num = 0;
@@ -475,20 +452,18 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		//go through each bin, find out if shared
         vector<string> binLabels = shared->getLabels();
 		for (int i = 0; i < shared->getNumBins(); i++) {
-			if (m->getControl_pressed()) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
+			if (m->getControl_pressed()) { outNames.close(); util.mothurRemove(outputFileNames); return 0; }
 			
 			bool uniqueOTU = true;
 			
 			map<string, int> atLeastOne;
-			for (int f = 0; f < Groups.size(); f++) {
-				atLeastOne[Groups[f]] = 0;
-			}
+			for (int f = 0; f < Groups.size(); f++) { atLeastOne[Groups[f]] = 0; }
 			
 			vector<string> namesOfSeqsInThisBin;
 			
 			string names = shared->get(i); 
             vector<string> binNames;
-            m->splitAtComma(names, binNames);
+            util.splitAtComma(names, binNames);
 			for(int j = 0; j < binNames.size(); j++) {
 				string name = binNames[j];
 				
@@ -497,7 +472,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
                 if (groupfile != "") {  seqGroup = groupMap->getGroup(name); }
                 else {
                     seqsGroups = ct->getGroups(name);
-                    seqGroup = m->getStringFromVector(seqsGroups, "-");
+                    seqGroup = util.getStringFromVector(seqsGroups, "-");
                 }
                 
 				if (output != "accnos") {
@@ -555,7 +530,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		outNames.close();
 		
 		if (!wroteSomething) {
-			m->mothurRemove(outputFileNames);
+			util.mothurRemove(outputFileNames);
 			string outputString = "\t" + toString(num) + " - No otus shared by groups";
 			
 			string groupString = "";
@@ -574,11 +549,11 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		
 		//if fasta file provided output new fasta file
 		if ((fastafile != "") && wroteSomething) {
-			if (outputDir == "") { outputDir += m->hasPath(fastafile); }
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+			if (outputDir == "") { outputDir += util.hasPath(fastafile); }
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
 			string outputFileFasta = getOutputFileName("fasta", variables);
 			ofstream outFasta;
-			m->openOutputFile(outputFileFasta, outFasta);
+			util.openOutputFile(outputFileFasta, outFasta);
 			outputNames.push_back(outputFileFasta); outputTypes["fasta"].push_back(outputFileFasta);
 			
 			for (int k = 0; k < seqs.size(); k++) {
@@ -612,29 +587,21 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 /***********************************************************/
 int GetSharedOTUCommand::runShared() {
 	try {
-        InputData input(sharedfile, "sharedfile");
+        InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
         
-        if (Groups.size() == 0) {
-            Groups = m->getGroups();
-            
+        if (userGroups == "") {
             //make string for outputfile name
             userGroups = "unique.";
             for(int i = 0; i < Groups.size(); i++) {  userGroups += Groups[i] + "-";  }
             userGroups = userGroups.substr(0, userGroups.length()-1);
             if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
-        }else {
-            //sanity check for group names
-            SharedUtil util;
-            vector<string> allGroups = m->getAllGroups();
-            util.setGroups(Groups, allGroups);
         }
         
         //put groups in map to find easier
-        for(int i = 0; i < Groups.size(); i++) {
-            groupFinder[Groups[i]] = Groups[i];
-        }
+        for(int i = 0; i < Groups.size(); i++) { groupFinder[Groups[i]] = Groups[i];}
 
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -643,8 +610,8 @@ int GetSharedOTUCommand::runShared() {
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->getControl_pressed()) {
-                outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
-                delete lookup; m->clearGroups(); return 0;
+                outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }
+                delete lookup;  return 0;
 			}
             
             
@@ -656,7 +623,7 @@ int GetSharedOTUCommand::runShared() {
 				userLabels.erase(lookup->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
@@ -681,8 +648,8 @@ int GetSharedOTUCommand::runShared() {
 		}
 		
 		if (m->getControl_pressed()) {
-            outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
-            delete lookup; m->clearGroups(); return 0;
+            outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }
+            delete lookup;  return 0;
         }
         
 		//output error messages about any remaining user labels
@@ -699,7 +666,7 @@ int GetSharedOTUCommand::runShared() {
 		}
 		
 		//run last label if you need to
-		if (needToRun == true)  {
+		if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             
@@ -709,7 +676,7 @@ int GetSharedOTUCommand::runShared() {
 		}
         
 		//reset groups parameter
-		m->clearGroups();  
+		  
 		
 		return 0;
 
@@ -724,24 +691,23 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
 	try {
 		
 		string outputFileNames;
-		if (outputDir == "") { outputDir += m->hasPath(sharedfile); }
+		if (outputDir == "") { outputDir += util.hasPath(sharedfile); }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup->getLabel();
         variables["[group]"] = userGroups;
 		if (output != "accnos") { outputFileNames = getOutputFileName("sharedseqs", variables); }
 		else { outputFileNames = getOutputFileName("accnos", variables); }
         
         ofstream outNames;
-		m->openOutputFile(outputFileNames, outNames);
+		util.openOutputFile(outputFileNames, outNames);
 		
 		bool wroteSomething = false;
 		int num = 0;
         
 		//go through each bin, find out if shared
-        vector<string> currentSharedBinLabels = m->getCurrentSharedBinLabels();
 		for (int i = 0; i < lookup->getNumBins(); i++) {
-			if (m->getControl_pressed()) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
+			if (m->getControl_pressed()) { outNames.close(); util.mothurRemove(outputFileNames); return 0; }
 			
 			bool uniqueOTU = true;
 			map<string, int> atLeastOne;
@@ -752,7 +718,7 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
             vector<string> groupNames = lookup->getNamesGroups();
 			for(int j = 0; j < lookup->size(); j++) {
 				string seqGroup = groupNames[j];
-                string name = currentSharedBinLabels[i];
+                string name = lookup->getOTUName(i);
                 int abund = lookup->get(i, seqGroup);
 				
                 if (abund != 0) {
@@ -790,7 +756,7 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
 		outNames.close();
 		
 		if (!wroteSomething) {
-			m->mothurRemove(outputFileNames);
+			util.mothurRemove(outputFileNames);
 			string outputString = "\t" + toString(num) + " - No otus shared by groups";
 			
 			string groupString = "";

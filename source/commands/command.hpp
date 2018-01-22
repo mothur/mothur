@@ -18,12 +18,13 @@
 #include "validparameter.h"
 #include "mothurout.h"
 #include "commandparameter.h"
-
+#include "currentfile.h"
+#include "utils.hpp"
 
 class Command {
 	
 	public:
-		Command() {  m = MothurOut::getInstance();   } 
+		Command() {  m = MothurOut::getInstance();  current = CurrentFile::getInstance(); }
 		
 		//needed by gui
 		virtual string getCommandName() = 0;
@@ -45,7 +46,7 @@ class Command {
                         
                         string patternTemp = getOutputPattern(type);
                         vector<string> patterns;
-                        m->splitAtDash(patternTemp, patterns);
+                        util.splitAtDash(patternTemp, patterns);
                         
                         //find pattern to use based on number of variables passed in
                         string pattern = "";
@@ -72,7 +73,7 @@ class Command {
                             for (int i = 0; i < pattern.length(); i++) { if (pattern[i] == '[') { numVariables++; } }
                             
                             vector<string> pieces;
-                            m->splitAtComma(pattern, pieces);
+                            util.splitAtComma(pattern, pieces);
                             
                         
                             for (int i = 0; i < pieces.size(); i++) {
@@ -125,6 +126,8 @@ class Command {
 	
 	protected:
 		MothurOut* m;
+        Utils util;
+        CurrentFile* current;
 		bool calledHelp;
 			
 		map<string, vector<string> > outputTypes;

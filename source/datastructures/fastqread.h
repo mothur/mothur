@@ -59,6 +59,7 @@ public:
 
 private:
     MothurOut* m;
+    Utils util;
     vector<int> scores;
     string name, comment;
     string sequence;

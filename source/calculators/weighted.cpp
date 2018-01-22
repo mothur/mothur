@@ -14,14 +14,13 @@
 EstOutput Weighted::getValues(Tree* t, int p, string o) {
     try {
 		data.clear(); //clear out old values
-		int numGroups;
+		int numGroups = Groups.size();
 		vector<double> D;
 		processors = p;
 		outputDir = o;
         
         CountTable* ct = t->getCountTable();
-		
-		numGroups = m->getNumGroups();
+        Treenames = t->getTreeNames();
 		
 		if (m->getControl_pressed()) { return data; }
 		
@@ -31,7 +30,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 			for (int l = 0; l < i; l++) {	
 				//initialize weighted scores
 				//WScore[globaldata->Groups[i]+globaldata->Groups[l]] = 0.0;
-				vector<string> groups; groups.push_back((m->getGroups())[i]); groups.push_back((m->getGroups())[l]);
+				vector<string> groups; groups.push_back(Groups[i]); groups.push_back(Groups[l]);
 				namesOfGroupCombos.push_back(groups);
 			}
 		}
@@ -64,6 +63,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
         vector<int> processIDS;
 		EstOutput results;
         bool recalc = false;
+        vector<string> Treenames = t->getTreeNames();
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -77,12 +77,12 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				process++;
 			}else if (pid == 0){
 				EstOutput Myresults;
-				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
+				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, ct);
 			
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + m->mothurGetpid(process) + ".weighted.results.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = outputDir + toString(process) + ".weighted.results.temp";
+				util.openOutputFile(tempFile, out);
 	
 				out << Myresults.size() << endl;
 				for (int i = 0; i < Myresults.size(); i++) {  out << Myresults[i] << '\t';  } out << endl;
@@ -99,75 +99,14 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));
+                    util.mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));
                 }
                 recalc = true;
                 break;
 			}
 		}
 	
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            lines.clear();
-            
-            //calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
-            int numGroups = m->getNumGroups();
-            vector< vector<string> > namesOfGroupCombos;
-            for (int i=0; i<numGroups; i++) {
-                for (int l = 0; l < i; l++) {
-                    //initialize weighted scores
-                    vector<string> groups; groups.push_back((m->getGroups())[i]); groups.push_back((m->getGroups())[l]);
-                    namesOfGroupCombos.push_back(groups);
-                }
-            }
-            
-            int remainingPairs = namesOfGroupCombos.size();
-            int startIndex = 0;
-            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-                int numPairs = remainingPairs; //case for last processor
-                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-                lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
-                startIndex = startIndex + numPairs;
-                remainingPairs = remainingPairs - numPairs;
-            }
-            
-            results.clear();
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    EstOutput Myresults;
-                    Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = outputDir + m->mothurGetpid(process) + ".weighted.results.temp";
-                    m->openOutputFile(tempFile, out);
-                    
-                    out << Myresults.size() << endl;
-                    for (int i = 0; i < Myresults.size(); i++) {  out << Myresults[i] << '\t';  } out << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-        
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, ct);
 	
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -181,12 +120,12 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 		for (int i=0;i<(processors-1);i++) { 
 			ifstream in;
 			string s = outputDir + toString(processIDS[i]) + ".weighted.results.temp";
-			m->openInputFile(s, in);
+			util.openInputFile(s, in);
 			
 			//get quantiles
 			while (!in.eof()) {
 				int num;
-				in >> num; m->gobble(in);
+				in >> num; util.gobble(in);
 				
 				if (m->getControl_pressed()) { break; }
 
@@ -195,10 +134,10 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 					in >> w;
 					results.push_back(w);
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
 			in.close();
-			m->mothurRemove(s);
+			util.mothurRemove(s);
 		}
 #else
         
@@ -213,20 +152,20 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);
             trees.push_back(copyTree);
             
-            weightedData* tempweighted = new weightedData(m, lines[i].start, lines[i].num, namesOfGroupCombos, copyTree, copyCount, includeRoot);
+            weightedData* tempweighted = new weightedData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount, includeRoot);
 			pDataArray.push_back(tempweighted);
 			processIDS.push_back(i);
             
 			hThreadArray[i-1] = CreateThread(NULL, 0, MyWeightedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, ct);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);

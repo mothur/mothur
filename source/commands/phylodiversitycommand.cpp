@@ -128,14 +128,14 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("tree");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
 				}
@@ -143,7 +143,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -151,7 +151,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -159,37 +159,37 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			treefile = validParameter.validFile(parameters, "tree", true);
+			treefile = validParameter.validFile(parameters, "tree");
 			if (treefile == "not open") { treefile = ""; abort = true; }
 			else if (treefile == "not found") { 				
 				//if there is a current design file, use it
-				treefile = m->getTreeFile(); 
+				treefile = current->getTreeFile(); 
 				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
-			}else { m->setTreeFile(treefile); }	
+			}else { current->setTreeFile(treefile); }	
 			
 			//check for required parameters
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -199,18 +199,18 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
             }
 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(treefile);	}
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, freq);
+			temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
+			util.mothurConvert(temp, freq);
 			
-			temp = validParameter.validFile(parameters, "rarefy", false);			if (temp == "not found") { temp = "F"; }
-			rarefy = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "rarefy");			if (temp == "not found") { temp = "F"; }
+			rarefy = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "sampledepth", false);		if (temp == "not found") { temp = "0"; }
-            if (m->isNumeric1(temp)) {
-                m->mothurConvert(temp, subsampleSize);
+            temp = validParameter.valid(parameters, "sampledepth");		if (temp == "not found") { temp = "0"; }
+            if (util.isNumeric1(temp)) {
+                util.mothurConvert(temp, subsampleSize);
                 if (subsampleSize == 0) { subsample = false; }
                 else { subsample = true; }
             }else {
@@ -219,28 +219,27 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
             }
             if (subsample) { rarefy = true;  }
             
-            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-            m->mothurConvert(temp, iters);
+            temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
+            util.mothurConvert(temp, iters);
             if (!rarefy) { iters = 1;  }
 			
-			temp = validParameter.validFile(parameters, "summary", false);			if (temp == "not found") { temp = "T"; }
-			summary = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "summary");			if (temp == "not found") { temp = "T"; }
+			summary = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "scale", false);			if (temp == "not found") { temp = "F"; }
-			scale = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "scale");			if (temp == "not found") { temp = "F"; }
+			scale = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "collect", false);			if (temp == "not found") { temp = "F"; }
-			collect = m->isTrue(temp);
+			temp = validParameter.valid(parameters, "collect");			if (temp == "not found") { temp = "F"; }
+			collect = util.isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);
+			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			processors = current->setProcessors(temp);
             
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = "";  }
 			else { 
-				m->splitAtDash(groups, Groups);
-				m->setGroups(Groups);
+				util.splitAtDash(groups, Groups);
+                if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
 			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default."); m->mothurOutEndLine(); abort=true; }
@@ -248,7 +247,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			if (countfile=="") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(treefile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 } 
             }
 		}
@@ -264,11 +263,11 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 int PhyloDiversityCommand::execute(){
 	try {
 		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        int start = time(NULL);
+        long start = time(NULL);
         
-		m->setTreeFile(treefile);
+		current->setTreeFile(treefile);
         TreeReader* reader;
         if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
         else { reader = new TreeReader(treefile, countfile); }
@@ -276,40 +275,47 @@ int PhyloDiversityCommand::execute(){
         ct = trees[0]->getCountTable();
         delete reader;
 
-		SharedUtil util;
-		vector<string> mGroups = m->getGroups();
 		vector<string> tGroups = ct->getNamesOfGroups();
-		util.setGroups(mGroups, tGroups, "phylo.diversity");	//sets the groups the user wants to analyze
-		
+        if (Groups.size() == 0) { Groups = tGroups; }
+        else {
+            //check that groups are valid
+            for (int i = 0; i < Groups.size(); i++) {
+                if (!util.inUsersGroups(Groups[i], tGroups)) {
+                    m->mothurOut(Groups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
+                    // erase the invalid group from userGroups
+                    Groups.erase(Groups.begin()+i);
+                    i--;
+                }
+            }
+        }
 		//incase the user had some mismatches between the tree and group files we don't want group xxx to be analyzed
-		for (int i = 0; i < mGroups.size(); i++) {  if (mGroups[i] == "xxx") { mGroups.erase(mGroups.begin()+i);  break; }  }
-		m->setGroups(mGroups);
+		for (int i = 0; i < Groups.size(); i++) {  if (Groups[i] == "xxx") { Groups.erase(Groups.begin()+i);  break; }  }
 		 
 		vector<string> outputNames;
 		
 		//for each of the users trees
 		for(int i = 0; i < trees.size(); i++) {
 		
-			if (m->getControl_pressed()) { delete ct; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]); 	} return 0; }
+			if (m->getControl_pressed()) { delete ct; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]); 	} return 0; }
 			
 			ofstream outSum, outRare, outCollect;
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
             variables["[tag]"] = toString(i+1);
 			string outSumFile = getOutputFileName("summary",variables);
 			string outRareFile = getOutputFileName("rarefy",variables);
 			string outCollectFile = getOutputFileName("phylodiv",variables);
 			
-			if (summary)	{ m->openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);		outputTypes["summary"].push_back(outSumFile);			}
-			if (rarefy)		{ m->openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);	outputTypes["rarefy"].push_back(outRareFile);			}
-			if (collect)	{ m->openOutputFile(outCollectFile, outCollect); outputNames.push_back(outCollectFile);	 outputTypes["phylodiv"].push_back(outCollectFile);  }
+			if (summary)	{ util.openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);		outputTypes["summary"].push_back(outSumFile);			}
+			if (rarefy)		{ util.openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);	outputTypes["rarefy"].push_back(outRareFile);			}
+			if (collect)	{ util.openOutputFile(outCollectFile, outCollect); outputNames.push_back(outCollectFile);	 outputTypes["phylodiv"].push_back(outCollectFile);  }
 			
 			int numLeafNodes = trees[i]->getNumLeaves();
             
 			//create a vector containing indexes of leaf nodes, randomize it, select nodes to send to calculator
 			vector<int> randomLeaf;
 			for (int j = 0; j < numLeafNodes; j++) {  
-				if (m->inUsersGroups(trees[i]->tree[j].getGroup(), mGroups) == true) { //is this a node from the group the user selected.
+				if (util.inUsersGroups(trees[i]->tree[j].getGroup(), Groups) ) { //is this a node from the group the user selected.
 					randomLeaf.push_back(j); 
 				}
 			}
@@ -324,15 +330,15 @@ int PhyloDiversityCommand::execute(){
 			
 			//find largest group total 
 			int largestGroup = 0;
-			for (int j = 0; j < mGroups.size(); j++) {
-                int numSeqsThisGroup = ct->getGroupCount(mGroups[j]);
+			for (int j = 0; j < Groups.size(); j++) {
+                int numSeqsThisGroup = ct->getGroupCount(Groups[j]);
                 if (numSeqsThisGroup > largestGroup) { largestGroup = numSeqsThisGroup; }
 				
                 //initialize diversity
-                diversity[mGroups[j]].resize(numSeqsThisGroup+1, 0.0);		//numSampled
+                diversity[Groups[j]].resize(numSeqsThisGroup+1, 0.0);		//numSampled
 																											//groupA		0.0			0.0
                 //initialize sumDiversity
-                sumDiversity[mGroups[j]].resize(numSeqsThisGroup+1, 0.0);
+                sumDiversity[Groups[j]].resize(numSeqsThisGroup+1, 0.0);
 			}
 
 			//convert freq percentage to number
@@ -348,8 +354,8 @@ int PhyloDiversityCommand::execute(){
 			
 			//add other groups ending points
             if (!subsample) {
-                for (int j = 0; j < mGroups.size(); j++) {
-                    if (numSampledList.count(diversity[mGroups[j]].size()-1) == 0) {  numSampledList.insert(diversity[mGroups[j]].size()-1); }
+                for (int j = 0; j < Groups.size(); j++) {
+                    if (numSampledList.count(diversity[Groups[j]].size()-1) == 0) {  numSampledList.insert(diversity[Groups[j]].size()-1); }
                 }
             }
 			
@@ -373,7 +379,7 @@ int PhyloDiversityCommand::execute(){
 		}
 		
 	
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
+		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run phylo.diversity."); m->mothurOutEndLine();
 
@@ -399,6 +405,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 		vector<int> processIDS;
 		map< string, vector<float> >::iterator itSum;
         bool recalc = false;
+        vector<string> Treenames = t->getTreeNames();
 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
@@ -412,9 +419,9 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 			}else if (pid == 0){
 				driver(t, div, sumDiv, procIters[process], increment, randomLeaf, numSampledList, outCollect, outSum, false);
 				
-				string outTemp = outputDir + m->mothurGetpid(process) + ".sumDiv.temp";
+				string outTemp = outputDir + toString(process) + ".sumDiv.temp";
 				ofstream out;
-				m->openOutputFile(outTemp, out);
+				util.openOutputFile(outTemp, out);
 				
 				//output the sumDIversity
 				for (itSum = sumDiv.begin(); itSum != sumDiv.end(); itSum++) {
@@ -438,7 +445,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
                 }
                 m->setControl_pressed(false);
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");
+                    util.mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");
                 }
                 recalc = true;
                 break;
@@ -448,7 +455,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
         if (recalc) {
             //test line, also set recalc to true.
             //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-                    for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+                    for (int i=0;i<processIDS.size();i++) {util.mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             //divide iters between processes
             procIters.clear();
@@ -471,9 +478,9 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
                 }else if (pid == 0){
                     driver(t, div, sumDiv, procIters[process], increment, randomLeaf, numSampledList, outCollect, outSum, false);
                     
-                    string outTemp = outputDir + m->mothurGetpid(process) + ".sumDiv.temp";
+                    string outTemp = outputDir + toString(process) + ".sumDiv.temp";
                     ofstream out;
-                    m->openOutputFile(outTemp, out);
+                    util.openOutputFile(outTemp, out);
                     
                     //output the sumDIversity
                     for (itSum = sumDiv.begin(); itSum != sumDiv.end(); itSum++) {
@@ -509,14 +516,14 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 			//input the sumDIversity
 			string inTemp = outputDir + toString(processIDS[i]) + ".sumDiv.temp";
 			ifstream in;
-			m->openInputFile(inTemp, in);
+			util.openInputFile(inTemp, in);
 				
 			//output the sumDIversity
 			for (int j = 0; j < sumDiv.size(); j++) { 
 				string group = "";
 				int size = 0;
 				
-				in >> group >> size; m->gobble(in);
+				in >> group >> size; util.gobble(in);
 				
 				for (int k = 0; k < size; k++) { 
 					float tempVal;
@@ -524,11 +531,11 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 					
 					sumDiv[group][k] += tempVal;
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
 				
 			in.close();
-			m->mothurRemove(inTemp);
+			util.mothurRemove(inTemp);
 		}
 #else
         
@@ -544,7 +551,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);
@@ -556,7 +563,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
             set<int> copynumSampledList = numSampledList;
             map<string, int> copyRootForGrouping = rootForGroup;
             
-            phylodivData* temp = new phylodivData(m, procIters[i], copydiv, copysumDiv, copyTree, copyCount, increment, copyrandomLeaf, copynumSampledList, copyRootForGrouping, subsample, subsampleSize);
+            phylodivData* temp = new phylodivData(m, procIters[i], copydiv, copysumDiv, copyTree, copyCount, increment, copyrandomLeaf, copynumSampledList, copyRootForGrouping, subsample, subsampleSize, Groups);
 			pDataArray.push_back(temp);
 			processIDS.push_back(i);
             
@@ -595,27 +602,26 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, map<string, vector<float> >& sumDiv, int numIters, int increment, vector<int>& randomLeaf, set<int>& numSampledList, ofstream& outCollect, ofstream& outSum, bool doSumCollect){
 	try {
 		int numLeafNodes = randomLeaf.size();
-		vector<string> mGroups = m->getGroups();
         
         map<string, int> rootForGroup = getRootForGroups(t); //maps groupName to root node in tree. "root" for group may not be the trees root and we don't want to include the extra branches.
         
         
 		for (int l = 0; l < numIters; l++) {
-            m->mothurRandomShuffle(randomLeaf);
+            util.mothurRandomShuffle(randomLeaf);
             
             //initialize counts
             map<string, int> counts;
             vector< map<string, bool> > countedBranch;
             for (int i = 0; i < t->getNumNodes(); i++) {
                 map<string, bool> temp;
-                for (int j = 0; j < mGroups.size(); j++) { temp[mGroups[j]] = false; }
+                for (int j = 0; j < Groups.size(); j++) { temp[Groups[j]] = false; }
                 countedBranch.push_back(temp);
             }
             
-            for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = 0;   }
+            for (int j = 0; j < Groups.size(); j++) {  counts[Groups[j]] = 0;   }
             
             map<string, int> metCount; bool allDone = false;
-            for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = false;   }
+            for (int j = 0; j < Groups.size(); j++) {  counts[Groups[j]] = false;   }
             for(int k = 0; k < numLeafNodes; k++){
                 
                 if (m->getControl_pressed()) { return 0; }
@@ -628,7 +634,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
                 
                 for (int j = 0; j < groups.size(); j++) {
                     
-                    if (m->inUsersGroups(groups[j], mGroups)) {
+                    if (util.inUsersGroups(groups[j], Groups)) {
                         int numSeqsInGroupJ = 0;
                         map<string, int>::iterator it;
                         it = t->tree[randomLeaf[k]].pcount.find(groups[j]);
@@ -645,8 +651,8 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
                         if (subsample) {
                             if (counts[groups[j]] >= subsampleSize) { metCount[groups[j]] = true; }
                             bool allTrue = true;
-                            for (int h = 0; h < mGroups.size(); h++) {
-                                if (!metCount[mGroups[h]]) { allTrue = false; }
+                            for (int h = 0; h < Groups.size(); h++) {
+                                if (!metCount[Groups[h]]) { allTrue = false; }
                             }
                             if (allTrue) { allDone = true; }
                         }
@@ -658,9 +664,9 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
             //if you subsample then rarefy=t
             if (rarefy) {
                 //add this diversity to the sum
-                for (int j = 0; j < mGroups.size(); j++) {
-                    for (int g = 0; g < div[mGroups[j]].size(); g++) {
-                        sumDiv[mGroups[j]][g] += div[mGroups[j]][g];
+                for (int j = 0; j < Groups.size(); j++) {
+                    for (int g = 0; g < div[Groups[j]].size(); g++) {
+                        sumDiv[Groups[j]][g] += div[Groups[j]][g];
                     }
                 }
             }
@@ -687,20 +693,19 @@ void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofst
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		vector<string> mGroups = m->getGroups();
         int numSampled = 0;
-		for (int j = 0; j < mGroups.size(); j++) {
+		for (int j = 0; j < Groups.size(); j++) {
             if (subsample) { numSampled = subsampleSize; }
-            else {  numSampled = (div[mGroups[j]].size()-1);  }
+            else {  numSampled = (div[Groups[j]].size()-1);  }
 			
-            out << mGroups[j] << '\t' << numSampled << '\t';
+            out << Groups[j] << '\t' << numSampled << '\t';
 			 
 			float score;
-			if (scale)	{  score = (div[mGroups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-			else		{	score = div[mGroups[j]][numSampled] / (float)numIters;	}
+			if (scale)	{  score = (div[Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+			else		{	score = div[Groups[j]][numSampled] / (float)numIters;	}
 				
 			out << setprecision(4) << score << endl;
-            //cout << mGroups[j] << '\t' << numSampled << '\t'<< setprecision(4) << score << endl;
+            //cout << Groups[j] << '\t' << numSampled << '\t'<< setprecision(4) << score << endl;
 		}
 					
 		out.close();
@@ -717,8 +722,7 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 	try {
 		
 		out << "numSampled";
-		vector<string> mGroups = m->getGroups();
-		for (int i = 0; i < mGroups.size(); i++) { out << '\t' << mGroups[i];  }
+		for (int i = 0; i < Groups.size(); i++) { out << '\t' << Groups[i];  }
 		out << endl;
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -728,11 +732,11 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 			
 			out << numSampled;
 		
-			for (int j = 0; j < mGroups.size(); j++) {
-				if (numSampled < div[mGroups[j]].size()) { 
+			for (int j = 0; j < Groups.size(); j++) {
+				if (numSampled < div[Groups[j]].size()) { 
 					float score;
-					if (scale)	{  score = (div[mGroups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-					else		{	score = div[mGroups[j]][numSampled] / (float)numIters;	}
+					if (scale)	{  score = (div[Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+					else		{	score = div[Groups[j]][numSampled] / (float)numIters;	}
 
 					out << '\t' << setprecision(4) << score ;
 				}else { out << "\tNA" ; }

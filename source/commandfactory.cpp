@@ -172,13 +172,13 @@ CommandFactory* CommandFactory::getInstance() {
 CommandFactory::CommandFactory(){
 	string s = "";
 	m = MothurOut::getInstance();
+    current = CurrentFile::getInstance();
 
 	command = new NoCommand(s);
 	shellcommand = new NoCommand(s);
 	pipecommand = new NoCommand(s);
 
-	outputDir = ""; inputDir = "";
-	logFileName = "";
+	current->setOutputDir(""); current->setInputDir("");
 	append = false;
 
 	//initialize list of valid commands
@@ -345,7 +345,7 @@ CommandFactory::~CommandFactory(){
 /***********************************************************/
 int CommandFactory::checkForRedirects(string optionString) {
     try {
-
+        Utils util;
         int pos = optionString.find("outputdir");
         if (pos != string::npos) { //user has set outputdir in command option string
             string outputOption = "";
@@ -356,8 +356,8 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   outputOption += optionString[i]; }
             }
             if (outputOption[0] == '=') { outputOption = outputOption.substr(1); }
-            if(m->mkDir(outputOption)){
-                setOutputDirectory(outputOption); 
+            if(util.mkDir(outputOption)){
+                current->setOutputDir(outputOption);
                 m->mothurOut("Setting output directory to: " + outputOption); m->mothurOutEndLine();
             }
         }
@@ -372,8 +372,8 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
-            if(m->dirCheck(intputOption)){
-                setInputDirectory(intputOption); 
+            if(util.dirCheck(intputOption)){
+                current->setInputDir(intputOption); 
                 m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
             }
         }
@@ -393,16 +393,17 @@ int CommandFactory::checkForRedirects(string optionString) {
                 random = time(NULL);
                 seed = true;
             }else {
-                if (m->isNumeric1(intputOption)) { m->mothurConvert(intputOption, random); seed=true; }
-                else { m->mothurOut("[ERROR]: Seed must be an integer."); m->mothurOutEndLine(); seed = false;}
+                if (util.isNumeric1(intputOption)) { util.mothurConvert(intputOption, random); seed=true; }
+                else { m->mothurOut("[ERROR]: Seed must be an integer.\n"); seed = false;}
             }
 
-            if (seed)  {
-                m->setRandomSeed(random);
-                m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
-            }
+            if (seed)  { m->mothurOut("Setting random seed to " + toString(random) + ".\n\n"); m->setRandomSeed(random); }
         }
-
+        
+        pos = optionString.find("mothurcalling=true");
+        if (pos != string::npos) { //user has set seed in command option string
+            current->setMothurCalling(true);
+        }else { current->setMothurCalling(false);  }
 
         return 0;
 	}
@@ -423,15 +424,15 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         checkForRedirects(optionString);
 
 		//user has opted to redirect output from dir where input files are located to some other place
-		if (outputDir != "") {
-			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
-			else { optionString += "outputdir=" + outputDir; }
+		if (current->getOutputDir() != "") {
+			if (optionString != "") { optionString += ", outputdir=" + current->getOutputDir(); }
+			else { optionString += "outputdir=" + current->getOutputDir(); }
 		}
 
 		//user has opted to redirect input from dir where mothur.exe is located to some other place
-		if (inputDir != "") {
-			if (optionString != "") { optionString += ", inputdir=" + inputDir; }
-			else { optionString += "inputdir=" + inputDir; }
+		if (current->getInputDir() != "") {
+			if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
+			else { optionString += "inputdir=" + current->getInputDir(); }
 		}
 
 		if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}
@@ -596,17 +597,17 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 
         checkForRedirects(optionString);
 
-		//user has opted to redirect output from dir where input files are located to some other place
-		if (outputDir != "") {
-			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
-			else { optionString += "outputdir=" + outputDir; }
-		}
-
-		//user has opted to redirect input from dir where mothur.exe is located to some other place
-		if (inputDir != "") {
-			if (optionString != "") { optionString += ", inputdir=" + inputDir; }
-			else { optionString += "inputdir=" + inputDir; }
-		}
+        //user has opted to redirect output from dir where input files are located to some other place
+        if (current->getOutputDir() != "") {
+            if (optionString != "") { optionString += ", outputdir=" + current->getOutputDir(); }
+            else { optionString += "outputdir=" + current->getOutputDir(); }
+        }
+        
+        //user has opted to redirect input from dir where mothur.exe is located to some other place
+        if (current->getInputDir() != "") {
+            if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
+            else { optionString += "inputdir=" + current->getInputDir(); }
+        }
 
 		if(commandName == "cluster")				{	pipecommand = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	pipecommand = new DeconvoluteCommand(optionString);				}

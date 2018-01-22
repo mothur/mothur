@@ -15,6 +15,8 @@
 
 #include "mothur.h"
 #include "sequence.hpp"
+#include "currentfile.h"
+#include "utils.hpp"
 
 /**************************************************************************************************/
 struct seqMatch {  //used to select top n matches
@@ -44,28 +46,31 @@ inline bool compareSeqMatchesReverse (seqMatch member, seqMatch member2){ //sort
 class Database {
 
 public:
-	Database();
-	virtual ~Database();
-	virtual void generateDB() = 0; 
+    Database(){ longest = 0; numSeqs = 0; m = MothurOut::getInstance(); current = CurrentFile::getInstance(); }
+    virtual ~Database(){};
+	virtual void generateDB() = 0;
+    virtual void readKmerDB(ifstream&){};
 	virtual void addSequence(Sequence) = 0;  //add sequence to search engine
-	virtual string getName(int) { return ""; }  
-	virtual vector<int> findClosestSequences(Sequence*, int) = 0;  // returns indexes of n closest sequences to query
-	virtual vector<int> findClosestMegaBlast(Sequence*, int, int){return results;}
-	virtual float getSearchScore();
-	virtual vector<float> getSearchScores() { return Scores; } //assumes you already called findClosestMegaBlast
-	virtual int getLongestBase(); 
-	virtual void readKmerDB(ifstream&){};
 	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
-	virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };  
+    
+    
+	virtual vector<int> findClosestSequences(Sequence*, int, vector<float>&) = 0;  // returns indexes of n closest sequences to query
+	
+    virtual int getLongestBase() {	return longest+1;		}
+    virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };
 	virtual int getReversed(int) { return 0; } 
 	virtual int getMaxKmer(){	return 1;	}
+    virtual string getName(int) { return ""; }
+    virtual vector<int> findClosestMegaBlast(Sequence*, int, int){ vector<int> results; return results;}
 	
 protected:
 	MothurOut* m;
+    CurrentFile* current;
 	int numSeqs, longest;
-	float searchScore;
-	vector<int> results;
-	vector<float> Scores;
+    std::mutex mutex;
+    Utils util;
+	
+	
 };
 /**************************************************************************************************/
 #endif

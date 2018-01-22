@@ -1326,11 +1326,8 @@ double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pV
 /*********************************************************************************************************************************/
 double LinearAlgebra::normalvariate(double mean, double standardDeviation) {
     try {
-        double u1 = m->getRandomDouble0to1();
-        double u2 = m->getRandomDouble0to1();
-        //double r = sqrt( -2.0*log(u1) );
-        //double theta = 2.0*PI*u2;
-        //cout << cos(8.*atan(1.)*u2)*sqrt(-2.*log(u1)) << endl;
+        double u1 = util.getRandomDouble0to1();
+        double u2 = util.getRandomDouble0to1();
         return cos(8.*atan(1.)*u2)*sqrt(-2.*log(u1));
     }
 	catch(exception& e) {
@@ -2109,7 +2106,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         vector<double> ave;
         for (int i = 0; i < numOtus; i++) {
             stdF1.push_back(0.0);
-            ave.push_back(m->getAverage(randCov[i]));
+            ave.push_back(util.getAverage(randCov[i]));
         }
         
         for (int i = 0; i < numOtus; i++) {
@@ -2298,7 +2295,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         
         //rank <- sum(X.s$d > tol * X.s$d[1L])
         //X.s$d[1L] = larger value in d vector
-        double largeD = m->max(d);
+        double largeD = util.max(d);
         rank = 0; goodColumns.clear();
         for (int i = 0; i < d.size(); i++) { if (d[i] > (0.0000000001*largeD)) { rank++; goodColumns.insert(i); } }
         

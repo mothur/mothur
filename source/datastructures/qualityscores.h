@@ -16,6 +16,8 @@
 #include "mothur.h"
 #include "mothurout.h"
 #include "sequence.hpp"
+#include "utils.hpp"
+#include "writer.h"
 
 /**************************************************************************************************/
 
@@ -34,6 +36,7 @@ public:
 	vector<int> getQualityScores() { return qScores; }
 	void printQScores(ofstream&);
     void printQScores(ostream&);
+    void printQScores(OutputWriter*);
 	void trimQScores(int, int);
 	void flipQScores();
 	bool stripQualThreshold(Sequence&, double);
@@ -52,12 +55,16 @@ private:
 	double calculateAverage(bool);
 	MothurOut* m;
 	vector<int> qScores;
+    Utils util;
 	
 	string seqName;
 	int seqLength;
     
     string getSequenceName(ifstream&);
+    string getCommentString(ifstream&);
+    
     #ifdef USE_BOOST
+    string getCommentString(boost::iostreams::filtering_istream&);
     string getSequenceName(boost::iostreams::filtering_istream&);
     #endif
 };

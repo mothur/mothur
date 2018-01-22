@@ -264,7 +264,6 @@
 		481FB6281AC1B7EA0076CFF3 /* blastalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66212D37EC300DA6239 /* blastalign.cpp */; };
 		481FB6291AC1B7EA0076CFF3 /* blastdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66412D37EC400DA6239 /* blastdb.cpp */; };
 		481FB62A1AC1B7EA0076CFF3 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
-		481FB62B1AC1B7EA0076CFF3 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BD12D37EC400DA6239 /* database.cpp */; };
 		481FB62C1AC1B7EA0076CFF3 /* designmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77916E6176F7F7600EEFE18 /* designmap.cpp */; };
 		481FB62D1AC1B7EA0076CFF3 /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */; };
 		481FB62E1AC1B7EA0076CFF3 /* fastamap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6DE12D37EC400DA6239 /* fastamap.cpp */; };
@@ -338,7 +337,6 @@
 		481FB67B1AC1B88F0076CFF3 /* readphylipvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBAB12DC7613000092AC /* readphylipvector.cpp */; };
 		481FB67C1AC1B88F0076CFF3 /* splitmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B84312D37EC400DA6239 /* splitmatrix.cpp */; };
 		481FB67D1AC1B88F0076CFF3 /* treereader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D755D91535F679009BF21A /* treereader.cpp */; };
-		481FB67E1AC1B8960076CFF3 /* sharedutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */; };
 		481FB67F1AC1B8960076CFF3 /* singlelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */; };
 		481FB6801AC1B8960076CFF3 /* slibshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B83012D37EC400DA6239 /* slibshuff.cpp */; };
 		481FB6811AC1B8960076CFF3 /* subsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7876A25152A017C00A0AE86 /* subsample.cpp */; };
@@ -389,6 +387,10 @@
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
+		48B44EEE1FB5006500789C45 /* currentfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EED1FB5006500789C45 /* currentfile.cpp */; };
+		48B44EEF1FB5006500789C45 /* currentfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EED1FB5006500789C45 /* currentfile.cpp */; };
+		48B44EF21FB9EF8200789C45 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EF01FB9EF8200789C45 /* utils.cpp */; };
+		48B44EF31FB9EF8200789C45 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EF01FB9EF8200789C45 /* utils.cpp */; };
 		48B662031BBB1B6600997EE4 /* testrenameseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */; };
 		48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
@@ -578,7 +580,6 @@
 		A7E9B8B412D37EC400DA6239 /* consensusseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B712D37EC400DA6239 /* consensusseqscommand.cpp */; };
 		A7E9B8B512D37EC400DA6239 /* corraxescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */; };
 		A7E9B8B612D37EC400DA6239 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BB12D37EC400DA6239 /* coverage.cpp */; };
-		A7E9B8B712D37EC400DA6239 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BD12D37EC400DA6239 /* database.cpp */; };
 		A7E9B8B812D37EC400DA6239 /* decalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C112D37EC400DA6239 /* decalc.cpp */; };
 		A7E9B8B912D37EC400DA6239 /* deconvolutecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C312D37EC400DA6239 /* deconvolutecommand.cpp */; };
 		A7E9B8BA12D37EC400DA6239 /* degapseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C512D37EC400DA6239 /* degapseqscommand.cpp */; };
@@ -732,7 +733,6 @@
 		A7E9B95E12D37EC400DA6239 /* sharedsorest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81D12D37EC400DA6239 /* sharedsorest.cpp */; };
 		A7E9B95F12D37EC400DA6239 /* sharedthetan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B81F12D37EC400DA6239 /* sharedthetan.cpp */; };
 		A7E9B96012D37EC400DA6239 /* sharedthetayc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82112D37EC400DA6239 /* sharedthetayc.cpp */; };
-		A7E9B96112D37EC400DA6239 /* sharedutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */; };
 		A7E9B96212D37EC400DA6239 /* shen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82512D37EC400DA6239 /* shen.cpp */; };
 		A7E9B96312D37EC400DA6239 /* shhhercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */; };
 		A7E9B96412D37EC400DA6239 /* simpson.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82912D37EC400DA6239 /* simpson.cpp */; };
@@ -871,6 +871,8 @@
 		485B0E071F264F2E00CA5F57 /* sharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvector.hpp; path = source/datastructures/sharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
 		485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvector.cpp; path = source/datastructures/sharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
 		485B0E0D1F27C40500CA5F57 /* sharedrabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundfloatvector.hpp; path = source/datastructures/sharedrabundfloatvector.hpp; sourceTree = SOURCE_ROOT; };
+		486741981FD9ACCE00B07480 /* sharedwriter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedwriter.hpp; path = source/sharedwriter.hpp; sourceTree = SOURCE_ROOT; };
+		4867419A1FD9B3FE00B07480 /* writer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = writer.h; path = source/writer.h; sourceTree = SOURCE_ROOT; };
 		48705ABB19BE32C50075E977 /* getmimarkspackagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getmimarkspackagecommand.cpp; path = source/commands/getmimarkspackagecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48705ABC19BE32C50075E977 /* getmimarkspackagecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getmimarkspackagecommand.h; path = source/commands/getmimarkspackagecommand.h; sourceTree = SOURCE_ROOT; };
 		48705ABD19BE32C50075E977 /* oligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = oligos.cpp; path = source/datastructures/oligos.cpp; sourceTree = SOURCE_ROOT; };
@@ -900,6 +902,9 @@
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = TestMothur/testcommands/testrenamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenamefilecommand.h; path = TestMothur/testcommands/testrenamefilecommand.h; sourceTree = SOURCE_ROOT; };
+		48B44EED1FB5006500789C45 /* currentfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = currentfile.cpp; path = source/currentfile.cpp; sourceTree = "<group>"; };
+		48B44EF01FB9EF8200789C45 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cpp; path = source/utils.cpp; sourceTree = "<group>"; };
+		48B44EF11FB9EF8200789C45 /* utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = utils.hpp; path = source/utils.hpp; sourceTree = "<group>"; };
 		48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenameseqscommand.cpp; path = TestMothur/testcommands/testrenameseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = TestMothur/testcommands/testrenameseqscommand.h; sourceTree = SOURCE_ROOT; };
 		48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvectors.cpp; path = source/datastructures/sharedrabundvectors.cpp; sourceTree = SOURCE_ROOT; };
@@ -1251,7 +1256,6 @@
 		A7E9B6BA12D37EC400DA6239 /* corraxescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = corraxescommand.h; path = source/commands/corraxescommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B6BB12D37EC400DA6239 /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = coverage.cpp; path = source/calculators/coverage.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6BC12D37EC400DA6239 /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = coverage.h; path = source/calculators/coverage.h; sourceTree = SOURCE_ROOT; };
-		A7E9B6BD12D37EC400DA6239 /* database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = database.cpp; path = source/datastructures/database.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6BE12D37EC400DA6239 /* database.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = database.hpp; path = source/datastructures/database.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6BF12D37EC400DA6239 /* datavector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = datavector.hpp; path = source/datastructures/datavector.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6C012D37EC400DA6239 /* dayhoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dayhoff.h; path = source/calculators/dayhoff.h; sourceTree = SOURCE_ROOT; };
@@ -1575,8 +1579,6 @@
 		A7E9B82012D37EC400DA6239 /* sharedthetan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedthetan.h; path = source/calculators/sharedthetan.h; sourceTree = SOURCE_ROOT; };
 		A7E9B82112D37EC400DA6239 /* sharedthetayc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedthetayc.cpp; path = source/calculators/sharedthetayc.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B82212D37EC400DA6239 /* sharedthetayc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedthetayc.h; path = source/calculators/sharedthetayc.h; sourceTree = SOURCE_ROOT; };
-		A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedutilities.cpp; path = source/sharedutilities.cpp; sourceTree = "<group>"; };
-		A7E9B82412D37EC400DA6239 /* sharedutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedutilities.h; path = source/sharedutilities.h; sourceTree = "<group>"; };
 		A7E9B82512D37EC400DA6239 /* shen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shen.cpp; path = source/calculators/shen.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B82612D37EC400DA6239 /* shen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shen.h; path = source/calculators/shen.h; sourceTree = SOURCE_ROOT; };
 		A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shhhercommand.cpp; path = source/commands/shhhercommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1753,6 +1755,7 @@
 				A7E9B6B612D37EC400DA6239 /* consensus.h */,
 				A7E9B6B512D37EC400DA6239 /* consensus.cpp */,
 				A7AACFBA132FE008003D6C4D /* currentfile.h */,
+				48B44EED1FB5006500789C45 /* currentfile.cpp */,
 				A7E9B6C912D37EC400DA6239 /* display.h */,
 				A7E9B6D112D37EC400DA6239 /* dlibshuff.cpp */,
 				A7E9B6D212D37EC400DA6239 /* dlibshuff.h */,
@@ -1811,9 +1814,8 @@
 				7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */,
 				A77410F514697C300098E6AC /* seqnoise.h */,
 				A77410F414697C300098E6AC /* seqnoise.cpp */,
+				486741981FD9ACCE00B07480 /* sharedwriter.hpp */,
 				A7E9BA5312D39A5E00DA6239 /* read */,
-				A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */,
-				A7E9B82412D37EC400DA6239 /* sharedutilities.h */,
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
 				A7E9B83012D37EC400DA6239 /* slibshuff.cpp */,
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
@@ -1826,6 +1828,8 @@
 				A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */,
 				A7FF19F0140FFDA500AD216D /* trimoligos.h */,
 				A7FF19F1140FFDA500AD216D /* trimoligos.cpp */,
+				48B44EF01FB9EF8200789C45 /* utils.cpp */,
+				48B44EF11FB9EF8200789C45 /* utils.hpp */,
 				A7E9B87412D37EC400DA6239 /* validcalculator.cpp */,
 				A7E9B87512D37EC400DA6239 /* validcalculator.h */,
 				A7E9B87612D37EC400DA6239 /* validparameter.cpp */,
@@ -1837,6 +1841,7 @@
 				A7D9378B17B15215001E90B0 /* wilcox.h */,
 				A7D9378917B146B5001E90B0 /* wilcox.cpp */,
 				A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */,
+				4867419A1FD9B3FE00B07480 /* writer.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -2390,8 +2395,8 @@
 				48910D421D5243E500F60EDB /* mergecountcommand.hpp */,
 				A7E9B75412D37EC400DA6239 /* mergefilecommand.h */,
 				A7E9B75312D37EC400DA6239 /* mergefilecommand.cpp */,
-				A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */,
 				A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */,
+				A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */,
 				48705AC019BE32C50075E977 /* mergesfffilecommand.h */,
 				48705ABF19BE32C50075E977 /* mergesfffilecommand.cpp */,
 				A799314816CBD0BC0017E888 /* mergetaxsummarycommand.h */,
@@ -2557,7 +2562,6 @@
 				48844B261AA74AF9006EF2B8 /* compare.h */,
 				A74D59A6159A1E3600043046 /* counttable.h */,
 				A74D59A3159A1E2000043046 /* counttable.cpp */,
-				A7E9B6BD12D37EC400DA6239 /* database.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
 				A77916E7176F7F7600EEFE18 /* designmap.h */,
@@ -2612,12 +2616,12 @@
 				A7E9B80512D37EC400DA6239 /* sharedlistvector.h */,
 				A7E9B80E12D37EC400DA6239 /* sharedordervector.h */,
 				A7E9B80D12D37EC400DA6239 /* sharedordervector.cpp */,
-				48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */,
-				48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */,
 				485B0E061F264F2E00CA5F57 /* sharedrabundvector.cpp */,
 				485B0E071F264F2E00CA5F57 /* sharedrabundvector.hpp */,
 				485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */,
 				485B0E0D1F27C40500CA5F57 /* sharedrabundfloatvector.hpp */,
+				48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */,
+				48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */,
 				48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */,
 				48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */,
 				A7E9B83912D37EC400DA6239 /* sparsematrix.cpp */,
@@ -2810,7 +2814,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "Schloss Lab";
 				TargetAttributes = {
 					481FB5181AC0A63E0076CFF3 = {
@@ -2903,6 +2907,7 @@
 				481FB5861AC1B6FF0076CFF3 /* chimerarealigner.cpp in Sources */,
 				481FB5A81AC1B7300076CFF3 /* collectcommand.cpp in Sources */,
 				481FB5961AC1B71B0076CFF3 /* chimeraccodecommand.cpp in Sources */,
+				48B44EEF1FB5006500789C45 /* currentfile.cpp in Sources */,
 				4827A4DC1CB3ED2200345170 /* fastqdataset.cpp in Sources */,
 				481FB61B1AC1B7AC0076CFF3 /* trimflowscommand.cpp in Sources */,
 				481FB6781AC1B88F0076CFF3 /* readcolumn.cpp in Sources */,
@@ -2911,7 +2916,6 @@
 				481FB63A1AC1B7EA0076CFF3 /* qualityscores.cpp in Sources */,
 				481FB5FD1AC1B7970076CFF3 /* removeotulabelscommand.cpp in Sources */,
 				481FB63F1AC1B7EA0076CFF3 /* sequencecountparser.cpp in Sources */,
-				481FB67E1AC1B8960076CFF3 /* sharedutilities.cpp in Sources */,
 				481FB67C1AC1B88F0076CFF3 /* splitmatrix.cpp in Sources */,
 				48E5447D1E9D3F0400FF6AB8 /* fdr.cpp in Sources */,
 				481FB59C1AC1B71B0076CFF3 /* chopseqscommand.cpp in Sources */,
@@ -2960,6 +2964,7 @@
 				481FB61E1AC1B7AC0076CFF3 /* unifracweightedcommand.cpp in Sources */,
 				48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */,
 				48E544341E92C49700FF6AB8 /* gtest-port.cc in Sources */,
+				48B44EF31FB9EF8200789C45 /* utils.cpp in Sources */,
 				481FB5951AC1B71B0076CFF3 /* chimerabellerophoncommand.cpp in Sources */,
 				481FB68D1AC1BA9E0076CFF3 /* classify.cpp in Sources */,
 				481FB65F1AC1B8450076CFF3 /* myseqdist.cpp in Sources */,
@@ -3059,7 +3064,6 @@
 				488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */,
 				481FB53F1AC1B6000076CFF3 /* canberra.cpp in Sources */,
 				48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */,
-				481FB62B1AC1B7EA0076CFF3 /* database.cpp in Sources */,
 				481FB5BD1AC1B74F0076CFF3 /* getlabelcommand.cpp in Sources */,
 				481FB5B91AC1B74F0076CFF3 /* getcurrentcommand.cpp in Sources */,
 				481FB5991AC1B71B0076CFF3 /* chimeraperseuscommand.cpp in Sources */,
@@ -3306,7 +3310,6 @@
 				A7E9B8B412D37EC400DA6239 /* consensusseqscommand.cpp in Sources */,
 				A7E9B8B512D37EC400DA6239 /* corraxescommand.cpp in Sources */,
 				A7E9B8B612D37EC400DA6239 /* coverage.cpp in Sources */,
-				A7E9B8B712D37EC400DA6239 /* database.cpp in Sources */,
 				A7E9B8B812D37EC400DA6239 /* decalc.cpp in Sources */,
 				A7E9B8B912D37EC400DA6239 /* deconvolutecommand.cpp in Sources */,
 				A7E9B8BA12D37EC400DA6239 /* degapseqscommand.cpp in Sources */,
@@ -3424,6 +3427,7 @@
 				A7E9B92412D37EC400DA6239 /* rarecalc.cpp in Sources */,
 				A7E9B92512D37EC400DA6239 /* raredisplay.cpp in Sources */,
 				A7E9B92612D37EC400DA6239 /* rarefact.cpp in Sources */,
+				48B44EF21FB9EF8200789C45 /* utils.cpp in Sources */,
 				A7E9B92712D37EC400DA6239 /* rarefactcommand.cpp in Sources */,
 				A7E9B92812D37EC400DA6239 /* rarefactsharedcommand.cpp in Sources */,
 				A7E9B92912D37EC400DA6239 /* readblast.cpp in Sources */,
@@ -3474,13 +3478,13 @@
 				A7E9B95512D37EC400DA6239 /* sharedochiai.cpp in Sources */,
 				A7E9B95612D37EC400DA6239 /* sharedordervector.cpp in Sources */,
 				A7E9B95A12D37EC400DA6239 /* sharedsobs.cpp in Sources */,
+				48B44EEE1FB5006500789C45 /* currentfile.cpp in Sources */,
 				A7E9B95B12D37EC400DA6239 /* sharedsobscollectsummary.cpp in Sources */,
 				A7E9B95C12D37EC400DA6239 /* sharedsorabund.cpp in Sources */,
 				A7E9B95D12D37EC400DA6239 /* sharedsorclass.cpp in Sources */,
 				A7E9B95E12D37EC400DA6239 /* sharedsorest.cpp in Sources */,
 				A7E9B95F12D37EC400DA6239 /* sharedthetan.cpp in Sources */,
 				A7E9B96012D37EC400DA6239 /* sharedthetayc.cpp in Sources */,
-				A7E9B96112D37EC400DA6239 /* sharedutilities.cpp in Sources */,
 				A7E9B96212D37EC400DA6239 /* shen.cpp in Sources */,
 				A7E9B96312D37EC400DA6239 /* shhhercommand.cpp in Sources */,
 				A7E9B96412D37EC400DA6239 /* simpson.cpp in Sources */,
@@ -3658,8 +3662,9 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.39.5\\\"\"",
-					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
+					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"LOGFILE_NAME=\"\\\"dev/null\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
@@ -3691,8 +3696,9 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.39.5\\\"\"",
-					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
+					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"LOGFILE_NAME=\"\\\"dev/null\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
@@ -3711,26 +3717,41 @@
 		1DEB928A08733DD80010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEPLOYMENT_LOCATION = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_SSE3_EXTENSIONS = NO;
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.39.5\\\"\"",
-					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
+					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
+					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
 				"GCC_VERSION[arch=*]" = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
@@ -3766,25 +3787,40 @@
 		1DEB928B08733DD80010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEPLOYMENT_LOCATION = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.39.5\\\"\"",
-					"RELEASE_DATE=\"\\\"3/20/2017\\\"\"",
+					"RELEASE_DATE=\"\\\"9/20/2017\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;

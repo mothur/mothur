@@ -4782,7 +4782,7 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
 // Compares the name of each test with the user-specified filter to
 // decide whether the test should be run, then records the result in
 // each TestCase and TestInfo object.
-// If shard_tests == true, further filters tests based on sharding
+// If shard_tests , further filters tests based on sharding
 // variables in the environment - see
 // http://code.google.com/p/googletest/wiki/GoogleTestAdvancedGuide.
 // Returns the number of tests that should run.

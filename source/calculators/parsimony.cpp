@@ -16,10 +16,10 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 		processors = p;
 		outputDir = o;
         CountTable* ct = t->getCountTable();
+        Treenames = t->getTreeNames();
 		
 		//if the users enters no groups then give them the score of all groups
-		vector<string> mGroups = m->getGroups();
-		int numGroups = mGroups.size();
+		int numGroups = Groups.size();
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -27,7 +27,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = 0; l < r; l++) {
 				numComp++;
-				vector<string> groups; groups.push_back(mGroups[r]); groups.push_back(mGroups[l]);
+				vector<string> groups; groups.push_back(Groups[r]); groups.push_back(Groups[l]);
 				//cout << globaldata->Groups[r] << '\t' << globaldata->Groups[l] << endl;
 				namesOfGroupCombos.push_back(groups);
 			}
@@ -47,8 +47,8 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 				}
 				namesOfGroupCombos.push_back(groups);
 			}else {
-				for (int i = 0; i < mGroups.size(); i++) {
-					groups.push_back(mGroups[i]);
+				for (int i = 0; i < Groups.size(); i++) {
+					groups.push_back(Groups[i]);
 					//cout << globaldata->Groups[i] << endl;
 				}
 				namesOfGroupCombos.push_back(groups);
@@ -97,14 +97,14 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 				process++;
 			}else if (pid == 0){
 				EstOutput myresults;
-				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
+				//myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
 				
 				if (m->getControl_pressed()) { exit(0); }
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + m->mothurGetpid(process) + ".pars.results.temp";
-				m->openOutputFile(tempFile, out);
+				string tempFile = outputDir + toString(process) + ".pars.results.temp";
+				util.openOutputFile(tempFile, out);
 				out << myresults.size() << endl;
 				for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
 				out.close();
@@ -121,7 +121,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
                 m->setControl_pressed(false);
 				
                 for (int i=0;i<processIDS.size();i++) {
-                    m->mothurRemove(outputDir + (toString(processIDS[i]) + ".pars.results.temp"));
+                    util.mothurRemove(outputDir + (toString(processIDS[i]) + ".pars.results.temp"));
                 }
                 recalc = true;
                 break;
@@ -131,7 +131,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
         if (recalc) {
             //test line, also set recalc to true.
             //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  for (int i=0;i<processIDS.size();i++) {m->mothurRemove(outputDir + (toString(processIDS[i]) + ".pars.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
+					  for (int i=0;i<processIDS.size();i++) {util.mothurRemove(outputDir + (toString(processIDS[i]) + ".pars.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
             
             lines.clear();
             int remainingPairs = namesOfGroupCombos.size();
@@ -156,14 +156,14 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
                     process++;
                 }else if (pid == 0){
                     EstOutput myresults;
-                    myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
+                    //myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
                     
                     if (m->getControl_pressed()) { exit(0); }
                     
                     //pass numSeqs to parent
                     ofstream out;
-                    string tempFile = outputDir + m->mothurGetpid(process) + ".pars.results.temp";
-                    m->openOutputFile(tempFile, out);
+                    string tempFile = outputDir + toString(process) + ".pars.results.temp";
+                    util.openOutputFile(tempFile, out);
                     out << myresults.size() << endl;
                     for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
                     out.close();
@@ -178,7 +178,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
         }
 
         
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		//results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -192,12 +192,12 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 		for (int i=0;i<processIDS.size();i++) { 
 			ifstream in;
 			string s = outputDir + toString(processIDS[i]) + ".pars.results.temp";
-			m->openInputFile(s, in);
+			util.openInputFile(s, in);
 			
 			//get scores
 			if (!in.eof()) {
 				int num;
-				in >> num; m->gobble(in);
+				in >> num; util.gobble(in);
 				
 				if (m->getControl_pressed()) { break; }
 				
@@ -206,10 +206,10 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 					in >> w;
 					results.push_back(w);
 				}
-				m->gobble(in);
+				util.gobble(in);
 			}
 			in.close();
-			m->mothurRemove(s);
+			util.mothurRemove(s);
 		}
 #else
         //fill in functions
@@ -223,20 +223,20 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 		for( int i=1; i<processors; i++ ){
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount);
+            Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
             cts.push_back(copyCount);
             trees.push_back(copyTree);
             
-            parsData* temppars = new parsData(m, lines[i].start, lines[i].num, namesOfGroupCombos, copyTree, copyCount);
+            parsData* temppars = new parsData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount);
 			pDataArray.push_back(temppars);
 			processIDS.push_back(i);
             
 			hThreadArray[i-1] = CreateThread(NULL, 0, MyParsimonyThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, ct);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -264,7 +264,7 @@ EstOutput Parsimony::driver(Tree* t, vector< vector<string> > namesOfGroupCombos
 		
 		EstOutput results; results.resize(num);
 		
-		Tree* copyTree = new Tree(ct);
+		Tree* copyTree = new Tree(ct, Treenames);
 		int count = 0;
 		
 		for (int h = start; h < (start+num); h++) {

@@ -110,14 +110,14 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 			}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -125,7 +125,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -133,7 +133,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -141,7 +141,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
                 it = parameters.find("count");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
+					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
@@ -153,28 +153,28 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 			outputTypes["summary"] = tempOutNames;
 			
 			//check for required parameters
-			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") { 				
-				taxfile = m->getTaxonomyFile(); 
+				taxfile = current->getTaxonomyFile(); 
 				if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setTaxonomyFile(taxfile); }	
+			}else { current->setTaxonomyFile(taxfile); }	
 			
-			namefile = validParameter.validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = "";  }	
-			else { m->setNameFile(namefile); }
+			else { current->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
+			else { current->setGroupFile(groupfile); }
             
-            countfile = validParameter.validFile(parameters, "count", true);
+            countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
-			else { m->setCountTableFile(countfile); }
+			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -185,28 +185,28 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
             }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(taxfile); //if user entered a file with a path then preserve it	
+				outputDir += util.hasPath(taxfile); //if user entered a file with a path then preserve it	
 			}
             
-            string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
-			relabund = m->isTrue(temp);
+            string temp = validParameter.valid(parameters, "relabund");		if (temp == "not found"){	temp = "false";			}
+			relabund = util.isTrue(temp);
             
-            temp = validParameter.validFile(parameters, "printlevel", false);		if (temp == "not found"){	temp = "-1";		}
-            m->mothurConvert(temp, printlevel);
+            temp = validParameter.valid(parameters, "printlevel");		if (temp == "not found"){	temp = "-1";		}
+            util.mothurConvert(temp, printlevel);
 
             
-            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "detail"; }
+            output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "detail"; }
             if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
 			
-            temp = validParameter.validFile(parameters, "threshold", false);			if (temp == "not found") { temp = "0"; }
-            m->mothurConvert(temp, threshold);
+            temp = validParameter.valid(parameters, "threshold");			if (temp == "not found") { temp = "0"; }
+            util.mothurConvert(temp, threshold);
             
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(taxfile);
-                    parser.getNameFile(files);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
 			}
 		}
@@ -220,11 +220,11 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 
 int SummaryTaxCommand::execute(){
 	try{
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         int maxLevel = findMaxLevel(taxfile);
         
-		int start = time(NULL);
+		long start = time(NULL);
 		
         GroupMap* groupMap = NULL;
         CountTable* ct = NULL;
@@ -245,20 +245,20 @@ int SummaryTaxCommand::execute(){
 		int numSeqs = 0;
         map<string, vector<string> > nameMap;
         map<string, vector<string> >::iterator itNames;
-        if (namefile != "") { m->readNames(namefile, nameMap); }
+        if (namefile != "") { util.readNames(namefile, nameMap); }
 		
         ifstream in;
-        m->openInputFile(taxfile, in);
+        util.openInputFile(taxfile, in);
         
         string name, taxon;
         while(!in.eof()){
             
             if (m->getControl_pressed()) { break; }
             
-            in >> name; m->gobble(in);
-            taxon = m->getline(in); m->gobble(in);
+            in >> name; util.gobble(in);
+            taxon = util.getline(in); util.gobble(in);
             
-            string newTax = m->addUnclassifieds(taxon, maxLevel, true);
+            string newTax = util.addUnclassifieds(taxon, maxLevel, true);
             
             if (threshold != 0) {  newTax = processTaxMap(newTax);  }
             
@@ -290,16 +290,16 @@ int SummaryTaxCommand::execute(){
 		//print summary file
 		ofstream outTaxTree;
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(taxfile));
+		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(taxfile));
 		string summaryFile = getOutputFileName("summary",variables);
-		m->openOutputFile(summaryFile, outTaxTree);
+		util.openOutputFile(summaryFile, outTaxTree);
 		taxaSum->print(outTaxTree, output);
 		outTaxTree.close();
 		
 		delete taxaSum;
         if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { numSeqs = ct->getNumSeqs();  delete ct; }
 		
-		if (m->getControl_pressed()) {  m->mothurRemove(summaryFile); return 0; }
+		if (m->getControl_pressed()) {  util.mothurRemove(summaryFile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -337,7 +337,7 @@ string SummaryTaxCommand::processTaxMap(string tax) {
                 string newtaxon, confidence;
                 if ((openParen != string::npos) && (closeParen != string::npos)) {
                     string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
-                    if (m->isNumeric1(confidenceScore)) {  //its a confidence
+                    if (util.isNumeric1(confidenceScore)) {  //its a confidence
                         newtaxon = taxon.substr(0, openParen); //rip off confidence
                         confidence = taxon.substr((openParen+1), (closeParen-openParen-1));
                     }else { //its part of the taxon
@@ -350,7 +350,7 @@ string SummaryTaxCommand::processTaxMap(string tax) {
                 }
                 float con = 0;
                 
-                m->mothurConvert(confidence, con);
+                util.mothurConvert(confidence, con);
                 
                 if (con == -1) { i += taxLength; } //not a confidence score, no confidence scores on this taxonomy
                 else if ( con < threshold)  { spot = i; break; } //below threshold, set all to unclassified
@@ -370,9 +370,9 @@ string SummaryTaxCommand::processTaxMap(string tax) {
             for (int i = 0; i < taxons.size(); i++) {  newTax += taxons[i] + ";";  }
             //for (int i = spot; i < taxLength; i++) {
                 //if(tax[i] == ';'){   newTax += "unclassified;"; }
-                m->removeConfidences(newTax);
+                util.removeConfidences(newTax);
             //}
-        }else { m->removeConfidences(tax); newTax = tax; } //leave tax alone
+        }else { util.removeConfidences(tax); newTax = tax; } //leave tax alone
         
         return newTax;
     }
