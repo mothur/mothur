@@ -272,6 +272,7 @@ LefseCommand::LefseCommand(string option)  {
 
 int LefseCommand::execute(){
 	try {
+        unsigned int holdRandom = m->getRandomSeed();
         m->setRandomSeed(1982);
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
@@ -368,7 +369,7 @@ int LefseCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
-        m->setRandomSeed((unsigned)time(NULL));
+        m->setRandomSeed(holdRandom);
         return 0;
 		
     }
