@@ -7,7 +7,7 @@ To help us resolve issues quickly, please include the following:
 
 * Please describe how to reproduce the issue. For example, the commands you ran within mothur as well as any outside program you used to format the data. 
   
- * Please tell us about your system. For example, the version of the project, operating system, or hardware. _"I am running version 1.39.5 on OSX 10.13.2 with 32G of RAM"_
+ * Please tell us about your system. For example, the version of mothur, operating system details and hardware limitations. _"I am running version 1.39.5 on OSX 10.13.2 with 32G of RAM."_
    
 **Additional information you are welcome to provide:**
 
