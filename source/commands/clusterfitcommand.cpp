@@ -635,7 +635,6 @@ int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector* list){
         
         if (unfittedSeqs.size() != 0) {
             string unfittedListFileName = fileroot+ cluster.getTag() + ".unfitted" + ".list";
-            m->mothurOut("Note: Could not fit " + toString(unfittedSeqs.size()) + " sequences. \n");
             ListVector unfittedList; unfittedList.setLabel(toString(cutoff));
             for (set<string>::iterator it = unfittedSeqs.begin(); it != unfittedSeqs.end(); it++) { unfittedList.push_back(*it); }
             ofstream listFile;
