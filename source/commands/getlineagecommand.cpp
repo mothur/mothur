@@ -596,7 +596,6 @@ int GetLineageCommand::readList(){
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
 				newList.setLabels(newBinLabels);
-                newList.printHeaders(out);
 				newList.print(out, false);
 			}
 
@@ -667,7 +666,6 @@ int GetLineageCommand::readConsList(){
         if (newList.getNumBins() != 0) {
             wroteSomething = true;
             newList.setLabels(newBinLabels);
-            newList.printHeaders(out);
             newList.print(out);
         }
 		out.close();
@@ -795,7 +793,6 @@ int GetLineageCommand::readShared(){
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		lookup->printHeaders(out);
         lookup->print(out);
 		out.close();
         

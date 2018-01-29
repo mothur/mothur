@@ -239,24 +239,19 @@ int BinSeqCommand::execute(){
 	
 		int error = 0;
 		
-		fasta = new FastaMap();
-		if (groupfile != "") {
-			groupMap = new GroupMap(groupfile);
-			groupMap->readMap();
-		}
-		
-		//read fastafile
-		fasta->readFastaFile(fastafile);
-		
+		FastaMap fasta; fasta.readFastaFile(fastafile);
+        GroupMap groupMap;
+		if (groupfile != "") { groupMap.readMap(groupfile); }
+				
 		//if user gave a namesfile then use it
-		if (namesfile != "") {  readNamesFile();  }
+		if (namesfile != "") {  readNamesFile(fasta);  }
         if (countfile != "") {  ct.readTable(countfile, true, false);  }
 		
-		input = new InputData(listfile, "list", nullVector);
-		list = input->getListVector();
+		InputData input(listfile, "list", nullVector);
+		ListVector* list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
-		if (m->getControl_pressed()) {  delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+		if (m->getControl_pressed()) {  return 0; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -265,12 +260,12 @@ int BinSeqCommand::execute(){
 				
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if(m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+			if(m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}   return 0; }
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 				
-				error = process(list);	
-				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }	
+				error = process(list, fasta, groupMap);
+				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -280,10 +275,10 @@ int BinSeqCommand::execute(){
 				string saveLabel = list->getLabel();
 				
 				delete list;
-				list = input->getListVector(lastLabel);
+				list = input.getListVector(lastLabel);
 				
-				error = process(list);	
-				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+				error = process(list, fasta, groupMap);
+				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }
 													
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -295,10 +290,10 @@ int BinSeqCommand::execute(){
 			lastLabel = list->getLabel();			
 			
 			delete list;
-			list = input->getListVector();
+			list = input.getListVector();
 		}
 		
-		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -316,17 +311,13 @@ int BinSeqCommand::execute(){
 		//run last label if you need to
 		if (needToRun )  {
 			if (list != NULL) {		delete list;	}
-			list = input->getListVector(lastLabel);
+			list = input.getListVector(lastLabel);
 				
-			error = process(list);	
-			if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
+			error = process(list, fasta, groupMap);	
+			if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}   return 0; }
 			
 			delete list;  
 		}
-		
-		delete input;  
-		delete fasta; 
-		if (groupfile != "") {  delete groupMap;   } 
 		
 		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }	
         
@@ -352,32 +343,25 @@ int BinSeqCommand::execute(){
 }
 
 //**********************************************************************************************************************
-void BinSeqCommand::readNamesFile() {
+void BinSeqCommand::readNamesFile(FastaMap& fasta) {
 	try {
-		vector<string> dupNames;
+		ifstream inNames;
 		util.openInputFile(namesfile, inNames);
 		
 		string name, names, sequence;
 	
 		while(inNames){
-			inNames >> name;			//read from first column  A
-			inNames >> names;		//read from second column  A,B,C,D
-			
-			dupNames.clear();
-			
-			//parse names into vector
-			util.splitAtComma(names, dupNames);
+			inNames >> name;	util.gobble(inNames);		//read from first column  A
+			inNames >> names;	util.gobble(inNames);	//read from second column  A,B,C,D
+            
+            //parse names into vector
+			vector<string> dupNames; util.splitAtComma(names, dupNames);
 			
 			//store names in fasta map
-			sequence = fasta->getSequence(name);
-			for (int i = 0; i < dupNames.size(); i++) {
-				fasta->push_back(dupNames[i], sequence);
-			}
-		
-			util.gobble(inNames);
+			sequence = fasta.getSequence(name);
+			for (int i = 0; i < dupNames.size(); i++) { fasta.push_back(dupNames[i], sequence); }
 		}
 		inNames.close();
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "BinSeqCommand", "readNamesFile");
@@ -386,14 +370,14 @@ void BinSeqCommand::readNamesFile() {
 }
 //**********************************************************************************************************************
 //return 1 if error, 0 otherwise
-int BinSeqCommand::process(ListVector* list) {
+int BinSeqCommand::process(ListVector* list, FastaMap& fasta, GroupMap& groupMap) {
 	try {
         map<string, string> variables; 
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = list->getLabel();
         string outputFileName = getOutputFileName("fasta", variables);
         
-        util.openOutputFile(outputFileName, out);
+        ofstream out; util.openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
         
         m->mothurOut(list->getLabel()); m->mothurOutEndLine();
@@ -411,7 +395,7 @@ int BinSeqCommand::process(ListVector* list) {
                 string name = names[j];
                 
                 //do work for that name
-                string sequence = fasta->getSequence(name);
+                string sequence = fasta.getSequence(name);
                 
                 if (countfile != "") {
                     if (sequence != "not found") {
@@ -432,7 +416,7 @@ int BinSeqCommand::process(ListVector* list) {
                             out << sequence << endl;
                         }
                         
-                    }else { m->mothurOut(name + " is missing from your fasta. Does your list file contain all sequence names or just the uniques?"); m->mothurOutEndLine(); return 1; }
+                    }else { m->mothurOut(name + " is missing from your fasta. Does your list file contain all sequence names or just the uniques?\n"); return 1; }
                 }else {
                     if (sequence != "not found") {
                         //if you don't have groups
@@ -441,9 +425,9 @@ int BinSeqCommand::process(ListVector* list) {
                             out << ">" << name << endl;
                             out << sequence << endl;
                         }else {//if you do have groups
-                            string group = groupMap->getGroup(name);
+                            string group = groupMap.getGroup(name);
                             if (group == "not found") {  
-                                m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
+                                m->mothurOut(name + " is missing from your group file. Please correct. \n");
                                 return 1;
                             }else{
                                 name = name + "\t" + group + "\t" + binLabels[i];
@@ -451,7 +435,7 @@ int BinSeqCommand::process(ListVector* list) {
                                 out << sequence << endl;
                             }
                         }
-                    }else { m->mothurOut(name + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine(); return 1; }
+                    }else { m->mothurOut(name + " is missing from your fasta or name file. Please correct. \n");  return 1; }
                 }
             }
         }

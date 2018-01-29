@@ -113,28 +113,6 @@ double LinearAlgebra::gammp(const double a, const double x) {
 	}
 }
 /*********************************************************************************************************************************/
-//Numerical Recipes pg. 223
-/*double LinearAlgebra::gammq(const double a, const double x) {
-    try {
-        double gamser,gammcf,gln;
-        
-        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMQ\n"); m->setControl_pressed(true); return 0.0; }
-        if (x < (a+1.0)) {
-            gser(gamser,a,x,gln);
-            return 1.0-gamser;
-        } else {
-            gcf(gammcf,a,x,gln);
-            return gammcf;
-        }   
-        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "LinearAlgebra", "gammq");
-		exit(1);
-	}
-}
-*********************************************************************************************************************************/
 //Numerical Recipes pg. 224
 double LinearAlgebra::gcf(double& gammcf, const double a, const double x, double& gln){
     try {

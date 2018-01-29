@@ -478,20 +478,17 @@ int GetOtuLabelsCommand::readShared(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[extension]"] = util.getExtension(sharedfile);
         variables["[distance]"] = lookup->getLabel();
-		string outputFileName = getOutputFileName("shared", variables); 
-        ofstream out;
-		util.openOutputFile(outputFileName, out);
-		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        
-		lookup->printHeaders(out);
+		string outputFileName = getOutputFileName("shared", variables);
+        outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        ofstream out; util.openOutputFile(outputFileName, out);
         lookup->print(out);
 		out.close();
         
         delete lookup;
         
-        if (wroteSomething == false) { m->mothurOut("Your file does not contain any OTUs from the .accnos file."); m->mothurOutEndLine();  }
+        if (wroteSomething == false) { m->mothurOut("Your file does not contain any OTUs from the .accnos file.\n");  }
 
-		m->mothurOut("Selected " + toString(numSelected) + " OTUs from your shared file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(numSelected) + " OTUs from your shared file.\n"); 
         
         return 0;
     }
@@ -540,7 +537,6 @@ int GetOtuLabelsCommand::readList(){
         if (newList.getNumBins() != 0) {
             wroteSomething = true;
             newList.setLabels(newLabels);
-            newList.printHeaders(out);
             newList.print(out, false);
         }
 		out.close();

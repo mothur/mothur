@@ -13,6 +13,7 @@
 //removes anyone with no valid dists and changes name to matrix short names
 SensSpecCalc::SensSpecCalc(OptiMatrix& matrix, ListVector* list){
     try {
+        m = MothurOut::getInstance();
         map<string, int> nameIndex = matrix.getNameIndexMap();
         
         if (list != NULL) {

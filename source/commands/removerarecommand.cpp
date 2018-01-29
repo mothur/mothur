@@ -494,7 +494,6 @@ int RemoveRareCommand::processList(){
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
 				newList.setLabels(newLabels);
-                newList.printHeaders(out);
                 newList.print(out, false);
 			}
 		}	

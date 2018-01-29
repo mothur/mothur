@@ -1221,22 +1221,24 @@ int Utils::getOTUNames(vector<string>& currentLabels, int numBins, string tagHea
         
         if (currentLabels.size() == numBins) { return 0; }
         
+        int maxLabelNumber = 0;
         if (currentLabels.size() < numBins) {
             string snumBins = toString(numBins);
             
             for (int i = 0; i < numBins; i++) {
                 string binLabel = tagHeader;
-                
                 if (i < currentLabels.size()) { //label exists, check leading zeros length
                     string sbinNumber = getSimpleLabel(currentLabels[i]);
+                    int tempBinNumber; mothurConvert(sbinNumber, tempBinNumber);
+                    if (tempBinNumber > maxLabelNumber) { maxLabelNumber = tempBinNumber; }
                     if (sbinNumber.length() < snumBins.length()) {
                         int diff = snumBins.length() - sbinNumber.length();
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
                     }
                     binLabel += sbinNumber;
                     currentLabels[i] = binLabel;
-                }else{
-                    string sbinNumber = toString(i+1);
+                }else{ //create new label
+                    string sbinNumber = toString(maxLabelNumber+1); maxLabelNumber++;
                     if (sbinNumber.length() < snumBins.length()) {
                         int diff = snumBins.length() - sbinNumber.length();
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }

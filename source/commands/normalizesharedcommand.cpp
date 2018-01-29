@@ -493,7 +493,6 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
 				
 		thisLookUp->eliminateZeroOTUS();
-		thisLookUp->printHeaders(out);
         thisLookUp->print(out);
 		out.close();
 		
@@ -568,7 +567,6 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 		
 		
         thisLookUp->eliminateZeroOTUS();
-        thisLookUp->printHeaders(out);
         thisLookUp->print(out);
         out.close();
 	

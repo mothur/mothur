@@ -1165,11 +1165,8 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("shared",variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
-        
-        lookup->printHeaders(out);
+        outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
+		ofstream out; util.openOutputFile(outputFileName, out);
         lookup->print(out);
         out.close();
 
@@ -1334,13 +1331,8 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors*& lookup, map<
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("relabund",variables);
-        ofstream out;
-    
-        util.openOutputFile(outputFileName, out);
-        
         outputNames.push_back(outputFileName); outputTypes["relabund"].push_back(outputFileName);
-        
-        lookup->printHeaders(out);
+        ofstream out; util.openOutputFile(outputFileName, out);
         lookup->print(out);
         out.close();
         

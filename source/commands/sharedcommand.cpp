@@ -475,7 +475,6 @@ int SharedCommand::createSharedFromBiom() {
             lookup->eliminateZeroOTUS();
 
             m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-            lookup->printHeaders(out);
             printSharedData(lookup, out);
         }
 
@@ -840,11 +839,9 @@ int SharedCommand::createSharedFromListGroup() {
                     util.openOutputFile(filename, out2);
 
                     lookup->eliminateZeroOTUS();
-                    lookup->printHeaders(out2);
                     printSharedData(lookup, out2);
                     out2.close();
                 }else {
-                    lookup->printHeaders(out);
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -883,11 +880,9 @@ int SharedCommand::createSharedFromListGroup() {
                     util.openOutputFile(filename, out2);
 
                     lookup->eliminateZeroOTUS();
-                    lookup->printHeaders(out2);
                     printSharedData(lookup, out2);
                     out2.close();
                 }else {
-                    lookup->printHeaders(out);
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -943,11 +938,9 @@ int SharedCommand::createSharedFromListGroup() {
                 util.openOutputFile(filename, out2);
 
                 lookup->eliminateZeroOTUS();
-                lookup->printHeaders(out2);
                 printSharedData(lookup, out2);
                 out2.close();
             }else {
-                lookup->printHeaders(out); 
                 printSharedData(lookup, out); //prints info to the .shared file
             }
             delete lookup;

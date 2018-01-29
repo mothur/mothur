@@ -62,9 +62,7 @@ public:
     int getNumSeqs(string); //group
     void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundVectors.\n"); m->setControl_pressed(true); }
     void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; }
-    
     void print(ostream&);
-    void printHeaders(ostream&);
     
     RAbundVector getRAbundVector();
     RAbundVector getRAbundVector(string); //group you want the rabund for
@@ -75,6 +73,7 @@ public:
     vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
     
 private:
+    void printHeaders(ostream&);
     vector<SharedRAbundVector*> lookup;
     vector<string> currentLabels;
     map<string, int> groupNames;

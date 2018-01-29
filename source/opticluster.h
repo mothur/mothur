@@ -35,7 +35,7 @@ public:
     
 #ifdef UNIT_TEST
     friend class TestOptiCluster;
-    OptiCluster() : Cluster() { m = MothurOut::getInstance(); truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; } //for testing class
+    OptiCluster() : Cluster() { m = MothurOut::getInstance(); truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; removeTrainers = false; } //for testing class
     void setVariables(OptiMatrix* mt, ClusterMetric* met) { matrix = mt; metric = met; }
 #endif
     
@@ -47,18 +47,24 @@ public:
     string getTag() { string tag = "opti_" + metric->getName(); return tag; }
     long long getNumBins();
     int initialize(double&, bool, string);  //randomize and place in "best" OTUs
+    int initialize(double& value, bool randomize, string initialize, vector<vector< string > > existingBins, vector<string>, long long tp, long long tn, long long fp, long long fn);
     bool update(double&); //returns whether list changed and MCC
     vector<double> getStats( long long&,  long long&,  long long&,  long long&);
     ListVector* getList();
+    ListVector* getList(set<string>&);
     
 protected:
     MothurOut* m;
+    Utils util;
     map<int, int> seqBin; //sequence# -> bin#
     OptiMatrix* matrix;
     vector<int> randomizeSeqs;
     vector< vector<int> > bins; //bin[0] -> seqs in bin[0]
+    map<int, string> binLabels; //for fitting - maps binNumber to existing reference label
+    set<string> immovableNames;
     ClusterMetric* metric;
-    long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, totalPairs, numSingletons;
+    long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, numSingletons;
+    bool removeTrainers;
     
     int findInsert();
     vector<long long> getCloseFarCounts(int seq, int newBin);

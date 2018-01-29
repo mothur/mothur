@@ -261,6 +261,55 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
 	}
 }
 /************************************************************/
+int CountTable::readTable(string file, string format) {
+    try {
+        if (format == "fasta") {
+            filename = file;
+            ifstream in;
+            util.openInputFile(filename, in);
+            
+            hasGroups = false;
+            groups.clear();
+            totalGroups.clear();
+            indexGroupMap.clear();
+            indexNameMap.clear();
+            counts.clear();
+            bool error = false;
+            uniques = 0;
+            total = 0;
+            while (!in.eof()) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                Sequence seq(in); util.gobble(in);
+                string name = seq.getName();
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(1) + "\n"); }
+                
+                map<string, int>::iterator it = indexNameMap.find(name);
+                if (it == indexNameMap.end()) {
+                    indexNameMap[name] = uniques;
+                    totals.push_back(1);
+                    total ++;
+                    uniques++;
+                }else {
+                    error = true;
+                    m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct.\n");
+                }
+            }
+            in.close();
+            
+            if (error) { m->setControl_pressed(true); }
+        }else { m->mothurOut("[ERROR]: Unsupported format: " + format + ", please correct.\n"); m->setControl_pressed(true);  }
+        
+        return total;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "readTable");
+        exit(1);
+    }
+}
+
+/************************************************************/
 int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
     try {
         filename = file;

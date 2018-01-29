@@ -58,9 +58,7 @@ public:
     int getNumBins() { return numBins; }
     float getNumSeqs(string); //group
     float getNumSeqsSmallestGroup();
-    
     void print(ostream&);
-    void printHeaders(ostream&);
     
     vector<SharedRAbundVector*> getSharedRAbundVectors();
     vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
@@ -72,6 +70,7 @@ public:
     void eliminateZeroOTUS(); //run after push_backs if groups are chosen
     
 private:
+    void printHeaders(ostream&);
     vector<SharedRAbundFloatVector*> lookup;
     vector<string> currentLabels;
     map<string, int> groupNames;

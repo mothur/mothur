@@ -716,8 +716,7 @@ int RemoveGroupsCommand::readList(){
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
 				newList.setLabels(newBinLabels);
-                newList.printHeaders(out);
-				newList.print(out, false);
+                newList.print(out, false);
 			}
 			
             out.close();

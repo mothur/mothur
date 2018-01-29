@@ -934,7 +934,6 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
         ofstream out;
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		thislookup->printHeaders(out);
 		thislookup->print(out);
         out.close();
 		
@@ -1325,7 +1324,6 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 		
 		if (m->getControl_pressed()) { out.close(); return 0; }
 		
-        list->printHeaders(out);
 		list->print(out, false);
         out.close();
 		

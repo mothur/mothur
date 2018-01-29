@@ -571,7 +571,6 @@ int MGClusterCommand::runMothurCluster(){
             util.openOutputFile(rabundFileName,	rabundFile);
         }
         util.openOutputFile(listFileName,	listFile);
-        list->printHeaders(listFile);
         
         if (m->getControl_pressed()) {
             delete nameMap; delete read; delete list; delete rabund;

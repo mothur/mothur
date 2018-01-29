@@ -486,8 +486,6 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         ofstream out;
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        
-		sharedLookup->printHeaders(out);
         sharedLookup->print(out);
 		out.close();
         

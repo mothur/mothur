@@ -194,7 +194,6 @@ int GetRelAbundCommand::execute(){
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				lookup->printHeaders(out);
 				getRelAbundance(lookup, out);
 				
 				processedLabels.insert(lookup->getLabel());
@@ -207,7 +206,6 @@ int GetRelAbundCommand::execute(){
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				lookup->printHeaders(out);
 				getRelAbundance(lookup, out);
 				
 				processedLabels.insert(lookup->getLabel());
@@ -248,7 +246,6 @@ int GetRelAbundCommand::execute(){
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-			lookup->printHeaders(out);
 			getRelAbundance(lookup, out);
 			
 			delete lookup;

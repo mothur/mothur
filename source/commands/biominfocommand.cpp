@@ -441,7 +441,6 @@ int BiomInfoCommand::createFilesFromBiom() {
             SharedRAbundVectors* lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
             lookup->setOTUNames(otuNames);
             m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-            lookup->printHeaders(out);
             lookup->print(out);
             
             if (conTaxonomy.size() != 0) {

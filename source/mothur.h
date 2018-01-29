@@ -247,8 +247,9 @@ struct consTax{
 struct listCt{
     string bin;
     int binSize;
-    listCt() :  bin(""), binSize(0) {};
-    listCt(string b, int a) :  bin(b), binSize(a) {}
+    string label;
+    listCt() :  bin(""), binSize(0), label("") {};
+    listCt(string b, int a, string l) :  bin(b), binSize(a), label(l) {}
 };
 /***********************************************************************/
 struct consTax2{
