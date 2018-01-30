@@ -16,7 +16,8 @@ TreeReader::TreeReader(string tf, string cf) : treefile(tf), countfile(cf)  {
         m = MothurOut::getInstance();
         ct = new CountTable();
         ct->readTable(cf, true, false);
-        Tree t(tf, Treenames); //fills treenames
+        Utils util;
+        Treenames = util.parseTreeFile(treefile); //fills treenames
         
         //if no groupinfo in count file we need to add it
         if (!ct->hasGroupInfo()) {
@@ -39,7 +40,8 @@ TreeReader::TreeReader(string tf, string cf) : treefile(tf), countfile(cf)  {
 TreeReader::TreeReader(string tf, string gf, string nf) : treefile(tf),  groupfile(gf), namefile(nf)  { 
     try {
         m = MothurOut::getInstance();
-        Tree t(tf, Treenames); //fills treenames
+        Utils util;
+        Treenames = util.parseTreeFile(treefile); //fills treenames
         countfile = "";
         ct = new CountTable();
         if (namefile != "") { ct->createTable(namefile, groupfile, true); }

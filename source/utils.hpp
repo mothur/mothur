@@ -109,6 +109,7 @@ public:
     int getNumSeqs(ifstream&);
     void gobble(istream&);
     void gobble(istringstream&);
+    vector<string> parseTreeFile(string filename); //returns treenames
     set<string> readAccnos(string);
     int readAccnos(string, vector<string>&);
     int readAccnos(string, vector<string>&, string);
@@ -210,6 +211,8 @@ private:
     MothurOut* m;
     bool modifyNames;
     mt19937_64 mersenne_twister_engine;
+    
+    vector<string> readTreeString(ifstream& filehandle);
     
 };
 

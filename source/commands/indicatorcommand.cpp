@@ -272,8 +272,7 @@ int IndicatorCommand::execute(){
 		if (treefile != "") {
 			string groupfile = ""; 
 			current->setTreeFile(treefile);
-            vector<string> Treenames;
-			Tree tree(treefile, Treenames);  //extracts names from tree to make faked out groupmap
+            vector<string> Treenames = util.parseTreeFile(treefile);
 			ct = new CountTable();
 			bool mismatch = false;
             
