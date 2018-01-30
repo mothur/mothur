@@ -15,10 +15,9 @@
 #include "distancedb.hpp"
 
 /**************************************************************************************************/
-void Classify::generateDatabaseAndNames(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch)  {		
+void Classify::generateDatabaseAndNames(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, string version)  {
 	try {
         m = MothurOut::getInstance();
-        current = CurrentFile::getInstance();
         Utils util;
         
         maxLevel = 0;
@@ -48,7 +47,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
             kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
             ifstream kmerFileTest(kmerDBName.c_str());
             if(kmerFileTest){
-                bool GoodFile = util.checkReleaseVersion(kmerFileTest, current->getVersion());
+                bool GoodFile = util.checkReleaseVersion(kmerFileTest, version);
                 int shortcutTimeStamp = util.getTimeStamp(kmerDBName);
                 int referenceTimeStamp = util.getTimeStamp(tempFile);
                 

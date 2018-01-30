@@ -24,7 +24,7 @@ KmerTree::KmerTree(string referenceFileName, string taxonomyFileName, int k, int
         readTaxonomy(taxonomyFileName);
         
         ifstream referenceFile;
-        util.openInputFile(referenceFileName, referenceFile);
+        Utils util; util.openInputFile(referenceFileName, referenceFile);
         bool error = false;
         while(!referenceFile.eof()){
             

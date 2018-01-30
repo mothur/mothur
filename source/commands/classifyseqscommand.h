@@ -92,12 +92,12 @@ struct classifyData {
     Utils util;
 	 
 	classifyData(){}
-    classifyData(string acc, bool p, string a, string r, string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool fli, Classify* c) {
+    classifyData(string acc, bool p, string a, string r, string f, unsigned long long st, unsigned long long en, bool fli, Classify* c) {
         accnos = acc;
         taxFName = a;
         tempTFName = r;
         filename = f;
-        m = mout;
+        m = MothurOut::getInstance();
         start = st;
         end = en;
         probs = p;

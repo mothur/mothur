@@ -126,12 +126,9 @@ void Utils::mothurRandomShuffle(vector< vector<double> >& randomize){
 int Utils::getRandomIndex(int highest){
     try {
         if (highest == 0) { return 0; }
-        
-        //int random = (int) ((float)(highest+1) * (float)(rand()) / ((float)RAND_MAX+1.0));
+    
         uniform_int_distribution<int> dis(0, highest);
-        
         int random = dis(mersenne_twister_engine);
-        
         return random;
     }
     catch(exception& e) {

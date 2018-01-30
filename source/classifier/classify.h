@@ -35,7 +35,6 @@ public:
 	
 protected:
     
-    CurrentFile* current;
 	map<string, string> taxonomy;  //name maps to taxonomy
 	map<string, int>::iterator itTax;
 	map<string, string>::iterator it;
@@ -47,12 +46,11 @@ protected:
 	int threadID, numLevels, numTaxa, maxLevel;
 	bool flip, shortcuts;
     MothurOut* m;
-    Utils util;
 	
 	int readTaxonomy(string);
 	vector<string> parseTax(string);
     double getLogExpSum(vector<double>, int&);
-    virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float);
+    virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float, string);
 
 	
 };

@@ -10,14 +10,14 @@
 #include "knn.h"
 
 /**************************************************************************************************/
-Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int n, int tid) 
+Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int n, int tid, string version)
 : Classify(), num(n), search(method) {
 	try {
 		threadID = tid;
         shortcuts = true;
 		
 		//create search database and names vector
-		generateDatabaseAndNames(tfile, tempFile, method, kmerSize, gapOpen, gapExtend, match, misMatch);
+		generateDatabaseAndNames(tfile, tempFile, method, kmerSize, gapOpen, gapExtend, match, misMatch, version);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Knn", "Knn");
@@ -29,7 +29,7 @@ void Knn::setDistName(string s) {
 	try {
 		outDistName = s;
 		ofstream outDistance;
-		util.openOutputFile(outDistName, outDistance);
+        Utils util; util.openOutputFile(outDistName, outDistance);
 		outDistance << "Name\tBestMatch\tDistance" << endl;
 		outDistance.close();
 	}
@@ -58,6 +58,7 @@ string Knn::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped) {
         vector<float> Scores;
 		vector<int> closest = database->findClosestSequences(seq, num, Scores); 
 	
+         Utils util;
 		if (search == "distance") { ofstream outDistance; util.openOutputFileAppend(outDistName, outDistance); outDistance << seq->getName() << '\t' << database->getName(closest[0]) << '\t' << Scores[0] << endl; outDistance.close();  }
 	
 		if (m->getControl_pressed()) { return tax; }
