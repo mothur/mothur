@@ -300,7 +300,7 @@ vector<vector<float> > SparccCommand::shuffleSharedVector(vector<vector<float> >
         int numOTUs = (int)sharedVector[0].size();
         
         vector<vector<float> > shuffledVector = sharedVector;
-        
+        Utils util;
         for(int i=0;i<numGroups;i++){
             for(int j=0;j<numOTUs;j++){
                 shuffledVector[i][j] = sharedVector[util.getRandomIndex(numGroups-1)][j];

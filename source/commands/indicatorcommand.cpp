@@ -1632,7 +1632,7 @@ map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vec
 	try {
 		
 		map< vector<int>, vector<int> > randomGroupings; 
-		
+		Utils util;
 		for (int i = 0; i < numLookupGroups; i++) {
 			if (m->getControl_pressed()) {break;}
 			
@@ -1667,7 +1667,7 @@ map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vec
 	try {
 		
 		map< vector<int>, vector<int> > randomGroupings; 
-		
+		Utils util;
 		for (int i = 0; i < numLookupGroups; i++) {
 			
 			//get random groups to swap to switch with

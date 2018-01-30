@@ -794,6 +794,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
             //find "good" random vector
             vector<int> rand_s;
             int save = 0;
+            Utils util;
             for (int h = 0; h < 1000; h++) { //generate a vector of length fractionNumGroups with range 0 to numGroups-1
                 save = h;
                 rand_s.clear();

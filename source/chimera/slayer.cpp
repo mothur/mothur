@@ -290,7 +290,7 @@ int Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, flo
 	
 		int numLeft = max(1, int(left.size() * percentSNPSample/(float)100 + 0.5));
 		int numRight = max(1, int(right.size() * percentSNPSample/(float)100 + 0.5));
-
+        Utils util;
 		for (int i = 0; i < numIters; i++) {
 			//random sampling with replacement.
 		

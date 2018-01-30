@@ -54,7 +54,7 @@ AbstractDecisionTree::AbstractDecisionTree(vector<vector<int> >& baseDataSet,
 int AbstractDecisionTree::createBootStrappedSamples(){
     try {    
         vector<bool> isInTrainingSamples(numSamples, false);
-        
+        Utils util;
         for (int i = 0; i < numSamples; i++) {
             if (m->getControl_pressed()) { return 0; }
         

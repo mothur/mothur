@@ -68,7 +68,6 @@ protected:
     int optimumFeatureSubsetSize;
     string treeSplitCriterion;
     MothurOut* m;
-    Utils util;
   
 private:
     

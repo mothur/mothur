@@ -97,7 +97,7 @@ static DWORD WINAPI MyIndicatorThreadFunction(LPVOID lpParam){
 	try {
         
 		pDataArray->pvalues.resize(pDataArray->indicatorValues.size(), 0);
-		
+		Utils util;
 		for(int i=0;i<pDataArray->iters;i++){
 			if (pDataArray->m->getControl_pressed()) { break; }
             

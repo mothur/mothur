@@ -748,6 +748,7 @@ string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
 	try{
         vector<string> reps;
         string rep = "notFound";
+        Utils util;
     
         if (m->getDebug()) { m->mothurOut("[DEBUG]: group=" + group + " names.size() = " + toString(names.size()) + " " + names[0] + "\n"); }
         

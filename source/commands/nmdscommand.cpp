@@ -380,7 +380,7 @@ vector< vector<double> > NMDSCommand::generateStartingConfiguration(int numNames
 	try {
 		vector< vector<double> > axes;  axes.resize(dimension);
 		for (int i = 0; i < axes.size(); i++) {  axes[i].resize(numNames); }
-		
+		Utils util;
 		//generate random number between -1 and 1, precision 6
 		for (int i = 0; i < axes.size(); i++) {
 			for (int j = 0; j < axes[i].size(); j++) {
