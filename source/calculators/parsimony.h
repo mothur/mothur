@@ -19,18 +19,18 @@
 class Parsimony : public TreeCalculator  {
 	
 	public:
-        Parsimony(vector<string> G) { Groups = G;};
+        Parsimony(vector<string> G);
 		~Parsimony() {};
 		EstOutput getValues(Tree*, int, string);
 		
 	private:
-        vector<string> Groups;
+        vector<string> Groups, Treenames;
 		int processors;
 		string outputDir;
         Utils util;
-        vector<string> Treenames;
+        vector< vector<string> > namesOfGroupCombos;
 	
-		EstOutput createProcesses(Tree*, vector< vector<string> >, CountTable*);
+		EstOutput createProcesses(Tree*, CountTable*);
 };
 /***********************************************************************/
 struct parsData {

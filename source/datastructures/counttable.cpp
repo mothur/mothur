@@ -45,9 +45,9 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
             }else {
                 //look for it in names of groups to see if the user accidently used the wrong file
                 if (util.inUsersGroups(seqName, groups)) {
-                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n");
                 }
-                m->mothurOut("[ERROR]: Your group file does not contain " + seqName + ". Please correct."); m->mothurOutEndLine();
+                m->mothurOut("[ERROR]: Your group file does not contain " + seqName + ". Please correct.\n"); 
             }
             
             map<string, int>::iterator it2 = indexNameMap.find(seqName);

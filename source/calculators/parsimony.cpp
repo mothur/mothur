@@ -10,52 +10,32 @@
 #include "parsimony.h"
 
 /**************************************************************************************************/
+Parsimony::Parsimony(vector<string> G) : Groups(G) {
+    try {
+        int numGroups = Groups.size();
+        
+        //calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
+        for (int i=0; i<numGroups; i++) {
+            for (int l = 0; l < i; l++) {
+                vector<string> groups; groups.push_back(Groups[i]); groups.push_back(Groups[l]);
+                namesOfGroupCombos.push_back(groups);
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Parsimony", "Parsimony");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
 
 EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 	try {
-		processors = p;
-		outputDir = o;
+		processors = p; outputDir = o;
         CountTable* ct = t->getCountTable();
         Treenames = t->getTreeNames();
 		
-		//if the users enters no groups then give them the score of all groups
-		int numGroups = Groups.size();
-		
-		//calculate number of comparsions
-		int numComp = 0;
-		vector< vector<string> > namesOfGroupCombos;
-		for (int r=0; r<numGroups; r++) { 
-			for (int l = 0; l < r; l++) {
-				numComp++;
-				vector<string> groups; groups.push_back(Groups[r]); groups.push_back(Groups[l]);
-				//cout << globaldata->Groups[r] << '\t' << globaldata->Groups[l] << endl;
-				namesOfGroupCombos.push_back(groups);
-			}
-		}
-
-		//numComp+1 for AB, AC, BC, ABC
-		if (numComp != 1) {
-			vector<string> groups;
-			if (numGroups == 0) {
-				//get score for all users groups
-				vector<string> tGroups = ct->getNamesOfGroups();
-				for (int i = 0; i < tGroups.size(); i++) {
-					if (tGroups[i] != "xxx") {
-						groups.push_back(tGroups[i]);
-						//cout << tmap->namesOfGroups[i] << endl;
-					}
-				}
-				namesOfGroupCombos.push_back(groups);
-			}else {
-				for (int i = 0; i < Groups.size(); i++) {
-					groups.push_back(Groups[i]);
-					//cout << globaldata->Groups[i] << endl;
-				}
-				namesOfGroupCombos.push_back(groups);
-			}
-		}
-        
-		return (createProcesses(t, namesOfGroupCombos, ct));
+		return (createProcesses(t, ct));
 		
 	}
 	catch(exception& e) {
@@ -118,7 +98,7 @@ void driverPars(parsData* params) {
 }
 /**************************************************************************************************/
 
-EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, CountTable* ct) {
+EstOutput Parsimony::createProcesses(Tree* t, CountTable* ct) {
 	try {
         vector<linePair> lines;
         int remainingPairs = namesOfGroupCombos.size();

@@ -287,7 +287,7 @@ int UnifracWeightedCommand::execute() {
         ct = T[0]->getCountTable();
         if ((Groups.size() == 0) || (Groups.size() < 2)) {  Groups = ct->getNamesOfGroups();  } //must have at least 2 groups to compare
         delete reader;
-        
+       
         if (m->getControl_pressed()) {  delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
 		
         map<string, string> variables; 
@@ -758,71 +758,9 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 				out.close();
 				
 				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    util.mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));
-                }
-                recalc = true;
-                break;
 			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-				for (int i=0;i<processIDS.size();i++) {util.mothurRemove(outputDir + (toString(processIDS[i]) + ".weightedcommand.results.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            lines.clear();
-            
-            //breakdown work between processors
-            int remainingPairs = namesOfGroupCombos.size();
-            int startIndex = 0;
-            for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-                int numPairs = remainingPairs; //case for last processor
-                if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-                lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
-                startIndex = startIndex + numPairs;
-                remainingPairs = remainingPairs - numPairs;
-            }
-            
-            results.clear();
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, scores);
-                    
-                    //pass numSeqs to parent
-                    ofstream out;
-                    string tempFile = outputDir + toString(process) + ".weightedcommand.results.temp";
-                    util.openOutputFile(tempFile, out);
-                    for (int i = lines[process].start; i < (lines[process].start + lines[process].end); i++) { out << scores[i][(scores[i].size()-1)] << '\t';  } out << endl;
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
         }
-        
+		
 		driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, scores);
 		
 		//force parent to wait until all the processes are done

@@ -691,7 +691,7 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
         for (int j = 0; j < iters; j++) {
             
             //we need a different getValues because when we swap the labels we only want to swap those in each pairwise comparison
-            randomData = unweighted.getValues(thisTree, "", "", processors, outputDir);
+            randomData = unweighted.getValues(thisTree, true, processors, outputDir);
             
             if (m->getControl_pressed()) { return 0; }
 			

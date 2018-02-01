@@ -435,72 +435,9 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 				out.close();
 				
 				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    util.mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");
-                }
-                recalc = true;
-                break;
 			}
 		}
 		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-                    for (int i=0;i<processIDS.size();i++) {util.mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //divide iters between processes
-            procIters.clear();
-            int numItersPerProcessor = iters / processors;
-            for (int h = 0; h < processors; h++) {
-                if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
-                procIters.push_back(numItersPerProcessor);
-            }
-            
-            processIDS.resize(0);
-            process = 1;
-
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    driver(t, div, sumDiv, procIters[process], increment, randomLeaf, numSampledList, outCollect, outSum, false);
-                    
-                    string outTemp = outputDir + toString(process) + ".sumDiv.temp";
-                    ofstream out;
-                    util.openOutputFile(outTemp, out);
-                    
-                    //output the sumDIversity
-                    for (itSum = sumDiv.begin(); itSum != sumDiv.end(); itSum++) {
-                        out << itSum->first << '\t' << (itSum->second).size() << '\t';
-                        for (int k = 0; k < (itSum->second).size(); k++) {
-                            out << (itSum->second)[k] << '\t';
-                        }
-                        out << endl;
-                    }
-                    
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
         
 		driver(t, div, sumDiv, procIters[0], increment, randomLeaf, numSampledList, outCollect, outSum, true);
 		

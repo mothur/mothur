@@ -1189,7 +1189,7 @@ vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundFloatVector*> 
 vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues){
 	try {
 		vector<float> pvalues;
-        bool recalc = false;
+       
 
 		if(processors == 1){
 			pvalues = driver(groupings, groupingNames, num, indicatorValues, iters);
@@ -1231,69 +1231,10 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
 					out.close();
 					
 					exit(0);
-				}else { 
-                    m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    //wait to die
-                    for (int i=0;i<processIDS.size();i++) {
-                        int temp = processIDS[i];
-                        wait(&temp);
-                    }
-                    m->setControl_pressed(false);
-                    for (int i=0;i<processIDS.size();i++) {
-                        util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
-                    }
-                    recalc = true;
-                    break;
 				}
 			}
 			
-            if (recalc) {
-                //test line, also set recalc to true.
-                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-					  for (int i=0;i<processIDS.size();i++) {util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-                
-                //divide iters between processors
-                processIDS.resize(0);
-                process = 1;
-                procIters.clear();
-                int numItersPerProcessor = iters / processors;
-                
-                //divide iters between processes
-                for (int h = 0; h < processors; h++) {
-                    if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
-                    procIters.push_back(numItersPerProcessor);
-                }
-                
-                //loop through and create all the processes you want
-                while (process != processors) {
-                    pid_t pid = fork();
-                    
-                    if (pid > 0) {
-                        processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                        process++;
-                    }else if (pid == 0){
-                        pvalues = driver(groupings, groupingNames, num, indicatorValues, procIters[process]);
-                        
-                        //pass pvalues to parent
-                        ofstream out;
-                        string tempFile = toString(process) + ".pvalues.temp";
-                        util.openOutputFile(tempFile, out);
-                        
-                        //pass values
-                        for (int i = 0; i < pvalues.size(); i++) {  out << pvalues[i] << '\t'; } out << endl;
-                        
-                        out.close();
-                        
-                        exit(0);
-                    }else { 
-                        m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                        exit(0);
-                    }
-                }
-            }
-
+            
 			//do my part
 			pvalues = driver(groupings, groupingNames, num, indicatorValues, procIters[0]);
 			
@@ -1421,7 +1362,6 @@ vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundVector*> >& gr
 vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >& groupings, vector< vector<string> >& groupingNames, int num, vector<float> indicatorValues){
 	try {
 		vector<float> pvalues;
-        bool recalc = false;
         
 		if(processors == 1){
 			pvalues = driver(groupings, groupingNames, num, indicatorValues, iters);
@@ -1466,68 +1406,10 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 					out.close();
 					
 					exit(0);
-				}else {
-                    m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    //wait to die
-                    for (int i=0;i<processIDS.size();i++) {
-                        int temp = processIDS[i];
-                        wait(&temp);
-                    }
-                    m->setControl_pressed(false);
-                    for (int i=0;i<processIDS.size();i++) {
-                        util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));
-                    }
-                    recalc = true;
-                    break;
 				}
 			}
 			
-            if (recalc) {
-                //test line, also set recalc to true.
-                //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-                    for (int i=0;i<processIDS.size();i++) {util.mothurRemove((toString(processIDS[i]) + ".pvalues.temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-                
-                //divide iters between processors
-                processIDS.resize(0);
-                process = 1;
-                procIters.clear();
-                int numItersPerProcessor = iters / processors;
-                
-                //divide iters between processes
-                for (int h = 0; h < processors; h++) {
-                    if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
-                    procIters.push_back(numItersPerProcessor);
-                }
-                
-                //loop through and create all the processes you want
-                while (process != processors) {
-                    pid_t pid = fork();
-                    
-                    if (pid > 0) {
-                        processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                        process++;
-                    }else if (pid == 0){
-                        pvalues = driver(groupings, groupingNames, num, indicatorValues, procIters[process]);
-                        
-                        //pass pvalues to parent
-                        ofstream out;
-                        string tempFile = toString(process) + ".pvalues.temp";
-                        util.openOutputFile(tempFile, out);
-                        
-                        //pass values
-                        for (int i = 0; i < pvalues.size(); i++) {  out << pvalues[i] << '\t'; } out << endl;
-                        
-                        out.close();
-                        
-                        exit(0);
-                    }else {
-                        m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
-                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                        exit(0);
-                    }
-                }
-            }
+        
 
 			//do my part
 			pvalues = driver(groupings, groupingNames, num, indicatorValues, procIters[0]);

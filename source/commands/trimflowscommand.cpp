@@ -881,88 +881,10 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 								 tempBarcodePrimerComboFileNames, lines[process]);
 
 				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    util.mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));
-                    util.mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));
-                    util.mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));
-                    if(allFiles){
-                        for(int i=0;i<barcodePrimerComboFileNames.size();i++){
-                            for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
-                                if (barcodePrimerComboFileNames[i][j] != "") {
-                                    string tempFile = barcodePrimerComboFileNames[i][j] +(toString(processIDS[i])) + ".temp";
-                                    util.mothurRemove(tempFile);
-                                }
-                            }
-                        }
-                    }
-                }
-                recalc = true;
-                break;
 			}
-		}
-        
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-				for (int i=0;i<processIDS.size();i++) {util.mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));util.mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));util.mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //redo file divide
-            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-            vector<unsigned long long> flowFilePos = getFlowFileBreaks();
-            for (int i = 0; i < (flowFilePos.size()-1); i++) {
-                lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
-            }
-            
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    
-                    vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
-                    if(allFiles){
-                        for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
-                            for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
-                                if (tempBarcodePrimerComboFileNames[i][j] != "") {
-                                    tempBarcodePrimerComboFileNames[i][j] += toString(process) + ".temp";
-                                    ofstream temp;
-                                    util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
-                                    temp.close();
-                                }
-                            }
-                        }
-                    }
-                    driverCreateTrim(flowFileName,
-                                     (trimFlowFileName + toString(process) + ".temp"),
-                                     (scrapFlowFileName + toString(process) + ".temp"),
-                                     (fastaFileName + toString(process) + ".temp"),
-                                     tempBarcodePrimerComboFileNames, lines[process]);
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-            
         }
-		
+        
+        
 		//parent do my part
 		ofstream temp;
 		util.openOutputFile(trimFlowFileName, temp);
@@ -984,11 +906,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 			wait(&temp);
 		}
 #else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the trimFlowData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*
+				/*
 		vector<trimFlowData*> pDataArray; 
 		DWORD   dwThreadIdArray[processors-1];
 		HANDLE  hThreadArray[processors-1]; 

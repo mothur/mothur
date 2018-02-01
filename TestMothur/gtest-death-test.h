@@ -68,7 +68,7 @@ GTEST_API_ bool InDeathTestChild();
 // executed:
 //
 //   1. It generates a warning if there is more than one active
-//   thread.  This is because it's safe to fork() or clone() only
+//   thread.  This is because it's safe to for k() or clone() only
 //   when there is a single thread.
 //
 //   2. The parent process clone()s a sub-process and runs the death
