@@ -70,7 +70,7 @@ string UnifracWeightedCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         if (type == "weighted")            {  pattern = "[filename],weighted-[filename],[tag],weighted";   }
-        else if (type == "wsummary")        {  pattern = "[filename],wsummary";   }
+        else if (type == "wsummary")        {  pattern = "[filename],[tag],wsummary";   }
         else if (type == "phylip")           {  pattern = "[filename],[tag],[tag2],dist";   }
         else if (type == "column")           {  pattern = "[filename],[tag],[tag2],dist";   }
         else if (type == "tree")             {  pattern = "[filename],[tag],[tag2],tre";   }
@@ -275,37 +275,27 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 /***********************************************************/
 int UnifracWeightedCommand::execute() {
 	try {
-	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		current->setTreeFile(treefile);
-		
+        long start = time(NULL);
+        
         TreeReader* reader;
         if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
         else { reader = new TreeReader(treefile, countfile); }
-        T = reader->getTrees();
-        ct = T[0]->getCountTable();
+        vector<Tree*> T = reader->getTrees();
+        CountTable* ct; ct = T[0]->getCountTable();
         if ((Groups.size() == 0) || (Groups.size() < 2)) {  Groups = ct->getNamesOfGroups();  } //must have at least 2 groups to compare
         delete reader;
        
         if (m->getControl_pressed()) {  delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
 		
-        map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getSimpleName(treefile);
-		sumFile = getOutputFileName("wsummary",variables);
-		util.openOutputFile(sumFile, outSum);
-		outputNames.push_back(sumFile);  outputTypes["wsummary"].push_back(sumFile);
-		
+        map<string, string> variables;
 		vector<string> nameGroups = ct->getNamesOfGroups();
         if (Groups.size() < 2) { m->mothurOut("[ERROR]: You cannot run unifrac.weighted with less than 2 groups, aborting.\n"); delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
         if (m->getControl_pressed()) {  delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
         
         if ((Groups.size() == 0) || (Groups.size() < 2)) {  Groups = ct->getNamesOfGroups();  } //must have at least 2 groups to compare
-        
-		Weighted weighted(includeRoot, Groups);
-			
-		long start = time(NULL);
-            
+   
         //set or check size
         if (subsample) {
             //user has not set size, set size = smallest samples size
@@ -325,55 +315,34 @@ int UnifracWeightedCommand::execute() {
                     
                     if (thisSize >= subsampleSize) {    Groups.push_back(newGroups[i]);	}
                     else {   m->mothurOut("You have selected a size that is larger than "+newGroups[i]+" number of sequences, removing "+newGroups[i]+".\n"); }
-                } 
-                
+                }
             }
         }
         
-        //here in case some groups are removed by subsample
-        util.getCombos(groupComb, Groups, numComp);
+        vector<string> groupComb; util.getCombos(groupComb, Groups, numComp); //here in case some groups are removed by subsample
         
         if (numComp < processors) { processors = numComp; m->mothurOut("Reducing processors to " + toString(numComp) + ".\n"); }
-        
         if (consensus && (numComp < 2)) { m->mothurOut("consensus can only be used with numComparisions greater than 1, setting consensus=f.\n"); consensus=false; }
         
-        //get weighted scores for users trees
+        Weighted weighted(includeRoot, Groups);
+        
         for (int i = 0; i < T.size(); i++) {
             
-            if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
+            if (m->getControl_pressed()) { break; }
             
-            counter = 0;
-            rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
-            uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
-            
+            vector<double> WScoreSig;  //tree weighted score signifigance when compared to random trees - percentage of random trees with that score or lower.
+            vector< vector<double> > uScores;  uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
             vector<double> userData; userData.resize(numComp,0);  //weighted score info for user tree. data[0] = weightedscore AB, data[1] = weightedscore AC...
             vector<double> randomData; randomData.resize(numComp,0); //weighted score info for random trees. data[0] = weightedscore AB, data[1] = weightedscore AC...
             
-            if (random) {  
-                variables["[filename]"] = outputDir + util.getSimpleName(treefile);
-                variables["[tag]"] = toString(i+1);
-                string wFileName = getOutputFileName("weighted", variables);
-                output = new ColumnFile(wFileName, itersString);
-				outputNames.push_back(wFileName); outputTypes["weighted"].push_back(wFileName);
-            } 
-            
             userData = weighted.getValues(T[i], processors, outputDir); //userData[0] = weightedscore
-            if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } if (random) { delete output; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
+            if (m->getControl_pressed()) { break; }
             
-            //save users score
-            for (int s=0; s<numComp; s++) {
-                //add users score to vector of user scores
-                uScores[s].push_back(userData[s]);
-                //save users tree score for summary file
-                utreeScores.push_back(userData[s]);
-            }
+            if (phylip) {	createPhylipFile((i+1), userData);          }
+            if (random) { runRandomCalcs(T[i], ct, userData, (i+1), WScoreSig, groupComb);    }
+            printWSummaryFile((i+1), userData, WScoreSig, groupComb);
             
-            if (random) {  runRandomCalcs(T[i], userData); }
-            
-            //clear data
-            rScores.clear();
-            uScores.clear();
-            validScores.clear();
+            if (m->getControl_pressed()) { break; }
             
             //subsample loop
             vector< vector<double> > calcDistsTotals;  //each iter, each groupCombos dists. this will be used to make .dist files
@@ -402,27 +371,16 @@ int UnifracWeightedCommand::execute() {
                 if((thisIter+1) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 	}
             }
             
-            if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } if (random) { delete output; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
+            if (m->getControl_pressed()) { break; }
             
-            if (subsample) {  getAverageSTDMatrices(calcDistsTotals, i); }
-            if (consensus) {  getConsensusTrees(calcDistsTotals, i);  }
+            if (subsample) {  getAverageSTDMatrices(calcDistsTotals, i);    }
+            if (consensus) {  getConsensusTrees(calcDistsTotals, i);        }
         }
-        
-		
-		if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;  }
-		
-        if (phylip) {	createPhylipFile();		}
-    
-		printWSummaryFile();
-		
-		//clear out users groups
-		
-		delete ct; 
-		for (int i = 0; i < T.size(); i++) { delete T[i]; }
+		delete ct;  for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.weighted."); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.weighted.\n"); 
 		
 		//set phylip file as new current phylipfile
 		string currentName = "";
@@ -437,13 +395,11 @@ int UnifracWeightedCommand::execute() {
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setColumnFile(currentName); }
 		}
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n");
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
 		
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "execute");
@@ -453,8 +409,6 @@ int UnifracWeightedCommand::execute() {
 /**************************************************************************************************/
 int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dists, int treeNum) {
 	try {
-        //we need to find the average distance and standard deviation for each groups distance
-        
         //finds sum
         vector<double> averages = util.getAverages(dists);        
         
@@ -473,12 +427,9 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
         //make matrix with scores in it
         vector< vector<double> > stddists;	//stddists.resize(m->getNumGroups());
         for (int i = 0; i < numGroups; i++) {
-            vector<double> temp;
-            for (int j = 0; j < numGroups; j++) { temp.push_back(0.0); }
-            //stddists[i].resize(m->getNumGroups(), 0.0);
+            vector<double> temp; for (int j = 0; j < numGroups; j++) { temp.push_back(0.0); }
             stddists.push_back(temp);
         }
-
         
         //flip it so you can print it
         int count = 0;
@@ -517,41 +468,28 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
         
         //output to file
         for (int r=0; r< numGroups; r++) {
-            //output name
             string name = Groups[r];
-            if (name.length() < 10) { //pad with spaces to make compatible
-                while (name.length() < 10) {  name += " ";  }
-            }
+            if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } } //pad with spaces to make compatible
             
             if (outputForm == "lt") {
-                out << name;
-                outStd << name;
-                
-                //output distances
-                for (int l = 0; l < r; l++) {	out  << '\t' << avedists[r][l];  outStd   << '\t' << stddists[r][l];}
+                out << name; outStd << name;
+                for (int l = 0; l < r; l++) {	out  << '\t' << avedists[r][l];  outStd   << '\t' << stddists[r][l];}  //output distances
                 out << endl;  outStd << endl;
             }else if (outputForm == "square") {
-                out << name;
-                outStd << name;
-                
-                //output distances
-                for (int l = 0; l < numGroups; l++) {	out  << '\t' << avedists[r][l]; outStd  << '\t' << stddists[r][l]; }
+                out << name; outStd << name;
+                for (int l = 0; l < numGroups; l++) {	out  << '\t' << avedists[r][l]; outStd  << '\t' << stddists[r][l]; }  //output distances
                 out << endl; outStd << endl;
             }else{
-                //output distances
                 for (int l = 0; l < r; l++) {	
                     string otherName = Groups[l];
-                    if (otherName.length() < 10) { //pad with spaces to make compatible
-                        while (otherName.length() < 10) {  otherName += " ";  }
-                    }
+                    if (otherName.length() < 10) { while (otherName.length() < 10) {  otherName += " ";  } }  //pad with spaces to make compatible
                     
-                    out  << name << '\t' << otherName  << '\t' << avedists[r][l] << endl;
+                    out  << name << '\t' << otherName  << '\t' << avedists[r][l] << endl;  //output distances
                     outStd  << name << '\t' << otherName  << '\t' << stddists[r][l] << endl;
                 }
             }
         }
-        out.close();
-        outStd.close();
+        out.close(); outStd.close();
         
         return 0;
     }
@@ -564,7 +502,6 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
 /**************************************************************************************************/
 int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, int treeNum) {
 	try {
-        
         ///create treemap class from groupmap for tree class to use
         CountTable newCt;
         set<string> nameMap;
@@ -579,7 +516,7 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         newCt.createTable(nameMap, groupMap, gps);
         
         vector<Tree*> newTrees = buildTrees(dists, treeNum, newCt); //also creates .all.tre file containing the trees created
-        
+
         if (m->getControl_pressed()) { return 0; }
         
         Consensus con;
@@ -595,11 +532,9 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         ofstream outTree;
         util.openOutputFile(conFile, outTree);
         
-        if (conTree != NULL) { conTree->print(outTree, "boot"); delete conTree; }
-        outTree.close();
+        if (conTree != NULL) { conTree->print(outTree, "boot"); delete conTree; } outTree.close();
         
         return 0;
-
     }
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "getConsensusTrees");
@@ -610,7 +545,6 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
 
 vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists, int treeNum, CountTable& myct) {
 	try {
-        
         vector<Tree*> trees;
         
         //create a new filename
@@ -631,9 +565,7 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
             
             //make matrix with scores in it
             vector< vector<double> > sims;	sims.resize(numGroups);
-            for (int j = 0; j < numGroups; j++) {
-                sims[j].resize(numGroups, 0.0);
-            }
+            for (int j = 0; j < numGroups; j++) { sims[j].resize(numGroups, 0.0); }
             
             int count = 0;
 			for (int r=0; r<numGroups; r++) {
@@ -648,13 +580,9 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
             //create tree
             Tree* tempTree = new Tree(&myct, sims, Groups);
             tempTree->assembleTree();
-            
             trees.push_back(tempTree);
-            
-            //print tree
-            tempTree->print(outAll);
+            tempTree->print(outAll); //print tree
         }
-        
         outAll.close();
         
         if (m->getControl_pressed()) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = NULL; } util.mothurRemove(outputFile); }
@@ -668,38 +596,33 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
 }
 /**************************************************************************************************/
 
-int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersScores) {
+int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vector<double> usersScores, int iter, vector<double>& WScoreSig, vector<string> groupComb) {
 	try {
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+        variables["[tag]"] = toString(iter);
+        string wFileName = getOutputFileName("weighted", variables);
+        ColumnFile output(wFileName, itersString);
+        outputNames.push_back(wFileName); outputTypes["weighted"].push_back(wFileName);
         
         //calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
         vector< vector<string> > namesOfGroupCombos;
-        for (int a=0; a<numGroups; a++) { 
-            for (int l = 0; l < a; l++) {	
+        int numGroups = Groups.size();
+        for (int a=0; a<numGroups; a++) {
+            for (int l = 0; l < a; l++) {
                 vector<string> groups; groups.push_back(Groups[a]); groups.push_back(Groups[l]);
                 namesOfGroupCombos.push_back(groups);
             }
         }
         
-        lines.clear();
-        
-        //breakdown work between processors
-        int remainingPairs = namesOfGroupCombos.size();
-        int startIndex = 0;
-        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
-            int numPairs = remainingPairs; //case for last processor
-            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-            lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
-            startIndex = startIndex + numPairs;
-            remainingPairs = remainingPairs - numPairs;
-        }
-       
         //get scores for random trees
+        vector< vector<double> > rScores;  rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
         for (int j = 0; j < iters; j++) {
-            createProcesses(thisTree,  namesOfGroupCombos, rScores);
-            if (m->getControl_pressed()) { delete ct;  for (int i = 0; i < T.size(); i++) { delete T[i]; } delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
-            
+            vector<double> thisItersScores = createProcesses(thisTree, ct, namesOfGroupCombos);
+            for (int f = 0; f < numComp; f++) {  rScores[f].push_back(thisItersScores[f]); } //save this iters scores
+            if((j+1) % 100 == 0){	m->mothurOutJustToScreen(toString(j+1)+"\n"); 		}
+            if (m->getControl_pressed()) { return 0; }
         }
-        lines.clear();
         
         //find the signifigance of the score for summary file
         for (int f = 0; f < numComp; f++) {
@@ -710,18 +633,27 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersS
             //so if you have 1000 random trees the index returned is 100 
             //then there are 900 trees with a score greater then you. 
             //giving you a signifigance of 0.900
-            int index = findIndex(usersScores[f], f);    if (index == -1) { m->mothurOut("error in UnifracWeightedCommand"); m->mothurOutEndLine(); exit(1); } //error code
+            int index = findIndex(usersScores[f], f, rScores);    if (index == -1) { m->mothurOut("error in UnifracWeightedCommand"); m->mothurOutEndLine(); exit(1); } //error code
             
             //the signifigance is the number of trees with the users score or higher 
             WScoreSig.push_back((iters-index)/(float)iters);
         }
         
-        //out << "Tree# " << i << endl;
-        calculateFreqsCumuls();
-        printWeightedFile();
+        map<double, double>  validScores;  //map contains scores from random
+        vector< map<double, double> > rScoreFreq;  //map <weighted score, number of random trees with that score.> -vector entry for each combination.
+        vector< map<double, double> > rCumul;  //map <weighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each c
+        calculateFreqsCumuls(validScores, rScores, rScoreFreq, rCumul);
         
-        delete output;
-        
+        vector<string> tags; tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul");
+        for(int a = 0; a < numComp; a++) {
+            output.initFile(groupComb[a], tags);
+            //print each line
+            for (map<double,double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
+                vector<double> data; data.push_back(it->first);  data.push_back(rScoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]);
+                output.output(data);
+            } 
+            output.resetFile();
+        }
         return 0;
     }
 	catch(exception& e) {
@@ -729,183 +661,136 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersS
 		exit(1);
 	}
 }
+/***********************************************************************/
+struct weightedRandomData {
+    bool includeRoot;
+    int start, num, count;
+    vector<string> Groups, Treenames;
+    vector<double> scores;
+    vector< vector<string> > namesOfGroupCombos;
+    MothurOut* m;
+    Tree* t;
+    CountTable* ct;
+    
+    weightedRandomData(){}
+    weightedRandomData(int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count, bool ir, vector<string> g) {
+        m = MothurOut::getInstance();
+        start = st;
+        num = en;
+        namesOfGroupCombos = ngc;
+        t = tree;
+        ct = count;
+        includeRoot = ir;
+        Groups = g;
+        Treenames = t->getTreeNames();
+        count = 0;
+    }
+};
 /**************************************************************************************************/
-
-int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, vector< vector<double> >& scores) {
-	try {
-        int process = 1;
-		vector<int> processIDS;
-		EstOutput results;
-        bool recalc = false;
-        vector<string> Treenames = t->getTreeNames();
+void driverWeightedRandom(weightedRandomData* params) {
+    try {
+        Tree* randT = new Tree(params->ct, params->Treenames);
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				driver(t, namesOfGroupCombos, lines[process].start, lines[process].end, scores);
-			
-				//pass numSeqs to parent
-				ofstream out;
-				string tempFile = outputDir + toString(process) + ".weightedcommand.results.temp";
-				util.openOutputFile(tempFile, out);
-				for (int i = lines[process].start; i < (lines[process].start + lines[process].end); i++) { out << scores[i][(scores[i].size()-1)] << '\t';  } out << endl;
-				out.close();
-				
-				exit(0);
-			}
+        Weighted weighted(params->includeRoot, params->Groups);
+        params->count = 0;
+        for (int h = params->start; h < (params->start+params->num); h++) {
+            
+            if (params->m->getControl_pressed()) { break; }           //initialize weighted score
+            string groupA = params->namesOfGroupCombos[h][0];
+            string groupB = params->namesOfGroupCombos[h][1];
+            
+            //copy T[i]'s info.
+            randT->getCopy(params->t);
+            
+            //create a random tree with same topology as T[i], but different labels
+            randT->assembleRandomUnifracTree(groupA, groupB);
+            
+            if (params->m->getControl_pressed()) { break; }
+            
+            //get wscore of random tree
+            EstOutput randomData = weighted.getValues(randT, groupA, groupB);
+            
+            if (params->m->getControl_pressed()) { break; }
+            
+            //save scores
+            params->scores.push_back(randomData[0]);
+            params->count++;
         }
-		
-		driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, scores);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<(processors-1);i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//get data created by processes
-		for (int i=0;i<(processors-1);i++) { 
-	
-			ifstream in;
-			string s = outputDir + toString(processIDS[i]) + ".weightedcommand.results.temp";
-			util.openInputFile(s, in);
-			
-			double tempScore;
-			for (int j = lines[(i+1)].start; j < (lines[(i+1)].start + lines[(i+1)].end); j++) { in >> tempScore; scores[j].push_back(tempScore); }
-			in.close();
-			util.mothurRemove(s);
-		}
-#else
-        //fill in functions
-        vector<weightedRandomData*> pDataArray;
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1];
-        vector<CountTable*> cts;
-        vector<Tree*> trees;
-		
-		//Create processor worker threads.
-		for( int i=1; i<processors; i++ ){
+        
+        delete randT;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "UnifracWeightedCommand", "driver");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+vector<double> UnifracWeightedCommand::createProcesses(Tree* t, CountTable* ct, vector< vector<string> > namesOfGroupCombos) {
+	try {
+        //breakdown work between processors
+        vector<linePair> lines;
+        int remainingPairs = namesOfGroupCombos.size();
+        int startIndex = 0;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+            int numPairs = remainingPairs; //case for last processor
+            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+            lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
+            startIndex = startIndex + numPairs;
+            remainingPairs = remainingPairs - numPairs;
+        }
+
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<weightedRandomData*> data;
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
             CountTable* copyCount = new CountTable();
             copyCount->copy(ct);
+            vector<string> Treenames = t->getTreeNames();
             Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
-            cts.push_back(copyCount);
-            trees.push_back(copyTree);
+            weightedRandomData* dataBundle = new weightedRandomData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, Groups);
+            data.push_back(dataBundle);
             
-            vector< vector<double> > copyScores = rScores;
-            
-            weightedRandomData* tempweighted = new weightedRandomData(m, lines[i].start, lines[i].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, copyScores, Groups);
-			pDataArray.push_back(tempweighted);
-			processIDS.push_back(i);
-            
-			hThreadArray[i-1] = CreateThread(NULL, 0, MyWeightedRandomThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
-		}
-		
-		driver(t, namesOfGroupCombos, lines[0].start, lines[0].end, scores);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            for (int j = pDataArray[i]->start; j < (pDataArray[i]->start+pDataArray[i]->num); j++) {
-                scores[j].push_back(pDataArray[i]->scores[j][pDataArray[i]->scores[j].size()-1]);
-            }
-			delete cts[i];
-            delete trees[i];
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-
-		
-#endif	
+            workerThreads.push_back(new thread(driverWeightedRandom, dataBundle));
+        }
         
-        return 0;
+        weightedRandomData* dataBundle = new weightedRandomData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot, Groups);
+        driverWeightedRandom(dataBundle);
+        vector<double> scores = dataBundle->scores;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            for (int j = 0; j < data[i]->scores.size(); j++) {  scores.push_back(data[i]->scores[j]);  }
+            if (data[i]->count != data[i]->num) { //you didn't complete your tasks
+                m->mothurOut("[ERROR]: thread " + toString(i+1) + " failed to complete it's tasks, quitting.\n");
+                m->setControl_pressed(true);
+            }
+            
+            delete data[i]->t; delete data[i]->ct; delete data[i]; delete workerThreads[i];
+        }
+        
+        return scores;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "createProcesses");
 		exit(1);
 	}
 }
-
-/**************************************************************************************************/
-int UnifracWeightedCommand::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, vector< vector<double> >& scores) { 
- try {
-        vector<string> Treenames = t->getTreeNames();
-		Tree* randT = new Tree(ct, Treenames);
-     
-        Weighted weighted(includeRoot, Groups);
-     
-		for (int h = start; h < (start+num); h++) {
-	
-			if (m->getControl_pressed()) { return 0; }
-		
-			//initialize weighted score
-			string groupA = namesOfGroupCombos[h][0]; 
-			string groupB = namesOfGroupCombos[h][1];
-			
-			//copy T[i]'s info.
-			randT->getCopy(t);
-			 
-			//create a random tree with same topology as T[i], but different labels
-			randT->assembleRandomUnifracTree(groupA, groupB);
-			
-			if (m->getControl_pressed()) { delete randT;  return 0;  }
-
-			//get wscore of random tree
-			EstOutput randomData = weighted.getValues(randT, groupA, groupB);
-		
-			if (m->getControl_pressed()) { delete randT;  return 0;  }
-										
-			//save scores
-			scores[h].push_back(randomData[0]);
-		}
-	
-		delete randT;
-	
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "UnifracWeightedCommand", "driver");
-		exit(1);
-	}
-}
 /***********************************************************/
-void UnifracWeightedCommand::printWeightedFile() {
+void UnifracWeightedCommand::printWSummaryFile(int treeIndex, vector<double> utreeScores, vector<double> WScoreSig, vector<string> groupComb) {
 	try {
-		vector<double> data;
-		vector<string> tags;
-		tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul");
-		
-		for(int a = 0; a < numComp; a++) {
-			output->initFile(groupComb[a], tags);
-			//print each line
-			for (map<double,double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
-				data.push_back(it->first);  data.push_back(rScoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
-				output->output(data);
-				data.clear();
-			} 
-			output->resetFile();
-		}
-	}
-	catch(exception& e) {
-		m->errorOut(e, "UnifracWeightedCommand", "printWeightedFile");
-		exit(1);
-	}
-}
-
-
-/***********************************************************/
-void UnifracWeightedCommand::printWSummaryFile() {
-	try {
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+        variables["[tag]"] = toString(treeIndex);
+        sumFile = getOutputFileName("wsummary",variables);
+        ofstream outSum; util.openOutputFile(sumFile, outSum);
+        outputNames.push_back(sumFile);  outputTypes["wsummary"].push_back(sumFile);
+        
 		//column headers
 		outSum << "Tree#" << '\t' << "Groups" << '\t' << "WScore" << '\t';
 		m->mothurOut("Tree#\tGroups\tWScore\t");
@@ -916,27 +801,24 @@ void UnifracWeightedCommand::printWSummaryFile() {
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
 		
 		//print each line
-		int count = 0;
-		for (int i = 0; i < T.size(); i++) { 
-			for (int j = 0; j < numComp; j++) {
-				if (random) {
-					if (WScoreSig[count] > (1/(float)iters)) {
-						outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << WScoreSig[count] << endl; 
-						cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << WScoreSig[count] << endl; 
-						m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t" +  toString(WScoreSig[count]) + "\n");   
-					}else{
-						outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
-						cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
-						m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t<" +  toString((1/float(iters))) + "\n");  
-					}
-				}else{
-					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << endl; 
-					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count]  << endl; 
-					m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\n"); 
-				}
-				count++;
-			}
-		}
+        int precisionLength = itersString.length();
+        for (int j = 0; j < numComp; j++) {
+            if (random) {
+                if (WScoreSig[j] > (1/(float)iters)) {
+                    outSum << setprecision(6) << treeIndex << '\t' << groupComb[j] << '\t' << utreeScores[j] << '\t' << setprecision(precisionLength) << WScoreSig[j] << endl;
+                    cout << setprecision(6) << treeIndex << '\t' << groupComb[j] << '\t' << utreeScores[j] << '\t' << setprecision(precisionLength) << WScoreSig[j] << endl;
+                    m->mothurOutJustToLog(toString(treeIndex) +"\t" + groupComb[j] +"\t" + toString(utreeScores[j]) +"\t" +  toString(WScoreSig[j]) + "\n");
+                }else{
+                    outSum << setprecision(6) << treeIndex << '\t' << groupComb[j] << '\t' << utreeScores[j] << '\t' << setprecision(precisionLength) << "<" << (1/float(iters)) << endl;
+                    cout << setprecision(6) << treeIndex << '\t' << groupComb[j] << '\t' << utreeScores[j] << '\t' << setprecision(precisionLength) << "<" << (1/float(iters)) << endl;
+                    m->mothurOutJustToLog(toString(treeIndex) +"\t" + groupComb[j] +"\t" + toString(utreeScores[j]) +"\t<" +  toString((1/float(iters))) + "\n");
+                }
+            }else{
+                outSum << setprecision(6) << treeIndex << '\t' << groupComb[j] << '\t' << utreeScores[j] << endl;
+                cout << setprecision(6) << treeIndex << '\t' << groupComb[j] << '\t' << utreeScores[j]  << endl;
+                m->mothurOutJustToLog(toString(treeIndex) +"\t" + groupComb[j] +"\t" + toString(utreeScores[j]) +"\n");
+            }
+        }
 		outSum.close();
 	}
 	catch(exception& e) {
@@ -945,82 +827,59 @@ void UnifracWeightedCommand::printWSummaryFile() {
 	}
 }
 /***********************************************************/
-void UnifracWeightedCommand::createPhylipFile() {
+void UnifracWeightedCommand::createPhylipFile(int treeIndex, vector<double> utreeScores) {
 	try {
 		int count = 0;
         int numGroups = Groups.size();
-		//for each tree
-		for (int i = 0; i < T.size(); i++) { 
-		
-            string phylipFileName;
-			map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getSimpleName(treefile);
-            variables["[tag]"] = toString(i+1);
-            if ((outputForm == "lt") || (outputForm == "square")) {
-                variables["[tag2]"] = "weighted.phylip";
-                phylipFileName = getOutputFileName("phylip",variables);
-                outputNames.push_back(phylipFileName); outputTypes["phylip"].push_back(phylipFileName); 
-            }else { //column
-                variables["[tag2]"] = "weighted.column";
-                phylipFileName = getOutputFileName("column",variables);
-                outputNames.push_back(phylipFileName); outputTypes["column"].push_back(phylipFileName); 
+        
+        string phylipFileName;
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+        variables["[tag]"] = toString(treeIndex);
+        if ((outputForm == "lt") || (outputForm == "square")) {
+            variables["[tag2]"] = "weighted.phylip";
+            phylipFileName = getOutputFileName("phylip",variables);
+            outputNames.push_back(phylipFileName); outputTypes["phylip"].push_back(phylipFileName);
+        }else { //column
+            variables["[tag2]"] = "weighted.column";
+            phylipFileName = getOutputFileName("column",variables);
+            outputNames.push_back(phylipFileName); outputTypes["column"].push_back(phylipFileName);
+        }
+        
+        ofstream out; util.openOutputFile(phylipFileName, out);
+        
+        if ((outputForm == "lt") || (outputForm == "square")) { out << numGroups << endl; }
+        
+        //make matrix with scores in it
+        vector< vector<float> > dists;	dists.resize(numGroups);
+        for (int i = 0; i < numGroups; i++) { dists[i].resize(numGroups, 0.0); }
+        
+        //flip it so you can print it
+        for (int r=0; r< numGroups; r++) { for (int l = 0; l < r; l++) { dists[r][l] = utreeScores[count]; dists[l][r] = utreeScores[count]; count++; } }
+        
+        //output to file
+        for (int r=0; r<numGroups; r++) {
+            string name = Groups[r];
+            
+            //pad with spaces to make compatible
+            if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
+            
+            if (outputForm == "lt") {
+                out << name;  for (int l = 0; l < r; l++) {	out   << '\t' << dists[r][l];  } out << endl;
+            }else if (outputForm == "square") {
+                out << name; for (int l = 0; l < numGroups; l++) {	out   << '\t' << dists[r][l];  } out << endl;
+            }else{
+                for (int l = 0; l < r; l++) {
+                    string otherName = Groups[l];
+                    
+                    //pad with spaces to make compatible
+                    if (otherName.length() < 10) { while (otherName.length() < 10) {  otherName += " ";  } }
+                    
+                    out  << name << '\t' << otherName  << '\t' << dists[r][l] << endl;  
+                }
             }
-
-			
-			ofstream out;
-			util.openOutputFile(phylipFileName, out);
-			
-			if ((outputForm == "lt") || (outputForm == "square")) { out << numGroups << endl; }
-
-			//make matrix with scores in it
-			vector< vector<float> > dists;	dists.resize(numGroups);
-			for (int i = 0; i < numGroups; i++) {
-				dists[i].resize(numGroups, 0.0);
-			}
-			
-			//flip it so you can print it
-			for (int r=0; r< numGroups; r++) {
-				for (int l = 0; l < r; l++) {
-					dists[r][l] = utreeScores[count];
-					dists[l][r] = utreeScores[count];
-					count++;
-				}
-			}
-
-			//output to file
-			for (int r=0; r<numGroups; r++) {
-				//output name
-				string name = Groups[r];
-				if (name.length() < 10) { //pad with spaces to make compatible
-					while (name.length() < 10) {  name += " ";  }
-				}
-				
-				if (outputForm == "lt") {
-					out << name;
-					
-					//output distances
-					for (int l = 0; l < r; l++) {	out   << '\t' << dists[r][l];  }
-					out << endl;
-				}else if (outputForm == "square") {
-					out << name;
-					
-					//output distances
-					for (int l = 0; l < numGroups; l++) {	out   << '\t' << dists[r][l];  }
-					out << endl;
-				}else{
-					//output distances
-					for (int l = 0; l < r; l++) {	
-						string otherName = Groups[l];
-						if (otherName.length() < 10) { //pad with spaces to make compatible
-							while (otherName.length() < 10) {  otherName += " ";  }
-						}
-						
-						out  << name << '\t' << otherName  << '\t' << dists[r][l] << endl;  
-					}
-				}
-			}
-			out.close();
-		}
+        }
+        out.close();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "createPhylipFile");
@@ -1028,11 +887,9 @@ void UnifracWeightedCommand::createPhylipFile() {
 	}
 }
 /***********************************************************/
-int UnifracWeightedCommand::findIndex(float score, int index) {
+int UnifracWeightedCommand::findIndex(float score, int index, vector< vector<double> >& rScores) {
 	try{
-		for (int i = 0; i < rScores[index].size(); i++) {
-			if (rScores[index][i] >= score)	{	return i;	}
-		}
+		for (int i = 0; i < rScores[index].size(); i++) { if (rScores[index][i] >= score)	{	return i;	} }
 		return rScores[index].size();
 	}
 	catch(exception& e) {
@@ -1040,28 +897,21 @@ int UnifracWeightedCommand::findIndex(float score, int index) {
 		exit(1);
 	}
 }
-
 /***********************************************************/
 
-void UnifracWeightedCommand::calculateFreqsCumuls() {
+void UnifracWeightedCommand::calculateFreqsCumuls(map<double, double>& validScores, vector< vector<double> > rScores, vector< map<double, double> >& rScoreFreq, vector< map<double, double> >& rCumul) {
 	try {
 		//clear out old tree values
-		rScoreFreq.clear();
-		rScoreFreq.resize(numComp);
-		rCumul.clear();
-		rCumul.resize(numComp);
-		validScores.clear();
+		rScoreFreq.clear(); rScoreFreq.resize(numComp); rCumul.clear(); rCumul.resize(numComp); validScores.clear();
 	
 		//calculate frequency
 		for (int f = 0; f < numComp; f++) {
 			for (int i = 0; i < rScores[f].size(); i++) { //looks like 0,0,1,1,1,2,4,7...  you want to make a map that say rScoreFreq[0] = 2, rScoreFreq[1] = 3...
 				validScores[rScores[f][i]] = rScores[f][i];
 				map<double,double>::iterator it = rScoreFreq[f].find(rScores[f][i]);
-				if (it != rScoreFreq[f].end()) {
-					rScoreFreq[f][rScores[f][i]]++;
-				}else{
-					rScoreFreq[f][rScores[f][i]] = 1;
-				}
+                
+				if (it != rScoreFreq[f].end())  { rScoreFreq[f][rScores[f][i]]++;   }
+				else                            { rScoreFreq[f][rScores[f][i]] = 1; }
 			}
 		}
 		
@@ -1078,7 +928,6 @@ void UnifracWeightedCommand::calculateFreqsCumuls() {
 				else { rScoreFreq[a][it->first] = 0.0000; } //no random trees with that score
 			}
 		}
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "calculateFreqsCums");

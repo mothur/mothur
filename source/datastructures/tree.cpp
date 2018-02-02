@@ -572,15 +572,10 @@ map<string, int> Tree::mergeGroups(int i) {
 		//look at right child groups and update maxPars if right child has something higher for that group.
 		for(it=tree[rc].pGroups.begin();it!=tree[rc].pGroups.end();it++){
 			it2 = parsimony.find(it->first);
-			if (it2 != parsimony.end()) {
-				parsimony[it->first]++;
-			}else {
-				parsimony[it->first] = 1;
-			}
+			if (it2 != parsimony.end()) { parsimony[it->first]++;  }
+			else { parsimony[it->first] = 1; }
 			
-			if(parsimony[it->first] > maxPars){
-				maxPars = parsimony[it->first];
-			}
+			if(parsimony[it->first] > maxPars){ maxPars = parsimony[it->first]; }
 		}
 	
 		// this is true if right child had a greater parsimony for a certain group
@@ -593,10 +588,7 @@ map<string, int> Tree::mergeGroups(int i) {
 			}
 			//set one remaining groups to 1
 			//so with our above example p[white] = 2 would be left and it would become p[white] = 1
-			for(it=parsimony.begin();it!=parsimony.end();it++){
-				parsimony[it->first] = 1;
-			}
-		
+			for(it=parsimony.begin();it!=parsimony.end();it++){ parsimony[it->first] = 1; }
 		}
 	
 		return parsimony;
