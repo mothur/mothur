@@ -48,7 +48,7 @@ class UnifracWeightedCommand : public Command {
         //random comparison functions
 		int findIndex(float, int, vector< vector<double> >&);
 		void calculateFreqsCumuls(map<double, double>&, vector< vector<double> > rScores, vector< map<double, double> >&, vector< map<double, double> >&);
-		vector<double> createProcesses(Tree*, CountTable*, vector< vector<string> >);
+		vector< vector<double> > createProcesses(Tree*, CountTable*, vector< vector<string> >);
         int runRandomCalcs(Tree*, CountTable*, vector<double>, int, vector<double>&, vector<string>);
     
         vector<Tree*> buildTrees(vector< vector<double> >&, int, CountTable&);

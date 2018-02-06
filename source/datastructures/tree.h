@@ -67,19 +67,12 @@ private:
 	void randomTopology();
 	void randomBlengths();
 	void randomLabels(vector<string>);
-	//void randomLabels(string, string);
 	void printBranch(int, ostream&, map<string, string>);  //recursively print out tree
     void printBranch(int, ostream&, string);
-	//vector<string> parseTreeFile(string);	//parses through tree file to find names of nodes and number of them
-							//this is required in case user has sequences in the names file that are
-							//not included in the tree. 
-							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
-	//vector<string> readTreeString(ifstream&);
 	int populateNewTree(vector<Node>&, int, int&);
 	void printBranch(int, ostream&, string, vector<Node>&);
 		
 	MothurOut* m;
-    //CurrentFile* current;
     vector<string> Treenames;
     Utils util;
 		

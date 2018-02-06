@@ -56,6 +56,7 @@ public:
     bool anyLabelsToProcess(string, set<string>&, string);
     bool appendBinaryFiles(string, string);
     int appendFiles(string, string);
+    int appendFilesFront(string, string);
     int appendFilesWithoutHeaders(string, string);
     vector<bool> allGZFiles(vector<string>&);
     bool appendSFFFiles(string, string);

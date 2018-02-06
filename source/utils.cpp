@@ -13,7 +13,7 @@
 /***********************************************************************/
 Utils::Utils(){
     try {
-        m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames();
+        m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames(); 
         long long s = m->getRandomSeed();
         mersenne_twister_engine.seed(s); srand(s);
     }
@@ -801,6 +801,38 @@ int Utils::appendFiles(string temp, string filename) {
         exit(1);
     }
 }
+/**************************************************************************************************/
+int Utils::appendFilesFront(string temp, string filename) {
+    try{
+        ofstream output;
+        ifstream input;
+        
+        //open output file in append mode
+        openOutputFileBinaryAppend(temp, output);
+        bool ableToOpen = openInputFileBinary(filename, input, "no error");
+        
+        if (ableToOpen) { //you opened it
+            char buffer[4096];
+            while (!input.eof()) {
+                input.read(buffer, 4096);
+                output.write(buffer, input.gcount());
+            }
+            input.close();
+        }
+        output.close();
+        
+        mothurRemove(filename);
+        renameFile(temp, filename);
+        mothurRemove(temp);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "appendFiles");
+        exit(1);
+    }
+}
+
 /**************************************************************************************************/
 bool Utils::appendBinaryFiles(string temp, string filename) {
     try{
