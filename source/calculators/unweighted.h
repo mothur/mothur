@@ -22,7 +22,7 @@ class Unweighted : public TreeCalculator  {
         Unweighted(bool r, vector<string> g);
 		~Unweighted() {};
 		EstOutput getValues(Tree*, int, string);
-		EstOutput getValues(Tree*, bool, int, string);
+		EstOutput getValues(Tree*, vector<vector<int> >&, int, string);
 		
 	private:
 		vector< vector<string> > namesOfGroupCombos;
@@ -30,10 +30,9 @@ class Unweighted : public TreeCalculator  {
 		int processors;
 		string outputDir;
 		bool includeRoot;
-		Utils util;
 		
 		EstOutput createProcesses(Tree*, CountTable*);
-		EstOutput createProcesses(Tree*, bool, CountTable*);
+		EstOutput createProcesses(Tree*, vector<vector<int> >&, CountTable*);
 };
 
 /**************************************************************************************************/

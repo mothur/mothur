@@ -15,7 +15,7 @@ class OrderVector;
 class SharedOrderVector;
 class RAbundVector;
 class SharedRAbundVector;
-
+class Tree;
 
 class Utils {
     
@@ -37,6 +37,7 @@ public:
     void mothurRandomShuffle(OrderVector&);
     void mothurRandomShuffle(SharedOrderVector&);
     void mothurRandomShuffle(vector<SharedRAbundVector*>&);
+    void mothurRandomShuffle(Tree* t, vector<string> g);
     
     //checks
     bool isTrue(string);

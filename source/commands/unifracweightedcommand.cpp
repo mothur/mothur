@@ -604,8 +604,24 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vecto
             }
         }
         
+        vector<vector<int> > randomTreeNodes;
+        for (int f = 0; f < numComp; f++) {
+            if (m->getControl_pressed()) { return 0; }
+            
+            randomTreeNodes.push_back(thisTree->getNodes(namesOfGroupCombos[f]));
+        }
+        
         //get scores for random trees
-        vector< vector<double> > rScores = createProcesses(thisTree, ct, namesOfGroupCombos);
+        vector<vector<double> > rScores; rScores.resize(numComp);
+        for (int i = 0; i < iters; i++) {
+            if (m->getControl_pressed()) { return 0; }
+            
+            for (int f = 0; f < numComp; f++) {   util.mothurRandomShuffle(randomTreeNodes[f]);  }
+            
+            vector<double> thisItersRScores = createProcesses(thisTree, ct, namesOfGroupCombos, randomTreeNodes);
+            
+            for (int f = 0; f < numComp; f++) {   rScores[f].push_back(thisItersRScores[f]);  }
+        }
         
         //find the signifigance of the score for summary file
         for (int f = 0; f < numComp; f++) {
@@ -622,7 +638,7 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vecto
             WScoreSig.push_back((iters-index)/(float)iters);
         }
         
-        map<double, double>  validScores;  //map contains scores from random
+        set<double>  validScores;  //map contains scores from random
         vector< map<double, double> > rScoreFreq;  //map <weighted score, number of random trees with that score.> -vector entry for each combination.
         vector< map<double, double> > rCumul;  //map <weighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each c
         calculateFreqsCumuls(validScores, rScores, rScoreFreq, rCumul);
@@ -631,8 +647,8 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vecto
         for(int a = 0; a < numComp; a++) {
             output.initFile(groupComb[a], tags);
             //print each line
-            for (map<double,double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
-                vector<double> data; data.push_back(it->first);  data.push_back(rScoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]);
+            for (set<double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
+                vector<double> data; data.push_back(*it);  data.push_back(rScoreFreq[a][*it]); data.push_back(rCumul[a][*it]);
                 output.output(data);
             } 
             output.resetFile();
@@ -647,20 +663,24 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vecto
 /***********************************************************************/
 struct weightedRandomData {
     bool includeRoot;
-    int num, count, numComps;
+    int count, numComps, start, num;
     vector<string> Groups, Treenames;
-    vector< vector<double> > scores;
+    vector<double> scores;
     vector< vector<string> > namesOfGroupCombos;
+    vector<vector<int> > randomizedTreeNodes;
     MothurOut* m;
     Tree* t;
     CountTable* ct;
+    Utils util;
     
     weightedRandomData(){}
-    weightedRandomData(int en, vector< vector<string> > ngc, Tree* tree, CountTable* count, bool ir, vector<string> g) {
+    weightedRandomData(int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count, bool ir, vector<string> g, vector<vector<int> > randomTreeNodes) {
         m = MothurOut::getInstance();
         num = en;
+        start = st;
         namesOfGroupCombos = ngc;
         numComps = namesOfGroupCombos.size();
+        randomizedTreeNodes = randomTreeNodes;
         t = tree;
         ct = count;
         includeRoot = ir;
@@ -677,39 +697,34 @@ void driverWeightedRandom(weightedRandomData* params) {
         params->count = 0;
         params->scores.resize(params->numComps);
         
-        for (int i = 0; i < params->num; i++) {
+        Tree* randT = new Tree(params->ct, params->Treenames);
+
+        for (int h = params->start; h < (params->start+params->num); h++) {
             
-            if (params->m->getControl_pressed()) { break; }           //initialize weighted score
+            if (params->m->getControl_pressed()) { break; }
             
-            Tree* randT = new Tree(params->ct, params->Treenames);
+            string groupA = params->namesOfGroupCombos[h][0];
+            string groupB = params->namesOfGroupCombos[h][1];
+            vector<int> treeNodesFromTheseGroups = params->randomizedTreeNodes[h];
             
-            for (int h = 0; h < params->numComps; h++) {
-                
-                string groupA = params->namesOfGroupCombos[h][0];
-                string groupB = params->namesOfGroupCombos[h][1];
-                
-                //copy T[i]'s info.
-                randT->getCopy(params->t);
-                
-                //create a random tree with same topology as T[i], but different labels
-                randT->assembleRandomUnifracTree(groupA, groupB);
-                
-                if (params->m->getControl_pressed()) { break; }
-                
-                //get wscore of random tree
-                EstOutput randomData = weighted.getValues(randT, groupA, groupB);
-                
-                if (params->m->getControl_pressed()) { break; }
-                
-                //save scores
-                params->scores[h].push_back(randomData[0]);
-                cout << "iter = " << i << " comp = " << h << " result = " << randomData[0] << endl;
-            }
-            delete randT;
-            params->count++;
-            if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
+            //copy T[i]'s info.
+            randT->getCopy(params->t);
+            
+            //create a random tree with same topology as T[i], but different labels
+            randT->assembleRandomUnifracTree(treeNodesFromTheseGroups);
+            
+            if (params->m->getControl_pressed()) { break; }
+            
+            //get wscore of random tree
+            EstOutput randomData = weighted.getValues(randT, groupA, groupB);
+            
+            if (params->m->getControl_pressed()) { break; }
+            
+            //save scores
+            params->scores.push_back(randomData[0]);
         }
-       
+        
+        delete randT;
     }
     catch(exception& e) {
         params->m->errorOut(e, "UnifracWeightedCommand", "driver");
@@ -717,21 +732,20 @@ void driverWeightedRandom(weightedRandomData* params) {
     }
 }
 /**************************************************************************************************/
-vector< vector<double> > UnifracWeightedCommand::createProcesses(Tree* t, CountTable* ct, vector< vector<string> > namesOfGroupCombos) {
+vector<double> UnifracWeightedCommand::createProcesses(Tree* t, CountTable* ct, vector< vector<string> > namesOfGroupCombos, vector<vector<int> >& randomizedTreeNodes) {
 	try {
-        processors = current->setProcessors(current->getProcessors());
-        if (iters < processors) { processors = iters; m->mothurOut("Reducing processors to " + toString(iters) + ".\n"); }
-        
         //breakdown work between processors
-        vector<int> lines;
-        int remainingPairs = iters;
+        vector<linePair> lines;
+        int remainingPairs = namesOfGroupCombos.size();
+        if (remainingPairs < processors) { processors = remainingPairs; }
+        int startIndex = 0;
         for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
             int numPairs = remainingPairs; //case for last processor
             if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
-            lines.push_back(numPairs);
+            lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
+            startIndex = startIndex + numPairs;
             remainingPairs = remainingPairs - numPairs;
         }
-
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<weightedRandomData*> data;
@@ -744,21 +758,20 @@ vector< vector<double> > UnifracWeightedCommand::createProcesses(Tree* t, CountT
             Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
-            weightedRandomData* dataBundle = new weightedRandomData(lines[i+1], namesOfGroupCombos, copyTree, copyCount, includeRoot, Groups);
+            weightedRandomData* dataBundle = new weightedRandomData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, Groups, randomizedTreeNodes);
             data.push_back(dataBundle);
             workerThreads.push_back(new thread(driverWeightedRandom, dataBundle));
         }
         
-        weightedRandomData* dataBundle = new weightedRandomData(lines[0], namesOfGroupCombos, t, ct, includeRoot, Groups);
+        weightedRandomData* dataBundle = new weightedRandomData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot, Groups, randomizedTreeNodes);
         driverWeightedRandom(dataBundle);
-        vector< vector<double> > scores = dataBundle->scores;
+        vector<double> scores = dataBundle->scores;
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             
-            for (int j = 0; j < data[i]->scores.size(); j++) { scores[j].insert(scores[j].end(), data[i]->scores[j].begin(), data[i]->scores[j].end()); }
-            if (data[i]->count != data[i]->num) { m->mothurOut("[ERROR]: thread " + toString(i+1) + " failed to complete it's tasks, quitting.\n"); m->setControl_pressed(true); }
+            scores.insert(scores.end(), data[i]->scores.begin(), data[i]->scores.end());
             
             delete data[i]->t; delete data[i]->ct; delete data[i]; delete workerThreads[i];
         }
@@ -872,8 +885,14 @@ void UnifracWeightedCommand::createPhylipFile(int treeIndex, vector<double> utre
 /***********************************************************/
 int UnifracWeightedCommand::findIndex(float score, int index, vector< vector<double> >& rScores) {
 	try{
-		for (int i = 0; i < rScores[index].size(); i++) { if (rScores[index][i] >= score)	{	return i;	} }
-		return rScores[index].size();
+        int results = rScores[index].size();
+        //set<double> scores;
+		for (int i = 0; i < rScores[index].size(); i++) {
+            //scores.insert(rScores[index][i]);
+            if (rScores[index][i] >= score)	{	results = i; 	break; }
+        }
+        //for (set<double>::iterator it = scores.begin(); it != scores.end(); it++) { cout << score << '\t' << *it << endl; }
+		return results;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "findIndex");
@@ -881,15 +900,16 @@ int UnifracWeightedCommand::findIndex(float score, int index, vector< vector<dou
 	}
 }
 /***********************************************************/
-void UnifracWeightedCommand::calculateFreqsCumuls(map<double, double>& validScores, vector< vector<double> > rScores, vector< map<double, double> >& rScoreFreq, vector< map<double, double> >& rCumul) {
+void UnifracWeightedCommand::calculateFreqsCumuls(set<double>& validScores, vector< vector<double> > rScores, vector< map<double, double> >& rScoreFreq, vector< map<double, double> >& rCumul) {
 	try {
 		//clear out old tree values
 		rScoreFreq.clear(); rScoreFreq.resize(numComp); rCumul.clear(); rCumul.resize(numComp); validScores.clear();
 	
 		//calculate frequency
 		for (int f = 0; f < numComp; f++) {
+            cout << f << '\t' << rScores[f].size() << endl;
 			for (int i = 0; i < rScores[f].size(); i++) { //looks like 0,0,1,1,1,2,4,7...  you want to make a map that say rScoreFreq[0] = 2, rScoreFreq[1] = 3...
-				validScores[rScores[f][i]] = rScores[f][i];
+				validScores.insert(rScores[f][i]);
 				map<double,double>::iterator it = rScoreFreq[f].find(rScores[f][i]);
                 
 				if (it != rScoreFreq[f].end())  { rScoreFreq[f][rScores[f][i]]++;   }
@@ -900,19 +920,20 @@ void UnifracWeightedCommand::calculateFreqsCumuls(map<double, double>& validScor
 		//calculate rcumul
 		for(int a = 0; a < numComp; a++) {
 			float rcumul = 1.0000;
+            cout << "number of random scores for comp " << a << '\t' << rScoreFreq[a].size() << endl;
 			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (map<double,double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
+			for (set<double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
 				//make rscoreFreq map and rCumul
-				map<double,double>::iterator it2 = rScoreFreq[a].find(it->first);
-				rCumul[a][it->first] = rcumul;
+				map<double,double>::iterator it2 = rScoreFreq[a].find(*it);
+				rCumul[a][*it] = rcumul;
 				//get percentage of random trees with that info
-				if (it2 != rScoreFreq[a].end()) {  rScoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
-				else { rScoreFreq[a][it->first] = 0.0000; } //no random trees with that score
+				if (it2 != rScoreFreq[a].end()) {  rScoreFreq[a][*it] /= iters; rcumul-= it2->second;  }
+				else { rScoreFreq[a][*it] = 0.0000; } //no random trees with that score
 			}
 		}
 	}
 	catch(exception& e) {
-		m->errorOut(e, "UnifracWeightedCommand", "calculateFreqsCums");
+		m->errorOut(e, "UnifracWeightedCommand", "calculateFreqsCumuls");
 		exit(1);
 	}
 }

@@ -254,7 +254,10 @@ void Tree::setIndex(string searchName, int index) {
 }
 /*****************************************************************/
 int Tree::assembleTree() {
-	try {		
+	try {
+        //initialize groupNodeInfo
+        for (int i = 0; i < (ct->getNamesOfGroups()).size(); i++) { groupNodeInfo[(ct->getNamesOfGroups())[i]].resize(0); }
+        
 		//build the pGroups in non leaf nodes to be used in the parsimony calcs.
 		for (int i = numLeaves; i < numNodes; i++) {
 			if (m->getControl_pressed()) { return 1; }
@@ -262,6 +265,8 @@ int Tree::assembleTree() {
 			tree[i].pGroups = (mergeGroups(i));
 			tree[i].pcount = (mergeGcounts(i));
 		}
+        
+        for(int i = 0; i < numLeaves; i++){ for (int k = 0; k < (tree[i].getGroup()).size(); k++) {  groupNodeInfo[(tree[i].getGroup())[k]].push_back(i); } }
 		
 		return 0;
 	}
@@ -606,10 +611,10 @@ map<string, int> Tree::mergeGroups(int i) {
 
 map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 	try {
-        Utils util;
 		int lc = tree[i].getLChild();
 		int rc = tree[i].getRChild();
 		
+        Utils util;
 		//loop through nodes groups removing the ones the user doesn't want
 		for(it=tree[lc].pGroups.begin();it!=tree[lc].pGroups.end();){
 				if (util.inUsersGroups(it->first, g) != true) {
@@ -664,8 +669,6 @@ map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 		exit(1);
 	}
 }
-
-
 /**************************************************************************************************/
 
 map<string,int> Tree::mergeGcounts(int position) {
@@ -688,125 +691,119 @@ map<string,int> Tree::mergeGcounts(int position) {
 	}
 }
 /**************************************************************************************************/
-void Tree::randomLabels(vector<string> g) {
-	try {
-        Utils util;
-		//initialize groupNodeInfo
-		for (int i = 0; i < (ct->getNamesOfGroups()).size(); i++) {
-			groupNodeInfo[(ct->getNamesOfGroups())[i]].resize(0);
-		}
-		
-		for(int i = 0; i < numLeaves; i++){
-			int z;
-			//get random index to switch with
-			z = util.getRandomIndex(i);
-			
-			//you only want to randomize the nodes that are from a group the user wants analyzed, so
-			//if either of the leaf nodes you are about to switch are not in the users groups then you don't want to switch them.
-			bool treez, treei;
-		
-			treez = util.inUsersGroups(tree[z].getGroup(), g);
-			treei = util.inUsersGroups(tree[i].getGroup(), g);
-			
-			if ((treez ) && (treei )) {
-				//switches node i and node z's info.
-				map<string,int> lib_hold = tree[z].pGroups;
-				tree[z].pGroups = (tree[i].pGroups);
-				tree[i].pGroups = (lib_hold);
-				
-				vector<string> zgroup = tree[z].getGroup();
-				tree[z].setGroup(tree[i].getGroup());
-				tree[i].setGroup(zgroup);
-				
-				string zname = tree[z].getName();
-				tree[z].setName(tree[i].getName());
-				tree[i].setName(zname);
-				
-				map<string,int> gcount_hold = tree[z].pcount;
-				tree[z].pcount = (tree[i].pcount);
-				tree[i].pcount = (gcount_hold);
-			}
-			
-			for (int k = 0; k < (tree[i].getGroup()).size(); k++) {  groupNodeInfo[(tree[i].getGroup())[k]].push_back(i); }
-			for (int k = 0; k < (tree[z].getGroup()).size(); k++) {  groupNodeInfo[(tree[z].getGroup())[k]].push_back(z); }
-		}
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Tree", "randomLabels");
-		exit(1);
-	}
+int Tree::randomLabels(vector<int> nodesToSwap) {
+    try {
+        if (nodesToSwap.size() > 1)  {  return 0; } //nothing to swap
+        
+        for(int j = 0; j < nodesToSwap.size()-1;){
+            int z = nodesToSwap[j];
+            int i = nodesToSwap[j+1];
+            swapLabels(z,i);
+            j += 2;
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Tree", "randomTopology");
+        exit(1);
+    }
 }
+
 /**************************************************************************************************/
-void Tree::randomBlengths()  {
-	try {
-		for(int i=numNodes-1;i>=0;i--){
-			int z = util.getRandomIndex(i);	
-		
-			float bl_hold = tree[z].getBranchLength();
-			tree[z].setBranchLength(tree[i].getBranchLength());
-			tree[i].setBranchLength(bl_hold);
-		}
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Tree", "randomBlengths");
-		exit(1);
-	}
+//you only want to randomize the nodes that are from a group the user wants analyzed, so
+//if either of the leaf nodes you are about to switch are not in the users groups then you don't want to switch them.
+int Tree::swapLabels(int first, int second) {
+    try {
+        if ((first > numLeaves) || (second > numLeaves)) { m->mothurOut("[ERROR]: cannot swap tree indexes.\n"); m->setControl_pressed(true); return 0; }
+        
+        //switches node i and node z's info.
+        map<string,int> lib_hold = tree[first].pGroups;
+        tree[first].pGroups = (tree[second].pGroups);
+        tree[second].pGroups = (lib_hold);
+        
+        vector<string> zgroup = tree[first].getGroup();
+        tree[first].setGroup(tree[second].getGroup());
+        tree[second].setGroup(zgroup);
+        
+        string zname = tree[first].getName();
+        tree[first].setName(tree[second].getName());
+        setIndex(tree[second].getName(), first);
+        tree[second].setName(zname);
+        setIndex(zname, second);
+        
+        map<string,int> gcount_hold = tree[first].pcount;
+        tree[first].pcount = (tree[second].pcount);
+        tree[second].pcount = (gcount_hold);
+        
+        return 1;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Tree", "swapLabels");
+        exit(1);
+    }
 }
 /*************************************************************************************************/
-void Tree::assembleRandomUnifracTree(vector<string> g) {
+void Tree::assembleRandomUnifracTree(vector<int> g) {
 	randomLabels(g);
 	assembleTree();
 }
 /*************************************************************************************************/
-void Tree::assembleRandomUnifracTree(string groupA, string groupB) {
-	vector<string> temp; temp.push_back(groupA); temp.push_back(groupB);
-	randomLabels(temp);
-	assembleTree();
-}
-
-/*************************************************************************************************/
 //for now it's just random topology but may become random labels as well later that why this is such a simple function now...
-void Tree::assembleRandomTree() {
-	randomTopology();
+void Tree::assembleRandomTree(Utils* myUtil) {
+	randomTopology(myUtil);
 	assembleTree();
 }
 /**************************************************************************************************/
 
-void Tree::randomTopology() {
+void Tree::randomTopology(Utils* myUtil) {
 	try {
-		for(int i=0;i<numNodes;i++){
-			tree[i].setParent(-1);
-		}
-		for(int i=numLeaves;i<numNodes;i++){
-			tree[i].setChildren(-1, -1); 
-		}
-    
-		for(int i=numLeaves;i<numNodes;i++){
-			int escape =0;
-			int rnd_index1, rnd_index2;
-			while(escape == 0){
-				rnd_index1 = util.getRandomIndex(i);
-				if(tree[rnd_index1].getParent() == -1){escape = 1;}
-			}
-		
-			escape = 0;
-			while(escape == 0){
-				rnd_index2 = (int)(((double)rand() / (double) RAND_MAX)*i);
-				if(rnd_index2 != rnd_index1 && tree[rnd_index2].getParent() == -1){
-					escape = 1;
-				}		
-			}
-	
-			tree[i].setChildren(rnd_index1,rnd_index2);
-			tree[i].setParent(-1);
-			tree[rnd_index1].setParent(i);
-			tree[rnd_index2].setParent(i);
-		}
+        for(int i=0;i<numNodes;i++)         { tree[i].setParent(-1);        }
+        for(int i=numLeaves;i<numNodes;i++) { tree[i].setChildren(-1, -1);  }
+        
+        for(int i=numLeaves;i<numNodes;i++){
+            int escape =0;
+            int rnd_index1, rnd_index2;
+            while(escape == 0){
+                rnd_index1 = myUtil->getRandomIndex(i);
+                if(tree[rnd_index1].getParent() == -1){escape = 1;}
+            }
+            
+            escape = 0;
+            while(escape == 0){
+                rnd_index2 = myUtil->getRandomIndex(i);
+                if(rnd_index2 != rnd_index1 && tree[rnd_index2].getParent() == -1){
+                    escape = 1;
+                }		
+            }
+            
+            tree[i].setChildren(rnd_index1,rnd_index2);
+            tree[i].setParent(-1);
+            tree[rnd_index1].setParent(i);
+            tree[rnd_index2].setParent(i);
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "randomTopology");
 		exit(1);
 	}
+}
+/*****************************************************************/
+vector<int> Tree::getNodes(vector<string> theseGroups) {
+    try {
+        vector<int> nodes;
+        for (int i = 0; i < theseGroups.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            map<string, vector<int> >::iterator it = groupNodeInfo.find(theseGroups[i]);
+            if (it != groupNodeInfo.end()) {//we have nodes for this group
+                nodes.insert(nodes.end(), it->second.begin(), it->second.end());
+            }
+        }
+        return nodes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Tree", "getNodes");
+        exit(1);
+    }
 }
 /*****************************************************************/
 void Tree::print(ostream& out) {
@@ -887,7 +884,6 @@ int Tree::findRoot() {
 /*****************************************************************/
 void Tree::printBranch(int node, ostream& out, map<string, string> names) {
 try {
-    Utils util;
 // you are not a leaf
 		if (tree[node].getLChild() != -1) {
 			out << "(";
@@ -903,7 +899,7 @@ try {
 			
 		}else { //you are a leaf
             map<string, string>::iterator itNames = names.find(tree[node].getName());
-            
+            Utils util;
             string outputString = "";
             if (itNames != names.end()) { 
                 

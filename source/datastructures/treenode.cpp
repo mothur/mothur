@@ -61,28 +61,9 @@ int Node::getIndex() { return vectorIndex; }
 //to be used by printTree in the Tree class to print the leaf info			
 void Node::printNode() {
 	try{
-		m->mothurOut(name + " " + toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " ");
+		m->mothurOut(name + " " + toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " \n");
 		
-		/*for (int i = 0; i < group.size(); i++) {  m->mothurOut( group[i] + " "); }
-		
-		//there is a branch length
-		if (branchLength != -1) { 
-			m->mothurOut(" " + toString(branchLength)); 
-		}
-		m->mothurOut(" |");
-		
-		map<string, int>::iterator it;
-		for(it=pGroups.begin();it!=pGroups.end();it++){
-			m->mothurOut(" " + it->first + ":" + toString(it->second));
-		}
-		m->mothurOut(" |");
-		for(it=pcount.begin();it!=pcount.end();it++){
-			m->mothurOut(" " + it->first + ":" + toString(it->second));
-		}*/
-		m->mothurOutEndLine();
-		
-		
-	}
+    }
 	catch(exception& e) {
 		m->errorOut(e, "Node", "printNode");
 		exit(1);

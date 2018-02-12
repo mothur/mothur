@@ -29,9 +29,10 @@ public:
 	void getSubTree(Tree*, vector<string>);  //makes tree a that contains only the names passed in.
     //int getSubTree(Tree* originalToCopy, vector<string> seqToInclude, map<string, string> nameMap);  //used with (int, TreeMap) constructor. SeqsToInclude contains subsample wanted - assumes these are unique seqs and size of vector=numLeaves passed into constructor. nameMap is unique -> redundantList can be empty if no namesfile was provided. 
     
-	void assembleRandomTree();
-	void assembleRandomUnifracTree(vector<string>);
-	void assembleRandomUnifracTree(string, string);
+    //this function takes the leaf info and populates the non leaf nodes
+    int assembleTree();
+    void assembleRandomTree(Utils*); //pass tree indexes in random order
+    void assembleRandomUnifracTree(vector<int>); //pass nodes to swap in random order
     
 	void createNewickFile(string);
 	int getIndex(string);
@@ -44,12 +45,10 @@ public:
 	void print(ostream&, string);
     void print(ostream&, map<string, string>);
 	int findRoot();  //return index of root node
-	
-	//this function takes the leaf info and populates the non leaf nodes
-	int assembleTree();	
-	
+    
 	vector<Node> tree;		//the first n nodes are the leaves, where n is the number of sequences.
 	map< string, vector<int> > groupNodeInfo;	//maps group to indexes of leaf nodes with that group, different groups may contain same node because of names file.
+    vector<int> getNodes(vector<string>); //return tree indexes of nodes for groups passed in
 			
 private:
 	CountTable* ct;
@@ -63,19 +62,19 @@ private:
 	map<string,int> mergeGcounts(int);
     map<string, int> indexes; //maps seqName -> index in tree vector
 	
+    int randomLabels(vector<int> nodesToSwap);
+    int swapLabels(int first, int second);
 	void addNamesToCounts(map<string, string>);
-	void randomTopology();
-	void randomBlengths();
+	void randomTopology(Utils*);
 	void randomLabels(vector<string>);
 	void printBranch(int, ostream&, map<string, string>);  //recursively print out tree
     void printBranch(int, ostream&, string);
 	int populateNewTree(vector<Node>&, int, int&);
 	void printBranch(int, ostream&, string, vector<Node>&);
-		
+    
 	MothurOut* m;
     vector<string> Treenames;
     Utils util;
-		
 };
 
 #endif

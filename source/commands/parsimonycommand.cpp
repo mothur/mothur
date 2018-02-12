@@ -331,6 +331,7 @@ int ParsimonyCommand::execute() {
 				}
 			}
 			
+            Utils* stableRandom = new Utils();
 			//get pscores for random trees
 			for (int j = 0; j < iters; j++) {
 								
@@ -338,13 +339,13 @@ int ParsimonyCommand::execute() {
 				randT = new Tree(ct, Treenames);
 
 				//create random relationships between nodes
-				randT->assembleRandomTree();
+				randT->assembleRandomTree(stableRandom);
 
 				//get pscore of random tree
 				randomData = pars.getValues(randT, processors, outputDir);
 				
 				if (m->getControl_pressed()) { 
-					delete reading;  delete output; delete randT;
+                    delete reading;  delete output; delete randT; delete stableRandom;
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
 					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
@@ -369,7 +370,9 @@ int ParsimonyCommand::execute() {
 				
 				delete randT;
 			}
+            delete stableRandom;
 		}else {
+            Utils* stableRandom = new Utils();
 			//get pscores for random trees
 			for (int j = 0; j < iters; j++) {
 								
@@ -377,10 +380,10 @@ int ParsimonyCommand::execute() {
 				randT = new Tree(ct, Treenames);
 				//create random relationships between nodes
 
-				randT->assembleRandomTree();
+				randT->assembleRandomTree(stableRandom);
 				
 				if (m->getControl_pressed()) { 
-					delete reading; delete output; delete randT; delete ct; 
+					delete reading; delete output; delete randT; delete ct;  delete stableRandom;
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
 
@@ -410,6 +413,7 @@ int ParsimonyCommand::execute() {
 				
 				delete randT;
 			}
+            delete stableRandom;
 		}
 
 		for(int a = 0; a < numComp; a++) {

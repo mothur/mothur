@@ -325,7 +325,6 @@ int UnifracUnweightedCommand::execute() {
 		Unweighted unweighted(includeRoot, Groups);
         util.getCombos(groupComb, Groups, numComp);
         
-        
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
         
 		if (numComp < processors) { processors = numComp;  m->mothurOut("Reducing processors to " + toString(numComp) + ".\n"); }
@@ -343,15 +342,6 @@ int UnifracUnweightedCommand::execute() {
 			
             counter = 0;
 			
-			if (random)  {  
-                variables["[filename]"] = outputDir + util.getSimpleName(treefile);
-                variables["[tag]"] = toString(i+1);
-                string unFileName = getOutputFileName("unweighted", variables);
-				output = new ColumnFile(unFileName, itersString);
-				outputNames.push_back(unFileName); outputTypes["unweighted"].push_back(unFileName);
-			}
-			
-			
 			//get unweighted for users tree
 			rscoreFreq.resize(numComp);  
 			rCumul.resize(numComp);  
@@ -362,7 +352,7 @@ int UnifracUnweightedCommand::execute() {
 
 			userData = unweighted.getValues(T[i], processors, outputDir);  //userData[0] = unweightedscore
 		
-			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }return 0; }
+			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }return 0; }
 			
 			//output scores for each combination
 			for(int k = 0; k < numComp; k++) {
@@ -377,7 +367,7 @@ int UnifracUnweightedCommand::execute() {
             
             if (random) {  runRandomCalcs(T[i], userData);  }
 			
-			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;  }
+			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }  outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;  }
             
             int startSubsample = time(NULL);
             
@@ -413,14 +403,14 @@ int UnifracUnweightedCommand::execute() {
             }
             if (subsample) { m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling."); m->mothurOutEndLine(); }
             
-            if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;  }
+            if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }  outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;  }
 
             if (subsample) {  getAverageSTDMatrices(calcDistsTotals, i); }
             if (consensus) {  getConsensusTrees(calcDistsTotals, i);  }
             
             //print output files
 			printUWSummaryFile(i);
-			if (random)  {	printUnweightedFile();	delete output;	}
+			if (random)  {	printUnweightedFile(i+1);	}
 			if (phylip) {	createPhylipFile(i);		}
 			
 			rscoreFreq.clear(); 
@@ -687,11 +677,27 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
         
         Unweighted unweighted(includeRoot, Groups);
         
+        vector< vector<string> > namesOfGroupCombos;
+        int numGroups = Groups.size();
+        for (int a=0; a<numGroups; a++) {
+            for (int l = 0; l < a; l++) {
+                vector<string> groups; groups.push_back(Groups[a]); groups.push_back(Groups[l]);
+                namesOfGroupCombos.push_back(groups);
+            }
+        }
+        vector<vector<int> > randomTreeNodes;
+        for (int f = 0; f < numComp; f++) {
+            vector<int> randomNodesForThisCombo = thisTree->getNodes(namesOfGroupCombos[f]);
+            randomTreeNodes.push_back(randomNodesForThisCombo);
+        }
+
         //get unweighted scores for random trees - if random is false iters = 0
         for (int j = 0; j < iters; j++) {
             
+            for (int f = 0; f < numComp; f++) { util.mothurRandomShuffle(randomTreeNodes[f]);  } //randomize labels
+            
             //we need a different getValues because when we swap the labels we only want to swap those in each pairwise comparison
-            randomData = unweighted.getValues(thisTree, true, processors, outputDir);
+            randomData = unweighted.getValues(thisTree, randomTreeNodes, processors, outputDir);
             
             if (m->getControl_pressed()) { return 0; }
 			
@@ -732,13 +738,20 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
 	}
 }
 /***********************************************************/
-void UnifracUnweightedCommand::printUnweightedFile() {
+void UnifracUnweightedCommand::printUnweightedFile(int treeNum) {
 	try {
 		vector<double> data;
 		vector<string> tags;
 		
 		tags.push_back("Score");
 		tags.push_back("RandFreq"); tags.push_back("RandCumul");
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+        variables["[tag]"] = toString(treeNum);
+        string unFileName = getOutputFileName("unweighted", variables);
+        FileOutput* output = new ColumnFile(unFileName, itersString);
+        outputNames.push_back(unFileName); outputTypes["unweighted"].push_back(unFileName);
 			
 		for(int a = 0; a < numComp; a++) {
 			output->initFile(groupComb[a], tags);
@@ -750,6 +763,7 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 			} 
 			output->resetFile();
 		}
+        delete output;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracUnweightedCommand", "printUnweightedFile");

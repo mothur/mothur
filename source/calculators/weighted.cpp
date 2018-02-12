@@ -334,8 +334,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		/********************************************************/
 	 
 		//calculate weighted score for the group combination
-		double UN;	
-		UN = (WScore[(groupA+groupB)] / D);
+		double UN = (WScore[(groupA+groupB)] / D);
 		
 		if (isnan(UN) || isinf(UN)) { UN = 0; } 
 		data.push_back(UN);

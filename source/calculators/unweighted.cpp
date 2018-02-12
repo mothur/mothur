@@ -50,6 +50,7 @@ struct unweightedData {
     MothurOut* m;
     EstOutput results;
     vector< vector<string> > namesOfGroupCombos;
+    vector<vector<int> > randomizedTreeNodes;
     Tree* t;
     CountTable* ct;
     bool includeRoot;
@@ -62,6 +63,20 @@ struct unweightedData {
         start = st;
         num = en;
         namesOfGroupCombos = ngc;
+        t = tree;
+        ct = count;
+        includeRoot = ir;
+        Treenames = tree->getTreeNames();
+        results.resize(num);
+        count = 0;
+    }
+
+    unweightedData(int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count, bool ir, vector<vector<int> > randomTreeNodes) {
+        m = MothurOut::getInstance();
+        start = st;
+        num = en;
+        namesOfGroupCombos = ngc;
+        randomizedTreeNodes = randomTreeNodes;
         t = tree;
         ct = count;
         includeRoot = ir;
@@ -251,10 +266,7 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
                 m->setControl_pressed(true);
             }
             
-            delete data[i]->t;
-            delete data[i]->ct;
-            delete data[i];
-            delete workerThreads[i];
+            delete data[i]->t; delete data[i]->ct; delete data[i]; delete workerThreads[i];
         }
         
         return results;
@@ -266,14 +278,14 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
 }
 /**************************************************************************************************/
 
-EstOutput Unweighted::getValues(Tree* t, bool randomCalcs, int p, string o) {
+EstOutput Unweighted::getValues(Tree* t, vector<vector<int> >& randomTreeNodes, int p, string o) {
  try {
 		processors = p;
 		outputDir = o;
 		
         CountTable* ct = t->getCountTable();
      
-        return (createProcesses(t, randomCalcs, ct));
+        return (createProcesses(t, randomTreeNodes, ct));
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Unweighted", "getValues");
@@ -296,7 +308,7 @@ void driverRandomCalcs(unweightedData* params) {
             copyTree->getCopy(params->t);
             
             //swap labels in the groups you want to compare
-            copyTree->assembleRandomUnifracTree(params->namesOfGroupCombos[h]);
+            copyTree->assembleRandomUnifracTree(params->randomizedTreeNodes[h]);
             
             double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
             double totalBL = 0.00;	//all branch lengths
@@ -364,7 +376,7 @@ void driverRandomCalcs(unweightedData* params) {
 }
 /**************************************************************************************************/
 
-EstOutput Unweighted::createProcesses(Tree* t, bool usingGroups, CountTable* ct) {
+EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeNodes, CountTable* ct) {
 	try {
         
         vector<linePair> lines;
@@ -390,13 +402,13 @@ EstOutput Unweighted::createProcesses(Tree* t, bool usingGroups, CountTable* ct)
             Tree* copyTree = new Tree(copyCount, Treenames);
             copyTree->getCopy(t);
             
-            unweightedData* dataBundle = new unweightedData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount, includeRoot);
+            unweightedData* dataBundle = new unweightedData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, randomTreeNodes);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverRandomCalcs, dataBundle));
         }
         
-        unweightedData* dataBundle = new unweightedData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot);
+        unweightedData* dataBundle = new unweightedData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot, randomTreeNodes);
         driverRandomCalcs(dataBundle);
         EstOutput results = dataBundle->results;
         delete dataBundle;

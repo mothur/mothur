@@ -13,6 +13,7 @@
 /***********************************************************************/
 Utils::Utils(){
     try {
+        
         m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames(); 
         long long s = m->getRandomSeed();
         mersenne_twister_engine.seed(s); srand(s);
