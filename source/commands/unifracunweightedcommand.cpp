@@ -175,8 +175,8 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			if (treefile == "not open") { abort = true; }
 			else if (treefile == "not found") { 				//if there is a current design file, use it
 				treefile = current->getTreeFile();
-				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
+				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter.\n");  }
+				else { 	m->mothurOut("You have no current tree file and the tree parameter is required.\n");  abort = true; }
 			}else { current->setTreeFile(treefile); }
 			
 			//check for required parameters
@@ -281,14 +281,13 @@ int UnifracUnweightedCommand::execute() {
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-		current->setTreeFile(treefile);
-		
-		TreeReader* reader;
+
+        TreeReader* reader = NULL;
         if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
         else { reader = new TreeReader(treefile, countfile); }
-        T = reader->getTrees();
-        ct = T[0]->getCountTable();
+        
+        vector<Tree*> T; T = reader->getTrees();   //user trees
+        CountTable* ct; ct = T[0]->getCountTable();
         if ((Groups.size() == 0) || (Groups.size() < 2)) {  Groups = ct->getNamesOfGroups();  } //must have at least 2 groups to compare
         delete reader;
         
@@ -338,21 +337,15 @@ int UnifracUnweightedCommand::execute() {
 	 
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
-			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
+			if (m->getControl_pressed()) { break; }
 			
-            counter = 0;
-			
-			//get unweighted for users tree
-			rscoreFreq.resize(numComp);  
-			rCumul.resize(numComp);  
-			utreeScores.resize(numComp);  
-			UWScoreSig.resize(numComp); 
+            counter = 0; rscoreFreq.resize(numComp);   rCumul.resize(numComp);   utreeScores.resize(numComp);   UWScoreSig.resize(numComp);
             
             vector<double> userData; userData.resize(numComp,0);  //weighted score info for user tree. data[0] = weightedscore AB, data[1] = weightedscore AC...
 
 			userData = unweighted.getValues(T[i], processors, outputDir);  //userData[0] = unweightedscore
 		
-			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }return 0; }
+			if (m->getControl_pressed()) { break; }
 			
 			//output scores for each combination
 			for(int k = 0; k < numComp; k++) {
@@ -367,7 +360,7 @@ int UnifracUnweightedCommand::execute() {
             
             if (random) {  runRandomCalcs(T[i], userData);  }
 			
-			if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }  outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;  }
+			if (m->getControl_pressed()) { break; }
             
             int startSubsample = time(NULL);
             
@@ -403,7 +396,7 @@ int UnifracUnweightedCommand::execute() {
             }
             if (subsample) { m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling."); m->mothurOutEndLine(); }
             
-            if (m->getControl_pressed()) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }  outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;  }
+            if (m->getControl_pressed()) { break; }
 
             if (subsample) {  getAverageSTDMatrices(calcDistsTotals, i); }
             if (consensus) {  getConsensusTrees(calcDistsTotals, i);  }
@@ -413,14 +406,9 @@ int UnifracUnweightedCommand::execute() {
 			if (random)  {	printUnweightedFile(i+1);	}
 			if (phylip) {	createPhylipFile(i);		}
 			
-			rscoreFreq.clear(); 
-			rCumul.clear();  
-			validScores.clear(); 
-			utreeScores.clear();  
-			UWScoreSig.clear(); 
+			rscoreFreq.clear();  rCumul.clear();  validScores.clear();  utreeScores.clear();  UWScoreSig.clear();
 		}
 		
-
 		outSum.close();
 		delete ct; 
 		for (int i = 0; i < T.size(); i++) { delete T[i]; }

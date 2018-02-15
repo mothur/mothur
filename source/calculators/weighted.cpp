@@ -35,7 +35,6 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		processors = p; outputDir = o;
         
         CountTable* ct = t->getCountTable();
-        Treenames = t->getTreeNames();
 		
 		if (m->getControl_pressed()) { return data; }
 		
@@ -282,7 +281,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		
 			D += weightedSum;
 		}
-		
+     
 		//adding the wieghted sums from group l
 		for (int j = 0; j < t->groupNodeInfo[groups[1]].size(); j++) { //the leaf nodes that have seqs from group l
 			map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[1]][j]].pcount.find(groups[1]);
@@ -293,7 +292,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		
 			D += weightedSum;
 		}
-				
+	
 		//calculate u for the group comb 
 		for(int i=0;i<t->getNumNodes();i++){
 		 
@@ -334,10 +333,10 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		/********************************************************/
 	 
 		//calculate weighted score for the group combination
-		double UN = (WScore[(groupA+groupB)] / D);
-		
-		if (isnan(UN) || isinf(UN)) { UN = 0; } 
-		data.push_back(UN);
+		double W = (WScore[(groupA+groupB)] / D);
+     
+		if (isnan(W) || isinf(W)) { W = 0; }
+		data.push_back(W);
 				
 		return data; 
 	}
@@ -365,7 +364,7 @@ EstOutput Weighted::createProcesses(Tree* t, CountTable* ct) {
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<weightedData*> data;
-        
+        vector<string> Treenames; Treenames = t->getTreeNames();
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             CountTable* copyCount = new CountTable();
@@ -378,10 +377,15 @@ EstOutput Weighted::createProcesses(Tree* t, CountTable* ct) {
             
             workerThreads.push_back(new thread(driverWeighted, dataBundle));
         }
+        CountTable* copyCount = new CountTable();
+        copyCount->copy(ct);
+        Tree* copyTree = new Tree(copyCount, Treenames);
+        copyTree->getCopy(t);
         
-        weightedData* dataBundle = new weightedData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot);
+        weightedData* dataBundle = new weightedData(lines[0].start, lines[0].end, namesOfGroupCombos, copyTree, copyCount, includeRoot);
         driverWeighted(dataBundle);
         EstOutput results = dataBundle->results;
+        delete copyTree; delete copyCount;
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {

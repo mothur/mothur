@@ -29,6 +29,7 @@ TreeReader::TreeReader(string tf, string cf) : treefile(tf), countfile(cf)  {
         }
         namefile = "";
         groupfile = "";
+        
         readTrees();
     }
 	catch(exception& e) {
@@ -76,12 +77,11 @@ bool TreeReader::readTrees()  {
     try {
         
         int numUniquesInName = ct->getNumUniqueSeqs();
-		//if (namefile != "") { numUniquesInName = readNamesFile(); }
 		
 		ReadTree* read = new ReadNewickTree(treefile, Treenames);
 		int readOk = read->read(ct); 
 		
-		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine();  delete read; m->setControl_pressed(true); return 0; }
+		if (readOk != 0) { m->mothurOut("Read Terminated.\n");  delete read; m->setControl_pressed(true); return 0; }
 		
 		read->AssembleTrees();
 		trees = read->getTrees();

@@ -30,7 +30,7 @@ class Weighted : public TreeCalculator  {
         int processors;
         string outputDir;
         bool includeRoot;
-        vector<string> Groups, Treenames;
+        vector<string> Groups;
         vector< vector<string> > namesOfGroupCombos;
 		
 		EstOutput createProcesses(Tree*, CountTable*);

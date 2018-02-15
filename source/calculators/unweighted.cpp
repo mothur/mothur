@@ -34,7 +34,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 		processors = p; outputDir = o;
         
         CountTable* ct = t->getCountTable();
-        Treenames = t->getTreeNames();
+        
 		
 		return (createProcesses(t,  ct));
 	}
@@ -238,6 +238,7 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<unweightedData*> data;
+        vector<string> Treenames; Treenames = t->getTreeNames();
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
@@ -252,9 +253,15 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
             workerThreads.push_back(new thread(driverUnweighted, dataBundle));
         }
         
+        CountTable* copyCount = new CountTable();
+        copyCount->copy(ct);
+        Tree* copyTree = new Tree(copyCount, Treenames);
+        copyTree->getCopy(t);
+        
         unweightedData* dataBundle = new unweightedData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot);
         driverUnweighted(dataBundle);
         EstOutput results = dataBundle->results;
+        delete copyTree; delete copyCount;
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
@@ -296,7 +303,7 @@ EstOutput Unweighted::getValues(Tree* t, vector<vector<int> >& randomTreeNodes, 
 void driverRandomCalcs(unweightedData* params) {
     try {
         params->count = 0;
-         map< vector<string>, set<int> > rootForGrouping;
+        map< vector<string>, set<int> > rootForGrouping;
         vector<string> Treenames = params->t->getTreeNames();
         Tree* copyTree = new Tree(params->ct, Treenames);
         
@@ -364,7 +371,6 @@ void driverRandomCalcs(unweightedData* params) {
                 params->results[params->count] = UW;
             }
             params->count++;
-            
         }
         
         delete copyTree;
@@ -378,7 +384,6 @@ void driverRandomCalcs(unweightedData* params) {
 
 EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeNodes, CountTable* ct) {
 	try {
-        
         vector<linePair> lines;
         int remainingPairs = namesOfGroupCombos.size();
         if (remainingPairs < processors) { processors = remainingPairs; }
@@ -394,7 +399,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeN
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<unweightedData*> data;
-        
+        vector<string> Treenames; Treenames = t->getTreeNames();
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             CountTable* copyCount = new CountTable();

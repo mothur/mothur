@@ -26,7 +26,7 @@ class Unweighted : public TreeCalculator  {
 		
 	private:
 		vector< vector<string> > namesOfGroupCombos;
-        vector<string> Groups, Treenames;
+        vector<string> Groups;
 		int processors;
 		string outputDir;
 		bool includeRoot;

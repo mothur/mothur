@@ -691,9 +691,9 @@ map<string,int> Tree::mergeGcounts(int position) {
 	}
 }
 /**************************************************************************************************/
-int Tree::randomLabels(vector<int> nodesToSwap) {
+int Tree::randomLabels(vector<int>& nodesToSwap) {
     try {
-        if (nodesToSwap.size() > 1)  {  return 0; } //nothing to swap
+        if (nodesToSwap.size() < 1)  {  return 0; } //nothing to swap
         
         for(int j = 0; j < nodesToSwap.size()-1;){
             int z = nodesToSwap[j];
@@ -703,7 +703,7 @@ int Tree::randomLabels(vector<int> nodesToSwap) {
         }
     }
     catch(exception& e) {
-        m->errorOut(e, "Tree", "randomTopology");
+        m->errorOut(e, "Tree", "randomLabels");
         exit(1);
     }
 }

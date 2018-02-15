@@ -38,9 +38,7 @@ class UnifracUnweightedCommand : public Command {
 	
 	
 	private:
-		//FileOutput* output;
-		vector<Tree*> T;	   //user trees
-		CountTable* ct;
+
 		string sumFile, allGroups;
 		vector<string> groupComb; // AB. AC, BC...
 		int iters, numGroups, numComp, counter, processors, subsampleSize, subsampleIters;

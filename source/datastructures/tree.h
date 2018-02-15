@@ -62,7 +62,7 @@ private:
 	map<string,int> mergeGcounts(int);
     map<string, int> indexes; //maps seqName -> index in tree vector
 	
-    int randomLabels(vector<int> nodesToSwap);
+    int randomLabels(vector<int>& nodesToSwap);
     int swapLabels(int first, int second);
 	void addNamesToCounts(map<string, string>);
 	void randomTopology(Utils*);

@@ -85,7 +85,7 @@ int SetLogFileCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
+        
         string directory = util.hasPath(name);
         if (directory == "") {
             m->setLogFileName(name, append);

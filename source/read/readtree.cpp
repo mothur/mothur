@@ -98,8 +98,9 @@ float ReadTree::readBranchLength(istream& f) {
 int ReadNewickTree::read(CountTable* ct) {
 	try {
 		holder = "";
-		int c, error;
+		int error;
 		int comment = 0;
+        char c;
 		
 		//if you are not a nexus file 
 		if ((c = filehandle.peek()) != '#') {  
@@ -113,7 +114,7 @@ int ReadNewickTree::read(CountTable* ct) {
 					if((c == '(') && (comment != 1)){ break; }
 					filehandle.get();
 				}
-
+                
 				//make new tree
 				T = new Tree(ct, Treenames);
 
@@ -165,7 +166,7 @@ int ReadNewickTree::read(CountTable* ct) {
 		if (error != 0) { readOk = error; } 
 		
 		filehandle.close();
-
+        
 		return readOk;
 	}
 	catch(exception& e) {
