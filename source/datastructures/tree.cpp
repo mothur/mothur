@@ -680,9 +680,8 @@ map<string,int> Tree::mergeGcounts(int position) {
 	
 		map<string,int> sum = tree[lc].pcount;
     
-		for(it=tree[rc].pcount.begin();it!=tree[rc].pcount.end();it++){
-			sum[it->first] += it->second;
-		}
+		for(it=tree[rc].pcount.begin();it!=tree[rc].pcount.end();it++){ sum[it->first] += it->second; }
+        
 		return sum;
 	}
 	catch(exception& e) {
@@ -696,8 +695,12 @@ int Tree::randomLabels(vector<int>& nodesToSwap) {
         if (nodesToSwap.size() < 1)  {  return 0; } //nothing to swap
         
         for(int j = 0; j < nodesToSwap.size()-1;){
+            
+            if (m->getControl_pressed()) { break; }
+            
             int z = nodesToSwap[j];
             int i = nodesToSwap[j+1];
+    
             swapLabels(z,i);
             j += 2;
         }
@@ -789,16 +792,20 @@ void Tree::randomTopology(Utils* myUtil) {
 /*****************************************************************/
 vector<int> Tree::getNodes(vector<string> theseGroups) {
     try {
-        vector<int> nodes;
+        set<int> nodes;
         for (int i = 0; i < theseGroups.size(); i++) {
             if (m->getControl_pressed()) { break; }
             
             map<string, vector<int> >::iterator it = groupNodeInfo.find(theseGroups[i]);
             if (it != groupNodeInfo.end()) {//we have nodes for this group
-                nodes.insert(nodes.end(), it->second.begin(), it->second.end());
+                for (int j = 0; j < (it->second).size(); j++) { nodes.insert((it->second)[j]); } //removes dups
             }
         }
-        return nodes;
+        
+        vector<int> uniqueNodes;
+        for (set<int>::iterator it = nodes.begin(); it != nodes.end(); it++) { uniqueNodes.push_back(*it); }
+        
+        return uniqueNodes;
     }
     catch(exception& e) {
         m->errorOut(e, "Tree", "getNodes");

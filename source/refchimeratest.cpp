@@ -34,10 +34,10 @@ RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, bool aligned) : aligned(a
 }
 //***************************************************************************************************************
 
-int RefChimeraTest::printHeader(ofstream& chimeraReportFile){
+string RefChimeraTest::getHeader(){
 	try {
-		chimeraReportFile << "queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\tdistToBestMera\tnumParents" << endl;
-		return 0; 
+		return ("queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\tdistToBestMera\tnumParents\n");
+		
 	}catch(exception& e) {
 		m->errorOut(e, "RefChimeraTest", "printHeader");
 		exit(1);
@@ -46,15 +46,15 @@ int RefChimeraTest::printHeader(ofstream& chimeraReportFile){
 
 //***************************************************************************************************************
 
-int RefChimeraTest::analyzeQuery(string queryName, string querySeq, ofstream& chimeraReportFile){
+int RefChimeraTest::analyzeQuery(string queryName, string querySeq, string& output){
 
     int numParents = -1;
     
     if(aligned){
-        numParents = analyzeAlignedQuery(queryName, querySeq, chimeraReportFile);
+        numParents = analyzeAlignedQuery(queryName, querySeq, output);
     }
     else{
-        numParents = analyzeUnalignedQuery(queryName, querySeq, chimeraReportFile);
+        numParents = analyzeUnalignedQuery(queryName, querySeq, output);
     }
     
     return numParents;
@@ -63,7 +63,7 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq, ofstream& ch
  
 //***************************************************************************************************************
 
-int RefChimeraTest::analyzeAlignedQuery(string queryName, string querySeq, ofstream& chimeraReportFile){
+int RefChimeraTest::analyzeAlignedQuery(string queryName, string querySeq, string& output){
 	
     vector<vector<int> > left; left.resize(numRefSeqs);
     vector<vector<int> > right; right.resize(numRefSeqs);
@@ -98,10 +98,10 @@ int RefChimeraTest::analyzeAlignedQuery(string queryName, string querySeq, ofstr
     
 	double distToChimera = calcDistToChimera(bestQueryAlignment, bestRefAlignment);
 	
-	chimeraReportFile << queryName << '\t' << referenceNames[bestMatchIndex] << '\t' << bestSequenceMismatch << '\t';
-	chimeraReportFile << referenceNames[leftParentBi] << ',' << referenceNames[rightParentBi] << '\t' << breakPointBi << '\t';
-	chimeraReportFile << minMismatchToChimera << '\t';
-    chimeraReportFile << '\t' << distToChimera << '\t' << nMera << endl;
+	output = queryName + "\t" + referenceNames[bestMatchIndex] + "\t" + toString(bestSequenceMismatch) + "\t";
+	output += referenceNames[leftParentBi] + ',' + referenceNames[rightParentBi] + "\t" + toString(breakPointBi) + "\t";
+	output += toString(minMismatchToChimera) + "\t";
+    output += toString(distToChimera) + "\t" + toString(nMera) +"\n";
     
     bestMatch = bestMatchIndex;
 		
@@ -110,7 +110,7 @@ int RefChimeraTest::analyzeAlignedQuery(string queryName, string querySeq, ofstr
 
 //***************************************************************************************************************
 
-int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, ofstream& chimeraReportFile){
+int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, string& output){
 	
     int nMera = 0;
     
@@ -225,23 +225,22 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, ofs
             nMera = 1;
             reference = referenceSeqs[bestRefIndex];
         }
-
+        
         double alignLength;
         double finalDiffs = alignQueryToReferences(querySeq, reference, bestQueryAlignment, bestRefAlignment, alignLength);
         double finalDistance = finalDiffs / alignLength;
 
-        chimeraReportFile << queryName << '\t' << referenceNames[bestRefIndex] << '\t' << bestRefDiffs << '\t';
-        chimeraReportFile << referenceNames[leftParent] << ',' << referenceNames[rightParent] << '\t' << breakPoint << '\t';
-        chimeraReportFile << bestChimeraMismatches << '\t';
-        chimeraReportFile << '\t' << finalDistance << '\t' << nMera << endl;
+        output = queryName + "\t" +  referenceNames[bestRefIndex] + "\t" + toString(bestRefDiffs) + "\t";
+        output += referenceNames[leftParent] + ',' + referenceNames[rightParent] + "\t" + toString(breakPoint) + "\t";
+        output += toString(bestChimeraMismatches) + "\t";
+        output += toString(finalDistance) + "\t" + toString(nMera) +"\n";
     }
     else{
         bestQueryAlignment = queryAlign[bestRefIndex];
         bestRefAlignment = refAlign[bestRefIndex];
         nMera = 1;
         
-        chimeraReportFile << queryName << '\t' << referenceNames[bestRefIndex] << '\t' << bestRefDiffs << '\t';
-        chimeraReportFile << "NA\tNA\tNA\tNA\t1" << endl;
+        output = queryName + "\t" + referenceNames[bestRefIndex] + "\t" + toString(bestRefDiffs) + "\tNA\tNA\tNA\tNA\t1\n";
     } 
     
     bestMatch = bestRefIndex;

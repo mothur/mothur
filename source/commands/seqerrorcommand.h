@@ -38,44 +38,21 @@ public:
 private:
 	bool abort;
 	
-	vector<int> processIDS;   //processid
-	vector<linePair> lines;
-	vector<linePair> qLines;
-	vector<linePair> rLines;
-
-	void getReferences();
-	map<string,int> getWeights();
-	Compare getErrors(Sequence, Sequence);
-	void printErrorHeader(ofstream&);
-	void printErrorData(Compare, int, ofstream&, ofstream&);
-	void printSubMatrix();
-	void printErrorFRFile(map<char, vector<int> >, map<char, vector<int> >);
-	void printErrorQuality(map<char, vector<int> >);
-	void printQualityFR(vector<vector<int> >, vector<vector<int> >);
+	vector<Sequence> getReferences(string);
+	void printSubMatrix(vector<vector<int> >& substitutionMatrix);
+	void printErrorFRFile(map<char, vector<int> >& errorForward, map<char, vector<int> >& errorReverse);
+	void printErrorQuality(map<char, vector<int> >&);
+	void printQualityFR(vector<vector<int> >& qualForwardMap, vector<vector<int> >& qualReverseMap);
 	
-	int setLines(string, string, string);
-	int driver(string, string, string, string, string, string, linePair, linePair, linePair);
-	int createProcesses(string, string, string, string, string, string);
+	int setLines(string, string, string, vector<linePair>&, vector<linePair>&, vector<linePair>&);
+    int createProcesses(string, string, string, string, string, string, vector<vector<int> >&, vector<vector<int> >&, vector<vector<int> >&, vector<int>&,  map<char, vector<int> >&, map<char, vector<int> >&, map<char, vector<int> >&, vector<string>&, vector<Sequence>&);
 
 	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir, countfile;
 	double threshold;
 	bool ignoreChimeras, aligned;
 	int numRefs, processors;
 	int maxLength, totalBases, totalMatches;
-	//ofstream errorSummaryFile, errorSeqFile;
 	vector<string> outputNames;
-	
-	vector<Sequence> referenceSeqs;
-	vector<vector<int> > substitutionMatrix;
-	vector<vector<int> > qualForwardMap;
-	vector<vector<int> > qualReverseMap;
-	vector<int> misMatchCounts;
-	map<char, vector<int> > qScoreErrorMap;
-	map<char, vector<int> > errorForward;
-	map<char, vector<int> > errorReverse;
-	map<string, int> weights;
-	vector<string> megaAlignVector;
-
 };
 
 #endif

@@ -678,9 +678,12 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
             vector<int> randomNodesForThisCombo = thisTree->getNodes(namesOfGroupCombos[f]);
             randomTreeNodes.push_back(randomNodesForThisCombo);
         }
-
+        vector<vector<int> > savedRandomTreeNodes = randomTreeNodes;
+        
         //get unweighted scores for random trees - if random is false iters = 0
         for (int j = 0; j < iters; j++) {
+            
+            randomTreeNodes = savedRandomTreeNodes;
             
             for (int f = 0; f < numComp; f++) { util.mothurRandomShuffle(randomTreeNodes[f]);  } //randomize labels
             
