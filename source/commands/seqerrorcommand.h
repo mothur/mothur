@@ -13,7 +13,33 @@
 #include "command.hpp"
 #include "sequence.hpp"
 #include "counttable.h"
-#include "compare.h"
+
+struct Compare {
+    
+    Compare(){
+        AA=0; AT=0; AG=0; AC=0;
+        TA=0; TT=0; TG=0; TC=0;
+        GA=0; GT=0; GG=0; GC=0;
+        CA=0; CT=0; CG=0; CC=0;
+        NA=0; NT=0; NG=0; NC=0;
+        Ai=0; Ti=0; Gi=0; Ci=0; Ni=0;
+        dA=0; dT=0; dG=0; dC=0;
+        refName = "";
+        queryName = "";
+        weight = 1;
+        matches = 0;
+        mismatches = 0;
+        total = 0;
+        errorRate = 1.0000;
+        sequence = "";
+    }
+    ~Compare(){}
+    
+    int AA, AT, AG, AC,	TA, TT, TG, TC,	GA, GT, GG, GC,	CA, CT, CG, CC,	NA, NT, NG, NC, Ai, Ti, Gi, Ci, Ni, dA, dT, dG, dC;
+    string refName, queryName, sequence;
+    double errorRate;
+    int weight, matches, mismatches, total;
+};
 
 
 class SeqErrorCommand : public Command {
@@ -36,8 +62,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	bool abort;
-	
 	vector<Sequence> getReferences(string);
 	void printSubMatrix(vector<vector<int> >& substitutionMatrix);
 	void printErrorFRFile(map<char, vector<int> >& errorForward, map<char, vector<int> >& errorReverse);
@@ -45,11 +69,11 @@ private:
 	void printQualityFR(vector<vector<int> >& qualForwardMap, vector<vector<int> >& qualReverseMap);
 	
 	int setLines(string, string, string, vector<linePair>&, vector<linePair>&, vector<linePair>&);
-    int createProcesses(string, string, string, string, string, string, vector<vector<int> >&, vector<vector<int> >&, vector<vector<int> >&, vector<int>&,  map<char, vector<int> >&, map<char, vector<int> >&, map<char, vector<int> >&, vector<string>&, vector<Sequence>&);
+    long long createProcesses(string, string, string, string, string, string, vector<vector<int> >&, vector<vector<int> >&, vector<vector<int> >&, vector<int>&,  map<char, vector<int> >&, map<char, vector<int> >&, map<char, vector<int> >&, vector<string>&, vector<Sequence>&);
 
 	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir, countfile;
 	double threshold;
-	bool ignoreChimeras, aligned;
+	bool ignoreChimeras, aligned, abort;
 	int numRefs, processors;
 	int maxLength, totalBases, totalMatches;
 	vector<string> outputNames;

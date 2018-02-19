@@ -46,15 +46,15 @@ string SeqErrorCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The seq.error command reads a query alignment file and a reference alignment file and creates .....\n";
-		helpString += "The fasta parameter...\n";
-		helpString += "The reference parameter...\n";
-		helpString += "The qfile parameter...\n";
+		helpString += "The fasta parameter allows you to provide your dataset's fasta file.\n";
+		helpString += "The reference parameter contains the Mock sequences.\n";
+		helpString += "The qfile parameter ...\n";
 		helpString += "The report parameter...\n";
 		helpString += "The name parameter allows you to provide a name file associated with the fasta file.\n";
         helpString += "The count parameter allows you to provide a count file associated with the fasta file.\n";
 		helpString += "The ignorechimeras parameter...\n";
 		helpString += "The threshold parameter...\n";
-		helpString += "The processors parameter...\n";
+		//helpString += "The processors parameter...\n";
 		helpString += "Example seq.error(...).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n";
@@ -265,8 +265,9 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
             temp = validParameter.valid(parameters, "aligned");			if (temp == "not found"){	temp = "t";				}
 			aligned = util.isTrue(temp); 
 
-			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
-			processors = current->setProcessors(temp); 
+			//temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+			//processors = current->setProcessors(temp);
+            processors=1;
 
 			if ((namesFileName == "") && (queryFileName != "")){
 				vector<string> files; files.push_back(queryFileName); 
@@ -286,8 +287,6 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
                     m->mothurOutEndLine();
                 }
             }
-            
-
 		}
 	}
 	catch(exception& e) {
@@ -334,7 +333,7 @@ int SeqErrorCommand::execute(){
         
         if (m->getControl_pressed()) { return 0; }
         
-        int numSeqs = createProcesses(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName, substitutionMatrix, qualForwardMap, qualReverseMap, misMatchCounts, qScoreErrorMap, errorForward, errorReverse, megaAlignVector, referenceSeqs);
+        long long numSeqs = createProcesses(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName, substitutionMatrix, qualForwardMap, qualReverseMap, misMatchCounts, qScoreErrorMap, errorForward, errorReverse, megaAlignVector, referenceSeqs);
 
 		if(qualFileName != ""){		
 			printErrorQuality(qScoreErrorMap);
@@ -387,7 +386,6 @@ int SeqErrorCommand::execute(){
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
 struct seqErrorData {
     OutputWriter* summaryFile;
@@ -413,7 +411,7 @@ struct seqErrorData {
     MothurOut* m;
     Utils util;
     
-    seqErrorData(){}
+    seqErrorData(){ delete summaryFile;  delete errorFile; delete chimeraFile; }
     seqErrorData(string fname, string qname, string rname, linePair l, linePair q, linePair r, OutputWriter* sum,  OutputWriter* err, OutputWriter* chim, vector<Sequence> refseqs, bool al, int mxl, map<string, int> nam, double thre) {
         m = MothurOut::getInstance();
         weights = nam;
@@ -783,10 +781,8 @@ void driverSeqError(seqErrorData* params) {
     }
 }
 //**********************************************************************************************************************
-int SeqErrorCommand::createProcesses(string filename, string qFileName, string rFileName, string summaryFileName, string errorOutputFileName, string chimeraOutputFileName, vector<vector<int> >& substitutionMatrix, vector<vector<int> >& qualForwardMap, vector<vector<int> >& qualReverseMap, vector<int>& misMatchCounts, map<char, vector<int> >& qScoreErrorMap, map<char, vector<int> >& errorForward, map<char, vector<int> >& errorReverse, vector<string>& megaAlignVector, vector<Sequence>& referenceSeqs) {
+long long SeqErrorCommand::createProcesses(string filename, string qFileName, string rFileName, string summaryFileName, string errorOutputFileName, string chimeraOutputFileName, vector<vector<int> >& substitutionMatrix, vector<vector<int> >& qualForwardMap, vector<vector<int> >& qualReverseMap, vector<int>& misMatchCounts, map<char, vector<int> >& qScoreErrorMap, map<char, vector<int> >& errorForward, map<char, vector<int> >& errorReverse, vector<string>& megaAlignVector, vector<Sequence>& referenceSeqs) {
 	try {
-        
-
         map<string, int> weights;
         if(namesFileName != "")     {	weights = util.readNames(namesFileName);                                            }
         else if (countfile != "")   {   CountTable ct;  ct.readTable(countfile, false, false);  weights = ct.getNameMap();  }
@@ -807,7 +803,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
             OutputWriter* threadSummaryWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
             OutputWriter* threadErrorWriter = new OutputWriter(synchronizedOutputErrorFile);
             OutputWriter* threadChimeraWriter = new OutputWriter(synchronizedOutputChimeraFile);
-           
+            
             seqErrorData* dataBundle = new seqErrorData(filename, qFileName, rFileName, lines[i+1], qLines[i+1], rLines[i+1], threadSummaryWriter, threadErrorWriter, threadChimeraWriter, referenceSeqs, aligned, maxLength, weights, threshold);
             data.push_back(dataBundle);
             
@@ -833,10 +829,6 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
         errorForward = dataBundle->errorForward;
         errorReverse = dataBundle->errorReverse;
         megaAlignVector = dataBundle->megaAlignVector;
-
-        delete threadSummaryWriter;
-        delete threadErrorWriter;
-        delete threadChimeraWriter;
         delete dataBundle;
         
         for (int k = 0; k < processors-1; k++) {
@@ -875,10 +867,6 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
             
             for (int j = 0; j < megaAlignVector.size(); j++) { megaAlignVector[j] += data[k]->megaAlignVector[j] + "\n"; }
             
-            
-            delete data[k]->chimeraFile;
-            delete data[k]->summaryFile;
-            delete data[k]->errorFile;
             delete data[k];
             delete workerThreads[k];
         }
@@ -888,7 +876,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
         out << "query\treference\tweight\tAA\tAT\tAG\tAC\tTA\tTT\tTG\tTC\tGA\tGT\tGG\tGC\tCA\tCT\tCG\tCC\tNA\tNT\tNG\tNC\tAi\tTi\tGi\tCi\tNi\tdA\tdT\tdG\tdC\tinsertions\tdeletions\tsubstitutions\tambig\tmatches\tmismatches\ttotal\terror\tnumparents\n";
         out.close();
         
-        util.appendFilesFront("header.temp", errorOutputFileName);
+        util.appendFilesFront("header.temp", summaryFileName);
         
 		return numSeqs;
 	}

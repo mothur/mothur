@@ -276,38 +276,14 @@ int SparccCommand::execute(){
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to process.");
-        m->mothurOutEndLine();
-        m->mothurOutEndLine();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to process.\n\n");
         
         //output files created by command
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n");
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
         return 0;
 		
-    }
-	catch(exception& e) {
-		m->errorOut(e, "SparccCommand", "execute");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-vector<vector<float> > SparccCommand::shuffleSharedVector(vector<vector<float> >& sharedVector){
-    try {
-        int numGroups = (int)sharedVector.size();
-        int numOTUs = (int)sharedVector[0].size();
-        
-        vector<vector<float> > shuffledVector = sharedVector;
-        Utils util;
-        for(int i=0;i<numGroups;i++){
-            for(int j=0;j<numOTUs;j++){
-                shuffledVector[i][j] = sharedVector[util.getRandomIndex(numGroups-1)][j];
-            }
-        }
-        
-        return shuffledVector;
     }
 	catch(exception& e) {
 		m->errorOut(e, "SparccCommand", "execute");
@@ -406,131 +382,89 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+struct sparccData {
+   	MothurOut* m;
+    vector< vector<float> > sharedVector;
+    vector< vector<float> > origCorrMatrix;
+    vector<vector<float> > pValues;
+    int numSamplings, maxIterations, numPermutations, numOTUs;
+    string normalizeMethod;
+    Utils util;
+    
+    sparccData(){}
+    sparccData(vector< vector<float> > cs, vector< vector<float> > co, int ns, int mi, int np, string nm) {
+        m = MothurOut::getInstance();
+        sharedVector = cs;
+        origCorrMatrix = co;
+        numSamplings = ns;
+        maxIterations = mi;
+        numPermutations = np;
+        normalizeMethod = nm;
+        numOTUs = sharedVector[0].size();
+        pValues.resize(numOTUs);
+        for(int i=0;i<numOTUs;i++){ pValues[i].assign(numOTUs, 0);  }
+    }
+};
+/**************************************************************************************************/
+vector<vector<float> > shuffleSharedVector(vector<vector<float> >& sharedVector, MothurOut* m, Utils& util){
+    try {
+        int numGroups = (int)sharedVector.size();
+        int numOTUs = (int)sharedVector[0].size();
+        
+        vector<vector<float> > shuffledVector = sharedVector;
+        for(int i=0;i<numGroups;i++){
+            for(int j=0;j<numOTUs;j++){
+                shuffledVector[i][j] = sharedVector[util.getRandomIndex(numGroups-1)][j];
+            }
+        }
+        
+        return shuffledVector;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SparccCommand", "shuffleSharedVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void driverSparcc(sparccData* params){
+    try {
+        vector<vector<float> > sharedShuffled = params->sharedVector;
+        
+        for(int i=0;i<params->numPermutations;i++){
+            if (params->m->getControl_pressed()) { break; }
+            sharedShuffled = shuffleSharedVector(params->sharedVector, params->m, params->util);
+            CalcSparcc permutedData(sharedShuffled, params->maxIterations, params->numSamplings, params->normalizeMethod);
+            vector<vector<float> > permuteCorrMatrix = permutedData.getRho();
+            
+            for(int j=0;j<params->numOTUs;j++){
+                for(int k=0;k<j;k++){
+                    
+                    double randValue = permuteCorrMatrix[j][k];
+                    double observedValue = params->origCorrMatrix[j][k];
+                    if(observedValue >= 0 &&  randValue > observedValue)   { params->pValues[j][k]++; }//this method seems to deflate the
+                    else if(observedValue < 0 && randValue < observedValue){ params->pValues[j][k]++; }//pvalues of small rho values
+                }
+            }
+            
+            float done = ceil(params->numPermutations * 0.05);
+            if((i+1) % (int)(done) == 0){ cout << i+1 << endl;  }
+        }
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "SparccCommand", "driverSparcc");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sharedVector, vector<vector<float> >& origCorrMatrix){
 	try {
         int numOTUs = sharedVector[0].size();
-        vector<vector<float> > pValues;
-        bool recalc = false;
+        sparccData* dataBundle = new sparccData(sharedVector, origCorrMatrix, numSamplings, maxIterations, numPermutations, normalizeMethod);
+        driverSparcc(dataBundle);
+        vector<vector<float> > pValues = dataBundle->pValues;
+        delete dataBundle;
         
-        if(processors == 1){
-			pValues = driver(sharedVector, origCorrMatrix, numPermutations);
-		}else{
-            //divide iters between processors
-			vector<int> procIters;
-            int numItersPerProcessor = numPermutations / processors;
-            
-            //divide iters between processes
-            for (int h = 0; h < processors; h++) {
-                if(h == processors - 1){ numItersPerProcessor = numPermutations - h * numItersPerProcessor; }
-                procIters.push_back(numItersPerProcessor);
-            }
-            
-            vector<int> processIDS;
-            int process = 1;
-			
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            
-			//loop through and create all the processes you want
-			while (process != processors) {
-				pid_t pid = fork();
-				
-				if (pid > 0) {
-					processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-					process++;
-				}else if (pid == 0){
-					pValues = driver(sharedVector, origCorrMatrix, procIters[process]);
-					
-					//pass pvalues to parent
-					ofstream out;
-					string tempFile = toString(process) + ".pvalues.temp";
-					util.openOutputFile(tempFile, out);
-					
-					//pass values
-					for (int i = 0; i < pValues.size(); i++) {
-                        for (int j = 0; j < pValues[i].size(); j++) {
-                            out << pValues[i][j] << '\t';
-                        }
-                        out << endl;
-					}
-					out << endl;
-					
-					out.close();
-					
-					exit(0);
-				}
-			}
-			
-            
-            
-			//do my part
-			pValues = driver(sharedVector, origCorrMatrix, procIters[0]);
-			
-			//force parent to wait until all the processes are done
-			for (int i=0;i<processIDS.size();i++) {
-				int temp = processIDS[i];
-				wait(&temp);
-			}
-			
-			//combine results
-			for (int i = 0; i < processIDS.size(); i++) {
-				ifstream in;
-				string tempFile =  toString(processIDS[i]) + ".pvalues.temp";
-				util.openInputFile(tempFile, in);
-				
-				////// to do ///////////
-				int numTemp; numTemp = 0;
-				
-                for (int j = 0; j < pValues.size(); j++) {
-                    for (int k = 0; k < pValues.size(); k++) {
-                        in >> numTemp; util.gobble(in);
-                        pValues[j][k] += numTemp;
-                    }
-                    util.gobble(in);
-				}
-				in.close(); util.mothurRemove(tempFile);
-			}
-#else
-            
-            //fill in functions
-            vector<sparccData*> pDataArray;
-            DWORD   dwThreadIdArray[processors-1];
-            HANDLE  hThreadArray[processors-1];
-            
-            //Create processor worker threads.
-            for( int i=1; i<processors; i++ ){
-                
-                //make copy so we don't get access violations
-                vector< vector<float> > copySharedVector = sharedVector;
-                vector< vector<float> > copyOrig = origCorrMatrix;
-                
-                sparccData* temp = new sparccData(m, procIters[i], copySharedVector, copyOrig, numSamplings, maxIterations, numPermutations, normalizeMethod);
-                pDataArray.push_back(temp);
-                processIDS.push_back(i);
-                
-                hThreadArray[i-1] = CreateThread(NULL, 0, MySparccThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
-            }
-            
-            //do my part
-			pValues = driver(sharedVector, origCorrMatrix, procIters[0]);
-            
-            //Wait until all threads have terminated.
-            WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-            
-            //Close all thread handles and free memory allocations.
-            for(int i=0; i < pDataArray.size(); i++){
-                for (int j = 0; j < pDataArray[i]->pValues.size(); j++) {
-                    for (int k = 0; k < pDataArray[i]->pValues[j].size(); k++) {
-                        pValues[j][k] += pDataArray[i]->pValues[j][k];
-                    }
-                }
-                
-                CloseHandle(hThreadArray[i]);
-                delete pDataArray[i];
-            }
-#endif
-		}
-
         for(int i=0;i<numOTUs;i++){
             pValues[i][i] = 1;
             for(int j=0;j<i;j++){
@@ -547,39 +481,3 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
 	}
 }
 //**********************************************************************************************************************
-vector<vector<float> > SparccCommand::driver(vector<vector<float> >& sharedVector, vector<vector<float> >& origCorrMatrix, int numPerms){
-	try {
-        int numOTUs = sharedVector[0].size();
-        vector<vector<float> > sharedShuffled = sharedVector;
-        vector<vector<float> > pValues(numOTUs);
-        for(int i=0;i<numOTUs;i++){ pValues[i].assign(numOTUs, 0);  }
-
-        for(int i=0;i<numPerms;i++){
-            if (m->getControl_pressed()) { return pValues; }
-            sharedShuffled = shuffleSharedVector(sharedVector);
-            CalcSparcc permutedData(sharedShuffled, maxIterations, numSamplings, normalizeMethod);
-            vector<vector<float> > permuteCorrMatrix = permutedData.getRho();
-            
-            for(int j=0;j<numOTUs;j++){
-                for(int k=0;k<j;k++){
-                    //cout << k << endl;
-                    double randValue = permuteCorrMatrix[j][k];
-                    double observedValue = origCorrMatrix[j][k];
-                    if(observedValue >= 0 &&  randValue > observedValue)   { pValues[j][k]++; }//this method seems to deflate the
-                    else if(observedValue < 0 && randValue < observedValue){ pValues[j][k]++; }//pvalues of small rho values
-                }
-            }
-            
-            float done = ceil(numPermutations * 0.05);
-            if((i+1) % (int)(done) == 0){ cout << i+1 << endl;  }
-        }
-        
-        return pValues;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "SparccCommand", "driver");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
