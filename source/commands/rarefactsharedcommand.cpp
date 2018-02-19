@@ -434,16 +434,11 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		}
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		if (m->getControl_pressed()) { 

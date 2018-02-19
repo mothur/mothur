@@ -589,16 +589,11 @@ int RemoveRareCommand::processSabund(){
 		if (m->getControl_pressed()) {  out.close(); return 0; }	
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
@@ -695,16 +690,11 @@ int RemoveRareCommand::processRabund(){
 		if (m->getControl_pressed()) {  out.close(); return 0; }	
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
@@ -780,16 +770,11 @@ int RemoveRareCommand::processShared(){
 		if (m->getControl_pressed()) {  return 0; }	
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
