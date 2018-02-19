@@ -393,10 +393,8 @@ int GetMIMarksPackageCommand::execute(){
         out.close();
         
         //output files created by command
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
         return 0;
 		
     }

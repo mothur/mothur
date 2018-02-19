@@ -300,8 +300,7 @@ int AlignCheckCommand::execute(){
 		else { m->mothurOut("# of unique seqs:\t" + toString(count)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
 		
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(outfile); m->mothurOutEndLine();	outputNames.push_back(outfile); outputTypes["aligncheck"].push_back(outfile);
 		m->mothurOutEndLine();
 		

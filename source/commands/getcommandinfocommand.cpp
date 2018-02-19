@@ -193,8 +193,7 @@ int GetCommandInfoCommand::execute(){
 		util.appendFiles(output+".temp", output);
 		util.mothurRemove((output+".temp"));
 	
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(output); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
 		

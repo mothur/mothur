@@ -266,8 +266,7 @@ int MGClusterCommand::execute(){
         if (method == "opti") {  runOptiCluster(); }
         else { runMothurCluster();  }
 				
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(listFileName); m->mothurOutEndLine();	outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		if (countfile == "") {
             m->mothurOut(rabundFileName); m->mothurOutEndLine();	outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);

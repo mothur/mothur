@@ -364,11 +364,9 @@ int DeconvoluteCommand::execute() {
 		
 		if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outFastaFile); for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		outputNames.push_back(outFastaFile);   outputTypes["fasta"].push_back(outFastaFile);  
-        for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+        for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
 		//set fasta file as new current fastafile
 		string currentName = "";

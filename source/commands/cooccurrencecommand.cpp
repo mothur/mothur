@@ -272,8 +272,7 @@ int CooccurrenceCommand::execute(){
 		//reset groups parameter
          
 
-        m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
         

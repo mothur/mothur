@@ -263,13 +263,10 @@ int AnosimCommand::execute(){
 		m->mothurOut("If you have borderline P-values, you should try increasing the number of iterations\n");
 		ANOSIMFile.close();
 		
-			
 		delete designMap;
 				
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -283,7 +280,6 @@ int AnosimCommand::execute(){
 double AnosimCommand::runANOSIM(ofstream& ANOSIMFile, vector<vector<double> > dMatrix, map<string, vector<int> > groupSampleMap, double alpha) {
 	try {
 
-		
 		vector<vector<double> > rankMatrix = convertToRanks(dMatrix);
 		double RValue = calcR(rankMatrix, groupSampleMap);
 		
@@ -369,10 +365,8 @@ double AnosimCommand::calcR(vector<vector<double> > rankMatrix, map<string, vect
 						numBetweenComps++;
 					}					
 				}
-				
 			}
 		}
-		
 		
 		between /= (float) numBetweenComps;
 		
@@ -401,7 +395,6 @@ vector<vector<double> > AnosimCommand::convertToRanks(vector<vector<double> > di
 				}
 			}
 		}
-		
 		
 		//sort distances
 		sort(cells.begin(), cells.end(), compareSequenceDistance); 	

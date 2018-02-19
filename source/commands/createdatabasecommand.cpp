@@ -503,8 +503,7 @@ int CreateDatabaseCommand::execute(){
         out.close();
         if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return 0; }
         
-        m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
         
