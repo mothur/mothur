@@ -1026,8 +1026,7 @@ int IndicatorCommand::getShared(){
 			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				break;
 			}
 			
@@ -1037,8 +1036,7 @@ int IndicatorCommand::getShared(){
                 delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);

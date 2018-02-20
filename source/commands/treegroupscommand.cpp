@@ -543,8 +543,7 @@ int TreeGroupCommand::makeSimsShared(InputData& input, SharedRAbundVectors*& loo
 				m->mothurOut(lookup->getLabel()+"\n");
 				createProcesses(lookup, ct);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 			
 			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -556,8 +555,7 @@ int TreeGroupCommand::makeSimsShared(InputData& input, SharedRAbundVectors*& loo
 				m->mothurOut(lookup->getLabel()+"\n");
 				createProcesses(lookup, ct);
 					
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);

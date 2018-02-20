@@ -617,8 +617,7 @@ int GetSharedOTUCommand::runShared() {
 				m->mothurOut(lookup->getLabel());
 				process(lookup);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 			
 			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {

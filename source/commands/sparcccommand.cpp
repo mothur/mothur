@@ -213,7 +213,7 @@ int SparccCommand::execute(){
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 process(lookup);
                 
@@ -226,7 +226,7 @@ int SparccCommand::execute(){
                 
                 delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 process(lookup);                
                 
@@ -267,7 +267,7 @@ int SparccCommand::execute(){
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             
-            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()+"\n"); 
             
             process(lookup);           
             

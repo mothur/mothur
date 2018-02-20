@@ -472,7 +472,7 @@ int SharedCommand::createSharedFromBiom() {
             lookup->setOTUNames(otuNames);
             lookup->eliminateZeroOTUS();
 
-            m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()+"\n"); 
             printSharedData(lookup, out);
         }
 
@@ -814,7 +814,7 @@ int SharedCommand::createSharedFromListGroup() {
 
                 lookup = SharedList->getSharedRAbundVector();
 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
 
                 if (m->getControl_pressed()) {
                     delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
@@ -855,7 +855,7 @@ int SharedCommand::createSharedFromListGroup() {
                 SharedList = input.getSharedListVector(lastLabel); //get new list vector to process
 
                 lookup = SharedList->getSharedRAbundVector();
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
 
                 if (m->getControl_pressed()) {
                     delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
@@ -914,7 +914,7 @@ int SharedCommand::createSharedFromListGroup() {
             SharedList = input.getSharedListVector(lastLabel); //get new list vector to process
 
             lookup = SharedList->getSharedRAbundVector();
-            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()+"\n"); 
 
             if (m->getControl_pressed()) {
                 if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }

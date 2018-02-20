@@ -246,11 +246,10 @@ int MatrixOutputCommand::execute(){
 			if (m->getControl_pressed()) { outputTypes.clear(); delete lookup;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				createProcesses(lookup);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 			
 			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -259,11 +258,10 @@ int MatrixOutputCommand::execute(){
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				createProcesses(lookup);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);
@@ -298,7 +296,7 @@ int MatrixOutputCommand::execute(){
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 
-			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()+"\n"); 
 			createProcesses(lookup);
 			delete lookup;
 		}

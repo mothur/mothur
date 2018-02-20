@@ -247,11 +247,10 @@ int MetaStatsCommand::execute(){
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				process(lookup);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 			
 			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -259,12 +258,11 @@ int MetaStatsCommand::execute(){
 			
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				
 				process(lookup);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);
@@ -295,7 +293,7 @@ int MetaStatsCommand::execute(){
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()+"\n"); 
 			
 			process(lookup);
 			

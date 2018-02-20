@@ -537,7 +537,6 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         time(&start);
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            //alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, MothurOut* mo, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se)
             int threadID = i+1;
             alignStruct* dataBundle = new alignStruct(*lines[i+1], (alignFileName + toString(threadID) + ".temp"),
                                                         reportFileName + toString(threadID) + ".temp",

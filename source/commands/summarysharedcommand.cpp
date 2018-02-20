@@ -409,13 +409,12 @@ int SummarySharedCommand::execute(){
 
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n");
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 process(data, outputFileName, outAllFileName, currentLabels);
                 for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 			
 			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -424,13 +423,12 @@ int SummarySharedCommand::execute(){
 					delete lookup;
 					lookup = input.getSharedRAbundVectors(lastLabel);
 
-					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookup->getLabel()+"\n"); 
                     vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                     process(data, outputFileName, outAllFileName, currentLabels);
                     for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 					
-					processedLabels.insert(lookup->getLabel());
-					userLabels.erase(lookup->getLabel());
+					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
 					lookup->setLabels(saveLabel);
@@ -461,16 +459,13 @@ int SummarySharedCommand::execute(){
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
 
-            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()+"\n"); 
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             process(data, outputFileName, outAllFileName, currentLabels);
             for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
             delete lookup;
 		}
 		
-				
-		//reset groups parameter
-		  
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		

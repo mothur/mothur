@@ -640,8 +640,7 @@ SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
 			if (m->getControl_pressed()) {   delete lookup; return NULL;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				break;
 			}
 			
@@ -651,8 +650,7 @@ SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
                 delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);

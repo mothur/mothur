@@ -701,8 +701,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 			if (m->getControl_pressed()) {  return lookup;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				break;
 			}
 			
@@ -712,8 +711,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
                 delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);

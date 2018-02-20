@@ -380,7 +380,7 @@ int MakeBiomCommand::execute(){
                 
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     getBiom(lookup);
                     
                     processedLabels.insert(lookup->getLabel());
@@ -392,7 +392,7 @@ int MakeBiomCommand::execute(){
                     
                     delete lookup;
                     lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     
                     getBiom(lookup);
                     
@@ -465,7 +465,7 @@ int MakeBiomCommand::execute(){
                 delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 getBiom(lookup);
                 
                 delete lookup;

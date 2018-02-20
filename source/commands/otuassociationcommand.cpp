@@ -257,10 +257,9 @@ int OTUAssociationCommand::processShared(){
 			if (m->getControl_pressed()) {  delete input; return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				process(lookup);
 			}
 			
@@ -270,13 +269,12 @@ int OTUAssociationCommand::processShared(){
 				delete lookup;
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				process(lookup);
 			}
 			
@@ -304,7 +302,7 @@ int OTUAssociationCommand::processShared(){
 			delete lookup;
 			lookup = input->getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()+"\n"); 
 			process(lookup);
 		}	
 		
@@ -418,10 +416,9 @@ int OTUAssociationCommand::processRelabund(){
 			if (m->getControl_pressed()) {  delete input; return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				process(lookup);
 			}
 			
@@ -431,13 +428,12 @@ int OTUAssociationCommand::processRelabund(){
 				delete lookup;
 				lookup = input->getSharedRAbundFloatVectors(lastLabel);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				process(lookup);
 			}
 			
@@ -465,7 +461,7 @@ int OTUAssociationCommand::processRelabund(){
 			delete lookup;
 			lookup = input->getSharedRAbundFloatVectors(lastLabel);
 			
-			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()+"\n"); 
 			process(lookup);
             delete lookup;
 		}	

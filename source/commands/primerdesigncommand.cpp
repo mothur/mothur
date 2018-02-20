@@ -251,18 +251,21 @@ int PrimerDesignCommand::execute(){
         //////////////////////////////////////////////////////////////////////////////
         
         //reads list file and selects the label the users specified or the first label
-        getListVector();
+        ListVector* list = getListVector();
         vector<string> binLabels = list->getLabels();
         int binIndex = findIndex(otulabel, binLabels);
         if (binIndex == -1) { m->mothurOut("[ERROR]: You selected an OTU label that is not in your in your list file, quitting.\n"); return 0; }
         
         map<string, int> nameMap;
-        unsigned long int numSeqs;  //used to sanity check the files. numSeqs = total seqs for namefile and uniques for count.
+        long long numSeqs;  //used to sanity check the files. numSeqs = total seqs for namefile and uniques for count.
                                     //list file should have all seqs if namefile was used to create it and only uniques in count file was used.
         
-        if (namefile != "")         {  nameMap = util.readNames(namefile, numSeqs);       }
-        else if (countfile != "")   {  nameMap = readCount(numSeqs);                    }
-        else { numSeqs = list->getNumSeqs();  }
+        if (namefile != "")         {  unsigned long int temp; nameMap = util.readNames(namefile, temp);   numSeqs = temp;      }
+        else if (countfile != "")   {
+            CountTable ct; ct.readTable(countfile, false, false);
+            numSeqs = ct.getNumUniqueSeqs();
+            nameMap = ct.getNameMap();
+        }else { numSeqs = list->getNumSeqs();  }
         
         //sanity check
         if (numSeqs != list->getNumSeqs()) {
@@ -278,9 +281,11 @@ int PrimerDesignCommand::execute(){
         //////////////////////////////////////////////////////////////////////////////
         //              process data                                                //
         //////////////////////////////////////////////////////////////////////////////
-        m->mothurOut("\nFinding consensus sequences for each otu..."); cout.flush();
+        m->mothurOut("\nFinding consensus sequences for each otu...\n");
         
-        vector<Sequence> conSeqs = createProcessesConSeqs(nameMap, numSeqs);
+        map<string, int> seq2Bin = getSequenceBinAssignments(list, nameMap);
+        
+        vector<Sequence> conSeqs = createProcessesConSeqs(nameMap, seq2Bin, binLabels);
         
         map<string, string> variables; 
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
@@ -291,8 +296,6 @@ int PrimerDesignCommand::execute(){
         util.openOutputFile(consFastaFile, out);
         for (int i = 0; i < conSeqs.size(); i++) {  conSeqs[i].printSequence(out);  }
         out.close();
-        
-        m->mothurOut("Done.\n\n");
         
         set<string> primers = getPrimer(conSeqs[binIndex]);
         
@@ -336,11 +339,13 @@ int PrimerDesignCommand::execute(){
             }else { primers.erase(it++);  } //erase because it didn't qualify
         }
         
-        outSum << "\nOTUNumber\tPrimer\tStart\tEnd\tLength\tMismatches\tminTm\tmaxTm\n";
+        outSum << "\nOTU\tPrimer\tStart\tEnd\tLength\tMismatches\tminTm\tmaxTm\n";
         outSum.close();
         
+        m->mothurOut("\nProcessing OTUs...\n");
+        
         //check each otu's conseq for each primer in otunumber
-        set<int> otuToRemove = createProcesses(consSummaryFile, minTms, maxTms, primers, conSeqs, binIndex);
+        set<int> otuToRemove = createProcesses(consSummaryFile, minTms, maxTms, primers, conSeqs, binIndex, binLabels);
         
         if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
@@ -372,13 +377,11 @@ int PrimerDesignCommand::execute(){
         util.appendFiles(newListFile+".temp", newListFile);
         util.mothurRemove(newListFile+".temp");
         outputNames.push_back(newListFile); outputTypes["list"].push_back(newListFile);
-        
-        if (m->getControl_pressed()) { delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
-        
         delete list;
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(list->getNumBins()) + " OTUs.\n");
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(list->getNumBins()) + " OTUs.\n");
         
         //output files created by command
 		m->mothurOut("\nOutput File Names: \n"); 
@@ -476,40 +479,6 @@ int PrimerDesignCommand::findMeltingPoint(string primer, double& minTm, double& 
 	}
 }
 //********************************************************************/
-//search for a primer over the sequence string
-bool PrimerDesignCommand::findPrimer(string rawSequence, string primer, vector<int>& primerStart, vector<int>& primerEnd, vector<int>& mismatches){
-	try {
-        bool foundAtLeastOne = false;  //innocent til proven guilty
-        
-        //look for exact match
-        if(rawSequence.length() < primer.length()) {  return false;  }
-			
-        //search for primer
-        for (int j = 0; j < rawSequence.length()-length; j++){
-            
-            if (m->getControl_pressed()) {  return foundAtLeastOne; }
-            
-            string rawChunk = rawSequence.substr(j, length);
-            
-            int numDiff = countDiffs(primer, rawChunk);
-           
-            if(numDiff <= pdiffs){
-                primerStart.push_back(j);
-                primerEnd.push_back(j+length);
-                mismatches.push_back(numDiff);
-                foundAtLeastOne = true;
-            }
-        }
-		
-		return foundAtLeastOne;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PrimerDesignCommand", "findPrimer");
-		exit(1);
-	}
-}
-//********************************************************************/
 //find all primers for the given sequence
 set<string> PrimerDesignCommand::getPrimer(Sequence primerSeq){
 	try {
@@ -531,15 +500,175 @@ set<string> PrimerDesignCommand::getPrimer(Sequence primerSeq){
 		exit(1);
 	}
 }
+//********************************************************************/
+/* A = adenine
+ * C = cytosine
+ * G = guanine
+ * T = thymine
+ * R = G A (purine)
+ * Y = T C (pyrimidine)
+ * K = G T (keto)
+ * M = A C (amino)
+ * S = G C (strong bonds)
+ * W = A T (weak bonds)
+ * B = G T C (all but A)
+ * D = G A T (all but C)
+ * H = A C T (all but G)
+ * V = G C A (all but T)
+ * N = A G C T (any) */
+int countDiffs(string oligo, string seq, MothurOut* m){
+    try {
+        
+        int length = oligo.length();
+        int countDiffs = 0;
+        
+        for(int i=0;i<length;i++){
+            
+            oligo[i] = toupper(oligo[i]);
+            seq[i] = toupper(seq[i]);
+            
+            if(oligo[i] != seq[i]){
+                if(oligo[i] == 'A' && (seq[i] != 'A' && seq[i] != 'M' && seq[i] != 'R' && seq[i] != 'W' && seq[i] != 'D' && seq[i] != 'H' && seq[i] != 'V'))       {	countDiffs++;	}
+                else if(oligo[i] == 'C' && (seq[i] != 'C' && seq[i] != 'Y' && seq[i] != 'M' && seq[i] != 'S' && seq[i] != 'B' && seq[i] != 'H' && seq[i] != 'V'))       {	countDiffs++;	}
+                else if(oligo[i] == 'G' && (seq[i] != 'G' && seq[i] != 'R' && seq[i] != 'K' && seq[i] != 'S' && seq[i] != 'B' && seq[i] != 'D' && seq[i] != 'V'))       {	countDiffs++;	}
+                else if(oligo[i] == 'T' && (seq[i] != 'T' && seq[i] != 'Y' && seq[i] != 'K' && seq[i] != 'W' && seq[i] != 'B' && seq[i] != 'D' && seq[i] != 'H'))       {	countDiffs++;	}
+                else if((oligo[i] == '.' || oligo[i] == '-'))           {	countDiffs++;	}
+                else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))                         {	countDiffs++;	}
+                else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))                        {	countDiffs++;	}
+                else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))                        {	countDiffs++;	}
+                else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))                        {	countDiffs++;	}
+                else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))                        {	countDiffs++;	}
+                else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))                        {	countDiffs++;	}
+                else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))                        {	countDiffs++;	}
+                else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))       {	countDiffs++;	}
+                else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))       {	countDiffs++;	}
+                else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))       {	countDiffs++;	}
+                else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))       {	countDiffs++;	}
+            }
+            
+        }
+        
+        return countDiffs;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PrimerDesignCommand", "countDiffs");
+        exit(1);
+    }
+}
+//********************************************************************/
+//search for a primer over the sequence string
+bool findPrimer(string rawSequence, string primer, vector<int>& primerStart, vector<int>& primerEnd, vector<int>& mismatches, int length, int pdiffs, MothurOut* m){
+    try {
+        bool foundAtLeastOne = false;  //innocent til proven guilty
+        
+        //look for exact match
+        if(rawSequence.length() < primer.length()) {  return false;  }
+        
+        //search for primer
+        for (int j = 0; j < rawSequence.length()-length; j++){
+            
+            if (m->getControl_pressed()) {  return foundAtLeastOne; }
+            
+            string rawChunk = rawSequence.substr(j, length);
+            
+            int numDiff = countDiffs(primer, rawChunk, m);
+            
+            if(numDiff <= pdiffs){
+                primerStart.push_back(j);
+                primerEnd.push_back(j+length);
+                mismatches.push_back(numDiff);
+                foundAtLeastOne = true;
+            }
+        }
+        
+        return foundAtLeastOne;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PrimerDesignCommand", "findPrimer");
+        exit(1);
+    }
+}
+
 /**************************************************************************************************/
-set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<double>& minTms, vector<double>& maxTms, set<string>& primers, vector<Sequence>& conSeqs, int binIndex) {
+struct primerDesignData {
+    OutputWriter* summaryFile;
+    MothurOut* m;
+    int start;
+    int end;
+    int pdiffs, length, binIndex;
+    set<string> primers;
+    vector<double> minTms, maxTms;
+    set<int> otusToRemove;
+    vector<Sequence> consSeqs;
+    vector<string> binLabels;
+    int numBinsProcessed;
+    Utils util;
+    
+    primerDesignData(){ delete summaryFile; }
+    primerDesignData(OutputWriter* sf, int st, int en, vector<double> min, vector<double> max, set<string> pri, vector<Sequence> seqs, int d, int otun, int l, vector<string> bl) {
+        summaryFile = sf;
+        m = MothurOut::getInstance();
+        start = st;
+        end = en;
+        pdiffs = d;
+        minTms = min;
+        maxTms = max;
+        primers = pri;
+        consSeqs = seqs;
+        binIndex = otun;
+        length = l;
+        binLabels = bl;
+        numBinsProcessed = 0;
+    }
+};
+//**********************************************************************************************************************
+void driverPDesign(primerDesignData* params){
+    try {
+        
+        for (int i = params->start; i < params->end; i++) {
+            
+            if (params->m->getControl_pressed()) { break; }
+            
+            if (i != (params->binIndex)) {
+                int primerIndex = 0;
+                string output = "";
+                for (set<string>::iterator it = params->primers.begin(); it != params->primers.end(); it++) {
+                    vector<int> primerStarts;
+                    vector<int> primerEnds;
+                    vector<int> mismatches;
+                    
+                    bool found = findPrimer(params->consSeqs[i].getUnaligned(), (*it), primerStarts, primerEnds, mismatches, params->length, params->pdiffs, params->m);
+                    
+                    //if we found it report to the table
+                    if (found) {
+                        for (int j = 0; j < primerStarts.size(); j++) {
+                            output += params->binLabels[i] + '\t' + *it + '\t' + toString(primerStarts[j]) + '\t' + toString(primerEnds[j]) + '\t' + toString(params->length) + '\t' + toString(mismatches[j]) + '\t' + toString(params->minTms[primerIndex]) + '\t' + toString(params->maxTms[primerIndex]) + '\n';
+                        }
+                        params->otusToRemove.insert(i);
+                    }
+                    primerIndex++;
+                }
+                params->summaryFile->write(output);
+            }
+            params->numBinsProcessed++;
+            
+            if((params->numBinsProcessed) % 100 == 0){	params->m->mothurOutJustToScreen(toString(params->numBinsProcessed)+"\n"); 		}
+        }
+        
+        if((params->numBinsProcessed) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->numBinsProcessed)+"\n"); 		}
+     }
+    catch(exception& e) {
+        params->m->errorOut(e, "PrimerDesignCommand", "driver");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<double>& minTms, vector<double>& maxTms, set<string>& primers, vector<Sequence>& conSeqs, int binIndex, vector<string>& binLabels) {
 	try {
-		
-		vector<int> processIDS;
-		int process = 1;
-        set<int> otusToRemove;
-        int numBinsProcessed = 0;
-        bool recalc = false;
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<primerDesignData*> data;
 		
 		//sanity check
         int numBins = conSeqs.size();
@@ -555,112 +684,36 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 			lines.push_back(linePair(startIndex, endIndex));
 		}
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-                //clear old file because we append in driver
-                util.mothurRemove(newSummaryFile + toString(process) + ".temp");
-                
-				otusToRemove = driver(newSummaryFile + toString(process) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
-                
-                string tempFile = toString(process) + ".otus2Remove.temp";
-                ofstream outTemp;
-                util.openOutputFile(tempFile, outTemp);
-                
-                outTemp << numBinsProcessed << endl;
-                outTemp << otusToRemove.size() << endl;
-                for (set<int>::iterator it = otusToRemove.begin(); it != otusToRemove.end(); it++) { outTemp << *it << endl; }
-                outTemp.close();
-                
-				exit(0);
-			}
-		}
+        auto synchronizedOutputSummaryFile = std::make_shared<SynchronizedOutputFile>(newSummaryFile, true); //open append
         
-        
-		//do my part
-		otusToRemove = driver(newSummaryFile, minTms, maxTms, primers, conSeqs, lines[0].start, lines[0].end, numBinsProcessed, binIndex);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-        
-        for (int i = 0; i < processIDS.size(); i++) {
-            string tempFile = toString(processIDS[i]) +  ".otus2Remove.temp";
-            ifstream intemp;
-            util.openInputFile(tempFile, intemp);
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            OutputWriter* threadSummaryWriter = new OutputWriter(synchronizedOutputSummaryFile);
             
-            int num;
-            intemp >> num; util.gobble(intemp);
-            if (num != (lines[i+1].end - lines[i+1].start)) { m->mothurOut("[ERROR]: process " + toString(processIDS[i]) + " did not complete processing all OTUs assigned to it, quitting.\n"); m->setControl_pressed(true); }
-            intemp >> num; util.gobble(intemp);
-            for (int k = 0; k < num; k++) {
-                int otu;
-                intemp >> otu; util.gobble(intemp);
-                otusToRemove.insert(otu); 
-            }
-            intemp.close();
-            util.mothurRemove(tempFile);
+            primerDesignData* dataBundle = new primerDesignData(threadSummaryWriter, lines[i+1].start, lines[i+1].end, minTms, maxTms, primers, conSeqs, pdiffs, binIndex, length, binLabels);
+            
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverPDesign, dataBundle));
+        }
+        
+        OutputWriter* threadSummaryWriter = new OutputWriter(synchronizedOutputSummaryFile);
+        primerDesignData* dataBundle = new primerDesignData(threadSummaryWriter, lines[0].start, lines[0].end, minTms, maxTms, primers, conSeqs, pdiffs, binIndex, length, binLabels);
+        
+        driverPDesign(dataBundle);
+        set<int> otusToRemove = dataBundle->otusToRemove;
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+    
+            otusToRemove.insert(data[i]->otusToRemove.begin(), data[i]->otusToRemove.end());
+            
+            delete data[i];
+            delete workerThreads[i];
         }
 
-        
-    #else
-		
-		vector<primerDesignData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=1; i<processors; i++ ){
-			// Allocate memory for thread data.
-			string extension = toString(i) + ".temp";
-			util.mothurRemove(newSummaryFile+extension);
-            
-			primerDesignData* tempPrimer = new primerDesignData((newSummaryFile+extension), m, lines[i].start, lines[i].end, minTms, maxTms, primers, conSeqs, pdiffs, binIndex, length, i);
-			pDataArray.push_back(tempPrimer);
-			processIDS.push_back(i);
-			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i-1] = CreateThread(NULL, 0, MyPrimerThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
-		}
-		
-        
-		//using the main process as a worker saves time and memory
-		otusToRemove = driver(newSummaryFile, minTms, maxTms, primers, conSeqs, lines[0].start, lines[0].end, numBinsProcessed, binIndex);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            for (set<int>::iterator it = pDataArray[i]->otusToRemove.begin(); it != pDataArray[i]->otusToRemove.end(); it++) { 
-				otusToRemove.insert(*it);  
-			}
-            int num = pDataArray[i]->numBinsProcessed;
-            if (num != (lines[processIDS[i]].end - lines[processIDS[i]].start)) { m->mothurOut("[ERROR]: process " + toString(processIDS[i]) + " did not complete processing all OTUs assigned to it, quitting.\n"); m->setControl_pressed(true); }
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		
-#endif		
-		
-		//append output files
-		for(int i=0;i<processIDS.size();i++){
-			util.appendFiles((newSummaryFile + toString(processIDS[i]) + ".temp"), newSummaryFile);
-			util.mothurRemove((newSummaryFile + toString(processIDS[i]) + ".temp"));
-		}
-		
-		return otusToRemove;	
-		
+		return otusToRemove;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PrimerDesignCommand", "createProcesses");
@@ -668,269 +721,234 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 	}
 }
 //**********************************************************************************************************************
-set<int> PrimerDesignCommand::driver(string summaryFileName, vector<double>& minTms, vector<double>& maxTms, set<string>& primers, vector<Sequence>& conSeqs, int start, int end, int& numBinsProcessed, int binIndex){
-	try {
-        set<int> otuToRemove;
-        
-        ofstream outSum;
-        util.openOutputFileAppend(summaryFileName, outSum);
-        
-        for (int i = start; i < end; i++) {
-        
-            if (m->getControl_pressed()) { break; }
-            
-            if (i != (binIndex)) {
-                int primerIndex = 0;
-                for (set<string>::iterator it = primers.begin(); it != primers.end(); it++) {
-                    vector<int> primerStarts;
-                    vector<int> primerEnds;
-                    vector<int> mismatches;
-                    
-                    bool found = findPrimer(conSeqs[i].getUnaligned(), (*it), primerStarts, primerEnds, mismatches);
-                    
-                    //if we found it report to the table
-                    if (found) {
-                        for (int j = 0; j < primerStarts.size(); j++) {
-                            outSum << (i+1) << '\t' << *it << '\t' << primerStarts[j] << '\t' << primerEnds[j] << '\t' << length << '\t' << mismatches[j] << '\t' << minTms[primerIndex] << '\t' << maxTms[primerIndex] << endl;
-                        }
-                        otuToRemove.insert(i);
-                    }
-                    primerIndex++;
-                }
-            }
-            numBinsProcessed++;
-        }
-        outSum.close();
-        
-        
-        return otuToRemove;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "PrimerDesignCommand", "driver");
-		exit(1);
-	}
-}
-/**************************************************************************************************/ 
-vector< vector< vector<unsigned int> > > PrimerDesignCommand::driverGetCounts(map<string, int>& nameMap, unsigned long int& fastaCount, vector<unsigned int>& otuCounts, unsigned long long& start, unsigned long long& end){
+int initializeCounts(vector< vector< vector<unsigned int> > >& counts, int length, int numBins, MothurOut* m){
     try {
-        vector< vector< vector<unsigned int> > > counts;
+        counts.clear();
+        
+        //vector< vector< vector<unsigned int> > > counts - otu < spot_in_alignment < counts_for_A,T,G,C,Gap > > >
+        for (int i = 0; i < numBins; i++) {
+            
+            vector<unsigned int> temp; temp.resize(5, 0); //A,T,G,C,Gap
+            vector< vector<unsigned int> > temp2;
+            for (int j = 0; j < length; j++) {
+                temp2.push_back(temp);
+            }
+            counts.push_back(temp2);
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PrimerDesignCommand", "initializeCounts");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+struct primerCountsData {
+    map<string, int> seq2Bin;
+    vector< vector< vector<unsigned int> > > counts;  // - otu < spot_in_alignment < counts_for_A,T,G,C,Gap > > >
+    MothurOut* m;
+    long long start, end, count, total, alignedLength, numBins;
+    string fastafile;
+    Utils util;
+    map<string, int> nameMap;
+    vector<long long> otuCounts;
+    bool hasNameMap;
+    
+    primerCountsData(){  }
+    primerCountsData(string ff, map<string, int> nmp, long long st, long long en, map<string, int> seq2B, int nb) {
+        fastafile = ff;
+        m = MothurOut::getInstance();
+        start = st;
+        end = en;
+        hasNameMap = false;
+        nameMap = nmp;
+        if (nameMap.size() != 0) { hasNameMap = true; }
+        seq2Bin = seq2B;
+        numBins = nb;
+        count = 0; total = 0;
+    }
+};
+//**********************************************************************************************************************
+map<string, int> PrimerDesignCommand::getSequenceBinAssignments(ListVector* list, map<string, int>& nameMap){
+    try {
         map<string, int> seq2Bin;
-        alignedLength = 0;
+        bool hasNameMap = false;
+        if (nameMap.size() != 0) { hasNameMap = true; }
         
-        ifstream in;
-		util.openInputFile(fastafile, in);
+        for (int i = 0; i < list->getNumBins(); i++) {
+            string binNames = list->get(i);
+            vector<string> names;
+            util.splitAtComma(binNames, names);
+            
+            //lets be smart and only map the unique names if a name or count file was given to save search time and memory
+            if (hasNameMap) {
+                for (int j = 0; j < names.size(); j++) {
+                    map<string, int>::iterator itNames = nameMap.find(names[j]);
+                    if (itNames != nameMap.end()) { //add name because its a unique one
+                        seq2Bin[names[j]] = i;
+                    }
+                }
+            }else { for (int j = 0; j < names.size(); j++) { seq2Bin[names[j]] = i;  } } //map everyone
+        }
+
+        return seq2Bin;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PrimerDesignCommand", "getSequenceBinAssignments");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+void driverGetCounts(primerCountsData* params){
+    try {
+        params->otuCounts.resize(params->numBins, 0);
+        params->alignedLength = 0;
         
-		in.seekg(start);
+        ifstream in; params->util.openInputFile(params->fastafile, in);
+		in.seekg(params->start);
         
         //adjust start if null strings
-        if (start == 0) {  util.zapGremlins(in); util.gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
         
 		bool done = false;
-		fastaCount = 0;
-        
+    
 		while (!done) {
-            if (m->getControl_pressed()) { in.close(); return counts; }
+            if (params->m->getControl_pressed()) { break; }
             
-			Sequence seq(in); util.gobble(in);
+			Sequence seq(in); params->util.gobble(in);
             
 			if (seq.getName() != "") {
-                if (fastaCount == 0) { alignedLength = seq.getAligned().length(); initializeCounts(counts, alignedLength, seq2Bin, nameMap, otuCounts); }
-                else if (alignedLength != seq.getAligned().length()) {
-                    m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned."); m->mothurOutEndLine(); m->setControl_pressed(true); break;
+                if (params->count == 0) { params->alignedLength = seq.getAligned().length(); initializeCounts(params->counts, params->alignedLength, params->numBins, params->m); }
+                else if (params->alignedLength != seq.getAligned().length()) {
+                    params->m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned.\n"); params->m->setControl_pressed(true); break;
                 }
                 
                 int num = 1;
-                map<string, int>::iterator itCount;
-                if (namefile != "") { 
-                    itCount = nameMap.find(seq.getName());
-                    if (itCount == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your name file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); break; }
-                    else { num = itCount->second; }
-                    fastaCount+=num;
-                }else if (countfile != "") {
-                    itCount = nameMap.find(seq.getName());
-                    if (itCount == nameMap.end()) {  m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your count file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); break; }
-                    else { num = itCount->second; }
-                    fastaCount++;
-                }else {
-                    fastaCount++;
-                }
+                if (params->hasNameMap) {
+                    map<string, int>::iterator itCount = params->nameMap.find(seq.getName());
+                    if (itCount == params->nameMap.end()) {  params->m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your name or count file, aborting.\n");  params->m->setControl_pressed(true); break; }
+                    else { params->total += itCount->second; num = itCount->second; }
+                }else { params->total++; }
                 
                 //increment counts
-                itCount = seq2Bin.find(seq.getName());
-                if (itCount == seq2Bin.end()) {
-                    if ((namefile != "") || (countfile != "")) {
-                        m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your list file, aborting. Perhaps you forgot to include your name or count file while clustering.\n"); m->mothurOutEndLine(); m->setControl_pressed(true); break;
-                    }else{
-                        m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your list file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); break;
-                    }
+                map<string, int>::iterator itCount = params->seq2Bin.find(seq.getName());
+                if (itCount == params->seq2Bin.end()) { params->m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your list file, aborting.\n");  params->m->setControl_pressed(true); break;
                 }else {
-                    otuCounts[itCount->second] += num;
+                    params->otuCounts[itCount->second] += num;
                     string aligned = seq.getAligned();
-                    for (int i = 0; i < alignedLength; i++) {
+                    for (int i = 0; i < params->alignedLength; i++) {
                         char base = toupper(aligned[i]);
-                        if (base == 'A') { counts[itCount->second][i][0]+=num; }
-                        else if (base == 'T') { counts[itCount->second][i][1]+=num; }
-                        else if (base == 'G') { counts[itCount->second][i][2]+=num; }
-                        else if (base == 'C') { counts[itCount->second][i][3]+=num; }
-                        else { counts[itCount->second][i][4]+=num; }
+                        if (base == 'A') { params->counts[itCount->second][i][0]+=num; }
+                        else if (base == 'T') { params->counts[itCount->second][i][1]+=num; }
+                        else if (base == 'G') { params->counts[itCount->second][i][2]+=num; }
+                        else if (base == 'C') { params->counts[itCount->second][i][3]+=num; }
+                        else { params->counts[itCount->second][i][4]+=num; }
                     }
                 }
 
             }
-
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            params->count++;
+            
+            if((params->count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
+            
+#if defined NON_WINDOWS
             unsigned long long pos = in.tellg();
-            if ((pos == -1) || (pos >= end)) { break; }
+            if ((pos == -1) || (pos >= params->end)) { break; }
 #else
-            if (in.eof()) { break; }
+            if ((params->count == params->end) || (in.eof())) { break; }
 #endif
 		}
-				
-		in.close();
+		
+        if((params->count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n");		}
         
-        return counts;
+		in.close();
     }
 	catch(exception& e) {
-		m->errorOut(e, "PrimerDesignCommand", "driverGetCounts");
+		params->m->errorOut(e, "PrimerDesignCommand", "driverGetCounts");
 		exit(1);
 	}
 }
 /**************************************************************************************************/
-vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& nameMap, unsigned long int& numSeqs) {
+vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& nameMap, map<string, int>& seq2Bin, vector<string>& binLabels) {
 	try {
-        vector< vector< vector<unsigned int> > > counts;
-        vector<unsigned int> otuCounts;
-		vector<int> processIDS;
-		int process = 1;
-        unsigned long int fastaCount = 0;
-        bool recalc = false;
- 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
-		
-        vector<unsigned long long> positions; 
-        vector<fastaLinePair> lines;
-        positions = util.divideFile(fastafile, processors);
-        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(fastaLinePair(positions[i], positions[(i+1)]));	}
-
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
- 				counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[process].start, lines[process].end);
-                
-                string tempFile = toString(process) + ".cons_counts.temp";
-                ofstream outTemp;
-                util.openOutputFile(tempFile, outTemp);
-                
-                outTemp << fastaCount << endl;
-                //pass counts
-                outTemp << counts.size() << endl;
-                for (int i = 0; i < counts.size(); i++) { 
-                    outTemp << counts[i].size() << endl;
-                    for (int j = 0; j < counts[i].size(); j++) { 
-                        for (int k = 0; k < 5; k++) {  outTemp << counts[i][j][k] << '\t'; }
-                        outTemp << endl;
-                    }
-                }
-                //pass otuCounts
-                outTemp << otuCounts.size() << endl;
-                for (int i = 0; i < otuCounts.size(); i++) { outTemp << otuCounts[i] << '\t'; }
-                outTemp << endl;
-                outTemp.close();
-                
-				exit(0);
-			}
-		}
-        
-        
-		//do my part
-		counts = driverGetCounts(nameMap, fastaCount, otuCounts, lines[0].start, lines[0].end);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-        
-        for (int i = 0; i < processIDS.size(); i++) {
-            string tempFile = toString(processIDS[i]) +  ".cons_counts.temp";
-            ifstream intemp;
-            util.openInputFile(tempFile, intemp);
-            
-            unsigned long int num;
-            intemp >> num; util.gobble(intemp); fastaCount += num;
-            intemp >> num; util.gobble(intemp);
-            if (num != counts.size()) { m->mothurOut("[ERROR]: " + tempFile + " was not built correctly by the child process, quitting.\n"); m->setControl_pressed(true); }
-            else {
-                //read counts
-                for (int k = 0; k < num; k++) {
-                    int alength;
-                    intemp >> alength; util.gobble(intemp);
-                    if (alength != alignedLength) {  m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-                    else {
-                        for (int j = 0; j < alength; j++) {
-                            for (int l = 0; l < 5; l++) {  unsigned int numTemp; intemp >> numTemp; util.gobble(intemp); counts[k][j][l] += numTemp;  }
-                        }
-                    }
-                }
-                //read otuCounts
-                intemp >> num; util.gobble(intemp);
-                for (int k = 0; k < num; k++) {  
-                    unsigned int numTemp; intemp >> numTemp; util.gobble(intemp); 
-                    otuCounts[k] += numTemp; 
-                }
-            }
-            intemp.close();
-            util.mothurRemove(tempFile);
-        }
-        
-        
+        int numBins = binLabels.size();
+        vector<linePair> lines;
+#if defined NON_WINDOWS
+        vector<unsigned long long> positions;  positions = util.divideFile(fastafile, processors);
+        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        unsigned long long start = 0;
-        unsigned long long end = 1000;
-		counts = driverGetCounts(nameMap, fastaCount, otuCounts, start, end);	
-#endif		
+        positions = util.setFilePosFasta(fastafile, numSeqs);
+        if (numSeqs < processors) { processors = numSeqs; m->mothurOut("Reducing processors to " + toString(numSeqs) + ".\n");  }
         
-        //you will have a nameMap error if there is a namefile or countfile, but if those aren't given we want to make sure the fasta and list file match.
-        if (fastaCount != numSeqs) {
-            if ((namefile == "") && (countfile == ""))   {  m->mothurOut("[ERROR]: Your list file contains " + toString(list->getNumSeqs()) + " sequences, and your fasta file contains " + toString(fastaCount) + " sequences, aborting. Do you have the correct files? Perhaps you forgot to include the name or count file? \n");   }
-            m->setControl_pressed(true);
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = numSeqs / processors;
+        for (int i = 0; i < processors; i++) {
+            int startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
+#endif
+        
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<primerCountsData*> data;
+
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            if (m->getControl_pressed()) {  cout << " control pressed " << "\n"; break; }
+            
+            primerCountsData* dataBundle = new primerCountsData(fastafile, nameMap, lines[i+1].start, lines[i+1].end, seq2Bin, numBins);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverGetCounts, dataBundle));
         }
         
-		vector<Sequence> conSeqs;
-        
-        if (m->getControl_pressed()) { return conSeqs; }
+        primerCountsData* dataBundle = new primerCountsData(fastafile, nameMap, lines[0].start, lines[0].end, seq2Bin, numBins);
+        driverGetCounts(dataBundle);
+        vector< vector< vector<unsigned int> > > counts = dataBundle->counts;
+        vector<long long> otuCounts = dataBundle->otuCounts;
+        long long total = dataBundle->total;
+        int alignedLength = dataBundle->alignedLength;
+        delete dataBundle;
+     
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            total += data[i]->total;
+            
+            if (m->getControl_pressed()) {  cout << " control pressed " << "\n"; break; }
+            
+            if (data[i]->alignedLength != alignedLength) {  m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned.\n"); m->setControl_pressed(true); }
+            
+            for (int k = 0; k < numBins; k++) { //for each bin
+                for (int j = 0; j < data[i]->alignedLength; j++) { //for each position
+                    for (int l = 0; l < 5; l++) {  counts[k][j][l] += data[i]->counts[k][j][l];  }  //for each base
+                }
+                otuCounts[k] += data[i]->otuCounts[k];
+            }
+            delete data[i];
+            delete workerThreads[i];
+        }
+        vector<Sequence> conSeqs;
+        if (m->getControl_pressed()) {  return conSeqs; }
         
 		//build consensus seqs
-        string snumBins = toString(counts.size());
         for (int i = 0; i < counts.size(); i++) {
-            if (m->getControl_pressed()) { break; }
+            if (m->getControl_pressed()) {  break; }
             
-            string otuLabel = "Otu";
-            string sbinNumber = toString(i+1);
-            if (sbinNumber.length() < snumBins.length()) { 
-                int diff = snumBins.length() - sbinNumber.length();
-                for (int h = 0; h < diff; h++) { otuLabel += "0"; }
-            }
-            otuLabel += sbinNumber; 
+            string otuLabel = binLabels[i];
             
             string cons = "";
-            for (int j = 0; j < counts[i].size(); j++) {
-                cons += getBase(counts[i][j], otuCounts[i]);
-            }
+            for (int j = 0; j < counts[i].size(); j++) { cons += getBase(counts[i][j], otuCounts[i]); }
+            
             Sequence consSeq(otuLabel, cons);
+            
             conSeqs.push_back(consSeq);
         }
         
         if (m->getControl_pressed()) { conSeqs.clear(); return conSeqs; }
         
         return conSeqs;
-	
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PrimerDesignCommand", "createProcessesConSeqs");
@@ -1043,77 +1061,13 @@ char PrimerDesignCommand::getBase(vector<unsigned int> counts, int size){  //A,T
 }
 
 //**********************************************************************************************************************
-int PrimerDesignCommand::initializeCounts(vector< vector< vector<unsigned int> > >& counts, int length, map<string, int>& seq2Bin, map<string, int>& nameMap, vector<unsigned int>& otuCounts){
-	try {
-        counts.clear();
-        otuCounts.clear();
-        seq2Bin.clear();
-        
-        //vector< vector< vector<unsigned int> > > counts - otu < spot_in_alignment < counts_for_A,T,G,C,Gap > > >
-        for (int i = 0; i < list->getNumBins(); i++) {
-            string binNames = list->get(i);
-            vector<string> names;
-            util.splitAtComma(binNames, names);
-            otuCounts.push_back(0);
-            
-            //lets be smart and only map the unique names if a name or count file was given to save search time and memory
-            if ((namefile != "") || (countfile != "")) {
-                for (int j = 0; j < names.size(); j++) {
-                    map<string, int>::iterator itNames = nameMap.find(names[j]);
-                    if (itNames != nameMap.end()) { //add name because its a unique one
-                        seq2Bin[names[j]] = i;
-                    }
-                }
-            }else { //map everyone
-                for (int j = 0; j < names.size(); j++) { seq2Bin[names[j]] = i;  }
-            }
-            
-            vector<unsigned int> temp; temp.resize(5, 0); //A,T,G,C,Gap
-            vector< vector<unsigned int> > temp2;
-            for (int j = 0; j < length; j++) {
-                temp2.push_back(temp);
-            }
-            counts.push_back(temp2);
-        }
-        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "PrimerDesignCommand", "initializeCounts");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-map<string, int> PrimerDesignCommand::readCount(unsigned long int& numSeqs){
-	try {
-        map<string, int> nameMap;
-        
-        CountTable ct;
-        ct.readTable(countfile, false, false);
-        vector<string> namesOfSeqs = ct.getNamesOfSeqs();
-        numSeqs = ct.getNumUniqueSeqs();
-        
-        for (int i = 0; i < namesOfSeqs.size(); i++) {
-            if (m->getControl_pressed()) { break; }
-            
-            nameMap[namesOfSeqs[i]] = ct.getNumSeqs(namesOfSeqs[i]);
-        }
-        
-        return nameMap;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "PrimerDesignCommand", "readCount");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int PrimerDesignCommand::getListVector(){
+ListVector* PrimerDesignCommand::getListVector(){
 	try {
 		InputData input(listfile, "list", nullVector);
-		list = input.getListVector();
+		ListVector* list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
-		if (label == "") { label = lastLabel;  return 0; }
+		if (label == "") { label = lastLabel;  return list; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> labels; labels.insert(label);
@@ -1122,7 +1076,7 @@ int PrimerDesignCommand::getListVector(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && (userLabels.size() != 0)) {
-			if (m->getControl_pressed()) {  return 0;  }
+			if (m->getControl_pressed()) {  return list;  }
 			
 			if(labels.count(list->getLabel()) == 1){
 				processedLabels.insert(list->getLabel());
@@ -1153,19 +1107,14 @@ int PrimerDesignCommand::getListVector(){
 		}
 		
 		
-		if (m->getControl_pressed()) {  return 0;  }
+		if (m->getControl_pressed()) {  return list;  }
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
@@ -1174,65 +1123,10 @@ int PrimerDesignCommand::getListVector(){
 			list = input.getListVector(lastLabel);
 		}	
 		
-		return 0;
+		return list;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PrimerDesignCommand", "getListVector");	
-		exit(1);
-	}
-}
-//********************************************************************/
-/* A = adenine
- * C = cytosine
- * G = guanine
- * T = thymine
- * R = G A (purine)
- * Y = T C (pyrimidine)
- * K = G T (keto)
- * M = A C (amino)
- * S = G C (strong bonds)
- * W = A T (weak bonds)
- * B = G T C (all but A)
- * D = G A T (all but C)
- * H = A C T (all but G)
- * V = G C A (all but T)
- * N = A G C T (any) */
-int PrimerDesignCommand::countDiffs(string oligo, string seq){
-	try {
-		
-		int length = oligo.length();
-		int countDiffs = 0;
-		
-		for(int i=0;i<length;i++){
-            
-			oligo[i] = toupper(oligo[i]);
-            seq[i] = toupper(seq[i]);
-            
-			if(oligo[i] != seq[i]){
-                if(oligo[i] == 'A' && (seq[i] != 'A' && seq[i] != 'M' && seq[i] != 'R' && seq[i] != 'W' && seq[i] != 'D' && seq[i] != 'H' && seq[i] != 'V'))       {	countDiffs++;	}
-                else if(oligo[i] == 'C' && (seq[i] != 'C' && seq[i] != 'Y' && seq[i] != 'M' && seq[i] != 'S' && seq[i] != 'B' && seq[i] != 'H' && seq[i] != 'V'))       {	countDiffs++;	}
-                else if(oligo[i] == 'G' && (seq[i] != 'G' && seq[i] != 'R' && seq[i] != 'K' && seq[i] != 'S' && seq[i] != 'B' && seq[i] != 'D' && seq[i] != 'V'))       {	countDiffs++;	}
-                else if(oligo[i] == 'T' && (seq[i] != 'T' && seq[i] != 'Y' && seq[i] != 'K' && seq[i] != 'W' && seq[i] != 'B' && seq[i] != 'D' && seq[i] != 'H'))       {	countDiffs++;	}
-                else if((oligo[i] == '.' || oligo[i] == '-'))           {	countDiffs++;	}
-				else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))                         {	countDiffs++;	}
-				else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))                        {	countDiffs++;	}
-				else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))                        {	countDiffs++;	}
-				else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))                        {	countDiffs++;	}
-				else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))                        {	countDiffs++;	}
-				else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))                        {	countDiffs++;	}
-				else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))                        {	countDiffs++;	}
-				else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))       {	countDiffs++;	}
-				else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))       {	countDiffs++;	}
-				else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))       {	countDiffs++;	}
-				else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))       {	countDiffs++;	}	
-            }
-			
-		}
-		
-		return countDiffs;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PrimerDesignCommand", "countDiffs");
 		exit(1);
 	}
 }

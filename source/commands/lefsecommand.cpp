@@ -303,7 +303,7 @@ int LefseCommand::execute(){
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 process(lookup, designMap);
                 
@@ -316,7 +316,7 @@ int LefseCommand::execute(){
                 
                 delete lookup;
                 lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 process(lookup, designMap);
                 
@@ -357,7 +357,7 @@ int LefseCommand::execute(){
             delete lookup;
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
             
-            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()+"\n"); 
             process(lookup, designMap);
             
             delete lookup;

@@ -738,9 +738,8 @@ int RemoveRareCommand::processShared(){
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				m->mothurOut(lookup->getLabel()+"\n"); 
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				processLookup(lookup);
 			}
@@ -751,9 +750,8 @@ int RemoveRareCommand::processShared(){
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				m->mothurOut(lookup->getLabel()+"\n"); 
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				processLookup(lookup);			
 				
@@ -782,7 +780,7 @@ int RemoveRareCommand::processShared(){
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()+"\n"); 
 			processLookup(lookup);	
 			
 			delete lookup;
