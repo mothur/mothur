@@ -325,9 +325,9 @@ int AlignCommand::execute(){
 }
 //**********************************************************************************************************************
 struct alignStruct {
-    string alignFName;
-    string reportFName;
-    string accnosFName;
+    OutputWriter* alignWriter;
+    OutputWriter* reportWriter;
+    OutputWriter* accnosWriter;
     string inputFilename;
     string alignMethod, search;
     float match, misMatch, gapOpen, gapExtend, threshold;
@@ -341,13 +341,13 @@ struct alignStruct {
     AlignmentDB* templateDB;
     Utils util;
     
-       alignStruct (linePair fP, string aFName, string reFName, string ac, string fname, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se) {
+       alignStruct (linePair fP, OutputWriter* aFName, OutputWriter* reFName, OutputWriter* ac, string fname, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se) {
         
         filePos.start = fP.start;
         filePos.end = fP.end;
-        alignFName = aFName;
-        reportFName = reFName;
-        accnosFName = ac;
+        alignWriter = aFName;
+        reportWriter = reFName;
+        accnosWriter = ac;
         inputFilename = fname;
         numSeqs = 0;
         m = MothurOut::getInstance();
@@ -367,13 +367,7 @@ struct alignStruct {
 //**********************************************************************************************************************
 void alignDriver(alignStruct* params) {
 	try {
-		ofstream alignmentFile;
-		params->util.openOutputFile(params->alignFName, alignmentFile);
-		
-		ofstream accnosFile;
-		params->util.openOutputFile(params->accnosFName, accnosFile);
-		
-		NastReport report(params->reportFName);
+        NastReport report;
 		
 		ifstream inFASTA;
 		params->util.openInputFile(params->inputFilename, inFASTA);
@@ -474,7 +468,7 @@ void alignDriver(alignStruct* params) {
 					}
 					
 					//create accnos file with names
-					accnosFile << candidateSeq->getName() << wasBetter << endl;
+					params->accnosWriter->write(candidateSeq->getName() + wasBetter + "\n");
 				}
 				
 				report.setTemplate(templateSeq);
@@ -482,9 +476,8 @@ void alignDriver(alignStruct* params) {
 				report.setAlignmentParameters(params->alignMethod, alignment);
 				report.setNastParameters(*nast);
 	
-				alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
-				
-				report.print();
+				params->alignWriter->write('>' + candidateSeq->getName() + '\n' + candidateSeq->getAligned() + '\n');
+				params->reportWriter->write(report.getReport());
 				delete nast;
                 delete templateSeq;
 				if (needToDeleteCopy) {   delete copy;   }
@@ -512,9 +505,7 @@ void alignDriver(alignStruct* params) {
         params->flippedResults[1] += numFlipped_1;
         
 		delete alignment;
-		alignmentFile.close();
 		inFASTA.close();
-		accnosFile.close();
 		
 	}
 	catch(exception& e) {
@@ -535,19 +526,33 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         
         time_t start, end;
         time(&start);
-        //Lauch worker threads
+        
+        NastReport nast; string nastHeaders = nast.getHeaders();
+        ofstream out; util.openOutputFile(reportFileName, out); out << nastHeaders; out.close();
+        
+        auto synchronizedOutputAlignFile = std::make_shared<SynchronizedOutputFile>(alignFileName);
+        auto synchronizedOutputReportFile = std::make_shared<SynchronizedOutputFile>(reportFileName, true);
+        auto synchronizedOutputAccnosFile = std::make_shared<SynchronizedOutputFile>(accnosFName);
+
         for (int i = 0; i < processors-1; i++) {
-            int threadID = i+1;
-            alignStruct* dataBundle = new alignStruct(*lines[i+1], (alignFileName + toString(threadID) + ".temp"),
-                                                        reportFileName + toString(threadID) + ".temp",
-                                                        accnosFName + toString(threadID) + ".temp", filename,
+            
+            OutputWriter* threadAlignWriter = new OutputWriter(synchronizedOutputAlignFile);
+            OutputWriter* threadReportWriter = new OutputWriter(synchronizedOutputReportFile);
+            OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedOutputAccnosFile);
+
+            
+            alignStruct* dataBundle = new alignStruct(*lines[i+1], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename,
                                                         align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new thread(alignDriver, dataBundle));
          }
         
-        alignStruct* dataBundle = new alignStruct(*lines[0], (alignFileName), reportFileName, accnosFName, filename,
+        OutputWriter* threadAlignWriter = new OutputWriter(synchronizedOutputAlignFile);
+        OutputWriter* threadReportWriter = new OutputWriter(synchronizedOutputReportFile);
+        OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedOutputAccnosFile);
+        
+        alignStruct* dataBundle = new alignStruct(*lines[0], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename,
                                                   align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
         alignDriver(dataBundle);
         numFlipped[0] = dataBundle->flippedResults[0];
@@ -560,76 +565,25 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             num += data[i]->numSeqs;
             numFlipped[0] += data[i]->flippedResults[0];
             numFlipped[1] += data[i]->flippedResults[1];
+            
+            delete data[i]->alignWriter;
+            delete data[i]->reportWriter;
+            delete data[i]->accnosWriter;
+            
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete threadAlignWriter; delete threadAccnosWriter; delete threadReportWriter;
         
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to align " + toString(num) + " sequences.\n\n");
         
-        vector<string> nonBlankAccnosFiles;
-        if (!(util.isBlank(accnosFName))) { nonBlankAccnosFiles.push_back(accnosFName); }
-        else { util.mothurRemove(accnosFName); } //remove so other files can be renamed to it
-        
-        for (int i = 0; i < processors-1; i++) {
-            int threadID = i+1;
-            util.appendFiles((alignFileName + toString(threadID) + ".temp"), alignFileName);
-            util.mothurRemove((alignFileName + toString(threadID) + ".temp"));
-            
-            appendReportFiles((reportFileName + toString(threadID) + ".temp"), reportFileName);
-            util.mothurRemove((reportFileName + toString(threadID) + ".temp"));
-            
-            if (!(util.isBlank(accnosFName + toString(threadID) + ".temp"))) {
-                nonBlankAccnosFiles.push_back(accnosFName + toString(threadID) + ".temp");
-            }else { util.mothurRemove((accnosFName + toString(threadID) + ".temp"));  }
-            
-        }
-        
-        //append accnos files
-        if (nonBlankAccnosFiles.size() != 0) {
-            rename(nonBlankAccnosFiles[0].c_str(), accnosFName.c_str());
-            
-            for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-                util.appendFiles(nonBlankAccnosFiles[h], accnosFName);
-                util.mothurRemove(nonBlankAccnosFiles[h]);
-            }
-        }else { //recreate the accnosfile if needed
-            ofstream out;
-            util.openOutputFile(accnosFName, out);
-            out.close();
-        }
+        if (util.isBlank(accnosFName)) { util.mothurRemove(accnosFName); }
         
         return num;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AlignCommand", "createProcesses");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-void AlignCommand::appendReportFiles(string temp, string filename) {
-	try{
-		
-		ofstream output;
-		ifstream input;
-		util.openOutputFileAppend(filename, output);
-		util.openInputFile(temp, input);
-
-		while (!input.eof())	{	char c = input.get(); if (c == 10 || c == 13){	break;	}	} // get header line
-				
-        char buffer[4096];        
-        while (!input.eof()) {
-            input.read(buffer, 4096);
-            output.write(buffer, input.gcount());
-        }
-		
-		input.close();
-		output.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "appendReportFiles");
 		exit(1);
 	}
 }
