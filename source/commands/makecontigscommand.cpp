@@ -2056,13 +2056,6 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         
         driverContigs(dataBundle);
         
-        delete threadFastaTrimWriter;
-        delete threadFastaScrapWriter;
-        delete threadMisMatchWriter;
-        if (hasQuality) {
-            delete threadQTrimWriter;
-            delete threadQScrapWriter;
-        }
         long long num = dataBundle->count;
         badNames.insert(dataBundle->badNames.begin(), dataBundle->badNames.end());
         groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
@@ -2071,7 +2064,6 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             if (itMine != groupCounts.end()) { itMine->second += it->second; }
             else { groupCounts[it->first] = it->second; }
         }
-        delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -2097,6 +2089,15 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             delete workerThreads[i];
         }
 
+        delete threadFastaTrimWriter;
+        delete threadFastaScrapWriter;
+        delete threadMisMatchWriter;
+        if (hasQuality) {
+            delete threadQTrimWriter;
+            delete threadQScrapWriter;
+        }
+        delete dataBundle;
+        
         return num;
     }
     catch(exception& e) {

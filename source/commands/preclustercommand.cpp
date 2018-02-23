@@ -922,13 +922,8 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
 
         driverGroups(dataBundle);
         
-        delete threadFastaWriter;
-        delete threadNameWriter;
-        
         outputNames.insert(outputNames.end(), dataBundle->outputNames.begin(), dataBundle->outputNames.end());
         outputTypes.insert(dataBundle->outputTypes.begin(), dataBundle->outputTypes.end());
-        
-        delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -942,7 +937,10 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete threadFastaWriter;
+        delete threadNameWriter;
+        delete dataBundle;
+
     }
     catch(exception& e) {
         m->errorOut(e, "PreClusterCommand", "createProcessesGroups");

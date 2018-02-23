@@ -892,17 +892,17 @@ int driverTrim(trimData* params) {
                 string seqComment = currSeq.getComment();
                 currSeq.setComment("\t" + commentString + "\t" + seqComment);
                 
-				if(trashCode.length() == 0){
+                if(trashCode.length() == 0){
                     string thisGroup = "";
                     if (params->createGroup) {
-						if(numBarcodes != 0){
-							thisGroup = params->barcodeNameVector[barcodeIndex];
-							if (numFPrimers != 0) {
-								if (params->primerNameVector[primerIndex] != "") {
-									if(thisGroup != "") { thisGroup += "." + params->primerNameVector[primerIndex]; }
-									else                { thisGroup = params->primerNameVector[primerIndex];        }
-								} 
-							}
+                        if(numBarcodes != 0){
+                            thisGroup = params->barcodeNameVector[barcodeIndex];
+                            if (numFPrimers != 0) {
+                                if (params->primerNameVector[primerIndex] != "") {
+                                    if(thisGroup != "") { thisGroup += "." + params->primerNameVector[primerIndex]; }
+                                    else                { thisGroup = params->primerNameVector[primerIndex];        }
+                                }
+                            }
                         }
                     }
                     
@@ -912,7 +912,7 @@ int driverTrim(trimData* params) {
                         currSeq.printSequence(params->trimFileName);
                         
                         if(params->qFileName != ""){ currQual.printQScores(params->trimQFileName); }
-         
+                        
                         if (params->createGroup) {
                             if (params->m->getDebug()) { params->m->mothurOut(", group= " + thisGroup + "\n"); }
                             params->groupMap[currSeq.getName()] = thisGroup;
@@ -922,15 +922,15 @@ int driverTrim(trimData* params) {
                             else { params->groupCounts[it->first] += 1; }
                         }
                     }
-				}
-				else{
+                }
+                else{
                     params->badNames.insert(currSeq.getName());
-					currSeq.setName(currSeq.getName() + " | " + trashCode);
-					currSeq.setUnaligned(origSeq);
-					currSeq.setAligned(origSeq);
-					currSeq.printSequence(params->scrapFileName);
-					if(params->qFileName != ""){ currQual.printQScores(params->scrapQFileName); }
-				}
+                    currSeq.setName(currSeq.getName() + " | " + trashCode);
+                    currSeq.setUnaligned(origSeq);
+                    currSeq.setAligned(origSeq);
+                    currSeq.printSequence(params->scrapFileName);
+                    if(params->qFileName != ""){ currQual.printQScores(params->scrapQFileName); }
+                }
 				params->count++;
 			}
 			
@@ -1013,17 +1013,10 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
         driverTrim(dataBundle);
         long long num = dataBundle->count;
         
-        delete threadFastaTrimWriter;
-        delete threadFastaScrapWriter;
-        if (qFileName != "") {
-            delete threadQTrimWriter;
-            delete threadQScrapWriter;
-        }
         set<string> badNames = dataBundle->badNames;
         groupCounts = dataBundle->groupCounts;
         groupMap = dataBundle->groupMap;
-        delete dataBundle;
-        
+
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
@@ -1047,6 +1040,13 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
             delete workerThreads[i];
         }
         
+        delete threadFastaTrimWriter;
+        delete threadFastaScrapWriter;
+        if (qFileName != "") {
+            delete threadQTrimWriter;
+            delete threadQScrapWriter;
+        }
+        delete dataBundle;
         
         processNamesCountFiles(trimFASTAFileName, badNames, groupMap, trimNameFileName, scrapNameFileName, trimCountFileName, scrapCountFileName, groupFile);
         

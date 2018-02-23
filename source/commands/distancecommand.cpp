@@ -654,12 +654,11 @@ void DistanceCommand::createProcesses(string filename) {
         if (output == "column")     {
             if (fitCalc)    { driverFitCalc(dataBundle);    }
             else            { driverColumn(dataBundle);     }
-            delete threadWriter;
         }
         else if (output == "lt")    { driverLt(dataBundle);            }
         else                        { driverSquare(dataBundle);        }
         distsBelowCutoff = dataBundle->count;
-        delete dataBundle;
+        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -674,6 +673,8 @@ void DistanceCommand::createProcesses(string filename) {
             delete data[i];
             delete workerThreads[i];
         }
+        if (output == "column")     { delete threadWriter; }
+        delete dataBundle;
         
         time(&end);
         m->mothurOut("\nIt took " + toString(difftime(end, start)) + " secs to find distances for " + toString(num) + " sequences. " + toString(distsBelowCutoff+numDistsBelowCutoff) + " distances below cutoff " + toString(cutoff) + ".\n\n");
