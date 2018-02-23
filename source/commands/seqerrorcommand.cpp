@@ -793,8 +793,12 @@ long long SeqErrorCommand::createProcesses(string filename, string qFileName, st
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<seqErrorData*> data;
-        
-        auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(summaryFileName);
+        ofstream out;
+        util.openOutputFile(summaryFileName, out);
+        out << "query\treference\tweight\tAA\tAT\tAG\tAC\tTA\tTT\tTG\tTC\tGA\tGT\tGG\tGC\tCA\tCT\tCG\tCC\tNA\tNT\tNG\tNC\tAi\tTi\tGi\tCi\tNi\tdA\tdT\tdG\tdC\tinsertions\tdeletions\tsubstitutions\tambig\tmatches\tmismatches\ttotal\terror\tnumparents\n";
+        out.close();
+
+        auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(summaryFileName, true); //append to add headers
         auto synchronizedOutputErrorFile = std::make_shared<SynchronizedOutputFile>(errorOutputFileName); synchronizedOutputErrorFile->setFixedShowPoint(); synchronizedOutputErrorFile->setPrecision(6);
         auto synchronizedOutputChimeraFile = std::make_shared<SynchronizedOutputFile>(chimeraOutputFileName);
         
@@ -870,13 +874,6 @@ long long SeqErrorCommand::createProcesses(string filename, string qFileName, st
             delete data[k];
             delete workerThreads[k];
         }
-        
-        ofstream out;
-        util.openOutputFile("header.temp", out);
-        out << "query\treference\tweight\tAA\tAT\tAG\tAC\tTA\tTT\tTG\tTC\tGA\tGT\tGG\tGC\tCA\tCT\tCG\tCC\tNA\tNT\tNG\tNC\tAi\tTi\tGi\tCi\tNi\tdA\tdT\tdG\tdC\tinsertions\tdeletions\tsubstitutions\tambig\tmatches\tmismatches\ttotal\terror\tnumparents\n";
-        out.close();
-        
-        util.appendFilesFront("header.temp", summaryFileName);
         
 		return numSeqs;
 	}

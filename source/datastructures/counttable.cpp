@@ -412,16 +412,6 @@ int CountTable::printTable(string file) {
                 out << endl;
             }
         }
-        /*for (map<string, int>::iterator itNames = indexNameMap.begin(); itNames != indexNameMap.end(); itNames++) {
-            out << itNames->first << '\t' << totals[itNames->second];
-            if (hasGroups) {
-                
-                for (int i = 0; i < groups.size(); i++) {
-                    out << '\t' << counts[itNames->second][i];
-                }
-            }
-            out << endl;
-        }*/
         out.close();
         return 0;
     }
