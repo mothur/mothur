@@ -41,25 +41,24 @@ FlowData::FlowData(int numFlows, float signal, float noise, int maxHomoP, string
 
 bool FlowData::getNext(ifstream& flowFile){
 	try {
+        //read name
+        seqName = getSequenceName(flowFile); if (m->getDebug()) {  m->mothurOut("[DEBUG]: flow = " + seqName + " "); }
         
-        seqName = getSequenceName(flowFile);
-        if (m->getDebug()) {  m->mothurOut("[DEBUG]: flow = " + seqName + " "); }
-		flowFile >> endFlow;
-        if (m->getDebug()) {  m->mothurOut(toString(endFlow) + " "); }
-        if (!m->getControl_pressed()) {
-            if (m->getDebug()) {  m->mothurOut(" "); }
-            for(int i=0;i<numFlows;i++)	{
-                flowFile >> flowData[i];
-                if (m->getDebug()) {  m->mothurOut(toString(flowData[i]) + " "); }
-            }
-            if (m->getDebug()) {  m->mothurOut("\n"); }
-            updateEndFlow(); 
-            translateFlow();
-            util.gobble(flowFile);
-		}
-           
-		if(flowFile){	return 1;	}
-		else		{	return 0;	}
+        //read end flow
+		flowFile >> endFlow;  if (m->getDebug()) {  m->mothurOut(toString(endFlow) + " "); }
+        
+        if (m->getControl_pressed()) {  return false; }
+        
+        //read flowgrams
+        for(int i=0;i<numFlows;i++)	{ flowFile >> flowData[i]; if (m->getDebug()) {  m->mothurOut(toString(flowData[i]) + " "); } } if (m->getDebug()) {  m->mothurOut("\n"); }
+        util.gobble(flowFile);
+        
+        //process flowgrams
+        updateEndFlow();
+        translateFlow();
+        
+		if(flowFile){	return true;	}
+		else		{	return false;	}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FlowData", "getNext");
@@ -277,6 +276,37 @@ void FlowData::printFlows(ofstream& outFlowFile, string scrapCode){
 		m->errorOut(e, "FlowData", "printFlows");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+
+void FlowData::printFlows(OutputWriter* out){
+    try{
+        //	outFlowFile << '>' << seqName << locationString << " length=" << seqLength << " numflows=" << maxFlows << endl;
+        string output = seqName + ' ' + toString(endFlow) + ' ';
+        
+        for(int i=0;i<maxFlows;i++){ output += toString(flowData[i]) + ' '; } output += "\n";
+        
+        out->write(output);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "FlowData", "printFlows");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+void FlowData::printFlows(OutputWriter* out, string scrapCode){
+    try{
+        string output = seqName + '|' + scrapCode + ' ' + toString(endFlow) + ' ';
+        
+        for(int i=0;i<numFlows;i++){ output += flowData[i] + ' '; } output += "\n";
+        
+        out->write(output);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "FlowData", "printFlows");
+        exit(1);
+    }
 }
 
 //**********************************************************************************************************************

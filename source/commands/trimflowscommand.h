@@ -17,6 +17,7 @@
 #include "groupmap.h"
 #include "trimoligos.h"
 #include "oligos.h"
+#include "splitgroupscommand.h"
 
 class TrimFlowsCommand : public Command {
 public:
@@ -38,30 +39,28 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	bool abort;
-
-	int comboStarts;
-	vector<int> processIDS;   //processid
-	vector<linePair*> lines;
     vector<string> outputNames;
 	set<string> filesToRemove;
-    bool allFiles;
-	int processors;
-	int numFPrimers, numRPrimers, numBarcodes;
+	int numFPrimers, numRPrimers, numBarcodes, processors, numFlows, comboStarts;
 	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, numLinkers, numSpacers;
-	int numFlows;
 	float signal, noise;
-	bool fasta, pairedOligos, reorient;
+	bool fasta, pairedOligos, reorient, allFiles, abort, createGroup;
 	string flowOrder, flowFileName, oligoFileName, outputDir;
-    Oligos oligos;
-
-
+    
+    map<int, oligosPair> pairedBarcodes;
+    map<int, oligosPair> pairedPrimers;
+    map<string, int> barcodes;
+    map<string, int> primers;
+    vector<string>  linker;
+    vector<string>  spacer;
+    vector<string> primerNameVector;
+    vector<string> barcodeNameVector;
+    vector<string> revPrimer;
+    map<string, string> groupMap;
+    
 	vector<unsigned long long> getFlowFileBreaks();
-	int createProcessesCreateTrim(string, string, string, string, vector<vector<string> >); 
-	int driverCreateTrim(string, string, string, string, vector<vector<string> >, linePair*);
-	int getOligos(vector<vector<string> >&);		//a rewrite of what is in trimseqscommand.h
-	
-	
+	int createProcessesCreateTrim(string, string, string, string);
+	int getOligos();
 	
 };
 #endif
