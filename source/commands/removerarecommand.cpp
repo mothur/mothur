@@ -494,7 +494,6 @@ int RemoveRareCommand::processList(){
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
 				newList.setLabels(newLabels);
-                newList.printHeaders(out);
                 newList.print(out, false);
 			}
 		}	
@@ -590,16 +589,11 @@ int RemoveRareCommand::processSabund(){
 		if (m->getControl_pressed()) {  out.close(); return 0; }	
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
@@ -696,16 +690,11 @@ int RemoveRareCommand::processRabund(){
 		if (m->getControl_pressed()) {  out.close(); return 0; }	
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
@@ -749,9 +738,8 @@ int RemoveRareCommand::processShared(){
 			
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				m->mothurOut(lookup->getLabel()+"\n"); 
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				processLookup(lookup);
 			}
@@ -762,9 +750,8 @@ int RemoveRareCommand::processShared(){
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				m->mothurOut(lookup->getLabel()+"\n"); 
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				processLookup(lookup);			
 				
@@ -781,16 +768,11 @@ int RemoveRareCommand::processShared(){
 		if (m->getControl_pressed()) {  return 0; }	
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
@@ -798,7 +780,7 @@ int RemoveRareCommand::processShared(){
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()+"\n"); 
 			processLookup(lookup);	
 			
 			delete lookup;

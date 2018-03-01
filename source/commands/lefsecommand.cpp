@@ -272,6 +272,7 @@ LefseCommand::LefseCommand(string option)  {
 
 int LefseCommand::execute(){
 	try {
+        unsigned int holdRandom = m->getRandomSeed();
         m->setRandomSeed(1982);
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
@@ -302,7 +303,7 @@ int LefseCommand::execute(){
             
             if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 process(lookup, designMap);
                 
@@ -315,7 +316,7 @@ int LefseCommand::execute(){
                 
                 delete lookup;
                 lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 process(lookup, designMap);
                 
@@ -356,7 +357,7 @@ int LefseCommand::execute(){
             delete lookup;
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
             
-            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()+"\n"); 
             process(lookup, designMap);
             
             delete lookup;
@@ -364,11 +365,9 @@ int LefseCommand::execute(){
                 
 		
         //output files created by command
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
-        m->setRandomSeed((unsigned)time(NULL));
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
+        m->setRandomSeed(holdRandom);
         return 0;
 		
     }
@@ -793,6 +792,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
             //find "good" random vector
             vector<int> rand_s;
             int save = 0;
+            Utils util;
             for (int h = 0; h < 1000; h++) { //generate a vector of length fractionNumGroups with range 0 to numGroups-1
                 save = h;
                 rand_s.clear();

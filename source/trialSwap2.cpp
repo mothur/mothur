@@ -196,6 +196,7 @@ int TrialSwap2::calc_combo (int nrows, int ncols, vector<vector<int> > &nullmatr
 int TrialSwap2::swap_checkerboards (vector<vector<int> > &co_matrix, int ncols, int nrows)
 {
     try {
+        Utils util;
         //do 100 runs to make sure enough swaps are happening. This does NOT mean that there will be 1000 swaps, but that is the theoretical max.
         for(int a=0;a<1000;a++){
             int i, j, k, l;

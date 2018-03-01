@@ -243,11 +243,10 @@ int NormalizeSharedCommand::execute(){
 				
 				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 					
-					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookup->getLabel()+"\n"); 
 					normalize(lookup);
 					
-					processedLabels.insert(lookup->getLabel());
-					userLabels.erase(lookup->getLabel());
+					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				}
 				
 				if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -255,12 +254,11 @@ int NormalizeSharedCommand::execute(){
 					
 					delete lookup;
 					lookup = input.getSharedRAbundVectors(lastLabel);
-					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookup->getLabel()+"\n"); 
 					
 					normalize(lookup);
 					
-					processedLabels.insert(lookup->getLabel());
-					userLabels.erase(lookup->getLabel());
+					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
 					lookup->setLabels(saveLabel);
@@ -295,7 +293,7 @@ int NormalizeSharedCommand::execute(){
 			if (needToRun )  {
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				normalize(lookup);
 				delete lookup;
 			}
@@ -402,11 +400,9 @@ int NormalizeSharedCommand::execute(){
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;}
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		//m->mothurOut(outputFileName); m->mothurOutEndLine(); outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		//set shared file as new current sharedfile
 		string currentName = "";
@@ -493,7 +489,6 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
 				
 		thisLookUp->eliminateZeroOTUS();
-		thisLookUp->printHeaders(out);
         thisLookUp->print(out);
 		out.close();
 		
@@ -568,7 +563,6 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 		
 		
         thisLookUp->eliminateZeroOTUS();
-        thisLookUp->printHeaders(out);
         thisLookUp->print(out);
         out.close();
 	

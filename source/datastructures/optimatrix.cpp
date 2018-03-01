@@ -107,6 +107,45 @@ map<string, int> OptiMatrix::getNameIndexMap() {
     }
 }
 /***********************************************************************/
+vector<int> OptiMatrix::getNumSeqs(vector<vector<string> > & binNames, vector<vector<int> > & fixedBins) {
+    try {
+        fixedBins.clear();
+        vector<int> movableSeqs;
+        
+        map<string, int> nameIndexes;
+        set<string> unique;
+        for (int i = 0; i < nameMap.size(); i++) {
+            vector<string> thisBinsSeqs; util.splitAtComma(nameMap[i], thisBinsSeqs);
+            if (i < closeness.size()) {  nameIndexes[thisBinsSeqs[0]] = i;  }
+            if (thisBinsSeqs.size() == 1) { //you are unique
+                unique.insert(thisBinsSeqs[0]);
+            }
+        }
+
+        for (int i = 0; i < binNames.size(); i++) {
+            vector<int> thisBinsSeqs;
+            for (int j = 0; j < binNames[i].size(); j++) {
+                map<string, int>::iterator it = nameIndexes.find(binNames[i][j]);
+                
+                if (it == nameIndexes.end()) { //not in distance matrix, but needs a value in fixedBins. 2 reasons for making it here: you are a redundant name in the listfile, you do not have any distances below the cutoff
+                    if (unique.count(binNames[i][j]) == 0) { } //you are redundant seq in list file because namefile was used. You should be edited out of the listfile.
+                    else { thisBinsSeqs.push_back(-1); } //you are unique, but have no distances so add placeholder
+                }else { thisBinsSeqs.push_back(it->second);  nameIndexes.erase(it); } //"name" of sequence in matrix
+            }
+            fixedBins.push_back(thisBinsSeqs);
+        }
+        
+        for (map<string, int>::iterator it = nameIndexes.begin(); it != nameIndexes.end(); it++) { movableSeqs.push_back(it->second); }
+        
+        return movableSeqs;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiMatrix", "getNumSeqs");
+        exit(1);
+    }
+
+}
+/***********************************************************************/
 string OptiMatrix::getName(int index) {
     try {
         //return toString(index);

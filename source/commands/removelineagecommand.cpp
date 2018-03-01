@@ -540,7 +540,6 @@ int RemoveLineageCommand::readList(){
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
 				newList.setLabels(newBinLabels);
-                newList.printHeaders(out);
 				newList.print(out);
 			}
 			
@@ -746,7 +745,6 @@ int RemoveLineageCommand::readConsList(){
         if (newList.getNumBins() != 0) {
             wroteSomething = true;
             newList.setLabels(newBinLabels);
-            newList.printHeaders(out);
             newList.print(out, false);
         }
 		out.close();
@@ -872,8 +870,6 @@ int RemoveLineageCommand::readShared(){
         ofstream out;
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        
-		lookup->printHeaders(out);
         lookup->print(out);
 		out.close();
         
@@ -907,8 +903,7 @@ SharedRAbundVectors* RemoveLineageCommand::getShared(){
 			if (m->getControl_pressed()) {   return 0;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				break;
 			}
 			
@@ -918,8 +913,7 @@ SharedRAbundVectors* RemoveLineageCommand::getShared(){
                 delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);

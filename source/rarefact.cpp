@@ -15,41 +15,16 @@
 int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 	try {
 		RarefactionCurveData* rcd = new RarefactionCurveData();
-		for(int i=0;i<displays.size();i++){
-			rcd->registerDisplay(displays[i]);
-		}
+		for(int i=0;i<displays.size();i++){ rcd->registerDisplay(displays[i]); }
 		
 		//convert freq percentage to number
 		int increment = 1;
 		if (percentFreq < 1.0) {  increment = numSeqs * percentFreq;  }
 		else { increment = percentFreq;  }	
 		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				if(processors == 1){
-					driver(rcd, increment, nIters);	
-				}else{
-					vector<int> procIters;
-					
-					int numItersPerProcessor = nIters / processors;
-					
-					//divide iters between processes
-					for (int i = 0; i < processors; i++) {
-						if(i == processors - 1){
-							numItersPerProcessor = nIters - i * numItersPerProcessor;
-						}
-						procIters.push_back(numItersPerProcessor);
-					}
-					
-					createProcesses(procIters, rcd, increment, nIters);
-				}
+        driver(rcd, increment, nIters);
 
-		#else
-			driver(rcd, increment, nIters);	
-		#endif
-
-		for(int i=0;i<displays.size();i++){
-			displays[i]->close();
-		}
+		for(int i=0;i<displays.size();i++){ displays[i]->close(); }
 		
 		delete rcd;
 		return 0;
@@ -98,65 +73,11 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Rarefact", "driver");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-
-int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd, int increment, int nIters) {
-	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
-		vector<int> processIDS;
-		EstOutput results;
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				driver(rcd, increment, procIters[process]);
-			
-				//pass numSeqs to parent
-				for(int i=0;i<displays.size();i++){
-					string tempFile = toString(process) + toString(i) + ".rarefact.temp";
-					displays[i]->outputTempFiles(tempFile);
-				}
-				exit(0);
-			}
-		}
-		
-		driver(rcd, increment, procIters[0]);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<(processors-1);i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//get data created by processes
-		for (int i=0;i<(processors-1);i++) { 
-			for(int j=0;j<displays.size();j++){
-				string s = toString(processIDS[i]) + toString(j) + ".rarefact.temp";
-				displays[j]->inputTempFiles(s);
-				util.mothurRemove(s);
-			}
-		}
-		
-		return 0;
-#endif		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Rarefact", "createProcesses");
+		m->errorOut(e, "Rarefact", "driverRarefact");
 		exit(1);
 	}
 }
 /***********************************************************************/
-
 int Rarefact::getSharedCurve(float percentFreq = 0.01, int nIters = 1000){
 try {
 		SharedRarefactionCurveData* rcd = new SharedRarefactionCurveData();

@@ -49,7 +49,7 @@ class ReadTree {
 class ReadNewickTree : public ReadTree {
 	
 public:
-    ReadNewickTree(string file, vector<string> T) : treeFile(file), Treenames(T) { Utils util; util.openInputFile(file, filehandle); readOk = 0; }
+    ReadNewickTree(string file, vector<string> T) : treeFile(file), Treenames(T) { Utils util; util.openInputFile(file, filehandle); readOk = 0; if (Treenames.size() == 0) { Treenames = util.parseTreeFile(treeFile); } }
 	~ReadNewickTree() {};
 	int read(CountTable*);
 	

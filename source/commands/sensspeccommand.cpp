@@ -264,7 +264,7 @@ int SensSpecCommand::execute(){
 
         m->mothurOut("It took " + toString(time(NULL) - startTime) + " to run sens.spec.\n");
 
-		m->mothurOut("/nOutput File Names: /n");
+		m->mothurOut("\nOutput File Names: \n");
 		m->mothurOut(sensSpecFileName+"\n\n");
 
 		return 0;
@@ -278,8 +278,6 @@ int SensSpecCommand::execute(){
 int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCutoff){
 	try {
         string label = list->getLabel();
-        long long numSeqs = list->getNumSeqs();
-        int numOTUs = list->getNumBins();
         
         if(getCutoff == 1){
             if(label != "unique"){
@@ -301,28 +299,8 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
         if (format == "phylip") { distfile = phylipfile; }
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
-
-        vector< vector< int > > otus = preProcessList(matrix, list); //converts names to matrix indices, remove any names without distances
-        
-        truePositives = 0;
-        falsePositives = 0;
-        trueNegatives = 0;
-        falseNegatives = 0;
-
-		for(int otu=0;otu<otus.size();otu++){
-			if (m->getControl_pressed()) { return 0; }
-			
-			for(int i=0;i<otus[otu].size();i++){
-				for(int j=0;j<i;j++){
-                    if (matrix.isClose(otus[otu][i], otus[otu][j])) { truePositives++; }
-                    else { falsePositives++; }
-				}
-			}
-		}
-        long long numDists = matrix.getNumDists();
-        falseNegatives = (numDists/2) - truePositives;
-        trueNegatives = numSeqs * (numSeqs-1)/2  - (falsePositives + falseNegatives + truePositives);
-
+        SensSpecCalc senscalc(matrix, list);
+        senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
 		outputStatistics(label, origCutoff);
 
 		return 0;
@@ -474,44 +452,6 @@ void SensSpecCommand::outputStatistics(string label, string cutoff){
 		m->errorOut(e, "SensSpecCommand", "outputStatistics");
 		exit(1);
 	}
-}
-//***************************************************************************************************************
-//removes anyone with no valid dists and changes name to matrix short names
-vector<vector< int> > SensSpecCommand::preProcessList(OptiMatrix& matrix, ListVector* list){
-    try {
-        map<string, int> nameIndex = matrix.getNameIndexMap();
-        vector<vector< int> > newList;
-        
-        if (list != NULL) {
-            //for each bin
-			for (int i = 0; i < list->getNumBins(); i++) {
-
-				//parse out names that are in accnos file
-				string binnames = list->get(i);
-                vector<string> bnames;
-                util.splitAtComma(binnames, bnames);
-
-				vector<int> newNames;
-                for (int j = 0; j < bnames.size(); j++) {
-					string name = bnames[j];
-                    map<string, int>::iterator itSeq1 = nameIndex.find(name);
-                    int seq1Index = -1;
-                    if (itSeq1 != nameIndex.end()) { seq1Index = itSeq1->second; } //you have distances in the matrix
-
-					//if that name is in the .accnos file, add it
-                    if (seq1Index != -1) {  newNames.push_back(seq1Index);  }
-				}
-
-				//if there are names in this bin add to new list
-				if (newNames.size() != 0) { newList.push_back(newNames); }
-			}
-        }
-        return newList;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "SensSpecCommand", "preProcessList");
-        exit(1);
-    }
 }
 //***************************************************************************************************************
 

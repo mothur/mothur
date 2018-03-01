@@ -113,28 +113,6 @@ double LinearAlgebra::gammp(const double a, const double x) {
 	}
 }
 /*********************************************************************************************************************************/
-//Numerical Recipes pg. 223
-/*double LinearAlgebra::gammq(const double a, const double x) {
-    try {
-        double gamser,gammcf,gln;
-        
-        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMQ\n"); m->setControl_pressed(true); return 0.0; }
-        if (x < (a+1.0)) {
-            gser(gamser,a,x,gln);
-            return 1.0-gamser;
-        } else {
-            gcf(gammcf,a,x,gln);
-            return gammcf;
-        }   
-        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "LinearAlgebra", "gammq");
-		exit(1);
-	}
-}
-*********************************************************************************************************************************/
 //Numerical Recipes pg. 224
 double LinearAlgebra::gcf(double& gammcf, const double a, const double x, double& gln){
     try {
@@ -1826,16 +1804,19 @@ void LinearAlgebra::ludcmp(vector<vector<double> >& A, vector<int>& index, doubl
         
         int n = (int)A.size();
         vector<double> vv(n, 0.0);
-        double temp;
         int imax;
         
         d = 1.0;
         
         for(int i=0;i<n;i++){
-            double big = 0.0;
-            for(int j=0;j<n;j++){   if((temp=fabs(A[i][j])) > big ) big=temp;  }
-            if(big==0.0){   m->mothurOut("Singular matrix in routine ludcmp\n");    }
-            vv[i] = 1.0/big;
+            float big = 0.0;
+            for(int j=0;j<n;j++){
+                float thisValue = fabs(A[i][j]);
+                if (thisValue > big)  { big = thisValue;  }
+            }
+
+            if(big==0.0){   m->mothurOut("[WARNING]: " + toString(i) + " produces singular matrix in routine ludcmp\n");   vv[i] = 0.0; }
+            else { vv[i] = 1.0/big;  }
         }
         
         for(int j=0;j<n;j++){
@@ -1938,9 +1919,13 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
         for(int i=0;i<n;i++){
             //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
             float big = 0.0;
-            for(int j=0;j<n;j++){   if((temp=fabs(A[i][j])) > big ) big=temp;  }
-            if(big==0.0){   m->mothurOut("Singular matrix in routine ludcmp\n");    }
-            vv[i] = 1.0/big;
+            for(int j=0;j<n;j++){
+                float thisValue = fabs(A[i][j]);
+                if (thisValue > big)  { big = thisValue;  }
+            }
+                                                    
+            if(big==0.0){   m->mothurOut("[WARNING]: " + toString(i) + " produces singular matrix in routine ludcmp\n");   vv[i] = 0.0; }
+            else { vv[i] = 1.0/big;  }
         }
         
         for(int j=0;j<n;j++){

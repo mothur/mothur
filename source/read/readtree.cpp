@@ -17,15 +17,7 @@
  
  */
 /***********************************************************************/
-ReadTree::ReadTree() {
-	try {
-		m = MothurOut::getInstance();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadTree", "ReadTree");
-		exit(1);
-	}
-}
+ReadTree::ReadTree() { m = MothurOut::getInstance(); }
 /***********************************************************************/
 int ReadTree::AssembleTrees() {
 	 try {
@@ -84,10 +76,7 @@ float ReadTree::readBranchLength(istream& f) {
     try {
 		float b;
 	
-		if(!(f >> b)){
-			m->mothurOut("Error: Missing branch length in input tree.\n");
-			exit(1);
-		}
+		if(!(f >> b)){ m->mothurOut("Error: Missing branch length in input tree.\n"); exit(1); }
 		util.gobble(f);
 		return b;
 	}
@@ -109,8 +98,9 @@ float ReadTree::readBranchLength(istream& f) {
 int ReadNewickTree::read(CountTable* ct) {
 	try {
 		holder = "";
-		int c, error;
+		int error;
 		int comment = 0;
+        char c;
 		
 		//if you are not a nexus file 
 		if ((c = filehandle.peek()) != '#') {  
@@ -119,16 +109,12 @@ int ReadNewickTree::read(CountTable* ct) {
 				while ((c = filehandle.peek()) != EOF) {
                     if (m->getControl_pressed()) {  filehandle.close(); return 0; }
 					// get past comments
-					if(c == '[') {
-						comment = 1;
-					}
-					if(c == ']'){
-						comment = 0;
-					}
+					if(c == '[')    { comment = 1; }
+					if(c == ']')    { comment = 0; }
 					if((c == '(') && (comment != 1)){ break; }
 					filehandle.get();
 				}
-
+                
 				//make new tree
 				T = new Tree(ct, Treenames);
 
@@ -152,12 +138,8 @@ int ReadNewickTree::read(CountTable* ct) {
 				// get past comments
 				while ((c = filehandle.peek()) != EOF) {
                     if (m->getControl_pressed()) {  filehandle.close(); return 0; }
-					if(holder == "[" || holder == "[!"){
-						comment = 1;
-					}
-					if(holder == "]"){
-						comment = 0;
-					}
+					if(holder == "[" || holder == "[!") { comment = 1; }
+					if(holder == "]")                   { comment = 0; }
 					if((holder == "tree" || holder == "end;") && comment != 1){ holder = ""; comment = 0; break;}
 					filehandle >> holder;
 				}
@@ -184,7 +166,7 @@ int ReadNewickTree::read(CountTable* ct) {
 		if (error != 0) { readOk = error; } 
 		
 		filehandle.close();
-
+        
 		return readOk;
 	}
 	catch(exception& e) {
@@ -196,19 +178,15 @@ int ReadNewickTree::read(CountTable* ct) {
 //This function read the file through the translation of the sequences names and updates treemap.
 string ReadNewickTree::nexusTranslation(CountTable* ct) {
 	try {
-		
 		holder = "";
 		int numSeqs = Treenames.size(); //must save this some when we clear old names we can still know how many sequences there were
 		int comment = 0;
 		
 		// get past comments
 		while(holder != "translate" && holder != "Translate"){	
-			if(holder == "[" || holder == "[!"){
-				comment = 1;
-			}
-			if(holder == "]"){
-				comment = 0;
-			}
+			if(holder == "[" || holder == "[!") { comment = 1; }
+			if(holder == "]")                   { comment = 0; }
+            
 			filehandle >> holder; 
 			if(holder == "tree" && comment != 1){return holder;}
 		}
@@ -233,12 +211,9 @@ string ReadNewickTree::nexusTranslation(CountTable* ct) {
 /**************************************************************************************************/
 int ReadNewickTree::readTreeString(CountTable* ct) {
 	try {
-		
 		int n = 0;
-		int lc, rc; 
-		
-		int rooted = 0;
-	
+		int lc, rc;
+        int rooted = 0;
 		int ch = filehandle.peek();	
 		
 		if(ch == '('){
@@ -247,20 +222,13 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 			lc = readNewickInt(filehandle, n, T, ct);
 			if (lc == -1) { m->mothurOut("error with lc\n");  m->setControl_pressed(true); return -1; } //reports an error in reading
 	
-			if(filehandle.peek()==','){							
-				readSpecialChar(filehandle,',',"comma");
-			}
-			// ';' means end of tree.												
-			else if((ch=filehandle.peek())==';' || ch=='['){		
-				rooted = 1;									
-			}	
+			if(filehandle.peek()==',')                      {	 readSpecialChar(filehandle,',',"comma");   }
+			else if((ch=filehandle.peek())==';' || ch=='[') { rooted = 1;                                   } // ';' means end of tree.
 		
 			if(rooted != 1){								
 				rc = readNewickInt(filehandle, n, T, ct);
 				if (rc == -1) { m->mothurOut("error with rc\n");  m->setControl_pressed(true); return -1; } //reports an error in reading
-				if(filehandle.peek() == ')'){					
-					readSpecialChar(filehandle,')',"right parenthesis");
-				}											
+				if(filehandle.peek() == ')'){	 readSpecialChar(filehandle,')',"right parenthesis"); }
 			}	
 		}
 		//note: treeclimber had the code below added - not sure why?
@@ -272,11 +240,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 		
 			n = T->getIndex(name);
 
-			if(n!=0){
-				m->mothurOut("Internal error: The only taxon is not taxon 0.\n");
-				//exit(1);
-				readOk = -1; return -1;
-			}
+			if(n!=0){ m->mothurOut("Internal error: The only taxon is not taxon 0.\n"); readOk = -1; return -1; }
 			lc = rc = -1;
 		} 
 		
@@ -303,7 +267,6 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 
 int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 	try {
-		
 		if (m->getControl_pressed()) { return -1; } 
 		
 		int c = readNodeChar(f);
@@ -316,7 +279,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 			while(f.peek() != ')'){
 				int child = readNewickInt(f, n, T, ct);
 				if (child == -1) { return -1; } //reports an error in reading
-		//cout << "child = " << child << endl;		
+		
 				childrenNodes.push_back(child);
 				
 				//after a child you either have , or ), check for both
@@ -324,7 +287,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 				else if (f.peek()==',') {   readSpecialChar(f,',',"comma");  }
 				else {;}
 			}
-	//cout << childrenNodes.size() << endl;		
+		
 			if (childrenNodes.size() < 2) {  m->mothurOut("Error in tree, please correct."); m->mothurOutEndLine(); return -1; }
 			
 			//then force into 2 node structure
@@ -333,12 +296,10 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 				int lc, rc;
 				if (i == 1) { lc = childrenNodes[i-1]; rc = childrenNodes[i]; }
 				else { lc = n-1; rc = childrenNodes[i]; }
-			//cout << i << '\t' << lc << '\t' << rc << endl;	
+				
 				T->tree[n].setChildren(lc,rc);
 				T->tree[lc].setParent(n);
 				T->tree[rc].setParent(n);
-				
-				//T->printTree(); cout << endl;
 				n++;
 			}
 			
@@ -359,9 +320,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 				if(n >= numNodes){ m->mothurOut("Error: Too many nodes in input tree\n");  readOk = -1; return -1; }
 				
 				T->tree[n].setBranchLength(readBranchLength(f));
-			}else{
-				T->tree[n].setBranchLength(0.0); 
-			}						
+			}else{ T->tree[n].setBranchLength(0.0);  }
 						
 			return n++;
 		
@@ -373,7 +332,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 				name += d;
 				d=f.get();
 			}
-//cout << name << endl;
+
 			int blen = 0;
 			if(d == ':')	{		blen = 1;	}		
 		
@@ -381,7 +340,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 		
 			//set group info
 			vector<string> group = ct->getGroups(name);
-            //cout << name << endl;	
+            
 			//find index in tree of name
 			int n1 = T->getIndex(name);
 			
@@ -403,15 +362,10 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 			T->tree[n1].setGroup(group);
 			T->tree[n1].setChildren(-1,-1);
 		
-			if(blen == 1){	
-				f.get();
-				T->tree[n1].setBranchLength(readBranchLength(f));
-			}else{
-				T->tree[n1].setBranchLength(0.0);
-			}
+            if(blen == 1)   {	 f.get(); T->tree[n1].setBranchLength(readBranchLength(f)); }
+			else            { T->tree[n1].setBranchLength(0.0);                             }
 		
-			while((c=f.get())!=0 && (c != ':' && c != ',' && c!=')') )		{;}		
-	
+			while((c=f.get())!=0 && (c != ':' && c != ',' && c!=')') )		{;}
 			f.putback(c);
 		
 			return n1;
@@ -422,6 +376,5 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 		exit(1);
 	}
 }
-/**************************************************************************************************/
 /**************************************************************************************************/
 

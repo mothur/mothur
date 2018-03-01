@@ -157,12 +157,12 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") { 				
 				taxfile = current->getTaxonomyFile(); 
-				if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter.\n"); }
+				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required.\n");  abort = true; }
 			}else { current->setTaxonomyFile(taxfile); }	
 			
 			namefile = validParameter.validFile(parameters, "name");
-			if (namefile == "not open") { namefile = ""; abort = true; }
+			if (namefile == "not open") {  abort = true; }
 			else if (namefile == "not found") { namefile = "";  }	
 			else { current->setNameFile(namefile); }
 			
@@ -172,7 +172,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 			else { current->setGroupFile(groupfile); }
             
             countfile = validParameter.validFile(parameters, "count");
-			if (countfile == "not open") { countfile = ""; abort = true; }
+			if (countfile == "not open") {  abort = true; }
 			else if (countfile == "not found") { countfile = "";  }	
 			else { current->setCountFile(countfile); }
             
@@ -303,8 +303,7 @@ int SummaryTaxCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
 		m->mothurOutEndLine();
 					

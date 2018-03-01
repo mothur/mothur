@@ -266,8 +266,7 @@ int MGClusterCommand::execute(){
         if (method == "opti") {  runOptiCluster(); }
         else { runMothurCluster();  }
 				
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(listFileName); m->mothurOutEndLine();	outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		if (countfile == "") {
             m->mothurOut(rabundFileName); m->mothurOutEndLine();	outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
@@ -571,7 +570,6 @@ int MGClusterCommand::runMothurCluster(){
             util.openOutputFile(rabundFileName,	rabundFile);
         }
         util.openOutputFile(listFileName,	listFile);
-        list->printHeaders(listFile);
         
         if (m->getControl_pressed()) {
             delete nameMap; delete read; delete list; delete rabund;

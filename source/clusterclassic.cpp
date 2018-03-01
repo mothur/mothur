@@ -457,7 +457,7 @@ double ClusterClassic::getSmallCell() {
 				}
 			}
 		}
-		
+		Utils util;
 		if (mins.size() > 0) {
 			int zrand = 0;
 			if (mins.size() > 1) {

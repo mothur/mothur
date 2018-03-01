@@ -44,91 +44,10 @@ private:
     
     int process(SharedRAbundVectors*&);
     vector<vector<float> > createProcesses(vector<vector<float> >&, vector<vector<float> >&);
-    vector<vector<float> > driver(vector<vector<float> >&, vector<vector<float> >&, int);
-    vector<vector<float> > shuffleSharedVector(vector<vector<float> >&);
+    //vector<vector<float> > driver(vector<vector<float> >&, vector<vector<float> >&, int);
+    //vector<vector<float> > shuffleSharedVector(vector<vector<float> >&);
 };
 
 /**************************************************************************************************/
-
-struct sparccData {
-   	MothurOut* m;
-    int numPerms;
-    vector< vector<float> > sharedVector;
-    vector< vector<float> > origCorrMatrix;
-    vector<vector<float> > pValues;
-    int numSamplings, maxIterations, numPermutations;
-    string normalizeMethod;
-    Utils util;
-    
-	sparccData(){}
-	sparccData(MothurOut* mout, int it, vector< vector<float> > cs, vector< vector<float> > co, int ns, int mi, int np, string nm) {
-		m = mout;
-        numPerms = it;
-        sharedVector = cs;
-        origCorrMatrix = co;
-        numSamplings = ns;
-        maxIterations = mi;
-        numPermutations = np;
-        normalizeMethod = nm;
-    }
-};
-/**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
-static DWORD WINAPI MySparccThreadFunction(LPVOID lpParam){
-	sparccData* pDataArray;
-	pDataArray = (sparccData*)lpParam;
-	
-	try {
-        
-        int numOTUs = pDataArray->sharedVector[0].size();
-        vector<vector<float> > sharedShuffled = pDataArray->sharedVector;
-        pDataArray->pValues.resize(numOTUs);
-        for(int i=0;i<numOTUs;i++){ pDataArray->pValues[i].assign(numOTUs, 0);  }
-        
-        for(int i=0;i<pDataArray->numPerms;i++){
-            if (pDataArray->m->getControl_pressed()) { return 0; }
-            
-            //sharedShuffled = shuffleSharedVector(sharedVector);
-            //////////////////////////////////////////////////////////
-            int numGroups = (int)pDataArray->sharedVector.size();
-            sharedShuffled = pDataArray->sharedVector;
-            
-            for(int k=0;k<numGroups;k++){
-                for(int j=0;j<numOTUs;j++){
-                    sharedShuffled[k][j] = pDataArray->sharedVector[pDataArray->util.getRandomIndex(numGroups-1)][j];
-                }
-            }
-            /////////////////////////////////////////////////////////
-            
-            CalcSparcc permutedData(sharedShuffled, pDataArray->maxIterations, pDataArray->numSamplings, pDataArray->normalizeMethod);
-            vector<vector<float> > permuteCorrMatrix = permutedData.getRho();
-            
-            for(int j=0;j<numOTUs;j++){
-                for(int k=0;k<j;k++){
-                    double randValue = permuteCorrMatrix[j][k];
-                    double observedValue = pDataArray->origCorrMatrix[j][k];
-                    if(observedValue >= 0 &&  randValue > observedValue)   { pDataArray->pValues[j][k]++; }//this method seems to deflate the
-                    else if(observedValue < 0 && randValue < observedValue){ pDataArray->pValues[j][k]++; }//pvalues of small rho values
-                }
-            }
-            if((i+1) % (int)(pDataArray->numPermutations * 0.05) == 0){ cout << i+1 << endl;  }
-        }
-        
-        return 0;
-		
-	}
-	catch(exception& e) {
-		pDataArray->m->errorOut(e, "SparccCommand", "MySparccThreadFunction");
-		exit(1);
-	}
-}
-#endif
-
-
-/**************************************************************************************************/
-
-
-
 
 #endif

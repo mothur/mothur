@@ -336,10 +336,8 @@ int HeatMapSimCommand::execute(){
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear(); return 0; }
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -375,14 +373,13 @@ int HeatMapSimCommand::runCommandShared() {
 
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 	
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
 				vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
                 for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }
 					
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 				
 			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -391,14 +388,13 @@ int HeatMapSimCommand::runCommandShared() {
 				delete lookup;
 				lookup = input->getSharedRAbundVectors(lastLabel);				
 
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
                 for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }
 					
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);
@@ -418,16 +414,11 @@ int HeatMapSimCommand::runCommandShared() {
 		if (m->getControl_pressed()) {  delete input;    return 0; }
 
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		if (m->getControl_pressed()) {  delete input;   return 0; }
@@ -437,7 +428,7 @@ int HeatMapSimCommand::runCommandShared() {
             delete lookup;
             lookup = input->getSharedRAbundVectors(lastLabel);
             
-            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()+"\n"); 
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
             for (int i = 0; i < data.size(); i++) {  delete data[i];  }

@@ -221,7 +221,7 @@ int ListOtuLabelsCommand::execute(){
                 
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     
                     createList(lookup);
                     
@@ -234,7 +234,7 @@ int ListOtuLabelsCommand::execute(){
                     
                     delete lookup;
                     lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     
                     createList(lookup);
                     
@@ -275,7 +275,7 @@ int ListOtuLabelsCommand::execute(){
                 delete lookup;
                 lookup = input.getSharedRAbundFloatVectors(lastLabel);
                 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 createList(lookup);
                 
@@ -298,7 +298,7 @@ int ListOtuLabelsCommand::execute(){
                 
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     
                     createList(lookup);
                     
@@ -311,7 +311,7 @@ int ListOtuLabelsCommand::execute(){
                     
                     delete lookup;
                     lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     
                     createList(lookup);
                     
@@ -352,7 +352,7 @@ int ListOtuLabelsCommand::execute(){
                 delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 createList(lookup);
                 
@@ -438,10 +438,8 @@ int ListOtuLabelsCommand::execute(){
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
         
         //output files created by command
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
         return 0;
 		
     }

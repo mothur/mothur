@@ -194,11 +194,9 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
         
         ofstream out;
         util.openOutputFile(listFile,	out);
-        list.printHeaders(out);
         
-        if (countfile != "") {
-            list.print(out, counts);
-        }else {
+        if (countfile != "") { list.print(out, counts); }
+        else {
             list.print(out);
             
             if ((sabundFile != "") && (rabundFile != "")){

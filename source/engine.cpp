@@ -93,7 +93,7 @@ bool InteractEngine::getInput(){
                 mout->setExecuting(true);
                 
                 //executes valid command
-                mout->setChangedSeqNames(false);
+                mout->setChangedSeqNames(true);
                 
                 Command* command = cFactory->getCommand(commandName, options);
                 quitCommandCalled = command->execute();
@@ -232,7 +232,7 @@ bool BatchEngine::getInput(){
 					mout->setExecuting(true);
 					
 					//executes valid command
-                    mout->setChangedSeqNames(false);
+                    mout->setChangedSeqNames(true);
 							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
@@ -349,7 +349,7 @@ bool ScriptEngine::getInput(){
                 mout->setExecuting(true);
                 
                 //executes valid command
-                mout->setChangedSeqNames(false);
+                mout->setChangedSeqNames(true);
                
                 Command* command = cFactory->getCommand(commandName, options);
                 quitCommandCalled = command->execute();

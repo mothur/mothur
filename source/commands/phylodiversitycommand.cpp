@@ -219,9 +219,12 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
             }
             if (subsample) { rarefy = true;  }
             
+            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+            processors = current->setProcessors(temp);
+            
             temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
             util.mothurConvert(temp, iters);
-            if (!rarefy) { iters = 1;  }
+            if (!rarefy) { iters = 1; processors = 1; }
 			
 			temp = validParameter.valid(parameters, "summary");			if (temp == "not found") { temp = "T"; }
 			summary = util.isTrue(temp);
@@ -231,9 +234,6 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			
 			temp = validParameter.valid(parameters, "collect");			if (temp == "not found") { temp = "F"; }
 			collect = util.isTrue(temp);
-			
-			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
-			processors = current->setProcessors(temp);
             
 			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = "";  }
@@ -242,7 +242,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default."); m->mothurOutEndLine(); abort=true; }
+			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default.\n");  abort=true; }
 			
 			if (countfile=="") {
                 if (namefile == "") {
@@ -259,6 +259,57 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 	}			
 }
 //**********************************************************************************************************************
+void printSumData(map< string, vector<float> >& div, ofstream& out, int numIters, vector<string> Groups, int subsampleSize, bool subsample, bool scale){
+    
+    out << "Groups\tnumSampled\tphyloDiversity" << endl;
+    
+    out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+    
+    int numSampled = 0;
+    for (int j = 0; j < Groups.size(); j++) {
+        if (subsample) { numSampled = subsampleSize; }
+        else {  numSampled = (div[Groups[j]].size()-1);  }
+        
+        out << Groups[j] << '\t' << numSampled << '\t';
+        
+        float score;
+        if (scale)	{  score = (div[Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+        else		{	score = div[Groups[j]][numSampled] / (float)numIters;	}
+        
+        out << setprecision(4) << score << endl;
+    }
+    
+    out.close();
+}
+//**********************************************************************************************************************
+void printData(set<int>& num, map< string, vector<float> >& div, ofstream& out, int numIters, vector<string> Groups, bool scale){
+    
+    out << "numSampled";
+    for (int i = 0; i < Groups.size(); i++) { out << '\t' << Groups[i];  }
+    out << endl;
+    
+    out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+    
+    for (set<int>::iterator it = num.begin(); it != num.end(); it++) {
+        int numSampled = *it;
+        
+        out << numSampled;
+        
+        for (int j = 0; j < Groups.size(); j++) {
+            if (numSampled < div[Groups[j]].size()) {
+                float score;
+                if (scale)	{  score = (div[Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+                else		{	score = div[Groups[j]][numSampled] / (float)numIters;	}
+                
+                out << '\t' << setprecision(4) << score ;
+            }else { out << "\tNA" ; }
+        }
+        out << endl;
+    }
+    
+    out.close();
+}
+//**********************************************************************************************************************
 
 int PhyloDiversityCommand::execute(){
 	try {
@@ -272,7 +323,7 @@ int PhyloDiversityCommand::execute(){
         if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
         else { reader = new TreeReader(treefile, countfile); }
         vector<Tree*> trees = reader->getTrees();
-        ct = trees[0]->getCountTable();
+        CountTable* ct; ct = trees[0]->getCountTable();
         delete reader;
 
 		vector<string> tGroups = ct->getNamesOfGroups();
@@ -298,7 +349,7 @@ int PhyloDiversityCommand::execute(){
 		
 			if (m->getControl_pressed()) { delete ct; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]); 	} return 0; }
 			
-			ofstream outSum, outRare, outCollect;
+			ofstream outRare;
             map<string, string> variables; 
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
             variables["[tag]"] = toString(i+1);
@@ -306,9 +357,9 @@ int PhyloDiversityCommand::execute(){
 			string outRareFile = getOutputFileName("rarefy",variables);
 			string outCollectFile = getOutputFileName("phylodiv",variables);
 			
-			if (summary)	{ util.openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);		outputTypes["summary"].push_back(outSumFile);			}
+			if (summary)	{ outputNames.push_back(outSumFile);		outputTypes["summary"].push_back(outSumFile);           }
 			if (rarefy)		{ util.openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);	outputTypes["rarefy"].push_back(outRareFile);			}
-			if (collect)	{ util.openOutputFile(outCollectFile, outCollect); outputNames.push_back(outCollectFile);	 outputTypes["phylodiv"].push_back(outCollectFile);  }
+			if (collect)	{ outputNames.push_back(outCollectFile);	 outputTypes["phylodiv"].push_back(outCollectFile);     }
 			
 			int numLeafNodes = trees[i]->getNumLeaves();
             
@@ -359,35 +410,17 @@ int PhyloDiversityCommand::execute(){
                 }
             }
 			
-            if (rarefy) {
-                vector<int> procIters;
-                int numItersPerProcessor = iters / processors;
-                
-                //divide iters between processes
-                for (int h = 0; h < processors; h++) {
-                    if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
-                    procIters.push_back(numItersPerProcessor);
-                }
-                
-                createProcesses(procIters, trees[i], diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollect, outSum);
-                
-            }else{ //no need to paralellize if you dont want to rarefy
-                driver(trees[i], diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollect, outSum, true);	
-            }
-				
-			if (rarefy) {	printData(numSampledList, sumDiversity, outRare, iters);	}
+            createProcesses(trees[i], ct, diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollectFile, outSumFile);
+            
+			if (rarefy) {	printData(numSampledList, sumDiversity, outRare, iters, Groups, scale);	}
 		}
 		
-	
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run phylo.diversity."); m->mothurOutEndLine();
-
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run phylo.diversity.\n");
         
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
 		
 		return 0;
@@ -397,391 +430,37 @@ int PhyloDiversityCommand::execute(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map< string, vector<float> >& div, map<string, vector<float> >& sumDiv, int numIters, int increment, vector<int>& randomLeaf, set<int>& numSampledList, ofstream& outCollect, ofstream& outSum){
-	try {
-        int process = 1;
-		
-		vector<int> processIDS;
-		map< string, vector<float> >::iterator itSum;
-        bool recalc = false;
-        vector<string> Treenames = t->getTreeNames();
 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				driver(t, div, sumDiv, procIters[process], increment, randomLeaf, numSampledList, outCollect, outSum, false);
-				
-				string outTemp = outputDir + toString(process) + ".sumDiv.temp";
-				ofstream out;
-				util.openOutputFile(outTemp, out);
-				
-				//output the sumDIversity
-				for (itSum = sumDiv.begin(); itSum != sumDiv.end(); itSum++) {
-					out << itSum->first << '\t' << (itSum->second).size() << '\t';
-					for (int k = 0; k < (itSum->second).size(); k++) { 
-						out << (itSum->second)[k] << '\t';
-					}
-					out << endl;
-				}
-				
-				out.close();
-				
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    util.mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");
-                }
-                recalc = true;
-                break;
-			}
-		}
-		
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-                    for (int i=0;i<processIDS.size();i++) {util.mothurRemove(outputDir + (toString(processIDS[i])) + ".sumDiv.temp");}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //divide iters between processes
-            procIters.clear();
-            int numItersPerProcessor = iters / processors;
-            for (int h = 0; h < processors; h++) {
-                if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
-                procIters.push_back(numItersPerProcessor);
-            }
-            
-            processIDS.resize(0);
-            process = 1;
-
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    driver(t, div, sumDiv, procIters[process], increment, randomLeaf, numSampledList, outCollect, outSum, false);
-                    
-                    string outTemp = outputDir + toString(process) + ".sumDiv.temp";
-                    ofstream out;
-                    util.openOutputFile(outTemp, out);
-                    
-                    //output the sumDIversity
-                    for (itSum = sumDiv.begin(); itSum != sumDiv.end(); itSum++) {
-                        out << itSum->first << '\t' << (itSum->second).size() << '\t';
-                        for (int k = 0; k < (itSum->second).size(); k++) {
-                            out << (itSum->second)[k] << '\t';
-                        }
-                        out << endl;
-                    }
-                    
-                    out.close();
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-        }
-        
-		driver(t, div, sumDiv, procIters[0], increment, randomLeaf, numSampledList, outCollect, outSum, true);
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<(processors-1);i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-		
-		//get data created by processes
-		for (int i=0;i<(processors-1);i++) { 
-			
-			//input the sumDIversity
-			string inTemp = outputDir + toString(processIDS[i]) + ".sumDiv.temp";
-			ifstream in;
-			util.openInputFile(inTemp, in);
-				
-			//output the sumDIversity
-			for (int j = 0; j < sumDiv.size(); j++) { 
-				string group = "";
-				int size = 0;
-				
-				in >> group >> size; util.gobble(in);
-				
-				for (int k = 0; k < size; k++) { 
-					float tempVal;
-					in >> tempVal;
-					
-					sumDiv[group][k] += tempVal;
-				}
-				util.gobble(in);
-			}
-				
-			in.close();
-			util.mothurRemove(inTemp);
-		}
-#else
-        
-        //fill in functions
-        vector<phylodivData*> pDataArray;
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1];
-        vector<CountTable*> cts;
-        vector<Tree*> trees;
-        map<string, int> rootForGroup = getRootForGroups(t);
-		
-		//Create processor worker threads.
-		for( int i=1; i<processors; i++ ){
-            CountTable* copyCount = new CountTable();
-            copyCount->copy(ct);
-            Tree* copyTree = new Tree(copyCount, Treenames);
-            copyTree->getCopy(t);
-            
-            cts.push_back(copyCount);
-            trees.push_back(copyTree);
-            
-            map<string, vector<float> > copydiv = div;
-            map<string, vector<float> > copysumDiv = sumDiv;
-            vector<int> copyrandomLeaf = randomLeaf;
-            set<int> copynumSampledList = numSampledList;
-            map<string, int> copyRootForGrouping = rootForGroup;
-            
-            phylodivData* temp = new phylodivData(m, procIters[i], copydiv, copysumDiv, copyTree, copyCount, increment, copyrandomLeaf, copynumSampledList, copyRootForGrouping, subsample, subsampleSize, Groups);
-			pDataArray.push_back(temp);
-			processIDS.push_back(i);
-            
-			hThreadArray[i-1] = CreateThread(NULL, 0, MyPhyloDivThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
-		}
-		
-		driver(t, div, sumDiv, procIters[0], increment, randomLeaf, numSampledList, outCollect, outSum, true);
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-            for (itSum = pDataArray[i]->sumDiv.begin(); itSum != pDataArray[i]->sumDiv.end(); itSum++) {
-                for (int k = 0; k < (itSum->second).size(); k++) {
-                    sumDiv[itSum->first][k] += (itSum->second)[k];
-                }
-            }
-			delete cts[i];
-            delete trees[i];
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		
-#endif
-
-	return 0;		
-	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "createProcesses");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, map<string, vector<float> >& sumDiv, int numIters, int increment, vector<int>& randomLeaf, set<int>& numSampledList, ofstream& outCollect, ofstream& outSum, bool doSumCollect){
-	try {
-		int numLeafNodes = randomLeaf.size();
-        
-        map<string, int> rootForGroup = getRootForGroups(t); //maps groupName to root node in tree. "root" for group may not be the trees root and we don't want to include the extra branches.
-        
-        
-		for (int l = 0; l < numIters; l++) {
-            util.mothurRandomShuffle(randomLeaf);
-            
-            //initialize counts
-            map<string, int> counts;
-            vector< map<string, bool> > countedBranch;
-            for (int i = 0; i < t->getNumNodes(); i++) {
-                map<string, bool> temp;
-                for (int j = 0; j < Groups.size(); j++) { temp[Groups[j]] = false; }
-                countedBranch.push_back(temp);
-            }
-            
-            for (int j = 0; j < Groups.size(); j++) {  counts[Groups[j]] = 0;   }
-            
-            map<string, int> metCount; bool allDone = false;
-            for (int j = 0; j < Groups.size(); j++) {  counts[Groups[j]] = false;   }
-            for(int k = 0; k < numLeafNodes; k++){
-                
-                if (m->getControl_pressed()) { return 0; }
-                
-                //calc branch length of randomLeaf k
-                vector<float> br = calcBranchLength(t, randomLeaf[k], countedBranch, rootForGroup);
-                
-                //for each group in the groups update the total branch length accounting for the names file
-                vector<string> groups = t->tree[randomLeaf[k]].getGroup();
-                
-                for (int j = 0; j < groups.size(); j++) {
-                    
-                    if (util.inUsersGroups(groups[j], Groups)) {
-                        int numSeqsInGroupJ = 0;
-                        map<string, int>::iterator it;
-                        it = t->tree[randomLeaf[k]].pcount.find(groups[j]);
-                        if (it != t->tree[randomLeaf[k]].pcount.end()) { //this leaf node contains seqs from group j
-                            numSeqsInGroupJ = it->second;
-                        }
-                        
-                        if (numSeqsInGroupJ != 0) {	div[groups[j]][(counts[groups[j]]+1)] = div[groups[j]][counts[groups[j]]] + br[j];  }
-                        
-                        for (int s = (counts[groups[j]]+2); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
-                            div[groups[j]][s] = div[groups[j]][s-1];  //update counts, but don't add in redundant branch lengths
-                        }
-                        counts[groups[j]] += numSeqsInGroupJ;
-                        if (subsample) {
-                            if (counts[groups[j]] >= subsampleSize) { metCount[groups[j]] = true; }
-                            bool allTrue = true;
-                            for (int h = 0; h < Groups.size(); h++) {
-                                if (!metCount[Groups[h]]) { allTrue = false; }
-                            }
-                            if (allTrue) { allDone = true; }
-                        }
-                        if (allDone) { j+=groups.size(); k+=numLeafNodes; }
-                    }
-                }
-            }
-            
-            //if you subsample then rarefy=t
-            if (rarefy) {
-                //add this diversity to the sum
-                for (int j = 0; j < Groups.size(); j++) {
-                    for (int g = 0; g < div[Groups[j]].size(); g++) {
-                        sumDiv[Groups[j]][g] += div[Groups[j]][g];
-                    }
-                }
-            }
-            
-            if ((collect) && (l == 0) && doSumCollect) {  printData(numSampledList, div, outCollect, 1);  }
-            if ((summary) && (l == 0) && doSumCollect) {  printSumData(div, outSum, 1);  }
-        }
-        
-        return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "driver");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofstream& out, int numIters){
-	try {
-		
-		out << "Groups\tnumSampled\tphyloDiversity" << endl;
-		
-		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-		
-        int numSampled = 0;
-		for (int j = 0; j < Groups.size(); j++) {
-            if (subsample) { numSampled = subsampleSize; }
-            else {  numSampled = (div[Groups[j]].size()-1);  }
-			
-            out << Groups[j] << '\t' << numSampled << '\t';
-			 
-			float score;
-			if (scale)	{  score = (div[Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-			else		{	score = div[Groups[j]][numSampled] / (float)numIters;	}
-				
-			out << setprecision(4) << score << endl;
-            //cout << Groups[j] << '\t' << numSampled << '\t'<< setprecision(4) << score << endl;
-		}
-					
-		out.close();
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "printSumData");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> >& div, ofstream& out, int numIters){
-	try {
-		
-		out << "numSampled";
-		for (int i = 0; i < Groups.size(); i++) { out << '\t' << Groups[i];  }
-		out << endl;
-		
-		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-		
-		for (set<int>::iterator it = num.begin(); it != num.end(); it++) {  
-			int numSampled = *it;
-			
-			out << numSampled;
-		
-			for (int j = 0; j < Groups.size(); j++) {
-				if (numSampled < div[Groups[j]].size()) { 
-					float score;
-					if (scale)	{  score = (div[Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-					else		{	score = div[Groups[j]][numSampled] / (float)numIters;	}
-
-					out << '\t' << setprecision(4) << score ;
-				}else { out << "\tNA" ; }
-			}
-			out << endl;
-		}
-		
-		out.close();
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "printData");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 //need a vector of floats one branch length for every group the node represents.
-vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, vector< map<string, bool> >& counted, map<string, int> roots){
-	try {
+vector<float> calcBranchLength(Tree* t, int leaf, vector< map<string, bool> >& counted, map<string, int> roots, MothurOut* m){
+    try {
         
-		//calc the branch length
-		//while you aren't at root
-		vector<float> sums; 
-		int index = leaf;
-		
-		vector<string> groups = t->tree[leaf].getGroup();
-		sums.resize(groups.size(), 0.0);
-		
+        //calc the branch length
+        //while you aren't at root
+        vector<float> sums;
+        int index = leaf;
+        
+        vector<string> groups = t->tree[leaf].getGroup();
+        sums.resize(groups.size(), 0.0);
+        
         
         //you are a leaf
-		if(t->tree[index].getBranchLength() != -1){	
-			for (int k = 0; k < groups.size(); k++) { 
-                sums[k] += abs(t->tree[index].getBranchLength());	
-			}
-		}
+        if(t->tree[index].getBranchLength() != -1){
+            for (int k = 0; k < groups.size(); k++) {
+                sums[k] += abs(t->tree[index].getBranchLength());
+            }
+        }
         
         
-        index = t->tree[index].getParent();	
+        index = t->tree[index].getParent();
         
-		//while you aren't at root
-		while(t->tree[index].getParent() != -1){
+        //while you aren't at root
+        while(t->tree[index].getParent() != -1){
             
-			if (m->getControl_pressed()) {  return sums; }
-			
-			for (int k = 0; k < groups.size(); k++) {
+            if (m->getControl_pressed()) {  return sums; }
+            
+            for (int k = 0; k < groups.size(); k++) {
                 
                 if (index >= roots[groups[k]]) { counted[index][groups[k]] = true; } //if you are at this groups "root", then say we are done
                 
@@ -792,25 +471,25 @@ vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, vector<
                     counted[index][groups[k]] = true;
                 }
             }
-            index = t->tree[index].getParent();	
+            index = t->tree[index].getParent();
         }
         
-		return sums;
+        return sums;
         
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "calcBranchLength");
-		exit(1);
-	}
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloDiversityCommand", "calcBranchLength");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
-map<string, int> PhyloDiversityCommand::getRootForGroups(Tree* t){
-	try {
-		map<string, int> roots; //maps group to root for group, may not be root of tree
-		map<string, bool> done;
-       
-		//initialize root for all groups to -1
-		for (int k = 0; k < (t->getCountTable())->getNamesOfGroups().size(); k++) { done[(t->getCountTable())->getNamesOfGroups()[k]] = false; }
+map<string, int> getRootForGroups(Tree* t, MothurOut* m){
+    try {
+        map<string, int> roots; //maps group to root for group, may not be root of tree
+        map<string, bool> done;
+        
+        //initialize root for all groups to -1
+        for (int k = 0; k < (t->getCountTable())->getNamesOfGroups().size(); k++) { done[(t->getCountTable())->getNamesOfGroups()[k]] = false; }
         
         for (int i = 0; i < t->getNumLeaves(); i++) {
             
@@ -820,47 +499,262 @@ map<string, int> PhyloDiversityCommand::getRootForGroups(Tree* t){
             
             for (int j = 0; j < groups.size(); j++) {
                 
-                    if (done[groups[j]] == false) { //we haven't found the root for this group yet, initialize it
-                        done[groups[j]] = true;
-                        roots[groups[j]] = i; //set root to self to start
-                    }
+                if (done[groups[j]] == false) { //we haven't found the root for this group yet, initialize it
+                    done[groups[j]] = true;
+                    roots[groups[j]] = i; //set root to self to start
+                }
+                
+                //while you aren't at root
+                while(t->tree[index].getParent() != -1){
                     
-                    //while you aren't at root
-                    while(t->tree[index].getParent() != -1){
-                        
-                        if (m->getControl_pressed()) {  return roots; }
-                        
-                        //do both your chidren have have descendants from the users groups? 
-                        int lc = t->tree[index].getLChild();
-                        int rc = t->tree[index].getRChild();
-                        
-                        int LpcountSize = 0;
-                        map<string, int>:: iterator itGroup = t->tree[lc].pcount.find(groups[j]);
-                        if (itGroup != t->tree[lc].pcount.end()) { LpcountSize++;  } 
-                        
-                        int RpcountSize = 0;
-                        itGroup = t->tree[rc].pcount.find(groups[j]);
-                        if (itGroup != t->tree[rc].pcount.end()) { RpcountSize++;  } 
-                        
-                        if ((LpcountSize != 0) && (RpcountSize != 0)) { //possible root
-                            if (index > roots[groups[j]]) {  roots[groups[j]] = index; }
-                        }else { ;}
-                        
-                        index = t->tree[index].getParent();	
-                    }
-                //}
+                    if (m->getControl_pressed()) {  return roots; }
+                    
+                    //do both your chidren have have descendants from the users groups?
+                    int lc = t->tree[index].getLChild();
+                    int rc = t->tree[index].getRChild();
+                    
+                    int LpcountSize = 0;
+                    map<string, int>:: iterator itGroup = t->tree[lc].pcount.find(groups[j]);
+                    if (itGroup != t->tree[lc].pcount.end()) { LpcountSize++;  }
+                    
+                    int RpcountSize = 0;
+                    itGroup = t->tree[rc].pcount.find(groups[j]);
+                    if (itGroup != t->tree[rc].pcount.end()) { RpcountSize++;  }
+                    
+                    if ((LpcountSize != 0) && (RpcountSize != 0)) { //possible root
+                        if (index > roots[groups[j]]) {  roots[groups[j]] = index; }
+                    }else { ;}
+                    
+                    index = t->tree[index].getParent();
+                }
             }
         }
         
-        
-        
         return roots;
         
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloDiversityCommand", "getRootForGroups");
+        exit(1);
+    }
+}
+/***********************************************************************/
+struct phylodivData {
+    int numIters;
+    MothurOut* m;
+    map< string, vector<float> > div;
+    map<string, vector<float> > sumDiv;
+    vector< vector<int> > randomLeaf; //each iters randomized nodes
+    set<int> numSampledList;
+    int increment, subsampleSize;
+    string collectName, sumName;
+    Tree* t;
+    CountTable* ct;
+    bool includeRoot, subsample, rarefy, collect, summary, doCollect, doSum, scale;
+    Utils util;
+    vector<string> Groups;
+    
+    
+    phylodivData(){}
+    phylodivData(int ni,  map< string, vector<float> > cd, map< string, vector<float> > csd, Tree* tree, CountTable* count, int incre, vector< vector<int> > crl, set<int> nsl, bool su, int suS, vector<string> gps, bool ds, bool dc, bool rar, bool sc, string coln, string sumn) {
+        m = MothurOut::getInstance();
+        t = tree;
+        ct = count;
+        div = cd;
+        numIters = ni;
+        sumDiv = csd;
+        increment = incre;
+        randomLeaf = crl;
+        numSampledList = nsl;
+        subsample = su;
+        subsampleSize = suS;
+        Groups = gps;
+        doSum = ds;
+        doCollect = dc;
+        collect = false;
+        collectName = coln; if (coln != "") { collect = true; }
+        summary = false;
+        sumName = sumn; if (sumn != "") { summary = true; }
+        rarefy = rar;
+        scale = sc;
+    }
+};
+//**********************************************************************************************************************
+int driverPhylo(phylodivData* params){
+	try {
+		int numLeafNodes = params->randomLeaf[0].size();
+        
+        map<string, int> rootForGroup = getRootForGroups(params->t, params->m); //maps groupName to root node in tree. "root" for group may not be the trees root and we don't want to include the extra branches.
+        
+        
+		for (int l = 0; l < params->numIters; l++) {
+            vector<int> thisItersRandomLeaves = params->randomLeaf[l];
+            
+            //initialize counts
+            map<string, int> counts;
+            vector< map<string, bool> > countedBranch;
+            for (int i = 0; i < params->t->getNumNodes(); i++) {
+                map<string, bool> temp;
+                for (int j = 0; j < params->Groups.size(); j++) { temp[params->Groups[j]] = false; }
+                countedBranch.push_back(temp);
+            }
+            
+            for (int j = 0; j < params->Groups.size(); j++) {  counts[params->Groups[j]] = false;   }
+            
+            map<string, int> metCount; bool allDone = false;
+            for(int k = 0; k < numLeafNodes; k++){
+                
+                if (params->m->getControl_pressed()) { return 0; }
+                
+                //calc branch length of randomLeaf k
+                vector<float> br = calcBranchLength(params->t, thisItersRandomLeaves[k], countedBranch, rootForGroup, params->m);
+                
+                //for each group in the groups update the total branch length accounting for the names file
+                vector<string> groups = params->t->tree[thisItersRandomLeaves[k]].getGroup();
+                
+                for (int j = 0; j < groups.size(); j++) {
+                    
+                    if (params->util.inUsersGroups(groups[j], params->Groups)) {
+                        int numSeqsInGroupJ = 0;
+                        map<string, int>::iterator it;
+                        it = params->t->tree[thisItersRandomLeaves[k]].pcount.find(groups[j]);
+                        if (it != params->t->tree[thisItersRandomLeaves[k]].pcount.end()) { //this leaf node contains seqs from group j
+                            numSeqsInGroupJ = it->second;
+                        }
+                        
+                        if (numSeqsInGroupJ != 0) {	params->div[groups[j]][(counts[groups[j]]+1)] = params->div[groups[j]][counts[groups[j]]] + br[j];  }
+                        
+                        for (int s = (counts[groups[j]]+2); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
+                            params->div[groups[j]][s] = params->div[groups[j]][s-1];  //update counts, but don't add in redundant branch lengths
+                        }
+                        counts[groups[j]] += numSeqsInGroupJ;
+                        if (params->subsample) {
+                            if (counts[groups[j]] >= params->subsampleSize) { metCount[groups[j]] = true; }
+                            bool allTrue = true;
+                            for (int h = 0; h < params->Groups.size(); h++) { if (!metCount[params->Groups[h]]) { allTrue = false; } }
+                            
+                            if (allTrue) { allDone = true; }
+                        }
+                        if (allDone) { j+=groups.size(); k+=numLeafNodes; }
+                    }
+                }
+            }
+            
+            //if you subsample then rarefy=t
+            if (params->rarefy) {
+                //add this diversity to the sum
+                for (int j = 0; j < params->Groups.size(); j++) {
+                    for (int g = 0; g < params->div[params->Groups[j]].size(); g++) {
+                        params->sumDiv[params->Groups[j]][g] += params->div[params->Groups[j]][g];
+                    }
+                }
+            }
+            
+            if ((params->collect) && params->doCollect) {
+                ofstream outCollect; params->util.openOutputFile(params->collectName, outCollect);
+                printData(params->numSampledList, params->div, outCollect, 1, params->Groups, params->scale);
+                params->doCollect = false;
+            }
+            if ((params->summary) && params->doSum) {
+                ofstream outSum; params->util.openOutputFile(params->sumName, outSum);
+                printSumData(params->div, outSum, 1, params->Groups, params->subsampleSize, params->subsample, params->scale);
+                params->doSum = false;
+            }
+            
+            if((l+1) % 100 == 0){	params->m->mothurOutJustToScreen(toString(l+1)+"\n"); 		}
+        }
+       
+        if((params->numIters) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->numIters)+"\n"); 		}
+        
+        return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "getRootForGroups");
+		params->m->errorOut(e, "PhyloDiversityCommand", "driverPhylo");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int PhyloDiversityCommand::createProcesses(Tree* t, CountTable* ct, map< string, vector<float> >& div, map<string, vector<float> >& sumDiv, int numIters, int increment, vector<int>& randomLeaf, set<int>& numSampledList, string outCollect, string outSum){
+    try {
+        vector<string> Treenames = t->getTreeNames();
+        vector<int> procIters;
+        if (iters < processors) { iters = processors;  }
+        int numItersPerProcessor = iters / processors;
+        
+        //divide iters between processes
+        for (int h = 0; h < processors; h++) {
+            if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
+            procIters.push_back(numItersPerProcessor);
+        }
+        
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<phylodivData*> data;
+        
+        //Lauch worker threads
+        vector<int> origRandomLeaf = randomLeaf;
+        for (int i = 0; i < processors-1; i++) {
+            
+            //create randomize randomLeaf for each iter
+            vector< vector<int> > thisRandomLeaf;
+            for (int j = 0; j < procIters[i+1]; j++) {
+                randomLeaf = origRandomLeaf;
+                util.mothurRandomShuffle(randomLeaf);
+                thisRandomLeaf.push_back(randomLeaf);
+            }
+
+            CountTable* copyCount = new CountTable();
+            copyCount->copy(ct);
+            Tree* copyTree = new Tree(copyCount, Treenames);
+            copyTree->getCopy(t);
+            
+            phylodivData* dataBundle = new phylodivData(procIters[i+1], div, sumDiv, copyTree, copyCount, increment, thisRandomLeaf, numSampledList, subsample, subsampleSize, Groups, false, false, rarefy, scale, "", "");
+            
+            data.push_back(dataBundle);
+
+            workerThreads.push_back(new thread(driverPhylo, dataBundle));
+        }
+        
+        vector< vector<int> > thisRandomLeaf;
+        for (int j = 0; j < procIters[0]; j++) {
+            randomLeaf = origRandomLeaf;
+            util.mothurRandomShuffle(randomLeaf);
+            thisRandomLeaf.push_back(randomLeaf);
+        }
+        
+        CountTable* copyCount = new CountTable();
+        copyCount->copy(ct);
+        Tree* copyTree = new Tree(copyCount, Treenames);
+        copyTree->getCopy(t);
+        
+        phylodivData* dataBundle = new phylodivData(procIters[0], div, sumDiv, copyTree, copyCount, increment, thisRandomLeaf, numSampledList, subsample, subsampleSize, Groups, true, true, rarefy, scale, outCollect, outSum);
+        
+        driverPhylo(dataBundle);
+        sumDiv = dataBundle->sumDiv;
+        
+        delete copyTree; delete copyCount;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            for (map<string, vector<float> >::iterator itSum = data[i]->sumDiv.begin(); itSum != data[i]->sumDiv.end(); itSum++) {
+                for (int k = 0; k < (itSum->second).size(); k++) {
+                    sumDiv[itSum->first][k] += (itSum->second)[k];
+                }
+            }
+            delete data[i]->t; delete data[i]->ct;
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
+        delete dataBundle;
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloDiversityCommand", "createProcesses");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 

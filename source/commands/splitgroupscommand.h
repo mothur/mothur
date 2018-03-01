@@ -43,12 +43,13 @@ public:
 private:
 	vector<string> outputNames;
 		
-	string outputDir, namefile, groupfile, countfile, groups, fastafile;
+	string outputDir, namefile, groupfile, countfile, groups, fastafile, flowfile;
 	vector<string> Groups;
 	bool abort;
     
     int runNameGroup();
     int runCount();
+    int splitFlow();
 };
 
 /***************************************************************************************/

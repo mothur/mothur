@@ -294,8 +294,7 @@ int GetRAbundCommand::execute(){
         
         if (m->getControl_pressed()) {  outputTypes.clear();  out.close(); util.mothurRemove(filename);  return 0; }
         
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(filename); m->mothurOutEndLine();	outputNames.push_back(filename); outputTypes["rabund"].push_back(filename);
 		m->mothurOutEndLine();
 		

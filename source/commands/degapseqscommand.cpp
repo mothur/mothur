@@ -193,8 +193,7 @@ int DegapSeqsCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
 		m->mothurOutEndLine();
 
@@ -314,9 +313,7 @@ long long DegapSeqsCommand::createProcesses(string filename, string outputFileNa
         degapData* dataBundle = new degapData(filename, lines[0].start, lines[0].end, threadWriter);
         driverDegap(dataBundle);
         num = dataBundle->count;
-        delete threadWriter;
-        delete dataBundle;
-        
+
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
@@ -325,6 +322,9 @@ long long DegapSeqsCommand::createProcesses(string filename, string outputFileNa
             delete data[i];
             delete workerThreads[i];
         }
+        delete threadWriter;
+        delete dataBundle;
+        
         return num;
     }
     catch(exception& e) {

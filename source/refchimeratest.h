@@ -18,16 +18,16 @@ public:
 	RefChimeraTest(){};
     ~RefChimeraTest(){}
     RefChimeraTest(vector<Sequence>&, bool);
-	int printHeader(ofstream&);
-    int analyzeQuery(string, string, ofstream&);
+	string getHeader();
+    int analyzeQuery(string, string, string&);
     int getClosestRefIndex();
     string getClosestRefAlignment();
     string getQueryAlignment();
 
 private:
 	int getAlignedMismatches(string&, vector<vector<int> >&, vector<vector<int> >&, int&);
-    int analyzeAlignedQuery(string, string, ofstream&);
-    int analyzeUnalignedQuery(string, string, ofstream&);
+    int analyzeAlignedQuery(string, string, string&);
+    int analyzeUnalignedQuery(string, string, string&);
     double alignQueryToReferences(string, string, string&, string&, double&);
     int getUnalignedDiffs(string, string, vector<int>&, vector<int>&, vector<int>&, vector<int>&);
 

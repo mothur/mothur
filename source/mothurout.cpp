@@ -37,7 +37,7 @@ void MothurOut::setLogFileName(string filename, bool append)  {
 	try {
 		logFileName = filename;
         Utils util;
-        if (filename == "dev/null") { devNull = true; }
+        if ((filename == "/dev/null") || (filename == "dev/null")) { devNull = true; }
         else {
             devNull = false;
             if (append)     {

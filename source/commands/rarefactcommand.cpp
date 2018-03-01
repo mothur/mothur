@@ -40,7 +40,6 @@ vector<string> RareFactCommand::setParameters(){
 		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-shannonrange", "sobs", "", "", "","",true,false,true); parameters.push_back(pcalc);
 		CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("alpha", "Multiple", "0-1-2", "1", "", "", "","",false,false,true); parameters.push_back(palpha);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pgroupmode);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -60,9 +59,8 @@ string RareFactCommand::getHelpString(){
 	try {
 		ValidCalculators validCalculator;
 		string helpString = "";
-		helpString += "The rarefaction.single command parameters are list, sabund, rabund, shared, label, iters, freq, calc, processors, groupmode, groups and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
+		helpString += "The rarefaction.single command parameters are list, sabund, rabund, shared, label, iters, freq, calc, groupmode, groups and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
-		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The rarefaction.single command should be in the following format: \n";
 		helpString += "rarefaction.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n";
 		helpString += "Example rarefaction.single(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n";
@@ -296,9 +294,6 @@ RareFactCommand::RareFactCommand(string option)  {
 			temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
 			util.mothurConvert(temp, nIters); 
 			
-			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
-            processors = current->setProcessors(temp);
-            
             temp = validParameter.valid(parameters, "alpha");		if (temp == "not found") { temp = "1"; }
 			util.mothurConvert(temp, alpha);
             
@@ -432,7 +427,7 @@ int RareFactCommand::execute(){
                     map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                     set<int> ends;
                     if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-					rCurve = new Rarefact(*order, rDisplays, processors, ends);
+					rCurve = new Rarefact(*order, rDisplays, ends);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -450,7 +445,7 @@ int RareFactCommand::execute(){
 					map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                     set<int> ends;
                     if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-					rCurve = new Rarefact(*order, rDisplays, processors, ends);
+					rCurve = new Rarefact(*order, rDisplays, ends);
 
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
@@ -494,7 +489,7 @@ int RareFactCommand::execute(){
 				map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                 set<int> ends;
                 if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-                rCurve = new Rarefact(*order, rDisplays, processors, ends);
+                rCurve = new Rarefact(*order, rDisplays, ends);
 
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
@@ -515,10 +510,8 @@ int RareFactCommand::execute(){
 
 		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
 		return 0;
 	}

@@ -15,7 +15,7 @@ class OrderVector;
 class SharedOrderVector;
 class RAbundVector;
 class SharedRAbundVector;
-
+class Tree;
 
 class Utils {
     
@@ -37,6 +37,7 @@ public:
     void mothurRandomShuffle(OrderVector&);
     void mothurRandomShuffle(SharedOrderVector&);
     void mothurRandomShuffle(vector<SharedRAbundVector*>&);
+    void mothurRandomShuffle(Tree* t, vector<string> g);
     
     //checks
     bool isTrue(string);
@@ -56,6 +57,7 @@ public:
     bool anyLabelsToProcess(string, set<string>&, string);
     bool appendBinaryFiles(string, string);
     int appendFiles(string, string);
+    int appendFilesFront(string, string);
     int appendFilesWithoutHeaders(string, string);
     vector<bool> allGZFiles(vector<string>&);
     bool appendSFFFiles(string, string);
@@ -109,6 +111,7 @@ public:
     int getNumSeqs(ifstream&);
     void gobble(istream&);
     void gobble(istringstream&);
+    vector<string> parseTreeFile(string filename); //returns treenames
     set<string> readAccnos(string);
     int readAccnos(string, vector<string>&);
     int readAccnos(string, vector<string>&, string);
@@ -210,6 +213,8 @@ private:
     MothurOut* m;
     bool modifyNames;
     mt19937_64 mersenne_twister_engine;
+    
+    vector<string> readTreeString(ifstream& filehandle);
     
 };
 

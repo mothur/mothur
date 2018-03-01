@@ -252,10 +252,8 @@ int GetOtuLabelsCommand::execute(){
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
         
         //output files created by command
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
         
         string currentName = "";
         itTypes = outputTypes.find("list");
@@ -478,20 +476,17 @@ int GetOtuLabelsCommand::readShared(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[extension]"] = util.getExtension(sharedfile);
         variables["[distance]"] = lookup->getLabel();
-		string outputFileName = getOutputFileName("shared", variables); 
-        ofstream out;
-		util.openOutputFile(outputFileName, out);
-		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        
-		lookup->printHeaders(out);
+		string outputFileName = getOutputFileName("shared", variables);
+        outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        ofstream out; util.openOutputFile(outputFileName, out);
         lookup->print(out);
 		out.close();
         
         delete lookup;
         
-        if (wroteSomething == false) { m->mothurOut("Your file does not contain any OTUs from the .accnos file."); m->mothurOutEndLine();  }
+        if (wroteSomething == false) { m->mothurOut("Your file does not contain any OTUs from the .accnos file.\n");  }
 
-		m->mothurOut("Selected " + toString(numSelected) + " OTUs from your shared file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(numSelected) + " OTUs from your shared file.\n"); 
         
         return 0;
     }
@@ -540,7 +535,6 @@ int GetOtuLabelsCommand::readList(){
         if (newList.getNumBins() != 0) {
             wroteSomething = true;
             newList.setLabels(newLabels);
-            newList.printHeaders(out);
             newList.print(out, false);
         }
 		out.close();
@@ -607,16 +601,11 @@ int GetOtuLabelsCommand::getListVector(){
 		if (m->getControl_pressed()) {  return 0;  }
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
@@ -651,8 +640,7 @@ SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
 			if (m->getControl_pressed()) {   delete lookup; return NULL;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				break;
 			}
 			
@@ -662,8 +650,7 @@ SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
                 delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);
@@ -682,16 +669,11 @@ SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
 		if (m->getControl_pressed()) {  return 0;  }
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to

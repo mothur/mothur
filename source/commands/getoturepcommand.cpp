@@ -550,10 +550,8 @@ int GetOTURepCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -748,6 +746,7 @@ string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
 	try{
         vector<string> reps;
         string rep = "notFound";
+        Utils util;
     
         if (m->getDebug()) { m->mothurOut("[DEBUG]: group=" + group + " names.size() = " + toString(names.size()) + " " + names[0] + "\n"); }
         

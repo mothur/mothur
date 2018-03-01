@@ -208,12 +208,11 @@ int CooccurrenceCommand::execute(){
 	
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				
 				getCooccurrence(lookup, out);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 			
 			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -221,11 +220,10 @@ int CooccurrenceCommand::execute(){
 			
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
 				getCooccurrence(lookup, out);
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
 				//restore real lastlabel to save below
 				lookup->setLabels(saveLabel);
@@ -243,16 +241,11 @@ int CooccurrenceCommand::execute(){
 		if (m->getControl_pressed()) { out.close(); util.mothurRemove(outputFileName); return 0; }
 
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 	
 		//run last label if you need to
@@ -260,7 +253,7 @@ int CooccurrenceCommand::execute(){
 			delete lookup;
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
-			m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel()+"\n"); 
 			
 			getCooccurrence(lookup, out);
 			
@@ -272,8 +265,7 @@ int CooccurrenceCommand::execute(){
 		//reset groups parameter
          
 
-        m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
         

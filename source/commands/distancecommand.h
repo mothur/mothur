@@ -26,7 +26,8 @@
 struct distanceData {
 	long long startLine, endLine, numNewFasta, count;
 	float cutoff;
-	SequenceDB alignDB;
+    SequenceDB alignDB;
+    SequenceDB oldFastaDB;
 	MothurOut* m;
 	OutputWriter* threadWriter;
     string outputFileName, Estimator;
@@ -43,11 +44,12 @@ struct distanceData {
         outputFileName = ofn;
         m = MothurOut::getInstance();
     }
-	void setVariables(int s, int e,  float c, SequenceDB db, string Est, long long num, bool cnt) {
+	void setVariables(int s, int e,  float c, SequenceDB db, SequenceDB oldfn, string Est, long long num, bool cnt) {
 		startLine = s;
 		endLine = e;
 		cutoff = c;
 		alignDB = db;
+        oldFastaDB = oldfn;
 		Estimator = Est;
 		numNewFasta = num;
 		countends = cnt;
@@ -80,10 +82,10 @@ private:
     SequenceDB alignDB;
 	string output, fastafile, calc, outputDir, oldfastafile, column, compress;
     int processors;
-    long long numNewFasta, numSeqs;
+    long long numNewFasta, numSeqs, numDistsBelowCutoff;
 	float cutoff;
 	
-	bool abort, countends;
+	bool abort, countends, fitCalc;
 	vector<string>  Estimators, outputNames; //holds estimators to be used
 	
 	void createProcesses(string);

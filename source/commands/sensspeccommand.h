@@ -16,6 +16,7 @@
 #include "listvector.hpp"
 #include "inputdata.h"
 #include "optimatrix.h"
+#include "sensspeccalc.hpp"
 
 class SensSpecCommand : public Command {
 

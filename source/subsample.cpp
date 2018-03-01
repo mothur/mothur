@@ -56,8 +56,8 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size,
             newCt->setAbund(it->first, "doNotIncludeMe", it->second);
         } 
         
-       
-        newTree = new Tree(newCt, mGroups);
+        vector<string> Treenames = T->getTreeNames();
+        newTree = new Tree(newCt, Treenames);
         newTree->getCopy(T, true);
         
         return newTree;

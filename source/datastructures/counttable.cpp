@@ -45,9 +45,9 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
             }else {
                 //look for it in names of groups to see if the user accidently used the wrong file
                 if (util.inUsersGroups(seqName, groups)) {
-                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n");
                 }
-                m->mothurOut("[ERROR]: Your group file does not contain " + seqName + ". Please correct."); m->mothurOutEndLine();
+                m->mothurOut("[ERROR]: Your group file does not contain " + seqName + ". Please correct.\n"); 
             }
             
             map<string, int>::iterator it2 = indexNameMap.find(seqName);
@@ -261,6 +261,55 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
 	}
 }
 /************************************************************/
+int CountTable::readTable(string file, string format) {
+    try {
+        if (format == "fasta") {
+            filename = file;
+            ifstream in;
+            util.openInputFile(filename, in);
+            
+            hasGroups = false;
+            groups.clear();
+            totalGroups.clear();
+            indexGroupMap.clear();
+            indexNameMap.clear();
+            counts.clear();
+            bool error = false;
+            uniques = 0;
+            total = 0;
+            while (!in.eof()) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                Sequence seq(in); util.gobble(in);
+                string name = seq.getName();
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(1) + "\n"); }
+                
+                map<string, int>::iterator it = indexNameMap.find(name);
+                if (it == indexNameMap.end()) {
+                    indexNameMap[name] = uniques;
+                    totals.push_back(1);
+                    total ++;
+                    uniques++;
+                }else {
+                    error = true;
+                    m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct.\n");
+                }
+            }
+            in.close();
+            
+            if (error) { m->setControl_pressed(true); }
+        }else { m->mothurOut("[ERROR]: Unsupported format: " + format + ", please correct.\n"); m->setControl_pressed(true);  }
+        
+        return total;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "readTable");
+        exit(1);
+    }
+}
+
+/************************************************************/
 int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
     try {
         filename = file;
@@ -363,16 +412,6 @@ int CountTable::printTable(string file) {
                 out << endl;
             }
         }
-        /*for (map<string, int>::iterator itNames = indexNameMap.begin(); itNames != indexNameMap.end(); itNames++) {
-            out << itNames->first << '\t' << totals[itNames->second];
-            if (hasGroups) {
-                
-                for (int i = 0; i < groups.size(); i++) {
-                    out << '\t' << counts[itNames->second][i];
-                }
-            }
-            out << endl;
-        }*/
         out.close();
         return 0;
     }

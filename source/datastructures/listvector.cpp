@@ -103,11 +103,10 @@ ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : Dat
 					if (m->getControl_pressed()) { break; }
 					string temp;
 					iStringStream >> temp;  util.gobble(iStringStream);
-                    
-					currentLabels.push_back(temp);
+					binLabels.push_back(temp);
 				}
-                if (currentLabels.size() != 0) {
-                    string binLabelTag = currentLabels[0];
+                if (binLabels.size() != 0) {
+                    string binLabelTag = binLabels[0];
                     labelTag = "";
                     for (int i = 0; i < binLabelTag.length(); i++) { if (isalpha(binLabelTag[i])){ labelTag += binLabelTag[i]; } }
                 }
@@ -128,7 +127,7 @@ ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : Dat
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
                     }
                     binLabel += sbinNumber;
-                    currentLabels.push_back(binLabel);
+                    binLabels.push_back(binLabel);
                 }
             }
 		}else { f >> label >> hold; }
@@ -246,15 +245,40 @@ void ListVector::clear(){
 }
 
 /***********************************************************************/
-void ListVector::printHeaders(ostream& output){
+void ListVector::printHeaders(ostream& output, map<string, int>& ct, bool sortPlease){
 	try {
         if (printListHeaders) {
-            output << "label\tnum" + otuTag + "s";
+            if (binLabels.size() == 0) { sortPlease = false; } //we are creating arbitary otuNames
             
             vector<string> theseLabels = getLabels();
             
-            for(int i = 0; i < theseLabels.size(); i++) { //print original label for sorted by abundance otu
-                output  << '\t' << theseLabels[i];
+            output << "label\tnum" + otuTag + "s";
+            
+            if (sortPlease) {
+                Utils util;
+                vector<listCt> hold;
+                for (int i = 0; i < data.size(); i++) {
+                    if (data[i] != "") {
+                        vector<string> binNames;
+                        string bin = data[i];
+                        util.splitAtComma(bin, binNames);
+                        int total = 0;
+                        for (int j = 0; j < binNames.size(); j++) {
+                            map<string, int>::iterator it = ct.find(binNames[j]);
+                            if (it == ct.end()) {
+                                m->mothurOut("[ERROR]: " + binNames[j] + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
+                            }else { total += ct[binNames[j]]; }
+                        }
+                        listCt temp(data[i], total, theseLabels[i]);
+                        hold.push_back(temp);
+                    }
+                }
+                sort(hold.begin(), hold.end(), abundNamesSort2);
+
+                //print original label for sorted by abundance otu
+                for (int i = 0; i < hold.size(); i++) { output  << '\t' << hold[i].label; }
+            }else {
+                for (int i = 0; i < theseLabels.size(); i++) { output  << '\t' << theseLabels[i]; }
             }
             
             output << endl;
@@ -272,9 +296,9 @@ void ListVector::printHeaders(ostream& output){
 
 void ListVector::print(ostream& output, map<string, int>& ct){
 	try {
-        printHeaders(output);
+        printHeaders(output, ct, true);
 		output << label << '\t' << numBins;
-	
+        
         Utils util;
         vector<listCt> hold;
         for (int i = 0; i < data.size(); i++) {
@@ -289,7 +313,7 @@ void ListVector::print(ostream& output, map<string, int>& ct){
                         m->mothurOut("[ERROR]: " + binNames[j] + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                     }else { total += ct[binNames[j]]; }
                 }
-                listCt temp(data[i], total);
+                listCt temp(data[i], total, "");
                 hold.push_back(temp);
             }
         }
@@ -313,22 +337,16 @@ void ListVector::print(ostream& output, map<string, int>& ct){
 
 void ListVector::print(ostream& output){
     try {
-        printHeaders(output);
-        output << label << '\t' << numBins;
-        
-        vector<string> hold = data;
-        sort(hold.begin(), hold.end(), abundNamesSort);
-        
-        //find first non blank otu
-        int start = 0;
-        for(int i=0;i<hold.size();i++){  if(hold[i] != ""){  start = i; break; } }
-        
-        for(int i=start;i<hold.size();i++){
-            if(hold[i] != ""){
-                output << '\t' << hold[i];
+        map<string, int> ct;
+        for (int i = 0; i < data.size(); i++) {
+            if (data[i] != "") {
+                string bin = data[i];
+                vector<string> binNames; util.splitAtComma(bin, binNames);
+                for (int j = 0; j < binNames.size(); j++) { ct[binNames[j]] = 1; }
             }
         }
-        output << endl;
+        
+        print(output, ct);
     }
     catch(exception& e) {
         m->errorOut(e, "ListVector", "print");
@@ -339,7 +357,16 @@ void ListVector::print(ostream& output){
 //no sort for subsampling and get.otus and remove.otus
 void ListVector::print(ostream& output, bool sortOtus){
     try {
-        printHeaders(output);
+        map<string, int> ct;
+        for (int i = 0; i < data.size(); i++) {
+            if (data[i] != "") {
+                string bin = data[i];
+                vector<string> binNames; util.splitAtComma(bin, binNames);
+                for (int j = 0; j < binNames.size(); j++) { ct[binNames[j]] = 1; }
+            }
+        }
+        
+        printHeaders(output, ct, sortOtus);
         output << label << '\t' << numBins;
         
         vector<string> hold = data;
@@ -372,16 +399,6 @@ RAbundVector ListVector::getRAbundVector(){
 			int binSize = util.getNumNames(data[i]);
 			rav.push_back(binSize);
 		}
-	
-	//  This was here before to output data in a nice format, but it screws up the name mapping steps
-	//	sort(rav.rbegin(), rav.rend());
-	//	
-	//	for(int i=data.size()-1;i>=0;i--){
-	//		if(rav.get(i) == 0){	rav.pop_back();	}
-	//		else{
-	//			break;
-	//		}
-	//	}
 		rav.setLabel(label);
 	
 		return rav;

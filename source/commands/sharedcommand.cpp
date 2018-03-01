@@ -276,10 +276,8 @@ int SharedCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 		}
 
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
 		return 0;
 	}
@@ -474,8 +472,7 @@ int SharedCommand::createSharedFromBiom() {
             lookup->setOTUNames(otuNames);
             lookup->eliminateZeroOTUS();
 
-            m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
-            lookup->printHeaders(out);
+            m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()+"\n"); 
             printSharedData(lookup, out);
         }
 
@@ -817,7 +814,7 @@ int SharedCommand::createSharedFromListGroup() {
 
                 lookup = SharedList->getSharedRAbundVector();
 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
 
                 if (m->getControl_pressed()) {
                     delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
@@ -840,11 +837,9 @@ int SharedCommand::createSharedFromListGroup() {
                     util.openOutputFile(filename, out2);
 
                     lookup->eliminateZeroOTUS();
-                    lookup->printHeaders(out2);
                     printSharedData(lookup, out2);
                     out2.close();
                 }else {
-                    lookup->printHeaders(out);
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -860,7 +855,7 @@ int SharedCommand::createSharedFromListGroup() {
                 SharedList = input.getSharedListVector(lastLabel); //get new list vector to process
 
                 lookup = SharedList->getSharedRAbundVector();
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
 
                 if (m->getControl_pressed()) {
                     delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
@@ -883,11 +878,9 @@ int SharedCommand::createSharedFromListGroup() {
                     util.openOutputFile(filename, out2);
 
                     lookup->eliminateZeroOTUS();
-                    lookup->printHeaders(out2);
                     printSharedData(lookup, out2);
                     out2.close();
                 }else {
-                    lookup->printHeaders(out);
                     printSharedData(lookup, out); //prints info to the .shared file
                 }
                 delete lookup;
@@ -921,7 +914,7 @@ int SharedCommand::createSharedFromListGroup() {
             SharedList = input.getSharedListVector(lastLabel); //get new list vector to process
 
             lookup = SharedList->getSharedRAbundVector();
-            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()+"\n"); 
 
             if (m->getControl_pressed()) {
                 if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
@@ -943,11 +936,9 @@ int SharedCommand::createSharedFromListGroup() {
                 util.openOutputFile(filename, out2);
 
                 lookup->eliminateZeroOTUS();
-                lookup->printHeaders(out2);
                 printSharedData(lookup, out2);
                 out2.close();
             }else {
-                lookup->printHeaders(out); 
                 printSharedData(lookup, out); //prints info to the .shared file
             }
             delete lookup;

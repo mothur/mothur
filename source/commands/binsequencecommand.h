@@ -39,19 +39,13 @@ public:
 	
 private:
 	CountTable ct;
-	ListVector* list;
-	InputData* input;
-	FastaMap* fasta;
-	GroupMap* groupMap;
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string filename, fastafile, listfile, namesfile, groupfile, countfile, label, outputDir;
-	ofstream out;
-	ifstream in, inNames;
 	vector<string> outputNames;
 	
-	void readNamesFile();
-	int process(ListVector*);
+	void readNamesFile(FastaMap&);
+	int process(ListVector*, FastaMap&, GroupMap&);
 };
 
 #endif

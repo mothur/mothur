@@ -314,14 +314,13 @@ int HeatMapCommand::execute(){
 		
 				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 	
-					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookup->getLabel()+"\n"); 
                     vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
 					string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
                     for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 					
-					processedLabels.insert(lookup->getLabel());
-					userLabels.erase(lookup->getLabel());
+					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				}
 				
 				if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -329,15 +328,14 @@ int HeatMapCommand::execute(){
                     delete lookup;
 			
 					lookup = input->getSharedRAbundVectors(lastLabel);
-					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookup->getLabel()+"\n"); 
 					
                     vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
 					string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
                     for (int i = 0; i < data.size(); i++) {  delete data[i];  }
 					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 					
-					processedLabels.insert(lookup->getLabel());
-					userLabels.erase(lookup->getLabel());
+					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
 					lookup->setLabels(saveLabel);
@@ -376,7 +374,7 @@ int HeatMapCommand::execute(){
 				delete lookup;
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n"); 
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
                 for (int i = 0; i < data.size(); i++) {  delete data[i];  }
@@ -553,10 +551,8 @@ int HeatMapCommand::execute(){
 			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear(); return 0;
 		}
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
 		return 0;
 	}

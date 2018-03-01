@@ -21,7 +21,7 @@ AlignTree::AlignTree(string referenceFileName, string taxonomyFileName, int cuto
         readTaxonomy(taxonomyFileName);
      
         ifstream referenceFile;
-        util.openInputFile(referenceFileName, referenceFile);
+        Utils util; util.openInputFile(referenceFileName, referenceFile);
         bool error = false;
         map<int, int> lengths;
         while(!referenceFile.eof()){

@@ -12,7 +12,7 @@
 #include "phylosummary.h"
 
 /**************************************************************************************************/
-Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid, bool f, bool sh) : 
+Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid, bool f, bool sh, string version) :
 Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 	try {
 		
@@ -43,9 +43,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		
 		//if they are there make sure they were created after this release date
 		bool FilesGood = false;
-		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3){
-			FilesGood = checkReleaseDate(probFileTest, probFileTest2, phyloTreeTest, probFileTest3);
-		}
+		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3){ FilesGood = checkReleaseDate(probFileTest, probFileTest2, phyloTreeTest, probFileTest3, version); }
 
 		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood){
 			
@@ -65,7 +63,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
         }else{
 		
 			//create search database and names vector
-			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0);
+			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0, version);
 			
 			//prevents errors caused by creating shortcut files if you had an error in the sanity check.
 			if (m->getControl_pressed()) {  util.mothurRemove(phyloTreeName);  util.mothurRemove(probFileName); util.mothurRemove(probFileName2); }
@@ -95,14 +93,14 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
                     util.openOutputFile(probFileName, out); 
 				
                     //output mothur version
-                    out << "#" << current->getVersion() << endl;
+                    out << "#" << version << endl;
 				
                     out << numKmers << endl;
 				
                     util.openOutputFile(probFileName2, out2);
 				
                     //output mothur version
-                    out2 << "#" << current->getVersion() << endl;
+                    out2 << "#" << version << endl;
                 }
 
 				//for each word
@@ -263,18 +261,20 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect, s
 		map<int, int>::iterator itBoot;
 		map<int, int>::iterator itBoot2;
 		map<int, int>::iterator itConvert;
-			
+        
+        int numKmers = kmers.size()-1;
+        Utils util;
 		for (int i = 0; i < iters; i++) {
 			if (m->getControl_pressed()) { return "control"; }
 			
-			vector<int> temp;
+            vector<int> temp;
 			for (int j = 0; j < numToSelect; j++) {
-				int index = util.getRandomIndex(kmers.size()-1);
-				
+				int index = util.getRandomIndex(numKmers);
+                
 				//add word to temp
 				temp.push_back(kmers[index]);
 			}
-			
+            
 			//get taxonomy
 			int newTax = getMostProbableTaxonomy(temp);
 			//int newTax = 1;
@@ -457,7 +457,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 	}
 }
 /**************************************************************************************************/
-bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file3, ifstream& file4) {
+bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file3, ifstream& file4, string version) {
 	try {
 		
 		bool good = true;
@@ -474,10 +474,7 @@ bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file
 		else {
 			//rip off #
 			for (int i = 0; i < lines.size(); i++) { lines[i] = lines[i].substr(1);  }
-			
-			//get mothurs current version
-			string version = current->getVersion();
-			
+
 			vector<string> versionVector;
 			util.splitAtChar(version, versionVector, '.');
 			

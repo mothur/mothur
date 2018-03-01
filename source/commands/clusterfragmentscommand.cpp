@@ -288,8 +288,7 @@ int ClusterFragmentsCommand::execute(){
 		
 		if (m->getControl_pressed()) { util.mothurRemove(newFastaFile); util.mothurRemove(newNamesFile); return 0; }
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(newFastaFile); m->mothurOutEndLine();	
 		m->mothurOut(newNamesFile); m->mothurOutEndLine();	
 		outputNames.push_back(newFastaFile);  outputNames.push_back(newNamesFile); outputTypes["fasta"].push_back(newFastaFile); outputTypes["name"].push_back(newNamesFile);

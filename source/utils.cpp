@@ -13,7 +13,8 @@
 /***********************************************************************/
 Utils::Utils(){
     try {
-        m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames();
+        
+        m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames(); 
         long long s = m->getRandomSeed();
         mersenne_twister_engine.seed(s); srand(s);
     }
@@ -126,12 +127,9 @@ void Utils::mothurRandomShuffle(vector< vector<double> >& randomize){
 int Utils::getRandomIndex(int highest){
     try {
         if (highest == 0) { return 0; }
-        
-        //int random = (int) ((float)(highest+1) * (float)(rand()) / ((float)RAND_MAX+1.0));
+    
         uniform_int_distribution<int> dis(0, highest);
-        
         int random = dis(mersenne_twister_engine);
-        
         return random;
     }
     catch(exception& e) {
@@ -805,6 +803,38 @@ int Utils::appendFiles(string temp, string filename) {
     }
 }
 /**************************************************************************************************/
+int Utils::appendFilesFront(string temp, string filename) {
+    try{
+        ofstream output;
+        ifstream input;
+        
+        //open output file in append mode
+        openOutputFileBinaryAppend(temp, output);
+        bool ableToOpen = openInputFileBinary(filename, input, "no error");
+        
+        if (ableToOpen) { //you opened it
+            char buffer[4096];
+            while (!input.eof()) {
+                input.read(buffer, 4096);
+                output.write(buffer, input.gcount());
+            }
+            input.close();
+        }
+        output.close();
+        
+        mothurRemove(filename);
+        renameFile(temp, filename);
+        mothurRemove(temp);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "appendFiles");
+        exit(1);
+    }
+}
+
+/**************************************************************************************************/
 bool Utils::appendBinaryFiles(string temp, string filename) {
     try{
         ofstream output;
@@ -1221,22 +1251,24 @@ int Utils::getOTUNames(vector<string>& currentLabels, int numBins, string tagHea
         
         if (currentLabels.size() == numBins) { return 0; }
         
+        int maxLabelNumber = 0;
         if (currentLabels.size() < numBins) {
             string snumBins = toString(numBins);
             
             for (int i = 0; i < numBins; i++) {
                 string binLabel = tagHeader;
-                
                 if (i < currentLabels.size()) { //label exists, check leading zeros length
                     string sbinNumber = getSimpleLabel(currentLabels[i]);
+                    int tempBinNumber; mothurConvert(sbinNumber, tempBinNumber);
+                    if (tempBinNumber > maxLabelNumber) { maxLabelNumber = tempBinNumber; }
                     if (sbinNumber.length() < snumBins.length()) {
                         int diff = snumBins.length() - sbinNumber.length();
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
                     }
                     binLabel += sbinNumber;
                     currentLabels[i] = binLabel;
-                }else{
-                    string sbinNumber = toString(i+1);
+                }else{ //create new label
+                    string sbinNumber = toString(maxLabelNumber+1); maxLabelNumber++;
                     if (sbinNumber.length() < snumBins.length()) {
                         int diff = snumBins.length() - sbinNumber.length();
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
@@ -4457,6 +4489,132 @@ double Utils::getStandardDeviation(vector<int>& featureVector){
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "getStandardDeviation");
+        exit(1);
+    }
+}
+/*****************************************************************/
+//this code is a mess and should be rethought...-slw
+vector<string> Utils::parseTreeFile(string filename) {
+    
+    //only takes names from the first tree and assumes that all trees use the same names.
+    try {
+        //string filename = current->getTreeFile();
+        ifstream filehandle;
+        Utils util; util.openInputFile(filename, filehandle);
+        int comment;
+        char c;
+        comment = 0;
+        
+        vector<string> Treenames;
+        if((c = filehandle.peek()) != '#') {  //ifyou are not a nexus file
+            
+            while ((c = filehandle.peek()) != ';') {
+                if (m->getControl_pressed()) {  filehandle.close(); return Treenames; }
+                // get past comments
+                if(c == '[')    { comment = 1; }
+                if(c == ']')    { comment = 0; }
+                if((c == '(') && (comment != 1)){ break; }
+                filehandle.get();
+            }
+            
+            Treenames = readTreeString(filehandle);
+            
+        }else if((c = filehandle.peek()) == '#') { //ifyou are a nexus file
+            string holder = "";
+            
+            // get past comments
+            while(holder != "translate" && holder != "Translate"){
+                if (m->getControl_pressed()) {  filehandle.close(); return Treenames; }
+                if(holder == "[" || holder == "[!") { comment = 1; }
+                if(holder == "]")                   { comment = 0; }
+                filehandle >> holder;
+                
+                //if there is no translate then you must read tree string otherwise use translate to get names
+                if((holder == "tree") && (comment != 1)){
+                    //pass over the "tree rep.6878900 = "
+                    while (((c = filehandle.get()) != '(') && ((c = filehandle.peek()) != EOF)) {;}
+                    
+                    if(c == EOF) { break; }
+                    filehandle.putback(c);  //put back first ( of tree.
+                    Treenames = readTreeString(filehandle);
+                    
+                    break;
+                }
+                
+                if (filehandle.eof()) { break; }
+            }
+            
+            //use nexus translation rather than parsing tree to save time
+            if((holder == "translate") || (holder == "Translate")) {
+                
+                string number, name, h;
+                h = ""; // so it enters the loop the first time
+                while((h != ";") && (number != ";")) {
+                    if (m->getControl_pressed()) {  filehandle.close(); return Treenames; }
+                    filehandle >> number;
+                    filehandle >> name;
+                    
+                    //c = , until done with translation then c = ;
+                    h = name.substr(name.length()-1, name.length());
+                    name.erase(name.end()-1);  //erase the comma
+                    Treenames.push_back(number);
+                }
+                if(number == ";") { Treenames.pop_back(); }  //in case ';' from translation is on next line instead of next to last name
+            }
+        }
+        filehandle.close();
+        
+        return Treenames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "parseTreeFile");
+        exit(1);
+    }
+}
+/*******************************************************/
+vector<string> Utils::readTreeString(ifstream& filehandle)	{
+    try {
+        char c;
+        string name;  //, k
+        vector<string> Treenames;
+        
+        while((c = filehandle.peek()) != ';') {
+            if (m->getControl_pressed()) {  return Treenames; }
+            
+            if(c == ')')  {
+                //to pass over labels in trees
+                c=filehandle.get();
+                while((c!=',') && (c != -1) && (c!= ':') && (c!=';')){ c=filehandle.get(); }
+                filehandle.putback(c);
+            }
+            if(c == ';') { return Treenames; }
+            if(c == -1) { return Treenames; }
+            //if you are a name
+            if((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != '\t') && (c != 32)) { //32 is space
+                name = "";
+                c = filehandle.get();
+                while ((c != '(') && (c != ')') && (c != ',') && (c != ':')  && (c != '\n') && (c != 32) && (c != '\t')) {
+                    name += c;
+                    c = filehandle.get();
+                }
+                
+                if (name != "\r" ) { Treenames.push_back(name);   }
+                filehandle.putback(c);
+            }
+            
+            if(c  == ':') { //read until you reach the end of the branch length
+                while ((c != '(') && (c != ')') && (c != ',') && (c != ';') && (c != '\n') && (c != '\t') && (c != 32)) { c = filehandle.get(); }
+                filehandle.putback(c);
+            }
+            c = filehandle.get();
+            if(c == ';') { return Treenames; }
+            if(c == ')') { filehandle.putback(c); }
+            if (filehandle.eof()) { break; }
+        }
+        return Treenames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "readTreeString");
         exit(1);
     }
 }

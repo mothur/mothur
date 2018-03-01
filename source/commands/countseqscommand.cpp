@@ -220,7 +220,7 @@ int CountSeqsCommand::execute(){
                 
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                     processShared(data, variables, currentLabels);
                     for(int i = 0; i < data.size(); i++) {  delete data[i]; } data.clear();
@@ -234,7 +234,7 @@ int CountSeqsCommand::execute(){
                     
                     delete lookup;
                     lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     
                     vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                     processShared(data, variables, currentLabels);
@@ -277,7 +277,7 @@ int CountSeqsCommand::execute(){
                 delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 processShared(data, variables, currentLabels);
@@ -294,8 +294,7 @@ int CountSeqsCommand::execute(){
 			if ((itTypes->second).size() != 0) { string currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
         
-        m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names: \n"); 
 		for(int i = 0; i < outputNames.size(); i++) {  m->mothurOut(outputNames[i]); m->mothurOutEndLine();	 }
 		m->mothurOutEndLine();
         

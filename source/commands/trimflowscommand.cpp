@@ -72,7 +72,8 @@ string TrimFlowsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "flow") {  pattern = "[filename],[tag],flow"; } 
+        if (type == "flow") {  pattern = "[filename],[tag],flow"; }
+        else if (type == "group") {  pattern = "[filename],flow.groups"; }
         else if (type == "fasta") {  pattern = "[filename],flow.fasta"; } 
         else if (type == "file") {  pattern = "[filename],flow.files"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
@@ -92,6 +93,7 @@ TrimFlowsCommand::TrimFlowsCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["flow"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
         outputTypes["file"] = tempOutNames;
 	}
@@ -132,6 +134,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			outputTypes["flow"] = tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
             outputTypes["file"] = tempOutNames;
+            outputTypes["group"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.valid(parameters, "inputdir");		
@@ -261,7 +264,6 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 
 int TrimFlowsCommand::execute(){
 	try{
-		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
         map<string, string> variables; 
@@ -276,115 +278,61 @@ int TrimFlowsCommand::execute(){
         variables["[tag]"] = "scrap";
 		string scrapFlowFileName = getOutputFileName("flow",variables);
 		outputNames.push_back(scrapFlowFileName); outputTypes["flow"].push_back(scrapFlowFileName);
-
+        
+        createGroup = false;
+		if(oligoFileName != ""){   getOligos();	 }
 		
-		
-		vector<unsigned long long> flowFilePos;
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		flowFilePos = getFlowFileBreaks();
-		for (int i = 0; i < (flowFilePos.size()-1); i++) {
-			lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
-		}	
-	#else
-		ifstream in; util.openInputFile(flowFileName, in); in >> numFlows; in.close();
-	///////////////////////////////////////// until I fix multiple processors for windows //////////////////	
-		processors = 1;
-	///////////////////////////////////////// until I fix multiple processors for windows //////////////////		
-		if (processors == 1) {
-			lines.push_back(new linePair(0, 1000));
-		}else {
-			long long numFlowLines;
-			flowFilePos = util.setFilePosEachLine(flowFileName, numFlowLines);
-			flowFilePos.erase(flowFilePos.begin() + 1); numFlowLines--;
-			
-			//figure out how many sequences you have to process
-			int numSeqsPerProcessor = numFlowLines / processors;
-			cout << numSeqsPerProcessor << '\t' << numFlowLines << endl;
-			for (int i = 0; i < processors; i++) {
-				int startIndex =  i * numSeqsPerProcessor;
-				if(i == (processors - 1)){	numSeqsPerProcessor = numFlowLines - i * numSeqsPerProcessor; 	}
-				lines.push_back(new linePair(flowFilePos[startIndex], numSeqsPerProcessor));
-				cout << flowFilePos[startIndex] << '\t' << numSeqsPerProcessor << endl;
-			}
-		}
-	#endif
-		
-		vector<vector<string> > barcodePrimerComboFileNames;
-		if(oligoFileName != ""){
-			getOligos(barcodePrimerComboFileNames);	
-		}
-		
-		if(processors == 1){
-			driverCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames, lines[0]);
-		}else{
-			createProcessesCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames); 
-		}	
-		
+        createProcessesCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName);
+    
 		if (m->getControl_pressed()) {  return 0; }			
 		
-		string flowFilesFileName;
-		ofstream output;
-		
+        string flowFilesFileName = getOutputFileName("file",variables);
+        outputTypes["file"].push_back(flowFilesFileName);
+        outputNames.push_back(flowFilesFileName);
+        
 		if(allFiles){
-			set<string> namesAlreadyProcessed;
-            set<string> namesToRemove;
-			flowFilesFileName = getOutputFileName("file",variables);
-			util.openOutputFile(flowFilesFileName, output);
-
-			for(int i=0;i<barcodePrimerComboFileNames.size();i++){
-				for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
-					if (namesAlreadyProcessed.count(barcodePrimerComboFileNames[i][j]) == 0) {
-                        if (barcodePrimerComboFileNames[i][j] != "") {
-                            if (namesToRemove.count(barcodePrimerComboFileNames[i][j]) == 0) {
-                                FILE * pFile;
-                                unsigned long long size;
-                                
-                                //get num bytes in file
-                                barcodePrimerComboFileNames[i][j] = util.getFullPathName(barcodePrimerComboFileNames[i][j]);
-                                pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
-                                if (pFile==NULL) perror ("Error opening file");
-                                else{
-                                    fseek (pFile, 0, SEEK_END);
-                                    size=ftell(pFile);
-                                    fclose (pFile);
-                                }
-                                
-                                if(size < 10){
-                                    util.mothurRemove(barcodePrimerComboFileNames[i][j]);
-                                    namesToRemove.insert(barcodePrimerComboFileNames[i][j]);
-                                }
-                                else{
-                                    output << util.getFullPathName(barcodePrimerComboFileNames[i][j]) << endl;
-                                }
-                                namesAlreadyProcessed.insert(barcodePrimerComboFileNames[i][j]);
-                            }
-                        }
-					}
-				}
-			}
-			output.close();
+            //print group file
+            string groupFileName = getOutputFileName("group",variables);
+            ofstream out; util.openOutputFile(groupFileName, out);
+            for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {  out << it->first << '\t' << it->second << endl;  } out.close();
             
-            //remove names for outputFileNames, just cleans up the output
-            vector<string> outputNames2;
-            for(int i = 0; i < outputNames.size(); i++) { if (namesToRemove.count(outputNames[i]) == 0) { outputNames2.push_back(outputNames[i]); } }
-            outputNames = outputNames2;
-		}
-		else{
-			flowFilesFileName = getOutputFileName("file",variables);
-			util.openOutputFile(flowFilesFileName, output);
-			
-			output << util.getFullPathName(trimFlowFileName) << endl;
-			
-			output.close();
-		}
-		outputTypes["file"].push_back(flowFilesFileName);
-		outputNames.push_back(flowFilesFileName);
+            //run split.groups command
+            string inputString = "flow=" + trimFlowFileName + ", group=" + groupFileName;
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Generating allfiles... Running command: split.groups(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* splitCommand = new SplitGroupCommand(inputString);
+            splitCommand->execute();
+            
+            map<string, vector<string> > filenames = splitCommand->getOutputFiles();
+            
+            delete splitCommand;
+            current->setMothurCalling(false);
+            m->mothurOut("/******************************************/\n");
+
+            //print file file
+            map<string, vector<string> >::iterator itFiles = filenames.find("flow");
+            
+            if (itFiles != filenames.end()) {
+                ofstream output; util.openOutputFile(flowFilesFileName, output);
+                for (int i = 0; i < (itFiles->second).size(); i++) {
+                    output << (itFiles->second)[i] << endl;
+                    outputNames.push_back((itFiles->second)[i]);
+                }
+                output.close();
+            }else {
+                ofstream output; util.openOutputFile(flowFilesFileName, output);
+                output << util.getFullPathName(trimFlowFileName) << endl; output.close();
+            }
+		}else{
+            ofstream output; util.openOutputFile(flowFilesFileName, output);
+            output << util.getFullPathName(trimFlowFileName) << endl; output.close();
+        }
         current->setFileFile(flowFilesFileName);
 			
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		return 0;	
 	}
@@ -393,64 +341,125 @@ int TrimFlowsCommand::execute(){
 		exit(1);
 	}
 }
-
+/**************************************************************************************************/
+struct trimFlowData {
+    MothurOut* m;
+    string flowFileName, flowOrder;
+    OutputWriter* trimFile;
+    OutputWriter* scrapFile;
+    OutputWriter* fastaFile;
+    set<string> badNames;
+    unsigned long long lineStart, lineEnd;
+    bool pairedOligos, reorient, fasta, createGroup;
+    int tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, numFlows, maxHomoP, maxFlows, minFlows;
+    float signal, noise;
+    long long count;
+    vector<string> revPrimer;
+    map<string, int> barcodes;
+    map<string, int> primers;
+    vector<string>  linker;
+    vector<string>  spacer;
+    vector<string> primerNameVector;
+    vector<string> barcodeNameVector;
+    map<int, oligosPair> pairedBarcodes;
+    map<int, oligosPair> pairedPrimers;
+    map<string, string> groupMap;
+    Utils util;
+    
+    trimFlowData(){}
+    ~trimFlowData() { }
+    trimFlowData(string fn, OutputWriter* tn, OutputWriter* sn, OutputWriter* ffn, bool useFasta, unsigned long long lstart, unsigned long long lend) {
+        fasta = useFasta;
+        fastaFile = ffn;
+        flowFileName = fn;
+        trimFile = tn;
+        scrapFile = sn;
+        lineStart = lstart;
+        lineEnd = lend;
+        m = MothurOut::getInstance();
+    }
+    void setOligosOptions(bool cg, int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, map<int, oligosPair> pbr, map<int, oligosPair> ppr, bool po, vector<string> priNameVector, vector<string> barNameVector, bool reo, float sg, float nos, int mhom, string flo, int mxflo, int mnflo, int nmf) {
+        createGroup = cg;
+        pdiffs = pd;
+        bdiffs = bd;
+        ldiffs = ld;
+        sdiffs = sd;
+        tdiffs = td;
+        barcodes = bar;
+        pairedPrimers = ppr;
+        pairedBarcodes = pbr;
+        pairedOligos = po;
+        primers = pri;
+        revPrimer = revP;
+        linker = li;
+        spacer = spa;
+        primerNameVector = priNameVector;
+        barcodeNameVector = barNameVector;
+        reorient = reo;
+        signal = sg;
+        noise = nos;
+        maxHomoP = mhom;
+        flowOrder = flo;
+        maxFlows = mxflo;
+        minFlows = mnflo;
+        numFlows = nmf;
+        count = 0;
+    }
+};
 //***************************************************************************************************************
 
-int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName, vector<vector<string> > thisBarcodePrimerComboFileNames, linePair* line){
+int driverCreateTrim(trimFlowData* params){
 	
 	try {
-		ofstream trimFlowFile;
-		util.openOutputFile(trimFlowFileName, trimFlowFile);
-		trimFlowFile.setf(ios::fixed, ios::floatfield); trimFlowFile.setf(ios::showpoint);
-
-		ofstream scrapFlowFile;
-		util.openOutputFile(scrapFlowFileName, scrapFlowFile);
-		scrapFlowFile.setf(ios::fixed, ios::floatfield); scrapFlowFile.setf(ios::showpoint);
+        ifstream flowFile; params->util.openInputFile(params->flowFileName, flowFile);
 		
-		ofstream fastaFile;
-		if(fasta){	util.openOutputFile(fastaFileName, fastaFile);	}
+		flowFile.seekg(params->lineStart);
 		
-		ifstream flowFile;
-		util.openInputFile(flowFileName, flowFile);
+        if(params->lineStart == 0){ int temp; flowFile >> temp; params->util.gobble(flowFile); }
 		
-		flowFile.seekg(line->start);
+		FlowData flowData(params->numFlows, params->signal, params->noise, params->maxHomoP, params->flowOrder);
+		params->count = 0;
 		
-		if(line->start == 0){
-			flowFile >> numFlows; util.gobble(flowFile);
-			scrapFlowFile << numFlows << endl;
-			trimFlowFile << maxFlows << endl;
-			if(allFiles){
-				for(int i=0;i<thisBarcodePrimerComboFileNames.size();i++){
-					for(int j=0;j<thisBarcodePrimerComboFileNames[0].size();j++){
-                        if (thisBarcodePrimerComboFileNames[i][j] != "") {
-                            ofstream temp;
-                            util.openOutputFile(thisBarcodePrimerComboFileNames[i][j], temp);
-                            temp << maxFlows << endl;
-                            temp.close();
-                        }
-					}
-				}			
-			}
-		}
-		
-		FlowData flowData(numFlows, signal, noise, maxHomoP, flowOrder);
-		//cout << " driver flowdata address " <<  &flowData  << &flowFile << endl;	
-		int count = 0;
-		bool moreSeqs = 1;
-		
-		TrimOligos* trimOligos = NULL;
-        if (pairedOligos)   {   trimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getPairedPrimers(), oligos.getPairedBarcodes(), false); }
-        else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  }
+        int numBarcodes = 0;
+        int numLinkers = params->linker.size();
+        int numSpacers = params->spacer.size();
+        int numFPrimers = 0;
+        int numRPrimers = 0;
+        TrimOligos* trimOligos = NULL;
+        if (params->pairedOligos)   {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->pairedPrimers, params->pairedBarcodes, false); numBarcodes = params->pairedBarcodes.size(); numFPrimers = params->pairedPrimers.size(); }
+        else                {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, params->ldiffs, params->sdiffs, params->primers, params->barcodes, params->revPrimer, params->linker, params->spacer); numBarcodes = params->barcodes.size();  numFPrimers = params->primers.size();  numRPrimers = params->revPrimer.size(); }
         
         TrimOligos* rtrimOligos = NULL;
-        if (reorient) {
-            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), false); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+        if (params->reorient) {
+            //create reoriented primer and barcode pairs
+            map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
+            for (map<int, oligosPair>::iterator it = params->pairedPrimers.begin(); it != params->pairedPrimers.end(); it++) {
+                oligosPair tempPair(params->util.reverseOligo((it->second).reverse), (params->util.reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
+                rpairedPrimers[it->first] = tempPair;
+            }
+            for (map<int, oligosPair>::iterator it = params->pairedBarcodes.begin(); it != params->pairedBarcodes.end(); it++) {
+                oligosPair tempPair(params->util.reverseOligo((it->second).reverse), (params->util.reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
+                rpairedBarcodes[it->first] = tempPair;
+            }
+            int index = rpairedBarcodes.size();
+            for (map<string, int>::iterator it = params->barcodes.begin(); it != params->barcodes.end(); it++) {
+                oligosPair tempPair("", params->util.reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+                rpairedBarcodes[index] = tempPair; index++;
+            }
+            
+            index = rpairedPrimers.size();
+            for (map<string, int>::iterator it = params->primers.begin(); it != params->primers.end(); it++) {
+                oligosPair tempPair("", params->util.reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+                rpairedPrimers[index] = tempPair; index++;
+            }
+            
+            rtrimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes, false); numBarcodes = rpairedBarcodes.size();
         }
 
-		
+        bool moreSeqs = 1;
 		while(moreSeqs) {
 				
-			if (m->getControl_pressed()) { break; }
+			if (params->m->getControl_pressed()) { break; }
 			
 			int success = 1;
 			int currentSeqDiffs = 0;
@@ -458,13 +467,13 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
             string commentString = "";
 			
 			flowData.getNext(flowFile); 
-			flowData.capFlows(maxFlows);	
+			flowData.capFlows(params->maxFlows);
 			
 			Sequence currSeq = flowData.getSequence();
             //for reorient
             Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
             
-			if(!flowData.hasMinFlows(minFlows)){	//screen to see if sequence is of a minimum number of flows
+			if(!flowData.hasMinFlows(params->minFlows)){	//screen to see if sequence is of a minimum number of flows
 				success = 0;
 				trashCode += 'l';
 			}
@@ -478,59 +487,59 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			
             if(numLinkers != 0){
                 success = trimOligos->stripLinker(currSeq);
-                if(success > ldiffs)		{	trashCode += 'k';	}
+                if(success > params->ldiffs)		{	trashCode += 'k';	}
                 else{ currentSeqDiffs += success;  }
                 
             }
             
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + currSeq.getName() + " " + currSeq.getUnaligned() + "\n"); }
+            if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + currSeq.getName() + " " + currSeq.getUnaligned() + "\n"); }
             
 			if(numBarcodes != 0){
 				vector<int> results = trimOligos->stripBarcode(currSeq, barcodeIndex);
-                if (pairedOligos) {
+                if (params->pairedOligos) {
                     success = results[0] + results[2];
-                    commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                    commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], params->bdiffs) + ") ";
                 }
                 else {
                     success = results[0];
-                    commentString += "bdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], bdiffs) + ") ";
+                    commentString += "bdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->bdiffs) + ") ";
                 }
-				if(success > bdiffs)		{	trashCode += 'b';	}
+				if(success > params->bdiffs)		{	trashCode += 'b';	}
 				else{ currentSeqDiffs += success;  }
 			}
 			
             if(numSpacers != 0){
                 success = trimOligos->stripSpacer(currSeq);
-                if(success > sdiffs)		{	trashCode += 's';	}
+                if(success > params->sdiffs)		{	trashCode += 's';	}
                 else{ currentSeqDiffs += success;  }
                 
             }
             
 			if(numFPrimers != 0){
 				vector<int> results = trimOligos->stripForward(currSeq, primerIndex);
-                if (pairedOligos) {
+                if (params->pairedOligos) {
                     success = results[0] + results[2];
-                    commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], pdiffs) + ") ";
+                    commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos->getCodeValue(results[3], params->pdiffs) + ") ";
                 }
                 else {
                     success = results[0];
-                    commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + ") ";
+                    commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->pdiffs) + ") ";
                 }
-				if(success > pdiffs)		{	trashCode += 'f';	}
+				if(success > params->pdiffs)		{	trashCode += 'f';	}
 				else{ currentSeqDiffs += success;  }
 			}
 			
 			if(numRPrimers != 0){
                 vector<int> results = trimOligos->stripReverse(currSeq);
                 success = results[0];
-                commentString += "rpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], pdiffs) + ") ";
-                if(success > pdiffs)		{	trashCode += 'r';	}
+                commentString += "rpdiffs=" + toString(results[0]) + "(" + trimOligos->getCodeValue(results[1], params->pdiffs) + ") ";
+                if(success > params->pdiffs)		{	trashCode += 'r';	}
                 else{ currentSeqDiffs += success;  }
 			}
             
-            if (currentSeqDiffs > tdiffs)	{	trashCode += 't';   }
+            if (currentSeqDiffs > params->tdiffs)	{	trashCode += 't';   }
             
-			if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+			if (params->reorient && (trashCode != "")) { //if you failed and want to check the reverse
                 int thisSuccess = 0;
                 string thisTrashCode = "";
                 int thisCurrentSeqsDiffs = 0;
@@ -541,33 +550,33 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
                 //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                 if(numBarcodes != 0){
                     vector<int> results = rtrimOligos->stripBarcode(savedSeq, thisBarcodeIndex);
-                    if (pairedOligos) {
+                    if (params->pairedOligos) {
                         thisSuccess = results[0] + results[2];
-                        thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                        thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], params->bdiffs) + ") ";
                     }
                     else {
                         thisSuccess = results[0];
-                        thiscommentString += "bdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + ") ";
+                        thiscommentString += "bdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->bdiffs) + ") ";
                     }
-                    if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
+                    if(thisSuccess > params->bdiffs)		{ thisTrashCode += "b"; }
                     else{ thisCurrentSeqsDiffs += thisSuccess;  }
                 }
                 //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                 if(numFPrimers != 0){
                     vector<int> results = rtrimOligos->stripForward(savedSeq, thisPrimerIndex);
-                    if (pairedOligos) {
+                    if (params->pairedOligos) {
                         thisSuccess = results[0] + results[2];
-                        thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], pdiffs) + ") ";
+                        thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], params->pdiffs) + ") ";
                     }
                     else {
                         thisSuccess = results[0];
-                        thiscommentString += "pdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], pdiffs) + ") ";
+                        thiscommentString += "pdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->pdiffs) + ") ";
                     }
-                    if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }
+                    if(thisSuccess > params->pdiffs)		{ thisTrashCode += "f"; }
                     else{ thisCurrentSeqsDiffs += thisSuccess;  }
                 }
                 
-                if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
+                if (thisCurrentSeqsDiffs > params->tdiffs)	{	thisTrashCode += 't';   }
                 
                 if (thisTrashCode == "") {
                     trashCode = thisTrashCode;
@@ -584,181 +593,89 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
             currSeq.setComment(commentString);
 
 			if(trashCode.length() == 0){
-                string thisGroup = oligos.getGroupName(barcodeIndex, primerIndex);
                 
-                int pos = thisGroup.find("ignore");
-                if (pos == string::npos) {		
-                    flowData.printFlows(trimFlowFile);
-                    
-                    if(fasta)	{ currSeq.printSequence(fastaFile);	}
-                    
-                    if(allFiles){
-                        ofstream output;
-                        util.openOutputFileAppend(thisBarcodePrimerComboFileNames[barcodeIndex][primerIndex], output);
-                        output.setf(ios::fixed, ios::floatfield); trimFlowFile.setf(ios::showpoint);
-                        
-                        flowData.printFlows(output);
-                        output.close();
+                string thisGroup = "";
+                if (params->createGroup) {
+                    if(numBarcodes != 0){
+                        thisGroup = params->barcodeNameVector[barcodeIndex];
+                        if (numFPrimers != 0) {
+                            if (params->primerNameVector[primerIndex] != "") {
+                                if(thisGroup != "") { thisGroup += "." + params->primerNameVector[primerIndex]; }
+                                else                { thisGroup = params->primerNameVector[primerIndex];        }
+                            }
+                        }
                     }
                 }
-			}
-			else{
-				flowData.printFlows(scrapFlowFile, trashCode);
-			}
-				
-			count++;
-			//cout << "driver" << '\t' << currSeq.getName() << endl;			
-			//report progress
-			if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+                
+                int pos = thisGroup.find("ignore");
+                if (pos == string::npos) {
+                    flowData.printFlows(params->trimFile);
+                    
+                    if(params->fasta)	{ currSeq.printSequence(params->fastaFile);	}
+                    
+                    if (thisGroup != "") {  params->groupMap[currSeq.getName()] = thisGroup; }
+                }
+                
+			}else{
+                params->badNames.insert(currSeq.getName());
+                flowData.printFlows(params->scrapFile, trashCode);
+            }
+            
+			params->count++;
+            if((params->count) % 10000 == 0){	params->m->mothurOut(toString(params->count)+"\n"); 		}
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 			unsigned long long pos = flowFile.tellg();
-
-			if ((pos == -1) || (pos >= line->end)) { break; }
+			if ((pos == -1) || (pos >= params->lineEnd)) { break; }
 #else
-			if (flowFile.eof()) { break; }
+			if ((params->count == params->lineEnd) || (flowFile.eof())) { break; }
 #endif
-			
 		}
+        
 		//report progress
-		if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		if((params->count) % 10000 != 0){	params->m->mothurOut(toString(params->count)+"\n");		}
 		
-		trimFlowFile.close();
-		scrapFlowFile.close();
 		flowFile.close();
-		if(fasta){	fastaFile.close();	}
-        delete trimOligos;
-        if (reorient) { delete rtrimOligos; }
 		
-		return count;
+        delete trimOligos;
+        if (params->reorient) { delete rtrimOligos; }
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "driverCreateTrim");
+		params->m->errorOut(e, "TrimSeqsCommand", "driverCreateTrim");
 		exit(1);
 	}
 }
 
 //***************************************************************************************************************
 
-int TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
+int TrimFlowsCommand::getOligos(){
 	try {
         bool allBlank = false;
-        oligos.read(oligoFileName);
+        Oligos oligos; oligos.read(oligoFileName);
         
         if (m->getControl_pressed()) { return 0; } //error in reading oligos
         
         if (oligos.hasPairedBarcodes()) {
             pairedOligos = true;
-            numFPrimers = oligos.getPairedPrimers().size();
-            numBarcodes = oligos.getPairedBarcodes().size();
+            pairedPrimers = oligos.getPairedPrimers(); numFPrimers = pairedPrimers.size();
+            pairedBarcodes = oligos.getPairedBarcodes(); numBarcodes = pairedBarcodes.size();
         }else {
             pairedOligos = false;
-            numFPrimers = oligos.getPrimers().size();
-            numBarcodes = oligos.getBarcodes().size();
+            primers = oligos.getPrimers(); numFPrimers = primers.size();
+            barcodes = oligos.getBarcodes(); numBarcodes = barcodes.size();
         }
         
-        numLinkers = oligos.getLinkers().size();
-        numSpacers = oligos.getSpacers().size();
-        numRPrimers = oligos.getReversePrimers().size();
+        barcodeNameVector = oligos.getBarcodeNames();
+        primerNameVector = oligos.getPrimerNames();
+        linker = oligos.getLinkers(); numLinkers = linker.size();
+        spacer = oligos.getSpacers(); numSpacers = spacer.size();
+        revPrimer = oligos.getReversePrimers(); numRPrimers = revPrimer.size();
         
         vector<string> groupNames = oligos.getGroupNames();
         if (groupNames.size() == 0) { allFiles = 0; allBlank = true;  }
+        else { createGroup = true; }
         
-        
-        outFlowFileNames.resize(oligos.getBarcodeNames().size());
-		for(int i=0;i<outFlowFileNames.size();i++){
-            for(int j=0;j<oligos.getPrimerNames().size();j++){  outFlowFileNames[i].push_back(""); }
-		}
-
-        if (allFiles) {
-            set<string> uniqueNames; //used to cleanup outputFileNames
-            if (pairedOligos) {
-                map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
-                map<int, oligosPair> primers = oligos.getPairedPrimers();
-                for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                    for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                        
-                        string primerName = oligos.getPrimerName(itPrimer->first);
-                        string barcodeName = oligos.getBarcodeName(itBar->first);
-                        
-                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                        else if ((primerName == "") && (barcodeName == "")) { } //do nothing
-                        else {
-                            string comboGroupName = "";
-                            
-                            if(primerName == ""){
-                                comboGroupName = barcodeName;
-                            }else{
-                                if(barcodeName == ""){
-                                    comboGroupName = primerName;
-                                }
-                                else{
-                                    comboGroupName = barcodeName + "." + primerName;
-                                }
-                            }
-                            
-                            
-                            ofstream temp;
-                            map<string, string> variables;
-                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(flowFileName));
-                            variables["[tag]"] = comboGroupName;
-                            string fileName = getOutputFileName("flow", variables);
-                            if (uniqueNames.count(fileName) == 0) {
-                                outputNames.push_back(fileName);
-                                outputTypes["flow"].push_back(fileName);
-                                uniqueNames.insert(fileName);
-                            }
-                            
-                            outFlowFileNames[itBar->first][itPrimer->first] = fileName;
-                            util.openOutputFile(fileName, temp);		temp.close();
-                        }
-                    }
-                }
-            }else {
-                map<string, int> barcodes = oligos.getBarcodes() ;
-                map<string, int> primers = oligos.getPrimers();
-                for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                    for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                        
-                        string primerName = oligos.getPrimerName(itPrimer->second);
-                        string barcodeName = oligos.getBarcodeName(itBar->second);
-                        
-                        if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                        else if ((primerName == "") && (barcodeName == "")) { } //do nothing
-                        else {
-                            string comboGroupName = "";
-                            
-                            if(primerName == ""){
-                                comboGroupName = barcodeName;
-                            }else{
-                                if(barcodeName == ""){
-                                    comboGroupName = primerName;
-                                }
-                                else{
-                                    comboGroupName = barcodeName + "." + primerName;
-                                }
-                            }
-                            
-                            ofstream temp;
-                            map<string, string> variables;
-                            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(flowFileName));
-                            variables["[tag]"] = comboGroupName;
-                            string fileName = getOutputFileName("flow", variables);
-                            if (uniqueNames.count(fileName) == 0) {
-                                outputNames.push_back(fileName);
-                                outputTypes["flow"].push_back(fileName);
-                                uniqueNames.insert(fileName);
-                            }
-                            
-                            outFlowFileNames[itBar->second][itPrimer->second] = fileName;
-                            util.openOutputFile(fileName, temp);		temp.close();
-                        }
-                    }
-                }
-            }
-            
-        }
-		return 0;
+        return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimFlowsCommand", "getOligos");
@@ -767,9 +684,7 @@ int TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 }
 /**************************************************************************************************/
 vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
-
 	try{
-			
 		vector<unsigned long long> filePos;
 		filePos.push_back(0);
 					
@@ -826,8 +741,6 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 		util.openInputFile(flowFileName, in);
 		in >> numFlows;
 		util.gobble(in);
-		//unsigned long long spot = in.tellg();
-		//filePos[0] = spot;
 		in.close();
 		
 		processors = (filePos.size() - 1);
@@ -842,262 +755,101 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 
 /**************************************************************************************************/
 
-int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName, vector<vector<string> > barcodePrimerComboFileNames){
+int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName){
 
 	try {
-		processIDS.clear();
-		int exitCommand = 1;
-        bool recalc = false;
-		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			pid_t pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-				process++;
-			}else if (pid == 0){
-				
-				vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
-				if(allFiles){
-					for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
-						for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
-                            if (tempBarcodePrimerComboFileNames[i][j] != "") {
-                                tempBarcodePrimerComboFileNames[i][j] += toString(process) + ".temp";
-                                ofstream temp;
-                                util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
-                                temp.close();
-                            }
-						}
-					}
-				}
-				driverCreateTrim(flowFileName,
-								 (trimFlowFileName + toString(process) + ".temp"),
-								 (scrapFlowFileName + toString(process) + ".temp"),
-								 (fastaFileName + toString(process) + ".temp"),
-								 tempBarcodePrimerComboFileNames, lines[process]);
-
-				exit(0);
-			}else { 
-                m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(process) + "\n"); processors = process;
-                for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                //wait to die
-                for (int i=0;i<processIDS.size();i++) {
-                    int temp = processIDS[i];
-                    wait(&temp);
-                }
-                m->setControl_pressed(false);
-                for (int i=0;i<processIDS.size();i++) {
-                    util.mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));
-                    util.mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));
-                    util.mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));
-                    if(allFiles){
-                        for(int i=0;i<barcodePrimerComboFileNames.size();i++){
-                            for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
-                                if (barcodePrimerComboFileNames[i][j] != "") {
-                                    string tempFile = barcodePrimerComboFileNames[i][j] +(toString(processIDS[i])) + ".temp";
-                                    util.mothurRemove(tempFile);
-                                }
-                            }
-                        }
-                    }
-                }
-                recalc = true;
-                break;
-			}
-		}
+        time_t start = time(NULL);
+        ifstream in; util.openInputFile(flowFileName, in); in >> numFlows; in.close();
         
-        if (recalc) {
-            //test line, also set recalc to true.
-            //for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); } for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; wait(&temp); } m->setControl_pressed(false);
-				for (int i=0;i<processIDS.size();i++) {util.mothurRemove(fastaFileName + (toString(processIDS[i]) + ".temp"));util.mothurRemove(trimFlowFileName + (toString(processIDS[i]) + ".temp"));util.mothurRemove(scrapFlowFileName + (toString(processIDS[i]) + ".temp"));}processors=3; m->mothurOut("[ERROR]: unable to spawn the number of processes you requested, reducing number to " + toString(processors) + "\n");
-            
-            //redo file divide
-            for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-            vector<unsigned long long> flowFilePos = getFlowFileBreaks();
-            for (int i = 0; i < (flowFilePos.size()-1); i++) {
-                lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
-            }
-            
-            processIDS.resize(0);
-            process = 1;
-            
-            //loop through and create all the processes you want
-            while (process != processors) {
-                pid_t pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
-                    process++;
-                }else if (pid == 0){
-                    
-                    vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
-                    if(allFiles){
-                        for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
-                            for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
-                                if (tempBarcodePrimerComboFileNames[i][j] != "") {
-                                    tempBarcodePrimerComboFileNames[i][j] += toString(process) + ".temp";
-                                    ofstream temp;
-                                    util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
-                                    temp.close();
-                                }
-                            }
-                        }
-                    }
-                    driverCreateTrim(flowFileName,
-                                     (trimFlowFileName + toString(process) + ".temp"),
-                                     (scrapFlowFileName + toString(process) + ".temp"),
-                                     (fastaFileName + toString(process) + ".temp"),
-                                     tempBarcodePrimerComboFileNames, lines[process]);
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-            
-        }
-		
-		//parent do my part
-		ofstream temp;
-		util.openOutputFile(trimFlowFileName, temp);
-		temp.close();
-
-		util.openOutputFile(scrapFlowFileName, temp);
-		temp.close();
-		
-		if(fasta){
-			util.openOutputFile(fastaFileName, temp);
-			temp.close();
-		}
-		
-		driverCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames, lines[0]);
-
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processIDS.size();i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
+        vector<linePair> lines;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        vector<unsigned long long> flowFilePos = getFlowFileBreaks();
+        for (int i = 0; i < (flowFilePos.size()-1); i++) { lines.push_back(linePair(flowFilePos[i], flowFilePos[(i+1)])); }
 #else
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the trimFlowData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*
-		vector<trimFlowData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors-1];
-		HANDLE  hThreadArray[processors-1]; 
-		
-		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++ ){
-			// Allocate memory for thread data.
-			string extension = "";
-			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
-			
-			vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
-			if(allFiles){
-				for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
-					for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
-                        if (tempBarcodePrimerComboFileNames[i][j] != "") {
-                            tempBarcodePrimerComboFileNames[i][j] += extension;
-                            ofstream temp;
-                            util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
-                            temp.close();
-						}
-					}
-				}
-			}
-			
-			trimFlowData* tempflow = new trimFlowData(flowFileName, (trimFlowFileName + extension), (scrapFlowFileName + extension), fastaFileName, flowOrder, tempBarcodePrimerComboFileNames, barcodes, primers, revPrimer, fasta, allFiles, lines[i]->start, lines[i]->end, m, signal, noise, numFlows, maxFlows, minFlows, maxHomoP, tdiffs, bdiffs, pdiffs, i);
-			pDataArray.push_back(tempflow);
-			
-			//MyTrimFlowThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
-			hThreadArray[i] = CreateThread(NULL, 0, MyTrimFlowThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-		}
-		
-		//using the main process as a worker saves time and memory
-		ofstream temp;
-		util.openOutputFile(trimFlowFileName, temp);
-		temp.close();
-		
-		util.openOutputFile(scrapFlowFileName, temp);
-		temp.close();
-		
-		if(fasta){
-			util.openOutputFile(fastaFileName, temp);
-			temp.close();
-		}
-		
-		vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
-		if(allFiles){
-			for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
-				for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
-                    if (tempBarcodePrimerComboFileNames[i][j] != "") {
-                        tempBarcodePrimerComboFileNames[i][j] += toString(processors-1) + ".temp";
-                        ofstream temp;
-                        util.openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
-                        temp.close();
-                    }
-					
-				}
-			}
-		}
-		
-		//do my part - do last piece because windows is looking for eof
-		int num = driverCreateTrim(flowFileName, (trimFlowFileName  + toString(processors-1) + ".temp"), (scrapFlowFileName  + toString(processors-1) + ".temp"), (fastaFileName + toString(processors-1) + ".temp"), tempBarcodePrimerComboFileNames, lines[processors-1]);
-		processIDS.push_back((processors-1)); 
-		
-		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		
-		//Close all thread handles and free memory allocations.
-		for(int i=0; i < pDataArray.size(); i++){
-			num += pDataArray[i]->count;
-			CloseHandle(hThreadArray[i]);
-			delete pDataArray[i];
-		}
-		*/
-		
-#endif	
-		//append files
-		m->mothurOutEndLine();
-		for(int i=0;i<processIDS.size();i++){
-			
-			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
-			
-			util.appendFiles((trimFlowFileName + toString(processIDS[i]) + ".temp"), trimFlowFileName);
-			util.mothurRemove((trimFlowFileName + toString(processIDS[i]) + ".temp"));
-//			m->mothurOut("\tDone with trim.flow file"); m->mothurOutEndLine();
+        
+        if (processors == 1) { lines.push_back(linePair(0, -1)); }
+        else {
+            long long numFlowLines;
+            vector<unsigned long long> flowFilePos = util.setFilePosEachLine(flowFileName, numFlowLines);
+            
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = numFlowLines / processors;
+            
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numFlowLines - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(flowFilePos[startIndex], numSeqsPerProcessor));
+            }
+        }
+#endif
+        
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<trimFlowData*> data;
+        
+        ofstream outTrim, outScrap;
+        util.openOutputFile(trimFlowFileName, outTrim); outTrim << maxFlows << endl; outTrim.close();
+        util.openOutputFile(scrapFlowFileName, outScrap); outScrap << numFlows << endl; outScrap.close();
+        
+        auto synchronizedOutputTrimFile = std::make_shared<SynchronizedOutputFile>(trimFlowFileName, true); //append
+        auto synchronizedOutputScrapFile = std::make_shared<SynchronizedOutputFile>(scrapFlowFileName, true); //append
+        auto synchronizedOutputFastaFile = std::make_shared<SynchronizedOutputFile>(fastaFileName);
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            OutputWriter* threadTrimWriter = new OutputWriter(synchronizedOutputTrimFile);
+            OutputWriter* threadScrapWriter = new OutputWriter(synchronizedOutputScrapFile);
+            OutputWriter* threadFastaWriter = NULL;
+            
+            if (fasta) { threadFastaWriter = new OutputWriter(synchronizedOutputFastaFile); }
+            
+            trimFlowData* dataBundle = new trimFlowData(flowFileName, threadTrimWriter, threadScrapWriter, threadFastaWriter, fasta, lines[i+1].start, lines[i+1].end);
+            dataBundle->setOligosOptions(createGroup, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
+                                         primerNameVector, barcodeNameVector, reorient, signal, noise, maxHomoP, flowOrder, maxFlows, minFlows, numFlows);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverCreateTrim, dataBundle));
+        }
+        
+        OutputWriter* threadTrimWriter = new OutputWriter(synchronizedOutputTrimFile);
+        OutputWriter* threadScrapWriter = new OutputWriter(synchronizedOutputScrapFile);
+        OutputWriter* threadFastaWriter = NULL;
+        
+        if (fasta) { threadFastaWriter = new OutputWriter(synchronizedOutputFastaFile); }
+        
+        trimFlowData* dataBundle = new trimFlowData(flowFileName, threadTrimWriter, threadScrapWriter, threadFastaWriter, fasta, lines[0].start, lines[0].end);
+        dataBundle->setOligosOptions(createGroup, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
+                                     primerNameVector, barcodeNameVector, reorient, signal, noise, maxHomoP, flowOrder, maxFlows, minFlows, numFlows);
+        
+        driverCreateTrim(dataBundle);
+        long long num = dataBundle->count;
 
-			util.appendFiles((scrapFlowFileName + toString(processIDS[i]) + ".temp"), scrapFlowFileName);
-			util.mothurRemove((scrapFlowFileName + toString(processIDS[i]) + ".temp"));
-//			m->mothurOut("\tDone with scrap.flow file"); m->mothurOutEndLine();
+        set<string> badNames = dataBundle->badNames;
+        groupMap = dataBundle->groupMap;
 
-			if(fasta){
-				util.appendFiles((fastaFileName + toString(processIDS[i]) + ".temp"), fastaFileName);
-				util.mothurRemove((fastaFileName + toString(processIDS[i]) + ".temp"));
-//				m->mothurOut("\tDone with flow.fasta file"); m->mothurOutEndLine();
-			}
-			if(allFiles){						
-				for (int j = 0; j < barcodePrimerComboFileNames.size(); j++) {
-					for (int k = 0; k < barcodePrimerComboFileNames[0].size(); k++) {
-                        if (barcodePrimerComboFileNames[j][k] != "") {
-                            util.appendFiles((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"), barcodePrimerComboFileNames[j][k]);
-                            util.mothurRemove((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"));
-                        }
-					}
-				}
-			}
-		}
-		
-		return exitCommand;
-	
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            num += data[i]->count;
+            
+            delete data[i]->trimFile;
+            delete data[i]->scrapFile;
+            if (fasta) { delete data[i]->fastaFile; }
+
+            badNames.insert(data[i]->badNames.begin(), data[i]->badNames.end());
+            groupMap.insert(data[i]->groupMap.begin(), data[i]->groupMap.end());
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+        
+       	delete threadTrimWriter;
+        delete threadScrapWriter;
+        if (fasta) { delete threadFastaWriter; }
+        delete dataBundle;
+        
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to trim " + toString(num) + " sequences."); if (m->getDebug()) {   m->mothurOut("Scrapped " + toString(badNames.size()) + ".");  } m->mothurOutEndLine();
+        
+		return num;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimFlowsCommand", "createProcessesCreateTrim");

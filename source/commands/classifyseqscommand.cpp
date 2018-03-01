@@ -419,8 +419,8 @@ int ClassifySeqsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         string outputMethodTag = method;
-		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, util.getRandomNumber(), flip, writeShortcuts);	}
-		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, util.getRandomNumber());				}
+		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, util.getRandomNumber(), flip, writeShortcuts, current->getVersion());	}
+		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, util.getRandomNumber(), current->getVersion());				}
         else if(method == "zap"){	
             outputMethodTag = search + "_" + outputMethodTag;
             if (search == "kmer") {   classify = new KmerTree(templateFileName, taxonomyFileName, kmerSize, cutoff); }
@@ -429,7 +429,7 @@ int ClassifySeqsCommand::execute(){
 		else {
 			m->mothurOut(search + " is not a valid method option. I will run the command using wang.");
 			m->mothurOutEndLine();
-			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, util.getRandomNumber(), flip, writeShortcuts);	
+			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, util.getRandomNumber(), flip, writeShortcuts, current->getVersion());
 		}
 		
 		if (m->getControl_pressed()) { delete classify; return 0; }
@@ -666,18 +666,6 @@ void driverClassifier(classifyData* params){
     }
 }
 /**************************************************************************************************/
-/*classifyData(string acc, bool p, string a, string r, string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool fli, Classify* c) {
-    accnos = acc;
-    taxFName = a;
-    tempTFName = r;
-    filename = f;
-    m = mout;
-    start = st;
-    end = en;
-    probs = p;
-    count = 0;
-}*/
-/**************************************************************************************************/
 
 int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string accnos, string filename) {
 	try {
@@ -714,13 +702,13 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            classifyData* dataBundle = new classifyData((accnos + toString(i+1) + ".temp"), probs, (taxFileName + toString(i+1) + ".temp"), (tempTaxFile + toString(i+1) + ".temp"), filename, m, lines[i+1]->start, lines[i+1]->end, flip, classify);
+            classifyData* dataBundle = new classifyData((accnos + toString(i+1) + ".temp"), probs, (taxFileName + toString(i+1) + ".temp"), (tempTaxFile + toString(i+1) + ".temp"), filename, lines[i+1]->start, lines[i+1]->end, flip, classify);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverClassifier, dataBundle));
         }
         
-        classifyData* dataBundle = new classifyData(accnos, probs, taxFileName, tempTaxFile, filename, m, lines[0]->start, lines[0]->end, flip, classify);
+        classifyData* dataBundle = new classifyData(accnos, probs, taxFileName, tempTaxFile, filename, lines[0]->start, lines[0]->end, flip, classify);
         driverClassifier(dataBundle);
         num = dataBundle->count;
         delete dataBundle;

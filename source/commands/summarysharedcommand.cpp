@@ -409,13 +409,12 @@ int SummarySharedCommand::execute(){
 
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(lookup->getLabel()+"\n");
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                 process(data, outputFileName, outAllFileName, currentLabels);
                 for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 				
-				processedLabels.insert(lookup->getLabel());
-				userLabels.erase(lookup->getLabel());
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 			
 			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -424,13 +423,12 @@ int SummarySharedCommand::execute(){
 					delete lookup;
 					lookup = input.getSharedRAbundVectors(lastLabel);
 
-					m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+					m->mothurOut(lookup->getLabel()+"\n"); 
                     vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
                     process(data, outputFileName, outAllFileName, currentLabels);
                     for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
 					
-					processedLabels.insert(lookup->getLabel());
-					userLabels.erase(lookup->getLabel());
+					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
 					lookup->setLabels(saveLabel);
@@ -449,16 +447,11 @@ int SummarySharedCommand::execute(){
 		}
 
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
 		
 		//run last label if you need to
@@ -466,23 +459,19 @@ int SummarySharedCommand::execute(){
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
 
-            m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+            m->mothurOut(lookup->getLabel()+"\n"); 
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             process(data, outputFileName, outAllFileName, currentLabels);
             for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
             delete lookup;
 		}
 		
-				
-		//reset groups parameter
-		  
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		
 		if (m->getControl_pressed()) { util.mothurRemove(outAllFileName);   util.mothurRemove(outputFileName);  return 0; }
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
 		if (mult) { m->mothurOut(outAllFileName); m->mothurOutEndLine();	outputTypes["summary"].push_back(outAllFileName); }
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	} outputTypes["summary"].push_back(outputFileName);

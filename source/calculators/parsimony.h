@@ -19,22 +19,18 @@
 class Parsimony : public TreeCalculator  {
 	
 	public:
-        Parsimony(vector<string> G) { Groups = G;};
+        Parsimony(vector<string> G);
 		~Parsimony() {};
 		EstOutput getValues(Tree*, int, string);
 		
 	private:
-		vector<linePair> lines;
-        vector<string> Groups;
-	
-		EstOutput data;
+        vector<string> Groups, Treenames;
 		int processors;
 		string outputDir;
         Utils util;
-        vector<string> Treenames;
+        vector< vector<string> > namesOfGroupCombos;
 	
-		EstOutput driver(Tree*, vector< vector<string> >, int, int, CountTable*);
-		EstOutput createProcesses(Tree*, vector< vector<string> >, CountTable*);
+		EstOutput createProcesses(Tree*, CountTable*);
 };
 /***********************************************************************/
 struct parsData {
@@ -49,14 +45,15 @@ struct parsData {
     vector<string> Treenames;
     
 	parsData(){}
-	parsData(MothurOut* mout, int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count) {
-        m = mout;
+	parsData(int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count) {
+        m = MothurOut::getInstance();
 		start = st;
 		num = en;
         namesOfGroupCombos = ngc;
         t = tree;
         ct = count;
         Treenames = t->getTreeNames();
+        results.resize(num);
 	}
 };
 

@@ -673,7 +673,6 @@ int GetGroupsCommand::readList(){
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
                 newList.setLabels(newBinLabels);
-                newList.printHeaders(out);
 				newList.print(out, false);
 			}
 			

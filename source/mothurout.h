@@ -61,7 +61,9 @@ class MothurOut {
         void setRandomSeed(unsigned s)                  { seed = s;                         }
         unsigned getRandomSeed()                        { return seed;                      }
         bool getControl_pressed()                       { return control_pressed;           }
-        void setControl_pressed(bool t)                 { control_pressed = t;              }
+        void setControl_pressed(bool t)                 {
+            control_pressed = t;
+        }
         bool getChangedSeqNames()                       { return changedSeqNames;           }
         void setChangedSeqNames(bool t)                 { changedSeqNames = t;              }
         bool getExecuting()                             { return executing;                 }

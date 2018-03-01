@@ -370,10 +370,8 @@ int ChopSeqsCommand::execute(){
         
         
 		
-        m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		return 0;		
 	}
@@ -670,8 +668,7 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
         driverChop(dataBundle);
         num = dataBundle->count;
         bool wroteAccnos = dataBundle->wroteAccnos;
-        delete threadOutputWriter;
-        delete threadAccnosWriter;
+        
         delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
@@ -695,7 +692,8 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete threadOutputWriter;
+        delete threadAccnosWriter;
         return wroteAccnos;
     }
     catch(exception& e) {

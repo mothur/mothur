@@ -230,12 +230,11 @@ int ParsimonyCommand::execute() {
 	try {
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-        Tree tree(treefile, Treenames); //extract treenames
+        Treenames = util.parseTreeFile(treefile); //extract treenames
 		
 		//randomtree will tell us if user had their own treefile or if they just want the random distribution
 		//user has entered their own tree
-		if (randomtree == "") { 
-			
+		if (randomtree == "") {
 			current->setTreeFile(treefile);
 			
             TreeReader* reader;
@@ -277,22 +276,22 @@ int ParsimonyCommand::execute() {
                 i--;
             }
         }
+        if (Groups.size() == 0) { Groups = tGroups;  }
 		util.getCombos(groupComb, Groups, numComp);
 			
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
-			
+        
+        if (numComp < processors) { m->mothurOut("Reducing processors to " + toString(numComp) + ".\n");  }
 		Parsimony pars(Groups);
 		counter = 0;
 	
-		Progress* reading;
-		reading = new Progress("Comparing to random:", iters);
+		Progress* reading; reading = new Progress("Comparing to random:", iters);
 		
 		if (m->getControl_pressed()) { 
 			delete reading; delete output;
 			delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 			if (randomtree == "") {  outSum.close();  }
 			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
-			
 			return 0;
 		}
 			
@@ -300,12 +299,7 @@ int ParsimonyCommand::execute() {
 		//get pscore for users tree
 		userData.resize(numComp,0);  //data = AB, AC, BC, ABC.
 		randomData.resize(numComp,0);  //data = AB, AC, BC, ABC.
-		rscoreFreq.resize(numComp);  
-		uscoreFreq.resize(numComp);  
-		rCumul.resize(numComp);  
-		uCumul.resize(numComp);  
-		userTreeScores.resize(numComp);  
-		UScoreSig.resize(numComp); 
+		rscoreFreq.resize(numComp); uscoreFreq.resize(numComp); rCumul.resize(numComp); uCumul.resize(numComp); userTreeScores.resize(numComp); UScoreSig.resize(numComp);
 				
 		if (randomtree == "") {
 			//get pscores for users trees
@@ -317,10 +311,8 @@ int ParsimonyCommand::execute() {
 					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
-					
 					return 0;
 				}
-
 
 				//output scores for each combination
 				for(int k = 0; k < numComp; k++) {
@@ -339,6 +331,7 @@ int ParsimonyCommand::execute() {
 				}
 			}
 			
+            Utils* stableRandom = new Utils();
 			//get pscores for random trees
 			for (int j = 0; j < iters; j++) {
 								
@@ -346,17 +339,16 @@ int ParsimonyCommand::execute() {
 				randT = new Tree(ct, Treenames);
 
 				//create random relationships between nodes
-				randT->assembleRandomTree();
+				randT->assembleRandomTree(stableRandom);
 
 				//get pscore of random tree
 				randomData = pars.getValues(randT, processors, outputDir);
 				
 				if (m->getControl_pressed()) { 
-					delete reading;  delete output; delete randT;
+                    delete reading;  delete output; delete randT; delete stableRandom;
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
 					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-					
 					return 0;
 				}
 					
@@ -378,8 +370,9 @@ int ParsimonyCommand::execute() {
 				
 				delete randT;
 			}
-
+            delete stableRandom;
 		}else {
+            Utils* stableRandom = new Utils();
 			//get pscores for random trees
 			for (int j = 0; j < iters; j++) {
 								
@@ -387,13 +380,12 @@ int ParsimonyCommand::execute() {
 				randT = new Tree(ct, Treenames);
 				//create random relationships between nodes
 
-				randT->assembleRandomTree();
+				randT->assembleRandomTree(stableRandom);
 				
 				if (m->getControl_pressed()) { 
-					delete reading; delete output; delete randT; delete ct; 
+					delete reading; delete output; delete randT; delete ct;  delete stableRandom;
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
-
 
 				//get pscore of random tree
 				randomData = pars.getValues(randT, processors, outputDir);
@@ -421,6 +413,7 @@ int ParsimonyCommand::execute() {
 				
 				delete randT;
 			}
+            delete stableRandom;
 		}
 
 		for(int a = 0; a < numComp; a++) {
@@ -460,8 +453,7 @@ int ParsimonyCommand::execute() {
 		}
 		
 		//finish progress bar
-		reading->finish();
-		delete reading;
+		reading->finish(); delete reading;
 		
 		printParsimonyFile();
 		if (randomtree == "") { printUSummaryFile(); }
@@ -470,14 +462,10 @@ int ParsimonyCommand::execute() {
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;}
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n");
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
-		
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParsimonyCommand", "execute");
@@ -491,11 +479,8 @@ void ParsimonyCommand::printParsimonyFile() {
 		vector<double> data;
 		vector<string> tags;
 		
-		if (randomtree == "") {
-			tags.push_back("Score"); tags.push_back("UserFreq"); tags.push_back("UserCumul"); tags.push_back("RandFreq"); tags.push_back("RandCumul");
-		}else {
-			tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul");
-		}
+		if (randomtree == "") { tags.push_back("Score"); tags.push_back("UserFreq"); tags.push_back("UserCumul"); tags.push_back("RandFreq"); tags.push_back("RandCumul"); }
+		else { tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul"); }
 
 		for(int a = 0; a < numComp; a++) {
 			output->initFile(groupComb[a], tags);
@@ -522,11 +507,10 @@ int ParsimonyCommand::printUSummaryFile() {
 	try {
 		//column headers
 		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "ParsScore" << '\t' << "ParsSig" <<  endl;
-		m->mothurOut("Tree#\tGroups\tParsScore\tParsSig"); m->mothurOutEndLine();
+		m->mothurOut("Tree#\tGroups\tParsScore\tParsSig\n");
 		
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
-		
 		
 		//print each line
 		for (int i = 0; i< T.size(); i++) {
@@ -556,7 +540,6 @@ int ParsimonyCommand::printUSummaryFile() {
 /***********************************************************/
 void ParsimonyCommand::getUserInput() {
 	try {
-	
 		//create treemap
 		ct = new CountTable();
 

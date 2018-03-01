@@ -19,7 +19,7 @@ public:
 	ListVector();
 	ListVector(int);
 	ListVector(string, vector<string>, string&);
-    ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), currentLabels(lv.currentLabels), otuTag(lv.otuTag), printListHeaders(true) {};
+    ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), otuTag(lv.otuTag), printListHeaders(true) {};
 	ListVector(ifstream&, string&, string&);
 	~ListVector(){};
 	
@@ -38,21 +38,20 @@ public:
     void print(ostream&);
     void print(ostream&, bool);
 	void print(ostream&, map<string, int>&);
-    void printHeaders(ostream&);
-	
+    
 	RAbundVector getRAbundVector();
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
 	
 private:
 	vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.
-    vector<string> currentLabels;
 	int maxRank;
 	int numBins;
 	int numSeqs;
     vector<string> binLabels;
     string otuTag;
     bool printListHeaders;
+    void printHeaders(ostream&, map<string, int>&, bool);
 
 };
 

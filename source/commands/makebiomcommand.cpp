@@ -380,7 +380,7 @@ int MakeBiomCommand::execute(){
                 
                 if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
                     
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     getBiom(lookup);
                     
                     processedLabels.insert(lookup->getLabel());
@@ -392,7 +392,7 @@ int MakeBiomCommand::execute(){
                     
                     delete lookup;
                     lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(lookup->getLabel()+"\n"); 
                     
                     getBiom(lookup);
                     
@@ -452,16 +452,11 @@ int MakeBiomCommand::execute(){
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }     
         
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
 		}
         
 		//run last label if you need to
@@ -470,7 +465,7 @@ int MakeBiomCommand::execute(){
                 delete lookup;
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 
-                m->mothurOut(lookup->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(lookup->getLabel()+"\n"); 
                 getBiom(lookup);
                 
                 delete lookup;
@@ -495,10 +490,8 @@ int MakeBiomCommand::execute(){
 		}
 
         
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -1165,11 +1158,8 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("shared",variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
-        
-        lookup->printHeaders(out);
+        outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
+		ofstream out; util.openOutputFile(outputFileName, out);
         lookup->print(out);
         out.close();
 
@@ -1334,13 +1324,8 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors*& lookup, map<
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("relabund",variables);
-        ofstream out;
-    
-        util.openOutputFile(outputFileName, out);
-        
         outputNames.push_back(outputFileName); outputTypes["relabund"].push_back(outputFileName);
-        
-        lookup->printHeaders(out);
+        ofstream out; util.openOutputFile(outputFileName, out);
         lookup->print(out);
         out.close();
         

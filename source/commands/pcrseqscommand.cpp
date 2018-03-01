@@ -842,9 +842,6 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         driverPcr(dataBundle);
         numFastaSeqs = dataBundle->count;
         
-        delete threadFastaWriter;
-        delete threadFastaScrapWriter;
-        
         set<string> badNames = dataBundle->badSeqNames;
         map<string, vector<int> > locations = dataBundle->locations;
         bool adjustNeeded = dataBundle->adjustNeeded;
@@ -852,7 +849,6 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         pstart = dataBundle->pstart; pend = dataBundle->pend;
         int numFPrimers = dataBundle->numFPrimers;
         int numRPrimers = dataBundle->numRPrimers;
-        delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -872,6 +868,9 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
             delete data[i];
             delete workerThreads[i];
         }
+        delete threadFastaWriter;
+        delete threadFastaScrapWriter;
+        delete dataBundle;
 
         if (fileAligned && adjustNeeded) {
             //find pend - pend is the biggest ending value, but we must account for when we adjust the start.  That adjustment may make the "new" end larger then the largest end. So lets find out what that "new" end will be.

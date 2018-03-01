@@ -33,6 +33,7 @@ public:
     bool isClose(int, int);
     int getNumClose(int index) { return closeness[index].size(); }
     int getNumSeqs() { return closeness.size(); }
+    vector<int> getNumSeqs(vector<vector<string> >&, vector< vector<int> >&);
     int getNumSingletons() { return singletons.size(); }
     long long getNumDists(); //number of distances under cutoff
     map<string, int> getNameIndexMap();

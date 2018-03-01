@@ -39,6 +39,7 @@
 #include "mothurout.h"
 #include "listvector.hpp"
 #include "groupmap.h"
+#include "sequence.hpp"
 
 class CountTable {
     
@@ -51,6 +52,7 @@ class CountTable {
         int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames 
         int createTable(string, string, bool); //namefile, groupfile, createGroup
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
+        int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
     
         int printTable(string);
         int printHeaders(ofstream&);

@@ -49,7 +49,6 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
             }
             falseNegatives /= 2; //square matrix
             trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
-            totalPairs = trueNegatives + truePositives + falseNegatives + falsePositives;
         }else {
             
             //put everyone in first bin
@@ -72,6 +71,96 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
             truePositives /= 2; //square matrix
             falsePositives = numSeqs * (numSeqs-1)/2 - (trueNegatives + falseNegatives + truePositives);
         }
+        
+        value = metric->getValue(truePositives, trueNegatives, falsePositives, falseNegatives);
+        
+        return value;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "initialize");
+        exit(1);
+    }
+}
+/***********************************************************************/
+//populate preset OTUs, randomize sequences to "fit" into these OTUs
+int OptiCluster::initialize(double& value, bool randomize, string initialize, vector<vector< string > > existingBins, vector<string> bls, long long tp, long long tn, long long fp, long long fn) {
+    try {
+        for (int i = 0; i < existingBins.size(); i++) { for (int j = 0; j < existingBins[i].size(); j++) { immovableNames.insert(existingBins[i][j]); }  }
+        vector< vector< int> > translatedBins;
+        vector<int> namesSeqs = matrix->getNumSeqs(existingBins, translatedBins); //number of seqs not in existingBins, gets
+        truePositives = 0;
+        falsePositives = 0;
+        falseNegatives = 0;
+        trueNegatives = 0;
+        numSeqs = namesSeqs.size();
+        removeTrainers = true;
+        
+        bins.resize(numSeqs); //place seqs in own bin
+    
+        Utils util;
+        if (initialize == "singleton") {
+            
+            //put everyone in own bin
+            for (int i = 0; i < numSeqs; i++) { bins[i].push_back(namesSeqs[i]); }
+            
+            //maps randomized sequences to bins
+            for (int i = 0; i < numSeqs; i++) {
+                seqBin[i] = bins[i][0];
+                randomizeSeqs.push_back(namesSeqs[i]);
+            }
+            
+            if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
+            
+            //for each sequence (singletons removed on read)
+            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+                if (it->second == -1) { }
+                else {
+                    long long numCloseSeqs = (matrix->getNumClose(it->first)); //does not include self
+                    falseNegatives += numCloseSeqs;
+                }
+            }
+            falseNegatives /= 2; //square matrix
+            trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
+        }else {
+            
+            //put everyone in first bin
+            for (int i = 0; i < numSeqs; i++) {
+                bins[0].push_back(i);
+                seqBin[i] = 0;
+                randomizeSeqs.push_back(i);
+            }
+            
+            if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
+            
+            //for each sequence (singletons removed on read)
+            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+                if (it->second == -1) { }
+                else {
+                    long long numCloseSeqs = (matrix->getNumClose(it->first)); //does not include self
+                    truePositives += numCloseSeqs;
+                }
+            }
+            truePositives /= 2; //square matrix
+            falsePositives = numSeqs * (numSeqs-1)/2 - (trueNegatives + falseNegatives + truePositives);
+        }
+        
+        int binNumber = bins.size();
+        for (int i = 0; i < translatedBins.size(); i++) {
+            binLabels[binNumber] = bls[i];
+            for (int j = 0; j < translatedBins[i].size(); j++) {  seqBin[translatedBins[i][j]] = binNumber;   }
+            binNumber++;
+        }
+
+        //add existing bins
+        bins.insert(bins.end(), translatedBins.begin(), translatedBins.end());
+        
+        //add insert location
+        seqBin[bins.size()] = -1;
+        insertLocation = bins.size();
+        vector<int> temp;
+        bins.push_back(temp);
+        
+        truePositives += tp;  falsePositives += fp; trueNegatives += tn; falseNegatives += fn;
         
         value = metric->getValue(truePositives, trueNegatives, falsePositives, falseNegatives);
         
@@ -237,7 +326,7 @@ ListVector* OptiCluster::getList() {
             }
             delete singleton;
         }
-
+        
         for (int i = 0; i < bins.size(); i++) {
             if (bins[i].size() != 0) {
                 string otu = matrix->getName(bins[i][0]);
@@ -246,6 +335,63 @@ ListVector* OptiCluster::getList() {
                     otu += "," + matrix->getName(bins[i][j]);
                 }
                 list->push_back(otu);
+            }
+        }
+        
+        return list;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiCluster", "getList");
+        exit(1);
+    }
+}
+/***********************************************************************/
+ListVector* OptiCluster::getList(set<string>& unfittedSeqs) {
+    try {
+        ListVector* list = new ListVector();
+        vector<string> newLabels;
+        
+        if (removeTrainers) {
+            map<int, string> newBins;
+            for (int i = 0; i < randomizeSeqs.size(); i++) { //build otus
+                
+                if (m->getControl_pressed()) { break; }
+                
+                map<int, int>::iterator it = seqBin.find(randomizeSeqs[i]);
+                
+                int seqNumber = it->first;
+                int binNumber = it->second;
+                
+                map<int, string>::iterator itBin = newBins.find(binNumber); // have we seen this otu yet?
+                
+                if (itBin == newBins.end()) { //create bin
+                    newBins[binNumber] = matrix->getName(seqNumber);
+                }else { //append bin
+                    newBins[binNumber] += "," + matrix->getName(seqNumber);
+                }
+            }
+            
+            for (map<int, string>::iterator itBin = newBins.begin(); itBin != newBins.end(); itBin++) {
+                
+                map<int, string>::iterator it = binLabels.find(itBin->first); //do we have a label for this bin.  If the seq maps to existing bin then we should, otherwise we couldn't "fit" this sequences and will add it to a list for the accnos file.
+                if (it != binLabels.end()) {  list->push_back(itBin->second); newLabels.push_back(it->second);   }
+                else { unfittedSeqs.insert(itBin->second); }
+            }
+            list->setLabels(newLabels);
+            
+            ListVector* singleton = matrix->getListSingle();
+            
+            if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+                for (int i = 0; i < singleton->getNumBins(); i++) {
+                    string bin = singleton->get(i);
+                    if (bin != "") {
+                        vector<string> names; util.splitAtComma(bin, names);
+                        if (immovableNames.count(names[0]) == 0) { //you are not a reference sequence
+                            list->push_back(singleton->get(i));
+                        }
+                    }
+                }
+                delete singleton;
             }
         }
         

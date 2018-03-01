@@ -1053,9 +1053,9 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
 
 #  else   // GTEST_OS_QNX
 #   if GTEST_OS_LINUX
-  // When a SIGPROF signal is received while fork() or clone() are executing,
+  // When a SIGPROF signal is received while f ork() or clone() are executing,
   // the process may hang. To avoid this, we ignore SIGPROF here and re-enable
-  // it after the call to fork()/clone() is complete.
+  // it after the call to f ork()/clone() is complete.
   struct sigaction saved_sigprof_action;
   struct sigaction ignore_sigprof_action;
   memset(&ignore_sigprof_action, 0, sizeof(ignore_sigprof_action));

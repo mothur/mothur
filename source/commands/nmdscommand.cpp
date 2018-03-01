@@ -299,10 +299,8 @@ int NMDSCommand::execute(){
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0; }
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -380,7 +378,7 @@ vector< vector<double> > NMDSCommand::generateStartingConfiguration(int numNames
 	try {
 		vector< vector<double> > axes;  axes.resize(dimension);
 		for (int i = 0; i < axes.size(); i++) {  axes[i].resize(numNames); }
-		
+		Utils util;
 		//generate random number between -1 and 1, precision 6
 		for (int i = 0; i < axes.size(); i++) {
 			for (int j = 0; j < axes[i].size(); j++) {

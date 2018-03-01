@@ -14,6 +14,7 @@
 #include "mothurout.h"
 #include "sequence.hpp"
 
+
 class FlowData {
 
 public:
@@ -30,6 +31,8 @@ public:
 
 	void printFlows(ofstream&);
 	void printFlows(ofstream&, string);
+    void printFlows(OutputWriter*);
+    void printFlows(OutputWriter*, string);
 private:
 	MothurOut* m;
     Utils util;

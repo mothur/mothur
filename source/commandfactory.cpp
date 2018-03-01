@@ -153,6 +153,7 @@
 #include "renamefilecommand.h"
 #include "chimeravsearchcommand.h"
 #include "mergecountcommand.hpp"
+#include "clusterfitcommand.hpp"
 
 //needed for testing project
 //CommandFactory* CommandFactory::_uniqueInstance;
@@ -329,6 +330,7 @@ CommandFactory::CommandFactory(){
     commands["set.seed"]            = "set.seed";
     commands["rename.file"]         = "rename.file";
     commands["merge.count"]         = "merge.count";
+    commands["cluster.fit"]         = "cluster.fit";
 
 
 }
@@ -578,6 +580,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.file")             {	command = new MakeFileCommand(optionString);                }
         else if(commandName == "biom.info")             {	command = new BiomInfoCommand(optionString);                }
         else if(commandName == "rename.file")           {	command = new RenameFileCommand(optionString);              }
+        else if(commandName == "cluster.fit")           {	command = new ClusterFitCommand(optionString);              }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -752,6 +755,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "make.file")             {	pipecommand = new MakeFileCommand(optionString);                }
         else if(commandName == "biom.info")             {	pipecommand = new BiomInfoCommand(optionString);                }
         else if(commandName == "rename.file")           {	pipecommand = new RenameFileCommand(optionString);              }
+        else if(commandName == "cluster.fit")           {	pipecommand = new ClusterFitCommand(optionString);              }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -911,7 +915,8 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
         else if(commandName == "make.file")             {	shellcommand = new MakeFileCommand();               }
         else if(commandName == "biom.info")             {	shellcommand = new BiomInfoCommand();               }
-        else if(commandName == "rename.file")           {	pipecommand = new RenameFileCommand();              }
+        else if(commandName == "rename.file")           {	shellcommand = new RenameFileCommand();             }
+        else if(commandName == "cluster.fit")           {	shellcommand = new ClusterFitCommand();             }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
@@ -921,23 +926,7 @@ Command* CommandFactory::getCommand(string commandName){
 		exit(1);
 	}
 }
-/***********************************************************
-//This function is used to interrupt a command
-Command* CommandFactory::getCommand(){
-	try {
-		delete command;   //delete the old command
-
-		string s = "";
-	    command = new NoCommand(s);
-
-		return command;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CommandFactory", "getCommand");
-		exit(1);
-	}
-}
-***********************************************************************/
+/***********************************************************************/
 bool CommandFactory::isValidCommand(string command) {
 	try {
 
@@ -962,14 +951,9 @@ bool CommandFactory::isValidCommand(string command) {
 /***********************************************************************/
 bool CommandFactory::isValidCommand(string command, string noError) {
 	try {
-
 		//is the command in the map
-		if ((commands.find(command)) != (commands.end())) {
-			return true;
-		}else{
-			return false;
-		}
-
+		if ((commands.find(command)) != (commands.end())) { return true;  }
+		else{ return false; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CommandFactory", "isValidCommand");
@@ -984,9 +968,7 @@ void CommandFactory::printCommands(ostream& out) {
         it++;
         out << it->first;
         it++;
-		for (; it != commands.end(); it++) {
-			out << ", " << it->first;
-		}
+		for (; it != commands.end(); it++) { out << ", " << it->first; }
 		out <<  "." << endl;
 	}
 	catch(exception& e) {
@@ -1028,5 +1010,4 @@ void CommandFactory::printCommandsCategories(ostream& out) {
 		exit(1);
 	}
 }
-
 /***********************************************************************/

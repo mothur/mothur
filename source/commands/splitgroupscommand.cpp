@@ -14,8 +14,9 @@
 
 //**********************************************************************************************************************
 vector<string> SplitGroupCommand::setParameters(){	
-	try {		
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
+	try {
+        CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","fasta",false,false,true); parameters.push_back(pflow);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,false,true); parameters.push_back(pfasta);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "CountGroup", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "CountGroup", "none","group",false,false,true); parameters.push_back(pgroup);
@@ -37,9 +38,9 @@ vector<string> SplitGroupCommand::setParameters(){
 string SplitGroupCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The split.groups command reads a group or count file, and parses your fasta and names or count files by groups. \n";
-		helpString += "The split.groups command parameters are fasta, name, group, count and groups.\n";
-		helpString += "The fasta and group or count parameters are required.\n";
+		helpString += "The split.groups command reads a group or count file, and parses your files by groups. \n";
+		helpString += "The split.groups command parameters are fasta, flow, name, group, count and groups.\n";
+		helpString += "The group or count parameter is required.\n";
 		helpString += "The groups parameter allows you to select groups to create files for.  \n";
 		helpString += "For example if you set groups=A-B-C, you will get a .A.fasta, .A.names, .B.fasta, .B.names, .C.fasta, .C.names files.  \n";
 		helpString += "If you want .fasta and .names files for all groups, set groups=all.  \n";
@@ -58,9 +59,10 @@ string SplitGroupCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fasta") {  pattern = "[filename],[group],fasta"; } 
-        else if (type == "name") {  pattern = "[filename],[group],names"; } 
-        else if (type == "count") {  pattern = "[filename],[group],count_table"; }
+        if (type == "fasta")        {  pattern = "[filename],[group],fasta";        }
+        else if (type == "flow")    {  pattern = "[filename],[group],flow";         }
+        else if (type == "name")    {  pattern = "[filename],[group],names";        }
+        else if (type == "count")   {  pattern = "[filename],[group],count_table";  }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -112,6 +114,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
+            outputTypes["flow"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
 		
@@ -151,6 +154,14 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("flow");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["flow"] = inputDir + it->second;		}
+                }
 			}
 
 			
@@ -161,11 +172,13 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 		
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") {			
-				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { current->setFastaFile(fastafile); }	
+            else if (fastafile == "not found") {	fastafile = "";  }
+            else { current->setFastaFile(fastafile); }
+            
+            flowfile = validParameter.validFile(parameters, "flow");
+            if (flowfile == "not open") { abort = true; }
+            else if (flowfile == "not found") {	flowfile = "";  }
+            else { current->setFlowFile(flowfile); }
 			
 			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") {  groupfile = ""; abort = true; }	
@@ -176,6 +189,16 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			if (countfile == "not open") { countfile = ""; abort = true; }
 			else if (countfile == "not found") { countfile = ""; }	
 			else { current->setCountFile(countfile); }
+            
+            if ((fastafile == "") && (flowfile == "")) {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
+                else {
+                    flowfile = current->getFlowFile();
+                    if (flowfile != "") {  m->mothurOut("Using " + flowfile + " as input file for the flow parameter.\n");  }
+                    else { m->mothurOut("[ERROR]: You need to provide a fasta or flow file.\n");  abort = true; }
+                }
+            }
             
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
             
@@ -216,7 +239,9 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			
             if (countfile == "") {
                 if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
+                    vector<string> files;
+                    if (fastafile != "")    {  files.push_back(fastafile);  }
+                    else                    {  files.push_back(flowfile);   }
                     if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
@@ -234,8 +259,11 @@ int SplitGroupCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        if (countfile == "" ) {  runNameGroup();  }
-        else { runCount();  }
+        if (flowfile != "")     {  splitFlow();  }
+        if (fastafile != "")    {
+            if (countfile == "" )   {  runNameGroup();  }
+            else                    {  runCount();      }
+        }
 				
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0; }
 		
@@ -244,6 +272,11 @@ int SplitGroupCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
+        
+        itTypes = outputTypes.find("flow");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFlowFile(currentName); }
+        }
 		
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
@@ -255,10 +288,8 @@ int SplitGroupCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n"); 
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -317,6 +348,113 @@ int SplitGroupCommand::runNameGroup(){
 		m->errorOut(e, "SplitGroupCommand", "runNameGroup");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+struct flowOutput {
+    string output;
+    string filename;
+    int total;
+    
+    flowOutput(string f) { filename = f; output = ""; total = 0;  }
+    flowOutput() { filename = ""; output = ""; total = 0;  }
+    flowOutput(string f, string o, int t) : filename(f), output(o), total(t) {}
+    
+};
+//**********************************************************************************************************************
+int SplitGroupCommand::splitFlow(){
+    try {
+        GroupMap* groupMap = NULL;
+        CountTable* ct = NULL;
+        vector<string> namesGroups;
+        if (groupfile != "") {
+            groupMap = new GroupMap(groupfile);
+            groupMap->readMap();
+            namesGroups = groupMap->getNamesOfGroups();
+        }else if (countfile != ""){
+            ct = new CountTable();
+            ct->readTable(countfile, true, true);
+            namesGroups = ct->getNamesOfGroups();
+        }else { m->mothurOut("[ERROR]: you must provide a count or group file to split by group. quitting... \n"); m->setControl_pressed(true);  }
+        
+        if (Groups.size() == 0) { Groups = namesGroups; }
+        
+        if (m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        
+        string flowfileRoot = outputDir + util.getRootName(util.getSimpleName(flowfile));
+        
+        ifstream in; int numFlows = 0;
+        util.openInputFile(flowfile, in);
+        in >> numFlows; util.gobble(in);
+        
+        map<string, flowOutput> parsedFlowData;
+        for (int i = 0; i < Groups.size(); i++) {
+            map<string, string> variables;
+            variables["[filename]"] = flowfileRoot;
+            variables["[group]"] = Groups[i];
+            string newFlow = getOutputFileName("flow",variables);
+            
+            flowOutput thisGroupsInfo(newFlow);
+            parsedFlowData[Groups[i]] = thisGroupsInfo;
+            
+            ofstream out;
+            util.openOutputFile(newFlow, out); out << numFlows << endl; out.close();  //clear file for append
+        
+            if (m->getControl_pressed()) { break; }
+        }
+        
+        string name, flows;
+        int count = 0;
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+            
+            in >> name; util.gobble(in);
+            flows = util.getline(in); util.gobble(in);
+            
+            vector<string> thisSeqsGroups;
+            if (groupMap != NULL) {
+                string thisGroup = groupMap->getGroup(name);
+                thisSeqsGroups.push_back(thisGroup);
+            }else if (ct != NULL) { thisSeqsGroups  = ct->getGroups(name); }
+            
+            for (int i = 0; i < thisSeqsGroups.size(); i++) {
+                
+                map<string, flowOutput>::iterator it = parsedFlowData.find(thisSeqsGroups[i]);
+                
+                if (it != parsedFlowData.end()) {
+                    it->second.total++; it->second.output += name + ' ' + flows + '\n';
+                    if (it->second.total % 100 == 0) { //buffer write
+                        ofstream out; util.openOutputFileAppend(it->second.filename, out);
+                        out << it->second.output; it->second.output = "";
+                    }
+                } //else not in the groups we are looking to parse, so ignore
+            }
+            
+            count++;
+        }
+        
+        //output rest
+        for (map<string, flowOutput>::iterator it = parsedFlowData.begin(); it != parsedFlowData.end(); it++) {
+            if (m->getControl_pressed()) { break; }
+            
+            if (it->second.output != "") { //more seqs to output
+                ofstream out; util.openOutputFileAppend(it->second.filename, out);
+                out << it->second.output; it->second.output = ""; outputNames.push_back(it->second.filename); outputTypes["flow"].push_back(it->second.filename);
+            }else if (it->second.total == 0) { //no seqs for this group, remove file
+                util.mothurRemove(it->second.filename);
+            }else { //finished writing, just add to list of output files
+                outputNames.push_back(it->second.filename); outputTypes["flow"].push_back(it->second.filename);
+            }
+        }
+        
+        if (m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        
+        return count;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitGroupCommand", "splitFlow");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int SplitGroupCommand::runCount(){
