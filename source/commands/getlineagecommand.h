@@ -55,7 +55,7 @@ class GetLineageCommand : public Command {
         int readConsList();
         SharedRAbundVectors* getShared();
         int getListVector();
-		vector< map<string, float> > getTaxons(string);
+		
 };
 
 #endif

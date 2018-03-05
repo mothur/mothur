@@ -50,6 +50,7 @@ public:
     bool isInteger(string);
     bool allSpaces(string);
     bool isLabelEquivalent(string, string);
+    bool hasConfidenceScore(string&, float&); //taxon, confidence score. Returns taxon with confidence removed and confidence score.  If no confidence score, then confidence=0
     unsigned long long getRAMUsed();
     unsigned long long getTotalRAM();
     
@@ -206,6 +207,9 @@ public:
     string findEdianness();
     string removeNs(string seq);
     string reverseOligo(string);
+    vector< map<string, float> > getTaxons(string, bool&);
+    bool findTaxon(string tax, string searchTax);
+    bool searchTax(string noQuotesTax, vector<string> listOfTaxons, vector<bool> taxonsHasConfidence, vector<string> noConfidenceTaxons, vector< vector< map<string, float> > > searchTaxons);
 
     
     

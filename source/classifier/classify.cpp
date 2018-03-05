@@ -66,50 +66,52 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
             database = new KmerDB(tempFile, 8);
         }
         
-        if (needToGenerate) {
-            ifstream fastaFile;
-            util.openInputFile(tempFile, fastaFile);
-            
-            while (!fastaFile.eof()) {
-                Sequence temp(fastaFile);
-                util.gobble(fastaFile);
+        if (!m->getControl_pressed()) {
+            if (needToGenerate) {
+                ifstream fastaFile;
+                util.openInputFile(tempFile, fastaFile);
                 
-                names.push_back(temp.getName());
+                while (!fastaFile.eof()) {
+                    Sequence temp(fastaFile);
+                    util.gobble(fastaFile);
+                    
+                    names.push_back(temp.getName());
+                    
+                    database->addSequence(temp);
+                }
+                fastaFile.close();
                 
-                database->addSequence(temp);
+                if ((method == "kmer") && (!shortcuts)) {;} //don't print
+                else {database->generateDB(); }
+                
+            }else if ((method == "kmer") && (!needToGenerate)) {
+                ifstream kmerFileTest(kmerDBName.c_str());
+                database->readKmerDB(kmerFileTest);
+                
+                ifstream fastaFile;
+                util.openInputFile(tempFile, fastaFile);
+                
+                while (!fastaFile.eof()) {
+                    Sequence temp(fastaFile);
+                    util.gobble(fastaFile);
+                    
+                    names.push_back(temp.getName());
+                }
+                fastaFile.close();
             }
-            fastaFile.close();
             
-            if ((method == "kmer") && (!shortcuts)) {;} //don't print
-            else {database->generateDB(); }
+            database->setNumSeqs(names.size());
             
-        }else if ((method == "kmer") && (!needToGenerate)) {
-            ifstream kmerFileTest(kmerDBName.c_str());
-            database->readKmerDB(kmerFileTest);
+            m->mothurOut("DONE.\n");
+            m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database.\n");
             
-            ifstream fastaFile;
-            util.openInputFile(tempFile, fastaFile);
+            readTaxonomy(taxFile);
             
-            while (!fastaFile.eof()) {
-                Sequence temp(fastaFile);
-                util.gobble(fastaFile);
-                
-                names.push_back(temp.getName());
-            }
-            fastaFile.close();
+            //sanity check
+            bool okay = phyloTree->ErrorCheck(names);
+            
+            if (!okay) { m->setControl_pressed(true); }
         }
-        
-        database->setNumSeqs(names.size());
-        
-        m->mothurOut("DONE."); m->mothurOutEndLine();
-        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); m->mothurOutEndLine();
-        
-        readTaxonomy(taxFile);
-        
-        //sanity check
-        bool okay = phyloTree->ErrorCheck(names);
-        
-        if (!okay) { m->setControl_pressed(true); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Classify", "generateDatabaseAndNames");

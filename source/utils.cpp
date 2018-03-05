@@ -3896,6 +3896,7 @@ bool Utils::inUsersGroups(vector<string> groupnames, vector<string> Groups) {
         exit(1);
     }
 }
+
 /**************************************************************************************************/
 string Utils::getTag(string filename) {
     try {
@@ -4400,9 +4401,167 @@ bool Utils::isContainingOnlyDigits(string input) {
     }
 }
 /**************************************************************************************************/
-float Utils::removeConfidences(string& tax) {
+/*M02352_41_000000000-AT06G_1_2104_18738_21630 Eukaryota(100);Archaeplastida(100);Chloroplastida(100);Chlorophyta(100);Mamiellophyceae(100);Mamiellales(100);Ostreococcus(100);Ostreococcus tauri(100);
+ 
+ When I run remove.lineage with:
+ taxon=Chloroplast-Mitochondria-unknown-Bacteria-Archaea-Metazoa-Charophyta
+ 
+ The word "Chloroplast" in the taxon string gets matched to the lineage Chloroplastida in the taxonomy (above) and wipes out all of the green algae.*/
+
+bool Utils::findTaxon(string tax, string searchTax) {
+    try {
+        string taxon = "";
+        int taxLength = tax.length();
+        
+        for(int i=0;i<taxLength;i++){
+            int pos = tax.find(searchTax);
+            if (pos != string::npos) {  //we found a match, but is it complete
+                int endOfTaxon = pos + searchTax.length();
+                if (tax[endOfTaxon] == ';') {  //we found a complete match
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "findTaxon");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+bool Utils::searchTax(string noQuotesTax, vector<string> listOfTaxons, vector<bool> taxonsHasConfidence, vector<string> noConfidenceTaxons, vector< vector< map<string, float> > > searchTaxons) {
+    try {
+        for (int j = 0; j < listOfTaxons.size(); j++) {
+            
+            string newtax = noQuotesTax;
+            
+            //if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
+            if (!taxonsHasConfidence[j]) {
+                int hasConfidences = noQuotesTax.find_first_of('(');
+                if (hasConfidences != string::npos) { newtax = noQuotesTax; removeConfidences(newtax); }
+                
+                if (findTaxon(newtax, noConfidenceTaxons[j])) { //this sequence contains the taxon the user wants
+                    return true;  //since you belong to at least one of the taxons we want you are included so no need to search for other
+                }
+            }else{//if listOfTaxons[i] has them and you don't them remove taxons
+                int hasConfidences = noQuotesTax.find_first_of('(');
+                if (hasConfidences == string::npos) {
+                    
+                    if (findTaxon(newtax, noConfidenceTaxons[j])) { //this sequence contains the taxon the user wants
+                        return true;  //since you belong to at least one of the taxons we want you are included so no need to search for other
+                    }
+                }else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
+                    //first remove confidences from both and see if the taxonomy exists
+                    
+                    string noNewTax = noQuotesTax;
+                    int hasConfidences = noQuotesTax.find_first_of('(');
+                    if (hasConfidences != string::npos) { noNewTax = noQuotesTax; removeConfidences(noNewTax); }
+                    
+                    if (findTaxon(noNewTax, noConfidenceTaxons[j])) { //if yes, then are the confidences okay
+                        
+                        bool good = true; bool hasCon;
+                        vector< map<string, float> > usersTaxon = getTaxons(newtax, hasCon);
+                        
+                        //the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
+                        //we want to "line them up", so we will find the the index where the searchstring starts
+                        int index = 0;
+                        for (int i = 0; i < usersTaxon.size(); i++) {
+                            
+                            if (usersTaxon[i].begin()->first == searchTaxons[j][0].begin()->first) {
+                                index = i;
+                                int spot = 0;
+                                bool goodspot = true;
+                                //is this really the start, or are we dealing with a taxon of the same name?
+                                while ((spot < searchTaxons[j].size()) && ((i+spot) < usersTaxon.size())) {
+                                    if (usersTaxon[i+spot].begin()->first != searchTaxons[j][spot].begin()->first) { goodspot = false; break; }
+                                    else { spot++; }
+                                }
+                                
+                                if (goodspot) { break; }
+                            }
+                        }
+                        
+                        for (int i = 0; i < searchTaxons[j].size(); i++) {
+                            
+                            if ((i+index) < usersTaxon.size()) { //just in case, should never be false
+                                if (usersTaxon[i+index].begin()->second < searchTaxons[j][i].begin()->second) { //is the users cutoff less than the search taxons
+                                    good = false;
+                                    break;
+                                }
+                            }else { good = false; break; }
+                        }
+                        
+                        //passed the test so add you
+                        if (good) { return true; }
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "searchTax");
+        exit(1);
+    }
+}
+
+/**************************************************************************************************/
+vector< map<string, float> > Utils::getTaxons(string tax, bool& hasConfidence) {
     try {
         
+        vector< map<string, float> > t;
+        string taxon = "";
+        int taxLength = tax.length();
+        
+        for(int i=0;i<taxLength;i++){
+            if(tax[i] == ';'){
+                string newtaxon = taxon; float confidence = 0;
+                hasConfidence = hasConfidenceScore(newtaxon, confidence);
+                
+                map<string, float> temp; temp[newtaxon] = confidence; t.push_back(temp);
+                taxon = "";
+            }
+            else{ taxon += tax[i]; }
+        }
+        
+        return t;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getTaxons");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+bool Utils::hasConfidenceScore(string& taxon, float& confidence) {
+    try {
+        int openParen = taxon.find_last_of('(');
+        int closeParen = taxon.find_last_of(')');
+        
+        if ((openParen != string::npos) && (closeParen != string::npos)) {
+            string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
+            if (isNumeric1(confidenceScore)) {  //its a confidence
+                taxon = taxon.substr(0, openParen); //rip off confidence
+                mothurConvert(confidenceScore, confidence);
+                return true;
+            }
+            else { confidence = 0; }//its part of the taxon
+        }
+        else{ confidence = 0; }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "hasConfidenceScore");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+float Utils::removeConfidences(string& tax) {
+    try {
+        float dummy;
+        if (!hasConfidenceScore(tax, dummy))  { return 0; }
         string taxon;
         string newTax = "";
         string confidenceScore = "0";

@@ -1045,13 +1045,10 @@ int GetLineageCommand::readTax(){
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
 			noConfidenceTaxons[i] = listOfTaxons[i];
-			int hasConPos = listOfTaxons[i].find_first_of('(');
-			if (hasConPos != string::npos) {  
-				taxonsHasConfidence[i] = true; 
-				searchTaxons[i] = getTaxons(listOfTaxons[i]); 
-				noConfidenceTaxons[i] = listOfTaxons[i];
-				util.removeConfidences(noConfidenceTaxons[i]);
-			}
+            bool hasCon = false;
+            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);  taxonsHasConfidence[i] = hasCon;
+            noConfidenceTaxons[i] = listOfTaxons[i];
+            if (hasCon) { util.removeConfidences(noConfidenceTaxons[i]); }
 		}
 		
 		while(!in.eof()){
@@ -1063,103 +1060,14 @@ int GetLineageCommand::readTax(){
 			
             string noQuotesTax = util.removeQuotes(tax);
             
-			for (int j = 0; j < listOfTaxons.size(); j++) {
-							
-				string newtax = noQuotesTax;
-			
-				//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
-				if (!taxonsHasConfidence[j]) {
-					int hasConfidences = noQuotesTax.find_first_of('(');
-					if (hasConfidences != string::npos) { 
-						newtax = noQuotesTax;
-						util.removeConfidences(newtax);
-					}
-				
-					int pos = newtax.find(noConfidenceTaxons[j]);
-				
-					if (pos != string::npos) { //this sequence contains the taxon the user wants
-						names.insert(name); 
-						out << name << '\t' << tax << endl;
-						//since you belong to at least one of the taxons we want you are included so no need to search for other
-						break;
-					}
-				}else{//if listOfTaxons[i] has them and you don't them remove taxons
-					int hasConfidences = noQuotesTax.find_first_of('(');
-					if (hasConfidences == string::npos) { 
-					
-						int pos = newtax.find(noConfidenceTaxons[j]);
-					
-						if (pos != string::npos) { //this sequence contains the taxon the user wants
-							names.insert(name);
-							out << name << '\t' << tax << endl;
-							//since you belong to at least one of the taxons we want you are included so no need to search for other
-							break;
-						}
-					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
-						//first remove confidences from both and see if the taxonomy exists
-					
-						string noNewTax = noQuotesTax;
-						int hasConfidences = noQuotesTax.find_first_of('(');
-						if (hasConfidences != string::npos) { 
-							noNewTax = noQuotesTax;
-							util.removeConfidences(noNewTax);
-						}
-					
-						int pos = noNewTax.find(noConfidenceTaxons[j]);
-					
-						if (pos != string::npos) { //if yes, then are the confidences okay
-						
-							bool good = true;
-							vector< map<string, float> > usersTaxon = getTaxons(newtax);
-						
-							//the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
-							//we want to "line them up", so we will find the the index where the searchstring starts
-							int index = 0;
-							for (int i = 0; i < usersTaxon.size(); i++) {
-							
-								if (usersTaxon[i].begin()->first == searchTaxons[j][0].begin()->first) { 
-									index = i;  
-									int spot = 0;
-									bool goodspot = true;
-									//is this really the start, or are we dealing with a taxon of the same name?
-									while ((spot < searchTaxons[j].size()) && ((i+spot) < usersTaxon.size())) {
-										if (usersTaxon[i+spot].begin()->first != searchTaxons[j][spot].begin()->first) { goodspot = false; break; }
-										else { spot++; }
-									}
-								
-									if (goodspot) { break; }
-								}
-							}
-						
-							for (int i = 0; i < searchTaxons[j].size(); i++) {
-							
-								if ((i+index) < usersTaxon.size()) { //just in case, should never be false
-									if (usersTaxon[i+index].begin()->second < searchTaxons[j][i].begin()->second) { //is the users cutoff less than the search taxons
-										good = false;
-										break;
-									}
-								}else {
-									good = false;
-									break;
-								}
-							}
-						
-							//passed the test so add you
-							if (good) {
-								names.insert(name);
-								out << name << '\t' << tax << endl;
-								break;
-							}
-						}
-					}
-				}
-			
-			}
-		}
+			if (util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+                names.insert(name); out << name << '\t' << tax << endl;
+            }
+        }
 		in.close();
 		out.close();
-		
-		if (names.size() == 0) { m->mothurOut("Your taxonomy file does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
+		names.insert(name); out << name << '\t' << tax << endl;
+		if (names.size() == 0) { m->mothurOut("Your taxonomy file does not contain any sequences from " + taxons + ".\n");  }
 		outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
 			
 		return 0;
@@ -1197,16 +1105,12 @@ int GetLineageCommand::readConsTax(){
 		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
-			noConfidenceTaxons[i] = listOfTaxons[i];
-			int hasConPos = listOfTaxons[i].find_first_of('(');
-			if (hasConPos != string::npos) {
-				taxonsHasConfidence[i] = true;
-				searchTaxons[i] = getTaxons(listOfTaxons[i]);
-				noConfidenceTaxons[i] = listOfTaxons[i];
-				util.removeConfidences(noConfidenceTaxons[i]);
-			}
-		}
-		
+            noConfidenceTaxons[i] = listOfTaxons[i];
+            bool hasCon = false;
+            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);  taxonsHasConfidence[i] = hasCon;
+            noConfidenceTaxons[i] = listOfTaxons[i];
+            if (hasCon) { util.removeConfidences(noConfidenceTaxons[i]); }
+        }
         
 		while(!in.eof()){
             
@@ -1218,99 +1122,11 @@ int GetLineageCommand::readConsTax(){
 			
             string noQuotesTax = util.removeQuotes(tax);
             
-			for (int j = 0; j < listOfTaxons.size(); j++) {
-                
-				string newtax = noQuotesTax;
-                
-				//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
-				if (!taxonsHasConfidence[j]) {
-					int hasConfidences = noQuotesTax.find_first_of('(');
-					if (hasConfidences != string::npos) {
-						newtax = noQuotesTax;
-						util.removeConfidences(newtax);
-					}
-                    
-					int pos = newtax.find(noConfidenceTaxons[j]);
-                    
-					if (pos != string::npos) { //this sequence contains the taxon the user wants
-						names.insert(util.getSimpleLabel(otuLabel));
-						out << otuLabel << '\t' << numReps << '\t' << tax << endl;
-						//since you belong to at least one of the taxons we want you are included so no need to search for other
-						break;
-					}
-				}else{//if listOfTaxons[i] has them and you don't them remove taxons
-					int hasConfidences = noQuotesTax.find_first_of('(');
-					if (hasConfidences == string::npos) {
-                        
-						int pos = newtax.find(noConfidenceTaxons[j]);
-                        
-						if (pos != string::npos) { //this sequence contains the taxon the user wants
-							names.insert(util.getSimpleLabel(otuLabel));
-							out << otuLabel << '\t' << numReps << '\t' << tax << endl;
-							//since you belong to at least one of the taxons we want you are included so no need to search for other
-							break;
-						}
-					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
-						//first remove confidences from both and see if the taxonomy exists
-                        
-						string noNewTax = noQuotesTax;
-						int hasConfidences = noQuotesTax.find_first_of('(');
-						if (hasConfidences != string::npos) {
-							noNewTax = noQuotesTax;
-							util.removeConfidences(noNewTax);
-						}
-                        
-						int pos = noNewTax.find(noConfidenceTaxons[j]);
-                        
-						if (pos != string::npos) { //if yes, then are the confidences okay
-                            
-							bool good = true;
-							vector< map<string, float> > usersTaxon = getTaxons(newtax);
-                            
-							//the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
-							//we want to "line them up", so we will find the the index where the searchstring starts
-							int index = 0;
-							for (int i = 0; i < usersTaxon.size(); i++) {
-                                
-								if (usersTaxon[i].begin()->first == searchTaxons[j][0].begin()->first) {
-									index = i;
-									int spot = 0;
-									bool goodspot = true;
-									//is this really the start, or are we dealing with a taxon of the same name?
-									while ((spot < searchTaxons[j].size()) && ((i+spot) < usersTaxon.size())) {
-										if (usersTaxon[i+spot].begin()->first != searchTaxons[j][spot].begin()->first) { goodspot = false; break; }
-										else { spot++; }
-									}
-                                    
-									if (goodspot) { break; }
-								}
-							}
-                            
-							for (int i = 0; i < searchTaxons[j].size(); i++) {
-                                
-								if ((i+index) < usersTaxon.size()) { //just in case, should never be false
-									if (usersTaxon[i+index].begin()->second < searchTaxons[j][i].begin()->second) { //is the users cutoff less than the search taxons
-										good = false;
-										break;
-									}
-								}else {
-									good = false;
-									break;
-								}
-							}
-                            
-							//passed the test so add you
-							if (good) {
-								names.insert(util.getSimpleLabel(otuLabel));
-								out << otuLabel << '\t' << numReps << '\t' << tax << endl;
-								break;
-							}
-						}
-					}
-				}
-                
-			}
-		}
+            if (util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+                names.insert(util.getSimpleLabel(otuLabel));
+                out << otuLabel << '\t' << numReps << '\t' << tax << endl;
+            }
+        }
 		in.close();
 		out.close();
 		
@@ -1318,60 +1134,9 @@ int GetLineageCommand::readConsTax(){
 		outputNames.push_back(outputFileName); outputTypes["constaxonomy"].push_back(outputFileName);
         
 		return 0;
-        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetLineageCommand", "readConsTax");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-vector< map<string, float> > GetLineageCommand::getTaxons(string tax) {
-	try {
-        
-		vector< map<string, float> > t;
-		string taxon = "";
-		int taxLength = tax.length();
-        
-		for(int i=0;i<taxLength;i++){
-			if(tax[i] == ';'){
-                
-				int openParen = taxon.find_last_of('(');
-				int closeParen = taxon.find_last_of(')');
-				
-				string newtaxon, confidence;
-				if ((openParen != string::npos) && (closeParen != string::npos)) {
-                    string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
-                    if (util.isNumeric1(confidenceScore)) {  //its a confidence
-                        newtaxon = taxon.substr(0, openParen); //rip off confidence
-                        confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
-                    }else { //its part of the taxon
-                        newtaxon = taxon;
-                        confidence = "0";
-                    }
-				}else{
-					newtaxon = taxon;
-					confidence = "0";
-				} 
-				float con = 0;
-				convert(confidence, con);
-				
-				map<string, float> temp;
-				temp[newtaxon] = con;
-                
-				t.push_back(temp);
-				taxon = "";
-			}
-			else{
-				taxon += tax[i];
-                
-			}
-		}
-		
-		return t;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "getTaxons");
 		exit(1);
 	}
 }
