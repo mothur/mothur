@@ -169,7 +169,7 @@ HomovaCommand::HomovaCommand(string option) {
 				util.splitAtDash(sets, Sets);
 			}
 		}
-		
+		if (outputDir == "") { outputDir = util.hasPath(phylipFileName); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HomovaCommand", "HomovaCommand");
@@ -184,9 +184,7 @@ int HomovaCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read design file
-		designMap = new DesignMap(designFileName);
-		
-		if (outputDir == "") { outputDir = util.hasPath(phylipFileName); }
+		DesignMap* designMap = new DesignMap(designFileName);
 		
 		//read in distance matrix and square it
 		ReadPhylipVector readMatrix(phylipFileName);
@@ -216,9 +214,7 @@ int HomovaCommand::execute(){
         }
 
 		for(int i=0;i<distanceMatrix.size();i++){
-			for(int j=0;j<i;j++){
-				distanceMatrix[i][j] *= distanceMatrix[i][j];	
-			}
+			for(int j=0;j<i;j++){ distanceMatrix[i][j] *= distanceMatrix[i][j];	 }
 		}
 		
 		//link designMap to rows/columns in distance matrix
@@ -266,14 +262,11 @@ int HomovaCommand::execute(){
 				}			
 			}
 			HOMOVAFile << endl;
-			m->mothurOutEndLine();
 			
-			m->mothurOut("Experiment-wise error rate: " + toString(experimentwiseAlpha) + '\n');
+			m->mothurOut("\nExperiment-wise error rate: " + toString(experimentwiseAlpha) + '\n');
 			m->mothurOut("Pair-wise error rate (Bonferroni): " + toString(pairwiseAlpha) + '\n');
 		}
-		else{
-			m->mothurOut("Experiment-wise error rate: " + toString(experimentwiseAlpha) + '\n');
-		}
+		else{ m->mothurOut("Experiment-wise error rate: " + toString(experimentwiseAlpha) + '\n'); }
 		
 		m->mothurOut("If you have borderline P-values, you should try increasing the number of iterations\n");
 		
@@ -289,7 +282,6 @@ int HomovaCommand::execute(){
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 
 double HomovaCommand::runHOMOVA(ofstream& HOMOVAFile, map<string, vector<int> > groupSampleMap, double alpha){
@@ -360,14 +352,11 @@ double HomovaCommand::calcSigleSSWithin(vector<int> sampleIndices) {
 			for(int j=0;j<numSamplesInGroup;j++){
 				int col = sampleIndices[j];
 				
-				if(col < row){
-					ssWithin += distanceMatrix[row][col];
-				}
-				
+				if(col < row){ ssWithin += distanceMatrix[row][col]; }
 			}
 		}
 		
-		ssWithin /= numSamplesInGroup;
+		ssWithin /= (double) numSamplesInGroup;
 		return ssWithin;
 	}
 	catch(exception& e) {
@@ -380,20 +369,12 @@ double HomovaCommand::calcSigleSSWithin(vector<int> sampleIndices) {
 
 double HomovaCommand::calcBValue(map<string, vector<int> > groupSampleMap, vector<double>& ssWithinVector) {
 	try {
-
-		map<string, vector<int> >::iterator it;
-		
 		double numGroups = (double)groupSampleMap.size();
 		ssWithinVector.resize(numGroups, 0);
 		
-		double totalNumSamples = 0;
-		double ssWithinFull;
-		double secondTermSum = 0;
-		double inverseOneMinusSum = 0;
-		int index = 0;
+		double totalNumSamples = 0; double ssWithinFull = 0; double secondTermSum = 0; double inverseOneMinusSum = 0; int index = 0;
 		
-		ssWithinVector.resize(numGroups, 0);
-		for(it = groupSampleMap.begin();it!=groupSampleMap.end();it++){
+		for(map<string, vector<int> >::iterator it = groupSampleMap.begin();it!=groupSampleMap.end();it++){
 			int numSamplesInGroup = it->second.size();
 			totalNumSamples += numSamplesInGroup;
 			
@@ -412,14 +393,12 @@ double HomovaCommand::calcBValue(map<string, vector<int> > groupSampleMap, vecto
 		B /= denomintor;
 		
 		return B;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HomovaCommand", "calcBValue");
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 
 map<string, vector<int> > HomovaCommand::getRandomizedGroups(map<string, vector<int> > origMapping){
@@ -427,8 +406,7 @@ map<string, vector<int> > HomovaCommand::getRandomizedGroups(map<string, vector<
 		vector<int> sampleIndices;
 		vector<int> samplesPerGroup;
 		
-		map<string, vector<int> >::iterator it;
-		for(it=origMapping.begin();it!=origMapping.end();it++){
+		for(map<string, vector<int> >::iterator it=origMapping.begin();it!=origMapping.end();it++){
 			vector<int> indices = it->second;
 			samplesPerGroup.push_back(indices.size());
 			sampleIndices.insert(sampleIndices.end(), indices.begin(), indices.end());
@@ -438,7 +416,7 @@ map<string, vector<int> > HomovaCommand::getRandomizedGroups(map<string, vector<
 		
 		int index = 0;
 		map<string, vector<int> > randomizedGroups = origMapping;
-		for(it=randomizedGroups.begin();it!=randomizedGroups.end();it++){
+		for(map<string, vector<int> >::iterator it=randomizedGroups.begin();it!=randomizedGroups.end();it++){
 			for(int i=0;i<it->second.size();i++){
 				it->second[i] = sampleIndices[index++];				
 			}
