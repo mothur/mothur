@@ -35,16 +35,18 @@ void MothurOut::appendLogBuffer(string partialLog)  {
 /*********************************************************************************************/
 void MothurOut::setLogFileName(string filename, bool append)  {
 	try {
-		logFileName = filename;
+        logFileName = filename;
         Utils util;
-        if ((filename == "/dev/null") || (filename == "dev/null")) { devNull = true; }
+        if ((filename == "silent")) { silenceLog = true; }
         else {
-            devNull = false;
+            if (out.is_open()) { closeLog(); }
+            silenceLog = false;
             if (append)     {
                 util.openOutputFileAppend(filename, out);
                 out << "\n\n************************************************************\n\n\n";
             }else            {  bool opendLog = util.openOutputFile(filename, out);       if (!opendLog) { control_pressed = true; } }
         }
+        
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "setFileName");
@@ -56,7 +58,7 @@ void MothurOut::closeLog()  {
 	try {
         if (buffer != "") { mothurOut(buffer); buffer = "";  }
         if (numErrors != 0) {
-            if (!devNull) {
+            if (!silenceLog) {
                 out << "\n\n************************************************************\n";
                 out << "************************************************************\n";
                 out << "************************************************************\n";
@@ -75,7 +77,7 @@ void MothurOut::closeLog()  {
         }
         
         if (numWarnings != 0) {
-            if (!devNull) {
+            if (!silenceLog) {
                 out << "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
                 out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
                 out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
@@ -119,12 +121,12 @@ void MothurOut::mothurOut(string output) {
         if (output.find("[WARNING]") != string::npos) { numWarnings++; }
         
         if (!quietMode) {
-            if (!devNull) { out << output; }
+            if (!silenceLog) { out << output; }
             logger() << output;
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                if (!devNull) { out << output; }
+                if (!silenceLog) { out << output; }
                 logger() << output;
             }
         }
@@ -161,7 +163,7 @@ void MothurOut::mothurOutJustToScreen(string output) {
 void MothurOut::mothurOutEndLine() {
 	try {
 		if (!quietMode) {
-            if (!devNull) { out << buffer << endl; }
+            if (!silenceLog) { out << buffer << endl; }
             logger() << buffer << endl;
         }
         buffer = "";
@@ -179,13 +181,13 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
         if (output.find("[WARNING]") != string::npos) { numWarnings++; }
         
         if (!quietMode) {
-            if (!devNull) { out << output; }
+            if (!silenceLog) { out << output; }
             outputFile << output;
             logger() << output;
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                if (!devNull) { out << output; }
+                if (!silenceLog) { out << output; }
                 outputFile << output;
                 logger() << output;
             }
@@ -201,7 +203,7 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
 void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 	try {
         if (!quietMode) {
-            if (!devNull) { out << buffer << endl; }
+            if (!silenceLog) { out << buffer << endl; }
             logger() << buffer << endl;
             outputFile << buffer << endl;
         }
@@ -219,11 +221,11 @@ void MothurOut::mothurOutJustToLog(string output) {
         if (output.find("[WARNING]") != string::npos) { numWarnings++; }
         
         if (!quietMode) {
-            if (!devNull) { out << output; }
+            if (!silenceLog) { out << output; }
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                if (!devNull) { out << output; }
+                if (!silenceLog) { out << output; }
             }
         }
 

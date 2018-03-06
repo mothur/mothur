@@ -78,7 +78,7 @@ class MothurOut {
             debug = false;
             quietMode = false;
             changedSeqNames = true;
-            devNull = false;
+            silenceLog = false;
             numErrors = 0;
             numWarnings = 0;
             logFileName = "";
@@ -91,7 +91,7 @@ class MothurOut {
         unsigned seed;
         int numErrors, numWarnings;
         string logFileName, buffer;
-        bool changedSeqNames, devNull, control_pressed, executing, debug, quietMode;
+        bool changedSeqNames, silenceLog, control_pressed, executing, debug, quietMode;
 };
 /***********************************************/
 
