@@ -49,7 +49,6 @@ string CreateDatabaseCommand::getHelpString(){
         helpString += "The create.database command should be in the following format: \n";
 		helpString += "create.database(repfasta=yourFastaFileFromGetOTURep, repname=yourNameFileFromGetOTURep, contaxonomy=yourConTaxFileFromClassifyOTU, list=yourListFile) \n";	
 		helpString += "Example: create.database(repfasta=final.an.0.03.rep.fasta, repname=final.an.0.03.rep.names, list=final.an.list, label=0.03, contaxonomy=final.an.0.03.cons.taxonomy) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. repfasta), '=' and parameters (i.e.yourFastaFileFromGetOTURep).\n";	
 		return helpString;
 	}
 	catch(exception& e) {

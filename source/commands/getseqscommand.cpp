@@ -54,7 +54,7 @@ string GetSeqsCommand::getHelpString(){
         helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

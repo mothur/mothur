@@ -46,7 +46,7 @@ string AmovaCommand::getHelpString(){
         helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
 		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000.";
 		helpString += "The amova command should be in the following format: amova(phylip=file.dist, design=file.design).";
-		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).";
+		
 		return helpString;
 	}
 	catch(exception& e) {

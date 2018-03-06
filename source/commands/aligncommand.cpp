@@ -65,7 +65,7 @@ string AlignCommand::getHelpString(){
 		helpString += "The align.seqs command should be in the following format:";
 		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty)";
 		helpString += "Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)";
-		helpString += "Note: No spaces between parameter labels (i.e. candidate), '=' and parameters (i.e.yourFastaFile).";
+		
 		return helpString;
 	}
 	catch(exception& e) {

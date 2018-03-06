@@ -131,7 +131,7 @@ string MakeBiomCommand::getHelpString(){
 		helpString += "Example make.biom(shared=abrecovery.an.shared, groups=A-B-C).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
 		helpString += "The make.biom command outputs a .biom file.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

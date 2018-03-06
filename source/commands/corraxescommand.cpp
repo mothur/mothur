@@ -48,7 +48,7 @@ string CorrAxesCommand::getHelpString(){
 		helpString += "The corr.axes command should be in the following format: corr.axes(axes=yourPcoaFile, shared=yourSharedFile, method=yourMethod).\n";
 		helpString += "Example corr.axes(axes=genus.pool.thetayc.genus.lt.pcoa, shared=genus.pool.shared, method=kendall).\n";
 		helpString += "The corr.axes command outputs a .corr.axes file.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

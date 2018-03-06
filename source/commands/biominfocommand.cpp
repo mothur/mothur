@@ -46,7 +46,7 @@ string BiomInfoCommand::getHelpString(){
         helpString += "For example consider the following basis=sequence could give Clostridiales	3	105, where 105 is the total number of sequences whose otu classified to Clostridiales.\n";
         helpString += "Now for basis=otu could give Clostridiales	3	7, where 7 is the number of otus that classified to Clostridiales.\n";
         helpString += "The biom.info command should be in the following format: biom.info(biom=test.biom, label=0.03).\n";
-        helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e. 0.03).\n";
+        
         return helpString;
     }
     catch(exception& e) {

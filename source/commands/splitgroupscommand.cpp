@@ -46,7 +46,7 @@ string SplitGroupCommand::getHelpString(){
 		helpString += "If you want .fasta and .names files for all groups, set groups=all.  \n";
 		helpString += "The split.groups command should be used in the following format: split.group(fasta=yourFasta, group=yourGroupFile).\n";
 		helpString += "Example: split.groups(fasta=abrecovery.fasta, group=abrecovery.groups).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

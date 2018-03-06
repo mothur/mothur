@@ -41,7 +41,6 @@ string CountSeqsCommand::getHelpString(){
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
 		helpString += "The count.seqs command should be in the following format: count.seqs(name=yourNameFile).\n";
 		helpString += "Example count.seqs(name=amazon.names) or make.table(name=amazon.names).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. name), '=' and parameters (i.e.yourNameFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

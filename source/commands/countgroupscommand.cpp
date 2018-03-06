@@ -58,7 +58,6 @@ string CountGroupsCommand::getHelpString(){
 		helpString += "The count.groups command should be in the following format: count.groups(accnos=yourAccnos, group=yourGroupFile).\n";
 		helpString += "Example count.groups(accnos=amazon.accnos, group=amazon.groups).\n";
 		helpString += "or count.groups(groups=pasture, group=amazon.groups).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. group), '=' and parameters (i.e.yourGroupFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

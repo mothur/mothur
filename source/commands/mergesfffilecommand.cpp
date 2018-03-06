@@ -40,7 +40,6 @@ string MergeSfffilesCommand::getHelpString(){
         helpString += "The keytrim parameter allows you to mergesff files with different keysequence by trimming them to the first 4 characters. Provided the first 4 match.  \n";
         helpString += "The output parameter allows you to provide an output filename.  \n";
 		helpString += "Example sffinfo(sff=mySffFile.sff-mySecond.sff).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. sff), '=' and parameters (i.e.yourSffFileName).\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -34,7 +34,6 @@ string MergeCountCommand::getHelpString(){
         helpString += "The merge.count command takes a list of count files separated by dashes and merges them into one file.";
         helpString += "The merge.count command parameters are count and output.";
         helpString += "Example merge.count(count=final.count_table-new.count_table, output=complete.count_table).";
-        helpString += "Note: No spaces between parameter labels (i.e. output), '=' and parameters (i.e.yourOutputFileName).\n";
         return helpString;
     }
     catch(exception& e) {

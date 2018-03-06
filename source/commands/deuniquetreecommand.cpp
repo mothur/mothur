@@ -35,7 +35,6 @@ string DeuniqueTreeCommand::getHelpString(){
 		helpString += "The deunique.tree command parameters are tree and name.  Both parameters are required unless you have valid current files.\n";
 		helpString += "The deunique.tree command should be in the following format: deunique.tree(tree=yourTreeFile, name=yourNameFile).\n";
 		helpString += "Example deunique.tree(tree=abrecovery.tree, name=abrecovery.names).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreeFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

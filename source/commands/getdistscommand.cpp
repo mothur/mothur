@@ -35,7 +35,6 @@ string GetDistsCommand::getHelpString(){
 		helpString += "The get.dists command parameters are accnos, phylip and column.\n";
 		helpString += "The get.dists command should be in the following format: get.dists(accnos=yourAccnos, phylip=yourPhylip).\n";
 		helpString += "Example get.dists(accnos=final.accnos, phylip=final.an.thetayc.0.03.lt.ave.dist).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. accnos), '=' and parameters (i.e.final.accnos).\n";
 		return helpString;
 	}
 	catch(exception& e) {

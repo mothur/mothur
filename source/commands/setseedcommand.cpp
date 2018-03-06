@@ -32,7 +32,6 @@ string SetSeedCommand::getHelpString(){
         helpString += "The set.seed command parameter is seed, and it is required.\n";
         helpString += "To seed random set seed=yourRandomValue. By default mothur seeds random with the start time.\n";
           helpString += "Example set.seed(seed=12345).\n";
-        helpString += "Note: No spaces between parameter labels (i.e. seed), '=' and parameters (i.e.yourSeedValue).\n";
         return helpString;
     }
     catch(exception& e) {

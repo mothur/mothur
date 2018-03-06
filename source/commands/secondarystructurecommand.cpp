@@ -40,7 +40,7 @@ string AlignCheckCommand::getHelpString(){
 		helpString += "The align.check command parameters are fasta and map, both are required.\n";
 		helpString += "The align.check command should be in the following format: align.check(fasta=yourFasta, map=yourMap).\n";
 		helpString += "Example align.check(map=silva.ss.map, fasta=amazon.fasta).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

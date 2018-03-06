@@ -38,7 +38,6 @@ string PCOACommand::getHelpString(){
 		helpString += "The phylip parameter allows you to enter your distance file.";
 		helpString += "The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True"; 
 		helpString += "Example pcoa(phylip=yourDistanceFile).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

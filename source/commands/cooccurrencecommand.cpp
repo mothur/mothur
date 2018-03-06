@@ -43,7 +43,6 @@ string CooccurrenceCommand::getHelpString(){
         helpString += "The cooccurrence command should be in the following format: \n";
 		helpString += "cooccurrence(shared=yourSharedFile) \n";
 		helpString += "Example cooccurrence(shared=final.an.shared).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. shared), '=' and parameters (i.e.yourShared).\n";
 		return helpString;
 	}
 	catch(exception& e) {

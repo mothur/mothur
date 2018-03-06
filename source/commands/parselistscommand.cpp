@@ -41,7 +41,6 @@ string ParseListCommand::getHelpString(){
 		helpString += "The label parameter is used to read specific labels in your input you want to use.\n";
 		helpString += "The parse.list command should be used in the following format: parse.list(list=yourListFile, group=yourGroupFile, label=yourLabels).\n";
 		helpString += "Example: parse.list(list=abrecovery.fn.list, group=abrecovery.groups, label=0.03).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

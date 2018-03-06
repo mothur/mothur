@@ -46,7 +46,7 @@ string ClassifyTreeCommand::getHelpString(){
         helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
         helpString += "The output parameter allows you to specify whether you want the tree node number displayed on the tree, or the taxonomy displayed. Default=node. Options are node or taxon.\n";
         helpString += "The classify.tree command should be used in the following format: classify.tree(tree=test.tre, group=test.group, taxonomy=test.taxonomy)\n";
-		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n"; 
+		 
 		return helpString;
 	}
 	catch(exception& e) {

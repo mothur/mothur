@@ -60,7 +60,6 @@ string ParseFastaQCommand::getHelpString(){
         helpString += "The qfile parameter allows you to indicate whether you want a quality file generated. Default=T.\n";
         helpString += "The pacbio parameter allows you to indicate .... When set to true, quality scores of 0 will results in a corresponding base of N. Default=F.\n";
 		helpString += "Example fastq.info(fastaq=test.fastaq).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fastq), '=' and yourFastQFile.\n";
 		return helpString;
 	}
 	catch(exception& e) {

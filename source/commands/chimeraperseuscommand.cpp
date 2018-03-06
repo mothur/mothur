@@ -57,7 +57,7 @@ string ChimeraPerseusCommand::getHelpString(){
 		helpString += "The chimera.perseus command should be in the following format: \n";
 		helpString += "chimera.perseus(fasta=yourFastaFile, name=yourNameFile) \n";
 		helpString += "Example: chimera.perseus(fasta=AD.align, name=AD.names) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
+			
 		return helpString;
 	}
 	catch(exception& e) {

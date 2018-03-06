@@ -50,7 +50,7 @@ string MergeGroupsCommand::getHelpString(){
 		helpString += "The merge.groups command should be in the following format: merge.groups(design=yourDesignFile, shared=yourSharedFile).\n";
 		helpString += "Example merge.groups(design=temp.design, groups=A-B-C, shared=temp.shared).\n";
 		helpString += "The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

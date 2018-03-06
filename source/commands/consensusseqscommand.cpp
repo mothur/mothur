@@ -47,7 +47,7 @@ string ConsensusSeqsCommand::getHelpString(){
 		helpString += "The consensus.seqs command should be in the following format: \n";
 		helpString += "consensus.seqs(fasta=yourFastaFile, list=yourListFile) \n";	
 		helpString += "Example: consensus.seqs(fasta=abrecovery.align, list=abrecovery.fn.list) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
+			
 		return helpString;
 	}
 	catch(exception& e) {

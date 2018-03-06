@@ -53,7 +53,7 @@ string RemoveSeqsCommand::getHelpString(){
 		helpString += "The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n";
 		helpString += "The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

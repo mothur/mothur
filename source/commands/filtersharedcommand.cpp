@@ -57,7 +57,7 @@ string FilterSharedCommand::getHelpString(){
 		helpString += "Example filter.shared(shared=final.an.shared, minabund=10).\n";
 		helpString += "The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n";
 		helpString += "The filter.shared command outputs a .filter.shared file.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

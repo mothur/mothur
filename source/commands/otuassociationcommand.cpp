@@ -47,7 +47,7 @@ string OTUAssociationCommand::getHelpString(){
 		helpString += "The otu.association command should be in the following format: otu.association(shared=yourSharedFile, method=yourMethod).\n";
 		helpString += "Example otu.association(shared=genus.pool.shared, method=kendall).\n";
 		helpString += "The otu.association command outputs a .otu.corr file.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

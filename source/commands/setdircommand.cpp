@@ -54,7 +54,6 @@ string SetDirectoryCommand::getHelpString(){
 		helpString += "To set the tempdefault to the directory where mothur.exe is located you may enter: tempdefault=default.\n";
 		helpString += "The set.dir command should be in the following format: set.dir(output=yourOutputDirectory, input=yourInputDirectory, tempdefault=yourTempDefault).\n";
 		helpString += "Example set.outdir(output=/Users/lab/desktop/outputs, input=/Users/lab/desktop/inputs).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. output), '=' and parameters (i.e.yourOutputDirectory).\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -60,7 +60,7 @@ string ClusterFragmentsCommand::getHelpString(){
 		helpString += "The cluster.fragments command should be in the following format: \n";
 		helpString += "cluster.fragments(fasta=yourFastaFile, names=yourNamesFile) \n";
 		helpString += "Example cluster.fragments(fasta=amazon.fasta).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

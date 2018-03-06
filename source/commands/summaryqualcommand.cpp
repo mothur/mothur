@@ -40,7 +40,6 @@ string SummaryQualCommand::getHelpString(){
         helpString += "The count parameter allows you to enter a count file associated with your quality file. \n";
 		helpString += "The summary.qual command should be in the following format: \n";
 		helpString += "summary.qual(qfile=yourQualityFile) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. qfile), '=' and parameters (i.e.yourQualityFile).\n";	
 		return helpString;
 	}
 	catch(exception& e) {

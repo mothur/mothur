@@ -40,7 +40,6 @@ string MakeGroupCommand::getHelpString(){
 		helpString += "The make.group command should be in the following format: \n";
 		helpString += "make.group(fasta=yourFastaFiles, groups=yourGroups). \n";
 		helpString += "Example make.group(fasta=seqs1.fasta-seq2.fasta-seqs3.fasta, groups=A-B-C)\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFiles).\n";
 		return helpString;
 	}
 	catch(exception& e) {

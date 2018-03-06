@@ -53,7 +53,7 @@ string RenameSeqsCommand::getHelpString(){
         helpString += "The rename.seqs command should be in the following format: \n";
 		helpString += "rename.seqs(fasta=yourFastaFile, group=yourGroupFile) \n";
 		helpString += "Example rename.seqs(fasta=abrecovery.unique.fasta, group=abrecovery.group).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

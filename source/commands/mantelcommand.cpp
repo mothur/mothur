@@ -42,7 +42,6 @@ string MantelCommand::getHelpString(){
 		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n";
 		helpString += "The mantel command should be in the following format: mantel(phylip1=veg.dist, phylip2=env.dist).\n";
 		helpString += "The mantel command outputs a .mantel file.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. phylip1), '=' and parameters (i.e. veg.dist).\n";
 		return helpString;
 	}
 	catch(exception& e) {

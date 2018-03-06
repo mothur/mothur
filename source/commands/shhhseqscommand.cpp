@@ -46,7 +46,7 @@ string ShhhSeqsCommand::getHelpString(){
 		helpString += "The shhh.seqs command should be in the following format: \n";
 		helpString += "shhh.seqs(fasta=yourFastaFile, name=yourNameFile) \n";
 		helpString += "Example: shhh.seqs(fasta=AD.align, name=AD.names) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
+			
 		return helpString;
 		
 	}

@@ -39,7 +39,7 @@ string DeUniqueSeqsCommand::getHelpString(){
 		helpString += "The deunique.seqs command should be in the following format: \n";
 		helpString += "deunique.seqs(fasta=yourFastaFile, name=yourNameFile) \n";	
 		helpString += "Example deunique.seqs(fasta=abrecovery.unique.fasta, name=abrecovery.names).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

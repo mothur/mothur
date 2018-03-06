@@ -46,7 +46,6 @@ string HomovaCommand::getHelpString(){
         helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
 		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n";
 		helpString += "The homova command should be in the following format: homova(phylip=file.dist, design=file.design).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).\n";
 		return helpString;
 	}
 	catch(exception& e) {

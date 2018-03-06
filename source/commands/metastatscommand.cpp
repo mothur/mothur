@@ -54,7 +54,7 @@ string MetaStatsCommand::getHelpString(){
 		helpString += "The metastats command should be in the following format: metastats(design=yourDesignFile).\n";
 		helpString += "Example metastats(design=temp.design, groups=A-B-C).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

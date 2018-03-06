@@ -56,7 +56,7 @@ string SeqErrorCommand::getHelpString(){
 		helpString += "The threshold parameter...\n";
 		//helpString += "The processors parameter...\n";
 		helpString += "Example seq.error(...).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n";
 		return helpString;
 	}

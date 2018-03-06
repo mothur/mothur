@@ -87,7 +87,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The chimera.slayer command should be in the following format: \n";
 		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate, search=yourSearch) \n";
 		helpString += "Example: chimera.slayer(fasta=AD.align, reference=core_set_aligned.imputed.fasta, search=kmer) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
+			
 		return helpString;
 	}
 	catch(exception& e) {

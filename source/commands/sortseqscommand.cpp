@@ -45,7 +45,7 @@ string SortSeqsCommand::getHelpString(){
         helpString += "The large parameters is used to indicate your files are too large to fit in RAM.\n";
 		helpString += "The sort.seqs command should be in the following format: sort.seqs(fasta=yourFasta).\n";
 		helpString += "Example sort.seqs(fasta=amazon.fasta).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

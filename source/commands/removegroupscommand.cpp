@@ -54,7 +54,7 @@ string RemoveGroupsCommand::getHelpString(){
 		helpString += "The remove.groups command should be in the following format: remove.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n";
 		helpString += "Example remove.groups(accnos=amazon.accnos, fasta=amazon.fasta, group=amazon.groups).\n";
 		helpString += "or remove.groups(groups=pasture, fasta=amazon.fasta, amazon.groups).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

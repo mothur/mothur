@@ -49,7 +49,7 @@ string ChimeraCheckCommand::getHelpString(){
         helpString += "The chimera.check command should be in the following format: \n";
 		helpString += "chimera.check(fasta=yourFastaFile, reference=yourTemplateFile, processors=yourProcessors, ksize=yourKmerSize) \n";
 		helpString += "Example: chimera.check(fasta=AD.fasta, reference=core_set_aligned,imputed.fasta, processors=4, ksize=8) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
+			
 		return helpString;
 	}
 	catch(exception& e) {

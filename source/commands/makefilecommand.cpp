@@ -42,7 +42,6 @@ string MakeFileCommand::getHelpString(){
         helpString += "The make.file command should be in the following format: \n";
         helpString += "make.file(inputdir=yourInputDirectory). \n";
         helpString += "Example make.group(inputdir=fastqFiles)\n";
-        helpString += "Note: No spaces between parameter labels (i.e. inputdir), '=' and parameters (i.e. yourInputDirectory).\n";
         return helpString;
     }
     catch(exception& e) {

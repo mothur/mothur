@@ -54,7 +54,7 @@ string PcrSeqsCommand::getHelpString(){
         helpString += "The keepdots parameter allows you to keep the leading and trailing .'s, default=true.\n";
         helpString += "The pdiffs parameter is used to specify the number of differences allowed in the forward primer. The default is 0.\n";
         helpString += "The rdiffs parameter is used to specify the number of differences allowed in the reverse primer. The default is 0.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Pcr.seqs .\n";
 		return helpString;
 	}

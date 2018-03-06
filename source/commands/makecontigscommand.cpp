@@ -194,7 +194,6 @@ string MakeContigsCommand::getHelpString(){
         helpString += "The trimoverlap parameter allows you to trim the sequences to only the overlapping section. The default is F.\n";
         helpString += "The make.contigs command should be in the following format: \n";
 		helpString += "make.contigs(ffastq=yourForwardFastqFile, rfastq=yourReverseFastqFile, align=yourAlignmentMethod) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. ffastq), '=' and parameters (i.e.yourForwardFastqFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

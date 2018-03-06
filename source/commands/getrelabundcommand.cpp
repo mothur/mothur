@@ -41,7 +41,7 @@ string GetRelAbundCommand::getHelpString(){
 		helpString += "Example get.relabund(groups=A-B-C, scale=averagegroup).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
 		helpString += "The get.relabund command outputs a .relabund file.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

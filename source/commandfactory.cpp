@@ -422,21 +422,23 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
 
 		delete command;   //delete the old command
-
-        checkForRedirects(optionString);
-
-		//user has opted to redirect output from dir where input files are located to some other place
-		if (current->getOutputDir() != "") {
-			if (optionString != "") { optionString += ", outputdir=" + current->getOutputDir(); }
-			else { optionString += "outputdir=" + current->getOutputDir(); }
-		}
-
-		//user has opted to redirect input from dir where mothur.exe is located to some other place
-		if (current->getInputDir() != "") {
-			if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
-			else { optionString += "inputdir=" + current->getInputDir(); }
-		}
-
+        
+        if (commandName != "help") {
+            checkForRedirects(optionString);
+            
+            //user has opted to redirect output from dir where input files are located to some other place
+            if (current->getOutputDir() != "") {
+                if (optionString != "") { optionString += ", outputdir=" + current->getOutputDir(); }
+                else { optionString += "outputdir=" + current->getOutputDir(); }
+            }
+            
+            //user has opted to redirect input from dir where mothur.exe is located to some other place
+            if (current->getInputDir() != "") {
+                if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
+                else { optionString += "inputdir=" + current->getInputDir(); }
+            }
+        }
+        
 		if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);				}
@@ -597,21 +599,22 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 Command* CommandFactory::getCommand(string commandName, string optionString, string mode){
 	try {
 		delete pipecommand;   //delete the old command
-
-        checkForRedirects(optionString);
-
-        //user has opted to redirect output from dir where input files are located to some other place
-        if (current->getOutputDir() != "") {
-            if (optionString != "") { optionString += ", outputdir=" + current->getOutputDir(); }
-            else { optionString += "outputdir=" + current->getOutputDir(); }
-        }
         
-        //user has opted to redirect input from dir where mothur.exe is located to some other place
-        if (current->getInputDir() != "") {
-            if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
-            else { optionString += "inputdir=" + current->getInputDir(); }
+        if (commandName != "help") {
+            checkForRedirects(optionString);
+            
+            //user has opted to redirect output from dir where input files are located to some other place
+            if (current->getOutputDir() != "") {
+                if (optionString != "") { optionString += ", outputdir=" + current->getOutputDir(); }
+                else { optionString += "outputdir=" + current->getOutputDir(); }
+            }
+            
+            //user has opted to redirect input from dir where mothur.exe is located to some other place
+            if (current->getInputDir() != "") {
+                if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
+                else { optionString += "inputdir=" + current->getInputDir(); }
+            }
         }
-
 		if(commandName == "cluster")				{	pipecommand = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	pipecommand = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	pipecommand = new ParsimonyCommand(optionString);				}

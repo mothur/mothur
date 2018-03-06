@@ -57,7 +57,7 @@ string UnifracUnweightedCommand::getHelpString(){
 		helpString += "Example unifrac.unweighted(groups=A-B-C, iters=500).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and iters is 1000.\n";
 		helpString += "The unifrac.unweighted command output two files: .unweighted and .uwsummary their descriptions are in the manual.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

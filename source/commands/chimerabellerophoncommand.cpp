@@ -44,7 +44,7 @@ string ChimeraBellerophonCommand::getHelpString(){
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default is 25.\n";
 		helpString += "chimera.bellerophon(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors) \n";
 		helpString += "Example: chimera.bellerophon(fasta=AD.align, filter=True, correction=true, window=200) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
+			
 		return helpString;
 	}
 	catch(exception& e) {

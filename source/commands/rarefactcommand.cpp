@@ -69,7 +69,6 @@ string RareFactCommand::getHelpString(){
 		validCalculator.printCalc("rarefaction");
 		helpString += "If you are running rarefaction.single with a shared file and would like your results collated in one file, set groupmode=t. (Default=true).\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n";
 		return helpString;
 	}
 	catch(exception& e) {

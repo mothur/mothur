@@ -53,7 +53,7 @@ string MatrixOutputCommand::getHelpString(){
 		helpString += "The default value for calc is jclass and thetayc.\n";
 		helpString += validCalculator.printCalc("matrix");
 		helpString += "The dist.shared command outputs a .dist file for each calculator you specify at each distance you choose.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

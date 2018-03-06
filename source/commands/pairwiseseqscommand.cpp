@@ -57,7 +57,7 @@ string PairwiseSeqsCommand::getHelpString(){
 		helpString += "The pairwise.seqs command should be in the following format: \n";
 		helpString += "pairwise.seqs(fasta=yourfastaFile, align=yourAlignmentMethod) \n";
 		helpString += "Example pairwise.seqs(fasta=candidate.fasta, align=blast)\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

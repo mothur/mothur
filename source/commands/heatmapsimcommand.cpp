@@ -65,7 +65,7 @@ string HeatMapSimCommand::getHelpString(){
 		helpString += "Using the command this way, the phylip or column parameter are required, and only one may be used.  If you use a column file the name filename is required. \n";
 		helpString += "The heatmap.sim command should be in the following format: heatmap.sim(phylip=yourDistanceFile).\n";
 		helpString += "Example heatmap.sim(phylip=amazonGroups.dist).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

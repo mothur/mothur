@@ -62,7 +62,7 @@ string TreeGroupCommand::getHelpString(){
 		helpString += validCalculator.printCalc("treegroup");
 		helpString += "Or the tree.shared command can be in the following format: tree.shared(phylip=yourPhylipFile).\n";
 		helpString += "Example tree.shared(phylip=abrecovery.dist).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

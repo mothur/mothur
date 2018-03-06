@@ -62,7 +62,6 @@ string MGClusterCommand::getHelpString(){
 		helpString += "The merge parameter allows you to shut off merging based on overlaps and just cluster.  By default merge is true, meaning you want to merge.\n";
 		helpString += "The mgcluster command should be in the following format: \n";
 		helpString += "mgcluster(blast=yourBlastfile, name=yourNameFile, cutoff=yourCutOff).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. balst), '=' and parameters (i.e.yourBlastfile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

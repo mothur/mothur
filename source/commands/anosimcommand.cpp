@@ -43,7 +43,6 @@ string AnosimCommand::getHelpString(){
 		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the sample name and the second column is the group the sample belongs to.\n";
 		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n";
 		helpString += "The anosim command should be in the following format: anosim(phylip=file.dist, design=file.design).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).\n";
 		return helpString;
 	}
 	catch(exception& e) {

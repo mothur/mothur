@@ -50,7 +50,7 @@ string IndicatorCommand::getHelpString(){
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
 		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000.";
 		helpString += "The indicator command should be used in the following format: indicator(tree=test.tre, shared=test.shared, label=0.03)\n";
-		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n"; 
+		 
 		return helpString;
 	}
 	catch(exception& e) {

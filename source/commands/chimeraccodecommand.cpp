@@ -49,7 +49,7 @@ string ChimeraCcodeCommand::getHelpString(){
 		helpString += "The chimera.ccode command should be in the following format: \n";
 		helpString += "chimera.ccode(fasta=yourFastaFile, reference=yourTemplate) \n";
 		helpString += "Example: chimera.ccode(fasta=AD.align, reference=core_set_aligned.imputed.fasta) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
+			
 		return helpString;
 	}
 	catch(exception& e) {

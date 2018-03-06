@@ -49,7 +49,6 @@ string SummaryTaxCommand::getHelpString(){
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The summary.tax command should be in the following format: \n";
 		helpString += "summary.tax(taxonomy=yourTaxonomyFile) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. taxonomy), '=' and parameters (i.e.yourTaxonomyFile).\n";	
 		return helpString;
 	}
 	catch(exception& e) {

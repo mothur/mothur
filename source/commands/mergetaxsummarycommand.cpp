@@ -34,7 +34,6 @@ string MergeTaxSummaryCommand::getHelpString(){
 		helpString += "The merge.taxsummary command takes a list of tax.summary files separated by dashes and merges them into one file."; 
 		helpString += "The merge.taxsummary command parameters are input and output."; 
 		helpString += "Example merge.taxsummary(input=small.tax.summary-large.tax.summary, output=all.tax.summary).";
-		helpString += "Note: No spaces between parameter labels (i.e. output), '=' and parameters (i.e.yourOutputFileName).\n";
 		return helpString;
 	}
 	catch(exception& e) {

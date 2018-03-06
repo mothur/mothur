@@ -91,7 +91,7 @@ string ChimeraUchimeCommand::getHelpString(){
 		helpString += "The chimera.uchime command should be in the following format: \n";
 		helpString += "chimera.uchime(fasta=yourFastaFile, reference=yourTemplate) \n";
 		helpString += "Example: chimera.uchime(fasta=AD.align, reference=silva.gold.align) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
+			
 		return helpString;
 	}
 	catch(exception& e) {

@@ -47,7 +47,6 @@ string NMDSCommand::getHelpString(){
 		helpString += "The iters parameter allows you to select the number of random configuration to try. Default=10\n"; 
 		helpString += "The epsilon parameter allows you to select set an acceptable stopping point. Default=1e-12.\n"; 
 		helpString += "Example nmds(phylip=yourDistanceFile).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

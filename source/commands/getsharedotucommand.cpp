@@ -54,7 +54,6 @@ string GetSharedOTUCommand::getHelpString(){
 		helpString += "Example get.sharedseqs(list=amazon.fn.list, label=unique-0.01, group=amazon.groups, uniquegroups=forest-pasture, fasta=amazon.fasta, output=accnos).\n";
 		helpString += "The output to the screen is the distance and the number of otus at that distance for the groups you specified.\n";
 		helpString += "The default value for label is all labels in your inputfile. The default for groups is all groups in your file.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -60,7 +60,7 @@ string VennCommand::getHelpString(){
 		helpString += "The only estimators available four 4 groups are sharedsobs and sharedchao.\n";
         helpString += "The sharedotus parameter can be used with the sharedsobs calculator to get the names of the OTUs in each section of the venn diagram. Default=t.\n";
 		helpString += "The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

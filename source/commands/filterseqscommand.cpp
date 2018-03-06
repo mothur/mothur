@@ -49,7 +49,7 @@ string FilterSeqsCommand::getHelpString(){
 		helpString += "The filter.seqs command should be in the following format: \n";
 		helpString += "filter.seqs(fasta=yourFastaFile, trump=yourTrump) \n";
 		helpString += "Example filter.seqs(fasta=abrecovery.fasta, trump=.).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		;
 		return helpString;
 	}
 	catch(exception& e) {

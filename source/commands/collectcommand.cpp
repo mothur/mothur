@@ -76,7 +76,7 @@ string CollectCommand::getHelpString(){
         helpString += "The alpha parameter is used to set the alpha value for the shannonrange calculator.\n";
 		helpString += validCalculator.printCalc("single");
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n";
+		
 		return helpString;
 	}
 	catch(exception& e) {

@@ -36,7 +36,6 @@ string SetLogFileCommand::getHelpString(){
 		helpString += "The set.logfile command parameters are name and append, name is required. Append is set to false by default.\n";
 		helpString += "The set.logfile command should be in the following format: set.logfile(name=yourLogFileName, append=T).\n";
 		helpString += "Example set.logfile(name=/Users/lab/desktop/output.txt, append=T).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. name), '=' and parameters (i.e.yourLogFileName).\n";
 		return helpString;
 	}
 	catch(exception& e) {
