@@ -680,7 +680,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         time(&start);
 
         vector<unsigned long long> positions;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 #else

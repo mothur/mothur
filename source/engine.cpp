@@ -119,7 +119,7 @@ bool InteractEngine::getInput(){
 string Engine::getCommand()  {
 	try {
 	
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 			#ifdef USE_READLINE
 				char* nextCommand = NULL;
 				nextCommand = readline("\nmothur > ");

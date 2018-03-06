@@ -149,7 +149,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 		
 		string blastCommand;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 		
 			blastCommand = path + "blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
 			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
@@ -214,7 +214,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 //7000004128189528left	0	100		66	0	0	1	66	61	126	1e-31	 131	
 		string blastCommand;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 			blastCommand = path + "megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
 		#else
@@ -288,7 +288,7 @@ void BlastDB::generateDB() {
 			
 		string formatdbCommand;
 		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 			formatdbCommand = path + "formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 		#else
 			//formatdbCommand = path + "blast\\bin\\formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability

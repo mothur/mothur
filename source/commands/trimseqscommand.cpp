@@ -933,7 +933,7 @@ int driverTrim(trimData* params) {
 				params->count++;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+			#if defined NON_WINDOWS
 				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= params->lineEnd)) { break; }
 			#else
@@ -1169,7 +1169,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         vector<unsigned long long> fastaFilePos;
 		vector<unsigned long long> qfileFilePos;
 		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 		//set file positions for fasta file
 		fastaFilePos = util.divideFile(filename, processors);
 		

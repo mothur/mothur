@@ -311,7 +311,7 @@ void driverSummarize(seqSumData* params) { //(string fastafile, string output, l
                 if (params->summaryFile != "") { out << seqInfo << endl; }
             }
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             unsigned long long pos = in.tellg();
             if ((pos == -1) || (pos >= params->end)) { break; }
 #else
@@ -334,7 +334,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
         long long num = 0;
         vector<linePair> lines;
         vector<unsigned long long> positions;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	 }
 #else
@@ -525,7 +525,7 @@ void driverFastaSummarySummarize(seqSumData* params) {
                 params->total += numReps;
             }
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             unsigned long long pos = in.tellg();
             if ((pos == -1) || (pos >= params->end)) { break; }
 #else
@@ -547,7 +547,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         positions = util.divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
@@ -718,7 +718,7 @@ void driverContigsSummarySummarize(seqSumData* params) {
                 params->total += numReps;
             }
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             unsigned long long pos = in.tellg();
             if ((pos == -1) || (pos >= params->end)) { break; }
 #else
@@ -740,7 +740,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         positions = util.divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
@@ -915,7 +915,7 @@ void driverAlignSummarySummarize(seqSumData* params) {
 
             }
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             unsigned long long pos = in.tellg();
             if ((pos == -1) || (pos >= params->end)) { break; }
 #else
@@ -936,7 +936,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         long long num = 0;
         vector<unsigned long long> positions;
         vector<linePair> lines;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         positions = util.divideFilePerLine(summaryfile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else

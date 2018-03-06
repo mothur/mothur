@@ -762,7 +762,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         ifstream in; util.openInputFile(flowFileName, in); in >> numFlows; in.close();
         
         vector<linePair> lines;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         vector<unsigned long long> flowFilePos = getFlowFileBreaks();
         for (int i = 0; i < (flowFilePos.size()-1); i++) { lines.push_back(linePair(flowFilePos[i], flowFilePos[(i+1)])); }
 #else

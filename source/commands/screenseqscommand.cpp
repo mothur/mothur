@@ -1088,7 +1088,7 @@ void driverScreen(sumScreenData* params){
                 params->count++;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+			#if defined NON_WINDOWS
 				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= params->end)) { break; }
 			#else
@@ -1118,7 +1118,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         
         vector<linePair> lines;
         vector<unsigned long long> positions;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else

@@ -277,7 +277,7 @@ bool Utils::fileExists(string name)  {
         bool exists = false;
         name = getFullPathName(name);
         
-    #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)        
+    #if defined NON_WINDOWS        
         ifstream in;
         openInputFile(name, in, "");
         
@@ -719,7 +719,7 @@ int Utils::renameFile(string oldName, string newName){
         bool exist = openInputFile(newName, inTest, "");
         inTest.close();
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         if (exist) { //you could open it so you want to delete it
             string command = "rm " + newName;
             system(command.c_str());
@@ -1779,7 +1779,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
             fclose (pFile);
         }
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         
         //estimate file breaks
         unsigned long long chunkSize = 0;
@@ -1861,7 +1861,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
         char secondaryDelim = '>';
         if (delimChar == '@') { secondaryDelim = '+'; }
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         
         //estimate file breaks
         unsigned long long chunkSize = 0;
@@ -4064,7 +4064,7 @@ int Utils::getTimeStamp(string filename) {
     try {
         int timeStamp = 0;
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         struct stat st;
         int errorCode = stat (filename.c_str(), &st);
         if (errorCode != 0) {

@@ -360,7 +360,7 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         string tempOut = tempFile;
         tempFile = "\"" + tempFile + "\"";
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 
         findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\" > " + tempFile;
         if (m->getDebug()) { m->mothurOut(findCommand + "\n"); }

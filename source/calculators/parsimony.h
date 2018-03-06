@@ -58,7 +58,7 @@ struct parsData {
 };
 
 /**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 #else
 static DWORD WINAPI MyParsimonyThreadFunction(LPVOID lpParam){
 	parsData* pDataArray;

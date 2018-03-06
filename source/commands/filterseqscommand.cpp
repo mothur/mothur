@@ -312,7 +312,7 @@ int FilterSeqsCommand::filterSequences() {
             vector<unsigned long long> positions;
             if (savedPositions.size() != 0) { positions = savedPositions[s]; }
             else {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             positions = util.divideFile(fastafileNames[s], processors);
 #else
             positions = util.setFilePosFasta(fastafileNames[s], numSeqs);
@@ -321,7 +321,7 @@ int FilterSeqsCommand::filterSequences() {
             }
             
             vector<linePair> lines;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 			for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 		#else
             
@@ -383,7 +383,7 @@ void driverRunFilter(filterRunData* params) {
 				params->count++;
         
         
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+			#if defined NON_WINDOWS
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= params->end)) { break; }
 			#else
@@ -537,7 +537,7 @@ void driverCreateFilter(filterData* params) {
 					params->count++;
             }
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+			#if defined NON_WINDOWS
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= params->end)) { break; }
 			#else
@@ -566,7 +566,7 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         vector<linePair> lines;
         vector<unsigned long long> positions;
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);
         for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 #else

@@ -103,7 +103,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				string outfile = util.getRootName(tempFile) + "sorted.dist.temp";
 				
 				//use the unix sort 
-				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+				#if defined NON_WINDOWS
 					string command = "sort -n " + tempFile + " -o " + outfile;
 					system(command.c_str());
 				#else //sort using windows sort
@@ -333,7 +333,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
             string outfile = util.getRootName(tempFile) + "sorted.dist.temp";
             
             //use the unix sort 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             string command = "sort -n " + tempFile + " -o " + outfile;
             system(command.c_str());
 #else //sort using windows sort

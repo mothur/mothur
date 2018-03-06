@@ -215,7 +215,7 @@ int CatchAllCommand::execute() {
 		string catchAllCommandExe = "";
         string catchAllTest = "";
         string programName = "";
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 			if (outputDir == "") { outputDir = "./"; } //force full pathname to be created for catchall, this is necessary because if catchall is in the path it will look for input file whereever the exe is and not the cwd.
             catchAllTest = path + "CatchAllcmdL.exe";
 		#else
@@ -231,7 +231,7 @@ int CatchAllCommand::execute() {
             m->mothurOut(catchAllTest + " file does not exist. Checking path... \n");
             
             programName = "CatchAllcmdW.exe";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             programName = "CatchAllcmdL.exe";
 #endif
             Utils util;
@@ -254,7 +254,7 @@ int CatchAllCommand::execute() {
         }
         catchAllTest = util.getFullPathName(catchAllTest);
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         if (programName == "catchall") { catchAllCommandExe += "catchall "; }
         else {  catchAllCommandExe += "mono \"" + catchAllTest + "\" ";  }
 #else
@@ -309,7 +309,7 @@ int CatchAllCommand::execute() {
 											
 						//create system command
 						string catchAllCommand = "";
-						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+						#if defined NON_WINDOWS
 							catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + + "\" 1";
 						#else
                             //removes extra '\\' catchall doesnt like that
@@ -372,7 +372,7 @@ int CatchAllCommand::execute() {
 											
 						//create system command
 						string catchAllCommand = "";
-						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+						#if defined NON_WINDOWS
                             catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + + "\" 1";
 						#else
                             //removes extra '\\' catchall doesnt like that
@@ -457,7 +457,7 @@ int CatchAllCommand::execute() {
 				
 				//create system command
 				string catchAllCommand = "";
-				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+				#if defined NON_WINDOWS
                     catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + + "\" 1";
 				#else
                     //removes extra '\\' catchall doesnt like that

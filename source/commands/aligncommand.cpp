@@ -271,7 +271,7 @@ int AlignCommand::execute(){
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 
 			vector<unsigned long long> positions; 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 			positions = util.divideFile(candidateFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 		#else
@@ -297,7 +297,7 @@ int AlignCommand::execute(){
 				m->mothurOut("[WARNING]: " + toString(numFlipped[1]) + " of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
 				if (!flip) {
 					m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well. flip=t");
-				}else{  m->mothurOut("[NOTE]: " + toString(numFlipped[0]) + " of your sequences were reversed to produce a better alignment.");  }
+				}else{  m->mothurOut("\n[NOTE]: " + toString(numFlipped[0]) + " of your sequences were reversed to produce a better alignment.");  }
 				m->mothurOutEndLine();
 			}
 
@@ -486,7 +486,7 @@ void alignDriver(alignStruct* params) {
 			}
 			delete candidateSeq;
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+			#if defined NON_WINDOWS
 				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= params->filePos.end)) { break; }
 			#else
@@ -577,8 +577,6 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to align " + toString(num) + " sequences.\n\n");
-        
-        if (util.isBlank(accnosFName)) { util.mothurRemove(accnosFName); }
         
         return num;
 	}

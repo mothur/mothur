@@ -757,7 +757,7 @@ void driverSeqError(seqErrorData* params) {
             
             index++;
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
             unsigned long long pos = queryFile.tellg();
             if ((pos == -1) || (pos >= params->line.end)) { break; }
 #else
@@ -1123,7 +1123,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
         vector<unsigned long long> qfileFilePos;
         vector<unsigned long long> rfileFilePos;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 		//set file positions for fasta file
 		fastaFilePos = util.divideFile(filename, processors);
 		

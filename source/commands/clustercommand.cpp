@@ -616,7 +616,7 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
         //cout << "commandString = " << commandString << endl;
         //exit(1);
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 #else
         commandString = "\"" + commandString + "\"";
 #endif

@@ -678,7 +678,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
             }
         }
 #else
-        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        #if defined NON_WINDOWS
         #else
         string extension = util.getExtension(fileInputs[0]);
         if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
@@ -2292,7 +2292,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         
         nameType = setNameType(fasta[0], fasta[1], delim, offByOneTrimLength, gz, format);
     
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         //set file positions for fasta file
         fastaFilePos = util.divideFile(fasta[0], processors, delim);
         
@@ -2899,7 +2899,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename, map<
                 }
 #else
                 allGZ=false;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 #else
                 string extension = util.getExtension(forward);
                 if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }

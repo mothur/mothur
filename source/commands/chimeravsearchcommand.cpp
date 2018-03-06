@@ -1174,7 +1174,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         for (int i = 0; i < cPara.size(); i++) {  vsearchParameters[i] = cPara[i];  commandString += toString(cPara[i]) + " "; }
         //int numArgs = cPara.size();
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 #else
         commandString = "\"" + commandString + "\"";
 #endif

@@ -683,7 +683,7 @@ string RenameFileCommand::renameOrCopy(string oldName, string newName){
         else {
             string command = "copy ";
             
-            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            #if defined NON_WINDOWS
                 command = "cp ";
             #endif
             

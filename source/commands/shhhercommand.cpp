@@ -265,7 +265,7 @@ ShhherCommand::ShhherCommand(string option) {
                 //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
                 //path = path.substr(0, (tempPath.find_last_of('m')));
                 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
                 path += "lookupFiles/";
 #else
                 path += "lookupFiles\\";

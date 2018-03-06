@@ -82,7 +82,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 		string outfile = util.getRootName(squareFile) + "sorted.dist.temp";
 		
 		//use the unix sort 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		#if defined NON_WINDOWS
 			string command = "sort -n " + squareFile + " -o " + outfile;
 			system(command.c_str());
 		#else //sort using windows sort
@@ -245,7 +245,7 @@ int FormatColumnMatrix::read(CountTable* nameMap){
 		string outfile = util.getRootName(squareFile) + "sorted.dist.temp";
 		
 		//use the unix sort 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
         string command = "sort -n " + squareFile + " -o " + outfile;
         system(command.c_str());
 #else //sort using windows sort

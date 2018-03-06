@@ -98,7 +98,7 @@ int main(int argc, char *argv[]){
 		
 		if (outputHeader)  {
 			//version
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+			#if defined NON_WINDOWS
 				#if defined (__APPLE__) || (__MACH__)
 					m->appendLogBuffer("Mac version\n\n");
 				#else
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]){
                 createLogFile = false;
                 string OS = "";
                 //version
-                #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                #if defined NON_WINDOWS
                 #if defined (__APPLE__) || (__MACH__)
                 OS = "Mac ";
                 #else
