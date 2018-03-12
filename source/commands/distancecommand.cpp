@@ -597,8 +597,7 @@ void DistanceCommand::createProcesses(string filename) {
         }
         
         auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(filename);
-        synchronizedOutputFile->setFixedShowPoint();
-        synchronizedOutputFile->setPrecision(4);
+        synchronizedOutputFile->setFixedShowPoint(); synchronizedOutputFile->setPrecision(4);
         
         SequenceDB oldFastaDB;
         if (fitCalc) {

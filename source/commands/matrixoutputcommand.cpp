@@ -616,7 +616,6 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         }
 
         vector< vector< vector<seqDist> > > calcDistsTotals = dataBundle->calcDistsTotals;
-        delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -628,6 +627,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
             delete data[i];
             delete workerThreads[i];
         }
+        delete dataBundle;
     
         //main thread finds averages
         if (iters != 0) {

@@ -377,7 +377,7 @@ long long SummaryQualCommand::createProcessesCreateSummary(vector<int>& position
         position = dataBundle->position;
         averageQ = dataBundle->averageQ;
         scores = dataBundle->scores;
-        delete dataBundle;
+        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -398,7 +398,7 @@ long long SummaryQualCommand::createProcessesCreateSummary(vector<int>& position
             delete data[i];
             delete workerThreads[i];
         }
-
+        delete dataBundle;
 		return numSeqs;
 	}
 	catch(exception& e) {

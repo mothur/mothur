@@ -15,6 +15,7 @@
 
 class OutputWriter {
 public:
+
     OutputWriter (std::shared_ptr<SynchronizedOutputFile> s) : sf(s) {}
     
     void write (const string& dataToWrite) { sf->write(dataToWrite); }

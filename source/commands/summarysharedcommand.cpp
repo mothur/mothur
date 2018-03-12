@@ -747,7 +747,7 @@ int SummarySharedCommand::runCalcs(vector<SharedRAbundVector*>& thisItersLookup,
             int size = dataBundle->calcDists[k].size();
             for (int j = 0; j < size; j++) {    calcDists[k].push_back(dataBundle->calcDists[k][j]);    }
         }
-        delete dataBundle;
+        
         for (int i = 0; i < newLookup.size(); i++) { delete newLookup[i]; } newLookup.clear();
         
         util.appendFiles((sumFileName + extension), sumFileName);
@@ -773,7 +773,7 @@ int SummarySharedCommand::runCalcs(vector<SharedRAbundVector*>& thisItersLookup,
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete dataBundle;
         return 0;
          
     }

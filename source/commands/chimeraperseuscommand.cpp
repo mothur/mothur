@@ -1004,9 +1004,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
         driverGroups(dataBundle);
         num = dataBundle->count;
         numChimeras = dataBundle->numChimeras;
-        
-        delete dataBundle;
-        
+
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
@@ -1015,7 +1013,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete dataBundle;
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to check " + toString(num) + " sequences.\n\n");
 

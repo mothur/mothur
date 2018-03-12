@@ -432,7 +432,7 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
         data.push_back(dataBundle);
         driverRunFilter(dataBundle);
         num = dataBundle->count;
-        delete dataBundle;
+        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -442,7 +442,7 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete dataBundle;
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to filter " + toString(num) + " sequences.\n");
         

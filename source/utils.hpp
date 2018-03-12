@@ -219,7 +219,6 @@ private:
     mt19937_64 mersenne_twister_engine;
     
     vector<string> readTreeString(ifstream& filehandle);
-    
 };
 
 #endif /* utils_hpp */

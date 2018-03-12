@@ -702,8 +702,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
         
         driverPDesign(dataBundle);
         set<int> otusToRemove = dataBundle->otusToRemove;
-        delete dataBundle;
-        
+    
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
     
@@ -712,7 +711,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
             delete data[i];
             delete workerThreads[i];
         }
-
+        delete dataBundle;
 		return otusToRemove;
 	}
 	catch(exception& e) {

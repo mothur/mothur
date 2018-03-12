@@ -1158,7 +1158,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         driverScreen(dataBundle);
         num = dataBundle->count;
         for (map<string, string>::iterator it = dataBundle->badSeqNames.begin(); it != dataBundle->badSeqNames.end(); it++) {	badSeqNames[it->first] = it->second;       }
-        delete dataBundle;
+  
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -1182,7 +1182,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
             util.appendFiles(badAccnos + extension, badAccnos);
             util.mothurRemove(badAccnos + extension);
         }
-        
+        delete dataBundle;
         return num;
         
 	}

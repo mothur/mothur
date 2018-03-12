@@ -651,7 +651,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
         }
         else if (output == "lt")    { driverLt(dataBundle);            }
         else                        { driverSquare(dataBundle);        }
-        delete dataBundle;
+        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -665,6 +665,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
             delete data[i];
             delete workerThreads[i];
         }
+        delete dataBundle;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PairwiseSeqsCommand", "createProcesses");

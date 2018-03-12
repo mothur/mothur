@@ -1523,7 +1523,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         tag = dataBundle->tag;
         cutoff = dataBundle->cutoff;
         labels = dataBundle->labels;
-        delete dataBundle;
+        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -1535,7 +1535,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
             delete data[i];
             delete workerThreads[i];
         }
- 
+        delete dataBundle;
         deleteFiles = true;
         
         if (deleteFiles) {

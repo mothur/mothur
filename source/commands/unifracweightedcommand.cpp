@@ -764,7 +764,7 @@ vector<double> UnifracWeightedCommand::createProcesses(Tree* t, CountTable* ct, 
         weightedRandomData* dataBundle = new weightedRandomData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot, Groups, randomizedTreeNodes);
         driverWeightedRandom(dataBundle);
         vector<double> scores = dataBundle->scores;
-        delete dataBundle;
+        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -773,7 +773,7 @@ vector<double> UnifracWeightedCommand::createProcesses(Tree* t, CountTable* ct, 
             
             delete data[i]->t; delete data[i]->ct; delete data[i]; delete workerThreads[i];
         }
-        
+        delete dataBundle;
         return scores;
 	}
 	catch(exception& e) {

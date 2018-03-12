@@ -448,7 +448,6 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
 
         metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, outputNames, namesOfGroupCombos, lookup, designMapGroups, iters, threshold);
         driver(dataBundle);
-        delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -457,7 +456,7 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
             delete data[i];
             delete workerThreads[i];
         }
-
+        delete dataBundle;
 		return 0;
 	}
 	catch(exception& e) {

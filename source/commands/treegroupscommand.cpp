@@ -818,7 +818,7 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
         Estimators.clear(); Estimators = dataBundle->Estimators;
         vector< vector< vector<seqDist> > > calcDistsTotals = dataBundle->calcDistsTotals;
         vector< vector< vector<double> > > matrices = dataBundle->matrices;
-        delete dataBundle;
+        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -830,7 +830,7 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete dataBundle;
         if (iters != 1) {
             //we need to find the average distance and standard deviation for each groups distance
             vector< vector<seqDist>  > calcAverages = util.getAverages(calcDistsTotals);

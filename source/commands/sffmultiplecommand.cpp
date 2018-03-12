@@ -782,8 +782,7 @@ long long SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<st
         outputNames = dataBundle->outputNames;
         outputTypes = dataBundle->outputTypes;
         
-        delete dataBundle;
-        
+      
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
@@ -801,7 +800,8 @@ long long SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<st
             delete data[i];
             delete workerThreads[i];
         }
-
+        delete dataBundle;
+        
         current->setMothurCalling(false);
         return num;
     }

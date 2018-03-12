@@ -668,9 +668,7 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
         driverChop(dataBundle);
         num = dataBundle->count;
         bool wroteAccnos = dataBundle->wroteAccnos;
-        
-        delete dataBundle;
-        
+
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
@@ -694,6 +692,7 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
         }
         delete threadOutputWriter;
         delete threadAccnosWriter;
+        delete dataBundle;
         return wroteAccnos;
     }
     catch(exception& e) {

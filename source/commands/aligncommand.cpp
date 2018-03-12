@@ -558,7 +558,6 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         numFlipped[0] = dataBundle->flippedResults[0];
         numFlipped[1] = dataBundle->flippedResults[1];
         num = dataBundle->numSeqs;
-        delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -574,6 +573,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             delete workerThreads[i];
         }
         delete threadAlignWriter; delete threadAccnosWriter; delete threadReportWriter;
+        delete dataBundle;
         
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to align " + toString(num) + " sequences.\n\n");

@@ -1439,9 +1439,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;
         allSeqsMap = dataBundle->uniqueNamesMap;
-        
-        delete dataBundle;
-        
+
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
@@ -1451,7 +1449,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete dataBundle;
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to check " + toString(num) + " sequences.\n\n");
         

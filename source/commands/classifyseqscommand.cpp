@@ -711,7 +711,6 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         classifyData* dataBundle = new classifyData(accnos, probs, taxFileName, tempTaxFile, filename, lines[0]->start, lines[0]->end, flip, classify);
         driverClassifier(dataBundle);
         num = dataBundle->count;
-        delete dataBundle;
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -720,7 +719,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
             delete data[i];
             delete workerThreads[i];
         }
-        
+        delete dataBundle;
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to classify " + toString(num) + " sequences.\n\n");
         

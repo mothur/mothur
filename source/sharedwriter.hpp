@@ -17,6 +17,7 @@ class SynchronizedOutputFile {
 public:
     SynchronizedOutputFile (const string& p)                : path(p) { util.openOutputFile(p, out);        }
     SynchronizedOutputFile (const string& p, bool append)   : path(p) { util.openOutputFileAppend(p, out);  }
+    ~SynchronizedOutputFile() { out.close(); }
     
     void write (const string& dataToWrite) {
         std::lock_guard<std::mutex> lock((writerMutex)); // Ensure that only one thread can execute at a time
