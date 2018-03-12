@@ -388,9 +388,9 @@ int SeqErrorCommand::execute(){
 }
 /**************************************************************************************************/
 struct seqErrorData {
-    OutputWriter* summaryFile;
-    OutputWriter* errorFile;
-    OutputWriter* chimeraFile;
+    string summaryFile;
+    string errorFile;
+    string chimeraFile;
     vector<vector<int> > substitutionMatrix;
     vector<vector<int> > qualForwardMap;
     vector<vector<int> > qualReverseMap;
@@ -411,7 +411,7 @@ struct seqErrorData {
     Utils util;
     
     seqErrorData(){  }
-    seqErrorData(string fname, string qname, string rname, OutputWriter* sum,  OutputWriter* err, OutputWriter* chim, vector<Sequence> refseqs, bool al, int mxl, map<string, int> nam, double thre) {
+    seqErrorData(string fname, string qname, string rname, string sum,  string err, string chim, vector<Sequence> refseqs, bool al, int mxl, map<string, int> nam, double thre) {
         m = MothurOut::getInstance();
         weights = nam;
         hasNameMap = false;
@@ -534,7 +534,7 @@ Compare getErrors(Sequence query, Sequence reference, MothurOut* m){
 }
 //***************************************************************************************************************
 
-void printErrorData(Compare error, int numParentSeqs, OutputWriter* summaryFile, OutputWriter* errorFile, vector<vector<int> >& substitutionMatrix, bool ignoreChimeras){
+void printErrorData(Compare error, int numParentSeqs, ofstream& summaryFile, ofstream& errorFile, vector<vector<int> >& substitutionMatrix, bool ignoreChimeras){
     string summaryOutput = error.queryName + '\t' + error.refName + '\t' + toString(error.weight) + '\t';
     summaryOutput += toString(error.AA)  + '\t' +  toString(error.AT) + '\t' + toString(error.AG)  + '\t' +  toString(error.AC) + '\t';
     summaryOutput += toString(error.TA)  + '\t' +  toString(error.TT) + '\t' + toString(error.TG)  + '\t' +  toString(error.TC) + '\t';
@@ -549,10 +549,10 @@ void printErrorData(Compare error, int numParentSeqs, OutputWriter* summaryFile,
     summaryOutput += toString(error.mismatches - (error.Ai + error.Ti + error.Gi + error.Ci) - (error.dA + error.dT + error.dG + error.dC) - (error.NA + error.NT + error.NG + error.NC + error.Ni)) + '\t';	//substitutions
     summaryOutput += toString(error.NA + error.NT + error.NG + error.NC + error.Ni) + '\t';	//ambiguities
     summaryOutput += toString(error.matches) + '\t' + toString(error.mismatches)  + '\t' + toString(error.total) + '\t' + toString(error.errorRate)  + '\t' + toString(numParentSeqs) + "\n";
-    summaryFile->write(summaryOutput);
+    summaryFile << (summaryOutput);
     
     summaryOutput = '>' + error.queryName + "\tref:" + error.refName + '\n' + error.sequence + '\n';
-    errorFile->write(summaryOutput);
+    errorFile << (summaryOutput);
     
     int a=0;		int t=1;		int g=2;		int c=3;
     int gap=4;		int n=5;
@@ -655,6 +655,17 @@ void driverSeqError(seqErrorData* params) {
         int numRefs = params->referenceSeqs.size();
         params->megaAlignVector.assign(numRefs, "");
         
+        ofstream out;
+        params->util.openOutputFile(params->summaryFile, out); out.precision(6); out.setf(ios::fixed, ios::showpoint);
+        out << "query\treference\tweight\tAA\tAT\tAG\tAC\tTA\tTT\tTG\tTC\tGA\tGT\tGG\tGC\tCA\tCT\tCG\tCC\tNA\tNT\tNG\tNC\tAi\tTi\tGi\tCi\tNi\tdA\tdT\tdG\tdC\tinsertions\tdeletions\tsubstitutions\tambig\tmatches\tmismatches\ttotal\terror\tnumparents\n";
+        
+        ofstream outChimera;
+        params->util.openOutputFile(params->chimeraFile, outChimera);
+        outChimera << params->chimeraHeader;
+        
+        ofstream outError;
+        params->util.openOutputFile(params->errorFile, outError);
+        
         int index = 0;
         bool ignoreSeq = 0;
         
@@ -670,7 +681,7 @@ void driverSeqError(seqErrorData* params) {
             
             string output = "";
             numParentSeqs = chimeraTest.analyzeQuery(query.getName(), querySeq, output);
-            params->chimeraFile->write(output);
+            outChimera << (output);
             
             closestRefIndex = chimeraTest.getClosestRefIndex();
             
@@ -690,7 +701,7 @@ void driverSeqError(seqErrorData* params) {
             }
             else{	minCompare.weight = 1;	}
             
-            printErrorData(minCompare, numParentSeqs, params->summaryFile, params->errorFile, params->substitutionMatrix, params->ignoreChimeras);
+            printErrorData(minCompare, numParentSeqs, out, outError, params->substitutionMatrix, params->ignoreChimeras);
             
             if(!ignoreSeq){
                 for(int i=0;i<minCompare.sequence.length();i++){
@@ -771,22 +782,9 @@ long long SeqErrorCommand::createProcesses(string filename, string qFileName, st
         if(namesFileName != "")     {	weights = util.readNames(namesFileName);                                            }
         else if (countfile != "")   {   CountTable ct;  ct.readTable(countfile, false, false);  weights = ct.getNameMap();  }
         
-        ofstream out;
-        util.openOutputFile(summaryFileName, out);
-        out << "query\treference\tweight\tAA\tAT\tAG\tAC\tTA\tTT\tTG\tTC\tGA\tGT\tGG\tGC\tCA\tCT\tCG\tCC\tNA\tNT\tNG\tNC\tAi\tTi\tGi\tCi\tNi\tdA\tdT\tdG\tdC\tinsertions\tdeletions\tsubstitutions\tambig\tmatches\tmismatches\ttotal\terror\tnumparents\n";
-        out.close();
-
-        auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(summaryFileName, true); //append to add headers
-        auto synchronizedOutputErrorFile = std::make_shared<SynchronizedOutputFile>(errorOutputFileName); synchronizedOutputErrorFile->setFixedShowPoint(); synchronizedOutputErrorFile->setPrecision(6);
-        auto synchronizedOutputChimeraFile = std::make_shared<SynchronizedOutputFile>(chimeraOutputFileName);
         
-        OutputWriter* threadSummaryWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
-        OutputWriter* threadErrorWriter = new OutputWriter(synchronizedOutputErrorFile);
-        OutputWriter* threadChimeraWriter = new OutputWriter(synchronizedOutputChimeraFile);
-        
-        seqErrorData* dataBundle = new seqErrorData(filename, qFileName, rFileName, threadSummaryWriter, threadErrorWriter, threadChimeraWriter, referenceSeqs, aligned, maxLength, weights, threshold);
+        seqErrorData* dataBundle = new seqErrorData(filename, qFileName, rFileName, summaryFileName, errorOutputFileName, chimeraOutputFileName, referenceSeqs, aligned, maxLength, weights, threshold);
         driverSeqError(dataBundle);
-
 
         totalMatches = dataBundle->totalMatches;
         
@@ -812,8 +810,7 @@ long long SeqErrorCommand::createProcesses(string filename, string qFileName, st
 
         megaAlignVector = dataBundle->megaAlignVector;
 
-        delete threadErrorWriter; delete threadChimeraWriter; delete threadSummaryWriter;
-        delete dataBundle;
+        //delete dataBundle;
 
 		return numSeqs;
 	}
