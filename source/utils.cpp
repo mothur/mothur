@@ -1425,7 +1425,54 @@ string Utils::hasPath(string longName){
         exit(1);
     }
 }
-
+/***********************************************************************/
+void Utils::getCurrentDate(string& thisYear, string& thisMonth, string& thisDay){
+    try {
+        time_t rawtime;
+        struct tm * timeinfo;
+        
+        time (&rawtime);
+        timeinfo = localtime(&rawtime);
+        
+        char buffer[80];
+        strftime(buffer,sizeof(buffer),"%Y",timeinfo);
+        string year(buffer); thisYear = year;
+        
+        strftime(buffer,sizeof(buffer),"%m",timeinfo);
+        string Month(buffer); thisMonth = Month;
+        
+        strftime(buffer,sizeof(buffer),"%d",timeinfo);
+        string Day(buffer); thisDay = Day;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getCurrentDate");
+        exit(1);
+    }
+}
+/***********************************************************************/
+bool Utils::isUTF_8(const string& input){
+    try {
+        
+        for (int i = 0;  i < input.length(); i++) {
+            int n = -1;
+            int c = (unsigned char) input[i];
+            if (0x00 <= c && c <= 0x7f)     { n = 0; }// 0bbbbbbb
+            else if ((c & 0xE0) == 0xC0)    { n = 1; }// 110bbbbb
+            else if ( c==0xed && i < (input.length()-1) && ((unsigned char)input[i+1] & 0xa0)==0xa0) { return false; }//U+d800 to U+dfff
+            else if ((c & 0xF0) == 0xE0)    { n = 2; }// 1110bbbb
+            else if ((c & 0xF8) == 0xF0)    { n = 3; }// 11110bbb
+            else                            { return false; }
+            for (int j = 0; j < n && i < input.length(); j++) { // n bytes matching 10bbbbbb follow ?
+                if ((++i == input.length()) || (( (unsigned char)input[i] & 0xC0) != 0x80)) { return false; }
+            }
+        }
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "isUTF_8");
+        exit(1);
+    }
+}
 /***********************************************************************/
 string Utils::getExtension(string longName){
     try {

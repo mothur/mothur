@@ -53,6 +53,8 @@ public:
     bool hasConfidenceScore(string&, float&); //taxon, confidence score. Returns taxon with confidence removed and confidence score.  If no confidence score, then confidence=0
     unsigned long long getRAMUsed();
     unsigned long long getTotalRAM();
+    bool isUTF_8(const string& input);
+    void getCurrentDate(string& thisYear, string& thisMonth, string& thisDay);
     
     //file operations
     bool anyLabelsToProcess(string, set<string>&, string);

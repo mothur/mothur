@@ -177,7 +177,7 @@ int Oligos::readOligos(){
                     else { uniquePrimers.insert(tempPair);
 					
                         if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
-                    
+                
                         pairedPrimers[indexPairedPrimer]=newPrimer; indexPairedPrimer++;
                         primerNameVector.push_back(group);
                         hasPPrimers = true;
@@ -351,8 +351,7 @@ int Oligos::readOligos(){
                         
                         if(primerName == ""){
                             comboGroupName = barcodeNameVector[itBar->first];
-                        }
-                        else{
+                        }else{
                             if(barcodeName == ""){
                                 comboGroupName = primerNameVector[itPrimer->first];
                             }

@@ -2,7 +2,6 @@
 USEREADLINE ?= no
 USEBOOST ?= no
 LOGFILE_NAME ?= yes
-RELEASE_DATE = "\"3/20/2017\""
 VERSION = "\"1.39.5\""
 
 # Optimize to level 3:
