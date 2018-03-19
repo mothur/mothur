@@ -68,8 +68,7 @@ private:
 	void printErrorQuality(map<char, vector<int> >&);
 	void printQualityFR(vector<vector<int> >& qualForwardMap, vector<vector<int> >& qualReverseMap);
 	
-	int setLines(string, string, string, vector<linePair>&, vector<linePair>&, vector<linePair>&);
-    long long createProcesses(string, string, string, string, string, string, vector<vector<int> >&, vector<vector<int> >&, vector<vector<int> >&, vector<int>&,  map<char, vector<int> >&, map<char, vector<int> >&, map<char, vector<int> >&, vector<string>&, vector<Sequence>&);
+    long long process(string, string, string, string, string, string, vector<Sequence>&);
 
 	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir, countfile;
 	double threshold;
@@ -77,6 +76,17 @@ private:
 	int numRefs, processors;
 	int maxLength, totalBases, totalMatches;
 	vector<string> outputNames;
+    
+    
+    vector<vector<int> > substitutionMatrix;
+    vector<vector<int> > qualForwardMap;
+    vector<vector<int> > qualReverseMap;
+    vector<int> misMatchCounts;
+    map<char, vector<int> > qScoreErrorMap;
+    map<char, vector<int> > errorForward;
+    map<char, vector<int> > errorReverse;
+    vector<string> megaAlignVector;
+
 };
 
 #endif
