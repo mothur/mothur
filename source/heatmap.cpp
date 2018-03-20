@@ -123,7 +123,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
-		vector<float> maxRelAbund(lookup[0]->size(), 0.0);		
+		vector<float> maxRelAbund(lookup.size(), 0.0);
 		float superMaxRelAbund = 0;
 		
 		for(int i = 0; i < lookup.size(); i++){
