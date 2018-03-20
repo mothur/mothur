@@ -883,6 +883,10 @@
 		48705AC019BE32C50075E977 /* mergesfffilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mergesfffilecommand.h; path = source/commands/mergesfffilecommand.h; sourceTree = SOURCE_ROOT; };
 		48705AC119BE32C50075E977 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrjsd.cpp; path = source/calculators/sharedrjsd.cpp; sourceTree = SOURCE_ROOT; };
 		48705AC219BE32C50075E977 /* sharedrjsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedrjsd.h; path = source/calculators/sharedrjsd.h; sourceTree = SOURCE_ROOT; };
+		48789AEF2061776100A7D848 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utf8.h; path = source/utf8.h; sourceTree = SOURCE_ROOT; };
+		48789AF02061776100A7D848 /* checked.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = checked.h; path = source/checked.h; sourceTree = SOURCE_ROOT; };
+		48789AF12061776100A7D848 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core.h; path = source/core.h; sourceTree = SOURCE_ROOT; };
+		48789AF22061776100A7D848 /* unchecked.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unchecked.h; path = source/unchecked.h; sourceTree = SOURCE_ROOT; };
 		487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mimarksattributescommand.cpp; path = source/commands/mimarksattributescommand.cpp; sourceTree = SOURCE_ROOT; };
 		487C5A861AB88B93002AF48A /* mimarksattributescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mimarksattributescommand.h; path = source/commands/mimarksattributescommand.h; sourceTree = SOURCE_ROOT; };
 		488841631CC6C34900C5E972 /* renamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renamefilecommand.cpp; path = source/commands/renamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1837,6 +1841,7 @@
 				A7FF19F1140FFDA500AD216D /* trimoligos.cpp */,
 				48B44EF01FB9EF8200789C45 /* utils.cpp */,
 				48B44EF11FB9EF8200789C45 /* utils.hpp */,
+				48789AEE206176EF00A7D848 /* utf8 */,
 				A7E9B87412D37EC400DA6239 /* validcalculator.cpp */,
 				A7E9B87512D37EC400DA6239 /* validcalculator.h */,
 				A7E9B87612D37EC400DA6239 /* validparameter.cpp */,
@@ -1965,6 +1970,17 @@
 				48C728761B6AB4EE00D40830 /* testsequence.h */,
 			);
 			name = testcontainers;
+			sourceTree = "<group>";
+		};
+		48789AEE206176EF00A7D848 /* utf8 */ = {
+			isa = PBXGroup;
+			children = (
+				48789AEF2061776100A7D848 /* utf8.h */,
+				48789AF02061776100A7D848 /* checked.h */,
+				48789AF12061776100A7D848 /* core.h */,
+				48789AF22061776100A7D848 /* unchecked.h */,
+			);
+			name = utf8;
 			sourceTree = "<group>";
 		};
 		48E5443E1E9C28CC00FF6AB8 /* clustercalcs */ = {

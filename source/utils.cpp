@@ -1450,22 +1450,31 @@ void Utils::getCurrentDate(string& thisYear, string& thisMonth, string& thisDay)
     }
 }
 /***********************************************************************/
-bool Utils::isUTF_8(const string& input){
+bool Utils::isUTF_8(string& input){
     try {
+        string::iterator end_it = utf8::find_invalid(input.begin(), input.end());
         
-        for (int i = 0;  i < input.length(); i++) {
-            int n = -1;
-            int c = (unsigned char) input[i];
-            if (0x00 <= c && c <= 0x7f)     { n = 0; }// 0bbbbbbb
-            else if ((c & 0xE0) == 0xC0)    { n = 1; }// 110bbbbb
-            else if ( c==0xed && i < (input.length()-1) && ((unsigned char)input[i+1] & 0xa0)==0xa0) { return false; }//U+d800 to U+dfff
-            else if ((c & 0xF0) == 0xE0)    { n = 2; }// 1110bbbb
-            else if ((c & 0xF8) == 0xF0)    { n = 3; }// 11110bbb
-            else                            { return false; }
-            for (int j = 0; j < n && i < input.length(); j++) { // n bytes matching 10bbbbbb follow ?
-                if ((++i == input.length()) || (( (unsigned char)input[i] & 0xC0) != 0x80)) { return false; }
-            }
+        if (end_it != input.end()) {
+            
+            //try to convert it
+            // Get the line length (at least for the valid part)
+            int length = utf8::distance(input.begin(), end_it);
+            m->mothurOut("[WARNING]: trying to convert " + input + " to UTF-8 format..."); cout.flush();
+            
+            // Convert it to utf-16
+            vector<unsigned short> utf16line;
+            utf8::utf8to16(input.begin(), end_it, back_inserter(utf16line));
+            
+            // And back to utf-8
+            string utf8line;
+            utf8::utf16to8(utf16line.begin(), utf16line.end(), back_inserter(utf8line));
+            
+            // Confirm that the conversion went OK:
+            if (utf8line != string(input.begin(), end_it)) {  m->mothurOut(" unsuccessful.\n"); return false; }
+            else { m->mothurOut(" successful. Replacing " + input + " with " + utf8line + ".\n"); input = utf8line; }
+            
         }
+        
         return true;
     }
     catch(exception& e) {

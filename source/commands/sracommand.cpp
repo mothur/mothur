@@ -214,7 +214,7 @@ SRACommand::SRACommand(string option)  {
 			else if(contactfile == "not open")	{	abort = true;		}
             
             mimarksfile = validParameter.validFile(parameters, "mimark");
-			if (mimarksfile == "not found")      {	mimarksfile = ""; m->mothurOut("[ERROR]: You must provide a mimark file before you can use the sra command. You can create a template for this file using the get.mimarkspackage command."); m->mothurOutEndLine(); abort = true;	}
+			if (mimarksfile == "not found")      {	mimarksfile = ""; m->mothurOut("[ERROR]: You must provide a mimark file before you can use the sra command. You can create a template for this file using the get.mimarkspackage command.\n"); abort = true;	}
 			else if(mimarksfile == "not open")	{	abort = true;		}
             
             file = validParameter.validFile(parameters, "file");
@@ -223,11 +223,11 @@ SRACommand::SRACommand(string option)  {
             else {  fileOption = findFileOption();  }
 			
             if ((file == "") && (oligosfile == "")) {
-                m->mothurOut("[ERROR]: You must provide an oligos file or file with oligos files in them before you can use the sra command."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: You must provide an oligos file or file with oligos files in them before you can use the sra command.\n"); abort = true;
             }
             
 			if ((fastqfile == "") && (file == "") && (sfffile == "")) {
-                m->mothurOut("[ERROR]: You must provide a file, sff file or fastq file before you can use the sra command."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: You must provide a file, sff file or fastq file before you can use the sra command.\n"); abort = true;
             }
             
             //use only one Mutliple type _LS454-ILLUMINA-ION_TORRENT-PACBIO_SMRT
@@ -797,9 +797,16 @@ int SRACommand::readMIMarksFile(){
 
         
         if (!util.isSubset(headers, requiredFieldsForPackage)){
-            string requiredFields = "";
-            for (int i = 0; i < requiredFieldsForPackage.size()-1; i++) { requiredFields += requiredFieldsForPackage[i] + ", "; } requiredFields += requiredFieldsForPackage[requiredFieldsForPackage.size()-1];
-            m->mothurOut("[ERROR]: missing required fields for package, please correct. Required fields are " + requiredFields + ".\n"); m->setControl_pressed(true); in.close(); return 0;
+            string requiredFields = ""; set<string> sanity;
+            for (int i = 0; i < headers.size(); i++) { sanity.insert(headers[i]);  }
+            string missing = "";
+            for (int i = 0; i < requiredFieldsForPackage.size()-1; i++) {
+                requiredFields += requiredFieldsForPackage[i] + ", ";
+                if (sanity.count(requiredFieldsForPackage[i]) == 0) {  missing += requiredFieldsForPackage[i] + ", "; }
+            }
+            requiredFields += requiredFieldsForPackage[requiredFieldsForPackage.size()-1];
+            if (sanity.count(requiredFieldsForPackage[requiredFieldsForPackage.size()-1]) == 0) { missing += requiredFieldsForPackage[requiredFieldsForPackage.size()-1]; }
+            m->mothurOut("[ERROR]: missing required fields for package, please correct. Required fields are " + requiredFields + ".  Missing " + missing + "\n"); m->setControl_pressed(true); in.close(); return 0;
         }
         
         map<string, bool> allNA;  for (int i = 1; i < headers.size(); i++) {  allNA[headers[i]] = true; }
@@ -808,14 +815,13 @@ int SRACommand::readMIMarksFile(){
             if (m->getControl_pressed()) { break; }
             
             temp = util.getline(in);  util.gobble(in);
-            //cout << temp << endl;
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
-            if (!util.isUTF_8(temp)) { m->mothurOut("[ERROR]: " + temp + " is not UTF8 compliant. Submission entries must be in UTF8 format, please correct.\n"); m->setControl_pressed(true); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
             string original = temp;
             vector<string> linePieces; util.splitAtChar(temp, linePieces, '\t');
             util.removeBlanks(linePieces);
+            for (int i = 0; i < linePieces.size(); i++) { if (!util.isUTF_8(linePieces[i])) { m->mothurOut("[ERROR]: " + linePieces[i] + " is not UTF8 compliant. Submission entries must be in UTF8 format, please correct. Try resaving mimarks file in UTF-8 format.\n"); m->setControl_pressed(true); } }
             
             if (linePieces.size() != headers.size()) { m->mothurOut("[ERROR]: line: " + original + " contains " + toString(linePieces.size()) + " columns, but you have " + toString(headers.size()) + " column headers, please correct.\n"); m->setControl_pressed(true); }
             else {
@@ -824,7 +830,8 @@ int SRACommand::readMIMarksFile(){
                 if (it == mimarks.end()) {
                     map<string, string> categories;
                     //start after *sample_name
-                    for (int i = 1; i < headers.size(); i++) {
+                    for (int i = 1; i
+                         < headers.size(); i++) {
                         //check the users inputs for appropriate organisms
                         if (headers[i] == "organism") {
                             if (!util.inUsersGroups(linePieces[i], acceptableOrganisms)) { //not an acceptable organism
@@ -844,6 +851,51 @@ int SRACommand::readMIMarksFile(){
                             bool okay = checkDateFormat(linePieces[i]);
                             if (!okay) { m->setControl_pressed(true); }
                         }
+                        if (headers[i] == "lat_lon") { //check format
+                            string lat_lon = linePieces[i];
+                            vector<string> latLon = util.splitWhiteSpace(lat_lon);
+                            if (latLon.size() > 4) {
+                                m->mothurOut("[ERROR]: " + linePieces[i] + " is not in correct format. Specify as degrees latitude and longitude in format 'd[d.dddd] N|S d[dd.dddd] W|E', eg, 38.98 N 77.11 W., quitting.\n"); m->setControl_pressed(true);
+                            }else if (latLon.size() == 4) { // 38.98 N 77.11 W
+                                bool isOkay = true;
+                                if (!util.isNumeric1(latLon[0]))                    { isOkay = false;   }
+                                if (!util.isNumeric1(latLon[2]))                    { isOkay = false;   }
+                                latLon[1] = toupper(latLon[1][0]);
+                                if ((latLon[1] != "N") && (latLon[1] != "S"))       { isOkay = false;   }
+                                latLon[3] = toupper(latLon[3][0]);
+                                if ((latLon[3] != "E") && (latLon[3] != "W"))       { isOkay = false;   }
+                                
+                                if (!isOkay) {
+                                    m->mothurOut("[ERROR]: " + linePieces[i] + " is not in correct format. Specify as degrees latitude and longitude in format 'd[d.dddd] N|S d[dd.dddd] W|E', eg, 38.98 N 77.11 W., quitting.\n"); m->setControl_pressed(true);
+                                }
+                            }else if (latLon.size() == 2) { // 38.98N 77.11W
+                                bool isOkay = true;
+                                int firstLength = latLon[0].length();
+                                int secondLength = latLon[1].length();
+                                
+                                string NSDir = latLon[0].substr(firstLength-1, 1);
+                                string EWDir = latLon[1].substr(secondLength-1, 1);
+                                string degreeFirst = latLon[0].substr(0, firstLength-1);
+                                string degreeSecond = latLon[1].substr(0, secondLength-1);
+                                
+                                if (!util.isNumeric1(degreeFirst))                { isOkay = false;   }
+                                if (!util.isNumeric1(degreeSecond))               { isOkay = false;   }
+                                NSDir = toupper(NSDir[0]);
+                                if ((NSDir != "N") && (NSDir != "S"))             { isOkay = false;   }
+                                EWDir = toupper(EWDir[0]);
+                                if ((EWDir != "E") && (EWDir != "W"))             { isOkay = false;   }
+                                
+                                if (!isOkay) {
+                                    m->mothurOut("[ERROR]: " + linePieces[i] + " is not in correct format. Specify as degrees latitude and longitude in format 'd[d.dddd] N|S d[dd.dddd] W|E', eg, 38.98 N 77.11 W., quitting.\n"); m->setControl_pressed(true);
+                                }else {
+                                    linePieces[i] = degreeFirst + " " + NSDir + " " + degreeSecond + " " + EWDir;
+                                }
+                            }else {
+                                m->mothurOut("[ERROR]: " + linePieces[i] + " is not in correct format. Specify as degrees latitude and longitude in format 'd[d.dddd] N|S d[dd.dddd] W|E', eg, 38.98 N 77.11 W., quitting.\n"); m->setControl_pressed(true);
+                            }
+                            
+                        }
+                        if (linePieces[i] == "#N/B")    {  m->mothurOut("[WARNING]: #N/B is not acceptable. Unknown or inapplicable fields MUST be assigned 'missing' value, correcting.\n");  linePieces[i] = "missing";  }
                         if (linePieces[i] != "missing") {  allNA[headers[i]] = false;     }
                         categories[headers[i]] = linePieces[i];
                     }
@@ -1968,9 +2020,10 @@ bool SRACommand::checkDateFormat(string& date){
             else if (pieces[pieces.size()-1].length() == 4) { format = "yearLast"; }
             
             if (format == "yearFirst" ) {
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                
                 //just year
                 if (pieces.size() == 1) {
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 1 -> " + pieces[0] + "\n"); }
                     if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
                     else {
                         int yearNumber; util.mothurConvert(pieces[0], yearNumber);
@@ -1978,6 +2031,7 @@ bool SRACommand::checkDateFormat(string& date){
                         if (isOkay) { date=pieces[0]; }
                     }
                 }else if (pieces.size() == 2) { //"YYYY-mm"
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 2 -> " + pieces[0] + '\t' + pieces[1] + "\n"); }
                     bool checkMonth = false;
                     if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
                     int yearNumber; util.mothurConvert(pieces[0], yearNumber);
@@ -1996,6 +2050,7 @@ bool SRACommand::checkDateFormat(string& date){
                     }
                     if (isOkay) { date = pieces[0] + "-" + pieces[1]; }
                 }else if (pieces.size() == 3) { //"YYYY-mm-dd"
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
                     bool checkMonth = false;
                     if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
                     int yearNumber; util.mothurConvert(pieces[0], yearNumber);
