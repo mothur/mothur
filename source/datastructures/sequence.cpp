@@ -612,6 +612,10 @@ void Sequence::setUnaligned(string sequence){
 		unaligned = sequence;
 	}
 	numBases = unaligned.length();
+    startPos = -1;
+    endPos = -1;
+    longHomoPolymer = -1;
+    ambigBases = -1;
 	
 }
 
@@ -642,7 +646,7 @@ void Sequence::setAligned(string sequence){
 			}
 		}
 	}
-	isAligned = 1;	
+	isAligned = 1;
 }
 
 //********************************************************************************************************************
@@ -915,8 +919,8 @@ void Sequence::reverseComplement(){
 		else if(unaligned[i] == 'C'){	temp += 'G';	}
 		else						{	temp += 'N';	}
 	}
-	unaligned = temp;
-	aligned = temp;
+	
+	setAligned(temp);
 	
 }
 

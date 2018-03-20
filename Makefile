@@ -23,7 +23,6 @@ LOGFILE_NAME ?= no
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"3/20/2018\""
 VERSION = "\"1.40.0\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
@@ -39,7 +38,7 @@ ifeq  ($(strip $(OPTIMIZE)),yes)
     CXXFLAGS += -O3
 endif
 
-CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION} -std=c++11
+CXXFLAGS += -std=c++11 //-DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
 LDFLAGS += -std=c++11 -pthread
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")

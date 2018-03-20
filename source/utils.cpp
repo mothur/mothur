@@ -1425,7 +1425,63 @@ string Utils::hasPath(string longName){
         exit(1);
     }
 }
-
+/***********************************************************************/
+void Utils::getCurrentDate(string& thisYear, string& thisMonth, string& thisDay){
+    try {
+        time_t rawtime;
+        struct tm * timeinfo;
+        
+        time (&rawtime);
+        timeinfo = localtime(&rawtime);
+        
+        char buffer[80];
+        strftime(buffer,sizeof(buffer),"%Y",timeinfo);
+        string year(buffer); thisYear = year;
+        
+        strftime(buffer,sizeof(buffer),"%m",timeinfo);
+        string Month(buffer); thisMonth = Month;
+        
+        strftime(buffer,sizeof(buffer),"%d",timeinfo);
+        string Day(buffer); thisDay = Day;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getCurrentDate");
+        exit(1);
+    }
+}
+/***********************************************************************/
+bool Utils::isUTF_8(string& input){
+    try {
+        string::iterator end_it = utf8::find_invalid(input.begin(), input.end());
+        
+        if (end_it != input.end()) {
+            
+            //try to convert it
+            // Get the line length (at least for the valid part)
+            int length = utf8::distance(input.begin(), end_it);
+            m->mothurOut("[WARNING]: trying to convert " + input + " to UTF-8 format..."); cout.flush();
+            
+            // Convert it to utf-16
+            vector<unsigned short> utf16line;
+            utf8::utf8to16(input.begin(), end_it, back_inserter(utf16line));
+            
+            // And back to utf-8
+            string utf8line;
+            utf8::utf16to8(utf16line.begin(), utf16line.end(), back_inserter(utf8line));
+            
+            // Confirm that the conversion went OK:
+            if (utf8line != string(input.begin(), end_it)) {  m->mothurOut(" unsuccessful.\n"); return false; }
+            else { m->mothurOut(" successful. Replacing " + input + " with " + utf8line + ".\n"); input = utf8line; }
+            
+        }
+        
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "isUTF_8");
+        exit(1);
+    }
+}
 /***********************************************************************/
 string Utils::getExtension(string longName){
     try {

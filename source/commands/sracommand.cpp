@@ -214,7 +214,7 @@ SRACommand::SRACommand(string option)  {
 			else if(contactfile == "not open")	{	abort = true;		}
             
             mimarksfile = validParameter.validFile(parameters, "mimark");
-			if (mimarksfile == "not found")      {	mimarksfile = ""; m->mothurOut("[ERROR]: You must provide a mimark file before you can use the sra command. You can create a template for this file using the get.mimarkspackage command."); m->mothurOutEndLine(); abort = true;	}
+			if (mimarksfile == "not found")      {	mimarksfile = ""; m->mothurOut("[ERROR]: You must provide a mimark file before you can use the sra command. You can create a template for this file using the get.mimarkspackage command.\n"); abort = true;	}
 			else if(mimarksfile == "not open")	{	abort = true;		}
             
             file = validParameter.validFile(parameters, "file");
@@ -223,11 +223,11 @@ SRACommand::SRACommand(string option)  {
             else {  fileOption = findFileOption();  }
 			
             if ((file == "") && (oligosfile == "")) {
-                m->mothurOut("[ERROR]: You must provide an oligos file or file with oligos files in them before you can use the sra command."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: You must provide an oligos file or file with oligos files in them before you can use the sra command.\n"); abort = true;
             }
             
 			if ((fastqfile == "") && (file == "") && (sfffile == "")) {
-                m->mothurOut("[ERROR]: You must provide a file, sff file or fastq file before you can use the sra command."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: You must provide a file, sff file or fastq file before you can use the sra command.\n"); abort = true;
             }
             
             //use only one Mutliple type _LS454-ILLUMINA-ION_TORRENT-PACBIO_SMRT
@@ -390,10 +390,8 @@ int SRACommand::execute(){
         if (Grants.size() != 0) {
             for (int i = 0; i < Grants.size(); i++) {
                 out << "\t\t\t\t\t\t\t<Grant GrantId=\"" + Grants[i].grantId + "\">\n";
+                if (Grants[i].grantTitle != "") { out << "\t\t\t\t\t\t\t\t<Title>" + Grants[i].grantTitle + "</Title>\n"; }
                 out << "\t\t\t\t\t\t\t\t<Agency>" + Grants[i].grantAgency + "</Agency>\n";
-                if (Grants[i].grantTitle != "") {
-                    out << "\t\t\t\t\t\t\t\t<Title>" + Grants[i].grantTitle + "</Title>\n";
-                }
                 out << "\t\t\t\t\t\t\t</Grant>\n";
             }
         }
@@ -654,6 +652,8 @@ int SRACommand::readContactFile(){
             in >> key; util.gobble(in);
             value = util.getline(in); util.gobble(in);
             
+            if (!util.isUTF_8(value)) { m->mothurOut("[ERROR]: " + value + " is not UTF8 compliant. Submission entries must be in UTF8 format, please correct.\n"); m->setControl_pressed(true); }
+            
             for (int i = 0; i < key.length(); i++) { key[i] = toupper(key[i]); }
             
             if (key == "USERNAME")          {   submissionName = value; }
@@ -764,11 +764,8 @@ int SRACommand::readMIMarksFile(){
             
             if (temp[0] == '#') {
                 int pos = temp.find("MIMARKS.survey");
-                if (pos != string::npos) {
-                    packageType = temp.substr(1);
-                }
-            }
-            else{ break; } //hit headers line
+                if (pos != string::npos) { packageType = temp.substr(1); }
+            } else{ break; } //hit headers line
          }
         
         //in future may want to add parsing of format header....
@@ -800,21 +797,17 @@ int SRACommand::readMIMarksFile(){
 
         
         if (!util.isSubset(headers, requiredFieldsForPackage)){
-            string requiredFields = "";
-            for (int i = 0; i < requiredFieldsForPackage.size()-1; i++) { requiredFields += requiredFieldsForPackage[i] + ", "; } requiredFields += requiredFieldsForPackage[requiredFieldsForPackage.size()-1];
-            m->mothurOut("[ERROR]: missing required fields for package, please correct. Required fields are " + requiredFields + ".\n"); m->setControl_pressed(true); in.close(); return 0;
-            
-            
+            string requiredFields = ""; set<string> sanity;
+            for (int i = 0; i < headers.size(); i++) { sanity.insert(headers[i]);  }
+            string missing = "";
+            for (int i = 0; i < requiredFieldsForPackage.size()-1; i++) {
+                requiredFields += requiredFieldsForPackage[i] + ", ";
+                if (sanity.count(requiredFieldsForPackage[i]) == 0) {  missing += requiredFieldsForPackage[i] + ", "; }
+            }
+            requiredFields += requiredFieldsForPackage[requiredFieldsForPackage.size()-1];
+            if (sanity.count(requiredFieldsForPackage[requiredFieldsForPackage.size()-1]) == 0) { missing += requiredFieldsForPackage[requiredFieldsForPackage.size()-1]; }
+            m->mothurOut("[ERROR]: missing required fields for package, please correct. Required fields are " + requiredFields + ".  Missing " + missing + "\n"); m->setControl_pressed(true); in.close(); return 0;
         }
-        
-        //if (m->getDebug()) {  m->mothurOut("[DEBUG]: chooseAtLeastOneForPackage.size() = " + toString(chooseAtLeastOneForPackage.size()) + "\n");   }
-        
-        //if (!util.inUsersGroups(chooseAtLeastOneForPackage, headers)){ //returns true if any of the choose at least ones are in headers
-            //string requiredFields = "";
-            //for (int i = 0; i < chooseAtLeastOneForPackage.size()-1; i++) { requiredFields += chooseAtLeastOneForPackage[i] + ", "; cout << chooseAtLeastOneForPackage[i] << endl; }
-            //if (chooseAtLeastOneForPackage.size() < 1) { requiredFields += chooseAtLeastOneForPackage[chooseAtLeastOneForPackage.size()-1]; }
-            //m->mothurOut("[ERROR]: missing a choose at least one fields for the package, please correct. These are marked with '**'. Required fields are " + requiredFields + ".\n"); m->setControl_pressed(true); in.close(); return 0;
-       // }
         
         map<string, bool> allNA;  for (int i = 1; i < headers.size(); i++) {  allNA[headers[i]] = true; }
         while(!in.eof()) {
@@ -822,12 +815,13 @@ int SRACommand::readMIMarksFile(){
             if (m->getControl_pressed()) { break; }
             
             temp = util.getline(in);  util.gobble(in);
-            //cout << temp << endl;
+            
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
             string original = temp;
             vector<string> linePieces; util.splitAtChar(temp, linePieces, '\t');
             util.removeBlanks(linePieces);
+            for (int i = 0; i < linePieces.size(); i++) { if (!util.isUTF_8(linePieces[i])) { m->mothurOut("[ERROR]: " + linePieces[i] + " is not UTF8 compliant. Submission entries must be in UTF8 format, please correct. Try resaving mimarks file in UTF-8 format.\n"); m->setControl_pressed(true); } }
             
             if (linePieces.size() != headers.size()) { m->mothurOut("[ERROR]: line: " + original + " contains " + toString(linePieces.size()) + " columns, but you have " + toString(headers.size()) + " column headers, please correct.\n"); m->setControl_pressed(true); }
             else {
@@ -836,7 +830,8 @@ int SRACommand::readMIMarksFile(){
                 if (it == mimarks.end()) {
                     map<string, string> categories;
                     //start after *sample_name
-                    for (int i = 1; i < headers.size(); i++) {
+                    for (int i = 1; i
+                         < headers.size(); i++) {
                         //check the users inputs for appropriate organisms
                         if (headers[i] == "organism") {
                             if (!util.inUsersGroups(linePieces[i], acceptableOrganisms)) { //not an acceptable organism
@@ -856,6 +851,51 @@ int SRACommand::readMIMarksFile(){
                             bool okay = checkDateFormat(linePieces[i]);
                             if (!okay) { m->setControl_pressed(true); }
                         }
+                        if (headers[i] == "lat_lon") { //check format
+                            string lat_lon = linePieces[i];
+                            vector<string> latLon = util.splitWhiteSpace(lat_lon);
+                            if (latLon.size() > 4) {
+                                m->mothurOut("[ERROR]: " + linePieces[i] + " is not in correct format. Specify as degrees latitude and longitude in format 'd[d.dddd] N|S d[dd.dddd] W|E', eg, 38.98 N 77.11 W., quitting.\n"); m->setControl_pressed(true);
+                            }else if (latLon.size() == 4) { // 38.98 N 77.11 W
+                                bool isOkay = true;
+                                if (!util.isNumeric1(latLon[0]))                    { isOkay = false;   }
+                                if (!util.isNumeric1(latLon[2]))                    { isOkay = false;   }
+                                latLon[1] = toupper(latLon[1][0]);
+                                if ((latLon[1] != "N") && (latLon[1] != "S"))       { isOkay = false;   }
+                                latLon[3] = toupper(latLon[3][0]);
+                                if ((latLon[3] != "E") && (latLon[3] != "W"))       { isOkay = false;   }
+                                
+                                if (!isOkay) {
+                                    m->mothurOut("[ERROR]: " + linePieces[i] + " is not in correct format. Specify as degrees latitude and longitude in format 'd[d.dddd] N|S d[dd.dddd] W|E', eg, 38.98 N 77.11 W., quitting.\n"); m->setControl_pressed(true);
+                                }
+                            }else if (latLon.size() == 2) { // 38.98N 77.11W
+                                bool isOkay = true;
+                                int firstLength = latLon[0].length();
+                                int secondLength = latLon[1].length();
+                                
+                                string NSDir = latLon[0].substr(firstLength-1, 1);
+                                string EWDir = latLon[1].substr(secondLength-1, 1);
+                                string degreeFirst = latLon[0].substr(0, firstLength-1);
+                                string degreeSecond = latLon[1].substr(0, secondLength-1);
+                                
+                                if (!util.isNumeric1(degreeFirst))                { isOkay = false;   }
+                                if (!util.isNumeric1(degreeSecond))               { isOkay = false;   }
+                                NSDir = toupper(NSDir[0]);
+                                if ((NSDir != "N") && (NSDir != "S"))             { isOkay = false;   }
+                                EWDir = toupper(EWDir[0]);
+                                if ((EWDir != "E") && (EWDir != "W"))             { isOkay = false;   }
+                                
+                                if (!isOkay) {
+                                    m->mothurOut("[ERROR]: " + linePieces[i] + " is not in correct format. Specify as degrees latitude and longitude in format 'd[d.dddd] N|S d[dd.dddd] W|E', eg, 38.98 N 77.11 W., quitting.\n"); m->setControl_pressed(true);
+                                }else {
+                                    linePieces[i] = degreeFirst + " " + NSDir + " " + degreeSecond + " " + EWDir;
+                                }
+                            }else {
+                                m->mothurOut("[ERROR]: " + linePieces[i] + " is not in correct format. Specify as degrees latitude and longitude in format 'd[d.dddd] N|S d[dd.dddd] W|E', eg, 38.98 N 77.11 W., quitting.\n"); m->setControl_pressed(true);
+                            }
+                            
+                        }
+                        if (linePieces[i] == "#N/B")    {  m->mothurOut("[WARNING]: #N/B is not acceptable. Unknown or inapplicable fields MUST be assigned 'missing' value, correcting.\n");  linePieces[i] = "missing";  }
                         if (linePieces[i] != "missing") {  allNA[headers[i]] = false;     }
                         categories[headers[i]] = linePieces[i];
                     }
@@ -871,26 +911,23 @@ int SRACommand::readMIMarksFile(){
                         if (allSame) { m->mothurOut("[ERROR]: " + linePieces[0]+ " is a duplicate sample to " + it2->first + ". It has all the same attributes in the MIMarks file. Samples must have distinguishing features to be uploaded to the NCBI library, please correct.\n"); m->setControl_pressed(true); isOkaySample = false; }
                     }
                     if (isOkaySample) { mimarks[linePieces[0]] = categories; }
-                }else {
-                    m->mothurOut("[ERROR]: " + linePieces[0]+ " is a duplicate sampleName. Sample names must be unique, please correct.\n"); m->setControl_pressed(true);
                 }
+                else { m->mothurOut("[ERROR]: " + linePieces[0]+ " is a duplicate sampleName. Sample names must be unique, please correct.\n"); m->setControl_pressed(true); }
             }
         }
         in.close();
-        
         
         //add in values for "scrap" group
         map<string, string> categories;
         //start after *sample_name
         for (int i = 1; i < headers.size(); i++) {
             categories[headers[i]] = "missing";
-            if (headers[i] == "organism")       { categories[headers[i]] = "metagenome"; }
+            if (headers[i] == "organism")       { categories[headers[i]] = "metagenome";                    }
             if (headers[i] == "description")    { categories[headers[i]] = "these sequences were scrapped"; }
-            if (headers[i] == "sample_title")          { categories[headers[i]] = "these sequences were scrapped"; }
+            if (headers[i] == "sample_title")   { categories[headers[i]] = "these sequences were scrapped"; }
         }
         mimarks["scrap"] = categories;
         Group2Organism["scrap"] = "metagenome";
-        
         
         if (organismError) {
             string organismTypes = "";
@@ -1875,7 +1912,10 @@ bool SRACommand::sanityCheckMiMarksGroups(){
 //BioSample has several accepted date formats like "DD-Mmm-YYYY" (eg., 30-Oct-2010) or standard "YYYY-mm-dd" or "YYYY-mm" (eg 2010-10-30, 2010-10).
 bool SRACommand::checkDateFormat(string& date){
     try {
-        
+        string thisYear, thisMonth, thisDay;
+        util.getCurrentDate(thisYear, thisMonth, thisDay); //used to make sure future dates are not entered for collection dates.
+        int thisYearNumber; util.mothurConvert(thisYear, thisYearNumber);
+                
         for (int i = 0; i < date.length(); i++) {
             if (date[i] == '/') { date[i] = '-'; }
         }
@@ -1884,6 +1924,7 @@ bool SRACommand::checkDateFormat(string& date){
         
         map<string, int> months; months["Jan"] = 31; months["Feb"] = 29; months["Mar"] = 31; months["Apr"] = 30; months["Jun"] = 30; months["May"] = 31; months["Jul"] = 31; months["Aug"] = 31; months["Sep"] = 30;months["Oct"] = 31; months["Nov"] = 30; months["Dec"] = 31;
         map<string, int> monthsN; monthsN["01"] = 31; monthsN["02"] = 29; monthsN["03"] = 31; monthsN["04"] = 30; monthsN["06"] = 30; monthsN["05"] = 31; monthsN["07"] = 31; monthsN["08"] = 31; monthsN["09"] = 30;monthsN["10"] = 31; monthsN["11"] = 30; monthsN["12"] = 31;
+        map<string, int> convertMonths; convertMonths["Jan"] = 1; convertMonths["Feb"] = 2; convertMonths["Mar"] = 3; convertMonths["Apr"] = 4; convertMonths["Jun"] = 6; convertMonths["May"] = 5; convertMonths["Jul"] = 7; convertMonths["Aug"] = 8; convertMonths["Sep"] = 9;convertMonths["Oct"] = 10; convertMonths["Nov"] = 11; convertMonths["Dec"] = 12;
         
         bool isOkay = true;
         if (util.containsAlphas(date)) { // then format == "DD-Mmm-YYYY", "Mmm-YYYY"
@@ -1893,11 +1934,15 @@ bool SRACommand::checkDateFormat(string& date){
              
             if (m->getDebug()) { m->mothurOut("[DEBUG]: in alpha\n"); }
             //check "Mmm-YYYY"
+            bool checkMonth = false;
             if (pieces.size() == 2) { //"Mmm-YYYY"
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: pieces = 2 -> " + pieces[0] + '\t' + pieces[1] + "\n"); }
                 map<string, int>::iterator it;
                 it = months.find(pieces[0]);  //is this a valid month
                 if (it != months.end()) {
+                    int yearNumber; util.mothurConvert(pieces[1], yearNumber);
+                    if (yearNumber > thisYearNumber) { m->mothurOut("[ERROR]: year " + pieces[1] + " is in the future, please correct. \n"); isOkay = false; }
+                    else if (yearNumber == thisYearNumber) { checkMonth = true; }
                     if (pieces[1].size() != 4) { m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
                 }else {
                     //see if we can correct if
@@ -1908,15 +1953,29 @@ bool SRACommand::checkDateFormat(string& date){
                     it = months.find(pieces[0]);  //is this a valid month
                     if (it == months.end()) { m->mothurOut("[ERROR] " + pieces[0] + " is not a valid month. Looking for ""Mmm-YYYY\" format.\n"); isOkay = false; }
                     else {
+                        int yearNumber; util.mothurConvert(pieces[1], yearNumber);
+                        if (yearNumber > thisYearNumber) { m->mothurOut("[ERROR]: year " + pieces[1] + " is in the future, please correct. \n"); isOkay = false; }
+                        else if (yearNumber == thisYearNumber) { checkMonth = true; }
                         if (pieces[1].size() != 4) { m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
                     }
                 }
-                if (isOkay) { date = pieces[0] + "-" + pieces[1]; }
+                if (isOkay) {
+                    if (checkMonth) {
+                        int monthNumber; util.mothurConvert(thisMonth, monthNumber);
+                        int monthInt = convertMonths[pieces[0]];
+                        if (monthInt > monthNumber) { m->mothurOut("[ERROR]: month " + pieces[0] + " is in the future, please correct. \n"); isOkay = false; }
+                        else { date = pieces[0] + "-" + pieces[1];  }
+                    }else { date = pieces[0] + "-" + pieces[1];  }
+                }
             }else if (pieces.size() == 3) { //DD-Mmm-YYYY"
+                bool checkMonth = false;
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
                 map<string, int>::iterator it;
                 it = months.find(pieces[1]);  //is this a valid month
                 if (it != months.end()) {
+                    int yearNumber; util.mothurConvert(pieces[2], yearNumber);
+                    if (yearNumber > thisYearNumber) { m->mothurOut("[ERROR]: year " + pieces[2] + " is in the future, please correct. \n"); isOkay = false; }
+                    else if (yearNumber == thisYearNumber) { checkMonth = true; }
                     if (pieces[2].size() != 4) { m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
                 }else {
                     //see if we can correct if
@@ -1927,6 +1986,9 @@ bool SRACommand::checkDateFormat(string& date){
                     it = months.find(pieces[1]);  //is this a valid month
                     if (it == months.end()) { m->mothurOut("[ERROR] " + pieces[1] + " is not a valid month. Looking for ""Mmm-YYYY\" format.\n"); isOkay = false; }
                     else {
+                        int yearNumber; util.mothurConvert(pieces[2], yearNumber);
+                        if (yearNumber > thisYearNumber) { m->mothurOut("[ERROR]: year " + pieces[2] + " is in the future, please correct. \n"); isOkay = false; }
+                        else if (yearNumber == thisYearNumber) { checkMonth = true; }
                         if (pieces[2].size() != 4) { m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
                     }
                 }
@@ -1938,9 +2000,13 @@ bool SRACommand::checkDateFormat(string& date){
                             if (pieces[0].length() == 1) { pieces[0] = '0'+ pieces[0]; }
                         }
                     }
+                    if (checkMonth) {
+                        int monthNumber; util.mothurConvert(thisMonth, monthNumber);
+                        int monthInt = convertMonths[pieces[1]];
+                        if (monthInt > monthNumber) { m->mothurOut("[ERROR]: month " + pieces[1] + " is in the future, please correct. \n"); isOkay = false; }
+                        else { date = pieces[0] + "-" + pieces[1] + "-" + pieces[2];  }
+                    }else { date = pieces[0] + "-" + pieces[1] + "-" + pieces[2];  }
                 }
-                
-                if (isOkay) { date = pieces[0] + "-" + pieces[1] + "-" + pieces[2]; }
             }
         }else { // no alpha months "YYYY" or "YYYY-mm-dd" or "YYYY-mm"
              if (m->getDebug()) { m->mothurOut("[DEBUG]: in nonAlpha\n"); }
@@ -1954,38 +2020,62 @@ bool SRACommand::checkDateFormat(string& date){
             else if (pieces[pieces.size()-1].length() == 4) { format = "yearLast"; }
             
             if (format == "yearFirst" ) {
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                
                 //just year
                 if (pieces.size() == 1) {
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 1 -> " + pieces[0] + "\n"); }
                     if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
-                    else { date= pieces[0]; }
+                    else {
+                        int yearNumber; util.mothurConvert(pieces[0], yearNumber);
+                        if (yearNumber > thisYearNumber) { m->mothurOut("[ERROR]: year " + pieces[0] + " is in the future, please correct. \n"); isOkay = false; }
+                        if (isOkay) { date=pieces[0]; }
+                    }
                 }else if (pieces.size() == 2) { //"YYYY-mm"
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 2 -> " + pieces[0] + '\t' + pieces[1] + "\n"); }
+                    bool checkMonth = false;
                     if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                    int yearNumber; util.mothurConvert(pieces[0], yearNumber);
+                    if (yearNumber > thisYearNumber) { m->mothurOut("[ERROR]: year " + pieces[0] + " is in the future, please correct. \n"); isOkay = false; }
+                    else if (yearNumber == thisYearNumber) { checkMonth = true; }
                     
                     //perhaps needs leading 0
                     if (pieces[1].length() < 2) { pieces[1] = "0" + pieces[1]; }
                     map<string, int>::iterator it = monthsN.find(pieces[1]);
                     if (it == monthsN.end()) {
                         m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the month. Must be mm. \n"); isOkay = false;
+                    }else if (checkMonth) {
+                        int monthNumber; util.mothurConvert(thisMonth, monthNumber);
+                        int monthInt = convertMonths[pieces[1]];
+                        if (monthInt > monthNumber) { m->mothurOut("[ERROR]: month " + pieces[1] + " is in the future, please correct. \n"); isOkay = false; }
                     }
                     if (isOkay) { date = pieces[0] + "-" + pieces[1]; }
                 }else if (pieces.size() == 3) { //"YYYY-mm-dd"
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: yearFirst pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
+                    bool checkMonth = false;
                     if (pieces[0].size() != 4) { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                    int yearNumber; util.mothurConvert(pieces[0], yearNumber);
+                    if (yearNumber > thisYearNumber) { m->mothurOut("[ERROR]: year " + pieces[0] + " is in the future, please correct. \n"); isOkay = false; }
+                    else if (yearNumber == thisYearNumber) { checkMonth = true; }
+
                     //perhaps needs leading 0
                     if (pieces[1].length() < 2) { pieces[1] = "0" + pieces[1]; }
                     map<string, int>::iterator it = monthsN.find(pieces[1]);
                     if (it == monthsN.end()) {
                         m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the month. Must be mm. \n"); isOkay = false;
                     }else {
+                        if (checkMonth) {
+                            int monthNumber; util.mothurConvert(thisMonth, monthNumber);
+                            int monthInt = convertMonths[pieces[1]];
+                            if (monthInt > monthNumber) { m->mothurOut("[ERROR]: month " + pieces[1] + " is in the future, please correct. \n"); isOkay = false; }
+                        }
+                        
                         //is the day in range
                         int maxDays = it->second;
                         //perhaps needs leading 0
                         if (pieces[2].length() < 2) { pieces[2] = "0" + pieces[2]; }
                         int day; util.mothurConvert(pieces[2], day);
                         if (day <= maxDays) {}
-                        else {
-                            m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid day for the month " + pieces[1]+ ". \n"); isOkay = false;
-                        }
+                        else { m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid day for the month " + pieces[1]+ ". \n"); isOkay = false; }
                     }
                     if (isOkay) {  date = pieces[0] + "-" + pieces[1] + "-" + pieces[2]; }
                 }
@@ -1995,6 +2085,10 @@ bool SRACommand::checkDateFormat(string& date){
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: yearLast pieces = 3 -> " + pieces[0] + '\t' + pieces[1] + '\t' + pieces[2] + "\n"); }
                 
                 if (pieces[2].size() != 4) { m->mothurOut("[ERROR]: " + pieces[2] + " is not a valid format for the year. Must be YYYY. \n"); isOkay = false; }
+                bool checkMonth = false;
+                int yearNumber; util.mothurConvert(pieces[0], yearNumber);
+                if (yearNumber > thisYearNumber) { m->mothurOut("[ERROR]: year " + pieces[0] + " is in the future, please correct. \n"); isOkay = false; }
+                else if (yearNumber == thisYearNumber) { checkMonth = true; }
                 
                 int first, second;
                 util.mothurConvert(pieces[0], first);
@@ -2009,6 +2103,12 @@ bool SRACommand::checkDateFormat(string& date){
                     if (it == monthsN.end()) {
                         m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid format for the month. Must be mm. \n"); isOkay = false;
                     }else {
+                        if (checkMonth) {
+                            int monthNumber; util.mothurConvert(thisMonth, monthNumber);
+                            int monthInt = convertMonths[pieces[0]];
+                            if (monthInt > monthNumber) { m->mothurOut("[ERROR]: month " + pieces[0] + " is in the future, please correct. \n"); isOkay = false; }
+                        }
+                        
                         //is the day in range
                         int maxDays = it->second;
                         if (second <= maxDays) { //reformat to acceptable format
@@ -2016,9 +2116,7 @@ bool SRACommand::checkDateFormat(string& date){
                             if (pieces[1].length() < 2) { pieces[1] = "0" + pieces[1]; }
                             date = pieces[2] + "-" + pieces[0] + "-" + pieces[1];
                         }
-                        else {
-                            m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid day for the month " + pieces[0]+ ". \n"); isOkay = false;
-                        }
+                        else { m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid day for the month " + pieces[0]+ ". \n"); isOkay = false; }
                     }
                 }else if ((second <= 12) && (first >= 12)) { //second=month and first = day, check valid date
                     if (pieces[1].length() < 2) { pieces[1] = "0" + pieces[1]; }
@@ -2026,6 +2124,12 @@ bool SRACommand::checkDateFormat(string& date){
                     if (it == monthsN.end()) {
                         m->mothurOut("[ERROR]: " + pieces[1] + " is not a valid format for the month. Must be mm. \n"); isOkay = false;
                     }else {
+                        if (checkMonth) {
+                            int monthNumber; util.mothurConvert(thisMonth, monthNumber);
+                            int monthInt = convertMonths[pieces[1]];
+                            if (monthInt > monthNumber) { m->mothurOut("[ERROR]: month " + pieces[1] + " is in the future, please correct. \n"); isOkay = false; }
+                        }
+                        
                         //is the day in range
                         int maxDays = it->second;
                         if (first <= maxDays) { //reformat to acceptable format
@@ -2033,14 +2137,10 @@ bool SRACommand::checkDateFormat(string& date){
                             if (pieces[0].length() < 2) { pieces[0] = "0" + pieces[0]; }
                             date = pieces[2] + "-" + pieces[1] + "-" + pieces[0];
                         }
-                        else {
-                            m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid day for the month " + pieces[1]+ ". \n"); isOkay = false;
-                        }
+                        else { m->mothurOut("[ERROR]: " + pieces[0] + " is not a valid day for the month " + pieces[1]+ ". \n"); isOkay = false; }
                     }
 
-                }else {
-                    m->mothurOut("[ERROR]: " + pieces[0] + " and " + pieces[1] + " are both > 12.  No valid date. \n"); isOkay = false;
-                }
+                }else { m->mothurOut("[ERROR]: " + pieces[0] + " and " + pieces[1] + " are both > 12.  No valid date. \n"); isOkay = false; }
             }
         }
         if (!isOkay) { m->mothurOut("[ERROR]: The date must be in one of the following formats: Date of sampling, in ""DD-Mmm-YYYY/"", ""Mmm-YYYY/"" or ""YYYY/"" format (eg., 30-Oct-1990, Oct-1990 or 1990) or ISO 8601 standard ""YYYY-mm-dd/"", ""YYYY-mm/""  (eg., 1990-10-30, 1990-10/"")"); }

@@ -67,9 +67,18 @@ int main(int argc, char *argv[]){
             m->setLogFileName(logfilename, false);
             m->mothurOut("\n");
         #endif
-		
+        
+        string releaseDate = "";
+        #ifdef RELEASE_DATE
+            releaseDate = RELEASE_DATE;
+        #else
+            string year, month, day;
+            util.getCurrentDate(year, month, day);
+            releaseDate = month + "/" + day + "/" + year;
+        #endif
+        
 		//get releaseDate from Make
-		string releaseDate = RELEASE_DATE; 
+		 
 		string mothurVersion = VERSION; 
 		current->setReleaseDate(releaseDate);
 		current->setVersion(mothurVersion);
