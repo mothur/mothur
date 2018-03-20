@@ -1346,7 +1346,6 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
             
             oldList = *list;
             
-            bool print_start = true;
             time_t start = time(NULL);
             double saveCutoff = params->cutoff;
             

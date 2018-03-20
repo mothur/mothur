@@ -80,17 +80,6 @@
  *          0 if character is NOT alphabetic
  *
  */
-static inline
-int 
-NJ_is_alpha(char c) {
-
-  if( (c >= 'A' && c <= 'Z') ||
-      (c >= 'a' && c <= 'z') ) {
-    return(1);
-  } else {
-    return(0);
-  }
-}
 
 
 
@@ -299,15 +288,6 @@ NJ_is_distance(char *token) {
  * Simply, if token is not a valid number, then it is a name
  *
  */
-static inline
-int
-NJ_is_label(char *token) {
-  if(NJ_is_distance(token)) {
-    return(0);
-  } else {
-    return(1);
-  }
-}
 
 
 

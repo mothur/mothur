@@ -231,7 +231,6 @@ int DistanceCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		int startTime = time(NULL);
         numDistsBelowCutoff = 0;
 		
 		//save number of new sequence
