@@ -40,7 +40,7 @@ ifeq  ($(strip $(OPTIMIZE)),yes)
     CXXFLAGS += -O3
 endif
 
-CXXFLAGS += -std=c++11 //-DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
+CXXFLAGS += -std=c++11 -DVERSION=${VERSION}
 LDFLAGS += -std=c++11 -pthread
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
