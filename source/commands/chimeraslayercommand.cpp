@@ -418,7 +418,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 
 				//test to make sure formatdb exists
 				ifstream in2;
-                string blastCommand = blastCommand = blastlocation + "megablast" + EXECUTABLE_EXT;
+                string blastCommand = blastlocation + "megablast" + EXECUTABLE_EXT;
 				blastCommand = util.getFullPathName(blastCommand);
 				ableToOpen = util.openInputFile(blastCommand, in2, "no error"); in2.close();
 				if(!ableToOpen) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe to run chimera.slayer."); m->mothurOutEndLine(); abort = true; }

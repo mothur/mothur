@@ -1644,7 +1644,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
 }
 //**********************************************************************************************************************
 //vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, , string group
-unsigned long long driverContigs(contigsData* params){
+void driverContigs(contigsData* params){
     try {
         vector< vector<double> > qual_match_simple_bayesian;
         qual_match_simple_bayesian.resize(47);
@@ -1882,7 +1882,7 @@ unsigned long long driverContigs(contigsData* params){
                         params->trimFileName->write(output);
                         if (hasQuality) {
                             output = ">" + fSeq.getName() + '\t' + commentString +"\n";
-                            for (int i = 0; i < contigScores.size(); i++) { output += contigScores[i] + " "; }  output += "\n";
+                            for (int i = 0; i < contigScores.size(); i++) { output += toString(contigScores[i]) + " "; }  output += "\n";
                             params->trimQFileName->write(output);
                         }
                         int numNs = 0;
@@ -1898,7 +1898,7 @@ unsigned long long driverContigs(contigsData* params){
                     
                     if (hasQuality) {
                         output = ">" + fSeq.getName() + " | " + trashCode + '\t' + commentString + "\n";
-                        for (int i = 0; i < contigScores.size(); i++) { output += contigScores[i] + " "; }  output += "\n";
+                        for (int i = 0; i < contigScores.size(); i++) { output += toString(contigScores[i]) + " "; }  output += "\n";
                         params->scrapQFileName->write(output);
                     }
                 }

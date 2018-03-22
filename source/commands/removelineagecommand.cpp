@@ -1046,7 +1046,7 @@ int RemoveLineageCommand::readTax(){
             
             if (!util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
                 wroteSomething = true; out << name << '\t' << tax << endl;
-            }
+            }else { names.insert(name); }
 		}
 		in.close();
 		out.close();
@@ -1111,7 +1111,7 @@ int RemoveLineageCommand::readConsTax(){
             if (!util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
                 names.insert(util.getSimpleLabel(otuLabel));
                 out << otuLabel << '\t' << numReps << '\t' << tax << endl;
-            }
+            }else { names.insert(otuLabel); }
 		}
 		in.close();
 		out.close();
@@ -1161,9 +1161,7 @@ vector< map<string, float> > RemoveLineageCommand::getTaxons(string tax) {
 				t.push_back(temp);
 				taxon = "";
 			}
-			else{
-				taxon += tax[i];
-			}
+			else{ taxon += tax[i]; }
 		}
 		
 		return t;

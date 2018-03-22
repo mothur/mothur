@@ -704,6 +704,7 @@ int Tree::randomLabels(vector<int>& nodesToSwap) {
             swapLabels(z,i);
             j += 2;
         }
+        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "Tree", "randomLabels");

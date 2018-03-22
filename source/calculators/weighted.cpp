@@ -148,7 +148,7 @@ double getLengthToRoot(Tree* t, bool includeRoot, int v, string groupA, string g
     }
 }
 /**************************************************************************************************/
-int driverWeighted(weightedData* params) {
+void driverWeighted(weightedData* params) {
  try {
 		vector<double> D;
 		params->count = 0;
