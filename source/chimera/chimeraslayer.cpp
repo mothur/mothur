@@ -186,8 +186,9 @@ int ChimeraSlayer::doPrep() {
 			ifstream kmerFileTestLeft(kmerDBNameLeft.c_str());
 			bool needToGenerateLeft = true;
 			
-			if(kmerFileTestLeft){	
-				bool GoodFile = util.checkReleaseVersion(kmerFileTestLeft, current->getVersion());
+			if(kmerFileTestLeft){
+                string line = util.getline(kmerFileTestLeft);
+				bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
 				if (GoodFile) {  needToGenerateLeft = false;	}
 			}
 			
@@ -217,8 +218,9 @@ int ChimeraSlayer::doPrep() {
 			ifstream kmerFileTestRight(kmerDBNameRight.c_str());
 			bool needToGenerateRight = true;
 			
-			if(kmerFileTestRight){	
-				bool GoodFile = util.checkReleaseVersion(kmerFileTestRight, current->getVersion());
+			if(kmerFileTestRight){
+                string line = util.getline(kmerFileTestRight);
+				bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
 				if (GoodFile) {  needToGenerateRight = false;	}
 			}
 			

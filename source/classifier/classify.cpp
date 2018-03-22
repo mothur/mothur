@@ -47,7 +47,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
             kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
             ifstream kmerFileTest(kmerDBName.c_str());
             if(kmerFileTest){
-                bool GoodFile = util.checkReleaseVersion(kmerFileTest, version);
+                string line = util.getline(kmerFileTest);
+                bool GoodFile = util.checkReleaseVersion(line, version); kmerFileTest.close();
                 int shortcutTimeStamp = util.getTimeStamp(kmerDBName);
                 int referenceTimeStamp = util.getTimeStamp(tempFile);
                 

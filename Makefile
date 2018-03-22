@@ -96,14 +96,14 @@ uchime:
 	cd source/uchime_src && ./mk && mv uchime ../../ && cd ..
 
 install : mothur uchime
-	if [ "${CURDIR}" = "$(PREFIX)" ]; then \
-		echo 'done'; \
-	else \
-		mkdir -p $(PREFIX); \
-		for file in mothur uchime; do \
-			cp -f $$file $(PREFIX) ; \
-		done \
-	fi
+#if [ "${CURDIR}" = "$(PREFIX)" ]; then \
+#		echo 'done'; \
+#	else \
+#		mkdir -p $(PREFIX); \
+#		for file in mothur uchime; do \
+#			cp -f $$file $(PREFIX) ; \
+#		done \
+#	fi
 
 
 %.o : %.c %.h

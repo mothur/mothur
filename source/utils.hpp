@@ -108,7 +108,7 @@ public:
     string sortFile(string, string);
     
     //file reads
-    bool checkReleaseVersion(ifstream&, string);
+    bool checkReleaseVersion(string, string);
     string getline(ifstream&);
     string getline(istringstream&);
     void getNumSeqs(ifstream&, int&);

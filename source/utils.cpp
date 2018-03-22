@@ -4071,12 +4071,10 @@ bool Utils::anyLabelsToProcess(string label, set<string>& userLabels, string err
 }
 
 /**************************************************************************************************/
-bool Utils::checkReleaseVersion(ifstream& file, string version) {
+bool Utils::checkReleaseVersion(string line, string version) {
     try {
         
         bool good = true;
-        
-        string line = getline(file);
         
         //before we added this check
         if (line[0] != '#') {  good = false;  }
@@ -4104,10 +4102,6 @@ bool Utils::checkReleaseVersion(ifstream& file, string version) {
             }
             
         }
-        
-        if (!good) {  file.close();  }
-        else { file.seekg(0);  }
-        
         return good;
     }
     catch(exception& e) {
@@ -4136,7 +4130,7 @@ int Utils::getTimeStamp(string filename) {
         
         if(hFile == INVALID_HANDLE_VALUE) {
             m->mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); m->setControl_pressed(true);
-            return timeStamp;
+            CloseHandle(hFile); return timeStamp;
         }
         
         FILETIME ftCreate, ftAccess, ftWrite;
@@ -4162,7 +4156,7 @@ int Utils::getTimeStamp(string filename) {
             timeStamp = t;
         }
         else { m->mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); m->setControl_pressed(true); }
-        
+        CloseHandle(hFile);
 #endif
         
         return timeStamp;

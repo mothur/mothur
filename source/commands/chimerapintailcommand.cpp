@@ -223,15 +223,17 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 				string tempConsFile = util.getRootName(inputDir + util.getSimpleName(templatefile)) + "freq";
 				ifstream FileTest(tempConsFile.c_str());
 				if(FileTest){	
-					bool GoodFile = util.checkReleaseVersion(FileTest, current->getVersion());
+                    string line = util.getline(FileTest);
+                    bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
 					if (GoodFile) {  
 						m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  consfile = tempConsFile;  FileTest.close();	
 					}
 				}else {
 					string tempConsFile = current->getDefaultPath() + util.getRootName(util.getSimpleName(templatefile)) + "freq";
 					ifstream FileTest2(tempConsFile.c_str());
-					if(FileTest2){	
-						bool GoodFile = util.checkReleaseVersion(FileTest2, current->getVersion());
+					if(FileTest2){
+                        string line = util.getline(FileTest2);
+						bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
 						if (GoodFile) {  
 							m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  consfile = tempConsFile;  FileTest2.close();	
 						}
@@ -280,8 +282,9 @@ int ChimeraPintailCommand::execute(){
 			}
 			
 			ifstream FileTest(tempQuan.c_str());
-			if(FileTest){	
-				bool GoodFile = util.checkReleaseVersion(FileTest, current->getVersion());
+			if(FileTest){
+                string line = util.getline(FileTest);
+				bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
 				if (GoodFile) {  
 					m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  quanfile = tempQuan;  FileTest.close();	
 				}
@@ -299,8 +302,9 @@ int ChimeraPintailCommand::execute(){
 				}
 				
 				ifstream FileTest2(tempQuan.c_str());
-				if(FileTest2){	
-					bool GoodFile = util.checkReleaseVersion(FileTest2, current->getVersion());
+				if(FileTest2){
+                    string line = util.getline(FileTest2);
+					bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
 					if (GoodFile) {  
 						m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  quanfile = tempQuan;  FileTest2.close();	
 					}

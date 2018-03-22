@@ -24,8 +24,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		Utils util;
         
         long start = time(NULL);
-        m->mothurOutEndLine();
-        m->mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
+        m->mothurOut("\nReading in the " + fastaFileName + " template sequences...\t");	cout.flush();
         //bool aligned = false;
         int tempLength = 0;
         
@@ -53,9 +52,9 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
         numSeqs = templateSequences.size();
         //all of this is elsewhere already!
         
-        m->mothurOut("DONE.");
-        m->mothurOutEndLine();	cout.flush();
-        m->mothurOut("It took " + toString(time(NULL) - start) + " to read  " + toString(templateSequences.size()) + " sequences."); m->mothurOutEndLine();  
+        m->mothurOut("DONE.\n");
+        cout.flush();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " to read  " + toString(templateSequences.size()) + " sequences.\n");   
 
 		
 		//in case you delete the seqs and then ask for them
@@ -74,7 +73,8 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
             ifstream kmerFileTest(kmerDBName.c_str());
 				
             if(kmerFileTest){
-                bool GoodFile = util.checkReleaseVersion(kmerFileTest, current->getVersion());
+                string line = util.getline(kmerFileTest);
+                bool GoodFile = util.checkReleaseVersion(line, current->getVersion());  kmerFileTest.close();
                 int shortcutTimeStamp = util.getTimeStamp(kmerDBName);
                 int referenceTimeStamp = util.getTimeStamp(fastaFileName);
                 
@@ -89,8 +89,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		else if(method == "blast")		{	search = new BlastDB(fastaFileName.substr(0,fastaFileName.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
 		else {
 			method = "kmer";
-			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
-			m->mothurOutEndLine();
+			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.\n");
 			search = new KmerDB(fastaFileName, 8);
 		}
 		
