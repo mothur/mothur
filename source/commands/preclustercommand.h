@@ -23,99 +23,6 @@
 #include "noalign.hpp"
 #include "filters.h"
 
-/************************************************************/
-struct seqPNode {
-	int numIdentical;
-	Sequence seq;
-    string filteredSeq;
-	string names;
-	bool active;
-	int diffs;
-	seqPNode() {}
-	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) { diffs = 0; filteredSeq = "";}
-	~seqPNode() {}
-};
-/************************************************************/
-inline bool comparePriorityTopDown(seqPNode first, seqPNode second) {  
-    if (first.numIdentical > second.numIdentical) { return true;  }
-    //else if (first.numIdentical == second.numIdentical) {
-        //if (first.seq.getName() > second.seq.getName()) { return true; }
-    //}
-
-    return false; 
-}
-/************************************************************/
-inline bool comparePriorityDownTop(seqPNode first, seqPNode second) {  
-    if (first.numIdentical < second.numIdentical) { return true;  }
-    //else if (first.numIdentical == second.numIdentical) {
-        //if (first.seq.getName() > second.seq.getName()) { return true; }
-    //}
-    return false; 
-}
-
-//**********************************************************************************************************************
-struct preClusterData {
-    string fastafile;
-    string namefile;
-    string groupfile, countfile, method, align, newMName;
-    OutputWriter* newFName;
-    OutputWriter* newNName;
-    MothurOut* m;
-    int start;
-    int end, count;
-    int diffs, length;
-    vector<string> groups;
-    //vector<string> mapFileNames;
-    bool topdown, hasCount, hasName;
-    float match, misMatch, gapOpen, gapExtend;
-    Utils util;
-    vector<string> outputNames;
-    map<string, vector<string> > outputTypes;
-    vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
-    Alignment* alignment;
-    
-    ~preClusterData() { if (alignment != NULL) { delete alignment; } }
-    preClusterData(){}
-    preClusterData(string f, string n, string g, string c, OutputWriter* nff,  OutputWriter* nnf, string nmf, vector<string> gr) {
-        fastafile = f;
-        groupfile = g;
-        newFName = nff;
-        newNName = nnf;
-        newMName = nmf;
-        groups = gr;
-        hasName = false;
-        namefile = n; if (namefile != "") { hasName = true; }
-        hasCount = false;
-        countfile = c; if (countfile != "") { hasCount = true; }
-        count=0;
-        m = MothurOut::getInstance();
-    }
-    void setVariables(int st, int en, int d, bool td, string me, string al, float ma, float misma, float gpOp, float gpEx) {
-        start = st;
-        end = en;
-        diffs = d;
-        topdown = td;
-        method = me;
-        align = al;
-        match = ma;
-        misMatch = misma;
-        gapExtend = gpEx;
-        gapOpen = gpOp;
-        length = 0;
-        
-        if (method == "unaligned") {
-            if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, 1000);	}
-            else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);			}
-            else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
-            else if(align == "noalign")		{	alignment = new NoAlign();													}
-            else {
-                m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
-                m->mothurOutEndLine();
-                alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);
-            }
-        }else { alignment = NULL; }
-    }
-};
 
 //************************************************************/
 class PreClusterCommand : public Command {
@@ -148,7 +55,6 @@ private:
 	
 	void createProcessesGroups(string, string, string);
     int mergeGroupCounts(string, string, string);
-    void print(string, string, preClusterData*);
 };
 
 

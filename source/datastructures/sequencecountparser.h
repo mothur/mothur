@@ -44,13 +44,11 @@ public:
     
     map<string, string> getAllSeqsMap(); //returns map where the key=sequenceName and the value=representativeSequence - helps us remove duplicates after group by group processing
 private:
-    std::mutex token;
     CountTable countTable;
     MothurOut* m;
 	
     int numSeqs;
     vector<int> indexes;
-    //map<string, string> allSeqsMap;
     map<string, vector<Sequence> > seqs; //a vector for each group
     map<string, map<string, int> > countTablePerGroup; //countTable for each group
     vector<string> namesOfGroups;

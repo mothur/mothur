@@ -261,6 +261,94 @@ PreClusterCommand::PreClusterCommand(string option) {
 		exit(1);
 	}
 }
+/************************************************************/
+struct seqPNode {
+    int numIdentical;
+    Sequence seq;
+    string filteredSeq;
+    string names;
+    bool active;
+    int diffs;
+    seqPNode() {}
+    seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) { diffs = 0; filteredSeq = "";}
+    ~seqPNode() {}
+};
+/************************************************************/
+inline bool comparePriorityTopDown(seqPNode* first, seqPNode* second) {
+    if (first->numIdentical > second->numIdentical) { return true;  }
+    //else if (first.numIdentical == second.numIdentical) {
+    //if (first.seq.getName() > second.seq.getName()) { return true; }
+    //}
+    
+    return false;
+}
+/************************************************************/
+inline bool comparePriorityDownTop(seqPNode* first, seqPNode* second) {
+    if (first->numIdentical < second->numIdentical) { return true;  }
+    //else if (first.numIdentical == second.numIdentical) {
+    //if (first.seq.getName() > second.seq.getName()) { return true; }
+    //}
+    return false;
+}
+
+//**********************************************************************************************************************
+struct preClusterData {
+    string fastafile, namefile, groupfile, countfile, method, align, newMName;
+    OutputWriter* newFName;
+    OutputWriter* newNName;
+    MothurOut* m;
+    int start, end, count, diffs, length;
+    vector<string> groups;
+    bool topdown, hasCount, hasName;
+    float match, misMatch, gapOpen, gapExtend;
+    Utils util;
+    vector<string> outputNames;
+    map<string, vector<string> > outputTypes;
+    vector<seqPNode*> alignSeqs; //maps the number of identical seqs to a sequence
+    Alignment* alignment;
+    
+    ~preClusterData() { if (alignment != NULL) { delete alignment; } }
+    preClusterData(){}
+    preClusterData(string f, string n, string g, string c, OutputWriter* nff,  OutputWriter* nnf, string nmf, vector<string> gr) {
+        fastafile = f;
+        groupfile = g;
+        newFName = nff;
+        newNName = nnf;
+        newMName = nmf;
+        groups = gr;
+        hasName = false;
+        namefile = n; if (namefile != "") { hasName = true; }
+        hasCount = false;
+        countfile = c; if (countfile != "") { hasCount = true; }
+        count=0;
+        m = MothurOut::getInstance();
+    }
+    void setVariables(int st, int en, int d, bool td, string me, string al, float ma, float misma, float gpOp, float gpEx) {
+        start = st;
+        end = en;
+        diffs = d;
+        topdown = td;
+        method = me;
+        align = al;
+        match = ma;
+        misMatch = misma;
+        gapExtend = gpEx;
+        gapOpen = gpOp;
+        length = 0;
+        
+        if (method == "unaligned") {
+            if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, 1000);	}
+            else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);			}
+            else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
+            else if(align == "noalign")		{	alignment = new NoAlign();													}
+            else {
+                m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+                m->mothurOutEndLine();
+                alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);
+            }
+        }else { alignment = NULL; }
+    }
+};
 /**************************************************************************************************/
 int calcMisMatches(string seq1, string seq2, preClusterData* params){
     try {
@@ -304,14 +392,10 @@ int calcMisMatches(string seq1, string seq2, preClusterData* params){
     }
 }
 /**************************************************************************************************/
-int process(string newMapFile, preClusterData* params){
+int process(string group, string newMapFile, preClusterData* params){
     try {
         ofstream out;
         params->util.openOutputFile(newMapFile, out);
-        
-        //sort seqs by number of identical seqs
-        if (params->topdown) { sort(params->alignSeqs.begin(), params->alignSeqs.end(), comparePriorityTopDown);  }
-        else {  sort(params->alignSeqs.begin(), params->alignSeqs.end(), comparePriorityDownTop);  }
         
         int count = 0;
         long long numSeqs = params->alignSeqs.size();
@@ -320,49 +404,49 @@ int process(string newMapFile, preClusterData* params){
             //think about running through twice...
             for (int i = 0; i < numSeqs; i++) {
                 
-                if (params->alignSeqs[i].active) {  //this sequence has not been merged yet
+                if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
                     
-                    string chunk = params->alignSeqs[i].seq.getName() + "\t" + toString(params->alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i].seq.getAligned() + "\n";
+                    string chunk = params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
                     
                     //try to merge it with all smaller seqs
                     for (int j = i+1; j < numSeqs; j++) {
                         
                         if (params->m->getControl_pressed()) { out.close(); return 0; }
                         
-                        if (params->alignSeqs[j].active) {  //this sequence has not been merged yet
+                        if (params->alignSeqs[j]->active) {  //this sequence has not been merged yet
                             //are you within "diff" bases
                             int mismatch = params->length;
-                            if (params->method == "unaligned") { mismatch = calcMisMatches(params->alignSeqs[i].seq.getAligned(), params->alignSeqs[j].seq.getAligned(), params); }
-                            else { mismatch = calcMisMatches(params->alignSeqs[i].filteredSeq, params->alignSeqs[j].filteredSeq, params); }
+                            if (params->method == "unaligned") { mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(), params->alignSeqs[j]->seq.getAligned(), params); }
+                            else { mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq, params->alignSeqs[j]->filteredSeq, params); }
                             
                             if (mismatch <= params->diffs) {
                                 //merge
-                                params->alignSeqs[i].names += ',' + params->alignSeqs[j].names;
-                                params->alignSeqs[i].numIdentical += params->alignSeqs[j].numIdentical;
+                                params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
+                                params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
                                 
-                                chunk += params->alignSeqs[j].seq.getName() + "\t" + toString(params->alignSeqs[j].numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j].seq.getAligned() + "\n";
+                                chunk += params->alignSeqs[j]->seq.getName() + "\t" + toString(params->alignSeqs[j]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
                                 
-                                params->alignSeqs[j].active = 0;
-                                params->alignSeqs[j].numIdentical = 0;
-                                params->alignSeqs[j].diffs = mismatch;
+                                params->alignSeqs[j]->active = 0;
+                                params->alignSeqs[j]->numIdentical = 0;
+                                params->alignSeqs[j]->diffs = mismatch;
                                 count++;
                             }
                         }//end if j active
                     }//end for loop j
                     
                     //remove from active list
-                    params->alignSeqs[i].active = 0;
+                    params->alignSeqs[i]->active = 0;
                     
-                    out << "ideal_seq_" << (i+1) << '\t' << params->alignSeqs[i].numIdentical << endl << chunk << endl;
+                    out << "ideal_seq_" << (i+1) << '\t' << params->alignSeqs[i]->numIdentical << endl << chunk << endl;
                     
                 }//end if active i
-                if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
+                if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
             }
         }else {
             map<int, string> mapFile;
             map<int, int> originalCount;
             map<int, int>::iterator itCount;
-            for (int i = 0; i < numSeqs; i++) { mapFile[i] = ""; originalCount[i] = params->alignSeqs[i].numIdentical; }
+            for (int i = 0; i < numSeqs; i++) { mapFile[i] = ""; originalCount[i] = params->alignSeqs[i]->numIdentical; }
             
             //think about running through twice...
             for (int i = 0; i < numSeqs; i++) {
@@ -375,16 +459,16 @@ int process(string newMapFile, preClusterData* params){
                     if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
                         //are you within "diff" bases
                         int mismatch = params->length;
-                        if (params->method == "unaligned") { mismatch = calcMisMatches(params->alignSeqs[i].seq.getAligned(), params->alignSeqs[j].seq.getAligned(), params); }
-                        else { mismatch = calcMisMatches(params->alignSeqs[i].filteredSeq, params->alignSeqs[j].filteredSeq, params); }
+                        if (params->method == "unaligned") { mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(), params->alignSeqs[j]->seq.getAligned(), params); }
+                        else { mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq, params->alignSeqs[j]->filteredSeq, params); }
                         
                         if (mismatch <= params->diffs) {
                             //merge
-                            params->alignSeqs[j].names += ',' + params->alignSeqs[i].names;
-                            params->alignSeqs[j].numIdentical += params->alignSeqs[i].numIdentical;
+                            params->alignSeqs[j]->names += ',' + params->alignSeqs[i]->names;
+                            params->alignSeqs[j]->numIdentical += params->alignSeqs[i]->numIdentical;
                             
-                            mapFile[j] = params->alignSeqs[i].seq.getName() + "\t" + toString(params->alignSeqs[i].numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[i].seq.getAligned() + "\n" + mapFile[i];
-                            params->alignSeqs[i].numIdentical = 0;
+                            mapFile[j] = params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n" + mapFile[i];
+                            params->alignSeqs[i]->numIdentical = 0;
                             originalCount.erase(i);
                             mapFile[i] = "";
                             count++;
@@ -397,15 +481,15 @@ int process(string newMapFile, preClusterData* params){
             }
             
             for (int i = 0; i < numSeqs; i++) {
-                if (params->alignSeqs[i].numIdentical != 0) {
-                    out << "ideal_seq_" << (i+1) << '\t' << params->alignSeqs[i].numIdentical << endl  << params->alignSeqs[i].seq.getName() + "\t" + toString(params->alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i].seq.getAligned() + "\n" << mapFile[i] << endl;
+                if (params->alignSeqs[i]->numIdentical != 0) {
+                    out << "ideal_seq_" << (i+1) << '\t' << params->alignSeqs[i]->numIdentical << endl  << params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n" << mapFile[i] << endl;
                 }
             }
             
         }
         out.close();
         
-        if(numSeqs % 100 != 0)	{ params->m->mothurOut(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
+        if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
         
         return count;
         
@@ -416,36 +500,36 @@ int process(string newMapFile, preClusterData* params){
     }
 }
 /**************************************************************************************************/
-void filterSeqs(preClusterData* params){
+void filterSeqs(vector<seqPNode*>& alignSeqs, int length, MothurOut* m){
     try {
         string filterString = "";
         Filters F;
         
-        F.setLength(params->length);
+        F.setLength(length);
         F.initialize();
-        F.setFilter(string(params->length, '1'));
+        F.setFilter(string(length, '1'));
         
-        for (int i = 0; i < params->alignSeqs.size(); i++) { F.getFreqs(params->alignSeqs[i].seq); }
+        for (int i = 0; i < alignSeqs.size(); i++) { F.getFreqs(alignSeqs[i]->seq); }
         
-        F.setNumSeqs(params->alignSeqs.size());
+        F.setNumSeqs(alignSeqs.size());
         F.doVerticalAllBases();
         filterString = F.getFilter();
         
         //run filter
-        for (int i = 0; i < params->alignSeqs.size(); i++) {
-            if (params->m->getControl_pressed()) { break; }
-            params->alignSeqs[i].filteredSeq = "";
-            string align = params->alignSeqs[i].seq.getAligned();
-            for(int j=0;j<params->length;j++){ if(filterString[j] == '1'){ params->alignSeqs[i].filteredSeq += align[j]; } }
+        for (int i = 0; i < alignSeqs.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            alignSeqs[i]->filteredSeq = "";
+            string align = alignSeqs[i]->seq.getAligned();
+            for(int j=0;j<length;j++){ if(filterString[j] == '1'){ alignSeqs[i]->filteredSeq += align[j]; } }
         }
     }
     catch(exception& e) {
-        params->m->errorOut(e, "PreClusterCommand", "filterSeqs");
+        m->errorOut(e, "PreClusterCommand", "filterSeqs");
         exit(1);
     }
 }
 /**************************************************************************************************/
-long long readFASTA(CountTable ct, preClusterData* params){
+vector<seqPNode*> readFASTA(CountTable ct, preClusterData* params, long long& num){
     try {
         map<string, string> nameMap;
         map<string, string>::iterator it;
@@ -454,10 +538,11 @@ long long readFASTA(CountTable ct, preClusterData* params){
         ifstream inFasta;
         params->util.openInputFile(params->fastafile, inFasta);
         set<int> lengths;
+        vector<seqPNode*> alignSeqs;
         
         while (!inFasta.eof()) {
             
-            if (params->m->getControl_pressed()) { inFasta.close(); return 0; }
+            if (params->m->getControl_pressed()) { inFasta.close(); break; }
             
             Sequence seq(inFasta);  params->util.gobble(inFasta);
             
@@ -469,15 +554,15 @@ long long readFASTA(CountTable ct, preClusterData* params){
                     else{
                         string second = it->second;
                         int numReps = params->util.getNumNames(second);
-                        seqPNode tempNode(numReps, seq, second);
-                        params->alignSeqs.push_back(tempNode);
+                        seqPNode* tempNode = new seqPNode(numReps, seq, second);
+                        alignSeqs.push_back(tempNode);
                         lengths.insert(seq.getAligned().length());
                     }
                 }else { //no names file, you are identical to yourself
                     int numRep = 1;
                     if (params->hasCount) { numRep = ct.getNumSeqs(seq.getName()); }
-                    seqPNode tempNode(numRep, seq, seq.getName());
-                    params->alignSeqs.push_back(tempNode);
+                    seqPNode* tempNode = new seqPNode(numRep, seq, seq.getName());
+                    alignSeqs.push_back(tempNode);
                     lengths.insert(seq.getAligned().length());
                 }
             }
@@ -487,12 +572,51 @@ long long readFASTA(CountTable ct, preClusterData* params){
         params->length = *(lengths.begin());
         
         if (lengths.size() > 1) { params->method = "unaligned"; }
-        else if (lengths.size() == 1) {  params->method = "aligned"; filterSeqs(params); }
+        else if (lengths.size() == 1) {  params->method = "aligned"; filterSeqs(alignSeqs, params->length, params->m); }
         
-        return params->alignSeqs.size();
+        //sort seqs by number of identical seqs
+        if (params->topdown) { sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);  }
+        else {  sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityDownTop);  }
+        
+        return alignSeqs;
     }
     catch(exception& e) {
         params->m->errorOut(e, "PreClusterCommand", "readFASTA");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+void print(string newfasta, string newname, preClusterData* params){
+    try {
+        ofstream outFasta;
+        ofstream outNames;
+        
+        params->util.openOutputFile(newfasta, outFasta);
+        params->util.openOutputFile(newname, outNames);
+        
+        if (params->countfile != "")  { outNames << "Representative_Sequence\ttotal\n";  }
+        
+        if (params->countfile != "") {
+            for (int i = 0; i < params->alignSeqs.size(); i++) {
+                if (params->alignSeqs[i]->numIdentical != 0) {
+                    params->alignSeqs[i]->seq.printSequence(outFasta);
+                    outNames << params->alignSeqs[i]->seq.getName() << '\t' << params->alignSeqs[i]->numIdentical << endl;
+                }
+            }
+        }else {
+            for (int i = 0; i < params->alignSeqs.size(); i++) {
+                if (params->alignSeqs[i]->numIdentical != 0) {
+                    params->alignSeqs[i]->seq.printSequence(outFasta);
+                    outNames << params->alignSeqs[i]->seq.getName() << '\t' << params->alignSeqs[i]->names << endl;
+                }
+            }
+        }
+        outFasta.close();
+        outNames.close();
+        
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "PreClusterCommand", "printData");
         exit(1);
     }
 }
@@ -557,14 +681,14 @@ int PreClusterCommand::execute(){
             params->setVariables(0,0, diffs, topdown, method, align, match, misMatch, gapOpen, gapExtend);
             
             //reads fasta file and return number of seqs
-			int numSeqs = readFASTA(ct, params); //fills alignSeqs and makes all seqs active
+            long long numSeqs = 0; params->alignSeqs = readFASTA(ct, params, numSeqs); //fills alignSeqs and makes all seqs active
 		
 			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
 	
 			if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine();  return 0;  }
 			if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine();  return 0;  }
 			
-			int count = process(newMapFile, params);
+			int count = process("", newMapFile, params);
 			outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
 			
 			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
@@ -573,7 +697,7 @@ int PreClusterCommand::execute(){
 			m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
 			if (countfile != "") { newNamesFile = newCountFile; }
             print(newFastaFile, newNamesFile, params);
-            			
+            for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); 
 		}
 				
@@ -609,93 +733,63 @@ int PreClusterCommand::execute(){
 	}
 }
 /**************************************************************************************************/
-void PreClusterCommand::print(string newfasta, string newname, preClusterData* params){
-    try {
-        ofstream outFasta;
-        ofstream outNames;
-
-        util.openOutputFile(newfasta, outFasta);
-        util.openOutputFile(newname, outNames);
-
-        if (countfile != "")  { outNames << "Representative_Sequence\ttotal\n";  }
-        
-        if (countfile != "") {
-            for (int i = 0; i < params->alignSeqs.size(); i++) {
-                if (params->alignSeqs[i].numIdentical != 0) {
-                    params->alignSeqs[i].seq.printSequence(outFasta);
-                    outNames << params->alignSeqs[i].seq.getName() << '\t' << params->alignSeqs[i].numIdentical << endl;
-                }
-            }
-        }else {
-            for (int i = 0; i < params->alignSeqs.size(); i++) {
-                if (params->alignSeqs[i].numIdentical != 0) {
-                    params->alignSeqs[i].seq.printSequence(outFasta);
-                    outNames << params->alignSeqs[i].seq.getName() << '\t' << params->alignSeqs[i].names << endl;
-                }
-            }
-        }
-        outFasta.close();
-        outNames.close();
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "PreClusterCommand", "printData");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
-long long loadSeqs(map<string, string>& thisName, vector<Sequence>& thisSeqs, map<string, int>& thisCount, string group, preClusterData* params){
+vector<seqPNode*> loadSeqs(map<string, string>& thisName, vector<Sequence>& thisSeqs, map<string, int>& thisCount, string group, long long& num, bool hasName, bool hasCount, int& length, string& method, bool topdown){
+    MothurOut* m = MothurOut::getInstance();
     try {
         set<int> lengths;
-        params->alignSeqs.clear();
-        bool error = false;
+        bool error = false; num = 0;
+        Utils util;
+        vector<seqPNode*> alignSeqs;
         
         for (int i = 0; i < thisSeqs.size(); i++) {
             
-            if (params->m->getControl_pressed()) { return 0; }
+            if (m->getControl_pressed()) { return alignSeqs; }
             
-            if (params->hasName) {
+            if (hasName) {
                 map<string, string>::iterator it = thisName.find(thisSeqs[i].getName());
                 
                 //should never be true since parser checks for this
-                if (it == thisName.end()) { params->m->mothurOut("[ERROR]: " + thisSeqs[i].getName() + " is not in your names file, please correct.\n"); error = true; }
+                if (it == thisName.end()) { m->mothurOut("[ERROR]: " + thisSeqs[i].getName() + " is not in your names file, please correct.\n"); error = true; }
                 else{
                     //get number of reps
-                    int numReps = params->util.getNumNames(it->second);
-                    seqPNode tempNode(numReps, thisSeqs[i], it->second);
-                    params->alignSeqs.push_back(tempNode);
+                    int numReps = util.getNumNames(it->second);
+                    seqPNode* tempNode = new seqPNode(numReps, thisSeqs[i], it->second);
+                    alignSeqs.push_back(tempNode);
                     lengths.insert(thisSeqs[i].getAligned().length());
                 }
             }else { //no names file, you are identical to yourself
                 int numRep = 1;
-                if (params->hasCount) {
+                if (hasCount) {
                     map<string, int>::iterator it2 = thisCount.find(thisSeqs[i].getName());
                     
                     //should never be true since parser checks for this
-                    if (it2 == thisCount.end()) { params->m->mothurOut("[ERROR]: " + thisSeqs[i].getName() + " is not in your count file, please correct.\n"); error = true; }
+                    if (it2 == thisCount.end()) { m->mothurOut("[ERROR]: " + thisSeqs[i].getName() + " is not in your count file, please correct.\n"); error = true; }
                     else { numRep = it2->second;  }
                 }
-                seqPNode tempNode(numRep, thisSeqs[i], thisSeqs[i].getName());
-                params->alignSeqs.push_back(tempNode);
+                seqPNode* tempNode = new seqPNode(numRep, thisSeqs[i], thisSeqs[i].getName());
+                alignSeqs.push_back(tempNode);
                 lengths.insert(thisSeqs[i].getAligned().length());
             }
         }
         
-        params->length = *(lengths.begin());
+        length = *(lengths.begin());
         
-        if (lengths.size() > 1) { params->method = "unaligned"; }
-        else if (lengths.size() == 1) {  params->method = "aligned"; filterSeqs(params); }
+        if (lengths.size() > 1) { method = "unaligned"; }
+        else if (lengths.size() == 1) {  method = "aligned"; filterSeqs(alignSeqs, length, m); }
         
         //sanity check
-        if (error) { params->m->setControl_pressed(true); }
+        if (error) { m->setControl_pressed(true); }
         
         thisSeqs.clear();
         
-        return params->alignSeqs.size();
+        //sort seqs by number of identical seqs
+        if (topdown) { sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);  }
+        else {  sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityDownTop);  }
+
+        return alignSeqs;
     }
-    
     catch(exception& e) {
-        params->m->errorOut(e, "PreClusterCommand", "loadSeqs");
+        m->errorOut(e, "PreClusterCommand", "loadSeqs");
         exit(1);
     }
 }
@@ -707,25 +801,25 @@ void printData(string group, preClusterData* params){
         if (params->hasCount) {
             if (group != "") {
                 for (int i = 0; i < params->alignSeqs.size(); i++) {
-                    if (params->alignSeqs[i].numIdentical != 0) {
-                        params->alignSeqs[i].seq.printSequence(params->newFName);
-                        params->newNName->write(group + '\t' + params->alignSeqs[i].seq.getName() + '\t' + params->alignSeqs[i].names + '\n');
+                    if (params->alignSeqs[i]->numIdentical != 0) {
+                        params->alignSeqs[i]->seq.printSequence(params->newFName);
+                        params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
                     }
                 }
             }
             else {
                 for (int i = 0; i < params->alignSeqs.size(); i++) {
-                    if (params->alignSeqs[i].numIdentical != 0) {
-                        params->alignSeqs[i].seq.printSequence(params->newFName);
-                        params->newNName->write(params->alignSeqs[i].seq.getName()  + '\t' + toString(params->alignSeqs[i].numIdentical) + '\n');
+                    if (params->alignSeqs[i]->numIdentical != 0) {
+                        params->alignSeqs[i]->seq.printSequence(params->newFName);
+                        params->newNName->write(params->alignSeqs[i]->seq.getName()  + '\t' + toString(params->alignSeqs[i]->numIdentical) + '\n');
                     }
                 }
             }
         }else {
             for (int i = 0; i < params->alignSeqs.size(); i++) {
-                if (params->alignSeqs[i].numIdentical != 0) {
-                    params->alignSeqs[i].seq.printSequence(params->newFName);
-                    params->newNName->write(group + '\t' + params->alignSeqs[i].seq.getName() + '\t' + params->alignSeqs[i].names + '\n');
+                if (params->alignSeqs[i]->numIdentical != 0) {
+                    params->alignSeqs[i]->seq.printSequence(params->newFName);
+                    params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
                 }
             }
         }
@@ -764,19 +858,18 @@ long long driverGroups(preClusterData* params){
             vector<Sequence> thisSeqs;
 			if (params->groupfile != "")        {  thisSeqs = parser->getSeqs(params->groups[i]);       }
             else if (params->hasCount)          { thisSeqs = cparser->getSeqs(params->groups[i]);       }
-			
             if (params->hasName)                {  thisNameMap = parser->getNameMap(params->groups[i]); }
             
             map<string, int> thisCount;
             if (params->hasCount) { thisCount = cparser->getCountTable(params->groups[i]);  }
-			numSeqs = loadSeqs(thisNameMap, thisSeqs, thisCount, params->groups[i], params);
+			params->alignSeqs = loadSeqs(thisNameMap, thisSeqs, thisCount, params->groups[i], numSeqs, params->hasName, params->hasCount, params->length, params->method, params->topdown);
 			
 			if (params->m->getControl_pressed()) {   return 0; }
 			
             if (params->method == "aligned") { if (params->diffs > params->length) { params->m->mothurOut("[ERROR]: diffs is greater than your sequence length.\n"); params->m->setControl_pressed(true); return 0;  } }
 			
             string extension = params->groups[i]+".map";
-			long long count = process(params->newMName+extension, params);
+			long long count = process(params->groups[i]+"\t", params->newMName+extension, params);
 			params->outputNames.push_back(params->newMName+extension); params->outputTypes["map"].push_back(params->newMName+extension);
 			
 			if (params->m->getControl_pressed()) {  return 0; }
@@ -784,6 +877,7 @@ long long driverGroups(preClusterData* params){
 			params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(params->alignSeqs.size()) + ".\n");
 			params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
 			printData(params->groups[i], params);
+            for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
 			
 			params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(count) + " sequences.\n");
 		}
