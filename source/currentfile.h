@@ -72,7 +72,7 @@ class CurrentFile {
         void setAccnosFile(string f)		{ accnosfile = util.getFullPathName(f);			}
         void setTaxonomyFile(string f)		{ taxonomyfile = util.getFullPathName(f);       }
         void setConsTaxonomyFile(string f)  { constaxonomyfile = util.getFullPathName(f);	}
-        void setProgramPath(string f)       { mothurProgramPath = util.getFullPathName(f);	}
+        void setProgramPath(string f)       {  mothurProgramPath = util.getFullPathName(f);	}
         void setFileFile(string f)          { filefile = util.getFullPathName(f);           }
     
         //current files - if you add a new type you must edit optionParser->getParameters, get.current and set.current commands and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes/hasCurrentFiles. add a get and set function.

@@ -279,7 +279,6 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
 
 /***********************************************************************/
 /***********************************************************************/
-//This function opens the batchfile to be used by BatchEngine::getInput.
 ScriptEngine::ScriptEngine(string path, string commandString){
 	try {
 		

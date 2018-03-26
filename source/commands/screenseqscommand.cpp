@@ -1035,12 +1035,6 @@ int ScreenSeqsCommand::getSummary(){
 
 void driverScreen(sumScreenData* params){
 	try {
-		ofstream goodFile;
-		params->util.openOutputFile(params->goodFName, goodFile);
-		
-		ofstream badAccnosFile;
-		params->util.openOutputFile(params->badAccnosFName, badAccnosFile);
-		
 		ifstream inFASTA;
 		params->util.openInputFile(params->filename, inFASTA);
 
@@ -1080,9 +1074,10 @@ void driverScreen(sumScreenData* params){
                 }
 				
 				if(goodSeq == 1){
-					currSeq.printSequence(goodFile);	
+					currSeq.printSequence(params->outputWriter);
 				}else{
-					badAccnosFile << currSeq.getName() << '\t' << trashCode.substr(0, trashCode.length()-1) << endl;
+					string badAccnos = currSeq.getName() + '\t' + trashCode.substr(0, trashCode.length()-1) + '\n';
+                    params->accnosWriter->write(badAccnos);
 					params->badSeqNames[currSeq.getName()] = trashCode;
 				}
                 params->count++;
@@ -1101,10 +1096,7 @@ void driverScreen(sumScreenData* params){
 		//report progress
 		if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n"); 	}
 		
-			
-		goodFile.close();
 		inFASTA.close();
-		badAccnosFile.close();
 	}
 	catch(exception& e) {
 		params->m->errorOut(e, "ScreenSeqsCommand", "driverScreen");
@@ -1145,16 +1137,26 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         
         time_t start, end;
         time(&start);
+        
+        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(goodFileName);
+        auto synchronizedAccnosFile = std::make_shared<SynchronizedOutputFile>(badAccnos);
+        
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            string extension = toString(i+1) + ".temp";
-            sumScreenData* dataBundle = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN, badSeqNames, filename, summaryfile, contigsreport, m, lines[i+1].start, lines[i+1].end,goodFileName+extension, badAccnos+extension);
+            
+            OutputWriter* outputThreadWriter = new OutputWriter(synchronizedOutputFile);
+            OutputWriter* accnosThreadWriter = new OutputWriter(synchronizedAccnosFile);
+            
+            sumScreenData* dataBundle = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN, badSeqNames, filename, summaryfile, contigsreport, lines[i+1].start, lines[i+1].end,outputThreadWriter, accnosThreadWriter);
             
             data.push_back(dataBundle);
             workerThreads.push_back(new thread(driverScreen, dataBundle));
         }
         
-        sumScreenData* dataBundle = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN, badSeqNames, filename, summaryfile, contigsreport, m, lines[0].start, lines[0].end,goodFileName, badAccnos);
+        OutputWriter* outputThreadWriter = new OutputWriter(synchronizedOutputFile);
+        OutputWriter* accnosThreadWriter = new OutputWriter(synchronizedAccnosFile);
+
+        sumScreenData* dataBundle = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN, badSeqNames, filename, summaryfile, contigsreport, lines[0].start, lines[0].end,outputThreadWriter, accnosThreadWriter);
         driverScreen(dataBundle);
         num = dataBundle->count;
         for (map<string, string>::iterator it = dataBundle->badSeqNames.begin(); it != dataBundle->badSeqNames.end(); it++) {	badSeqNames[it->first] = it->second;       }
@@ -1166,6 +1168,8 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
             
             for (map<string, string>::iterator it = data[i]->badSeqNames.begin(); it != data[i]->badSeqNames.end(); it++) {	badSeqNames[it->first] = it->second;       }
             
+            delete data[i]->outputWriter;
+            delete data[i]->accnosWriter;
             delete data[i];
             delete workerThreads[i];
         }
@@ -1173,15 +1177,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         
         time(&end);
         m->mothurOut("\nIt took " + toString(difftime(end, start)) + " secs to screen " + toString(num) + " sequences, removed " + toString(numRemoved) + ".\n\n");
-        
-        for (int i = 0; i < processors-1; i++) {
-            string extension = toString(i+1) + ".temp";
-            util.appendFiles((goodFileName + extension), goodFileName);
-            util.mothurRemove((goodFileName + extension));
-            
-            util.appendFiles(badAccnos + extension, badAccnos);
-            util.mothurRemove(badAccnos + extension);
-        }
+        delete outputThreadWriter; delete accnosThreadWriter;
         delete dataBundle;
         return num;
         

@@ -12,6 +12,7 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "sequence.hpp"
+#include "writer.h"
 
 class ScreenSeqsCommand : public Command {
 	
@@ -70,10 +71,12 @@ struct sumScreenData {
     map<string, string> badSeqNames;
     string summaryfile, contigsreport;
     Utils util;
+    OutputWriter* outputWriter;
+    OutputWriter* accnosWriter;
 	
 	
 	sumScreenData(){}
-	sumScreenData(int s, int e, int a, int h, int minl, int maxl, int mn, map<string, string> bs, string f, string sum, string cont, MothurOut* mout, unsigned long long st, unsigned long long en, string gf, string bf) {
+    sumScreenData(int s, int e, int a, int h, int minl, int maxl, int mn, map<string, string> bs, string f, string sum, string cont, unsigned long long st, unsigned long long en, OutputWriter* oWriter, OutputWriter* aWriter) {
 		startPos = s;
 		endPos = e;
 		minLength = minl;
@@ -82,9 +85,9 @@ struct sumScreenData {
 		maxHomoP = h;
         maxN = mn;
 		filename = f;
-        goodFName = gf;
-        badAccnosFName = bf;
-		m = mout;
+        outputWriter = oWriter;
+        accnosWriter = aWriter;
+        m = MothurOut::getInstance();
 		start = st;
 		end = en;
         summaryfile = sum;

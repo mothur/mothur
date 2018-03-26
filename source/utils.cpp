@@ -361,7 +361,10 @@ string Utils::getFullPathName(string fileName){
             }
             
             for (int i = index; i >= 0; i--) { newFileName = dirs[i] +  PATH_SEPARATOR + newFileName; }
+            
+#if defined NON_WINDOWS
             newFileName =  PATH_SEPARATOR +  newFileName;
+#endif
             return newFileName;
         }
     }
@@ -434,6 +437,19 @@ string Utils::findProgramPath(string programName){
             }
         }
         
+#if defined NON_WINDOWS
+#else
+        if (pPath == "") {
+            char buffer[MAX_PATH];
+            GetModuleFileName(NULL, buffer, MAX_PATH) ;
+            cout<<buffer<<endl;
+            pPath = buffer;
+            pPath = getPathName(pPath) + programName;
+            
+            //if this file exists
+            if (fileExists(pPath)) { pPath = getFullPathName(pPath); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } }
+        }
+#endif
         return pPath;
     }
     catch(exception& e) {
