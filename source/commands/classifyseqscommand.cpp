@@ -591,18 +591,39 @@ int ClassifySeqsCommand::execute(){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+struct classifyData {
+    OutputWriter* taxTWriter;
+    OutputWriter* taxWriter;
+    OutputWriter* accnosWriter;
+    string search, taxonomyFileName, templateFileName, method, filename;
+    unsigned long long start;
+    unsigned long long end;
+    MothurOut* m;
+    Classify* classify;
+    float match, misMatch, gapOpen, gapExtend;
+    int count, kmerSize, threadID, cutoff, iters, numWanted;
+    bool probs, flip, writeShortcuts;
+    Utils util;
+    
+    classifyData(){}
+    classifyData(OutputWriter* acc, bool p, OutputWriter* a, OutputWriter* r, string f, unsigned long long st, unsigned long long en, bool fli, Classify* c) {
+        accnosWriter = acc;
+        taxWriter = a;
+        taxTWriter = r;
+        filename = f;
+        m = MothurOut::getInstance();
+        start = st;
+        end = en;
+        probs = p;
+        flip = fli;
+        count = 0;
+        classify = c;
+    }
+};
 //**********************************************************************************************************************
 void driverClassifier(classifyData* params){
     try {
-        ofstream outTax;
-        params->util.openOutputFile(params->taxFName, outTax);
-        
-        ofstream outTaxSimple;
-        params->util.openOutputFile(params->tempTFName, outTaxSimple);
-        
-        ofstream outAcc;
-        params->util.openOutputFile(params->accnos, outAcc);
-        
         ifstream inFASTA;
         params->util.openInputFile(params->filename, inFASTA);
         
@@ -611,7 +632,7 @@ void driverClassifier(classifyData* params){
         inFASTA.seekg(params->start);
         
         bool done = false;
-        
+        string taxBuffer = ""; string taxTBuffer = ""; string accnosBuffer = "";
         while (!done) {
             if (params->m->getControl_pressed()) { break; }
             
@@ -627,15 +648,12 @@ void driverClassifier(classifyData* params){
                 if (taxonomy == "unknown;") { params->m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); params->m->mothurOutEndLine(); }
                 
                 //output confidence scores or not
-                if (params->probs) {
-                    outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
-                }else{
-                    outTax << candidateSeq->getName() << '\t' << simpleTax << endl;
-                }
+                if (params->probs)  { taxBuffer += candidateSeq->getName() + '\t' + taxonomy + '\n';    }
+                else                { taxBuffer += candidateSeq->getName() + '\t' + simpleTax + '\n';   }
                 
-                if (flipped) { outAcc << candidateSeq->getName() << endl; }
+                if (flipped) { accnosBuffer += candidateSeq->getName() + '\n'; }
                 
-                outTaxSimple << candidateSeq->getName() << '\t' << simpleTax << endl;
+                taxTBuffer = candidateSeq->getName() + '\t' + simpleTax + '\n';
                 
                 params->count++;
             }
@@ -649,16 +667,23 @@ void driverClassifier(classifyData* params){
 #endif
             
             //report progress
-            if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count) +"\n"); 		}
+            if((params->count) % 100 == 0){
+                params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count) +"\n");
+                params->taxTWriter->write(taxTBuffer); taxTBuffer = "";
+                params->taxWriter->write(taxBuffer); taxBuffer = "";
+                if (accnosBuffer != "") { params->accnosWriter->write(accnosBuffer); accnosBuffer = ""; }
+            }
             
         }
         //report progress
-        if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n"); 		}
+        if((params->count) % 100 != 0){
+            params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n");
+            params->taxTWriter->write(taxTBuffer); taxTBuffer = "";
+            params->taxWriter->write(taxBuffer); taxBuffer = "";
+            if (accnosBuffer != "") { params->accnosWriter->write(accnosBuffer); accnosBuffer = ""; }
+        }
         
         inFASTA.close();
-        outTax.close();
-        outTaxSimple.close();
-        outAcc.close();
     }
     catch(exception& e) {
         params->m->errorOut(e, "ClassifySeqsCommand", "driver");
@@ -699,16 +724,27 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
             }
         }
 #endif
-        
+        auto synchronizedAccnosFile = std::make_shared<SynchronizedOutputFile>(accnos);
+        auto synchronizedTaxFile = std::make_shared<SynchronizedOutputFile>(taxFileName);
+        auto synchronizedTaxTFile = std::make_shared<SynchronizedOutputFile>(tempTaxFile);
+
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            classifyData* dataBundle = new classifyData((accnos + toString(i+1) + ".temp"), probs, (taxFileName + toString(i+1) + ".temp"), (tempTaxFile + toString(i+1) + ".temp"), filename, lines[i+1]->start, lines[i+1]->end, flip, classify);
+            OutputWriter* threadTaxWriter = new OutputWriter(synchronizedTaxFile);
+            OutputWriter* threadTaxTWriter = new OutputWriter(synchronizedTaxTFile);
+            OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedAccnosFile);
+            
+            classifyData* dataBundle = new classifyData(threadAccnosWriter, probs, threadTaxWriter, threadTaxTWriter, filename, lines[i+1]->start, lines[i+1]->end, flip, classify);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverClassifier, dataBundle));
         }
         
-        classifyData* dataBundle = new classifyData(accnos, probs, taxFileName, tempTaxFile, filename, lines[0]->start, lines[0]->end, flip, classify);
+        OutputWriter* threadTaxWriter = new OutputWriter(synchronizedTaxFile);
+        OutputWriter* threadTaxTWriter = new OutputWriter(synchronizedTaxTFile);
+        OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedAccnosFile);
+        
+        classifyData* dataBundle = new classifyData(threadAccnosWriter, probs, threadTaxWriter, threadTaxTWriter, filename, lines[0]->start, lines[0]->end, flip, classify);
         driverClassifier(dataBundle);
         num = dataBundle->count;
         
@@ -716,41 +752,17 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
             workerThreads[i]->join();
             num += data[i]->count;
             
+            delete data[i]->taxTWriter;
+            delete data[i]->taxWriter;
+            delete data[i]->accnosWriter;
+
             delete data[i];
             delete workerThreads[i];
         }
+        delete threadTaxWriter; delete threadTaxTWriter; delete threadAccnosWriter;
         delete dataBundle;
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to classify " + toString(num) + " sequences.\n\n");
-        
-        vector<string> nonBlankAccnosFiles;
-        if (!(util.isBlank(accnos))) { nonBlankAccnosFiles.push_back(accnos); }
-        else { util.mothurRemove(accnos); } //remove so other files can be renamed to it
-        
-        for (int i = 0; i < processors-1; i++) {
-            util.appendFiles((taxFileName + toString(i+1) + ".temp"), taxFileName);
-            util.appendFiles((tempTaxFile + toString(i+1) + ".temp"), tempTaxFile);
-            if (!(util.isBlank(accnos + toString(i+1) + ".temp"))) {
-                nonBlankAccnosFiles.push_back(accnos + toString(i+1) + ".temp");
-            }else { util.mothurRemove((accnos + toString(i+1) + ".temp"));  }
-            
-            util.mothurRemove((util.getFullPathName(taxFileName) + toString(i+1) + ".temp"));
-            util.mothurRemove((util.getFullPathName(tempTaxFile) + toString(i+1) + ".temp"));
-        }
-        
-        //append accnos files
-        if (nonBlankAccnosFiles.size() != 0) {
-            rename(nonBlankAccnosFiles[0].c_str(), accnos.c_str());
-            
-            for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-                util.appendFiles(nonBlankAccnosFiles[h], accnos);
-                util.mothurRemove(nonBlankAccnosFiles[h]);
-            }
-        }else { //recreate the accnosfile if needed
-            ofstream out;
-            util.openOutputFile(accnos, out);
-            out.close();
-        }
         
         return num;
 	}

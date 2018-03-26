@@ -72,40 +72,9 @@ private:
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts, relabund;
 	
-	//int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string); 
 };
 
-/**************************************************************************************************/
-struct classifyData {
-	string taxFName; 
-	string tempTFName; 
-	string filename;
-	string search, taxonomyFileName, templateFileName, method, accnos;
-	unsigned long long start;
-	unsigned long long end;
-	MothurOut* m;
-    Classify* classify;
-	float match, misMatch, gapOpen, gapExtend;
-	int count, kmerSize, threadID, cutoff, iters, numWanted;
-	bool probs, flip, writeShortcuts;
-    Utils util;
-	 
-	classifyData(){}
-    classifyData(string acc, bool p, string a, string r, string f, unsigned long long st, unsigned long long en, bool fli, Classify* c) {
-        accnos = acc;
-        taxFName = a;
-        tempTFName = r;
-        filename = f;
-        m = MothurOut::getInstance();
-        start = st;
-        end = en;
-        probs = p;
-        flip = fli;
-        count = 0;
-        classify = c;
-    }
-};
 /**************************************************************************************************/
 
 

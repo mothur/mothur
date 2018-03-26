@@ -4626,8 +4626,8 @@ bool Utils::hasConfidenceScore(string& taxon, float& confidence) {
 /**************************************************************************************************/
 float Utils::removeConfidences(string& tax) {
     try {
-        float dummy;
-        if (!hasConfidenceScore(tax, dummy))  { return 0; }
+        string temp = tax; float dummy; if (!hasConfidenceScore(temp, dummy)) { return 0; }
+        
         string taxon;
         string newTax = "";
         string confidenceScore = "0";
