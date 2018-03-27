@@ -361,13 +361,13 @@ long long Summary::summarizeFasta(string fastafile, string output) {
             string outputName = output + extension;
             if (output == "") {  outputName = "";  }
             
-            seqSumData* dataBundle = new seqSumData(fastafile, outputName, m, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
+            seqSumData* dataBundle = new seqSumData(fastafile, outputName, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverSummarize, dataBundle));
         }
         
-        seqSumData* dataBundle = new seqSumData(fastafile, output, m, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
+        seqSumData* dataBundle = new seqSumData(fastafile, output, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
         
         driverSummarize(dataBundle);
         num = dataBundle->count;
@@ -569,13 +569,13 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
+            seqSumData* dataBundle = new seqSumData(summaryfile, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverFastaSummarySummarize, dataBundle));
         }
         
-        seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
+        seqSumData* dataBundle = new seqSumData(summaryfile, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
         
         driverFastaSummarySummarize(dataBundle);
         num = dataBundle->count-1; //header line
@@ -727,7 +727,6 @@ void driverContigsSummarySummarize(seqSumData* params) {
         }
         
         in.close();
-        
     }
     catch(exception& e) {
         params->m->errorOut(e, "Summary", "driverContigsSummarySummarize");
@@ -762,16 +761,16 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            
-            seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: creating thread " + toString(i+1) + "\n"); }
+            seqSumData* dataBundle = new seqSumData(summaryfile, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverFastaSummarySummarize, dataBundle));
+            workerThreads.push_back(new thread(driverContigsSummarySummarize, dataBundle));
         }
         
-        seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
+        seqSumData* dataBundle = new seqSumData(summaryfile, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
         
-        driverFastaSummarySummarize(dataBundle);
+        driverContigsSummarySummarize(dataBundle);
         num = dataBundle->count-1; //header line
         total = dataBundle->total;
         ostartPosition = dataBundle->ostartPosition;
@@ -958,15 +957,15 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             
-            seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
+            seqSumData* dataBundle = new seqSumData(summaryfile, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverFastaSummarySummarize, dataBundle));
+            workerThreads.push_back(new thread(driverAlignSummarySummarize, dataBundle));
         }
         
-        seqSumData* dataBundle = new seqSumData(summaryfile, m, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
+        seqSumData* dataBundle = new seqSumData(summaryfile, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
         
-        driverFastaSummarySummarize(dataBundle);
+        driverAlignSummarySummarize(dataBundle);
         num = dataBundle->count-1; //header line
         total = dataBundle->total;
         sims = dataBundle->sims;

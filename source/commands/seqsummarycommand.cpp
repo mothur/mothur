@@ -329,9 +329,10 @@ int SeqSummaryCommand::execute(){
         if (((namefile == "") && (countfile == "")) && (summaryfile == "")) {  m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to summarize " + toString(numUniques) + " sequences.\n");  }
         else{  m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
         
-        m->mothurOutEndLine();
-        m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-        if ((summaryfile == "") && (contigsfile == "") && (alignfile == "")) { m->mothurOut(outputFile); m->mothurOutEndLine();	outputNames.push_back(outputFile); outputTypes["summary"].push_back(outputFile);
+        m->mothurOut("\nOutput File Names:\n ");
+        if ((summaryfile == "") && (contigsfile == "") && (alignfile == "")) {
+            m->mothurOut(outputFile); m->mothurOutEndLine();
+            outputNames.push_back(outputFile); outputTypes["summary"].push_back(outputFile);
             //set fasta file as new current fastafile
             string currentName = "";
             itTypes = outputTypes.find("summary");

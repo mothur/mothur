@@ -134,9 +134,9 @@ struct seqSumData {
     
     seqSumData(){}
     //FastaSummarize - output file created
-    seqSumData(string f, string sum, MothurOut* mout, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
+    seqSumData(string f, string sum, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
         filename = f;
-        m = mout;
+        m = MothurOut::getInstance();
         start = st;
         end = en;
         hasNameMap = na;
@@ -147,9 +147,9 @@ struct seqSumData {
     }
     
     //FastaSummarySummarize - no output files
-    seqSumData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
+    seqSumData(string f, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
         filename = f;
-        m = mout;
+        m = MothurOut::getInstance();
         start = st;
         end = en;
         hasNameMap = na;
