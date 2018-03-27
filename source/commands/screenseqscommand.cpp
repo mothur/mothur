@@ -1091,10 +1091,10 @@ void driverScreen(sumScreenData* params){
 			#endif
 			
 			//report progress
-			if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n"); 		}
+			if((params->count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
 		}
 		//report progress
-		if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n"); 	}
+		if((params->count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
 		
 		inFASTA.close();
 	}

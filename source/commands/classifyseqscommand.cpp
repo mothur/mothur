@@ -668,7 +668,7 @@ void driverClassifier(classifyData* params){
             
             //report progress
             if((params->count) % 100 == 0){
-                params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count) +"\n");
+                params->m->mothurOutJustToScreen(toString(params->count) +"\n");
                 params->taxTWriter->write(taxTBuffer); taxTBuffer = "";
                 params->taxWriter->write(taxBuffer); taxBuffer = "";
                 if (accnosBuffer != "") { params->accnosWriter->write(accnosBuffer); accnosBuffer = ""; }
@@ -677,7 +677,7 @@ void driverClassifier(classifyData* params){
         }
         //report progress
         if((params->count) % 100 != 0){
-            params->m->mothurOutJustToScreen("Processing sequence: " + toString(params->count)+"\n");
+            params->m->mothurOutJustToScreen(toString(params->count)+"\n");
             params->taxTWriter->write(taxTBuffer); taxTBuffer = "";
             params->taxWriter->write(taxBuffer); taxBuffer = "";
             if (accnosBuffer != "") { params->accnosWriter->write(accnosBuffer); accnosBuffer = ""; }
