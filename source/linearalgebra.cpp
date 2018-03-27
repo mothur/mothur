@@ -96,7 +96,9 @@ double LinearAlgebra::gammp(const double a, const double x) {
     try {
         double gamser,gammcf,gln;
         
-        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMP\n"); m->setControl_pressed(true); return 0.0;}
+        if (x < 0.0 || a <= 0.0) {
+            m->mothurOut("[ERROR]: Invalid arguments in routine GAMMP\n"); m->setControl_pressed(true); return 0.0;
+        }
         if (x < (a+1.0)) {
             gser(gamser,a,x,gln);
             return gamser;
@@ -1279,13 +1281,15 @@ double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pV
         double firstTerm = 12 / (double) (values.size()*(values.size()+1));
         double lastTerm = 3 * (values.size()+1);
         
-        H = firstTerm * middleTerm - lastTerm;
-       
+        H = (firstTerm * middleTerm) - lastTerm;
+        H = (int)(H*1000.0)/(1000.0); //resolves floating point issue
+        
         //adjust for ties
         if (TIES.size() != 0) {
             double sum = 0.0;
             for (int j = 0; j < TIES.size(); j++) { sum += ((TIES[j]*TIES[j]*TIES[j])-TIES[j]); }
-            double result = 1.0 - (sum / (double) ((values.size()*values.size()*values.size())-values.size()));
+            long long valuesDenom = ((values.size()*values.size()*values.size())-values.size());
+            double result = 1.0 - (sum / (double) valuesDenom);
             H /= result;
         }
         
