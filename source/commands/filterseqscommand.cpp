@@ -353,10 +353,7 @@ int FilterSeqsCommand::filterSequences() {
 /**************************************************************************************/
 void driverRunFilter(filterRunData* params) {
 	try {
-		ofstream out;
-		params->util.openOutputFile(params->outputFilename, out);
-		
-		ifstream in;
+        ifstream in;
 		params->util.openInputFile(params->filename, in);
 				
 		in.seekg(params->start);
@@ -366,6 +363,8 @@ void driverRunFilter(filterRunData* params) {
 
 		bool done = false;
 		params->count = 0;
+        
+        string outBuffer = "";
 	
 		while (!done) {
 				
@@ -378,7 +377,7 @@ void driverRunFilter(filterRunData* params) {
                 
 					for(int j=0;j<params->alignmentLength;j++){ if(params->filter[j] == '1'){ filterSeq += align[j]; } }
 					
-					out << '>' << seq.getName() << endl << filterSeq << endl;
+					outBuffer += '>' + seq.getName() + '\n' + filterSeq + '\n';
                 }
 				params->count++;
         
@@ -391,15 +390,12 @@ void driverRunFilter(filterRunData* params) {
 			#endif
 			
 			//report progress
-			if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
+            if((params->count) % 1000 == 0){	params->outputWriter->write(outBuffer); outBuffer = "";  params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
         }
 		//report progress
-		if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
+		if((params->count) % 1000 != 0){	params->outputWriter->write(outBuffer);  params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
 		
-		
-		out.close();
 		in.close();
-		
 	}
 	catch(exception& e) {
 		params->m->errorOut(e, "FilterSeqsCommand", "driverRunFilter");
@@ -419,39 +415,39 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
     
         time_t start, end;
         time(&start);
+        
+        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(filteredFastaName);
+        
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            string extension = toString(i+1) + ".temp";
-            filterRunData* dataBundle = new filterRunData(filter, filename, (filteredFastaName + extension), m, lines[i+1].start, lines[i+1].end, alignmentLength);
+            OutputWriter* threadWriter = new OutputWriter(synchronizedOutputFile);
+            
+            filterRunData* dataBundle = new filterRunData(filter, filename, threadWriter, lines[i+1].start, lines[i+1].end, alignmentLength);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverRunFilter, dataBundle));
         }
         
-        filterRunData* dataBundle = new filterRunData(filter, filename, filteredFastaName, m, lines[0].start, lines[0].end, alignmentLength);
+        OutputWriter* threadWriter = new OutputWriter(synchronizedOutputFile);
+        filterRunData* dataBundle = new filterRunData(filter, filename, threadWriter, lines[0].start, lines[0].end, alignmentLength);
         data.push_back(dataBundle);
         driverRunFilter(dataBundle);
         num = dataBundle->count;
-        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             
             num += data[i]->count;
             
+            delete data[i]->outputWriter;
             delete data[i];
             delete workerThreads[i];
         }
+        delete threadWriter;
         delete dataBundle;
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to filter " + toString(num) + " sequences.\n");
         
-        //append and remove temp files
-        for (int i=0;i<processors-1;i++) {
-            util.appendFiles((filteredFastaName + toString(i+1) + ".temp"), filteredFastaName);
-            util.mothurRemove((filteredFastaName + toString(i+1) + ".temp"));
-        }
-
         return num;
 	}
 	catch(exception& e) {
@@ -545,10 +541,10 @@ void driverCreateFilter(filterData* params) {
 			#endif
 			
 			//report progress
-			if((params->count) % 100 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
+			if((params->count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
 		}
 		//report progress
-		if((params->count) % 100 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
+		if((params->count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
 		in.close();
         
         if (error) { params->m->setControl_pressed(true); }
@@ -597,13 +593,13 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         time(&start);
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            filterData* dataBundle = new filterData(filename, m, lines[i+1].start, lines[i+1].end, alignmentLength, trump, doVertical, soft, hard, i+1);
+            filterData* dataBundle = new filterData(filename, lines[i+1].start, lines[i+1].end, alignmentLength, trump, doVertical, soft, hard, i+1);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverCreateFilter, dataBundle));
         }
         
-        filterData* dataBundle = new filterData(filename, m, lines[0].start, lines[0].end, alignmentLength, trump, doVertical, soft, hard, 0);
+        filterData* dataBundle = new filterData(filename, lines[0].start, lines[0].end, alignmentLength, trump, doVertical, soft, hard, 0);
         driverCreateFilter(dataBundle);
         
         num = dataBundle->count;

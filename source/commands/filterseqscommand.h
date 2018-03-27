@@ -72,9 +72,9 @@ struct filterData {
     Utils util;
 	
 	filterData(){}
-	filterData(string fn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength, char tr, bool vert, float so, string ha, int tid) {
+	filterData(string fn, unsigned long long st, unsigned long long en, int aLength, char tr, bool vert, float so, string ha, int tid) {
         filename = fn;
-		m = mout;
+		m = MothurOut::getInstance();
 		start = st;
 		end = en;
         trump = tr;
@@ -96,15 +96,16 @@ struct filterRunData {
     long long count;
     MothurOut* m;
     string filename;
-    string filter, outputFilename;
+    string filter;
+    OutputWriter* outputWriter;
     Utils util;
 	
 	filterRunData(){}
-	filterRunData(string f, string fn, string ofn, MothurOut* mout, unsigned long long st, unsigned long long en, int aLength) {
+	filterRunData(string f, string fn, OutputWriter* ofn, unsigned long long st, unsigned long long en, int aLength) {
         filter = f;
-        outputFilename = ofn;
+        outputWriter = ofn;
         filename = fn;
-		m = mout;
+        m = MothurOut::getInstance();
 		start = st;
 		end = en;
         alignmentLength = aLength;
