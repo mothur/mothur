@@ -164,8 +164,6 @@ string Engine::getCommand()  {
 //This function opens the batchfile to be used by BatchEngine::getInput.
 BatchEngine::BatchEngine(string path, string batchFileName){
 	try {
-		openedBatch = util.openInputFile(batchFileName, inputBatchFile);
-		
 		string temppath = path.substr(0, (path.find_last_of("othur")-5));
 	
 		//this will happen if you set the path variable to contain mothur's exe location
@@ -174,6 +172,12 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 		
         current->setProgramPath(util.getFullPathName(path));
         current->setBlastPath(current->getProgramPath());
+        
+        openedBatch = util.openInputFile(batchFileName, inputBatchFile, "no error");
+        if (!openedBatch) {
+            if (util.checkLocations(batchFileName, current->getLocations())) { openedBatch = util.openInputFile(batchFileName, inputBatchFile); }
+            else {  mout->mothurOut("[ERROR]: unable to open batch file, please correct.\n");  }
+        }
         
         //if you haven't set your own location
 #ifdef MOTHUR_FILES
@@ -199,10 +203,7 @@ BatchEngine::~BatchEngine(){	}
 bool BatchEngine::getInput(){
 	try {
 		//check if this is a valid batchfile
-		if (!openedBatch) {  
-			mout->mothurOut("unable to open batchfile\n");
-			return 1; 
-		}
+		if (!openedBatch) { return 1;  }
 	
 		string input = "";
 		string commandName = "";
