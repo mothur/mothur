@@ -73,8 +73,7 @@ private:
 	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir, countfile;
 	double threshold;
 	bool ignoreChimeras, aligned, abort;
-	int numRefs, processors;
-	int maxLength, totalBases, totalMatches;
+	int maxLength, totalBases, totalMatches, numRefs;
 	vector<string> outputNames;
     
     

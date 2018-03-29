@@ -25,7 +25,6 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pignorechimeras);
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pthreshold);
 		CommandParameter paligned("aligned", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(paligned);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -54,7 +53,6 @@ string SeqErrorCommand::getHelpString(){
         helpString += "The count parameter allows you to provide a count file associated with the fasta file.\n";
 		helpString += "The ignorechimeras parameter...\n";
 		helpString += "The threshold parameter...\n";
-		//helpString += "The processors parameter...\n";
 		helpString += "Example seq.error(...).\n";
 		;
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n";
@@ -264,10 +262,6 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			
             temp = validParameter.valid(parameters, "aligned");			if (temp == "not found"){	temp = "t";				}
 			aligned = util.isTrue(temp); 
-
-			//temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
-			//processors = current->setProcessors(temp);
-            processors=1;
 
 			if ((namesFileName == "") && (queryFileName != "")){
 				vector<string> files; files.push_back(queryFileName); 
