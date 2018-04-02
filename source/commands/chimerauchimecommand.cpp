@@ -391,11 +391,12 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                 m->mothurOut(uchimeCommand + " file does not exist. Checking path... \n");
                 //check to see if uchime is in the path??
                 ifstream in2;
-                string uLocation = "uchime"; uLocation += EXECUTABLE_EXT;
-                uLocation = util.findProgramPath(uLocation);
+                string uName = "uchime"; uName += EXECUTABLE_EXT;
+                string uLocation = util.findProgramPath(uName);
+                uLocation += uName;
                 ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
 
-                if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the uchime executable."); m->mothurOutEndLine(); abort = true; } 
+                if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the uchime executable.\n");  abort = true; }
                 else {  m->mothurOut("Found uchime in your path, using " + uLocation + "\n");uchimeLocation = uLocation; }
             }else {  uchimeLocation = uchimeCommand; }
             

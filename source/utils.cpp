@@ -381,10 +381,10 @@ string Utils::findProgramPath(string programName){
         //look in ./
         //is this the programs path?
         string tempIn = ".";
-        tempIn += PATH_SEPARATOR + programName;
+        tempIn += PATH_SEPARATOR;
         
         //if this file exists
-        if (fileExists(tempIn)) { pPath = getFullPathName(tempIn); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } return pPath;   }
+        if (fileExists(tempIn+programName)) { pPath = getFullPathName(tempIn); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } return pPath;   }
         
         string envPath = getenv("PATH");
         
@@ -419,7 +419,7 @@ string Utils::findProgramPath(string programName){
         if (m->getDebug()) { m->mothurOut("[DEBUG]: programPath = " + pPath + "\n"); }
         
         //add programName so it looks like what argv would look like
-        if (pPath != "") { pPath += PATH_SEPARATOR + programName;  }
+        if (pPath != "") { pPath += PATH_SEPARATOR;  }
         else {
             //okay programName is not in the path, so the folder programName is in must be in the path
             //lets find out which one
@@ -430,10 +430,10 @@ string Utils::findProgramPath(string programName){
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: looking in " + dirs[i] + " for " + programName + " \n"); }
                 
                 //is this the programs path?
-                string tempIn = dirs[i] + PATH_SEPARATOR + programName;
+                string tempIn = dirs[i] + PATH_SEPARATOR;
                 
                 //if this file exists
-                if (fileExists(tempIn)) { pPath = getFullPathName(tempIn); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } break;   }
+                if (fileExists(tempIn + programName)) { pPath = getFullPathName(tempIn); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } break;   }
             }
         }
         
@@ -442,12 +442,12 @@ string Utils::findProgramPath(string programName){
         if (pPath == "") {
             char buffer[MAX_PATH];
             GetModuleFileName(NULL, buffer, MAX_PATH) ;
-            cout<<buffer<<endl;
+
             pPath = buffer;
-            pPath = getPathName(pPath) + programName;
+            pPath = getPathName(pPath);
             
             //if this file exists
-            if (fileExists(pPath)) { pPath = getFullPathName(pPath); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } }
+            if (fileExists(pPath + programName)) { pPath = getFullPathName(pPath); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } }
         }
 #endif
         return pPath;

@@ -238,19 +238,10 @@ int CatchAllCommand::execute() {
             string cLocation = util.findProgramPath(programName);
             
             ifstream in2;
-            ableToOpen = util.openInputFile(cLocation, in2, "no error"); in2.close();
+            ableToOpen = util.openInputFile(cLocation+programName, in2, "no error"); in2.close();
 
-            if(!ableToOpen) {
-                programName = "catchall";
-                
-                string cLocation = util.findProgramPath(programName);
-                
-                ifstream in3;
-                ableToOpen = util.openInputFile(cLocation, in3, "no error"); in3.close();
-                
-                if(!ableToOpen) { m->mothurOut("[ERROR]: " + cLocation + " file does not exist. mothur requires the catchall executable."); m->mothurOutEndLine();  return 0; }else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
-            }
-            else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
+            if(!ableToOpen) { m->mothurOut("[ERROR]: " + cLocation + " file does not exist. mothur requires the catchall executable.\n"); return 0; }
+            else            {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation+programName; }
         }
         catchAllTest = util.getFullPathName(catchAllTest);
         

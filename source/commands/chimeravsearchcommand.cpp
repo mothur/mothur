@@ -366,6 +366,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                 ifstream in2;
                 string programName = "vsearch"; programName += EXECUTABLE_EXT;
                 string uLocation = util.findProgramPath(programName);
+                uLocation += programName;
                 ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
                 
                 if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }

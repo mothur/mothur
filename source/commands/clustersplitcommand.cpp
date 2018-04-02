@@ -1802,15 +1802,14 @@ bool ClusterSplitCommand::findVsearch(){
         bool ableToOpen = util.openInputFile(vsearchCommand, in, "no error"); in.close();
         if(!ableToOpen) {
             m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-            //check to see if vsearch is in the path??
             
             ifstream in2;
             string programName = "vsearch"; programName += EXECUTABLE_EXT;
             string uLocation = util.findProgramPath(programName);
-            ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
+            ableToOpen = util.openInputFile(uLocation+programName, in2, "no error"); in2.close();
             
-            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
-            else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
+            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  m->setControl_pressed(true);  }
+            else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation+programName; }
         }else {  vsearchLocation = vsearchCommand; }
         
         vsearchLocation = util.getFullPathName(vsearchLocation);

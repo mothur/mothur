@@ -460,10 +460,10 @@ int ClusterCommand::runVsearchCluster(){
             ifstream in2;
             string programName = "vsearch"; programName += EXECUTABLE_EXT;
             string uLocation = util.findProgramPath(programName);
-            ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
+            ableToOpen = util.openInputFile(uLocation+programName, in2, "no error"); in2.close();
             
-            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
-            else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
+            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  m->setControl_pressed(true);  }
+            else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation+programName; }
         }else {  vsearchLocation = vsearchCommand; }
         
         if (m->getControl_pressed()) {  return 0; }
