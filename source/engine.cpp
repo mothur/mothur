@@ -104,9 +104,7 @@ bool InteractEngine::getInput(){
                 mout->setControl_pressed(false);
                 mout->setExecuting(false);
                 
-            }else {
-                mout->mothurOut("Invalid.\n");
-            }
+            }else { mout->mothurOut("[ERROR]: Invalid.\n"); }
         }
 		return 1;
 	}
@@ -245,9 +243,7 @@ bool BatchEngine::getInput(){
                     mout->setControl_pressed(false);
                     mout->setExecuting(false);
 										
-				}else {		
-					mout->mothurOut("Invalid.\n");
-				}
+				}else {	 mout->mothurOut("[ERROR]: Invalid.\n"); }
 				
 			}
 			util.gobble(inputBatchFile);
@@ -361,7 +357,7 @@ bool ScriptEngine::getInput(){
                 mout->setControl_pressed(false);
                 mout->setExecuting(false);
                                 
-            }else {	mout->mothurOut("Invalid.\n"); }
+            }else {	mout->mothurOut("[ERROR]: Invalid.\n"); }
 		}
 		
 		return 1;
