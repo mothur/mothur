@@ -728,6 +728,7 @@ vector<bool> Utils::isGZ(string filename){
 
 int Utils::renameFile(string oldName, string newName){
     try {
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: renaming " + oldName + " to " + newName + "\n"); }
         
         if (oldName == newName) { return 0; }
         
@@ -737,12 +738,26 @@ int Utils::renameFile(string oldName, string newName){
         
 #if defined NON_WINDOWS
         if (exist) { //you could open it so you want to delete it
+            if(m->getDebug()) { m->mothurOut("[DEBUG]: removing old copy of " + newName + "\n"); }
             string command = "rm " + newName;
             system(command.c_str());
         }
         
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: mv " + oldName + " to " + newName + "\n"); }
+        
         string command = "mv " + oldName + " " + newName;
-        system(command.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command mv " + oldName + " " + newName + "\n"); }
+        
+        int returnCode = system(command.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: system command mv " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
+        
+        if (returnCode != 0) {
+            int renameOk = rename(oldName.c_str(), newName.c_str());
+        
+            if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
+        }
 #else
         mothurRemove(newName);
         int renameOk = rename(oldName.c_str(), newName.c_str());

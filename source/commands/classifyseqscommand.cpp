@@ -476,13 +476,11 @@ int ClassifySeqsCommand::execute(){
 						
             numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastaFileNames[s]);
 			
-			
-			if (!util.isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); 
+			if (!util.isBlank(newaccnosFile)) { m->mothurOut("\n[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences.\n");
                 outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
             }else { util.mothurRemove(newaccnosFile); }
 
-            m->mothurOutEndLine();
-            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences.\n\n");
             start = time(NULL);
             
             //read namefile
@@ -564,14 +562,12 @@ int ClassifySeqsCommand::execute(){
             if (groupMap != NULL) { delete groupMap; } delete taxaSum;
             util.mothurRemove(tempTaxonomyFile);
             
-            m->mothurOutEndLine();
-            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences.\n\n");
 			
 		}
         delete classify;
         
-        m->mothurOutEndLine();
-        m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names: \n");
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
         m->mothurOutEndLine();
 		
