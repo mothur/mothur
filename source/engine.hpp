@@ -23,8 +23,6 @@ public:
 	Engine(); 
 	virtual ~Engine(){}
 	virtual bool getInput() = 0;
-	virtual string getCommand();
-	//virtual string getOutputDir()			{	return current->getOutputDir();         }
 	virtual string getLogFileName()			{	return mout->getLogFileName();          }
 
 	vector<string> getOptions()		{	return options;		}
@@ -57,7 +55,9 @@ public:
 	InteractEngine(string);
 	~InteractEngine();
 	virtual bool getInput();
+    
 private:
+    string getCommand();
 	
 };
 
