@@ -21,7 +21,7 @@ PREFIX := ${CURDIR}
 OPTIMIZE ?= yes
 USEREADLINE ?= yes
 USEBOOST ?= yes
-LOGFILE_NAME ?= no
+LOGFILE_NAME ?= yes
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
@@ -33,7 +33,7 @@ endif
 
 # Set a static logfile name
 ifeq  ($(strip $(LOGFILE_NAME)),yes)
-    LOGFILE_NAME="\"mothur.logfile\""
+    LOGFILE_NAME="\"silent\""
 endif
 
 ifeq  ($(strip $(OPTIMIZE)),yes)
