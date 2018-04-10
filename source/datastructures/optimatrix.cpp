@@ -24,11 +24,11 @@ OptiMatrix::OptiMatrix(string d, string df, double c, bool s) : distFile(d), dis
 /***********************************************************************/
 OptiMatrix::OptiMatrix(string d, string nc, string f, string df, double c, bool s) : distFile(d), distFormat(df), format(f), cutoff(c), sim(s) {
     m = MothurOut::getInstance();
-    
+    cout << distFile << '\t' << distFormat << '\t' <<format<< '\t' <<cutoff<< '\t' << endl;
     if (format == "name") { namefile = nc; countfile = ""; }
     else if (format == "count") { countfile = nc; namefile = ""; }
     else { countfile = ""; namefile = ""; }
-    
+    cout << countfile << '\t' << namefile << '\t' <<format<< '\t' <<cutoff<< '\t' << endl;
     setBlastVariables(5, 0.10, true);
     if (distFormat == "phylip")         { readPhylip();     }
     else if (distFormat == "column")    { readColumn();     }
@@ -369,6 +369,8 @@ int OptiMatrix::readPhylip(){
 
 int OptiMatrix::readColumn(){
     try {
+        
+        cout << countfile << '\t' << namefile << '\t' <<format<< '\t' <<cutoff<< '\t' << endl;
         Utils util;
         map<string, int> nameAssignment;
         if (namefile != "") { nameAssignment = util.readNames(namefile); }

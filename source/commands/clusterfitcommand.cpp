@@ -33,7 +33,7 @@
 //**********************************************************************************************************************
 vector<string> ClusterFitCommand::setParameters(){
     try {
-        CommandParameter plist("list", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(plist);
+        CommandParameter plist("reflist", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(plist);
         CommandParameter pfasta("fasta", "InputTypes", "", "", "", "", "","list",false,true,true); parameters.push_back(pfasta);
         CommandParameter prepfasta("reffasta", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(prepfasta);
         CommandParameter pfastamap("fastamap", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(pfastamap);
@@ -66,11 +66,11 @@ vector<string> ClusterFitCommand::setParameters(){
 string ClusterFitCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The cluster.fit command parameter options are list, refcolumn, refname, refcount, fasta, name, count, method, cutoff, precision, metric, iters, initialize.\n";
+        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refname, refcount, fasta, name, count, method, cutoff, precision, metric, iters, initialize.\n";
         helpString += "The refcolumn parameter allow you to enter your reference data distance file, to reduce processing time. \n";
         helpString += "The fasta parameter allows you to enter your fasta file. \n";
         helpString += "The reffasta parameter allows you to enter your fasta file for your reference dataset. \n";
-        helpString += "The list parameter allows you to enter your list file for your reference dataset. \n";
+        helpString += "The reflist parameter allows you to enter your list file for your reference dataset. \n";
         helpString += "The name parameter allows you to enter your name file. \n";
         helpString += "The count parameter allows you to enter your count file.\nA count or name file is required if your distance file is in column format.\n";
         helpString += "The refname parameter allows you to enter your reference name file. \n";
@@ -193,12 +193,12 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
                     if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
                 }
                 
-                it = parameters.find("list");
+                it = parameters.find("reflist");
                 //user has given a template file
                 if(it != parameters.end()){
                     path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["list"] = inputDir + it->second;		}
+                    if (path == "") {	parameters["reflist"] = inputDir + it->second;		}
                 }
                 
                 it = parameters.find("refname");
@@ -224,45 +224,47 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["reffasta"] = inputDir + it->second;		}
                 }
-                
-                it = parameters.find("fastamap");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fastamap"] = inputDir + it->second;		}
-                }
-
             }
             
-            //for testing
-            fastaMapFile = validParameter.validFile(parameters, "fastamap");
-            if (fastaMapFile == "not open") { abort = true; }
-            else if (fastaMapFile == "not found") { fastaMapFile = ""; translate = false; }
-            else { translate = true; }
+            selfReference = true;
             
             //check for required parameters
             reffastafile = validParameter.validFile(parameters, "reffasta");
             if (reffastafile == "not open") { abort = true; }
-            else if (reffastafile == "not found") { m->mothurOut("[ERROR]: You must provide a reffasta file before you can use the cluster.fit command\n"); abort = true; reffastafile = ""; }
-            else { distfile = "";  format="column";  }
+            else if (reffastafile == "not found") { reffastafile = "";  }
+            else { distfile = "";  format="column";  selfReference = false; }
             
-            columnfile = validParameter.validFile(parameters, "refcolumn");
-            if (columnfile == "not open") { columnfile = ""; abort = true; }
-            else if (columnfile == "not found") { columnfile = ""; }
-            else {  distfile = columnfile; format = "column"; current->setColumnFile(columnfile);	}
+            refcolumnfile = validParameter.validFile(parameters, "refcolumn");
+            if (refcolumnfile == "not open") { refcolumnfile = ""; abort = true; }
+            else if (refcolumnfile == "not found") { refcolumnfile = ""; }
+            else {  distfile = refcolumnfile; format = "column"; current->setColumnFile(refcolumnfile);	selfReference = false; }
             
-            reflistfile = validParameter.validFile(parameters, "list");
+            reflistfile = validParameter.validFile(parameters, "reflist");
             if (reflistfile == "not open") { abort = true; }
-            else if (reflistfile == "not found") { m->mothurOut("[ERROR]: You must provide a reference list file before you can use the cluster.fit command\n"); abort = true; reflistfile = ""; }
+            else if (reflistfile == "not found") { reflistfile = ""; }
+            else { selfReference = false; }
             
             refnamefile = validParameter.validFile(parameters, "refname");
             if (refnamefile == "not open") { abort = true; }
             else if (refnamefile == "not found") { refnamefile = ""; }
+            else { selfReference = false; }
             
             refcountfile = validParameter.validFile(parameters, "refcount");
             if (refcountfile == "not open") { abort = true;  }
             else if (refcountfile == "not found") { refcountfile = ""; }
+            else { selfReference = false; }
+            
+            if (refcolumnfile != "") {
+                if ((refnamefile == "") && (refcountfile == "")){
+                    m->mothurOut("[ERROR]: You need to provide a reference namefile or reference countfile for your refcolumn file, aborting.\n"); refcolumnfile = ""; abort = true;
+                }
+            }
+            
+            fittedColumnName = "";
+            
+            if (!selfReference) { //if you are providing reference files, lets make sure we have all of them
+                if ((refcolumnfile == "") || (reffastafile == "") || (reflistfile == "")) { m->mothurOut("[ERROR]: When providing a reference file, you must provide a reffasta, refcolumn, reflist and refcount or refname, aborting.\n");  abort = true; }
+            }
             
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not open") { abort = true; }
@@ -288,12 +290,18 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             if (method == "opti") { }
             else { m->mothurOut("[ERROR]: " + method + " is not a valid cluster fitting method.  Valid algorithm is opti.\n"); abort = true; }
             
-            if (columnfile != "") {
-                if ((refnamefile == "") && (refcountfile == "")){
-                    m->mothurOut("You need to provide a reference namefile or reference countfile if you are going to use the column format, ignoring distance matrix.\n"); columnfile = "";
+            
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: count or name.\n"); abort = true; }
+            
+            if ((namefile == "") && (countfile == "")) {
+                namefile = current->getNameFile();
+                if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n"); }
+                else {
+                    countfile = current->getCountFile();
+                    if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); }
+                    else {  m->mothurOut("[ERROR]: You need to provide a namefile or countfile if you are going to use the column format.\n");  abort = true; }
                 }
             }
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: count or name.\n"); abort = true; }
             
             string temp = validParameter.valid(parameters, "precision");
             if (temp == "not found") { temp = "100"; }
@@ -320,6 +328,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             temp = validParameter.valid(parameters, "cutoff");
             if (temp == "not found") { temp = "0.03"; }
             util.mothurConvert(temp, cutoff);
+            
         }
     }
     catch(exception& e) {
@@ -336,26 +345,27 @@ int ClusterFitCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
     
-        time_t estart = time(NULL);
-        
-        //calc sens.spec values for reference
-        InputData input(reflistfile, "list", nullVector);
-        ListVector* list = input.getListVector();
-        
-        calcReferenceValues(list); //creates distance file if needed
-
-        //calc distance matrix for fasta file and distances between fasta file and reffasta file
-        string newDistFile = calcDists(list);
-        
-        OptiMatrix matrix(newDistFile, combinedNameFile, combinedNameOrCount, "column", cutoff, false); util.mothurRemove(combinedNameFile);
-        
-        runOptiCluster(matrix, list);
-        
-        //create list file for new data
-        
-        if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
-        
-        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to fit sequences to reference OTUs.\n");
+        if (selfReference) { }
+        else {
+            time_t estart = time(NULL);
+            
+            //calc sens.spec values for reference
+            InputData input(reflistfile, "list", nullVector);
+            ListVector* list = input.getListVector();
+            
+            calcReferenceValues(list); //creates distance file if needed
+            
+            //calc distance matrix for fasta file and distances between fasta file and reffasta file
+            string newDistFile = calcDists(list);
+            cout << "countfile = " << countfile << '\t' << combinedNameOrCount << '\t' << combinedNameFile << endl;
+            OptiMatrix matrix(newDistFile, combinedNameFile, combinedNameOrCount, "column", cutoff, false); util.mothurRemove(combinedNameFile);
+            
+            runOptiCluster(matrix, list);
+            
+            if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
+            
+            m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to fit sequences to reference OTUs.\n");
+        }
         
         //set list file as new current listfile
         string currentName = "";
@@ -383,7 +393,7 @@ void ClusterFitCommand::calcReferenceValues(ListVector* list) {
         if (refcountfile != "")     { nameOrCount = "count"; thisNamefile = refcountfile;   }
         else if (refnamefile != "") { nameOrCount = "name"; thisNamefile = refnamefile;     }
         
-        distfile = columnfile;
+        distfile = refcolumnfile;
         if (distfile == "") {
             string options = "fasta=" + reffastafile + ", cutoff=" + toString(cutoff);
             if (outputDir != "")        { options += ", outputdir=" + outputDir;        }
@@ -427,12 +437,32 @@ string ClusterFitCommand::calcDists(ListVector* list) {
         distCommand->execute();
         map<string, vector<string> > filenames = distCommand->getOutputFiles();
         distfile = filenames[format][0];
+        fittedColumnName = distfile;
         
         delete distCommand;
         current->setMothurCalling(false);
+        
         m->mothurOut("/******************************************/\n");
         
-        options = "fitcalc=t, fasta=" + reffastafile + ", oldfasta=" + fastafile + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
+        options = "fasta=" + reffastafile + "-" + fastafile + ", vertical=t";
+        if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
+        
+        //dists between reffasta and fastafile
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("Running command: filter.seqs(" + options + ")\n");
+        FilterSeqsCommand* filterCommand = new FilterSeqsCommand(options);
+        
+        filterCommand->execute();
+        filenames = filterCommand->getOutputFiles();
+        string filteredRef = filenames["fasta"][0];
+        string filteredFasta = filenames["fasta"][1];
+        
+        delete filterCommand;
+        current->setMothurCalling(false);
+
+        m->mothurOut("/******************************************/\n");
+        
+        options = "fitcalc=t, fasta=" + filteredRef + ", oldfasta=" + filteredFasta + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
         if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
         
         //dists between reffasta and fastafile
@@ -447,7 +477,7 @@ string ClusterFitCommand::calcDists(ListVector* list) {
         delete distCommand;
         current->setMothurCalling(false);
         m->mothurOut("/******************************************/\n");
-
+        cout << combinedNameOrCount << '\t' << combinedNameFile << endl;
         //create name of count file for combined distance file
         if (countfile != "")     {
             combinedNameOrCount = "count"; combinedNameFile = countfile+".temp";
@@ -464,6 +494,8 @@ string ClusterFitCommand::calcDists(ListVector* list) {
             //print new count table for optiCluster
             ct.printTable(combinedNameFile);
             counts = ct.getNameMap();
+            
+            cout << "countfile = " << countfile << '\t' << combinedNameOrCount << '\t' << combinedNameFile << endl;
         }else if (namefile != "") {
             combinedNameOrCount = "name"; combinedNameFile = namefile+".temp";
             
@@ -483,6 +515,8 @@ string ClusterFitCommand::calcDists(ListVector* list) {
                 for (int j = 0; j < names.size(); j++) { out << names[i] << '\t' << names[i] << endl;  }
             }
             out.close();
+            
+            cout << "namefile = " << namefile << '\t' << combinedNameOrCount << '\t' << combinedNameFile << endl;
         }else {
             //create count file
             CountTable ct; ct.readTable(fastafile, "fasta");
@@ -500,6 +534,8 @@ string ClusterFitCommand::calcDists(ListVector* list) {
             //print new count table for optiCluster
             ct.printTable(combinedNameFile);
             counts = ct.getNameMap();
+            
+            cout << combinedNameOrCount << '\t' << combinedNameFile << endl;
         }
         
         return distfile;
@@ -604,60 +640,45 @@ int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector* list){
         set<string> unfittedSeqs;
         ListVector* list = cluster.getList(unfittedSeqs);
         list->setLabel(toString(cutoff));
-        if (translate) {
-            map<string, string> renameMap;
-            //read map file
-            ifstream in; util.openInputFile(fastaMapFile, in);
-            while (!in.eof()) {
-                string name, fixedName;
-                in >> name >> fixedName; util.gobble(in);
-                renameMap[name] = fixedName;
-            }
-            in.close();
-            
-            for (int i = 0; i < list->getNumBins(); i++) {
-                string bin = list->get(i);
-                if (bin != "") {
-                    vector<string> binNames; util.splitAtComma(bin, binNames);
-                    string newBin = renameMap[binNames[0]];
-                    for (int j = 1; j < binNames.size(); j++) {  newBin += ","+renameMap[binNames[j]];  }
-                    list->set(i, newBin);
-                }
-            }
-        }
-
+        
+        m->mothurOut("\nFitted " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");
+        
+        for (set<string>::iterator it = unfittedSeqs.begin(); it != unfittedSeqs.end(); it++) { list->push_back(*it); }
+        
+        if (unfittedSeqs.size() != 0) { m->mothurOut(toString(unfittedSeqs.size()) + " sequences were unable to be fitted existing OTUs. \n\n"); }
+        
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
         listFile.close();
         
-        m->mothurOut("\nFitted " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");
         delete list;
         
-        if (unfittedSeqs.size() != 0) {
-            string unfittedListFileName = fileroot+ cluster.getTag() + ".unfitted" + ".list";
-            ListVector unfittedList; unfittedList.setLabel(toString(cutoff));
-            for (set<string>::iterator it = unfittedSeqs.begin(); it != unfittedSeqs.end(); it++) { unfittedList.push_back(*it); }
-            ofstream listFile;
-            util.openOutputFile(unfittedListFileName,	listFile);
-            outputNames.push_back(unfittedListFileName); outputTypes["list"].push_back(unfittedListFileName);
-            unfittedList.print(listFile);
-            listFile.close();
-        }
         
+        string inputString = "cutoff=" + toString(cutoff) + ", list=" + listFileName;
+        if (fittedColumnName != "") { inputString += ", column=" + fittedColumnName;  }
         
-        string sensspecFilename = fileroot+ tag + ".sensspec";
-        ofstream sensFile;
-        util.openOutputFile(sensspecFilename,	sensFile);
-        outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
+        if (namefile != "")         {  inputString += ", name=" + namefile; }
+        else if (countfile != "")   { inputString += ", count=" + countfile; }
+        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
         
-        sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("Running command: sens.spec(" + inputString + ")\n");
+        current->setMothurCalling(true);
         
-        results = cluster.getStats(tp, tn, fp, fn);
+        Command* sensspecCommand = new SensSpecCommand(inputString);
+        sensspecCommand->execute();
         
-        sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
-        for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; }
-        sensFile << '\n';
-        sensFile.close();
+        map<string, vector<string> > filenames = sensspecCommand->getOutputFiles();
+        
+        delete sensspecCommand;
+        current->setMothurCalling(false);
+        
+        string outputFileName = filenames["sensspec"][0];
+        
+        outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("Done.\n\n");
         
         return 0;
     }

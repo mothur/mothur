@@ -17,6 +17,7 @@
 #include "optimatrix.h"
 #include "calculator.h"
 #include "distancecommand.h"
+#include "filterseqscommand.h"
 
 
 class ClusterFitCommand : public Command {
@@ -39,8 +40,8 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, sim, print_start, translate;
-    string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, metric, initialize, metricName, reffastafile, refnamefile, refcountfile, reflistfile, combinedNameOrCount, combinedNameFile, fastaMapFile;
+    bool abort, sim, print_start, selfReference;
+    string method, fileroot, tag, outputDir, refcolumnfile, namefile, format, distfile, countfile, fastafile, inputDir, metric, initialize, metricName, reffastafile, refnamefile, refcountfile, reflistfile, combinedNameOrCount, combinedNameFile, fittedColumnName;
     double cutoff, stableMetric;
     float adjust;
     int precision, length, maxIters, processors;
