@@ -147,13 +147,14 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize, ve
         int binNumber = bins.size();
         for (int i = 0; i < translatedBins.size(); i++) {
             binLabels[binNumber] = bls[i];
-            for (int j = 0; j < translatedBins[i].size(); j++) {  seqBin[translatedBins[i][j]] = binNumber;   }
+            bins.push_back(translatedBins[i]);
+            for (int j = 0; j < translatedBins[i].size(); j++) {
+                cout << translatedBins[i][j] << '\t' << binNumber << endl;
+                seqBin[translatedBins[i][j]] = binNumber;
+            }
             binNumber++;
         }
 
-        //add existing bins
-        bins.insert(bins.end(), translatedBins.begin(), translatedBins.end());
-        
         //add insert location
         seqBin[bins.size()] = -1;
         insertLocation = bins.size();
@@ -187,7 +188,6 @@ bool OptiCluster::update(double& listMetric) {
             
             int seqNumber = it->first;
             int binNumber = it->second;
-            
             
             if (binNumber == -1) { }
             else {
@@ -420,7 +420,6 @@ long long OptiCluster::getNumBins() {
         exit(1);
     }
 }
-
 /***********************************************************************/
 int OptiCluster::findInsert() {
     try {

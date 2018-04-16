@@ -187,9 +187,7 @@ SharedListVector* InputData::getSharedListVector(){
 			util.gobble(fileHandle);
 			return SharedList;
 		}
-		else{
-			return NULL;
-		}
+		else{ return NULL; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "getSharedListVector");
@@ -208,7 +206,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 
 			if (format == "shared")  {
 			
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					SharedList = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					thisLabel = SharedList->getLabel();
@@ -230,9 +228,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 			in.close();
 			return SharedList;
 			
-		}else{
-			return NULL;
-		}
+		}else{ return NULL; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "getSharedListVector");

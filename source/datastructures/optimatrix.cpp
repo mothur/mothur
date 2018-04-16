@@ -24,11 +24,11 @@ OptiMatrix::OptiMatrix(string d, string df, double c, bool s) : distFile(d), dis
 /***********************************************************************/
 OptiMatrix::OptiMatrix(string d, string nc, string f, string df, double c, bool s) : distFile(d), distFormat(df), format(f), cutoff(c), sim(s) {
     m = MothurOut::getInstance();
-    cout << distFile << '\t' << distFormat << '\t' <<format<< '\t' <<cutoff<< '\t' << endl;
+    
     if (format == "name") { namefile = nc; countfile = ""; }
     else if (format == "count") { countfile = nc; namefile = ""; }
     else { countfile = ""; namefile = ""; }
-    cout << countfile << '\t' << namefile << '\t' <<format<< '\t' <<cutoff<< '\t' << endl;
+    
     setBlastVariables(5, 0.10, true);
     if (distFormat == "phylip")         { readPhylip();     }
     else if (distFormat == "column")    { readColumn();     }
@@ -122,9 +122,9 @@ vector<int> OptiMatrix::getNumSeqs(vector<vector<string> > & binNames, vector<ve
             }
         }
 
-        for (int i = 0; i < binNames.size(); i++) {
+        for (int i = 0; i < binNames.size(); i++) { //for each OTU
             vector<int> thisBinsSeqs;
-            for (int j = 0; j < binNames[i].size(); j++) {
+            for (int j = 0; j < binNames[i].size(); j++) { //for each sequence
                 map<string, int>::iterator it = nameIndexes.find(binNames[i][j]);
                 
                 if (it == nameIndexes.end()) { //not in distance matrix, but needs a value in fixedBins. 2 reasons for making it here: you are a redundant name in the listfile, you do not have any distances below the cutoff
@@ -174,6 +174,8 @@ string OptiMatrix::getOverlapName(int index) {
 /***********************************************************************/
 bool OptiMatrix::isClose(int i, int toFind){
     try {
+        if (i == -1) { return false; } //if we are running cluster fit and you are a reference sequence with no dists in the matrix
+        
         bool found = false;
         if (closeness[i].count(toFind) != 0) { found = true; }
         return found;
@@ -369,8 +371,6 @@ int OptiMatrix::readPhylip(){
 
 int OptiMatrix::readColumn(){
     try {
-        
-        cout << countfile << '\t' << namefile << '\t' <<format<< '\t' <<cutoff<< '\t' << endl;
         Utils util;
         map<string, int> nameAssignment;
         if (namefile != "") { nameAssignment = util.readNames(namefile); }

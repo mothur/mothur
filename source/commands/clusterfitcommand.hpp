@@ -18,6 +18,7 @@
 #include "calculator.h"
 #include "distancecommand.h"
 #include "filterseqscommand.h"
+#include "deconvolutecommand.h"
 
 
 class ClusterFitCommand : public Command {
@@ -41,7 +42,7 @@ public:
     
 private:
     bool abort, sim, print_start, selfReference;
-    string method, fileroot, tag, outputDir, refcolumnfile, namefile, format, distfile, countfile, fastafile, inputDir, metric, initialize, metricName, reffastafile, refnamefile, refcountfile, reflistfile, combinedNameOrCount, combinedNameFile, fittedColumnName;
+    string method, fileroot, tag, outputDir, refcolumnfile, namefile, format, distfile, countfile, fastafile, inputDir, metric, initialize, metricName, reffastafile, refnamefile, refcountfile, reflistfile, combinedNameOrCount, combinedNameFile, fittedColumnName, columnfile;
     double cutoff, stableMetric;
     float adjust;
     int precision, length, maxIters, processors;
@@ -50,9 +51,9 @@ private:
     long long truePositives, falsePositives, trueNegatives, falseNegatives;
     map<string, int> counts;
     
-    int runOptiCluster(OptiMatrix&, ListVector*);
-    void calcReferenceValues(ListVector*);
-    string calcDists(ListVector*);
+    int runOptiCluster(OptiMatrix&, ListVector*&);
+    void calcReferenceValues(ListVector*&);
+    string calcDists(ListVector*&);
 };
 
 #endif /* clusterfitcommand_hpp */

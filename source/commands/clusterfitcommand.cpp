@@ -42,6 +42,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter prefname("refname", "InputTypes", "", "", "RefNameCount", "none","","",false,false,true); parameters.push_back(prefname);
         CommandParameter prefcount("refcount", "InputTypes", "", "", "RefNameCount", "none", "","",false,false,true); parameters.push_back(prefcount);
         CommandParameter prefcolumn("refcolumn", "InputTypes", "", "", "", "", "ColumnName","",false,false,true); parameters.push_back(prefcolumn);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "", "", "ColumnName","",false,false,true); parameters.push_back(pcolumn);
         CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "opti", "opti", "", "", "","",false,false,true); parameters.push_back(pmethod);
@@ -66,8 +67,9 @@ vector<string> ClusterFitCommand::setParameters(){
 string ClusterFitCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refname, refcount, fasta, name, count, method, cutoff, precision, metric, iters, initialize.\n";
+        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refname, refcount, fasta, name, count, column, method, cutoff, precision, metric, iters, initialize.\n";
         helpString += "The refcolumn parameter allow you to enter your reference data distance file, to reduce processing time. \n";
+        helpString += "The column parameter allow you to enter your data distance file, to reduce processing time. \n";
         helpString += "The fasta parameter allows you to enter your fasta file. \n";
         helpString += "The reffasta parameter allows you to enter your fasta file for your reference dataset. \n";
         helpString += "The reflist parameter allows you to enter your list file for your reference dataset. \n";
@@ -117,7 +119,7 @@ ClusterFitCommand::ClusterFitCommand(){
         outputTypes["steps"] = tempOutNames;
     }
     catch(exception& e) {
-        m->errorOut(e, "ClusterCommand", "ClusterCommand");
+        m->errorOut(e, "ClusterFitCommand", "ClusterFitCommand");
         exit(1);
     }
 }
@@ -167,6 +169,14 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
                     path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["refcolumn"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("column");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["column"] = inputDir + it->second;		}
                 }
                 
                 it = parameters.find("name");
@@ -254,12 +264,6 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             else if (refcountfile == "not found") { refcountfile = ""; }
             else { selfReference = false; }
             
-            if (refcolumnfile != "") {
-                if ((refnamefile == "") && (refcountfile == "")){
-                    m->mothurOut("[ERROR]: You need to provide a reference namefile or reference countfile for your refcolumn file, aborting.\n"); refcolumnfile = ""; abort = true;
-                }
-            }
-            
             fittedColumnName = "";
             
             if (!selfReference) { //if you are providing reference files, lets make sure we have all of them
@@ -283,6 +287,11 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             if (countfile == "not open") { abort = true; countfile = ""; }
             else if (countfile == "not found") { countfile = ""; }
             else { current->setCountFile(countfile); }
+            
+            columnfile = validParameter.validFile(parameters, "column");
+            if (columnfile == "not open") { columnfile = ""; abort = true; }
+            else if (columnfile == "not found") { columnfile = ""; }
+            else {  distfile = columnfile; format = "column"; current->setColumnFile(columnfile);	}
             
             method = validParameter.valid(parameters, "method");
             if (method == "not found") {  method = "opti";}
@@ -332,7 +341,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
         }
     }
     catch(exception& e) {
-        m->errorOut(e, "ClusterCommand", "ClusterCommand");
+        m->errorOut(e, "ClusterFitCommand", "ClusterFitCommand");
         exit(1);
     }
 }
@@ -357,7 +366,7 @@ int ClusterFitCommand::execute(){
             
             //calc distance matrix for fasta file and distances between fasta file and reffasta file
             string newDistFile = calcDists(list);
-            cout << "countfile = " << countfile << '\t' << combinedNameOrCount << '\t' << combinedNameFile << endl;
+            
             OptiMatrix matrix(newDistFile, combinedNameFile, combinedNameOrCount, "column", cutoff, false); util.mothurRemove(combinedNameFile);
             
             runOptiCluster(matrix, list);
@@ -386,31 +395,29 @@ int ClusterFitCommand::execute(){
     }
 }
 //**********************************************************************************************************************
-void ClusterFitCommand::calcReferenceValues(ListVector* list) {
+void ClusterFitCommand::calcReferenceValues(ListVector*& list) {
     try {
         string nameOrCount = "";
         string thisNamefile = "";
         if (refcountfile != "")     { nameOrCount = "count"; thisNamefile = refcountfile;   }
         else if (refnamefile != "") { nameOrCount = "name"; thisNamefile = refnamefile;     }
-        
-        distfile = refcolumnfile;
-        if (distfile == "") {
-            string options = "fasta=" + reffastafile + ", cutoff=" + toString(cutoff);
-            if (outputDir != "")        { options += ", outputdir=" + outputDir;        }
-            if (thisNamefile == "")     { options += ", output=lt"; format="phylip";    }else { format="column"; }
-            
+        else { //create count file
+            current->setMothurCalling(true);
+            string options = "fasta=" + reffastafile + ", format=count";
             m->mothurOut("/******************************************/\n");
-            m->mothurOut("Running command: dist.seqs(" + options + ")\n");
-            Command* distCommand = new DistanceCommand(options);
+            m->mothurOut("Running command: unique.seqs(" + options + ")\n");
+            Command* deconvoluteCommand = new DeconvoluteCommand(options);
             
-            distCommand->execute();
-            map<string, vector<string> > filenames = distCommand->getOutputFiles();
-            distfile = filenames[format][0];
+            deconvoluteCommand->execute();
+            map<string, vector<string> > filenames = deconvoluteCommand->getOutputFiles();
+            refcountfile = filenames["count"][0];
+            nameOrCount = "count"; thisNamefile = refcountfile;
             
-            delete distCommand;
-            current->setMothurCalling(false);
+            delete deconvoluteCommand;
             m->mothurOut("/******************************************/\n");
         }
+        
+        distfile = refcolumnfile;
         
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false); //matrix memory is released before the second matrix is read in
         
@@ -423,28 +430,41 @@ void ClusterFitCommand::calcReferenceValues(ListVector* list) {
     }
 }
 //**********************************************************************************************************************
-string ClusterFitCommand::calcDists(ListVector* list) {
+string ClusterFitCommand::calcDists(ListVector*& list) {
     try {
-        string options = "fasta=" + fastafile + ", cutoff=" + toString(cutoff);
-        if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
-        format="column";
+        if (columnfile == "") { //calc user distances
+            string options = "fasta=" + fastafile + ", cutoff=" + toString(cutoff);
+            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
+            current->setMothurCalling(true);
+            
+            //calc dists for fastafile
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: dist.seqs(" + options + ")\n");
+            Command* distCommand = new DistanceCommand(options);
+            
+            distCommand->execute();
+            map<string, vector<string> > filenames = distCommand->getOutputFiles();
+            distfile = filenames[format][0];
+            
+            delete distCommand;
+            m->mothurOut("/******************************************/\n");
+        }else {
+            string copyColumn = columnfile+".temp";
+            
+            //copy to preserve original distance matrix
+            string command = "copy ";
+#if defined NON_WINDOWS
+            command = "cp ";
+#endif
+            command += columnfile + " " + copyColumn;
+            system(command.c_str());
+
+            distfile = copyColumn;
+        }
         
-        //calc dists for fastafile
-        m->mothurOut("/******************************************/\n");
-        m->mothurOut("Running command: dist.seqs(" + options + ")\n");
-        Command* distCommand = new DistanceCommand(options);
+        format="column"; fittedColumnName = distfile;
         
-        distCommand->execute();
-        map<string, vector<string> > filenames = distCommand->getOutputFiles();
-        distfile = filenames[format][0];
-        fittedColumnName = distfile;
-        
-        delete distCommand;
-        current->setMothurCalling(false);
-        
-        m->mothurOut("/******************************************/\n");
-        
-        options = "fasta=" + reffastafile + "-" + fastafile + ", vertical=t";
+        string options = "fasta=" + reffastafile + "-" + fastafile + ", vertical=t";
         if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
         
         //dists between reffasta and fastafile
@@ -453,13 +473,11 @@ string ClusterFitCommand::calcDists(ListVector* list) {
         FilterSeqsCommand* filterCommand = new FilterSeqsCommand(options);
         
         filterCommand->execute();
-        filenames = filterCommand->getOutputFiles();
+        map<string, vector<string> > filenames = filterCommand->getOutputFiles();
         string filteredRef = filenames["fasta"][0];
         string filteredFasta = filenames["fasta"][1];
         
         delete filterCommand;
-        current->setMothurCalling(false);
-
         m->mothurOut("/******************************************/\n");
         
         options = "fitcalc=t, fasta=" + filteredRef + ", oldfasta=" + filteredFasta + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
@@ -468,16 +486,16 @@ string ClusterFitCommand::calcDists(ListVector* list) {
         //dists between reffasta and fastafile
         m->mothurOut("/******************************************/\n");
         m->mothurOut("Running command: dist.seqs(" + options + ")\n");
-        distCommand = new DistanceCommand(options);
+        Command* distCommand = new DistanceCommand(options);
         
         distCommand->execute();
         filenames = distCommand->getOutputFiles();
         distfile = filenames[format][0];
         
         delete distCommand;
-        current->setMothurCalling(false);
         m->mothurOut("/******************************************/\n");
-        cout << combinedNameOrCount << '\t' << combinedNameFile << endl;
+        current->setMothurCalling(false);
+        
         //create name of count file for combined distance file
         if (countfile != "")     {
             combinedNameOrCount = "count"; combinedNameFile = countfile+".temp";
@@ -494,8 +512,6 @@ string ClusterFitCommand::calcDists(ListVector* list) {
             //print new count table for optiCluster
             ct.printTable(combinedNameFile);
             counts = ct.getNameMap();
-            
-            cout << "countfile = " << countfile << '\t' << combinedNameOrCount << '\t' << combinedNameFile << endl;
         }else if (namefile != "") {
             combinedNameOrCount = "name"; combinedNameFile = namefile+".temp";
             
@@ -515,8 +531,6 @@ string ClusterFitCommand::calcDists(ListVector* list) {
                 for (int j = 0; j < names.size(); j++) { out << names[i] << '\t' << names[i] << endl;  }
             }
             out.close();
-            
-            cout << "namefile = " << namefile << '\t' << combinedNameOrCount << '\t' << combinedNameFile << endl;
         }else {
             //create count file
             CountTable ct; ct.readTable(fastafile, "fasta");
@@ -534,8 +548,6 @@ string ClusterFitCommand::calcDists(ListVector* list) {
             //print new count table for optiCluster
             ct.printTable(combinedNameFile);
             counts = ct.getNameMap();
-            
-            cout << combinedNameOrCount << '\t' << combinedNameFile << endl;
         }
         
         return distfile;
@@ -547,7 +559,7 @@ string ClusterFitCommand::calcDists(ListVector* list) {
 }
 //**********************************************************************************************************************
 
-int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector* list){
+int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector*& list){
     try {
         ClusterMetric* metric = NULL;
         if (metricName == "mcc")             { metric = new MCC();              }
@@ -595,8 +607,10 @@ int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector* list){
         for (int i = 0; i < list->getNumBins(); i++) {
             vector<string> binNames;
             string bin = list->get(i);
-            util.splitAtComma(bin, binNames);
-            otus.push_back(binNames);
+            if (bin != "") {
+                util.splitAtComma(bin, binNames);
+                otus.push_back(binNames);
+            }
         }
         
         cluster.initialize(listVectorMetric, true, initialize, otus, list->getLabels(), truePositives, trueNegatives, falsePositives, falseNegatives);
