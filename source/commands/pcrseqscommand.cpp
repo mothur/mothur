@@ -340,76 +340,74 @@ int PcrSeqsCommand::execute(){
         if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("accnos",variables);
-        outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
 
-        //don't write or keep if blank
-        if (badNames.size() != 0)   { writeAccnos(badNames, outputFileName);        }
         if (util.isBlank(badSeqFile)) { util.mothurRemove(badSeqFile);  }
         else { outputNames.push_back(badSeqFile); outputTypes["fasta"].push_back(badSeqFile); }
         
-        
-        
-        string inputStringTemp = "";
-        if (countfile != "")            {   inputStringTemp += ", count=" + countfile;  }
-        else{
-            if (namefile != "")         {   inputStringTemp += ", name=" + namefile;    }
-            if (groupfile != "")        {   inputStringTemp += ", group=" + groupfile;  }
+        if (badNames.size() != 0)   {
+            writeAccnos(badNames, outputFileName);     outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
+            
+            string inputStringTemp = "";
+            if (countfile != "")            {   inputStringTemp += ", count=" + countfile;  }
+            else{
+                if (namefile != "")         {   inputStringTemp += ", name=" + namefile;    }
+                if (groupfile != "")        {   inputStringTemp += ", group=" + groupfile;  }
+            }
+            if (taxfile != "")              {   inputStringTemp += ", taxonomy=" + taxfile;  }
+            string inputString = "accnos=" + outputFileName + inputStringTemp;
+            
+            if (inputStringTemp != "") {
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+                current->setMothurCalling(true);
+                
+                Command* removeCommand = new RemoveSeqsCommand(inputString);
+                removeCommand->execute();
+                
+                map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+                
+                delete removeCommand;
+                current->setMothurCalling(false);
+                
+                if (groupfile != "") {
+                    thisOutputDir = outputDir;
+                    if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+                    variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+                    string outGroup = getOutputFileName("group", variables);
+                    util.renameFile(filenames["group"][0], outGroup);
+                    outputNames.push_back(outGroup); outputTypes["group"].push_back(outGroup);
+                }
+                
+                if (namefile != "") {
+                    thisOutputDir = outputDir;
+                    if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+                    variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+                    string outName = getOutputFileName("name", variables);
+                    util.renameFile(filenames["name"][0], outName);
+                    outputNames.push_back(outName); outputTypes["name"].push_back(outName);
+                }
+                
+                if (countfile != "") {
+                    thisOutputDir = outputDir;
+                    if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                    variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+                    string outCount = getOutputFileName("count", variables);
+                    util.renameFile(filenames["count"][0], outCount);
+                    outputNames.push_back(outCount); outputTypes["count"].push_back(outCount);
+                }
+                
+                if (taxfile != "")              {
+                    thisOutputDir = outputDir;
+                    if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
+                    variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
+                    variables["[extension]"] = util.getExtension(taxfile);
+                    string outputFileName = getOutputFileName("taxonomy", variables);
+                    util.renameFile(filenames["taxonomy"][0], outputFileName);
+                    outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
+                }
+                m->mothurOut("/******************************************/\n");
+            }
         }
-        if (taxfile != "")              {   inputStringTemp += ", taxonomy=" + taxfile;  }
-        string inputString = "accnos=" + outputFileName + inputStringTemp;
-        
-        if (inputStringTemp != "") {
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
-            current->setMothurCalling(true);
-            
-            Command* removeCommand = new RemoveSeqsCommand(inputString);
-            removeCommand->execute();
-            
-            map<string, vector<string> > filenames = removeCommand->getOutputFiles();
-            
-            delete removeCommand;
-            current->setMothurCalling(false);
-            
-            if (groupfile != "") {
-                thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
-                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
-                string outGroup = getOutputFileName("group", variables);
-                util.renameFile(filenames["group"][0], outGroup);
-                outputNames.push_back(outGroup); outputTypes["group"].push_back(outGroup);
-            }
-            
-            if (namefile != "") {
-                thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
-                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
-                string outName = getOutputFileName("name", variables);
-                util.renameFile(filenames["name"][0], outName);
-                outputNames.push_back(outName); outputTypes["name"].push_back(outName);
-            }
-            
-            if (countfile != "") {
-                thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
-                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
-                string outCount = getOutputFileName("count", variables);
-                util.renameFile(filenames["count"][0], outCount);
-                outputNames.push_back(outCount); outputTypes["count"].push_back(outCount);
-            }
-            
-            if (taxfile != "")              {
-                thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
-                variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
-                variables["[extension]"] = util.getExtension(taxfile);
-                string outputFileName = getOutputFileName("taxonomy", variables);
-                util.renameFile(filenames["taxonomy"][0], outputFileName);
-                outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
-            }
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-        }
-        
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
