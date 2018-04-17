@@ -97,7 +97,7 @@ ListVector* InputData::getListVector(string label){
 
 			if (format == "list") {
 			
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					list = new ListVector(in, nextDistanceLabel, otuTag);
 					nextDistanceLabel = list->getLabel();
@@ -201,6 +201,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 		ifstream in;
 		string  thisLabel;
 		util.openInputFile(filename, in);
+        nextDistanceLabel = "";
 		
 		if(in){
 
@@ -274,7 +275,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 
 			if (format == "sharedfile")  {
 			
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					SharedOrder = new SharedOrderVector(in, groups, nextDistanceLabel);
 					thisLabel = SharedOrder->getLabel();
@@ -349,11 +350,12 @@ OrderVector* InputData::getOrderVector(string label){
 		ifstream in;
 		string  thisLabel;
 		util.openInputFile(filename, in);
+        nextDistanceLabel = "";
 		
 		if(in){
 			if((format == "list") || (format == "listorder")) {
                 nextDistanceLabel = "";
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new ListVector(in, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
@@ -367,7 +369,7 @@ OrderVector* InputData::getOrderVector(string label){
 			}
 			else if (format == "shared")  {
 				nextDistanceLabel = "";
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
@@ -382,7 +384,7 @@ OrderVector* InputData::getOrderVector(string label){
 			}
 			else if(format == "rabund"){
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new RAbundVector(in);
 					thisLabel = input->getLabel();
@@ -397,7 +399,7 @@ OrderVector* InputData::getOrderVector(string label){
 			}
 			else if(format == "order"){			
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new OrderVector(in);
 					thisLabel = input->getLabel();
@@ -412,7 +414,7 @@ OrderVector* InputData::getOrderVector(string label){
 			}
 			else if(format == "sabund"){
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new SAbundVector(in);
 					thisLabel = input->getLabel();
@@ -493,7 +495,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 	
 		if(in){
 			if (format == "sharedfile")  {
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(in, groups, nextDistanceLabel, otuTag);
 					if (SharedRAbund != NULL) {
@@ -516,7 +518,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 					
 				}
 			}else if (format == "shared") {
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					SharedList = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					
@@ -604,7 +606,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 		
 		if(in){
 			if (format == "relabund")  {
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					SharedRAbundFloatVectors* SharedRelAbund = new SharedRAbundFloatVectors(in, groups, nextDistanceLabel, otuTag);
 					if (SharedRelAbund != NULL) {
@@ -622,7 +624,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 					util.gobble(in);
 				}
 			}else if (format == "sharedfile")  {
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					SharedRAbundVectors* SharedRAbund = new SharedRAbundVectors(in, groups, nextDistanceLabel, otuTag);
 					if (SharedRAbund != NULL) {
@@ -703,11 +705,12 @@ SAbundVector* InputData::getSAbundVector(string label){
 		ifstream in;
 		string  thisLabel;
 		util.openInputFile(filename, in);
+        nextDistanceLabel = "";
 		
 		if(in){
 			if (format == "list") {
                 nextDistanceLabel = "";
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new ListVector(in, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
@@ -721,7 +724,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 			}
 			else if (format == "shared")  {
 				nextDistanceLabel = "";
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
@@ -736,7 +739,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 			}
 			else if(format == "rabund"){
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new RAbundVector(in);
 					thisLabel = input->getLabel();
@@ -751,7 +754,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 			}
 			else if(format == "order"){			
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new OrderVector(in);
 					thisLabel = input->getLabel();
@@ -766,7 +769,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 			}
 			else if(format == "sabund"){
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new SAbundVector(in);
 					thisLabel = input->getLabel();
@@ -842,12 +845,13 @@ RAbundVector* InputData::getRAbundVector(string label){
 		ifstream in;
 		string  thisLabel;
 		util.openInputFile(filename, in);
+        nextDistanceLabel = "";
 		
 		if(in){
 			if (format == "list") {
                 nextDistanceLabel = "";
 			
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new ListVector(in, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
@@ -862,7 +866,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 			else if (format == "shared")  {
                 nextDistanceLabel = "";
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new SharedListVector(in, groups, nextDistanceLabel, otuTag);
 					thisLabel = input->getLabel();
@@ -877,7 +881,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 			}
 			else if(format == "rabund"){
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new RAbundVector(in);
 					thisLabel = input->getLabel();
@@ -892,7 +896,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 			}
 			else if(format == "order"){			
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new OrderVector(in);
 					thisLabel = input->getLabel();
@@ -907,7 +911,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 			}
 			else if(format == "sabund"){
 				
-				while (in.eof() != true) {
+				while (!in.eof()) {
 					
 					input = new SAbundVector(in);
 					thisLabel = input->getLabel();
