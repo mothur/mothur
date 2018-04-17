@@ -2687,12 +2687,9 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename, map<
                     if (path == "") {  rindex = inputDir + rindex;  }
                 }
             }
-            
+
             //look for mothur exe
             string mpath = current->getProgramPath();
-            //string tempPath = mpath;
-            //for (int i = 0; i < mpath.length(); i++) { tempPath[i] = tolower(mpath[i]); }
-            //mpath = mpath.substr(0, (tempPath.find_last_of('m')));
             
             //check to make sure both are able to be opened
             ifstream in2;
