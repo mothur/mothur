@@ -1052,7 +1052,7 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(string& composi
                 int thisNumReads = processSingleFileOption(outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, file2Group[l]);
                 numReads += thisNumReads;
                 
-                util.appendFilesWithoutHeaders(outMisMatchFile, compositeMisMatchFile); util.mothurRemove(outMisMatchFile);
+                util.appendFiles(outMisMatchFile, compositeMisMatchFile); util.mothurRemove(outMisMatchFile);
                 util.appendFiles(outFastaFile, compositeFastaFile);  util.mothurRemove(outFastaFile);
                 util.appendFiles(outScrapFastaFile, compositeScrapFastaFile); util.mothurRemove(outScrapFastaFile);
                 util.appendFiles(outQualFile, compositeQualFile); util.mothurRemove(outQualFile);
