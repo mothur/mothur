@@ -198,7 +198,7 @@ int SparccCommand::execute(){
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         string lastLabel = lookup->getLabel();
         Groups = lookup->getNamesGroups();
-        
+
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
@@ -338,6 +338,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         correlationFile.setf(ios::fixed, ios::floatfield);
         correlationFile.setf(ios::showpoint);
 
+				correlationFile << "OTU_id";
         for(int i=0;i<numOTUs;i++){ correlationFile << '\t' << otuNames[i];    }   correlationFile << endl;
         for(int i=0;i<numOTUs;i++){
             correlationFile << otuNames[i];
@@ -458,49 +459,49 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
         //divide work by number of permutations
         vector<int> lines;
         if (processors > numPermutations) { processors = numPermutations; }
-        
+
         //figure out how many sequences you have to process
         int numItersPerProcessor = numPermutations / processors;
         for (int i = 0; i < processors; i++) {
             if(i == (processors - 1)){	numItersPerProcessor = numPermutations - i * numItersPerProcessor; 	}
             lines.push_back(numItersPerProcessor);
         }
-        
+
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<sparccData*> data;
-        
+
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            
+
             sparccData* dataBundle = new sparccData(sharedVector, origCorrMatrix, numSamplings, maxIterations, lines[i+1], normalizeMethod);
             data.push_back(dataBundle);
-            
+
             workerThreads.push_back(new thread(driverSparcc, dataBundle));
         }
-        
+
         int numOTUs = sharedVector[0].size();
         sparccData* dataBundle = new sparccData(sharedVector, origCorrMatrix, numSamplings, maxIterations, lines[0], normalizeMethod);
         driverSparcc(dataBundle);
         vector<vector<float> > pValues = dataBundle->pValues;
-        
+
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
-            
+
             vector<vector<float> > thisProcessorsPValues = data[i]->pValues;
-            
+
             for (int k = 0; k < numOTUs; k++) {
                 for (int j = 0; j < k; j++) {
                     pValues[k][j] += thisProcessorsPValues[k][j];
                 }
             }
-            
+
             delete data[i];
             delete workerThreads[i];
         }
         delete dataBundle;
 
-        
+
         for(int i=0;i<numOTUs;i++){
             pValues[i][i] = 1;
             for(int j=0;j<i;j++){
