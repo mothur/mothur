@@ -24,6 +24,71 @@ Utils::Utils(){
     }
 }
 /***********************************************************************/
+float Utils::randomUniform() {
+    try {
+        uniform_real_distribution<float> unif;
+        return (unif(mersenne_twister_engine));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "randomUniform");
+        exit(1);
+    }
+}
+/***********************************************************************/
+float Utils::randomExp() {
+    try {
+        exponential_distribution<float> unif;
+        return (unif(mersenne_twister_engine));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "randomExp");
+        exit(1);
+    }
+}
+/***********************************************************************/
+float Utils::randomNorm() {
+    try {
+        normal_distribution<float> unif;
+        return (unif(mersenne_twister_engine));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "randomNorm");
+        exit(1);
+    }
+}
+/***********************************************************************/
+float Utils::randomGamma(float range) {
+    try {
+        gamma_distribution<float> unif(range, range);
+        return (unif(mersenne_twister_engine));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "randomGamma");
+        exit(1);
+    }
+}
+/***********************************************************************/
+vector<float> Utils::randomDirichlet(vector<float> alphas) {
+    try {
+        int nAlphas = (int)alphas.size();
+        vector<float> dirs(nAlphas, 0.0000);
+        
+        float sum = 0.0000;
+        for(int i=0;i<nAlphas;i++){
+            dirs[i] = randomGamma(alphas[i]);
+            sum += dirs[i];
+        }
+        
+        for(int i=0;i<nAlphas;i++){ dirs[i] /= sum; }
+        
+        return dirs;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "randomDirichlet");
+        exit(1);
+    }
+}
+/***********************************************************************/
 void Utils::mothurRandomShuffle(vector<int>& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);

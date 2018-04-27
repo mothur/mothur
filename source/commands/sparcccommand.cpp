@@ -198,8 +198,6 @@ int SparccCommand::execute(){
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         string lastLabel = lookup->getLabel();
         Groups = lookup->getNamesGroups();
-
-        int numOTUs = lookup->getNumBins();
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
@@ -437,7 +435,7 @@ void driverSparcc(sparccData* params){
 
             for(int j=0;j<params->numOTUs;j++){
                 for(int k=0;k<j;k++){
-
+                     if (params->m->getControl_pressed()) { break; }
                     double randValue = permuteCorrMatrix[j][k];
                     double observedValue = params->origCorrMatrix[j][k];
                     if(observedValue >= 0 &&  randValue > observedValue)   { params->pValues[j][k]++; }//this method seems to deflate the
@@ -446,7 +444,7 @@ void driverSparcc(sparccData* params){
             }
 
             float done = ceil(params->numPermutations * 0.05);
-            if((i+1) % (int)(done) == 0){ cout << i+1 << endl;  }
+            if((i+1) % (int)(done) == 0){ params->m->mothurOutJustToScreen(toString(i+1)+"\n");   }
         }
     }
     catch(exception& e) {
@@ -457,12 +455,52 @@ void driverSparcc(sparccData* params){
 //**********************************************************************************************************************
 vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sharedVector, vector<vector<float> >& origCorrMatrix){
 	try {
+        //divide work by number of permutations
+        vector<int> lines;
+        if (processors > numPermutations) { processors = numPermutations; }
+        
+        //figure out how many sequences you have to process
+        int numItersPerProcessor = numPermutations / processors;
+        for (int i = 0; i < processors; i++) {
+            if(i == (processors - 1)){	numItersPerProcessor = numPermutations - i * numItersPerProcessor; 	}
+            lines.push_back(numItersPerProcessor);
+        }
+        
+        //create array of worker threads
+        vector<thread*> workerThreads;
+        vector<sparccData*> data;
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            
+            sparccData* dataBundle = new sparccData(sharedVector, origCorrMatrix, numSamplings, maxIterations, lines[i+1], normalizeMethod);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new thread(driverSparcc, dataBundle));
+        }
+        
         int numOTUs = sharedVector[0].size();
-        sparccData* dataBundle = new sparccData(sharedVector, origCorrMatrix, numSamplings, maxIterations, numPermutations, normalizeMethod);
+        sparccData* dataBundle = new sparccData(sharedVector, origCorrMatrix, numSamplings, maxIterations, lines[0], normalizeMethod);
         driverSparcc(dataBundle);
         vector<vector<float> > pValues = dataBundle->pValues;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            
+            vector<vector<float> > thisProcessorsPValues = data[i]->pValues;
+            
+            for (int k = 0; k < numOTUs; k++) {
+                for (int j = 0; j < k; j++) {
+                    pValues[k][j] += thisProcessorsPValues[k][j];
+                }
+            }
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
         delete dataBundle;
 
+        
         for(int i=0;i<numOTUs;i++){
             pValues[i][i] = 1;
             for(int j=0;j<i;j++){

@@ -84,9 +84,7 @@ void CalcSparcc::addPseudoCount(vector<vector<float> >& sharedVector){
         m->errorOut(e, "CalcSparcc", "addPseudoCount");
         exit(1);
     }
-
 }
-
 /**************************************************************************************************/
 
 vector<float> CalcSparcc::getLogFractions(vector<vector<float> > sharedVector, string method){   //dirichlet by default
@@ -97,11 +95,9 @@ vector<float> CalcSparcc::getLogFractions(vector<vector<float> > sharedVector, s
             vector<float> alphas(numGroups);
             for(int i=0;i<numGroups;i++){   //iterate across the groups
                 if (m->getControl_pressed()) { return logSharedFractions; }
-                alphas = RNG.randomDirichlet(sharedVector[i]);
+                alphas = util.randomDirichlet(sharedVector[i]);
                 
-                for(int j=0;j<numOTUs;j++){
-                    logSharedFractions[i * numOTUs + j] = alphas[j];
-                }
+                for(int j=0;j<numOTUs;j++){  logSharedFractions[i * numOTUs + j] = alphas[j];  }
             }
         }
         else if(method == "relabund"){
