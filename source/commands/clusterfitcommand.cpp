@@ -36,7 +36,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter plist("reflist", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(plist);
         CommandParameter pfasta("fasta", "InputTypes", "", "", "", "", "","list",false,true,true); parameters.push_back(pfasta);
         CommandParameter prepfasta("reffasta", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(prepfasta);
-        CommandParameter pfastamap("fastamap", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(pfastamap);
+        //CommandParameter pfastamap("fastamap", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(pfastamap);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none","","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "","",false,false,true); parameters.push_back(pcount);
         CommandParameter prefname("refname", "InputTypes", "", "", "RefNameCount", "none","","",false,false,true); parameters.push_back(prefname);
@@ -247,7 +247,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             refcolumnfile = validParameter.validFile(parameters, "refcolumn");
             if (refcolumnfile == "not open") { refcolumnfile = ""; abort = true; }
             else if (refcolumnfile == "not found") { refcolumnfile = ""; }
-            else {  distfile = refcolumnfile; format = "column"; current->setColumnFile(refcolumnfile);	selfReference = false; }
+            else {  format = "column"; current->setColumnFile(refcolumnfile);	selfReference = false; }
             
             reflistfile = validParameter.validFile(parameters, "reflist");
             if (reflistfile == "not open") { abort = true; }
@@ -416,13 +416,6 @@ void ClusterFitCommand::calcReferenceValues(ListVector*& list) {
             delete deconvoluteCommand;
             m->mothurOut("/******************************************/\n");
         }
-        
-        distfile = refcolumnfile;
-        
-        OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false); //matrix memory is released before the second matrix is read in
-        
-        SensSpecCalc senscalc(matrix, list);
-        senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
     }
     catch(exception& e) {
         m->errorOut(e, "ClusterFitCommand", "calcReferenceValues");
@@ -464,37 +457,87 @@ string ClusterFitCommand::calcDists(ListVector*& list) {
         
         format="column"; fittedColumnName = distfile;
         
-        string options = "fasta=" + reffastafile + "-" + fastafile + ", vertical=t";
-        if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
+        map<string, vector<string> > filenames;
+        int refAlignLength = util.getAlignmentLength(reffastafile);
+        int alignLength = util.getAlignmentLength(fastafile);
         
-        //dists between reffasta and fastafile
-        m->mothurOut("/******************************************/\n");
-        m->mothurOut("Running command: filter.seqs(" + options + ")\n");
-        FilterSeqsCommand* filterCommand = new FilterSeqsCommand(options);
+        string copyFasta = fastafile+".temp";
         
-        filterCommand->execute();
-        map<string, vector<string> > filenames = filterCommand->getOutputFiles();
-        string filteredRef = filenames["fasta"][0];
-        string filteredFasta = filenames["fasta"][1];
+        //copy to preserve original distance matrix
+        string command = "copy ";
+#if defined NON_WINDOWS
+        command = "cp ";
+#endif
+        command += fastafile + " " + copyFasta;
+        system(command.c_str());
         
-        delete filterCommand;
-        m->mothurOut("/******************************************/\n");
-        
-        options = "fitcalc=t, fasta=" + filteredRef + ", oldfasta=" + filteredFasta + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
-        if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
-        
-        //dists between reffasta and fastafile
-        m->mothurOut("/******************************************/\n");
-        m->mothurOut("Running command: dist.seqs(" + options + ")\n");
-        Command* distCommand = new DistanceCommand(options);
-        
-        distCommand->execute();
-        filenames = distCommand->getOutputFiles();
-        distfile = filenames[format][0];
-        
-        delete distCommand;
-        m->mothurOut("/******************************************/\n");
-        current->setMothurCalling(false);
+        if (refAlignLength == alignLength) {
+            string options = "fitcalc=t, fasta=" + reffastafile + ", oldfasta=" + copyFasta + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
+            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
+            
+            //dists between reffasta and fastafile
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: dist.seqs(" + options + ")\n");
+            Command* distCommand = new DistanceCommand(options);
+            
+            distCommand->execute();
+            filenames = distCommand->getOutputFiles();
+            distfile = filenames[format][0];
+            
+            delete distCommand;
+            m->mothurOut("/******************************************/\n");
+            current->setMothurCalling(false);
+        }else {
+            //filter each file to improve distance calc time
+            string options = "fasta=" + reffastafile + ", vertical=t";
+            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
+            
+            m->mothurOut("\nRunning vertical filter to improve distance calculation time\n\n");
+            
+            //filter reffasta
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: filter.seqs(" + options + ")\n");
+            Command* filterCommand = new FilterSeqsCommand(options);
+            
+            filterCommand->execute();
+            map<string, vector<string> > filenames = filterCommand->getOutputFiles();
+            string filteredRef = filenames["fasta"][0];
+            
+            delete filterCommand;
+            m->mothurOut("/******************************************/\n");
+            
+            options = "fasta=" + copyFasta + ", reference=" + filteredRef;
+            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
+            
+            //align fasta to refFasta
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: align.seqs(" + options + ")\n");
+            Command* alignCommand = new AlignCommand(options);
+            
+            alignCommand->execute();
+            filenames = alignCommand->getOutputFiles();
+            string alignedFasta = filenames["fasta"][0];
+            
+            delete alignCommand;
+            m->mothurOut("/******************************************/\n");
+            
+            options = "fitcalc=t, fasta=" + filteredRef + ", oldfasta=" + alignedFasta + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
+            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
+            
+            //dists between reffasta and fastafile
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: dist.seqs(" + options + ")\n");
+            Command* distCommand = new DistanceCommand(options);
+            
+            distCommand->execute();
+            filenames = distCommand->getOutputFiles();
+            distfile = filenames[format][0];
+            
+            delete distCommand;
+            m->mothurOut("/******************************************/\n");
+            current->setMothurCalling(false);
+        }
+        util.mothurRemove(copyFasta);
         
         //create name of count file for combined distance file
         if (countfile != "")     {
@@ -613,7 +656,7 @@ int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector*& list){
             }
         }
         
-        cluster.initialize(listVectorMetric, true, initialize, otus, list->getLabels(), truePositives, trueNegatives, falsePositives, falseNegatives);
+        cluster.initialize(listVectorMetric, true, otus, list->getLabels());
         
         long long numBins = cluster.getNumBins();
         m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
@@ -626,7 +669,7 @@ int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector*& list){
         m->mothurOutEndLine();
         outStep << endl;
         
-        while ((delta > stableMetric) && (iters < maxIters)) {
+        while ((delta > stableMetric) && (iters < maxIters)) { //
             
             long start = time(NULL);
             
@@ -669,7 +712,7 @@ int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector*& list){
         
         
         string inputString = "cutoff=" + toString(cutoff) + ", list=" + listFileName;
-        if (fittedColumnName != "") { inputString += ", column=" + fittedColumnName;  }
+        if (columnfile != "") { inputString += ", column=" + columnfile;  }
         
         if (namefile != "")         {  inputString += ", name=" + namefile; }
         else if (countfile != "")   { inputString += ", count=" + countfile; }
@@ -691,8 +734,7 @@ int ClusterFitCommand::runOptiCluster(OptiMatrix& matrix, ListVector*& list){
         
         outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-        m->mothurOut("/******************************************/\n");
-        m->mothurOut("Done.\n\n");
+        m->mothurOut("/******************************************/\nDone.\n\n");
         
         return 0;
     }

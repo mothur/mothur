@@ -17,6 +17,7 @@
 #include "optimatrix.h"
 #include "calculator.h"
 #include "distancecommand.h"
+#include "aligncommand.h"
 #include "filterseqscommand.h"
 #include "deconvolutecommand.h"
 
@@ -48,7 +49,7 @@ private:
     int precision, length, maxIters, processors;
     vector<string> outputNames;
     unsigned long loops;
-    long long truePositives, falsePositives, trueNegatives, falseNegatives;
+    //long long truePositives, falsePositives, trueNegatives, falseNegatives;
     map<string, int> counts;
     
     int runOptiCluster(OptiMatrix&, ListVector*&);

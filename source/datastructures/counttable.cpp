@@ -366,7 +366,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
                 uniques++;
             }else {
                 error = true;
-                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); 
+                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct.\n");  
             }
         }
         in.close();

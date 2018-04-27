@@ -15,6 +15,7 @@
 OptiMatrix::OptiMatrix(string d, string df, double c, bool s) : distFile(d), distFormat(df), cutoff(c), sim(s) {
     m = MothurOut::getInstance();
     countfile = ""; namefile = "";
+    numMovableSingletons = 0;
     
     setBlastVariables(5, 0.10, true);
     if (distFormat == "phylip")         { readPhylip();     }
@@ -24,6 +25,7 @@ OptiMatrix::OptiMatrix(string d, string df, double c, bool s) : distFile(d), dis
 /***********************************************************************/
 OptiMatrix::OptiMatrix(string d, string nc, string f, string df, double c, bool s) : distFile(d), distFormat(df), format(f), cutoff(c), sim(s) {
     m = MothurOut::getInstance();
+    numMovableSingletons = 0;
     
     if (format == "name") { namefile = nc; countfile = ""; }
     else if (format == "count") { countfile = nc; namefile = ""; }
@@ -38,6 +40,7 @@ OptiMatrix::OptiMatrix(string d, string nc, string f, string df, double c, bool 
 /***********************************************************************/
 int OptiMatrix::readFile(string d, string nc, string f, string df, double c, bool s)  {
     distFile = d; format = f; cutoff = c; sim = s; distFormat = df;
+    numMovableSingletons = 0;
     
     if (format == "name") { namefile = nc; countfile = ""; }
     else if (format == "count") { countfile = nc; namefile = ""; }
@@ -114,9 +117,9 @@ vector<int> OptiMatrix::getNumSeqs(vector<vector<string> > & binNames, vector<ve
         
         map<string, int> nameIndexes;
         set<string> unique;
-        for (int i = 0; i < nameMap.size(); i++) {
-            vector<string> thisBinsSeqs; util.splitAtComma(nameMap[i], thisBinsSeqs);
-            if (i < closeness.size()) {  nameIndexes[thisBinsSeqs[0]] = i;  }
+        for (int i = 0; i < nameMap.size(); i++) { //vector of string representing the name file.
+            vector<string> thisBinsSeqs; util.splitAtComma(nameMap[i], thisBinsSeqs); //split redundant names
+            if (i < closeness.size()) {  nameIndexes[thisBinsSeqs[0]] = i;  } //this is a sequence with distances in the matrix
             if (thisBinsSeqs.size() == 1) { //you are unique
                 unique.insert(thisBinsSeqs[0]);
             }
@@ -127,7 +130,7 @@ vector<int> OptiMatrix::getNumSeqs(vector<vector<string> > & binNames, vector<ve
             for (int j = 0; j < binNames[i].size(); j++) { //for each sequence
                 map<string, int>::iterator it = nameIndexes.find(binNames[i][j]);
                 
-                if (it == nameIndexes.end()) { //not in distance matrix, but needs a value in fixedBins. 2 reasons for making it here: you are a redundant name in the listfile, you do not have any distances below the cutoff
+                if (it == nameIndexes.end()) {//not in distance matrix, but needs a value in fixedBins. 2 reasons for making it here: you are a redundant name in the listfile, you do not have any distances below the cutoff
                     if (unique.count(binNames[i][j]) == 0) { } //you are redundant seq in list file because namefile was used. You should be edited out of the listfile.
                     else { thisBinsSeqs.push_back(-1); } //you are unique, but have no distances so add placeholder
                 }else { thisBinsSeqs.push_back(it->second);  nameIndexes.erase(it); } //"name" of sequence in matrix
@@ -137,13 +140,36 @@ vector<int> OptiMatrix::getNumSeqs(vector<vector<string> > & binNames, vector<ve
         
         for (map<string, int>::iterator it = nameIndexes.begin(); it != nameIndexes.end(); it++) { movableSeqs.push_back(it->second); }
         
+        set<string> immovableNames;
+        for (int i = 0; i < binNames.size(); i++) { for (int j = 0; j < binNames[i].size(); j++) { immovableNames.insert(binNames[i][j]); }  }
+        getNumSingletons(immovableNames);
+        
         return movableSeqs;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiMatrix", "getNumSeqs");
         exit(1);
     }
-
+}
+/***********************************************************************/
+int OptiMatrix::getNumSingletons(set<string> immovables) {
+    try {
+        numMovableSingletons = 0;
+        for (int i = 0; i < singletons.size(); i++) {
+            vector<string> theseSeqs; util.splitAtComma(singletons[i], theseSeqs);
+            for (int j = 0; j < theseSeqs.size(); j++) {
+                if (immovables.count(theseSeqs[j]) == 0) { //you are not immovable
+                    numMovableSingletons++;
+                }
+            }
+        }
+        
+        return numMovableSingletons;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiMatrix", "getNumSingletons");
+        exit(1);
+    }
 }
 /***********************************************************************/
 string OptiMatrix::getName(int index) {
@@ -174,7 +200,7 @@ string OptiMatrix::getOverlapName(int index) {
 /***********************************************************************/
 bool OptiMatrix::isClose(int i, int toFind){
     try {
-        if (i == -1) { return false; } //if we are running cluster fit and you are a reference sequence with no dists in the matrix
+        if (i < 0) { return false; } //if we are running cluster fit and you are a reference sequence with no dists in the matrix
         
         bool found = false;
         if (closeness[i].count(toFind) != 0) { found = true; }
@@ -950,7 +976,7 @@ int OptiMatrix::readBlast(){
         dists.clear();
         nameAssignment.clear();
         
-        m->mothurOut(" done."); m->mothurOutEndLine();
+        m->mothurOut(" done.\n"); 
         
         return 1;
         
@@ -1006,7 +1032,7 @@ int OptiMatrix::readBlastNames(map<string, int>& nameAssignment) {
         
         if (m->getControl_pressed()) { return 0; }
         
-        m->mothurOut(toString(num) + " names read."); m->mothurOutEndLine();
+        m->mothurOut(toString(num) + " names read.\n");
         
         return 0;
         

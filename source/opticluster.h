@@ -35,19 +35,19 @@ public:
     
 #ifdef UNIT_TEST
     friend class TestOptiCluster;
-    OptiCluster() : Cluster() { m = MothurOut::getInstance(); truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; removeTrainers = false; } //for testing class
+    OptiCluster() : Cluster() { m = MothurOut::getInstance(); truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; removeTrainers = false; fitCalc=false; } //for testing class
     void setVariables(OptiMatrix* mt, ClusterMetric* met) { matrix = mt; metric = met; }
 #endif
     
     OptiCluster(OptiMatrix* mt, ClusterMetric* met, long long ns) : Cluster() {
-        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; numSingletons = ns;
+        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; numSingletons = ns; fitCalc=false;
     }
     ~OptiCluster() {}
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
     string getTag() { string tag = "opti_" + metric->getName(); return tag; }
     long long getNumBins();
     int initialize(double&, bool, string);  //randomize and place in "best" OTUs
-    int initialize(double& value, bool randomize, string initialize, vector<vector< string > > existingBins, vector<string>, long long tp, long long tn, long long fp, long long fn);
+    int initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string>);
     bool update(double&); //returns whether list changed and MCC
     vector<double> getStats( long long&,  long long&,  long long&,  long long&);
     ListVector* getList();
@@ -62,12 +62,15 @@ protected:
     vector< vector<int> > bins; //bin[0] -> seqs in bin[0]
     map<int, string> binLabels; //for fitting - maps binNumber to existing reference label
     set<string> immovableNames;
+    set<int> namesSeqs; //matrix indexes for movable sequences
     ClusterMetric* metric;
     long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, numSingletons;
-    bool removeTrainers;
+    bool removeTrainers, fitCalc;
     
     int findInsert();
     vector<long long> getCloseFarCounts(int seq, int newBin);
+    vector<double> getFitStats( long long&,  long long&,  long long&,  long long&);
+    
 };
 
 #endif /* defined(__Mothur__opticluster__) */

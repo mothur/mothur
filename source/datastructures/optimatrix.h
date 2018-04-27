@@ -35,6 +35,7 @@ public:
     int getNumSeqs() { return closeness.size(); }
     vector<int> getNumSeqs(vector<vector<string> >&, vector< vector<int> >&);
     int getNumSingletons() { return singletons.size(); }
+    int getNumFitSingletons() { return numMovableSingletons; }
     long long getNumDists(); //number of distances under cutoff
     map<string, int> getNameIndexMap();
     
@@ -60,12 +61,13 @@ protected:
     double cutoff;
     bool sim, minWanted;
     float penalty;
-    int length;
+    int length, numMovableSingletons;
 
     int readPhylip();
     int readColumn();
     int readBlast();
     int readBlastNames(map<string, int>& nameAssignment);
+    int getNumSingletons(set<string> immovables);
     
 };
 

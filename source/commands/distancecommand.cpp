@@ -567,7 +567,7 @@ void driverFitCalc(distanceData* params){
 /**************************************************************************************************/
 void DistanceCommand::createProcesses(string filename) {
     try {
-        long long num = alignDB.getNumSeqs();;
+        long long num = alignDB.getNumSeqs();
         long long distsBelowCutoff = 0;
         time_t start, end;
         time(&start);
