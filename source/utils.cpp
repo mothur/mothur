@@ -3627,6 +3627,23 @@ int Utils::factorial(int num){
     }
 }
 /***********************************************************************/
+int Utils::getAlignmentLength(string file){
+    try {
+        ifstream in; openInputFile(file, in);
+        
+        Sequence seq(in);
+        
+        in.close();
+        
+        return seq.getAlignLength();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getAlignmentLength");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
 
 int Utils::getNumSeqs(ifstream& file){
     try {

@@ -82,6 +82,7 @@ public:
     int getTimeStamp(string filename);
     string hasPath(string);
     bool isBlank(string);
+    int getAlignmentLength(string);
     
     vector<bool> isGZ(string); //checks existence and format - will fail for either or both.
     bool mkDir(string&); //completes path, appends appropriate / or \. //returns true it exits or if we can make it
