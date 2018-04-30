@@ -963,6 +963,7 @@ int GetGroupsCommand::readTax(){
 		string name, tax;
 		
 		bool wroteSomething = false;
+        int selectedCount = 0;
 		
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
@@ -973,21 +974,23 @@ int GetGroupsCommand::readTax(){
 			//if this name is in the accnos file
 			if (names.count(name) != 0) {
 				wroteSomething = true;
-				out << name << '\t' << tax << endl;
+                out << name << '\t' << tax << endl; selectedCount++;
 			}else{
 				//if you are not in the accnos file check if you are a name that needs to be changed
 				map<string, string>::iterator it = uniqueToRedundant.find(name);
 				if (it != uniqueToRedundant.end()) {
 					wroteSomething = true;
-					out << it->second << '\t' << tax << endl;
+					out << it->second << '\t' << tax << endl; selectedCount++;
 				}
 			}
 		}
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");  }
 		outputTypes["taxonomy"].push_back(outputFileName); outputNames.push_back(outputFileName);
+        
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from your taxonomy file.\n");
 		
 		return 0;
 	}
