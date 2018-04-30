@@ -13,8 +13,9 @@
 /**************************************************************************************************/
 
 //#include "sparcc.h"
-#include "randomnumber.h"
+
 #include "mothurout.h"
+#include "utils.hpp"
 
 /**************************************************************************************************/
 
@@ -25,6 +26,7 @@ public:
     vector<vector<float> > getRho()    {   return median;  }
 private:
     MothurOut* m;
+    Utils util;
     void addPseudoCount(vector<vector<float> >&);
     vector<float> getLogFractions(vector<vector<float> >, string);
     void getT_Matrix(vector<float>);
@@ -48,8 +50,6 @@ private:
     int numOTUs;
     int numGroups;
     string normalizationMethod;
-    
-    RandomNumberGenerator RNG;    
 };
 
 #endif
