@@ -25,7 +25,7 @@ LOGFILE_NAME ?= yes
 BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-VERSION = "\"1.40.1\""
+VERSION = "\"1.40.3\""
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     CXXFLAGS += -DBIT_VERSION
