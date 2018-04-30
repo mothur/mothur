@@ -105,6 +105,7 @@ int OptiCluster::initialize(double& value, bool randomize, vector<vector< string
             if (translatedBins[i].size() != 0) { //remove any bins that contain seqeunces above cutoff, better to be a singleton than in a bin with no close seqs
                 binLabels[binNumber] = bls[i];
                 bins.push_back(translatedBins[i]);
+                numSeqs += translatedBins[i].size();
                 for (int j = 0; j < translatedBins[i].size(); j++) {
                     if (translatedBins[i][j] < 0) {  translatedBins[i][j] = placeHolderIndex; placeHolderIndex--; }
                     seqBin[translatedBins[i][j]] = binNumber;
@@ -113,20 +114,28 @@ int OptiCluster::initialize(double& value, bool randomize, vector<vector< string
             }
         }
         
-        
-        
+    
         //randomly assigns fit seqs to an OTU
         for (int i = 0; i < numSeqs; i++) {
             randomizeSeqs.push_back(indexSeqs[i]);
             
-            set<int> binsToTry;
+            set<int> refBinsToTry;
             set<int> closeSeqs = matrix->getCloseSeqs(indexSeqs[i]);
-            for (set<int>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) { if (namesSeqs.count(*itClose) == 0) {  binsToTry.insert(seqBin[*itClose]);  } }
+            for (set<int>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) {
+                if (namesSeqs.count(*itClose) == 0) {  refBinsToTry.insert(seqBin[*itClose]);  }
+            }
             
-            bins[i].push_back(indexSeqs[i]);
-            seqBin[indexSeqs[i]] = i;
+            int assignedBin = 0;
+            if (refBinsToTry.size() == 0) { assignedBin = util.getRandomIndex(bins.size()-1); } //you aren't close to any reference seqs so just randomly pick one
+            else { //randomly select a reference bin to assign the seq to
+                int location = util.getRandomIndex(refBinsToTry.size()-1);
+                set<int>::const_iterator it(refBinsToTry.begin());
+                advance(it,location);
+                assignedBin = *it;
+            }
             
-            
+            bins[assignedBin].push_back(indexSeqs[i]);
+            seqBin[indexSeqs[i]] = assignedBin;
         }
         
         if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
@@ -142,8 +151,6 @@ int OptiCluster::initialize(double& value, bool randomize, vector<vector< string
         falseNegatives /= 2; //square matrix
         trueNegatives = numSeqs * (numSeqs-1)/2 - (falsePositives + falseNegatives + truePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
         
-        
-        
         //add insert location
         seqBin[bins.size()] = -1;
         insertLocation = bins.size();
@@ -151,7 +158,7 @@ int OptiCluster::initialize(double& value, bool randomize, vector<vector< string
         bins.push_back(temp);
         
         value = metric->getValue(truePositives, trueNegatives, falsePositives, falseNegatives);
-        
+        exit(1);
         return value;
     }
     catch(exception& e) {
