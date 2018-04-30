@@ -107,8 +107,8 @@ MergeFileCommand::MergeFileCommand(string option)  {
 						if (path == "") {	fileNames[i] = inputDir + fileNames[i];		}
 					}
 					
-					if(util.openInputFile(fileNames[i], testFile)){	abort = true;	}
-					testFile.close();
+                    			if (util.checkLocations(fileNames[i], current->getLocations())) { }
+                    			else { fileNames.erase(fileNames.begin()+i); i--; } //erase from file list
 				}
 			}   
 			
