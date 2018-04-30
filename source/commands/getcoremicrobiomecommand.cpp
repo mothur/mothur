@@ -7,6 +7,7 @@
 //
 
 #include "getcoremicrobiomecommand.h"
+#include "getrelabundcommand.h"
 
 
 //**********************************************************************************************************************
@@ -216,6 +217,25 @@ int GetCoreMicroBiomeCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        
+        if (format == "sharedfile") { //convert to relabund
+            string options = "shared=" + sharedfile;
+            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
+            
+            //calc dists for fastafile
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: get.relabund(" + options + ")\n");
+            Command* relabundCommand = new GetRelAbundCommand(options);
+            
+            relabundCommand->execute();
+            map<string, vector<string> > filenames = relabundCommand->getOutputFiles();
+            relabundfile = filenames["relabund"][0];
+            inputFileName = relabundfile; format="relabund";
+            
+            delete relabundCommand;
+            current->setMothurCalling(false);
+            m->mothurOut("/******************************************/\n");
+        }
         
         InputData input(inputFileName, format, Groups);
         SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
