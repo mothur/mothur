@@ -11,7 +11,7 @@
 
 //***************************************************************************************************************
 //removes anyone with no valid dists and changes name to matrix short names
-SensSpecCalc::SensSpecCalc(OptiMatrix& matrix, ListVector* list){
+SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
     try {
         m = MothurOut::getInstance();
         map<string, int> nameIndex = matrix.getNameIndexMap();
@@ -32,8 +32,7 @@ SensSpecCalc::SensSpecCalc(OptiMatrix& matrix, ListVector* list){
                     int seq1Index = -1;
                     if (itSeq1 != nameIndex.end()) { seq1Index = itSeq1->second; } //you have distances in the matrix
                     
-                    //if that name is in the .accnos file, add it
-                    if (seq1Index != -1) {  newNames.push_back(seq1Index);  }
+                    newNames.push_back(seq1Index); 
                 }
                 
                 //if there are names in this bin add to new list
@@ -47,7 +46,7 @@ SensSpecCalc::SensSpecCalc(OptiMatrix& matrix, ListVector* list){
     }
 }
 //***************************************************************************************************************
-void SensSpecCalc::getResults(OptiMatrix& matrix, long long& tp, long long& tn, long long& fp, long long& fn){
+void SensSpecCalc::getResults(OptiData& matrix, long long& tp, long long& tn, long long& fp, long long& fn){
     try {
         tp = 0; tn = 0; fp = 0; fn = 0;
         

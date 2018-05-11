@@ -65,7 +65,7 @@ string DistanceCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "phylip") {  pattern = "[filename],[outputtag],dist"; } 
-        else if (type == "column") { pattern = "[filename],dist"; }
+        else if (type == "column") { pattern = "[filename],dist-[filename],[outputtag],dist"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -248,7 +248,8 @@ int DistanceCommand::execute(){
 		string outputFile;
         map<string, string> variables; 
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
-        if ((oldfastafile != "") && (column != ""))  {  variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(oldfastafile));  }
+        if ((oldfastafile != "") && (column != ""))  { variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(oldfastafile)); }
+            
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
             variables["[outputtag]"] = "phylip";
 			outputFile = getOutputFileName("phylip", variables);
@@ -294,9 +295,11 @@ int DistanceCommand::execute(){
 				util.appendFiles(tempcolumn, outputFile);
 				util.mothurRemove(tempcolumn);
 			}else{
-				util.appendFiles(outputFile, column);
-				util.mothurRemove(outputFile);
-				outputFile = column;
+                if (!fitCalc) {
+                    util.appendFiles(outputFile, column);
+                    util.mothurRemove(outputFile);
+                    outputFile = column;
+                }
 			}
             outputTypes["column"].clear(); outputTypes["column"].push_back(outputFile);
         }

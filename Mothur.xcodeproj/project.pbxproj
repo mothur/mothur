@@ -459,6 +459,10 @@
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
+		48FB99C5209B69FA00FF9F6E /* optirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */; };
+		48FB99C920A48EF700FF9F6E /* optidata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C720A48EF700FF9F6E /* optidata.cpp */; };
+		48FB99CC20A4AD7D00FF9F6E /* optiblastmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */; };
+		48FB99CF20A4F3FB00FF9F6E /* optifitcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */; };
 		835FE03E19F00A4D005AA754 /* svm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B21820117AD77BD00286E6A /* svm.cpp */; };
@@ -895,10 +899,10 @@
 		4889EA211E8962D50054E0BB /* summary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = summary.hpp; path = source/summary.hpp; sourceTree = SOURCE_ROOT; };
 		48910D411D5243E500F60EDB /* mergecountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergecountcommand.cpp; path = source/commands/mergecountcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48910D421D5243E500F60EDB /* mergecountcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergecountcommand.hpp; path = source/commands/mergecountcommand.hpp; sourceTree = SOURCE_ROOT; };
-		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = "<group>"; };
+		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = SOURCE_ROOT; };
 		48910D491D58CBA300F60EDB /* optimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optimatrix.cpp; path = source/datastructures/optimatrix.cpp; sourceTree = "<group>"; };
 		48910D4A1D58CBA300F60EDB /* optimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = optimatrix.h; path = source/datastructures/optimatrix.h; sourceTree = "<group>"; };
-		48910D4C1D58CBFC00F60EDB /* opticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = opticluster.h; path = source/opticluster.h; sourceTree = "<group>"; };
+		48910D4C1D58CBFC00F60EDB /* opticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = opticluster.h; path = source/opticluster.h; sourceTree = SOURCE_ROOT; };
 		48910D4D1D58E26C00F60EDB /* testopticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testopticluster.cpp; sourceTree = "<group>"; };
 		48910D4E1D58E26C00F60EDB /* testopticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testopticluster.h; sourceTree = "<group>"; };
 		48910D4F1D58E26C00F60EDB /* distcdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distcdataset.h; sourceTree = "<group>"; };
@@ -1009,6 +1013,14 @@
 		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
 		48F06CCC1D74BEC4004A45DD /* testphylotree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testphylotree.hpp; path = testclassifier/testphylotree.hpp; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = SOURCE_ROOT; };
+		48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optirefmatrix.cpp; path = source/datastructures/optirefmatrix.cpp; sourceTree = SOURCE_ROOT; };
+		48FB99C4209B69FA00FF9F6E /* optirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optirefmatrix.hpp; path = source/datastructures/optirefmatrix.hpp; sourceTree = SOURCE_ROOT; };
+		48FB99C720A48EF700FF9F6E /* optidata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optidata.cpp; path = source/datastructures/optidata.cpp; sourceTree = "<group>"; };
+		48FB99C820A48EF700FF9F6E /* optidata.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optidata.hpp; path = source/datastructures/optidata.hpp; sourceTree = SOURCE_ROOT; };
+		48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optiblastmatrix.cpp; path = source/datastructures/optiblastmatrix.cpp; sourceTree = SOURCE_ROOT; };
+		48FB99CB20A4AD7D00FF9F6E /* optiblastmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optiblastmatrix.hpp; path = source/datastructures/optiblastmatrix.hpp; sourceTree = "<group>"; };
+		48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optifitcluster.cpp; path = source/optifitcluster.cpp; sourceTree = SOURCE_ROOT; };
+		48FB99CE20A4F3FB00FF9F6E /* optifitcluster.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optifitcluster.hpp; path = source/optifitcluster.hpp; sourceTree = SOURCE_ROOT; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = classifysvmsharedcommand.cpp; path = source/commands/classifysvmsharedcommand.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = classifysvmsharedcommand.h; path = source/commands/classifysvmsharedcommand.h; sourceTree = SOURCE_ROOT; };
 		7B21820117AD77BD00286E6A /* svm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = svm.cpp; path = source/svm/svm.cpp; sourceTree = SOURCE_ROOT; };
@@ -1801,6 +1813,8 @@
 				A7E9B76512D37EC400DA6239 /* needlemanoverlap.cpp */,
 				A7E9B76612D37EC400DA6239 /* needlemanoverlap.hpp */,
 				A7E9B77012D37EC400DA6239 /* observable.h */,
+				48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */,
+				48FB99CE20A4F3FB00FF9F6E /* optifitcluster.hpp */,
 				48910D4C1D58CBFC00F60EDB /* opticluster.h */,
 				48910D451D58CAD700F60EDB /* opticluster.cpp */,
 				A7E9B77512D37EC400DA6239 /* optionparser.cpp */,
@@ -2614,8 +2628,14 @@
 				A7E9B76012D37EC400DA6239 /* nameassignment.hpp */,
 				48705ABE19BE32C50075E977 /* oligos.h */,
 				48705ABD19BE32C50075E977 /* oligos.cpp */,
+				48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */,
+				48FB99CB20A4AD7D00FF9F6E /* optiblastmatrix.hpp */,
+				48FB99C720A48EF700FF9F6E /* optidata.cpp */,
+				48FB99C820A48EF700FF9F6E /* optidata.hpp */,
 				48910D491D58CBA300F60EDB /* optimatrix.cpp */,
 				48910D4A1D58CBA300F60EDB /* optimatrix.h */,
+				48FB99C4209B69FA00FF9F6E /* optirefmatrix.hpp */,
+				48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */,
 				A7E9B77712D37EC400DA6239 /* ordervector.cpp */,
 				A7E9B77812D37EC400DA6239 /* ordervector.hpp */,
 				A7E9B79F12D37EC400DA6239 /* qualityscores.cpp */,
@@ -3296,6 +3316,7 @@
 				A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */,
 				A7E9B89212D37EC400DA6239 /* canberra.cpp in Sources */,
 				A7E9B89312D37EC400DA6239 /* catchallcommand.cpp in Sources */,
+				48FB99C5209B69FA00FF9F6E /* optirefmatrix.cpp in Sources */,
 				A7E9B89412D37EC400DA6239 /* ccode.cpp in Sources */,
 				A7E9B89512D37EC400DA6239 /* chao1.cpp in Sources */,
 				A7E9B89612D37EC400DA6239 /* mothurchimera.cpp in Sources */,
@@ -3305,6 +3326,7 @@
 				48E981CF189C38FB0042BE9D /* (null) in Sources */,
 				A7E9B89A12D37EC400DA6239 /* chimeracheckrdp.cpp in Sources */,
 				A7E9B89B12D37EC400DA6239 /* chimerapintailcommand.cpp in Sources */,
+				48FB99CF20A4F3FB00FF9F6E /* optifitcluster.cpp in Sources */,
 				A7E9B89C12D37EC400DA6239 /* chimerarealigner.cpp in Sources */,
 				A7E9B89E12D37EC400DA6239 /* chimeraslayer.cpp in Sources */,
 				A7E9B89F12D37EC400DA6239 /* chimeraslayercommand.cpp in Sources */,
@@ -3362,6 +3384,7 @@
 				A7E9B8D012D37EC400DA6239 /* getlineagecommand.cpp in Sources */,
 				A7E9B8D112D37EC400DA6239 /* getlistcountcommand.cpp in Sources */,
 				A7E9B8D212D37EC400DA6239 /* getopt_long.cpp in Sources */,
+				48FB99C920A48EF700FF9F6E /* optidata.cpp in Sources */,
 				A7E9B8D312D37EC400DA6239 /* getoturepcommand.cpp in Sources */,
 				A7E9B8D512D37EC400DA6239 /* getrabundcommand.cpp in Sources */,
 				A7E9B8D612D37EC400DA6239 /* getrelabundcommand.cpp in Sources */,
@@ -3469,6 +3492,7 @@
 				A7E9B93A12D37EC400DA6239 /* secondarystructurecommand.cpp in Sources */,
 				A7E9B93B12D37EC400DA6239 /* sensspeccommand.cpp in Sources */,
 				A7E9B93C12D37EC400DA6239 /* seqerrorcommand.cpp in Sources */,
+				48FB99CC20A4AD7D00FF9F6E /* optiblastmatrix.cpp in Sources */,
 				A7E9B93D12D37EC400DA6239 /* seqsummarycommand.cpp in Sources */,
 				A7E9B93E12D37EC400DA6239 /* sequence.cpp in Sources */,
 				A7E9B93F12D37EC400DA6239 /* sequencedb.cpp in Sources */,
@@ -3746,6 +3770,7 @@
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -3815,6 +3840,7 @@
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;

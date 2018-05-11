@@ -335,9 +335,7 @@ int MGClusterCommand::runOptiCluster(){
         
         time_t start = time(NULL);
         
-        OptiMatrix matrix;
-        matrix.setBlastVariables(length, penalty, minWanted);
-        matrix.readFile(distfile, thisNamefile, nameOrCount, "blast", cutoff, false);
+        OptiData* matrix; matrix = new OptiBlastMatrix(distfile, thisNamefile, nameOrCount, false, cutoff, length, penalty, minWanted);
         
         ClusterMetric* metricCalc = NULL;
         if (metric == "mcc")             { metricCalc = new MCC();              }
@@ -355,7 +353,7 @@ int MGClusterCommand::runOptiCluster(){
         else if (metric == "fdr")        { metricCalc = new FDR();              }
         else if (metric == "fpfn")       { metricCalc = new FPFN();             }
         
-        OptiCluster cluster(&matrix, metricCalc, 0);
+        OptiCluster cluster(matrix, metricCalc, 0);
         string tag = cluster.getTag();
         
         map<string, string> variables;
@@ -423,7 +421,7 @@ int MGClusterCommand::runOptiCluster(){
         list->setLabel(toString(cutoff));
         
         if (merge) {
-            vector< set<int> > overlap = matrix.getBlastOverlap();
+            vector< set<int> > overlap = matrix->getBlastOverlap();
         
             //assign each sequence to bins
             map<string, int> seqToBin;
@@ -439,8 +437,8 @@ int MGClusterCommand::runOptiCluster(){
             for (int i = 0; i < overlap.size(); i++) {
                 set<int> temp = overlap[i]; overlap[i].clear();
                 for (set<int>::iterator itOverlap = temp.begin(); itOverlap != temp.end(); itOverlap++) {
-                    string firstName = matrix.getOverlapName(i);
-                    string secondName = matrix.getOverlapName(*itOverlap);
+                    string firstName = matrix->getOverlapName(i);
+                    string secondName = matrix->getOverlapName(*itOverlap);
                     int binKeep = seqToBin[firstName];
                     int binRemove = seqToBin[secondName];
                     
@@ -503,8 +501,10 @@ int MGClusterCommand::runOptiCluster(){
         sensFile << '\n';
         sensFile.close();
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster."); m->mothurOutEndLine();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster.\n");
 
+        delete metricCalc; delete matrix;
+        
         return 0;
     }
     catch(exception& e) {

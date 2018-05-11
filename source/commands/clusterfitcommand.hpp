@@ -13,8 +13,8 @@
 #include "listvector.hpp"
 #include "cluster.hpp"
 #include "counttable.h"
-#include "opticluster.h"
-#include "optimatrix.h"
+#include "optifitcluster.hpp"
+#include "optirefmatrix.hpp"
 #include "calculator.h"
 #include "distancecommand.h"
 #include "aligncommand.h"
@@ -43,7 +43,11 @@ public:
     
 private:
     bool abort, sim, print_start, selfReference;
-    string method, fileroot, tag, outputDir, refcolumnfile, namefile, format, distfile, countfile, fastafile, inputDir, metric, initialize, metricName, reffastafile, refnamefile, refcountfile, reflistfile, combinedNameOrCount, combinedNameFile, fittedColumnName, columnfile;
+    string refcolumnfile, reffastafile, refnamefile, refcountfile, reflistfile, refNameOrCount;
+    string namefile, format, distfile, countfile, fastafile, columnfile, nameOrCount;
+    string comboDistFile;
+    
+    string method, fileroot, tag, outputDir, inputDir, metric, initialize, metricName;
     double cutoff, stableMetric;
     float adjust;
     int precision, length, maxIters, processors;
@@ -52,9 +56,9 @@ private:
     //long long truePositives, falsePositives, trueNegatives, falseNegatives;
     map<string, int> counts;
     
-    int runOptiCluster(OptiMatrix&, ListVector*&);
-    void calcReferenceValues(ListVector*&);
-    string calcDists(ListVector*&);
+    int runOptiCluster(ListVector*&);
+    void createReferenceNameCount();
+    string calcDists();
 };
 
 #endif /* clusterfitcommand_hpp */
