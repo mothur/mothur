@@ -629,8 +629,8 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
             numFitBins = cluster.getNumFitBins();
             results = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
             
-            m->mothurOut("fit\t" + toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-            outStep << "fit\t" << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+            m->mothurOut("fit\t" + toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t" + toString(cutoff) + "\t"+ toString(fittp) + "\t" + toString(fittn) + "\t" + toString(fitfp) + "\t" + toString(fitfn) + "\t");
+            outStep << "fit\t" << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t" + toString(cutoff) + "\t") << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
             for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
             m->mothurOutEndLine();
             outStep << endl;

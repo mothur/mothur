@@ -48,7 +48,7 @@ private:
 	RAbundVector oldRAbund;
 	ListVector oldList;
 	
-	void printData(string label, map<string, int>&);
+	void printData(string label, map<string, int>&, bool&);
 	vector<string> outputNames;
 };
 

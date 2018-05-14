@@ -715,6 +715,7 @@ int ClusterCommand::runMothurCluster(){
         start = time(NULL);
         loops = 0;
         double saveCutoff = cutoff;
+        bool printHeaders = true;
         
         while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
             
@@ -739,12 +740,8 @@ int ClusterCommand::runMothurCluster(){
             float dist = matrix->getSmallDist();
             float rndDist = util.ceilDist(dist, precision);
             
-            if(previousDist <= 0.0000 && dist != previousDist){
-                printData("unique", counts);
-            }
-            else if(rndDist != rndPreviousDist){
-                printData(toString(rndPreviousDist,  length-1), counts);
-            }
+            if(previousDist <= 0.0000 && dist != previousDist)  { printData("unique", counts, printHeaders);                                }
+            else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
             
             previousDist = dist;
             rndPreviousDist = rndDist;
@@ -760,10 +757,10 @@ int ClusterCommand::runMothurCluster(){
         }
         
         if(previousDist <= 0.0000){
-            printData("unique", counts);
+            printData("unique", counts, printHeaders);
         }
         else if(rndPreviousDist<cutoff){
-            printData(toString(rndPreviousDist, length-1), counts);
+            printData(toString(rndPreviousDist, length-1), counts, printHeaders);
         }
         
         delete matrix;
@@ -790,7 +787,7 @@ int ClusterCommand::runMothurCluster(){
 }
 //**********************************************************************************************************************
 
-void ClusterCommand::printData(string label, map<string, int>& counts){
+void ClusterCommand::printData(string label, map<string, int>& counts, bool& ph){
 	try {
 		if (util.isTrue(timing)) {
 			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
@@ -811,11 +808,13 @@ void ClusterCommand::printData(string label, map<string, int>& counts){
         }
         
 		oldList.setLabel(label);
+        oldList.setPrintedLabels(ph); ph = false;
         if(countfile != "") {
             oldList.print(listFile, counts);
         }else {
             oldList.print(listFile);
         }
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterCommand", "printData");
