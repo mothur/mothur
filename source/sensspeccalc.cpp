@@ -62,6 +62,7 @@ void SensSpecCalc::getResults(OptiData& matrix, long long& tp, long long& tn, lo
         }
         long long numSeqs = matrix.getNumSeqs() + matrix.getNumSingletons();
         long long numDists = matrix.getNumDists(); //square matrix
+        
         fn = (numDists/2) - tp;
         tn = numSeqs * (numSeqs-1)/2  - (fp + fn + tp);
     }

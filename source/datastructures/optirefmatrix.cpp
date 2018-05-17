@@ -70,8 +70,8 @@ vector<int> OptiRefMatrix::getNumSeqs(vector<vector<string> > & binNames, vector
 /***********************************************************************/
 bool OptiRefMatrix::isCloseFit(int i, int toFind, bool& isFit){
     try {
-        if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
-        else if (index < 0) { return false; }
+        if (index < 0) { return false; }
+        else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
         
         bool found = false;
         if (toFind >= refEnd) { //are you a fit seq
@@ -116,8 +116,8 @@ int OptiRefMatrix::getNumFitClose(int index) {
     try {
         int numClose = 0;
         
-        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
-        else if (index < 0) { }
+        if (index < 0) { }
+        else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
@@ -137,8 +137,8 @@ int OptiRefMatrix::getNumRefClose(int index) {
     try {
         int numClose = 0;
         
-        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
-        else if (index < 0) { }
+        if (index < 0) { }
+        else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
@@ -158,8 +158,8 @@ set<int> OptiRefMatrix::getCloseFitSeqs(int index){
     try {
         set<int> closeSeqs;
         
-        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
-        else if (index < 0) { } //
+        if (index < 0) { }
+        else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  } //
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
@@ -179,8 +179,8 @@ set<int> OptiRefMatrix::getCloseRefSeqs(int index){
     try {
         set<int> closeSeqs;
         
-        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
-        else if (index < 0) { } //
+        if (index < 0) { }
+        else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
@@ -270,10 +270,9 @@ int OptiRefMatrix::readFiles(){
         
         map<string, string> names;
         if (refnamefile != "") {
-            
             //update names for reference
             util.readNames(refnamefile, names);
-            for (int i = 0; i < numRefSeqs; i++) {
+            for (int i = 0; i < numRefSingletons; i++) {
                 singletons[i] = names[singletons[i]];
             }
         }
@@ -283,7 +282,7 @@ int OptiRefMatrix::readFiles(){
             map<string, string> fitnames;
             //update names for fit seqs
             util.readNames(fitnamefile, fitnames);
-            for (int i = numRefSeqs; i < numSeqs; i++) {
+            for (int i = numRefSingletons; i < numSingletons; i++) {
                 singletons[i] = fitnames[singletons[i]];
             }
             
@@ -308,9 +307,8 @@ int OptiRefMatrix::readFiles(){
         //read in between distances
         bool hasName = fitHasName;
         if (!hasName && refHasName) { hasName = true; } //if either the ref or fit has a name file then set hasName
-        if (fitdistformat == "column")        {  readColumn(fitdistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
-        else if (fitdistformat == "phylip")   {  readPhylip(fitdistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
-        
+        if (betweendistformat == "column")        {  readColumn(betweendistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
+        else if (betweendistformat == "phylip")   {  readPhylip(betweendistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
     }
     catch(exception& e) {
         m->errorOut(e, "OptiRefMatrix", "readFiles");

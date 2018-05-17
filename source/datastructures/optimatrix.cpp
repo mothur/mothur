@@ -10,14 +10,6 @@
 #include "progress.hpp"
 #include "counttable.h"
 
-/***********************************************************************
-
-OptiMatrix::OptiMatrix(string d, string df, double c, bool s) : distFile(d), distFormat(df), cutoff(c), sim(s), OptiData(c){
-    countfile = ""; namefile = "";
-    
-    if (distFormat == "phylip")         { readPhylip();     }
-    else if (distFormat == "column")    { readColumn();     }
-}
 /***********************************************************************/
 OptiMatrix::OptiMatrix(string d, string nc, string f, string df, double c, bool s) : distFile(d), distFormat(df), format(f), sim(s), OptiData(c) {
     

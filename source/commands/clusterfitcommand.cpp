@@ -45,7 +45,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter pcolumn("column", "InputTypes", "", "", "", "", "ColumnName","",false,false,true); parameters.push_back(pcolumn);
         CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
-        CommandParameter pmethod("method", "Multiple", "opti", "opti", "", "", "","",false,false,true); parameters.push_back(pmethod);
+        CommandParameter pmethod("method", "Multiple", "closed-open", "closed", "", "", "","",false,false,true); parameters.push_back(pmethod);
         CommandParameter pinitialize("initialize", "Multiple", "oneotu-singleton", "singleton", "", "", "","",false,false,true); parameters.push_back(pinitialize);
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.0001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
@@ -81,7 +81,7 @@ string ClusterFitCommand::getHelpString(){
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
         helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its own OTU, or oneotu meaning all sequences are assigned to one otu. Default=singleton.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method (delta=0.0001). \n";
-        helpString += "The method parameter allows you to enter your clustering mothod. Options are opti. Default=opti.\n";
+        helpString += "The method parameter allows you to enter your clustering method. Options are closed and open. Default=closed.\n";
         helpString += "The cluster.fit command should be in the following format: \n";
         helpString += "cluster.fit(list=yourreflist, reffasta=yourReferenceFasta, fasta=yourFastaFile, count=yourCountFile) \n";
         return helpString;
@@ -293,10 +293,10 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             else {  distfile = columnfile; format = "column"; current->setColumnFile(columnfile);	}
             
             method = validParameter.valid(parameters, "method");
-            if (method == "not found") {  method = "opti";}
+            if (method == "not found") {  method = "closed";}
             
-            if (method == "opti") { }
-            else { m->mothurOut("[ERROR]: " + method + " is not a valid cluster fitting method.  Valid algorithm is opti.\n"); abort = true; }
+            if ((method == "closed") || (method == "open")) { }
+            else { m->mothurOut("[ERROR]: " + method + " is not a valid cluster fitting method.  Valid options are closed and open.\n"); abort = true; }
             
             
             if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: count or name.\n"); abort = true; }
@@ -336,6 +336,8 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             temp = validParameter.valid(parameters, "cutoff");
             if (temp == "not found") { temp = "0.03"; }
             util.mothurConvert(temp, cutoff);
+            
+            //abort=false;
             
         }
     }
@@ -528,6 +530,8 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         if (countfile == "") { fitDupsFile = namefile; nameOrCount = "name"; }
         else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
         
+        //comboDistFile = "/Users/sarahwestcott/desktop/cluster.fit_refs/between.dist";
+        
         OptiData* matrix; matrix = new OptiRefMatrix(refcolumnfile, refDupsFile, refNameOrCount, "column",  cutoff, columnfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
         
         ClusterMetric* metric = NULL;
@@ -554,12 +558,6 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         if (outputDir == "") { outputDir += util.hasPath(distfile); }
         fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
         
-        string listFileName = fileroot+ tag + ".list";
-        
-        ofstream listFile;
-        util.openOutputFile(listFileName,	listFile);
-        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
-        
         map<string, string> variables;
         variables["[filename]"] = fileroot;
         variables["[clustertag]"] = tag;
@@ -582,10 +580,10 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
             }
         }
         
-        cluster.initialize(listVectorMetric, true, otus, list->getLabels());
+        cluster.initialize(listVectorMetric, true, otus, list->getLabels(), method);
         
         long long numBins = cluster.getNumBins();
-        m->mothurOut("\n\nstate\ttiter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        m->mothurOut("\n\nstate\titer\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         outStep << "state\titer\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
         long long tp, tn, fp, fn;
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
@@ -649,6 +647,11 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         
         if (numUnFitted != 0) { m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs. \n\n"); }
         
+        ofstream listFile;
+        string listFileName = fileroot+ tag + ".list";
+        util.openOutputFile(listFileName,	listFile);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
         listFile.close();

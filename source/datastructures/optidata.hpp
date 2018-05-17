@@ -18,10 +18,7 @@ class OptiData {
     
 public:
     
-    //OptiData()          { m = MothurOut::getInstance(); cutoff = 1.0; }
     OptiData(double c)  { m = MothurOut::getInstance(); cutoff = c; }
-    //OptiData(string, string, double, bool); //distfile, distformat, cutoff, sim
-    //OptiData(string, string, string, string, double, bool); //distfile, name or count, format, distformat, cutoff, sim
     virtual ~OptiData(){}
     
     set<int> getCloseSeqs(int i);// { return closeness[i]; }
@@ -32,7 +29,7 @@ public:
     
     long long getNumSeqs() { return closeness.size(); }
     long long getNumSingletons() { return singletons.size(); }
-    long long getNumDists(); //number of distances under cutoff
+    virtual long long getNumDists(); //number of distances under cutoff
     ListVector* getListSingle();
     
     //for mgcluster - reading blast files

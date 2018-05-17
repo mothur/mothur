@@ -12,8 +12,8 @@
 /***********************************************************************/
 int OptiData::getNumClose(int index) {
     try {
-        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return 0; }
-        else if (index < 0) { return 0; }
+        if (index < 0) { return 0; }
+        else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return 0; }
         else { return closeness[index].size(); }
     }
     catch(exception& e) {
@@ -24,8 +24,8 @@ int OptiData::getNumClose(int index) {
 /***********************************************************************/
 bool OptiData::isClose(int i, int toFind){
     try {
-        if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
-        else if (i < 0) { return false; }
+        if (i < 0) { return false; }
+        else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
         
         bool found = false;
         if (closeness[i].count(toFind) != 0) { found = true; }
@@ -39,8 +39,8 @@ bool OptiData::isClose(int i, int toFind){
 /***********************************************************************/
 set<int> OptiData::getCloseSeqs(int i){
     try {
-        if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); set<int> temp; return temp; }
-        else if (index < 0) { set<int> temp; return temp; }
+        if (index < 0) { set<int> temp; return temp; }
+        else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); set<int> temp; return temp; }
         
         return closeness[i];
     }
@@ -70,11 +70,10 @@ map<string, int> OptiData::getNameIndexMap() {
 /***********************************************************************/
 string OptiData::getName(int index) {
     try {
-        if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return ""; }
-        else if (index < 0) { return ""; }
+        if (index < 0) { return ""; }
+        else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return ""; }
         
-        string name = nameMap[index];
-        return name;
+        return nameMap[index];
     }
     catch(exception& e) {
         m->errorOut(e, "OptiData", "getName");
