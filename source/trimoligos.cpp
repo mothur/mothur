@@ -258,7 +258,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
             if (alignment != NULL) { delete alignment; }
             
             if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = 1e6; return success;	}	//no good matches
-            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = pdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
+            else if(minCount > 1)	{	minDiff = 1e6; primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = pdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
             else{  success[0] = minDiff; success[1] = 0; return success; }
         }
         
@@ -1009,7 +1009,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                             reverseQual.trimQScores(rStart, -1);
                         }
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
-                    }else { success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
+                    }else { minDiff = 1e6; success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
                 }
             }
             
@@ -1178,7 +1178,6 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
             
             fMinDiff = minDiff;
             
-           
             //cout << minDiff << '\t' << minCount << '\t' << endl;
             if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
             else{
@@ -1284,15 +1283,13 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                         }
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
                         //cout << "barcode = " << ipbarcodes[group].forward << '\t' << ipbarcodes[group].reverse << endl;
-                    }else { success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
+                    }else { minDiff = 1e6; success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
                 }
             }
             rMinDiff = minDiff;
 
             if (alignment != NULL) { delete alignment; }
         }
-        
-//        cout << "\nbcode:\t" << fMinDiff << '\t' << rMinDiff << endl;
 
         return success;
         
@@ -1581,7 +1578,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
                         }
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
                         //cout << "barcode = " << ipbarcodes[group].forward << '\t' << ipbarcodes[group].reverse << endl;
-                    }else { success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
+                    }else { minDiff = 1e6; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
                 }
             }
 
@@ -1842,7 +1839,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                         forwardQual.trimQScores(fStart, -1);
                         reverseQual.trimQScores(rStart, -1);
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
-                    }else { success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
+                    }else { minDiff = 1e6; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
 
                 }
             }
@@ -2095,7 +2092,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                         forwardSeq.setUnaligned(rawFSequence.substr(fStart));
                         reverseSeq.setUnaligned(rawRSequence.substr(rStart));
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
-                    }else { success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
+                    }else { minDiff = 1e6; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
                 }
             }
             
@@ -2302,7 +2299,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
             }
             
             if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
-            else if(minCount > 1)	{	success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
+            else if(minCount > 1)	{	minDiff = 1e6; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
             else{	//use the best match
                 group = minGroup;
                 seq.setUnaligned(rawSequence.substr(minPos));
@@ -2413,7 +2410,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
             }
             
             if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
-            else if(minCount > 1)	{	success[0] = minDiff; success[1] = pdiffs + 10000;	}//no good matches
+            else if(minCount > 1)	{	minDiff = 1e6; success[0] = minDiff; success[1] = pdiffs + 10000;	}//no good matches
             else{	//use the best match
                 group = minGroup;
                 if (!keepForward) { seq.setUnaligned(rawSequence.substr(minPos)); }
@@ -2523,7 +2520,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
             }
             
             if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
-            else if(minCount > 1)	{	success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
+            else if(minCount > 1)	{	minDiff = 1e6; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
             else{	//use the best match
                 seq.setUnaligned(rawSequence.substr(0, (rawSequence.length() - minPos)));
                 if(qual.getName() != ""){
@@ -2632,7 +2629,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
             }
             
             if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
-            else if(minCount > 1)	{	success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
+            else if(minCount > 1)	{	minDiff = 1e6; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
             else{	//use the best match
                 seq.setUnaligned(rawSequence.substr(0, (rawSequence.length() - minPos)));
                 success[0] = minDiff; success[1] = 0;
