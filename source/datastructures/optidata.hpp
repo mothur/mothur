@@ -56,7 +56,7 @@ public:
     virtual int getNumRefClose(int) { return 0;  }
     virtual set<int> getCloseFitSeqs(int i) { set<int> temp; return temp;  }
     virtual set<int> getCloseRefSeqs(int i) { set<int> temp; return temp;  }
-    virtual bool isCloseFit(int j, int i) { return false; }
+    virtual bool isCloseFit(int j, int i, bool&) { return false; }
     
 protected:
     

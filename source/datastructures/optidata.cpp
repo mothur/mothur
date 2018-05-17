@@ -25,7 +25,7 @@ int OptiData::getNumClose(int index) {
 bool OptiData::isClose(int i, int toFind){
     try {
         if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
-        else if (index < 0) { return false; }
+        else if (i < 0) { return false; }
         
         bool found = false;
         if (closeness[i].count(toFind) != 0) { found = true; }

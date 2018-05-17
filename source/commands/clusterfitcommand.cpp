@@ -526,6 +526,7 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         
         string fitDupsFile = countfile; string nameOrCount = "count";
         if (countfile == "") { fitDupsFile = namefile; nameOrCount = "name"; }
+        else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
         
         OptiData* matrix; matrix = new OptiRefMatrix(refcolumnfile, refDupsFile, refNameOrCount, "column",  cutoff, columnfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
         
@@ -653,7 +654,6 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         listFile.close();
         
         delete list;
-        
         
         string inputString = "cutoff=" + toString(cutoff) + ", list=" + listFileName;
         if (columnfile != "") { inputString += ", column=" + columnfile;  }

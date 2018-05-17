@@ -39,7 +39,7 @@ public:
     int getNumRefClose(int);
     set<int> getCloseFitSeqs(int);
     set<int> getCloseRefSeqs(int);
-    bool isCloseFit(int, int);
+    bool isCloseFit(int, int, bool&);
 
 protected:
     

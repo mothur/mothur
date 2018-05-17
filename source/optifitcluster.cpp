@@ -33,6 +33,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         for (int i = 0; i < translatedBins.size(); i++) {
             binLabels[binNumber] = bls[i];
             bins.push_back(translatedBins[i]);
+            numRefSeqs += translatedBins[i].size();
             
             for (int j = 0; j < translatedBins[i].size(); j++) {
                 for (int k = 0; k < j; k++) {
@@ -81,7 +82,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
          */
         
         //add fit seqs as singletons
-        int numRefBins = translatedBins.size();
+        int numRefBins = translatedBins.size()-1;
         //put every fit seq in own bin
         for (int i = 0; i < numFitSeqs; i++) {
             vector<int> thisBin;
@@ -94,12 +95,12 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         }
         
         fitfalseNegatives /= 2; //square matrix
-        fittrueNegatives = (numFitSeqs) * (numFitSeqs-1)/2 - (fitfalsePositives + fitfalseNegatives + fittruePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
+        fittrueNegatives = numFitSeqs * (numFitSeqs-1)/2 - (fitfalsePositives + fitfalseNegatives + fittruePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
         
         double fitValue = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
         
         cout << "fit intial mcc " << fitValue << endl;
-        
+        numComboSeqs = numRefSeqs + numFitSeqs;
         
         combofalseNegatives = matrix->getNumDists() - reftruePositives; //number of distance in matrix for reference seqs - reftruePositives
         combotrueNegatives = numComboSeqs * (numComboSeqs-1)/2 - (reffalsePositives + reffalseNegatives + reftruePositives);
@@ -117,6 +118,8 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         bins.push_back(temp);
         
         if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
+        
+        for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) { cout << it->first << '\t' << it->second <<endl; }
         
         return value;
     }
@@ -141,6 +144,8 @@ bool OptiFitCluster::update(double& listMetric) {
             
             int seqNumber = it->first;
             int binNumber = it->second;
+            
+            cout << seqNumber << '\t' << binNumber << endl;
             
             if (binNumber == -1) { }
             else {
@@ -193,7 +198,10 @@ bool OptiFitCluster::update(double& listMetric) {
                 
                 set<int> binsToTry;
                 set<int> closeSeqs = matrix->getCloseRefSeqs(seqNumber);
-                for (set<int>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) { binsToTry.insert(seqBin[*itClose]);   }
+                for (set<int>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) {
+                    cout << "close to " << *itClose << " try bin " << seqBin[*itClose] << endl;
+                    binsToTry.insert(seqBin[*itClose]);
+                }
                 
                 //merge into each "close" otu
                 for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
@@ -216,6 +224,8 @@ bool OptiFitCluster::update(double& listMetric) {
                     //new best
                     if (newFitMetric > bestMetric[0]) { bestMetric[0] = newFitMetric; bestBin[0] = (*it); bestTp[0] = tp[0]; bestTn[0] = tn[0]; bestFp[0] = fp[0]; bestFn[0] = fn[0]; }
                     if (newComboMetric > bestMetric[1]) { bestMetric[1] = newComboMetric; bestBin[1] = (*it); bestTp[1] = tp[1]; bestTn[1] = tn[1]; bestFp[1] = fp[1]; bestFn[1] = fn[1]; }
+                    
+                    cout << "trying bin " << *it << '\t' << bestMetric[0] << '\t' << bestMetric[1] << endl;
                 }
                 
                 //how to choose the best bin if they differ????
@@ -285,9 +295,11 @@ vector<long long> OptiFitCluster::getCloseFarFitCounts(int seq, int newBin) {
         if (newBin == -1) { }  //making a singleton bin. Close but we are forcing apart.
         else { //merging a bin
             for (int i = 0; i < bins[newBin].size(); i++) {
+                bool isFit = true;
                 if (seq == bins[newBin][i]) {} //ignore self
-                else if (!matrix->isCloseFit(seq, bins[newBin][i])) { results[1]++; }  //this sequence is "far away" from sequence i - above the cutoff
-                else { results[0]++;  }  //this sequence is "close" to sequence i - distance between them is less than cutoff
+                else if (!matrix->isCloseFit(seq, bins[newBin][i], isFit)) {  //this sequence is "far away" from sequence i - above the cutoff
+                    if (isFit) { results[1]++; }
+                }else { results[0]++;  }  //this sequence is "close" to sequence i - distance between them is less than cutoff
             }
         }
         

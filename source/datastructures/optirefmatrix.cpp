@@ -68,7 +68,7 @@ vector<int> OptiRefMatrix::getNumSeqs(vector<vector<string> > & binNames, vector
     }
 }
 /***********************************************************************/
-bool OptiRefMatrix::isCloseFit(int i, int toFind){
+bool OptiRefMatrix::isCloseFit(int i, int toFind, bool& isFit){
     try {
         if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
         else if (index < 0) { return false; }
@@ -78,7 +78,8 @@ bool OptiRefMatrix::isCloseFit(int i, int toFind){
             if (closeness[i].count(toFind) != 0) {  //are you close
                 found = true;
             }
-        }
+            isFit = true;
+        }else { isFit = false;  }
         return found;
     }
     catch(exception& e) {
@@ -183,7 +184,9 @@ set<int> OptiRefMatrix::getCloseRefSeqs(int index){
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
-                if ((*it) < refEnd) {  closeSeqs.insert(*it); } //you are a ref seq
+                if ((*it) < refEnd) {
+                    closeSeqs.insert(*it);
+                } //you are a ref seq
             }
         }
         
@@ -226,7 +229,7 @@ int OptiRefMatrix::readFiles(){
         if (refdistformat == "column")        {  refSingletonIndexSwap = readColumnSingletons(singleton, refnamefile, refcountfile, refdistfile, count, nameAssignment);     }
         else if (refdistformat == "phylip")   {  refSingletonIndexSwap = readPhylipSingletons(singleton, refdistfile, count, nameAssignment);                                }
         
-        int numRefSeqs = count+1;
+        int numRefSeqs = count;
         
         //read fit file to find singletons
         map<int, int> fitSingletonIndexSwap;
@@ -234,7 +237,7 @@ int OptiRefMatrix::readFiles(){
         if (fitdistformat == "column")        {  fitSingletonIndexSwap = readColumnSingletons(singleton, fitnamefile, fitcountfile, fitdistfile, count, nameAssignment);     }
         else if (fitdistformat == "phylip")   {  fitSingletonIndexSwap = readPhylipSingletons(singleton, fitdistfile, count, nameAssignment);                                }
         
-        int numFitSeqs = (count+1) - numRefSeqs;
+        int numFitSeqs = count - numRefSeqs;
         
         //read bewtween file to update singletons
         readColumnSingletons(singleton, betweendistfile, nameAssignment);
