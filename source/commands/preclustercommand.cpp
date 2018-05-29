@@ -619,7 +619,7 @@ void print(string newfasta, string newname, preClusterData* params){
         
     }
     catch(exception& e) {
-        params->m->errorOut(e, "PreClusterCommand", "printData");
+        params->m->errorOut(e, "PreClusterCommand", "print");
         exit(1);
     }
 }
@@ -657,9 +657,9 @@ int PreClusterCommand::execute(){
                 //run unique.seqs for deconvolute results
                 string inputString = "fasta=" + newFastaFile;
                 if (namefile != "") { inputString += ", name=" + newNamesFile; }
-                m->mothurOutEndLine(); 
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-                m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+                
+                m->mothurOut("\n/******************************************/\n");
+                m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 
                 Command* uniqueCommand = new DeconvoluteCommand(inputString);
@@ -825,10 +825,11 @@ void printData(string group, preClusterData* params){
             for (int i = 0; i < params->alignSeqs.size(); i++) {
                 if (params->alignSeqs[i]->numIdentical != 0) {
                     params->alignSeqs[i]->seq.printSequence(params->newFName);
-                    params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
+                    params->newNName->write(params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
                 }
             }
         }
+       
     }
     catch(exception& e) {
         params->m->errorOut(e, "PreClusterCommand", "printData");
