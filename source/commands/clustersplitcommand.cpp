@@ -573,7 +573,7 @@ int ClusterSplitCommand::execute(){
 
             }
 		//****************** break up files between processes and cluster each file set ******************************//
-		///////////////////// WINDOWS CAN ONLY USE 1 PROCESSORS ACCESS VIOLATION UNRESOLVED ///////////////////////
+		
         listFileNames = createProcesses(distName, labels);
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < listFileNames.size(); i++) { util.mothurRemove(listFileNames[i]); } return 0; }
@@ -701,6 +701,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 			string filledInList = listNames[k] + "filledInTemp";
 			ofstream outFilled;
 			util.openOutputFile(filledInList, outFilled);
+            bool printHeaders = true;
             
 			//for each label needed
 			for(int l = 0; l < orderFloat.size(); l++){
@@ -729,7 +730,8 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 				
 				//print to new file
 				list->setLabel(thisLabel);
-				list->print(outFilled, true);
+                list->setPrintedLabels(printHeaders);
+                list->print(outFilled, true); printHeaders = false;
 		
 				//update labelBin
 				labelBin[orderFloat[l]] += list->getNumBins();
@@ -786,6 +788,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
         
 		util.openOutputFile(listFileName,	outList);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+        bool printHeaders = true;
 
 		//for each label needed
 		for(map<double, int>::iterator itLabel = userLabels.begin(); itLabel != userLabels.end(); itLabel++) {
@@ -826,7 +829,6 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
 				if (list == NULL) { m->mothurOut("Error merging listvectors in file " + listNames[k]); m->mothurOutEndLine();  }	
 				else {		
 					for (int j = 0; j < list->getNumBins(); j++) {
-						//outList << list->get(j) << '\t';
                         completeList.push_back(list->get(j));
 						if (countfile == "") { rabund->push_back(util.getNumNames(list->get(j))); }
 					}
@@ -841,9 +843,10 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
                 rabund->print(outRabund);
             }
 
-            if (countfile == "") { completeList.print(outList); }
-            else if ((file == "") && (countfile != "")) { completeList.print(outList, counts);   }
-            else { completeList.print(outList); }
+            completeList.setPrintedLabels(printHeaders);
+            if (countfile == "") { completeList.print(outList);  printHeaders = false; }
+            else if ((file == "") && (countfile != "")) { completeList.print(outList, counts);  printHeaders = false; }
+            else { completeList.print(outList);  printHeaders = false; }
 			
 			if (rabund != NULL) { delete rabund; }
 		}
@@ -975,6 +978,7 @@ string clusterClassicFile(string thisDistFile, string thisNamefile, double& smal
         
         float previousDist = 0.00000;
         float rndPreviousDist = 0.00000;
+        bool printHeaders = true;
         oldList = *list;
         
         params->m->mothurOut("\nClustering " + thisDistFile + "\n");
@@ -990,12 +994,14 @@ string clusterClassicFile(string thisDistFile, string thisNamefile, double& smal
             
             if(previousDist <= 0.0000 && dist != previousDist){
                 oldList.setLabel("unique");
-                oldList.print(listFile);
+                oldList.setPrintedLabels(printHeaders);
+                oldList.print(listFile); printHeaders = false;
                 if (params->labels.count("unique") == 0) {  params->labels.insert("unique");  }
             }
             else if(rndDist != rndPreviousDist){
                 oldList.setLabel(toString(rndPreviousDist,  params->length-1));
-                oldList.print(listFile);
+                oldList.setPrintedLabels(printHeaders);
+                oldList.print(listFile); printHeaders = false;
                 if (params->labels.count(toString(rndPreviousDist,  params->length-1)) == 0) { params->labels.insert(toString(rndPreviousDist,  params->length-1)); }
             }
             
@@ -1007,12 +1013,14 @@ string clusterClassicFile(string thisDistFile, string thisNamefile, double& smal
         
         if(previousDist <= 0.0000){
             oldList.setLabel("unique");
-            oldList.print(listFile);
+            oldList.setPrintedLabels(printHeaders);
+            oldList.print(listFile); printHeaders = false;
             if (params->labels.count("unique") == 0) { params->labels.insert("unique"); }
         }
         else if(rndPreviousDist<params->cutoff){
             oldList.setLabel(toString(rndPreviousDist,  params->length-1));
-            oldList.print(listFile);
+            oldList.setPrintedLabels(printHeaders);
+            oldList.print(listFile); printHeaders = false;
             if (params->labels.count(toString(rndPreviousDist,  params->length-1)) == 0) { params->labels.insert(toString(rndPreviousDist,  params->length-1)); }
         }
         listFile.close();
@@ -1343,8 +1351,7 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
 
             float previousDist = 0.00000;
             float rndPreviousDist = 0.00000;
-            
-            oldList = *list;
+            bool printHeaders = true;
             
             time_t start = time(NULL);
             double saveCutoff = params->cutoff;
@@ -1365,12 +1372,14 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
                 
                 if(previousDist <= 0.0000 && dist != previousDist){
                     oldList.setLabel("unique");
-                    oldList.print(listFile);
+                    oldList.setPrintedLabels(printHeaders);
+                    oldList.print(listFile); printHeaders = false;
                     if (params->labels.count("unique") == 0) {  params->labels.insert("unique");  }
                 }
                 else if(rndDist != rndPreviousDist){
                     oldList.setLabel(toString(rndPreviousDist,  params->length-1));
-                    oldList.print(listFile);
+                    oldList.setPrintedLabels(printHeaders);
+                    oldList.print(listFile); printHeaders = false;
                     if (params->labels.count(toString(rndPreviousDist,  params->length-1)) == 0) { params->labels.insert(toString(rndPreviousDist,  params->length-1)); }
                 }
                 
@@ -1382,12 +1391,14 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
             
             if(previousDist <= 0.0000){
                 oldList.setLabel("unique");
-                oldList.print(listFile);
+                oldList.setPrintedLabels(printHeaders);
+                oldList.print(listFile); printHeaders = false;
                 if (params->labels.count("unique") == 0) { params->labels.insert("unique"); }
             }
             else if(rndPreviousDist<params->cutoff){
                 oldList.setLabel(toString(rndPreviousDist,  params->length-1));
-                oldList.print(listFile);
+                oldList.setPrintedLabels(printHeaders);
+                oldList.print(listFile); printHeaders = false;
                 if (params->labels.count(toString(rndPreviousDist,  params->length-1)) == 0) { params->labels.insert(toString(rndPreviousDist,  params->length-1)); }
             }
             
