@@ -715,6 +715,7 @@ int ClusterCommand::runMothurCluster(){
         start = time(NULL);
         loops = 0;
         double saveCutoff = cutoff;
+        bool printHeaders = true;
         
         while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
             
@@ -740,10 +741,10 @@ int ClusterCommand::runMothurCluster(){
             float rndDist = util.ceilDist(dist, precision);
             
             if(previousDist <= 0.0000 && dist != previousDist){
-                printData("unique", counts);
+                printData("unique", counts, printHeaders);
             }
             else if(rndDist != rndPreviousDist){
-                printData(toString(rndPreviousDist,  length-1), counts);
+                printData(toString(rndPreviousDist,  length-1), counts, printHeaders);
             }
             
             previousDist = dist;
@@ -760,10 +761,10 @@ int ClusterCommand::runMothurCluster(){
         }
         
         if(previousDist <= 0.0000){
-            printData("unique", counts);
+            printData("unique", counts, printHeaders);
         }
         else if(rndPreviousDist<cutoff){
-            printData(toString(rndPreviousDist, length-1), counts);
+            printData(toString(rndPreviousDist, length-1), counts, printHeaders);
         }
         
         delete matrix;
@@ -790,8 +791,10 @@ int ClusterCommand::runMothurCluster(){
 }
 //**********************************************************************************************************************
 
-void ClusterCommand::printData(string label, map<string, int>& counts){
+void ClusterCommand::printData(string label, map<string, int>& counts, bool& ph){
 	try {
+        oldList.setPrintedLabels(ph); ph = false;
+        
 		if (util.isTrue(timing)) {
 			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
 		     + "\tclusters. Updates: " + toString(loops)); m->mothurOutEndLine();

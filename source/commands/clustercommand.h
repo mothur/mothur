@@ -70,7 +70,7 @@ private:
 	time_t start;
 	unsigned long loops;
 	
-	void printData(string label, map<string, int>&);
+	void printData(string label, map<string, int>&, bool&);
 	vector<string> outputNames;
     
     int createRabund(CountTable*&, ListVector*&, RAbundVector*&);
