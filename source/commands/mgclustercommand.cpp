@@ -300,8 +300,10 @@ int MGClusterCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-void MGClusterCommand::printData(ListVector* mergedList, map<string, int>& counts){
+void MGClusterCommand::printData(ListVector* mergedList, map<string, int>& counts, bool& ph){
 	try {
+        mergedList->setPrintedLabels(ph); ph = false;
+        
         if (countfile != "") {
             mergedList->print(listFile, counts);
         }else { mergedList->print(listFile, true); }
@@ -578,6 +580,7 @@ int MGClusterCommand::runMothurCluster(){
         }
         
         double saveCutoff = cutoff;
+        bool printHeaders = true;
         
         //get distmatrix and overlap
         SparseDistanceMatrix* distMatrix = read->getDistMatrix();
@@ -619,7 +622,7 @@ int MGClusterCommand::runMothurCluster(){
             
             if(previousDist <= 0.0000 && dist != previousDist){
                 oldList.setLabel("unique");
-                printData(&oldList, counts);
+                printData(&oldList, counts, printHeaders);
             }
             else if(rndDist != rndPreviousDist){
                 if (merge) {
@@ -633,11 +636,11 @@ int MGClusterCommand::runMothurCluster(){
                     }
                     
                     temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
-                    printData(temp, counts);
+                    printData(temp, counts, printHeaders);
                     delete temp;
                 }else{
                     oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
-                    printData(&oldList, counts);
+                    printData(&oldList, counts, printHeaders);
                 }
             }
             
@@ -650,7 +653,7 @@ int MGClusterCommand::runMothurCluster(){
         
         if(previousDist <= 0.0000){
             oldList.setLabel("unique");
-            printData(&oldList, counts);
+            printData(&oldList, counts, printHeaders);
         }
         else if(rndPreviousDist<cutoff){
             if (merge) {
@@ -664,11 +667,11 @@ int MGClusterCommand::runMothurCluster(){
                 }
                 
                 temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
-                printData(temp, counts);
+                printData(temp, counts, printHeaders);
                 delete temp;
             }else{
                 oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
-                printData(&oldList, counts);
+                printData(&oldList, counts, printHeaders);
             }
         }
         

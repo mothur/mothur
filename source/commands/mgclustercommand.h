@@ -60,7 +60,7 @@ private:
 	int precision, length, precisionLength, maxIters;
 	bool abort, minWanted, hclusterWanted, merge, cutoffSet;
 	
-	void printData(ListVector*, map<string, int>&);
+	void printData(ListVector*, map<string, int>&, bool&);
 	ListVector* mergeOPFs(map<string, int>, float);
     vector<seqDist> getSeqs(ifstream&);
     void createRabund(CountTable*&, ListVector*&, RAbundVector*&);
