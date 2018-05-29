@@ -666,7 +666,6 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
         }else{  listSingle = NULL; numSingleBins = 0;  }
 		
         //go through users set and make them floats so we can sort them
-        double tcutoff = cutoff * 1000; tcutoff = ceil(tcutoff);
         for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
             double temp = -10.0;
             
@@ -675,9 +674,12 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
             
             double ttemp = temp * 1000; ttemp = ceil(temp);
             
-            if (ttemp <= tcutoff) {
+            if (temp < cutoff) {
                 orderFloat.push_back(temp);
-                labelBin[temp] = numSingleBins; //initialize numbins 
+                labelBin[temp] = numSingleBins; //initialize numbins
+            }else if (fabs(cutoff - temp) < 0.0001) {
+                orderFloat.push_back(temp);
+                labelBin[temp] = numSingleBins; //initialize numbins
             }
         }
 	
