@@ -20,7 +20,7 @@ public:
     OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat
     ~OptiRefMatrix(){ }
     
-    vector<int> getNumSeqs(vector<vector<string> >&, vector< vector<int> >&);
+    vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&);
     
     long long getNumFitSingletons() { return numFitSingletons; } //user singletons
     long long getNumRefSingletons() { return numRefSingletons; } //reference singletons
@@ -32,9 +32,10 @@ public:
     //ListVector* getRefListSingle();
     ListVector* getFitListSingle();
     
-    vector<int> getRefSeqs();
-    vector<int> getFitSeqs();
+    vector<int> getRefSeqs(); //every ref seq in matrix. Includes some that would have been singletons if not for the betweendistfile
+    vector<int> getFitSeqs(); //every fit seq in matrix. Includes some that would have been singletons if not for the betweendistfile
     
+    long long getNumUniqueFitSeqs() { return numFitSeqs; } //only Fit seqs that are in fitdistfile
     int getNumFitClose(int);
     int getNumRefClose(int);
     set<int> getCloseFitSeqs(int);
@@ -46,7 +47,7 @@ protected:
     string refdistfile, refnamefile, refcountfile, refformat, refdistformat, fitdistfile, fitnamefile, fitcountfile, fitformat, fitdistformat, betweendistfile, betweendistformat, method;
     bool square;
     long long numFitDists, numRefDists, numRefSingletons, numFitSingletons, numBetweenDists, numSingletons;
-    int length, refEnd;  //refEnd is index of first fit seq
+    long long length, refEnd, refSingletonsEnd, numFitSeqs;  //refEnd is index of first fit seq
     
     int readPhylip(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap);
     int readColumn(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap);

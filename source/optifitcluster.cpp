@@ -27,9 +27,9 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         if (meth == "closed") { closed = true; }
         
         vector< vector< int> > translatedBins;
-        randomizeSeqs = matrix->getNumSeqs(existingBins, translatedBins); //otus in existingBins, otus with matrix names
-        numFitSeqs = randomizeSeqs.size();
-        for (int i = 0; i < numFitSeqs; i++) { fitSeqs.insert(randomizeSeqs[i]); }
+        randomizeSeqs = matrix->getTranslatedBins(existingBins, translatedBins); //otus in existingBins, otus with matrix names
+        
+        for (int i = 0; i < randomizeSeqs.size(); i++) { fitSeqs.insert(randomizeSeqs[i]); }
         
         int binNumber = 0;
         int placeHolderIndex = -1;
@@ -60,12 +60,12 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         
         double refValue = metric->getValue(reftruePositives, reftrueNegatives, reffalsePositives, reffalseNegatives);
         
-        //cout << "reference mcc " << refValue << '\t' << reftruePositives << '\t' << reftrueNegatives << '\t' << reffalsePositives << '\t' << reffalseNegatives << endl;
+        cout << "reference mcc " << refValue << '\t' << reftruePositives << '\t' << reftrueNegatives << '\t' << reffalsePositives << '\t' << reffalseNegatives << endl;
         
         //add fit seqs as singletons
         int numRefBins = translatedBins.size();
         //put every fit seq in own bin
-        for (int i = 0; i < numFitSeqs; i++) {
+        for (int i = 0; i < randomizeSeqs.size(); i++) {
             vector<int> thisBin;
             thisBin.push_back(randomizeSeqs[i]);
             bins.push_back(thisBin);
@@ -74,13 +74,13 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
             long long numCloseSeqs = (matrix->getNumFitClose(randomizeSeqs[i])); //does not include self
             fitfalseNegatives += numCloseSeqs;
         }
-        
+        numFitSeqs = matrix->getNumUniqueFitSeqs();
         fitfalseNegatives /= 2; //square matrix
         fittrueNegatives = numFitSeqs * (numFitSeqs-1)/2 - (fitfalsePositives + fitfalseNegatives + fittruePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
         
         double fitValue = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
         
-        //cout << "fit intial mcc " << fitValue << '\t' << fittruePositives << '\t' << fittrueNegatives << '\t' << fitfalsePositives << '\t' << fitfalseNegatives << endl;
+        cout << "fit intial mcc " << fitValue << '\t' << fittruePositives << '\t' << fittrueNegatives << '\t' << fitfalsePositives << '\t' << fitfalseNegatives << endl;
         numComboSeqs = numRefSeqs + numFitSeqs;
         
         combofalseNegatives = matrix->getNumDists() - reftruePositives; //number of distance in matrix for reference seqs - reftruePositives
@@ -90,7 +90,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         
         double comboValue = metric->getValue(combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives);
         
-        //cout << "combo intial mcc " << comboValue << '\t' << combotruePositives << '\t' << combotrueNegatives << '\t' << combofalsePositives << '\t' << combofalseNegatives << endl;
+        cout << "combo intial mcc " << comboValue << '\t' << combotruePositives << '\t' << combotrueNegatives << '\t' << combofalsePositives << '\t' << combofalseNegatives << endl;
         
         //add insert location
         seqBin[bins.size()] = -1;
@@ -230,6 +230,8 @@ bool OptiFitCluster::update(double& listMetric) {
         
         double fitListMetric = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
         
+        cout << fitListMetric << endl;
+        
         if (m->getDebug()) { ListVector* list = getList(); list->print(cout); delete list; }
         
         return 0;
@@ -288,14 +290,16 @@ vector<long long> OptiFitCluster::getCloseFarFitCounts(int seq, int newBin) {
 /***********************************************************************/
 vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
-        //long long singletn = 0;
-        long long singletn = matrix->getNumSingletons();
+        long long singletn = 0;
+        //long long singletn = matrix->getNumSingletons();
         long long tempnumSeqs = numComboSeqs + singletn;
         
         tp = combotruePositives;
         fp = combofalsePositives;
         fn = combofalseNegatives;
         tn = tempnumSeqs * (tempnumSeqs-1)/2 - (combofalsePositives + combofalseNegatives + combotruePositives); //adds singletons to tn
+        
+        cout << tempnumSeqs << '\t' << singletn << endl;
         
         vector<double> results;
         
@@ -318,9 +322,11 @@ vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long lon
 /***********************************************************************/
 vector<double> OptiFitCluster::getFitStats(long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
-        //long long singletn = 0;
-        long long singletn = matrix->getNumFitSingletons();
+        long long singletn = 0;
+        //long long singletn = matrix->getNumFitSingletons();
         long long tempnumSeqs = numFitSeqs + singletn;
+        
+        cout << tempnumSeqs << '\t' << singletn << endl;
         
         tp = fittruePositives;
         fp = fitfalsePositives;

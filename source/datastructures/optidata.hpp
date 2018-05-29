@@ -36,7 +36,7 @@ public:
     virtual vector< set<int> > getBlastOverlap() { vector< set<int> > blank; return blank; }
     virtual string getOverlapName(int) { return ""; } //name from nameMap index
     
-    virtual vector<int> getNumSeqs(vector<vector<string> >&, vector< vector<int> >&) { vector<int> temp; return temp;  }
+    virtual vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&) { vector<int> temp; return temp;  }
     virtual long long getNumFitSingletons() { return 0; } //user singletons
     virtual long long getNumRefSingletons() { return 0; } //reference singletons
     
@@ -48,7 +48,7 @@ public:
     
     virtual vector<int> getRefSeqs() { vector<int> temp; return temp;  }
     virtual vector<int> getFitSeqs() { vector<int> temp; return temp;  }
-    
+    virtual long long getNumUniqueFitSeqs() { return 0; }
     virtual int getNumFitClose(int) { return 0;  }
     virtual int getNumRefClose(int) { return 0;  }
     virtual set<int> getCloseFitSeqs(int i) { set<int> temp; return temp;  }

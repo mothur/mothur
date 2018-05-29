@@ -19,6 +19,7 @@ OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c,
     numBetweenDists = 0;
     numFitDists = 0;
     numRefDists = 0;
+    numFitSeqs = 0;
     
     square = false;
     
@@ -33,13 +34,13 @@ OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c,
     readFiles();
 }
 /***********************************************************************/
-vector<int> OptiRefMatrix::getNumSeqs(vector<vector<string> > & binNames, vector<vector<int> > & fixedBins) {
+vector<int> OptiRefMatrix::getTranslatedBins(vector<vector<string> > & binNames, vector<vector<int> > & fixedBins) {
     try {
         fixedBins.clear();
         
         map<string, int> nameIndexes;
         set<string> unique;
-        for (int i = 0; i < nameMap.size(); i++) { //vector of string representing the name file.
+        for (int i = 0; i < nameMap.size(); i++) { //vector of string representing the sequences in the matrix from the name file.
             vector<string> thisSeqsReps; util.splitAtComma(nameMap[i], thisSeqsReps); //split redundant names
             if (i < closeness.size()) {  nameIndexes[thisSeqsReps[0]] = i;  } //this is a sequence with distances in the matrix
             if (thisSeqsReps.size() == 1) { //you are unique
@@ -47,15 +48,19 @@ vector<int> OptiRefMatrix::getNumSeqs(vector<vector<string> > & binNames, vector
             }
         }
         
+        for (int i = 0; i < numRefSingletons; i++) {
+            vector<string> thisSeqsReps; util.splitAtComma(singletons[i], thisSeqsReps); //split redundant names
+            nameIndexes[thisSeqsReps[0]] = -1;
+            if (thisSeqsReps.size() == 1) { unique.insert(thisSeqsReps[0]); }
+        }
+        
         for (int i = 0; i < binNames.size(); i++) { //for each OTU
             vector<int> thisBinsSeqs;
             for (int j = 0; j < binNames[i].size(); j++) { //for each sequence
                 map<string, int>::iterator it = nameIndexes.find(binNames[i][j]);
                 
-                if (it == nameIndexes.end()) {//not in distance matrix, but needs a value in fixedBins. 2 reasons for making it here: you are a redundant name in the listfile, you do not have any distances below the cutoff
-                    if (unique.count(binNames[i][j]) == 0) { } //you are redundant seq in list file because namefile was used. You should be edited out of the listfile.
-                    else { thisBinsSeqs.push_back(-1); } //you are unique, but have no distances so add placeholder
-                }else { thisBinsSeqs.push_back(it->second);  nameIndexes.erase(it); } //"name" of sequence in matrix
+                if (it == nameIndexes.end()) { }//not in distance matrix, but needs a value in fixedBins. 2 reasons for making it here: you are a redundant name in the listfile, you do not have any distances
+                else { thisBinsSeqs.push_back(it->second);  } //"name" of sequence in matrix
             }
             fixedBins.push_back(thisBinsSeqs);
         }
@@ -206,7 +211,7 @@ ListVector* OptiRefMatrix::getFitListSingle() {
         else {
             singlelist = new ListVector();
             
-            for (int i = numRefSingletons; i < singletons.size(); i++) { singlelist->push_back(singletons[i]); }
+            for (int i = refSingletonsEnd; i < singletons.size(); i++) { singlelist->push_back(singletons[i]); }
         }
         
         return singlelist;
@@ -230,14 +235,20 @@ int OptiRefMatrix::readFiles(){
         else if (refdistformat == "phylip")   {  refSingletonIndexSwap = readPhylipSingletons(singleton, refdistfile, count, nameAssignment);                                }
         
         int numRefSeqs = count;
-        
+        numRefSingletons = 0;
+        for (int i = 0; i < numRefSeqs; i++) { if (singleton[i]) { numRefSingletons++; } }
+        cout << "numRefSeqs = " << numRefSeqs << endl;
         //read fit file to find singletons
         map<int, int> fitSingletonIndexSwap;
         
         if (fitdistformat == "column")        {  fitSingletonIndexSwap = readColumnSingletons(singleton, fitnamefile, fitcountfile, fitdistfile, count, nameAssignment);     }
         else if (fitdistformat == "phylip")   {  fitSingletonIndexSwap = readPhylipSingletons(singleton, fitdistfile, count, nameAssignment);                                }
         
-        int numFitSeqs = count - numRefSeqs;
+        numFitSeqs = count - numRefSeqs;
+        int numSeqs = numFitSeqs+numRefSeqs;
+        
+        numFitSingletons = 0;
+        for (int i = numRefSeqs; i < numSeqs; i++) {  if (singleton[i]) { numFitSingletons++; } }
         
         //read bewtween file to update singletons
         readColumnSingletons(singleton, betweendistfile, nameAssignment);
@@ -251,10 +262,9 @@ int OptiRefMatrix::readFiles(){
             }else { singletons.push_back(nameMap[i]); }
         }
         refSingletonIndexSwap.clear();
-        numRefSingletons = singletons.size();
         refEnd = nonSingletonCount; // reference sequences are stored in beginning of closeness, fit seqs stored after
+        refSingletonsEnd = singletons.size();
         
-        int numSeqs = numFitSeqs+numRefSeqs;
         for (int i = numRefSeqs; i < numSeqs; i++) {
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
@@ -265,7 +275,6 @@ int OptiRefMatrix::readFiles(){
         fitSingletonIndexSwap.clear();
         
         numSingletons = singletons.size();
-        numFitSingletons = numSingletons - numRefSingletons;
         closeness.resize(nonSingletonCount);
         
         map<string, string> names;
@@ -309,6 +318,7 @@ int OptiRefMatrix::readFiles(){
         if (!hasName && refHasName) { hasName = true; } //if either the ref or fit has a name file then set hasName
         if (betweendistformat == "column")        {  readColumn(betweendistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
         else if (betweendistformat == "phylip")   {  readPhylip(betweendistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
+        
     }
     catch(exception& e) {
         m->errorOut(e, "OptiRefMatrix", "readFiles");

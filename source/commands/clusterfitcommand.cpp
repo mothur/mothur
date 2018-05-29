@@ -337,7 +337,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             if (temp == "not found") { temp = "0.03"; }
             util.mothurConvert(temp, cutoff);
             
-            //abort=false;
+            abort=false;
             
         }
     }
@@ -361,7 +361,7 @@ int ClusterFitCommand::execute(){
             
             createReferenceNameCount(); //creates name or count file if needed
             
-            calcDists();  //calc distance matrix for fasta file and distances between fasta file and reffasta file
+            //calcDists();  //calc distance matrix for fasta file and distances between fasta file and reffasta file
             
             //calc sens.spec values for reference
             InputData input(reflistfile, "list", nullVector);
@@ -530,7 +530,7 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         if (countfile == "") { fitDupsFile = namefile; nameOrCount = "name"; }
         else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
         
-        //comboDistFile = "/Users/sarahwestcott/desktop/cluster.fit_refs/between.dist";
+        comboDistFile = "/Users/sarahwestcott/desktop/release/final.fit.dist";
         
         OptiData* matrix; matrix = new OptiRefMatrix(refcolumnfile, refDupsFile, refNameOrCount, "column",  cutoff, columnfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
         
