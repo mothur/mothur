@@ -263,7 +263,7 @@ int ClusterDoturCommand::execute(){
 		oldRAbund = *rabund;
 		oldList = *list;
 
-		//double saveCutoff = cutoff;
+		bool printHeaders = true;
 		
 		int estart = time(NULL);
 	
@@ -277,10 +277,10 @@ int ClusterDoturCommand::execute(){
 			float rndDist = util.ceilDist(dist, precision);
 
 			if(previousDist <= 0.0000 && dist != previousDist){
-				printData("unique", counts);
+				printData("unique", counts, printHeaders);
 			}
 			else if(rndDist != rndPreviousDist){
-				printData(toString(rndPreviousDist,  length-1), counts);
+				printData(toString(rndPreviousDist,  length-1), counts, printHeaders);
 			}
 		
 			previousDist = dist;
@@ -290,10 +290,10 @@ int ClusterDoturCommand::execute(){
 		}
 	
 		if(previousDist <= 0.0000){
-			printData("unique", counts);
+			printData("unique", counts, printHeaders);
 		}
 		else if(rndPreviousDist<cutoff){
-			printData(toString(rndPreviousDist, length-1), counts);
+			printData(toString(rndPreviousDist, length-1), counts, printHeaders);
 		}
 		
         if (countfile == "") {
@@ -332,8 +332,10 @@ int ClusterDoturCommand::execute(){
 
 //**********************************************************************************************************************
 
-void ClusterDoturCommand::printData(string label, map<string, int>& counts){
+void ClusterDoturCommand::printData(string label, map<string, int>& counts, bool& ph){
 	try {
+        oldList.setPrintedLabels(ph); ph = false;
+        
         oldRAbund.setLabel(label);
         if (countfile == "") {
             oldRAbund.print(rabundFile);

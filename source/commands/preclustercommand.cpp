@@ -547,6 +547,7 @@ vector<seqPNode*> readFASTA(CountTable ct, preClusterData* params, long long& nu
             Sequence seq(inFasta);  params->util.gobble(inFasta);
             
             if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
+                
                 if (params->hasName) {
                     it = nameMap.find(seq.getName());
                     
@@ -577,6 +578,8 @@ vector<seqPNode*> readFASTA(CountTable ct, preClusterData* params, long long& nu
         //sort seqs by number of identical seqs
         if (params->topdown) { sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);  }
         else {  sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityDownTop);  }
+        
+        num = alignSeqs.size();
         
         return alignSeqs;
     }
@@ -616,7 +619,7 @@ void print(string newfasta, string newname, preClusterData* params){
         
     }
     catch(exception& e) {
-        params->m->errorOut(e, "PreClusterCommand", "printData");
+        params->m->errorOut(e, "PreClusterCommand", "print");
         exit(1);
     }
 }
@@ -654,9 +657,9 @@ int PreClusterCommand::execute(){
                 //run unique.seqs for deconvolute results
                 string inputString = "fasta=" + newFastaFile;
                 if (namefile != "") { inputString += ", name=" + newNamesFile; }
-                m->mothurOutEndLine(); 
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-                m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+                
+                m->mothurOut("\n/******************************************/\n");
+                m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 
                 Command* uniqueCommand = new DeconvoluteCommand(inputString);
@@ -672,7 +675,7 @@ int PreClusterCommand::execute(){
                 util.renameFile(filenames["name"][0], newNamesFile); 
 			}
             if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}	 return 0; }
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster."); m->mothurOutEndLine(); 
+			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster.\n");
 				
 		}else {
             if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
@@ -682,11 +685,12 @@ int PreClusterCommand::execute(){
             
             //reads fasta file and return number of seqs
             long long numSeqs = 0; params->alignSeqs = readFASTA(ct, params, numSeqs); //fills alignSeqs and makes all seqs active
+            length = params->length;
 		
 			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
 	
-			if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine();  return 0;  }
-			if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine();  return 0;  }
+			if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct.\n");  return 0;  }
+			if (diffs > length) { m->mothurOut("Error: diffs is set to " + toString(diffs) + " which is greater than your sequence length of " + toString(length) + ".\n");   return 0;  }
 			
 			int count = process("", newMapFile, params);
 			outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
@@ -698,7 +702,7 @@ int PreClusterCommand::execute(){
 			if (countfile != "") { newNamesFile = newCountFile; }
             print(newFastaFile, newNamesFile, params);
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); 
+			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
 		}
 				
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
@@ -786,6 +790,8 @@ vector<seqPNode*> loadSeqs(map<string, string>& thisName, vector<Sequence>& this
         if (topdown) { sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);  }
         else {  sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityDownTop);  }
 
+        num = alignSeqs.size();
+        
         return alignSeqs;
     }
     catch(exception& e) {
@@ -819,10 +825,11 @@ void printData(string group, preClusterData* params){
             for (int i = 0; i < params->alignSeqs.size(); i++) {
                 if (params->alignSeqs[i]->numIdentical != 0) {
                     params->alignSeqs[i]->seq.printSequence(params->newFName);
-                    params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
+                    params->newNName->write(params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
                 }
             }
         }
+       
     }
     catch(exception& e) {
         params->m->errorOut(e, "PreClusterCommand", "printData");
@@ -862,8 +869,11 @@ long long driverGroups(preClusterData* params){
             
             map<string, int> thisCount;
             if (params->hasCount) { thisCount = cparser->getCountTable(params->groups[i]);  }
-			params->alignSeqs = loadSeqs(thisNameMap, thisSeqs, thisCount, params->groups[i], numSeqs, params->hasName, params->hasCount, params->length, params->method, params->topdown);
-			
+            
+            long long num = 0;
+			params->alignSeqs = loadSeqs(thisNameMap, thisSeqs, thisCount, params->groups[i], num, params->hasName, params->hasCount, params->length, params->method, params->topdown);
+            numSeqs += num;
+            
 			if (params->m->getControl_pressed()) {   return 0; }
 			
             if (params->method == "aligned") { if (params->diffs > params->length) { params->m->mothurOut("[ERROR]: diffs is greater than your sequence length.\n"); params->m->setControl_pressed(true); return 0;  } }
@@ -879,7 +889,7 @@ long long driverGroups(preClusterData* params){
 			printData(params->groups[i], params);
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
 			
-			params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(count) + " sequences.\n");
+			params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(num) + " sequences.\n");
 		}
 		
         if (params->hasCount) { delete cparser; }else { delete parser; }
