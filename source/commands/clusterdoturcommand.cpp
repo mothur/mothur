@@ -263,8 +263,6 @@ int ClusterDoturCommand::execute(){
 		oldRAbund = *rabund;
 		oldList = *list;
         bool printHeaders = true;
-
-		bool printHeaders = true;
 		
 		int estart = time(NULL);
 	

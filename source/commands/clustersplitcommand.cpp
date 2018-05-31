@@ -1355,7 +1355,6 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
             float rndPreviousDist = 0.00000;
             bool printHeaders = true;
             
-            bool printHeaders = true;
             oldList = *list;
             
             time_t start = time(NULL);
