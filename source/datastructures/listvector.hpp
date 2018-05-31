@@ -16,28 +16,28 @@
 class ListVector : public DataVector {
     
 public:
-	ListVector();
-	ListVector(int);
-	ListVector(string, vector<string>, string&);
+    ListVector();
+    ListVector(int);
+    ListVector(string, vector<string>, string&);
     ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), otuTag(lv.otuTag), printListHeaders(lv.printListHeaders) {};
-	ListVector(ifstream&, string&, string&);
-	~ListVector(){};
-	
-	int getNumBins()							{	return numBins;		}
-	int getNumSeqs()							{	return numSeqs;		}
-	int getMaxRank()							{	return maxRank;		}
-
-	void set(int, string);	
-	string get(int);
+    ListVector(ifstream&, string&, string&);
+    ~ListVector(){};
+    
+    int getNumBins()							{	return numBins;		}
+    int getNumSeqs()							{	return numSeqs;		}
+    int getMaxRank()							{	return maxRank;		}
+    
+    void set(int, string);
+    string get(int);
     vector<string> getLabels();
     void setLabels(vector<string>);
     bool getPrintedLabels();
     void setPrintedLabels(bool pl) { printListHeaders = pl; }
     
-	void push_back(string);
-	void resize(int);
-	void clear();
-	int size();
+    void push_back(string);
+    void resize(int);
+    void clear();
+    int size();
     void print(ostream&);
     void print(ostream&, bool);
     void print(ostream&, map<string, int>&);

@@ -341,12 +341,15 @@ int PcrSeqsCommand::execute(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("accnos",variables);
 
+        //don't write or keep if blank
+        bool wroteAccnos = false;
+        if (badNames.size() != 0)   { writeAccnos(badNames, outputFileName);    wroteAccnos = true;   outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);  }
+        else { m->mothurOut("[NOTE]: no sequences were bad, removing " + outputFileName + "\n\n"); }
+        
         if (util.isBlank(badSeqFile)) { util.mothurRemove(badSeqFile);  }
         else { outputNames.push_back(badSeqFile); outputTypes["fasta"].push_back(badSeqFile); }
         
-        if (badNames.size() != 0)   {
-            writeAccnos(badNames, outputFileName);     outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
-            
+        if (wroteAccnos) {
             string inputStringTemp = "";
             if (countfile != "")            {   inputStringTemp += ", count=" + countfile;  }
             else{
@@ -357,8 +360,8 @@ int PcrSeqsCommand::execute(){
             string inputString = "accnos=" + outputFileName + inputStringTemp;
             
             if (inputStringTemp != "") {
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-                m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 
                 Command* removeCommand = new RemoveSeqsCommand(inputString);
@@ -405,7 +408,7 @@ int PcrSeqsCommand::execute(){
                     util.renameFile(filenames["taxonomy"][0], outputFileName);
                     outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
                 }
-                m->mothurOut("/******************************************/\n");
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
             }
         }
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }

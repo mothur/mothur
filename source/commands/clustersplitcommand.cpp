@@ -573,6 +573,7 @@ int ClusterSplitCommand::execute(){
 
             }
 		//****************** break up files between processes and cluster each file set ******************************//
+		
         listFileNames = createProcesses(distName, labels);
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < listFileNames.size(); i++) { util.mothurRemove(listFileNames[i]); } return 0; }
@@ -671,9 +672,11 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
             if ((*it != "unique") && (convertTestFloat(*it, temp) ))	{	util.mothurConvert(*it, temp);	}
             else if (*it == "unique")										{	temp = -1.0;		}
             
+            double ttemp = temp * 1000; ttemp = ceil(temp);
+            
             if (temp < cutoff) {
                 orderFloat.push_back(temp);
-                labelBin[temp] = numSingleBins; //initialize numbins 
+                labelBin[temp] = numSingleBins; //initialize numbins
             }else if (fabs(cutoff - temp) < 0.0001) {
                 orderFloat.push_back(temp);
                 labelBin[temp] = numSingleBins; //initialize numbins
@@ -731,7 +734,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 				//print to new file
 				list->setLabel(thisLabel);
                 list->setPrintedLabels(printHeaders);
-				list->print(outFilled, true); printHeaders = false;
+                list->print(outFilled, true); printHeaders = false;
 		
 				//update labelBin
 				labelBin[orderFloat[l]] += list->getNumBins();
@@ -1350,6 +1353,7 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
 
             float previousDist = 0.00000;
             float rndPreviousDist = 0.00000;
+            bool printHeaders = true;
             
             bool printHeaders = true;
             oldList = *list;
@@ -1380,6 +1384,7 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
                 else if(rndDist != rndPreviousDist){
                     oldList.setPrintedLabels(printHeaders);
                     oldList.setLabel(toString(rndPreviousDist,  params->length-1));
+                    oldList.setPrintedLabels(printHeaders);
                     oldList.print(listFile); printHeaders = false;
                     if (params->labels.count(toString(rndPreviousDist,  params->length-1)) == 0) { params->labels.insert(toString(rndPreviousDist,  params->length-1)); }
                 }

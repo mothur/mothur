@@ -740,8 +740,12 @@ int ClusterCommand::runMothurCluster(){
             float dist = matrix->getSmallDist();
             float rndDist = util.ceilDist(dist, precision);
             
-            if(previousDist <= 0.0000 && dist != previousDist)  { printData("unique", counts, printHeaders);                                }
-            else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
+            if(previousDist <= 0.0000 && dist != previousDist){
+                printData("unique", counts, printHeaders);
+            }
+            else if(rndDist != rndPreviousDist){
+                printData(toString(rndPreviousDist,  length-1), counts, printHeaders);
+            }
             
             previousDist = dist;
             rndPreviousDist = rndDist;
