@@ -264,7 +264,7 @@ int ClusterDoturCommand::execute(){
 		oldList = *list;
         bool printHeaders = true;
 
-		//double saveCutoff = cutoff;
+		bool printHeaders = true;
 		
 		int estart = time(NULL);
 	
@@ -335,6 +335,8 @@ int ClusterDoturCommand::execute(){
 
 void ClusterDoturCommand::printData(string label, map<string, int>& counts, bool& ph){
 	try {
+        oldList.setPrintedLabels(ph); ph = false;
+        
         oldRAbund.setLabel(label);
         if (countfile == "") {
             oldRAbund.print(rabundFile);

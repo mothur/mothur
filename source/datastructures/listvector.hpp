@@ -14,7 +14,7 @@
 			 ordervector	=	1	1	1	1	1	1	2	2	2	3	3	4	5 */
 
 class ListVector : public DataVector {
-	
+    
 public:
 	ListVector();
 	ListVector(int);
@@ -40,22 +40,22 @@ public:
 	int size();
     void print(ostream&);
     void print(ostream&, bool);
-	void print(ostream&, map<string, int>&);
+    void print(ostream&, map<string, int>&);
     
-	RAbundVector getRAbundVector();
-	SAbundVector getSAbundVector();
-	OrderVector getOrderVector(map<string,int>*);
-	
+    RAbundVector getRAbundVector();
+    SAbundVector getSAbundVector();
+    OrderVector getOrderVector(map<string,int>*);
+    
 private:
-	vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.
-	int maxRank;
-	int numBins;
-	int numSeqs;
+    vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.
+    int maxRank;
+    int numBins;
+    int numSeqs;
     vector<string> binLabels;
     string otuTag;
     bool printListHeaders;
     void printHeaders(ostream&, map<string, int>&, bool);
-
+    
 };
 
 #endif

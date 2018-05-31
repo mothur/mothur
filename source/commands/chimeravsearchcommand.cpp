@@ -1050,7 +1050,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
             *tempR = '\0'; strncat(tempR, templatefile.c_str(), templatefile.length());
             cPara.push_back(tempR);
             
-            char* tempIn = new char[8];
+            char* tempIn = new char[13];
             *tempIn = '\0'; strncat(tempIn, "--uchime_ref", 12);
             cPara.push_back(tempIn);
             char* temp = new char[filename.length()+1];

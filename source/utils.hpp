@@ -28,6 +28,11 @@ public:
     //random operations
     int getRandomIndex(int); //highest
     int getRandomNumber();
+    float randomUniform();
+    float randomExp();
+    float randomNorm();
+    float randomGamma(float);
+    vector<float> randomDirichlet(vector<float> alphas);
     double getRandomDouble0to1();
     void mothurRandomShuffle(vector<int>&);
     void mothurRandomShuffle(vector< vector<double> >&);
@@ -226,3 +231,5 @@ private:
 };
 
 #endif /* utils_hpp */
+
+

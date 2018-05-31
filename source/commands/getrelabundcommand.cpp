@@ -181,6 +181,9 @@ int GetRelAbundCommand::execute(){
 		lookup = input.getSharedRAbundVectors();
         Groups = lookup->getNamesGroups();
 		string lastLabel = lookup->getLabel();
+        vector<string> binLabels = lookup->getOTUNames();
+        out << "label\tGroup\tnumOtus";
+        for (int i = 0; i < binLabels.size(); i++) { out  << '\t' << binLabels[i]; } out << endl;
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -270,6 +273,8 @@ int GetRelAbundCommand::execute(){
 int GetRelAbundCommand::getRelAbundance(SharedRAbundVectors*& thisLookUp, ofstream& out){
 	try {
         vector<string> groups = thisLookUp->getNamesGroups();
+        vector<string> binLabels = thisLookUp->getOTUNames();
+        
 		 for (int i = 0; i < thisLookUp->size(); i++) {
 			out << thisLookUp->getLabel() << '\t' << groups[i] << '\t' << thisLookUp->getNumBins();
 			

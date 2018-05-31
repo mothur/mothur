@@ -273,7 +273,7 @@ ClusterCommand::ClusterCommand(string option)  {
                         }	
                     }
                 }
-                if ((method != "agc") || (method != "dgc")) {
+                if ((method != "agc") && (method != "dgc")) {
                     if ((columnfile == "") && (phylipfile == "")) {
                         m->mothurOut("[ERROR]: You must provide a distance file unless you are using the agc, dgc or unique clustering methods, aborting\n."); abort = true;
                     }
@@ -789,6 +789,8 @@ int ClusterCommand::runMothurCluster(){
 
 void ClusterCommand::printData(string label, map<string, int>& counts, bool& ph){
 	try {
+        oldList.setPrintedLabels(ph); ph = false;
+        
 		if (util.isTrue(timing)) {
 			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
 		     + "\tclusters. Updates: " + toString(loops)); m->mothurOutEndLine();

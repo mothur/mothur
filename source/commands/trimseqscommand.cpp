@@ -1097,7 +1097,7 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
         }
         
         //print group or count file.
-        if (countfile == "") {
+        if (groupFile != "") {
             ofstream outGroup;
             util.openOutputFile(groupFile, outGroup);
             for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
