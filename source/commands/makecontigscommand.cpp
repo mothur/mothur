@@ -1784,6 +1784,13 @@ void driverContigs(contigsData* params){
                 int numMismatches = 0;
                 vector<int> contigScores = assembleFragments(qual_match_simple_bayesian, qual_mismatch_simple_bayesian, fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, hasQuality, alignment, contig, trashCode, oend, oStart, numMismatches, params->insert, params->deltaq, params->trimOverlap);
 
+								//Note that usearch/vsearch cap the maximum Q value at 41 - perhaps due to ascii
+								//limits? we leave this value unbounded. if two sequences have a 40 then the
+								//assembled quality score will be 85. If two 250 nt reads are all 40 and they
+ 								//perfectly match each other, then the difference in the number of expected errors
+								//between using 85 and 41 all the way across will be 0.01986 - this is a "worst"
+								//case scenario
+
 								double expected_errors = 0;
 								for(int i=0;i<contigScores.size();i++){
 									expected_errors += convertQToProb(contigScores[i]);
