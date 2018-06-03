@@ -291,7 +291,7 @@ vector<long long> OptiFitCluster::getCloseFarFitCounts(int seq, int newBin) {
 vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
         long long singletn = 0;
-        //long long singletn = matrix->getNumSingletons();
+        if (!closed) { singletn = matrix->getNumSingletons(); }
         long long tempnumSeqs = numComboSeqs + singletn;
         
         tp = combotruePositives;
@@ -323,7 +323,7 @@ vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long lon
 vector<double> OptiFitCluster::getFitStats(long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
         long long singletn = 0;
-        //long long singletn = matrix->getNumFitSingletons();
+        if (!closed) { singletn = matrix->getNumFitSingletons(); }
         long long tempnumSeqs = numFitSeqs + singletn;
         
         cout << tempnumSeqs << '\t' << singletn << endl;
@@ -393,6 +393,7 @@ ListVector* OptiFitCluster::getFittedList(long long& unnumFitted) {
         vector<string> newLabels;
         
         map<int, string> newBins;
+        set<int> unFitted;
         for (int i = 0; i < randomizeSeqs.size(); i++) { //build otus
             
             if (m->getControl_pressed()) { break; }
@@ -412,11 +413,11 @@ ListVector* OptiFitCluster::getFittedList(long long& unnumFitted) {
                 }else { //append bin
                     newBins[binNumber] += "," + matrix->getName(seqNumber);
                 }
-            }
+            }else { unFitted.insert(seqNumber); }
         }
         
         for (map<int, string>::iterator itBin = newBins.begin(); itBin != newBins.end(); itBin++) {
-            if (itBin->first < maxRefBinNumber) {
+            if (itBin->first < maxRefBinNumber) { //maxRefBinNumber = location of first non ref seq
                 list->push_back(itBin->second);
                 newLabels.push_back(binLabels[itBin->first]);
             }
@@ -424,6 +425,34 @@ ListVector* OptiFitCluster::getFittedList(long long& unnumFitted) {
         
         list->setLabels(newLabels);
         unnumFitted = (numFitSeqs - list->getNumSeqs()) + matrix->getNumFitSingletons();
+        
+        if (!closed) { //cluster the unfitted seqs separately
+            
+            OptiData* unFittedMatrix = matrix->extractUnFitted(unFitted);
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+           /// to do /////
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        }
         
         /*
         ListVector* singleton = matrix->getFitListSingle();

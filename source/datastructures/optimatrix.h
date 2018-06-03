@@ -22,6 +22,7 @@ class OptiMatrix : public OptiData {
     
 public:
     
+    OptiMatrix(vector< set<int> >, vector<string>, vector<string>, double);
     OptiMatrix(string, string, string, string, double, bool);
     ~OptiMatrix(){ }
     

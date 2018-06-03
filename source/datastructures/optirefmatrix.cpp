@@ -34,6 +34,50 @@ OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c,
     readFiles();
 }
 /***********************************************************************/
+//given matrix indexes of unfitted seqs, pull out their dists and create optimatrix
+OptiData* OptiRefMatrix::extractUnFitted(set<int> & unfitted) {
+    try {
+        vector<string> unFittedNameMap;
+        vector<string> unFittedSingletons;
+        vector< set<int> > unFittedCloseness;
+        
+        for (set<int>::iterator it = unfitted.begin(); it != unfitted.end(); it++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            int seqNum = *it;
+            
+            set<int> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
+            set<int> thisSeqsCloseUnFittedSeqs;
+            for (set<int>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                int thisSeq = *itClose;
+                
+                //is this seq in the set of unfitted?
+                if (unfitted.count(thisSeq) != 0) { thisSeqsCloseUnFittedSeqs.insert(thisSeq); }
+            }
+            
+            if (thisSeqsCloseUnFittedSeqs.empty()) {
+                unFittedSingletons.push_back(getName(seqNum)); //add to singletons
+            }else {
+                unFittedCloseness.push_back(thisSeqsCloseUnFittedSeqs);
+                unFittedNameMap.push_back(getName(seqNum));
+            }
+            
+        }
+        
+        OptiData* unfittedMatrix = new OptiMatrix(unFittedCloseness, unFittedNameMap, unFittedSingletons, cutoff);
+        
+        return unfittedMatrix;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiRefMatrix", "extractUnFitted");
+        exit(1);
+    }
+}
+/***********************************************************************/
 vector<int> OptiRefMatrix::getTranslatedBins(vector<vector<string> > & binNames, vector<vector<int> > & fixedBins) {
     try {
         fixedBins.clear();

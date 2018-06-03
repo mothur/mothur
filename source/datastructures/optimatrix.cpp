@@ -10,6 +10,13 @@
 #include "progress.hpp"
 #include "counttable.h"
 
+
+/***********************************************************************/
+OptiMatrix::OptiMatrix(vector< set<int> > close, vector<string> name, vector<string> single, double c) : OptiData(c) {
+    closeness = close;
+    nameMap = name;
+    singletons = single;
+}
 /***********************************************************************/
 OptiMatrix::OptiMatrix(string d, string nc, string f, string df, double c, bool s) : distFile(d), distFormat(df), format(f), sim(s), OptiData(c) {
     

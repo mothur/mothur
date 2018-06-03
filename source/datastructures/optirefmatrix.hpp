@@ -10,6 +10,7 @@
 #define optirefmatrix_hpp
 
 #include "optidata.hpp"
+#include "optimatrix.h"
 
 /* Looking to easily access ref, fit and combined information to compare OTU assignments for the references, the sequences to fit, and the merged reference fit OTUs */
 
@@ -21,6 +22,7 @@ public:
     ~OptiRefMatrix(){ }
     
     vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&);
+    OptiData* extractUnFitted(set<int>&);
     
     long long getNumFitSingletons() { return numFitSingletons; } //user singletons
     long long getNumRefSingletons() { return numRefSingletons; } //reference singletons
