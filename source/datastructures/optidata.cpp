@@ -39,7 +39,7 @@ bool OptiData::isClose(int i, int toFind){
 /***********************************************************************/
 set<int> OptiData::getCloseSeqs(int i){
     try {
-        if (index < 0) { set<int> temp; return temp; }
+        if (i < 0) { set<int> temp; return temp; }
         else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); set<int> temp; return temp; }
         
         return closeness[i];
