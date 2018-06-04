@@ -119,7 +119,7 @@ vector<int> OptiRefMatrix::getTranslatedBins(vector<vector<string> > & binNames,
 /***********************************************************************/
 bool OptiRefMatrix::isCloseFit(int i, int toFind, bool& isFit){
     try {
-        if (index < 0) { return false; }
+        if (i < 0) { return false; }
         else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
         
         bool found = false;
