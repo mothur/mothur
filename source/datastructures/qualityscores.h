@@ -46,23 +46,24 @@ public:
 	void updateQScoreErrorMap(map<char, vector<int> >&, string, int, int, int);
 	void updateForwardMap(vector<vector<int> >&, int, int, int);
 	void updateReverseMap(vector<vector<int> >&, int, int, int);
-    void setName(string n); 
+    void setName(string n);
     void setScores(vector<int> qs) { qScores = qs; seqLength = qScores.size(); }
     vector<int> getScores() { return qScores; }
-	
+
 private:
-	
+
 	double calculateAverage(bool);
+	double calculateExpectedErrors(void);
 	MothurOut* m;
 	vector<int> qScores;
     Utils util;
-	
+
 	string seqName;
 	int seqLength;
-    
+
     string getSequenceName(ifstream&);
     string getCommentString(ifstream&);
-    
+
     #ifdef USE_BOOST
     string getCommentString(boost::iostreams::filtering_istream&);
     string getSequenceName(boost::iostreams::filtering_istream&);
