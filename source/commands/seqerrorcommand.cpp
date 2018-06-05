@@ -321,6 +321,8 @@ int SeqErrorCommand::execute(){
         
         long long numSeqs = process(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName, referenceSeqs);
 
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
+        
 		if(qualFileName != ""){		
 			printErrorQuality(qScoreErrorMap);
 			printQualityFR(qualForwardMap, qualReverseMap);
