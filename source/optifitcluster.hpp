@@ -26,6 +26,7 @@
 #include "tn.hpp"
 #include "fn.hpp"
 #include "accuracy.hpp"
+#include "opticluster.h"
 
 /***********************************************************************/
 
@@ -69,6 +70,7 @@ protected:
     int findInsert();
     vector<long long> getCloseFarCounts(int seq, int newBin);
     vector<long long> getCloseFarFitCounts(int seq, int newBin);
+    void clusterUnfitted(OptiData*);
     
 };
 

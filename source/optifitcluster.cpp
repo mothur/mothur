@@ -430,7 +430,7 @@ ListVector* OptiFitCluster::getFittedList(long long& unnumFitted) {
             
             OptiData* unFittedMatrix = matrix->extractUnFitted(unFitted);
             
-            
+            clusterUnfitted(unFittedMatrix);
             
             
             
@@ -472,6 +472,60 @@ ListVector* OptiFitCluster::getFittedList(long long& unnumFitted) {
         exit(1);
     }
 }
+/***********************************************************************/
+void OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix) {
+    try {
+        OptiCluster cluster(unfittedMatrix, metric, 0);
+        
+        int iters = 0;
+        double listVectorMetric = 0; //worst state
+        double delta = 1;
+        
+        cluster.initialize(listVectorMetric, true, "singleton");
+        
+        long long numBins = cluster.getNumBins();
+        m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        
+        long long tp, tn, fp, fn;
+        vector<double> results = cluster.getStats(tp, tn, fp, fn);
+        m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+       
+        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
+        m->mothurOutEndLine();
+        
+        
+        while ((delta > 0.0001) && (iters < 100)) {
+            
+            long start = time(NULL);
+            
+            if (m->getControl_pressed()) { break; }
+            double oldMetric = listVectorMetric;
+            
+            cluster.update(listVectorMetric);
+            
+            delta = abs(oldMetric - listVectorMetric);
+            iters++;
+            
+            results = cluster.getStats(tp, tn, fp, fn);
+            numBins = cluster.getNumBins();
+            
+            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            
+            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
+            m->mothurOutEndLine();
+            
+        }
+        m->mothurOutEndLine(); m->mothurOutEndLine();
+        
+        ListVector* list = cluster.getList();
+        list->setLabel(toString(cutoff));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiFitCluster", "clusterUnfitted");
+        exit(1);
+    }
+}
+
 /***********************************************************************/
 long long OptiFitCluster::getNumBins() {
     try {
