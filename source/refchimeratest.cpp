@@ -75,7 +75,7 @@ int RefChimeraTest::analyzeAlignedQuery(string queryName, string querySeq, strin
         right[i].assign(alignLength, 0);
 	}
 	
-    int bestMatchIndex;
+    int bestMatchIndex = 0;
 	int bestSequenceMismatch = getAlignedMismatches(querySeq, left, right, bestMatchIndex);
 	
 	int leftParentBi, rightParentBi, breakPointBi;

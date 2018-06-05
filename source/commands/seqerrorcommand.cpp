@@ -652,12 +652,15 @@ long long SeqErrorCommand::process(string filename, string qFileName, string rFi
             printErrorData(minCompare, numParentSeqs, out, outError, substitutionMatrix, ignoreChimeras);
             
             if(!ignoreSeq){
+                int numRs = 0;
                 for(int i=0;i<minCompare.sequence.length();i++){
                     char letter = minCompare.sequence[i];
                     if(letter != 'r'){
                         errorForward[letter][i] += minCompare.weight;
-                        errorReverse[letter][minCompare.total-i-1] += minCompare.weight;
-                    }
+                        int errorReverseLocation = minCompare.total-(i-numRs)-1;
+                        if (errorReverseLocation < 0) { errorReverseLocation = 0; m->mothurOut("[WARNING]: negative value for errorReverse " + query.getName() + "\n"); }
+                        errorReverse[letter][minCompare.total-(i-numRs)-1] += minCompare.weight;
+                    }else { numRs++; }
                 }
             }
             
