@@ -893,6 +893,7 @@
 		48789AF22061776100A7D848 /* unchecked.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unchecked.h; path = source/unchecked.h; sourceTree = SOURCE_ROOT; };
 		487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mimarksattributescommand.cpp; path = source/commands/mimarksattributescommand.cpp; sourceTree = SOURCE_ROOT; };
 		487C5A861AB88B93002AF48A /* mimarksattributescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mimarksattributescommand.h; path = source/commands/mimarksattributescommand.h; sourceTree = SOURCE_ROOT; };
+		48883FFB20C6D6C000CAF112 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = SOURCE_ROOT; };
 		488841631CC6C34900C5E972 /* renamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renamefilecommand.cpp; path = source/commands/renamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		488841641CC6C34900C5E972 /* renamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renamefilecommand.h; path = source/commands/renamefilecommand.h; sourceTree = SOURCE_ROOT; };
 		4889EA201E8962D50054E0BB /* summary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = summary.cpp; path = source/summary.cpp; sourceTree = SOURCE_ROOT; };
@@ -922,7 +923,7 @@
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = TestMothur/testcommands/testrenameseqscommand.h; sourceTree = SOURCE_ROOT; };
 		48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvectors.cpp; path = source/datastructures/sharedrabundvectors.cpp; sourceTree = SOURCE_ROOT; };
 		48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvectors.hpp; path = source/datastructures/sharedrabundvectors.hpp; sourceTree = "<group>"; };
-		48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvectors.cpp; path = source/datastructures/sharedrabundfloatvectors.cpp; sourceTree = "<group>"; };
+		48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvectors.cpp; path = source/datastructures/sharedrabundfloatvectors.cpp; sourceTree = SOURCE_ROOT; };
 		48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundfloatvectors.hpp; path = source/datastructures/sharedrabundfloatvectors.hpp; sourceTree = "<group>"; };
 		48BDDA771ECA3B8E00F0F6C0 /* rabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rabundfloatvector.cpp; path = source/datastructures/rabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
 		48BDDA781ECA3B8E00F0F6C0 /* rabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rabundfloatvector.hpp; path = source/datastructures/rabundfloatvector.hpp; sourceTree = "<group>"; };
@@ -2598,6 +2599,7 @@
 				A7E9B66312D37EC400DA6239 /* blastalign.hpp */,
 				A7E9B66412D37EC400DA6239 /* blastdb.cpp */,
 				A7E9B66512D37EC400DA6239 /* blastdb.hpp */,
+				48883FFB20C6D6C000CAF112 /* compare.h */,
 				A74D59A6159A1E3600043046 /* counttable.h */,
 				A74D59A3159A1E2000043046 /* counttable.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,

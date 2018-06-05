@@ -33,7 +33,7 @@ struct pairFastqRead {
     FastqRead reverse;
     FastqRead findex;
     FastqRead rindex;
-	
+
 	pairFastqRead() {};
 	pairFastqRead(FastqRead f, FastqRead r) : forward(f), reverse(r){};
     pairFastqRead(FastqRead f, FastqRead r, FastqRead fi, FastqRead ri) : forward(f), reverse(r), findex(fi), rindex(ri) {};
@@ -46,22 +46,22 @@ public:
     MakeContigsCommand(string);
     MakeContigsCommand();
     ~MakeContigsCommand(){}
-    
+
     vector<string> setParameters();
     string getCommandName()			{ return "make.contigs";			}
-    string getCommandCategory()		{ return "Sequence Processing";		} 
+    string getCommandCategory()		{ return "Sequence Processing";		}
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
-    
-	string getHelpString();	
-    string getOutputPattern(string);	
+
+	string getHelpString();
+    string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/Make.contigs"; }
     string getDescription()		{ return "description"; }
-    
-    int execute(); 
-    void help() { m->mothurOut(getHelpString()); }	
-    
+
+    int execute();
+    void help() { m->mothurOut(getHelpString()); }
+
 private:
-    
+
 #define perfectMatch 2
 #define poundMatch  1
 #define offByOne  3
@@ -69,19 +69,19 @@ private:
     char delim;
     bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient, gz;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
-	float match, misMatch, gapOpen, gapExtend;
+	float match, misMatch, gapOpen, gapExtend, maxee;
 	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, kmerSize, nameType, offByOneTrimLength;
     vector<string> outputNames;
     set<string> badNames;
-	map<string, int> groupCounts; 
+	map<string, int> groupCounts;
     map<string, string> groupMap;
-    
+
     unsigned long long processMultipleFileOption(string& outFastaFile, string&);
     unsigned long long processSingleFileOption(string& outFastaFile, string& outScrapFastaFile, string& outQualFile, string& outScrapQualFile, string& outMisMatchFile, string group);
 
     unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, string, map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes, vector<string>& barcodeNames, vector<string>& primerNames);
     unsigned long long createProcessesGroups(vector< vector<string> >, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<int, string>& file2Groups);
-    
+
     int createGroupFile(string outputGroupFile, string resultFastafile);
     vector< vector<string> > readFileNames(string, map<int, string>&);
     bool getOligos(map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes, vector<string>& barcodeNames, vector<string>& primerNames);
@@ -92,4 +92,3 @@ private:
 /**************************************************************************************************/
 
 #endif
-
