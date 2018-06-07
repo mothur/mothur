@@ -763,7 +763,7 @@ vector<bool> Utils::isGZ(string filename){
         if (getExtension(filename) != ".gz") { return results; } // results[0] = false; results[1] = false;
 
         bool ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
-        if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
+        if (!ableToOpen) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
 
         char c;
