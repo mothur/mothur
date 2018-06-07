@@ -293,7 +293,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             else {  distfile = columnfile; format = "column"; current->setColumnFile(columnfile);	}
             
             method = validParameter.valid(parameters, "method");
-            if (method == "not found") {  method = "closed";}
+            if (method == "not found") {  method = "open";}
             
             if ((method == "closed") || (method == "open")) { }
             else { m->mothurOut("[ERROR]: " + method + " is not a valid cluster fitting method.  Valid options are closed and open.\n"); abort = true; }
@@ -353,7 +353,7 @@ ClusterFitCommand::~ClusterFitCommand(){}
 int ClusterFitCommand::execute(){
     try {
         
-        if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        //if (abort) { if (calledHelp) { return 0; }  return 2;	}
     
         if (selfReference) { }
         else {
@@ -530,7 +530,7 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         if (countfile == "") { fitDupsFile = namefile; nameOrCount = "name"; }
         else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
         
-        comboDistFile = "/Users/sarahwestcott/desktop/release/final.fit.dist";
+        comboDistFile = "/Users/sarahwestcott/desktop/cluster.fit_refs/between.dist";
         
         OptiData* matrix; matrix = new OptiRefMatrix(refcolumnfile, refDupsFile, refNameOrCount, "column",  cutoff, columnfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
         
@@ -640,7 +640,7 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         if (m->getControl_pressed()) { delete metric; metric = NULL; return 0; }
         
         long long numUnFitted = 0;
-        ListVector* list = cluster.getFittedList(numUnFitted);
+        ListVector* list = cluster.getFittedList(numUnFitted, true);
         list->setLabel(toString(cutoff));
         
         m->mothurOut("\nFitted " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");

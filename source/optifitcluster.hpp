@@ -48,7 +48,7 @@ public:
     vector<double>  getFitStats( long long&,  long long&,  long long&,  long long&); //fitted seqs stats
     
     ListVector* getList();
-    ListVector* getFittedList(long long&);
+    ListVector* getFittedList(long long&, bool);
     
 protected:
     MothurOut* m;
@@ -70,7 +70,7 @@ protected:
     int findInsert();
     vector<long long> getCloseFarCounts(int seq, int newBin);
     vector<long long> getCloseFarFitCounts(int seq, int newBin);
-    void clusterUnfitted(OptiData*);
+    ListVector* clusterUnfitted(OptiData*);
     
 };
 

@@ -387,7 +387,7 @@ ListVector* OptiFitCluster::getList() {
     }
 }
 /***********************************************************************/
-ListVector* OptiFitCluster::getFittedList(long long& unnumFitted) {
+ListVector* OptiFitCluster::getFittedList(long long& numUnFitted, bool finalList) {
     try {
         ListVector* list = new ListVector();
         vector<string> newLabels;
@@ -424,46 +424,28 @@ ListVector* OptiFitCluster::getFittedList(long long& unnumFitted) {
         }
         
         list->setLabels(newLabels);
-        unnumFitted = (numFitSeqs - list->getNumSeqs()) + matrix->getNumFitSingletons();
+        numUnFitted = (numFitSeqs - list->getNumSeqs()) + matrix->getNumFitSingletons();
         
-        if (!closed) { //cluster the unfitted seqs separately
-            
-            OptiData* unFittedMatrix = matrix->extractUnFitted(unFitted);
-            
-            clusterUnfitted(unFittedMatrix);
-            
-            
-            
-            
-            
-            
-            
-            
-           /// to do /////
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        }
-        
-        /*
-        ListVector* singleton = matrix->getFitListSingle();
-        
-        if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
-            for (int i = 0; i < singleton->getNumBins(); i++) {
-                string bin = singleton->get(i);
-                if (bin != "") { list->push_back(singleton->get(i)); }
+        if (finalList && (numUnFitted != 0)) {
+            if (!closed) { //cluster the unfitted seqs separately
+                
+                m->mothurOut("\n**************** Clustering the unfitted sequences ****************\n");
+                
+                OptiData* unFittedMatrix = matrix->extractUnFitted(unFitted);
+                
+                ListVector* unfittedList = clusterUnfitted(unFittedMatrix);
+                
+                if (unfittedList != NULL) {
+                    for (int i = 0; i < unfittedList->getNumBins(); i++) {
+                        string bin = unfittedList->get(i);
+                        if (bin != "") { list->push_back(unfittedList->get(i)); }
+                    }
+                    delete unfittedList;
+                }
+                
+                m->mothurOut("\n*******************************************************************\n\n");
             }
-            delete singleton;
-        }*/
+        }
         
         return list;
     }
@@ -473,8 +455,10 @@ ListVector* OptiFitCluster::getFittedList(long long& unnumFitted) {
     }
 }
 /***********************************************************************/
-void OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix) {
+ListVector* OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix) {
     try {
+        ListVector* list = NULL;
+        
         OptiCluster cluster(unfittedMatrix, metric, 0);
         
         int iters = 0;
@@ -492,7 +476,6 @@ void OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix) {
        
         for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
         m->mothurOutEndLine();
-        
         
         while ((delta > 0.0001) && (iters < 100)) {
             
@@ -517,8 +500,12 @@ void OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix) {
         }
         m->mothurOutEndLine(); m->mothurOutEndLine();
         
-        ListVector* list = cluster.getList();
+        if (m->getControl_pressed()) { return list; }
+        
+        list = cluster.getList();
         list->setLabel(toString(cutoff));
+        
+        return list;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiFitCluster", "clusterUnfitted");
@@ -547,7 +534,7 @@ long long OptiFitCluster::getNumBins() {
 long long OptiFitCluster::getNumFitBins() {
     try {
         long long unnumFitted;
-        ListVector* list = getFittedList(unnumFitted);
+        ListVector* list = getFittedList(unnumFitted, false);
         
         int numBins = 0;
         if (list != NULL) {
