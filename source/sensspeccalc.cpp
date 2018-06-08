@@ -20,7 +20,6 @@ SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
             //for each bin
             for (int i = 0; i < list->getNumBins(); i++) {
                 
-                //parse out names that are in accnos file
                 string binnames = list->get(i);
                 vector<string> bnames;
                 util.splitAtComma(binnames, bnames);
@@ -66,7 +65,7 @@ void SensSpecCalc::getResults(OptiData& matrix, long long& tp, long long& tn, lo
         fn = (numDists/2) - tp;
         tn = numSeqs * (numSeqs-1)/2  - (fp + fn + tp);
         
-        cout << numSeqs << '\t' << numDists << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << endl;
+        //cout << numSeqs << '\t' << numDists << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << endl;
     }
     catch(exception& e) {
         m->errorOut(e, "SensSpecCalc", "getResults");

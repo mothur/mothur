@@ -20,7 +20,9 @@
 #include "aligncommand.h"
 #include "filterseqscommand.h"
 #include "deconvolutecommand.h"
-
+#include "listseqscommand.h"
+#include "getdistscommand.h"
+#include "getseqscommand.h"
 
 class ClusterFitCommand : public Command {
     

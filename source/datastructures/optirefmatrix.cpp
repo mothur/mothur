@@ -40,7 +40,39 @@ OptiData* OptiRefMatrix::extractUnFitted(set<int> & unfitted) {
         vector<string> unFittedNameMap;
         vector<string> unFittedSingletons;
         vector< set<int> > unFittedCloseness;
+        map<int, int> thisNameMap;
+        map<int, int> nonSingletonNameMap;
+        vector<bool> singleton; singleton.resize(unfitted.size(), true);
+        int count = 0;
         
+        for (set<int>::iterator it = unfitted.begin(); it != unfitted.end(); it++) {
+            int seqNum = *it;
+            thisNameMap[seqNum] = count;
+            nonSingletonNameMap[count] = seqNum;
+            
+            set<int> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
+            for (set<int>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                int thisSeq = *itClose;
+                
+                //is this seq in the set of unfitted?
+                if (unfitted.count(thisSeq) != 0) { singleton[thisNameMap[seqNum]] = false; }
+            }
+            count++;
+        }
+        
+        int nonSingletonCount = 0;
+        for (int i = 0; i < singleton.size(); i++) {
+            if (!singleton[i]) { //if you are a singleton
+                nonSingletonNameMap[i] = nonSingletonCount;
+                nonSingletonCount++;
+            }else { unfitted.erase(nonSingletonNameMap[i]);  unFittedSingletons.push_back(getName(nonSingletonNameMap[i])); } //remove from unfitted
+        }
+        singleton.clear();
+        
+        unFittedCloseness.resize(nonSingletonCount);
         for (set<int>::iterator it = unfitted.begin(); it != unfitted.end(); it++) {
             
             if (m->getControl_pressed()) { break; }
@@ -56,13 +88,11 @@ OptiData* OptiRefMatrix::extractUnFitted(set<int> & unfitted) {
                 int thisSeq = *itClose;
                 
                 //is this seq in the set of unfitted?
-                if (unfitted.count(thisSeq) != 0) { thisSeqsCloseUnFittedSeqs.insert(thisSeq); }
+                if (unfitted.count(thisSeq) != 0) { cout << nonSingletonNameMap[thisNameMap[thisSeq]] << endl; thisSeqsCloseUnFittedSeqs.insert(nonSingletonNameMap[thisNameMap[thisSeq]]); }
             }
             
-            if (thisSeqsCloseUnFittedSeqs.empty()) {
-                unFittedSingletons.push_back(getName(seqNum)); //add to singletons
-            }else {
-                unFittedCloseness.push_back(thisSeqsCloseUnFittedSeqs);
+            if (!thisSeqsCloseUnFittedSeqs.empty()) {
+                unFittedCloseness[nonSingletonNameMap[thisNameMap[seqNum]]] = thisSeqsCloseUnFittedSeqs;
                 unFittedNameMap.push_back(getName(seqNum));
             }
             
