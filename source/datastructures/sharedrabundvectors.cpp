@@ -551,6 +551,7 @@ RAbundVector SharedRAbundVectors::getRAbundVector(string group){
             //if this sharedrabund is not from a group the user wants then delete it.
             if ((*it)->getGroup() == group) {
                 for (int i = 0; i < (*it)->getNumBins(); i++) { rav.push_back((*it)->get(i)); }
+		return rav;
             }else { ++it; }
         }
         
