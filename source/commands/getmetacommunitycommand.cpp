@@ -339,6 +339,16 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
         rels.resize(1);
         matrix.resize(1);
         int minPartition = 0;
+
+        for (int i=1; i<=maxpartitions; i++) {
+          int processToAssign = 1;
+          dividedPartitions[(processToAssign-1)].push_back(i);
+          variables["[tag]"] = toString(i);
+          string relName = getOutputFileName("relabund", variables);
+          string mName = getOutputFileName("matrix", variables);
+          rels[(processToAssign-1)].push_back(relName);
+          matrix[(processToAssign-1)].push_back(mName);
+	}
         
         m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");
 		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
