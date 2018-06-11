@@ -39,7 +39,7 @@ public:
     virtual vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&) { vector<int> temp; return temp;  }
     virtual OptiData* extractUnFitted(set<int>&) { OptiData* temp = NULL; return temp;  }
     virtual long long getNumFitSingletons() { return 0; } //user singletons
-    virtual long long getNumRefSingletons() { return 0; } //reference singletons
+    //virtual long long getNumRefSingletons() { return 0; } //reference singletons
     
     virtual long long getNumFitDists() { return 0; } //user distances under cutoff
     virtual long long getNumRefDists() { return 0; } //ref distances under cutoff
@@ -49,7 +49,7 @@ public:
     
     virtual vector<int> getRefSeqs() { vector<int> temp; return temp;  }
     virtual vector<int> getFitSeqs() { vector<int> temp; return temp;  }
-    virtual long long getNumUniqueFitSeqs() { return 0; }
+    virtual long long getNumFitSeqs() { return 0; }
     virtual int getNumFitClose(int) { return 0;  }
     virtual int getNumRefClose(int) { return 0;  }
     virtual set<int> getCloseFitSeqs(int i) { set<int> temp; return temp;  }

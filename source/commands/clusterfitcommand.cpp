@@ -530,7 +530,7 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         if (countfile == "") { fitDupsFile = namefile; nameOrCount = "name"; }
         else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
         
-        comboDistFile = "/users/sarahwestcott/desktop/release/final.subsample.fit.dist";
+        comboDistFile = "/users/sarahwestcott/desktop/release/final.fit.dist";
         
         OptiData* matrix; matrix = new OptiRefMatrix(refcolumnfile, refDupsFile, refNameOrCount, "column",  cutoff, columnfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
         
@@ -639,12 +639,8 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         
         if (m->getControl_pressed()) { delete metric; metric = NULL; return 0; }
         
-        long long numUnFitted = 0;
-        ListVector* list = cluster.getFittedList(numUnFitted, toString(cutoff));
+        ListVector* list = cluster.getFittedList(toString(cutoff));
         list->setLabel(toString(cutoff));
-        
-        if (numUnFitted == 0) { m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n"); }
-        else { m->mothurOut("\nFitted " + toString(list->getNumSeqs()) + " sequences to existing OTUs. " + toString(numUnFitted) + " sequences were unable to be fitted existing OTUs. \n\n"); }
         
         ofstream listFile;
         string listFileName = fileroot+ tag + ".list";
@@ -657,73 +653,75 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         
         delete list;
         
-        //extract only distances related to the list file
-        string inputString = "list=" + listFileName;
-        m->mothurOut("/******************************************/\n");
-        m->mothurOut("Running command: list.seqs(" + inputString + ")\n");
-        current->setMothurCalling(true);
         
-        Command* listSeqsCommand = new ListSeqsCommand(inputString);
-        listSeqsCommand->execute();
+        string distFileName = columnfile;
+        if (method != "open") {
+            //extract only distances related to the list file
+            string inputString = "list=" + listFileName;
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: list.seqs(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* listSeqsCommand = new ListSeqsCommand(inputString);
+            listSeqsCommand->execute();
+            
+            map<string, vector<string> > filenames = listSeqsCommand->getOutputFiles();
+            
+            delete listSeqsCommand;
+            current->setMothurCalling(false);
+            
+            string accnosFileName = filenames["accnos"][0];
+            
+            inputString = "column=" + columnfile + ", accnos=" + accnosFileName;
+            m->mothurOut("/n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
+            m->mothurOut("Running command: get.dists(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* getDistsCommand = new GetDistsCommand(inputString);
+            getDistsCommand->execute();
+            
+            filenames = getDistsCommand->getOutputFiles();
+            
+            delete getDistsCommand;
+            current->setMothurCalling(false);
+            
+            distFileName = filenames["column"][0];
+            
+            inputString = "accnos=" + accnosFileName;
+            if (namefile != "")         {  inputString += ", name=" + namefile; }
+            else if (countfile != "")   { inputString += ", count=" + countfile; }
+            
+            
+            m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* getSeqsCommand = new GetSeqsCommand(inputString);
+            getSeqsCommand->execute();
+            
+            filenames = getSeqsCommand->getOutputFiles();
+            
+            if (namefile != "")         {  namefile = filenames["name"][0];     }
+            else if (countfile != "")   { countfile = filenames["count"][0];    }
+            
+            delete getSeqsCommand;
+            current->setMothurCalling(false);
+            
+        }
         
-        map<string, vector<string> > filenames = listSeqsCommand->getOutputFiles();
-        
-        delete listSeqsCommand;
-        current->setMothurCalling(false);
-        
-        string accnosFileName = filenames["accnos"][0];
-        
-        m->mothurOut("/******************************************/\nDone.\n\n");
-        
-        inputString = "column=" + columnfile + ", accnos=" + accnosFileName;
-        m->mothurOut("/******************************************/\n");
-        m->mothurOut("Running command: get.dists(" + inputString + ")\n");
-        current->setMothurCalling(true);
-        
-        Command* getDistsCommand = new GetDistsCommand(inputString);
-        getDistsCommand->execute();
-        
-        filenames = getDistsCommand->getOutputFiles();
-        
-        delete getDistsCommand;
-        current->setMothurCalling(false);
-        
-        string distFileName = filenames["column"][0];
-        
-        inputString = "accnos=" + accnosFileName;
-        if (namefile != "")         {  inputString += ", name=" + namefile; }
-        else if (countfile != "")   { inputString += ", count=" + countfile; }
-        
-        m->mothurOut("/******************************************/\n");
-        m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
-        current->setMothurCalling(true);
-        
-        Command* getSeqsCommand = new GetSeqsCommand(inputString);
-        getSeqsCommand->execute();
-        
-        filenames = getSeqsCommand->getOutputFiles();
-        
-        delete getSeqsCommand;
-        current->setMothurCalling(false);
-        
-        
-        m->mothurOut("/******************************************/\nDone.\n\n");
-
-        inputString = "cutoff=" + toString(cutoff) + ", list=" + listFileName;
+        string inputString = "cutoff=" + toString(cutoff) + ", list=" + listFileName;
         if (distFileName != "") { inputString += ", column=" + distFileName;  }
         
-        if (namefile != "")         {  inputString += ", name=" + filenames["name"][0]; }
-        else if (countfile != "")   { inputString += ", count=" + filenames["count"][0]; }
+        if (namefile != "")         {  inputString += ", name=" + namefile; }
+        else if (countfile != "")   { inputString += ", count=" + countfile; }
         else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
         
-        m->mothurOut("/******************************************/\n");
-        m->mothurOut("Running command: sens.spec(" + inputString + ")\n");
+        m->mothurOut("\nRunning command: sens.spec(" + inputString + ")\n");
         current->setMothurCalling(true);
         
         Command* sensspecCommand = new SensSpecCommand(inputString);
         sensspecCommand->execute();
         
-        filenames = sensspecCommand->getOutputFiles();
+        map<string, vector<string> > filenames = sensspecCommand->getOutputFiles();
         
         delete sensspecCommand;
         current->setMothurCalling(false);
@@ -732,7 +730,7 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         
         outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-        m->mothurOut("/******************************************/\nDone.\n\n");
+        m->mothurOut("/******************************************/\n\n");
         
         return 0;
     }

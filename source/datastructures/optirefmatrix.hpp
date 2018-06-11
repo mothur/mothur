@@ -25,8 +25,6 @@ public:
     OptiData* extractUnFitted(set<int>&);
     
     long long getNumFitSingletons() { return numFitSingletons; } //user singletons
-    long long getNumRefSingletons() { return numRefSingletons; } //reference singletons
-    
     long long getNumDists()    { return (numFitDists+numRefDists+numBetweenDists); } //all distances under cutoff
     long long getNumFitDists() { return numFitDists; } //user distances under cutoff
     long long getNumRefDists() { return numRefDists; } //ref distances under cutoff
@@ -37,7 +35,7 @@ public:
     vector<int> getRefSeqs(); //every ref seq in matrix. Includes some that would have been singletons if not for the betweendistfile
     vector<int> getFitSeqs(); //every fit seq in matrix. Includes some that would have been singletons if not for the betweendistfile
     
-    long long getNumUniqueFitSeqs() { return numFitSeqs; } //only Fit seqs that are in fitdistfile
+    long long getNumFitSeqs() { return numFitSeqs; } //only Fit seqs that are in fitdistfile and not singletons
     int getNumFitClose(int);
     int getNumRefClose(int);
     set<int> getCloseFitSeqs(int);

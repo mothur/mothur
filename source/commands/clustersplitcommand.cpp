@@ -1215,7 +1215,6 @@ int vsearchDriver(string inputFile, string ucClusteredFile, string logfile, doub
         string commandString = "";
         for (int i = 0; i < vsearchParameters.size(); i++) {    commandString += toString(vsearchParameters[i]) + " "; }
         
-        //cout << "commandString = " << commandString << endl;
 #if defined NON_WINDOWS
 #else
         commandString = "\"" + commandString + "\"";

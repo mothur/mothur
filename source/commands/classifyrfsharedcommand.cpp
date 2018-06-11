@@ -342,16 +342,6 @@ int ClassifyRFSharedCommand::execute() {
 
 void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup){
     try {
-//    for (int i = 0; i < designMap->getNamesOfGroups().size(); i++) {
-//      string groupName = designMap->getNamesOfGroups()[i];
-//      cout << groupName << endl;
-//    }
-
-//    for (int i = 0; i < designMap->getNumSeqs(); i++) {
-//      string sharedGroupName = designMap->getNamesSeqs()[i];
-//      string treatmentName = designMap->getGroup(sharedGroupName);
-//      cout << sharedGroupName << " : " << treatmentName <<  endl;
-//    }
   
         map<string, int> treatmentToIntMap;
         map<int, string> intToTreatmentMap;

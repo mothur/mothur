@@ -58,9 +58,9 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         reffalseNegatives = matrix->getNumRefDists() - reftruePositives; //number of distance in matrix for reference seqs - reftruePositives
         reftrueNegatives = numRefSeqs * (numRefSeqs-1)/2 - (reffalsePositives + reffalseNegatives + reftruePositives);
         
-        double refValue = metric->getValue(reftruePositives, reftrueNegatives, reffalsePositives, reffalseNegatives);
+        //double refValue = metric->getValue(reftruePositives, reftrueNegatives, reffalsePositives, reffalseNegatives);
         
-        cout << "reference mcc " << refValue << '\t' << reftruePositives << '\t' << reftrueNegatives << '\t' << reffalsePositives << '\t' << reffalseNegatives << endl;
+        //cout << "reference mcc " << refValue << '\t' << reftruePositives << '\t' << reftrueNegatives << '\t' << reffalsePositives << '\t' << reffalseNegatives << endl;
         
         //add fit seqs as singletons
         int numRefBins = translatedBins.size();
@@ -74,13 +74,15 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
             long long numCloseSeqs = (matrix->getNumFitClose(randomizeSeqs[i])); //does not include self
             fitfalseNegatives += numCloseSeqs;
         }
-        numFitSeqs = matrix->getNumUniqueFitSeqs();
+        numFitSeqs = randomizeSeqs.size();
+        
+        //cout << numFitSeqs << '\t' << randomizeSeqs.size() <<endl;
         fitfalseNegatives /= 2; //square matrix
         fittrueNegatives = numFitSeqs * (numFitSeqs-1)/2 - (fitfalsePositives + fitfalseNegatives + fittruePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
         
-        double fitValue = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
+        //double fitValue = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
         
-        cout << "fit intial mcc " << fitValue << '\t' << fittruePositives << '\t' << fittrueNegatives << '\t' << fitfalsePositives << '\t' << fitfalseNegatives << endl;
+        //cout << "fit intial mcc " << fitValue << '\t' << fittruePositives << '\t' << fittrueNegatives << '\t' << fitfalsePositives << '\t' << fitfalseNegatives << endl;
         numComboSeqs = numRefSeqs + numFitSeqs;
         
         combofalseNegatives = matrix->getNumDists() - reftruePositives; //number of distance in matrix for reference seqs - reftruePositives
@@ -88,9 +90,9 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         combotruePositives = reftruePositives;
         combofalsePositives = reffalsePositives;
         
-        double comboValue = metric->getValue(combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives);
+        //double comboValue = metric->getValue(combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives);
         
-        cout << "combo intial mcc " << comboValue << '\t' << combotruePositives << '\t' << combotrueNegatives << '\t' << combofalsePositives << '\t' << combofalseNegatives << endl;
+        //cout << "combo intial mcc " << comboValue << '\t' << combotruePositives << '\t' << combotrueNegatives << '\t' << combofalsePositives << '\t' << combofalseNegatives << endl;
         
         //add insert location
         seqBin[bins.size()] = -1;
@@ -196,7 +198,7 @@ bool OptiFitCluster::update(double& listMetric) {
                     double newComboMetric = metric->getValue(tp[1], tn[1], fp[1], fn[1]); //score when sequence is moved
                     double newFitMetric = metric->getValue(tp[0], tn[0], fp[0], fn[0]); //score when sequence is moved
                     //new best
-                    if ((newFitMetric > bestMetric[0]) || (newComboMetric > bestMetric[1])) {
+                    if ((newFitMetric > bestMetric[0]) || (newComboMetric > bestMetric[1])) { //fit is better and combo is not worse
                         //if (newComboMetric > bestMetric[1]) {
                             bestMetric[0] = newFitMetric; bestBin[0] = (*it); bestTp[0] = tp[0]; bestTn[0] = tn[0]; bestFp[0] = fp[0]; bestFn[0] = fn[0];
                             bestMetric[1] = newComboMetric; bestBin[1] = (*it); bestTp[1] = tp[1]; bestTn[1] = tn[1]; bestFp[1] = fp[1]; bestFn[1] = fn[1];
@@ -229,8 +231,6 @@ bool OptiFitCluster::update(double& listMetric) {
         listMetric = metric->getValue(combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives);
         
         double fitListMetric = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
-        
-        cout << fitListMetric << endl;
         
         if (m->getDebug()) { ListVector* list = getList(); list->print(cout); delete list; }
         
@@ -299,8 +299,6 @@ vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long lon
         fn = combofalseNegatives;
         tn = tempnumSeqs * (tempnumSeqs-1)/2 - (combofalsePositives + combofalseNegatives + combotruePositives); //adds singletons to tn
         
-        cout << tempnumSeqs << '\t' << singletn << endl;
-        
         vector<double> results;
         
         Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn); results.push_back(sensitivity);
@@ -325,8 +323,6 @@ vector<double> OptiFitCluster::getFitStats(long long& tp,  long long& tn,  long 
         long long singletn = 0;
         if (!closed) { singletn = matrix->getNumFitSingletons(); }
         long long tempnumSeqs = numFitSeqs + singletn;
-        
-        cout << tempnumSeqs << '\t' << singletn << endl;
         
         tp = fittruePositives;
         fp = fitfalsePositives;
@@ -387,7 +383,7 @@ ListVector* OptiFitCluster::getList() {
     }
 }
 /***********************************************************************/
-ListVector* OptiFitCluster::getFittedList(long long& numUnFitted, string label) {
+ListVector* OptiFitCluster::getFittedList(string label) {
     try {
         ListVector* list = new ListVector();
         vector<string> newLabels;
@@ -417,19 +413,34 @@ ListVector* OptiFitCluster::getFittedList(long long& numUnFitted, string label) 
         }
         
         for (map<int, string>::iterator itBin = newBins.begin(); itBin != newBins.end(); itBin++) {
-            if (itBin->first < maxRefBinNumber) { //maxRefBinNumber = location of first non ref seq
-                list->push_back(itBin->second);
-                newLabels.push_back(binLabels[itBin->first]);
-            }
+            list->push_back(itBin->second);
+            newLabels.push_back(binLabels[itBin->first]);
         }
         
         list->setLabels(newLabels);
-        numUnFitted = (numFitSeqs - list->getNumSeqs()); // + matrix->getNumFitSingletons();
+        long long numUnFitted = (numFitSeqs - list->getNumSeqs()) + matrix->getNumFitSingletons();
         
         if ((label != "") && (numUnFitted != 0)) {
+            
+            m->mothurOut("\nFitted " + toString(list->getNumSeqs()) + " sequences to existing OTUs.\n");
+            
             if (!closed) { //cluster the unfitted seqs separately
+                m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs.\n");
                 
                 numUnFitted = (numFitSeqs - list->getNumSeqs()) + matrix->getNumFitSingletons();
+                
+                //add in singletons
+                ListVector* singleton = matrix->getFitListSingle();
+                
+                if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+                    for (int i = 0; i < singleton->getNumBins(); i++) {
+                        if (singleton->get(i) != "") {
+                            list->push_back(singleton->get(i));
+                        }
+                    }
+                    delete singleton;
+                }
+
                 
                 m->mothurOut("\n**************** Clustering the unfitted sequences ****************\n");
                 
@@ -438,6 +449,9 @@ ListVector* OptiFitCluster::getFittedList(long long& numUnFitted, string label) 
                 ListVector* unfittedList = clusterUnfitted(unFittedMatrix, label);
                 
                 if (unfittedList != NULL) {
+                    
+                    m->mothurOut("The unfitted sequences clustered into " + toString(unfittedList->getNumBins()) + " new OTUs.\n");
+                    
                     for (int i = 0; i < unfittedList->getNumBins(); i++) {
                         string bin = unfittedList->get(i);
                         if (bin != "") { list->push_back(unfittedList->get(i)); }
@@ -446,9 +460,23 @@ ListVector* OptiFitCluster::getFittedList(long long& numUnFitted, string label) 
                 }
                 
                 m->mothurOut("\n*******************************************************************\n\n");
-            }
-        }
-        
+                
+                //add in singletons
+                ListVector* unFitsingleton = unFittedMatrix->getListSingle();
+                
+                if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+                    for (int i = 0; i < unFitsingleton->getNumBins(); i++) {
+                        if (unFitsingleton->get(i) != "") {
+                            list->push_back(unFitsingleton->get(i));
+                        }
+                    }
+                    delete unFitsingleton;
+                }
+                
+                delete unFittedMatrix;
+            }else { m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs, disgarding.\n");  }
+        }else { if (label != "") { m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");  } }
+    
         return list;
     }
     catch(exception& e) {
@@ -535,17 +563,15 @@ long long OptiFitCluster::getNumBins() {
 /***********************************************************************/
 long long OptiFitCluster::getNumFitBins() {
     try {
-        long long unnumFitted;
-        ListVector* list = getFittedList(unnumFitted, "");
+        ListVector* list = getFittedList("");
         
         int numBins = 0;
         if (list != NULL) {
-            numBins = list->getNumBins() + unnumFitted;
+            numBins = list->getNumBins();
             delete list;
         }
         
         return numBins;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "OptiFitCluster", "getNumFitBins");

@@ -88,7 +88,7 @@ OptiData* OptiRefMatrix::extractUnFitted(set<int> & unfitted) {
                 int thisSeq = *itClose;
                 
                 //is this seq in the set of unfitted?
-                if (unfitted.count(thisSeq) != 0) { cout << nonSingletonNameMap[thisNameMap[thisSeq]] << endl; thisSeqsCloseUnFittedSeqs.insert(nonSingletonNameMap[thisNameMap[thisSeq]]); }
+                if (unfitted.count(thisSeq) != 0) { thisSeqsCloseUnFittedSeqs.insert(nonSingletonNameMap[thisNameMap[thisSeq]]); }
             }
             
             if (!thisSeqsCloseUnFittedSeqs.empty()) {
@@ -308,28 +308,26 @@ int OptiRefMatrix::readFiles(){
         if (refdistformat == "column")        {  refSingletonIndexSwap = readColumnSingletons(singleton, refnamefile, refcountfile, refdistfile, count, nameAssignment);     }
         else if (refdistformat == "phylip")   {  refSingletonIndexSwap = readPhylipSingletons(singleton, refdistfile, count, nameAssignment);                                }
         
-        int numRefSeqs = count;
-        numRefSingletons = 0;
-        for (int i = 0; i < numRefSeqs; i++) { if (singleton[i]) { numRefSingletons++; } }
-        cout << "numRefSeqs = " << numRefSeqs << endl;
+        int refSeqsEnd = count;
+        
         //read fit file to find singletons
         map<int, int> fitSingletonIndexSwap;
         
         if (fitdistformat == "column")        {  fitSingletonIndexSwap = readColumnSingletons(singleton, fitnamefile, fitcountfile, fitdistfile, count, nameAssignment);     }
         else if (fitdistformat == "phylip")   {  fitSingletonIndexSwap = readPhylipSingletons(singleton, fitdistfile, count, nameAssignment);                                }
-        
-        numFitSeqs = count - numRefSeqs;
-        int numSeqs = numFitSeqs+numRefSeqs;
-        
-        numFitSingletons = 0;
-        for (int i = numRefSeqs; i < numSeqs; i++) {  if (singleton[i]) { numFitSingletons++; } }
-        
+                
         //read bewtween file to update singletons
         readColumnSingletons(singleton, betweendistfile, nameAssignment);
         
+        numRefSingletons = 0;
+        for (int i = 0; i < refSeqsEnd; i++) { if (singleton[i]) { numRefSingletons++; } }
+        
+        numFitSingletons = 0; numFitSeqs = 0;
+        for (int i = refSeqsEnd; i < singleton.size(); i++) {  if (singleton[i]) { numFitSingletons++; }else { numFitSeqs++; }  }
+        
         int nonSingletonCount = 0;
         map<int, int> singletonIndexSwap;
-        for (int i = 0; i < numRefSeqs; i++) {
+        for (int i = 0; i < refSeqsEnd; i++) {
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
@@ -339,7 +337,7 @@ int OptiRefMatrix::readFiles(){
         refEnd = nonSingletonCount; // reference sequences are stored in beginning of closeness, fit seqs stored after
         refSingletonsEnd = singletons.size();
         
-        for (int i = numRefSeqs; i < numSeqs; i++) {
+        for (int i = refSeqsEnd; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
@@ -393,6 +391,7 @@ int OptiRefMatrix::readFiles(){
         if (betweendistformat == "column")        {  readColumn(betweendistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
         else if (betweendistformat == "phylip")   {  readPhylip(betweendistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
         
+        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiRefMatrix", "readFiles");
