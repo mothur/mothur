@@ -427,7 +427,24 @@ ListVector* OptiFitCluster::getFittedList(string label) {
             if (!closed) { //cluster the unfitted seqs separately
                 m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs.\n");
                 
-                numUnFitted = (numFitSeqs - list->getNumSeqs()) + matrix->getNumFitSingletons();
+                m->mothurOut("\n**************** Clustering the unfitted sequences ****************\n");
+                
+                OptiData* unFittedMatrix = matrix->extractUnFitted(unFitted);
+                
+                ListVector* unfittedList = clusterUnfitted(unFittedMatrix, label);
+                
+                if (unfittedList != NULL) {
+                    
+                    m->mothurOut("The unfitted sequences clustered into " + toString(unfittedList->getNumBins()+unFittedMatrix->getNumSingletons()+ matrix->getNumFitSingletons()) + " new OTUs.\n");
+                    
+                    for (int i = 0; i < unfittedList->getNumBins(); i++) {
+                        string bin = unfittedList->get(i);
+                        if (bin != "") { list->push_back(unfittedList->get(i)); }
+                    }
+                    delete unfittedList;
+                }
+                
+                m->mothurOut("\n*******************************************************************\n\n");
                 
                 //add in singletons
                 ListVector* singleton = matrix->getFitListSingle();
@@ -440,27 +457,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
                     }
                     delete singleton;
                 }
-
-                
-                m->mothurOut("\n**************** Clustering the unfitted sequences ****************\n");
-                
-                OptiData* unFittedMatrix = matrix->extractUnFitted(unFitted);
-                
-                ListVector* unfittedList = clusterUnfitted(unFittedMatrix, label);
-                
-                if (unfittedList != NULL) {
-                    
-                    m->mothurOut("The unfitted sequences clustered into " + toString(unfittedList->getNumBins()) + " new OTUs.\n");
-                    
-                    for (int i = 0; i < unfittedList->getNumBins(); i++) {
-                        string bin = unfittedList->get(i);
-                        if (bin != "") { list->push_back(unfittedList->get(i)); }
-                    }
-                    delete unfittedList;
-                }
-                
-                m->mothurOut("\n*******************************************************************\n\n");
-                
+            
                 //add in singletons
                 ListVector* unFitsingleton = unFittedMatrix->getListSingle();
                 
