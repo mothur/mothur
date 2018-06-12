@@ -316,7 +316,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
         SensSpecCalc senscalc(matrix, list);
         senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
-		outputStatistics(label, origCutoff);
+		outputStatistics(label, origCutoff, list->getNumBins());
 
 		return 0;
 	}
@@ -412,8 +412,8 @@ void SensSpecCommand::setUpOutput(){
 		util.openOutputFile(sensSpecFileName, sensSpecFile);
         outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
 
-		sensSpecFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
-        m->mothurOut("label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+		sensSpecFile << "label\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        m->mothurOut("label\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
 
 		sensSpecFile.close();
 	}
@@ -423,7 +423,7 @@ void SensSpecCommand::setUpOutput(){
 	}
 }
 //***************************************************************************************************************
-void SensSpecCommand::outputStatistics(string label, string cutoff){
+void SensSpecCommand::outputStatistics(string label, string cutoff, int numBins){
 	try{
 		long long tp =  truePositives;
 		long long fp =  falsePositives;
@@ -442,13 +442,13 @@ void SensSpecCommand::outputStatistics(string label, string cutoff){
 		ofstream sensSpecFile;
 		util.openOutputFileAppend(sensSpecFileName, sensSpecFile);
 
-		sensSpecFile << label << '\t' << cutoff << '\t';
+		sensSpecFile << label << '\t' << cutoff << '\t' << numBins << '\t';
 		sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
 		sensSpecFile << setprecision(4);
 		sensSpecFile << sensitivity << '\t' << specificity << '\t' << positivePredictiveValue << '\t' << negativePredictiveValue << '\t';
 		sensSpecFile << falseDiscoveryRate << '\t' << accuracy << '\t' << matthewsCorrCoef << '\t' << f1Score << endl;
         
-        m->mothurOut(label + "\t" + toString(cutoff) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
+        m->mothurOut(label + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
         m->mothurOut(toString(sensitivity) + "\t" + toString(specificity) + "\t" + toString(positivePredictiveValue) + "\t" + toString(negativePredictiveValue) + "\t");
         m->mothurOut(toString(falseDiscoveryRate) + "\t" + toString(accuracy) + "\t" + toString(matthewsCorrCoef) + "\t" + toString(f1Score) + "\n\n");
 

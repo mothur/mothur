@@ -41,8 +41,9 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "","",false,false,true); parameters.push_back(pcount);
         CommandParameter prefname("refname", "InputTypes", "", "", "RefNameCount", "none","","",false,false,true); parameters.push_back(prefname);
         CommandParameter prefcount("refcount", "InputTypes", "", "", "RefNameCount", "none", "","",false,false,true); parameters.push_back(prefcount);
-        CommandParameter prefcolumn("refcolumn", "InputTypes", "", "", "", "", "ColumnName","",false,false,true); parameters.push_back(prefcolumn);
-        CommandParameter pcolumn("column", "InputTypes", "", "", "", "", "ColumnName","",false,false,true); parameters.push_back(pcolumn);
+        CommandParameter prefcolumn("refcolumn", "InputTypes", "", "", "PhylipColumnRef", "", "ColumnName","",false,false,true); parameters.push_back(prefcolumn);
+        CommandParameter prefphylip("refphylip", "InputTypes", "", "", "PhylipColumnRef", "", "","",false,false,true); parameters.push_back(prefphylip);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "", "ColumnName","",false,false,true); parameters.push_back(pcolumn);
         CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "closed-open", "closed", "", "", "","",false,false,true); parameters.push_back(pmethod);
@@ -67,8 +68,9 @@ vector<string> ClusterFitCommand::setParameters(){
 string ClusterFitCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refname, refcount, fasta, name, count, column, method, cutoff, precision, metric, iters, initialize.\n";
+        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refphylip, refname, refcount, fasta, name, count, column, method, cutoff, precision, metric, iters, initialize.\n";
         helpString += "The refcolumn parameter allow you to enter your reference data distance file, to reduce processing time. \n";
+        helpString += "The refphylip parameter allow you to enter your reference data distance file, to reduce processing time. \n";
         helpString += "The column parameter allow you to enter your data distance file, to reduce processing time. \n";
         helpString += "The fasta parameter allows you to enter your fasta file. \n";
         helpString += "The reffasta parameter allows you to enter your fasta file for your reference dataset. \n";
@@ -171,6 +173,14 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
                     if (path == "") {	parameters["refcolumn"] = inputDir + it->second;		}
                 }
                 
+                it = parameters.find("refphylip");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["refphylip"] = inputDir + it->second;		}
+                }
+                
                 it = parameters.find("column");
                 //user has given a template file
                 if(it != parameters.end()){
@@ -237,17 +247,24 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             }
             
             selfReference = true;
+            refdistfile = "";
+            distfile = "";
             
             //check for required parameters
             reffastafile = validParameter.validFile(parameters, "reffasta");
             if (reffastafile == "not open") { abort = true; }
             else if (reffastafile == "not found") { reffastafile = "";  }
-            else { distfile = "";  format="column";  selfReference = false; }
+            else {  selfReference = false; }
             
             refcolumnfile = validParameter.validFile(parameters, "refcolumn");
             if (refcolumnfile == "not open") { refcolumnfile = ""; abort = true; }
             else if (refcolumnfile == "not found") { refcolumnfile = ""; }
-            else {  format = "column"; current->setColumnFile(refcolumnfile);	selfReference = false; }
+            else {  refdistfile = refcolumnfile; refformat = "column"; current->setColumnFile(refcolumnfile);	selfReference = false; }
+            
+            refphylipfile = validParameter.validFile(parameters, "refphylip");
+            if (refphylipfile == "not open") { refphylipfile = ""; abort = true; }
+            else if (refphylipfile == "not found") { refphylipfile = ""; }
+            else {  refdistfile = refphylipfile; refformat = "phylip"; current->setPhylipFile(refphylipfile);	selfReference = false; }
             
             reflistfile = validParameter.validFile(parameters, "reflist");
             if (reflistfile == "not open") { abort = true; }
@@ -266,7 +283,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             
             
             if (!selfReference) { //if you are providing reference files, lets make sure we have all of them
-                if ((refcolumnfile == "") || (reffastafile == "") || (reflistfile == "")) { m->mothurOut("[ERROR]: When providing a reference file, you must provide a reffasta, refcolumn, reflist and refcount or refname, aborting.\n");  abort = true; }
+                if ((refdistfile == "") || (reffastafile == "") || (reflistfile == "")) { m->mothurOut("[ERROR]: When providing a reference file, you must provide a reffasta, refcolumn or refphylip, reflist and refcount or refname, aborting.\n");  abort = true; }
             }
             
             fastafile = validParameter.validFile(parameters, "fasta");
@@ -290,7 +307,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             columnfile = validParameter.validFile(parameters, "column");
             if (columnfile == "not open") { columnfile = ""; abort = true; }
             else if (columnfile == "not found") { columnfile = ""; }
-            else {  distfile = columnfile; format = "column"; current->setColumnFile(columnfile);	}
+            else {  distfile = columnfile;  current->setColumnFile(columnfile);	}
             
             method = validParameter.valid(parameters, "method");
             if (method == "not found") {  method = "open";}
@@ -298,16 +315,32 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             if ((method == "closed") || (method == "open")) { }
             else { m->mothurOut("[ERROR]: " + method + " is not a valid cluster fitting method.  Valid options are closed and open.\n"); abort = true; }
             
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.fit command you must enter ONLY ONE of the following: count or name.\n"); abort = true; }
             
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: count or name.\n"); abort = true; }
-            
-            if ((namefile == "") && (countfile == "")) {
-                namefile = current->getNameFile();
-                if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n"); }
+            if ((columnfile == "") && (fastafile == "")) {
+                //is there are current file available for either of these?
+                //give priority to column, then phylip
+                columnfile = current->getColumnFile();
+                if (columnfile != "") {  distfile = columnfile;  m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
                 else {
-                    countfile = current->getCountFile();
-                    if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); }
-                    else {  m->mothurOut("[ERROR]: You need to provide a namefile or countfile if you are going to use the column format.\n");  abort = true; }
+                    fastafile = current->getFastaFile();
+                    if (fastafile != "") {  distfile = fastafile;  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+                    else {
+                        m->mothurOut("No valid current files. You must provide a phylip, column or fasta file before you can use the cluster.fit command.\n");
+                        abort = true;
+                    }
+                }
+            }
+            
+            if (columnfile != "") {
+                if ((namefile == "") && (countfile == "")) {
+                    namefile = current->getNameFile();
+                    if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n"); }
+                    else {
+                        countfile = current->getCountFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); }
+                        else {  m->mothurOut("[ERROR]: You need to provide a namefile or countfile if you are going to use the column format.\n");  abort = true; }
+                    }
                 }
             }
             
@@ -326,8 +359,8 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             
             initialize = validParameter.valid(parameters, "initialize");		if (initialize == "not found") { initialize = "singleton"; }
             
-            if ((initialize == "singleton") || (initialize == "oneotu")){ }
-            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
+            if (initialize == "singleton"){ }
+            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initialization is singleton.\n");  abort = true; }
             
             temp = validParameter.valid(parameters, "iters");		if (temp == "not found")  { temp = "100"; }
             util.mothurConvert(temp, maxIters);
@@ -336,8 +369,6 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             temp = validParameter.valid(parameters, "cutoff");
             if (temp == "not found") { temp = "0.03"; }
             util.mothurConvert(temp, cutoff);
-            
-            abort=false;
             
         }
     }
@@ -361,7 +392,7 @@ int ClusterFitCommand::execute(){
             
             createReferenceNameCount(); //creates name or count file if needed
             
-            //calcDists();  //calc distance matrix for fasta file and distances between fasta file and reffasta file
+            calcDists();  //calc distance matrix for fasta file and distances between fasta file and reffasta file
             
             //calc sens.spec values for reference
             InputData input(reflistfile, "list", nullVector);
@@ -434,12 +465,12 @@ string ClusterFitCommand::calcDists() {
             
             distCommand->execute();
             map<string, vector<string> > filenames = distCommand->getOutputFiles();
-            distfile = filenames[format][0];
+            distfile = filenames["column"][0];
+            columnfile = distfile;
             
             delete distCommand;
             m->mothurOut("/******************************************/\n");
         }
-        format="column";
         
         map<string, vector<string> > filenames;
         int refAlignLength = util.getAlignmentLength(reffastafile);
@@ -456,7 +487,7 @@ string ClusterFitCommand::calcDists() {
             
             distCommand->execute();
             filenames = distCommand->getOutputFiles();
-            comboDistFile = filenames[format][0];
+            comboDistFile = filenames["column"][0];
             
             delete distCommand;
             m->mothurOut("/******************************************/\n");
@@ -505,7 +536,7 @@ string ClusterFitCommand::calcDists() {
             
             distCommand->execute();
             filenames = distCommand->getOutputFiles();
-            comboDistFile = filenames[format][0];
+            comboDistFile = filenames["column"][0];
             
             delete distCommand;
             m->mothurOut("/******************************************/\n");
@@ -530,9 +561,9 @@ int ClusterFitCommand::runOptiCluster(ListVector*& list){
         if (countfile == "") { fitDupsFile = namefile; nameOrCount = "name"; }
         else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
         
-        comboDistFile = "/users/sarahwestcott/desktop/release/final.fit.dist";
+        //comboDistFile = "/users/sarahwestcott/desktop/release/final.fit.dist";
         
-        OptiData* matrix; matrix = new OptiRefMatrix(refcolumnfile, refDupsFile, refNameOrCount, "column",  cutoff, columnfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
+        OptiData* matrix; matrix = new OptiRefMatrix(refdistfile, refDupsFile, refNameOrCount, refformat, cutoff, distfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
         
         ClusterMetric* metric = NULL;
         if (metricName == "mcc")             { metric = new MCC();              }

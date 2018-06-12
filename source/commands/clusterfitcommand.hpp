@@ -45,8 +45,8 @@ public:
     
 private:
     bool abort, sim, print_start, selfReference;
-    string refcolumnfile, reffastafile, refnamefile, refcountfile, reflistfile, refNameOrCount;
-    string namefile, format, distfile, countfile, fastafile, columnfile, nameOrCount;
+    string refcolumnfile, refphylipfile, refdistfile, reffastafile, refnamefile, refcountfile, reflistfile, refNameOrCount;
+    string namefile, refformat, distfile, countfile, fastafile, columnfile, nameOrCount;
     string comboDistFile;
     
     string method, fileroot, tag, outputDir, inputDir, metric, initialize, metricName;
@@ -55,7 +55,6 @@ private:
     int precision, length, maxIters, processors;
     vector<string> outputNames;
     unsigned long loops;
-    //long long truePositives, falsePositives, trueNegatives, falseNegatives;
     map<string, int> counts;
     
     int runOptiCluster(ListVector*&);
