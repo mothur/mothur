@@ -345,7 +345,6 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
                         cleanedTax[j] = '_'; //change any special chars to _ so the tree can be read by tree readers
                     }
                 }
-                cout << tax << '\t' << cleanedTax << endl;
                 T->tree[i].setLabel(cleanedTax);
             }
             

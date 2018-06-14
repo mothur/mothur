@@ -393,8 +393,6 @@ int LibShuffCommand::printCoverageFile() {
 			}
 		}
 		it=allDistances.begin();
-		
-		//cout << setprecision(8);
 
 		vector<int> prevRow = it->second;
 		it++;

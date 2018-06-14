@@ -608,14 +608,11 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
             vsearchParameters.push_back(sizeorder);
          }
 
-        if (m->getDebug()) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
+        if (m->getDebug()) {  m->mothurOut("[DEBUG]: "); for(int i = 0; i < vsearchParameters.size(); i++)  { m->mothurOut(toString(vsearchParameters[i]) + "\t"); } m->mothurOut("\n");  }
         
         string commandString = "";
         for (int i = 0; i < vsearchParameters.size(); i++) {    commandString += toString(vsearchParameters[i]) + " "; }
  
-        //cout << "commandString = " << commandString << endl;
-        //exit(1);
-        
 #if defined NON_WINDOWS
 #else
         commandString = "\"" + commandString + "\"";

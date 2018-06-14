@@ -900,7 +900,6 @@ int GetMetaCommunityCommand::driver(SharedRAbundVectors*& thisLookup, vector< ve
                     if (m->getControl_pressed()) { for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear(); return 1; }
                     
                     seqDist temp(l, k, tempdata[0]);
-                    //cout << l << '\t' << k << '\t' <<  tempdata[0] << endl;
                     calcDists[0].push_back(temp);
                 }
 				

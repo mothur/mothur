@@ -1141,7 +1141,6 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 				}
 				//rip off last dash
 				group = group.substr(0, group.length()-1);
-                //cout << group << endl;
             }
             else{ group = ""; }
 

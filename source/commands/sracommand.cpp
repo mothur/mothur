@@ -328,7 +328,7 @@ int SRACommand::execute(){
         else if (sfffile != "")     {       parseSffFile(filesBySample);    }
         else if (fastqfile != "")   {       parseFastqFile(filesBySample);  }
         
-        //cout << "files by sample size = " << filesBySample.size() << endl;
+        
         //checks groups and files returned from parse - removes any groups that did not get reads assigned to them, orders files.
         checkGroups(filesBySample);
         
@@ -488,7 +488,7 @@ int SRACommand::execute(){
                 itGroup = Group2Primer.find(Groups[i]);
                 if (itGroup != Group2Primer.end()) { thisGroupsPrimer = itGroup->second;  }
                 
-                //cout << Groups[i] << '\t' << thisGroupsFiles.size() << endl;
+                
                 
                 for (int j = 0; j < thisGroupsFiles.size(); j++) {
                     string libId = util.getSimpleName(thisGroupsFiles[j]) + "." + thisGroup;
@@ -1380,8 +1380,7 @@ int SRACommand::mapGroupToFile(map<string, vector<string> >& files, vector<strin
             for (int j = 0; j < theseFiles.size(); j++) {
                 
                 string tempName = util.getSimpleName(theseFiles[j]);
-                //if ((tempName == "GZGO5KL01.F006D146.sff") || (tempName == "G3BMWHG01.F008D021.sff") || (tempName == "GO2JXTW01.M002D125.sff") || (tempName == "GO5715J01.M003D125.sff")) { cout << Groups[i] << '\t' << theseFiles[j] << endl; }
-                //cout << i << '\t' << j << '\t' << Groups[i] << '\t' << theseFiles[j] << endl;
+                
                 int pos = theseFiles[j].find(thisGroup);
                 if (pos != string::npos) { //you have a potential match, make sure you dont have a case of partial name
                     if (theseFiles[j][pos+thisGroup.length()] == '.') { //final.soil.sff vs final.soil2.sff both would match soil.
@@ -1442,9 +1441,7 @@ int SRACommand::fixMap(map<string, vector<string> >& files){
                     }
                 }
             }
-            
-            //cout << it->first << '\t' << temp[0] << endl;
-            
+
             it->second = temp;
         }
         return 0;
@@ -1617,7 +1614,7 @@ int SRACommand::readOligos(){
                                 comboName = itBar->first + "." + itPrimer->first;
                             }
                         }
-                        //cout << comboGroupName << '\t' << comboName << endl;
+                       
                         if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
                         uniqueNames.insert(comboGroupName);
                         

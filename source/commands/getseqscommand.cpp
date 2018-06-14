@@ -1297,7 +1297,7 @@ int GetSeqsCommand::compareAccnos(){
 			if (namesAccnos.count(name) == 0){ //name unique to accnos2
 				int pos = name.find_last_of('_');
 				string tempName = name;
-				if (pos != string::npos) {  tempName = tempName.substr(pos+1); cout << tempName << endl; }
+				if (pos != string::npos) {  tempName = tempName.substr(pos+1);  }
 				if (namesAccnos.count(tempName) == 0){
 					namesAccnos2.insert(name);
 				}else { //you are in both so erase

@@ -351,7 +351,7 @@ int SplitMatrix::splitDistanceLarge(){
 			if (m->getControl_pressed()) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  util.mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
 					
 			if(dist < cutoff){
-				//cout << "in cutoff: " << dist << endl;
+				
 				int groupIDA = -1;
 				int groupIDB = -1;
 				int groupID = -1;
@@ -365,27 +365,25 @@ int SplitMatrix::splitDistanceLarge(){
 						groupIDA = i;
 						groupID = groupIDA;
 
-						//cout << "in aIt: " << groupID << endl;
-	//					break;
+						
 					}
 					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
 						groups[i].insert(seqA);
 						groupIDB = i;
 						groupID = groupIDB;
 
-					//	cout << "in bIt: " << groupID << endl;
-	//					break;
+					
 					}
 				
 					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
 						if(groupIDA < groupIDB){
-						//	cout << "A: " << groupIDA << "\t" << groupIDB << endl;
+						
 							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
 							groups[groupIDB].clear(); 
 							groupID = groupIDA;
 						}
 						else{
-						//	cout << "B: " << groupIDA << "\t" << groupIDB << endl;
+						
 							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
 							groups[groupIDA].clear();  
 							groupID = groupIDB;
@@ -775,7 +773,7 @@ int SplitMatrix::splitDistanceRAM(){
 			if (m->getControl_pressed()) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  util.mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
 					
 			if(dist < cutoff){
-				//cout << "in cutoff: " << dist << endl;
+				
 				int groupIDA = -1;
 				int groupIDB = -1;
 				int groupID = -1;
@@ -788,28 +786,21 @@ int SplitMatrix::splitDistanceRAM(){
 						groups[i].insert(seqB);
 						groupIDA = i;
 						groupID = groupIDA;
-
-						//cout << "in aIt: " << groupID << endl;
-	//					break;
 					}
 					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
 						groups[i].insert(seqA);
 						groupIDB = i;
 						groupID = groupIDB;
-
-					//	cout << "in bIt: " << groupID << endl;
-	//					break;
 					}
 				
 					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
 						if(groupIDA < groupIDB){
-						//	cout << "A: " << groupIDA << "\t" << groupIDB << endl;
+						
 							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
 							groups[groupIDB].clear(); 
 							groupID = groupIDA;
 						}
 						else{
-						//	cout << "B: " << groupIDA << "\t" << groupIDB << endl;
 							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
 							groups[groupIDA].clear();  
 							groupID = groupIDB;

@@ -1181,7 +1181,6 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
 #endif
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
-        //cout << "commandString = " << commandString << endl;
         
         system(commandString.c_str());
         

@@ -1844,7 +1844,7 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, long long&
                 while(isspace(d) && (d != in.eof()))		{ d=in.get(); count++;}
             }
             positions.push_back(count-1);
-            //cout << count-1 << endl;
+            
         }
         in.close();
 
@@ -1899,7 +1899,6 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, unsigned l
                 while(isspace(d) && (d != in.eof()))		{ d=in.get(); count++;}
             }
             positions.push_back(count-1);
-            //cout << count-1 << endl;
         }
         in.close();
 
@@ -2270,7 +2269,7 @@ vector<string> Utils::splitWhiteSpace(string& rest, char buffer[], int size){
                 if (rest != "") { pieces.push_back(rest);  rest = ""; }
                 while (i < size) {  //gobble white space
                     if (isspace(buffer[i])) { i++; }
-                    else { rest = buffer[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                    else { rest = buffer[i];  break; }
                 }
             }
         }
@@ -2294,7 +2293,7 @@ vector<string> Utils::splitWhiteSpace(string input){
                 if (rest != "") { pieces.push_back(rest);  rest = ""; }
                 while (i < input.length()) {  //gobble white space
                     if (isspace(input[i])) { i++; }
-                    else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                    else { rest = input[i];  break; }
                 }
             }
         }
@@ -2321,7 +2320,7 @@ int Utils::splitWhiteSpace(string input, vector<float>& pieces, int index){
                 if (rest != "") { float tdist; mothurConvert(rest, tdist); pieces.push_back(tdist); count++; rest = ""; }
                 while (i < input.length()) {  //gobble white space
                     if (isspace(input[i])) { i++; }
-                    else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                    else { rest = input[i];  break; }
                 }
                 if (count > index) { return 0; }
             }
@@ -2362,7 +2361,7 @@ vector<string> Utils::splitWhiteSpaceWithQuotes(string input){
                     if (rest != "") { pieces.push_back(rest);  rest = ""; }
                     while (i < input.length()) {  //gobble white space
                         if (isspace(input[i])) { i++; }
-                        else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                        else { rest = input[i];  break; } 
                     }
                 }
             }

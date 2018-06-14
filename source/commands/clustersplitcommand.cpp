@@ -1210,7 +1210,7 @@ int vsearchDriver(string inputFile, string ucClusteredFile, string logfile, doub
             vsearchParameters.push_back(sizeorder);
         }
         
-        if (params->m->getDebug()) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
+        if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: "); for(int i = 0; i < vsearchParameters.size(); i++)  { params->m->mothurOut(toString(vsearchParameters[i]) + "\t"); } params->m->mothurOut("\n");  }
         
         string commandString = "";
         for (int i = 0; i < vsearchParameters.size(); i++) {    commandString += toString(vsearchParameters[i]) + " "; }
