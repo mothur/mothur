@@ -11,6 +11,20 @@
 #include "sharedordervector.h"
 
 /***********************************************************************/
+string getLabelTag(string label){
+    
+    string tag = "";
+    
+    //remove OTU or phylo tag
+    string newLabel1 = "";
+    for (int i = 0; i < label.length(); i++) {
+        if(label[i]>47 && label[i]<58) { //is a digit
+        }else {  tag += label[i];  }
+    }
+    
+    return tag;
+}
+/***********************************************************************/
 Utils::Utils(){
     try {
 
@@ -1354,16 +1368,18 @@ int Utils::getOTUNames(vector<string>& currentLabels, int numBins, string tagHea
 
             for (int i = 0; i < numBins; i++) {
                 string binLabel = tagHeader;
-                if (i < currentLabels.size()) { //label exists, check leading zeros length
-                    string sbinNumber = getSimpleLabel(currentLabels[i]);
-                    int tempBinNumber; mothurConvert(sbinNumber, tempBinNumber);
-                    if (tempBinNumber > maxLabelNumber) { maxLabelNumber = tempBinNumber; }
-                    if (sbinNumber.length() < snumBins.length()) {
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                if (i < currentLabels.size()) { //label exists
+                    if (getLabelTag(currentLabels[i]) == tagHeader) { //adjust 0's??
+                        string sbinNumber = getSimpleLabel(currentLabels[i]);
+                        int tempBinNumber; mothurConvert(sbinNumber, tempBinNumber);
+                        if (tempBinNumber > maxLabelNumber) { maxLabelNumber = tempBinNumber; }
+                        if (sbinNumber.length() < snumBins.length()) {
+                            int diff = snumBins.length() - sbinNumber.length();
+                            for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                        }
+                        binLabel += sbinNumber;
+                        currentLabels[i] = binLabel;
                     }
-                    binLabel += sbinNumber;
-                    currentLabels[i] = binLabel;
                 }else{ //create new label
                     string sbinNumber = toString(maxLabelNumber+1); maxLabelNumber++;
                     if (sbinNumber.length() < snumBins.length()) {

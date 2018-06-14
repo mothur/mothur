@@ -417,6 +417,11 @@ int ClusterFitCommand::execute(){
             InputData input(reflistfile, "list", nullVector);
             ListVector* list = input.getListVector();
             
+            //add tag to OTULabels to indicate the reference
+            vector<string> refListLabels = list->getLabels();
+            for (int i = 0; i < refListLabels.size(); i++) { refListLabels[i] = "Ref_" + refListLabels[i];  }
+            list->setLabels(refListLabels);
+            
             string refDupsFile = refcountfile;
             if (refNameOrCount == "name") { refDupsFile = refnamefile; }
             
