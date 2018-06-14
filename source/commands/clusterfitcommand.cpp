@@ -384,9 +384,28 @@ ClusterFitCommand::~ClusterFitCommand(){}
 int ClusterFitCommand::execute(){
     try {
         
-        //if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        
+        ClusterMetric* metric = NULL;
+        if (metricName == "mcc")             { metric = new MCC();              }
+        else if (metricName == "sens")       { metric = new Sensitivity();      }
+        else if (metricName == "spec")       { metric = new Specificity();      }
+        else if (metricName == "tptn")       { metric = new TPTN();             }
+        else if (metricName == "tp")         { metric = new TP();               }
+        else if (metricName == "tn")         { metric = new TN();               }
+        else if (metricName == "fp")         { metric = new FP();               }
+        else if (metricName == "fn")         { metric = new FN();               }
+        else if (metricName == "f1score")    { metric = new F1Score();          }
+        else if (metricName == "accuracy")   { metric = new Accuracy();         }
+        else if (metricName == "ppv")        { metric = new PPV();              }
+        else if (metricName == "npv")        { metric = new NPV();              }
+        else if (metricName == "fdr")        { metric = new FDR();              }
+        else if (metricName == "fpfn")       { metric = new FPFN();             }
     
-        if (selfReference) { }
+        if (selfReference) {
+         //how to adjust the "are you a ref or fit..."
+        
+        }
         else {
             time_t estart = time(NULL);
             
@@ -398,12 +417,35 @@ int ClusterFitCommand::execute(){
             InputData input(reflistfile, "list", nullVector);
             ListVector* list = input.getListVector();
             
-            runOptiCluster(list);
+            string refDupsFile = refcountfile;
+            if (refNameOrCount == "name") { refDupsFile = refnamefile; }
+            
+            map<string, int> counts;
+            string fitDupsFile = countfile; string nameOrCount = "count";
+            if (countfile == "") { fitDupsFile = namefile; nameOrCount = "name"; }
+            else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+            
+            //comboDistFile = "/users/sarahwestcott/desktop/release/final.fit.dist";
+            if (outputDir == "") { outputDir += util.hasPath(distfile); }
+            fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
+            
+            map<string, string> variables;
+            variables["[filename]"] = fileroot;
+            variables["[clustertag]"] = "optifit_" + metric->getName();
+            string outputName = getOutputFileName("steps", variables);
+            
+            OptiData* matrix = new OptiRefMatrix(refdistfile, refDupsFile, refNameOrCount, refformat, cutoff, distfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
+        
+            runRefOptiCluster(matrix, metric, list, counts, outputName);
             
             if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
             
+            outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
+            
             m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to fit sequences to reference OTUs.\n");
         }
+        
+        delete metric;
         
         //set list file as new current listfile
         string currentName = "";
@@ -420,6 +462,193 @@ int ClusterFitCommand::execute(){
     }
     catch(exception& e) {
         m->errorOut(e, "ClusterFitCommand", "execute");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& metric, ListVector*& refList, map<string, int>& counts, string outStepFile){
+    try {
+        OptiFitCluster cluster(matrix, metric, 0);
+        tag = cluster.getTag();
+        
+        m->mothurOut("\nClustering " + distfile + "\n"); 
+        
+        int iters = 0;
+        double listVectorMetric = 0; //worst state
+        double delta = 1;
+        
+        vector<vector<string> > otus;
+        for (int i = 0; i < refList->getNumBins(); i++) {
+            vector<string> binNames;
+            string bin = refList->get(i);
+            if (bin != "") {
+                util.splitAtComma(bin, binNames);
+                otus.push_back(binNames);
+            }
+        }
+        
+        cluster.initialize(listVectorMetric, true, otus, refList->getLabels(), method);
+        
+        long long numBins = cluster.getNumBins();
+        long long tp, tn, fp, fn;
+        vector<double> results = cluster.getStats(tp, tn, fp, fn);
+        
+        long long fittp, fittn, fitfp, fitfn;
+        long long numFitBins = cluster.getNumFitBins();
+        vector<double> fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
+        
+        outputSteps(outStepFile, true, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, 0);
+        
+        while ((delta > stableMetric) && (iters < maxIters)) { //
+            
+            if (m->getControl_pressed()) { break; }
+            double oldMetric = listVectorMetric;
+            
+            cluster.update(listVectorMetric);
+            
+            delta = abs(oldMetric - listVectorMetric);
+            iters++;
+            
+            results = cluster.getStats(tp, tn, fp, fn);
+            numBins = cluster.getNumBins();
+            numFitBins = cluster.getNumFitBins();
+            fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
+            
+            outputSteps(outStepFile, false, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, iters);
+        }
+        m->mothurOutEndLine(); m->mothurOutEndLine();
+        
+        if (m->getControl_pressed()) {  return 0; }
+        
+        ListVector* list = cluster.getFittedList(toString(cutoff));
+        list->setLabel(toString(cutoff));
+        
+        ofstream listFile;
+        string listFileName = fileroot+ tag + ".list";
+        util.openOutputFile(listFileName,	listFile);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+
+        if(countfile != "") { list->print(listFile, counts); }
+        else { list->print(listFile); }
+        listFile.close();
+        
+        delete list;
+        
+        string distFileName = columnfile;
+        if (method != "open") {
+            //extract only distances related to the list file
+            string inputString = "list=" + listFileName;
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: list.seqs(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* listSeqsCommand = new ListSeqsCommand(inputString);
+            listSeqsCommand->execute();
+            
+            map<string, vector<string> > filenames = listSeqsCommand->getOutputFiles();
+            
+            delete listSeqsCommand;
+            current->setMothurCalling(false);
+            
+            string accnosFileName = filenames["accnos"][0];
+            
+            inputString = "column=" + columnfile + ", accnos=" + accnosFileName;
+            m->mothurOut("/n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
+            m->mothurOut("Running command: get.dists(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* getDistsCommand = new GetDistsCommand(inputString);
+            getDistsCommand->execute();
+            
+            filenames = getDistsCommand->getOutputFiles();
+            
+            delete getDistsCommand;
+            current->setMothurCalling(false);
+            
+            distFileName = filenames["column"][0];
+            
+            inputString = "accnos=" + accnosFileName;
+            if (namefile != "")         {  inputString += ", name=" + namefile; }
+            else if (countfile != "")   { inputString += ", count=" + countfile; }
+            
+            
+            m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* getSeqsCommand = new GetSeqsCommand(inputString);
+            getSeqsCommand->execute();
+            
+            filenames = getSeqsCommand->getOutputFiles();
+            
+            if (namefile != "")         {  namefile = filenames["name"][0];     }
+            else if (countfile != "")   { countfile = filenames["count"][0];    }
+            
+            delete getSeqsCommand;
+            current->setMothurCalling(false);
+            
+        }
+        
+        string inputString = "cutoff=" + toString(cutoff) + ", list=" + listFileName;
+        if (distFileName != "") { inputString += ", column=" + distFileName;  }
+        
+        if (namefile != "")         {  inputString += ", name=" + namefile; }
+        else if (countfile != "")   { inputString += ", count=" + countfile; }
+        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
+        
+        m->mothurOut("\nRunning command: sens.spec(" + inputString + ")\n");
+        current->setMothurCalling(true);
+        
+        Command* sensspecCommand = new SensSpecCommand(inputString);
+        sensspecCommand->execute();
+        
+        map<string, vector<string> > filenames = sensspecCommand->getOutputFiles();
+        
+        delete sensspecCommand;
+        current->setMothurCalling(false);
+        
+        string outputFileName = filenames["sensspec"][0];
+        
+        outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        m->mothurOut("/******************************************/\n\n");
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterFitCommand", "runOptiCluster");
+        exit(1);
+    }
+    
+}
+//**********************************************************************************************************************
+void ClusterFitCommand::outputSteps(string outputName, bool printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int iter) {
+    try {
+
+        if (printHeaders) {  m->mothurOut("\n\nstate\titer\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");  }
+        
+        m->mothurOut("combo\t" + toString(iter) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  } m->mothurOutEndLine();
+        
+        m->mothurOut("fit\t" + toString(iter) + "\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t"+ toString(cutoff) + "\t" + toString(fittp) + "\t" + toString(fittn) + "\t" + toString(fitfp) + "\t" + toString(fitfn) + "\t");
+        for (int i = 0; i < fitresults.size(); i++) { m->mothurOut(toString(fitresults[i]) + "\t");  } m->mothurOutEndLine();
+        
+        
+        if (!selfReference) { //writes to file as well
+            ofstream outStep;
+            if (printHeaders)   {
+                util.openOutputFile(outputName, outStep);
+                outStep << "state\titer\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+            }else                { util.openOutputFileAppend(outputName, outStep);   }
+            
+            outStep << "combo\t" + toString(iter) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+            for (int i = 0; i < results.size(); i++) {  outStep << results[i] << "\t"; } outStep << endl;
+            
+            outStep << "fit\t" + toString(iter) + "\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t" + toString(cutoff) + "\t" << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
+            for (int i = 0; i < fitresults.size(); i++) {  outStep << fitresults[i] << "\t"; } outStep << endl;
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterFitCommand", "outputSteps");
         exit(1);
     }
 }
@@ -549,227 +778,6 @@ string ClusterFitCommand::calcDists() {
         m->errorOut(e, "ClusterFitCommand", "calcDists");
         exit(1);
     }
-}
-//**********************************************************************************************************************
-
-int ClusterFitCommand::runOptiCluster(ListVector*& list){
-    try {
-        string refDupsFile = refcountfile;
-        if (refNameOrCount == "name") { refDupsFile = refnamefile; }
-        
-        string fitDupsFile = countfile; string nameOrCount = "count";
-        if (countfile == "") { fitDupsFile = namefile; nameOrCount = "name"; }
-        else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
-        
-        //comboDistFile = "/users/sarahwestcott/desktop/release/final.fit.dist";
-        
-        OptiData* matrix; matrix = new OptiRefMatrix(refdistfile, refDupsFile, refNameOrCount, refformat, cutoff, distfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
-        
-        ClusterMetric* metric = NULL;
-        if (metricName == "mcc")             { metric = new MCC();              }
-        else if (metricName == "sens")       { metric = new Sensitivity();      }
-        else if (metricName == "spec")       { metric = new Specificity();      }
-        else if (metricName == "tptn")       { metric = new TPTN();             }
-        else if (metricName == "tp")         { metric = new TP();               }
-        else if (metricName == "tn")         { metric = new TN();               }
-        else if (metricName == "fp")         { metric = new FP();               }
-        else if (metricName == "fn")         { metric = new FN();               }
-        else if (metricName == "f1score")    { metric = new F1Score();          }
-        else if (metricName == "accuracy")   { metric = new Accuracy();         }
-        else if (metricName == "ppv")        { metric = new PPV();              }
-        else if (metricName == "npv")        { metric = new NPV();              }
-        else if (metricName == "fdr")        { metric = new FDR();              }
-        else if (metricName == "fpfn")       { metric = new FPFN();             }
-        
-        OptiFitCluster cluster(matrix, metric, 0);
-        tag = cluster.getTag();
-        
-        m->mothurOut("\nClustering " + distfile + "\n"); 
-        
-        if (outputDir == "") { outputDir += util.hasPath(distfile); }
-        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
-        
-        map<string, string> variables;
-        variables["[filename]"] = fileroot;
-        variables["[clustertag]"] = tag;
-        string outputName = getOutputFileName("steps", variables);
-        outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
-        ofstream outStep;
-        util.openOutputFile(outputName, outStep);
-        
-        int iters = 0;
-        double listVectorMetric = 0; //worst state
-        double delta = 1;
-        
-        vector<vector<string> > otus;
-        for (int i = 0; i < list->getNumBins(); i++) {
-            vector<string> binNames;
-            string bin = list->get(i);
-            if (bin != "") {
-                util.splitAtComma(bin, binNames);
-                otus.push_back(binNames);
-            }
-        }
-        
-        cluster.initialize(listVectorMetric, true, otus, list->getLabels(), method);
-        
-        long long numBins = cluster.getNumBins();
-        m->mothurOut("\n\nstate\titer\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
-        outStep << "state\titer\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
-        long long tp, tn, fp, fn;
-        vector<double> results = cluster.getStats(tp, tn, fp, fn);
-        m->mothurOut("combo\t0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-        outStep << "combo\t0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
-        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
-        m->mothurOutEndLine();
-        outStep << endl;
-        
-        long long fittp, fittn, fitfp, fitfn;
-        long long numFitBins = cluster.getNumFitBins();
-        results = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
-        m->mothurOut("fit\t0\t0\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t"+ toString(cutoff) + "\t" + toString(fittp) + "\t" + toString(fittn) + "\t" + toString(fitfp) + "\t" + toString(fitfn) + "\t");
-        outStep << "fit\t0\t0\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t" + toString(cutoff) + "\t" << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
-        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
-        m->mothurOutEndLine();
-        outStep << endl;
-
-        
-        while ((delta > stableMetric) && (iters < maxIters)) { //
-            
-            long start = time(NULL);
-            
-            if (m->getControl_pressed()) { break; }
-            double oldMetric = listVectorMetric;
-            
-            cluster.update(listVectorMetric);
-            
-            delta = abs(oldMetric - listVectorMetric);
-            iters++;
-            
-            results = cluster.getStats(tp, tn, fp, fn);
-            numBins = cluster.getNumBins();
-            
-            m->mothurOut("combo\t" + toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-            outStep << "combo\t" << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
-            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
-            m->mothurOutEndLine();
-            outStep << endl;
-            
-            
-            numFitBins = cluster.getNumFitBins();
-            results = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
-            
-            m->mothurOut("fit\t" + toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t" + toString(cutoff) + "\t"+ toString(fittp) + "\t" + toString(fittn) + "\t" + toString(fitfp) + "\t" + toString(fitfn) + "\t");
-            outStep << "fit\t" << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t" + toString(cutoff) + "\t") << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
-            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
-            m->mothurOutEndLine();
-            outStep << endl;
-            
-        }
-        m->mothurOutEndLine(); m->mothurOutEndLine();
-        
-        if (m->getControl_pressed()) { delete metric; metric = NULL; return 0; }
-        
-        ListVector* list = cluster.getFittedList(toString(cutoff));
-        list->setLabel(toString(cutoff));
-        
-        ofstream listFile;
-        string listFileName = fileroot+ tag + ".list";
-        util.openOutputFile(listFileName,	listFile);
-        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
-
-        if(countfile != "") { list->print(listFile, counts); }
-        else { list->print(listFile); }
-        listFile.close();
-        
-        delete list;
-        
-        
-        string distFileName = columnfile;
-        if (method != "open") {
-            //extract only distances related to the list file
-            string inputString = "list=" + listFileName;
-            m->mothurOut("/******************************************/\n");
-            m->mothurOut("Running command: list.seqs(" + inputString + ")\n");
-            current->setMothurCalling(true);
-            
-            Command* listSeqsCommand = new ListSeqsCommand(inputString);
-            listSeqsCommand->execute();
-            
-            map<string, vector<string> > filenames = listSeqsCommand->getOutputFiles();
-            
-            delete listSeqsCommand;
-            current->setMothurCalling(false);
-            
-            string accnosFileName = filenames["accnos"][0];
-            
-            inputString = "column=" + columnfile + ", accnos=" + accnosFileName;
-            m->mothurOut("/n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
-            m->mothurOut("Running command: get.dists(" + inputString + ")\n");
-            current->setMothurCalling(true);
-            
-            Command* getDistsCommand = new GetDistsCommand(inputString);
-            getDistsCommand->execute();
-            
-            filenames = getDistsCommand->getOutputFiles();
-            
-            delete getDistsCommand;
-            current->setMothurCalling(false);
-            
-            distFileName = filenames["column"][0];
-            
-            inputString = "accnos=" + accnosFileName;
-            if (namefile != "")         {  inputString += ", name=" + namefile; }
-            else if (countfile != "")   { inputString += ", count=" + countfile; }
-            
-            
-            m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
-            current->setMothurCalling(true);
-            
-            Command* getSeqsCommand = new GetSeqsCommand(inputString);
-            getSeqsCommand->execute();
-            
-            filenames = getSeqsCommand->getOutputFiles();
-            
-            if (namefile != "")         {  namefile = filenames["name"][0];     }
-            else if (countfile != "")   { countfile = filenames["count"][0];    }
-            
-            delete getSeqsCommand;
-            current->setMothurCalling(false);
-            
-        }
-        
-        string inputString = "cutoff=" + toString(cutoff) + ", list=" + listFileName;
-        if (distFileName != "") { inputString += ", column=" + distFileName;  }
-        
-        if (namefile != "")         {  inputString += ", name=" + namefile; }
-        else if (countfile != "")   { inputString += ", count=" + countfile; }
-        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
-        
-        m->mothurOut("\nRunning command: sens.spec(" + inputString + ")\n");
-        current->setMothurCalling(true);
-        
-        Command* sensspecCommand = new SensSpecCommand(inputString);
-        sensspecCommand->execute();
-        
-        map<string, vector<string> > filenames = sensspecCommand->getOutputFiles();
-        
-        delete sensspecCommand;
-        current->setMothurCalling(false);
-        
-        string outputFileName = filenames["sensspec"][0];
-        
-        outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        
-        m->mothurOut("/******************************************/\n\n");
-        
-        return 0;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "ClusterFitCommand", "runOptiCluster");
-        exit(1);
-    }
-    
 }
 //**********************************************************************************************************************
 

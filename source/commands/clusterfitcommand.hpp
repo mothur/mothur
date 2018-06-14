@@ -55,11 +55,11 @@ private:
     int precision, length, maxIters, processors;
     vector<string> outputNames;
     unsigned long loops;
-    map<string, int> counts;
     
-    int runOptiCluster(ListVector*&);
+    int runRefOptiCluster(OptiData*&, ClusterMetric*&, ListVector*&, map<string, int>&, string);
     void createReferenceNameCount();
     string calcDists();
+    void outputSteps(string outputName, bool printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int);
 };
 
 #endif /* clusterfitcommand_hpp */
