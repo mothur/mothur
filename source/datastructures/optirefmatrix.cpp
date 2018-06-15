@@ -10,8 +10,100 @@
 #include "progress.hpp"
 #include "counttable.h"
 
+
+//OptiRefMatrix(double, string, string, string, string, set<string>); //cutoff, distfile, name or count, format, distformat, names of fitseqs - files for denovo
 /***********************************************************************/
-OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c, string fit, string fitnc, string fitf, string fitdf, string betweend, string betweendf) : refdistfile(d), refdistformat(df), refformat(f), fitdistfile(fit), fitdistformat(fitdf), fitformat(fitf), betweendistfile(betweend), betweendistformat(betweendf), OptiData(c) {
+OptiRefMatrix::OptiRefMatrix(double c, string distFile, string dupsFile, string dupsFormat, string distFormat, vector<string> seqToFit) :  OptiData(c) {
+    
+    numFitSingletons = 0;
+    numRefSingletons = 0;
+    numSingletons = 0;
+    numBetweenDists = 0;
+    numFitDists = 0;
+    numRefDists = 0;
+    numFitSeqs = 0;
+    
+    square = false;
+    bool hasName = false;
+    string namefile, countfile;
+    if (dupsFormat == "name") { namefile = dupsFile; countfile = ""; hasName = true; }
+    else if (dupsFormat == "count") { countfile = dupsFile; namefile = ""; }
+    else { countfile = ""; namefile = ""; }
+    
+    vector<bool> singleton;
+    map<int, int> singletonIndexSwap;
+    map<string, int> nameAssignment;
+    int count = 0;
+    
+    if (distFormat == "column")        {  singletonIndexSwap = readColumnSingletons(singleton, namefile, countfile, distFile, count, nameAssignment);     }
+    else if (distFormat == "phylip")   {  singletonIndexSwap = readPhylipSingletons(singleton, distFile, count, nameAssignment);                          }
+    
+    int nonSingletonCount = 0;
+    for (int i = 0; i < singleton.size(); i++) {
+        if (!singleton[i]) { //if you are not a singleton
+            singletonIndexSwap[i] = nonSingletonCount;
+            nonSingletonCount++;
+        }else { singletons.push_back(nameMap[i]); }
+    }
+    
+    closeness.resize(nonSingletonCount);
+    
+    map<string, string> names;
+    if (namefile != "") {
+        //update names for reference
+        util.readNames(namefile, names);
+        for (int i = 0; i < numRefSingletons; i++) {
+            singletons[i] = names[singletons[i]];
+        }
+    }
+    
+    //read fit distances
+    if (distFormat == "column")        {  readColumn(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
+    else if (distFormat == "phylip")   {  readPhylip(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
+    
+    assignReferences(seqToFit);
+    
+    //still need to set class variables
+    //numFitDists, numRefDists, numRefSingletons, numFitSingletons, numBetweenDists, numSingletons, refEnd, refSingletonsEnd, numFitSeqs;
+    
+}
+/***********************************************************************/
+
+void OptiRefMatrix::assignReferences(vector<string> unfitted) {
+    try {
+        
+        //only names for sequences in matrix, unfitted may contain singletons which are not stored in matrix
+        map<string, int> closenessIndex = getNameIndexMap();
+        map<string, int>::iterator it;
+        
+        
+        for (int i = 0; i < unfitted.size(); i++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            it = closenessIndex.find(unfitted[i]);
+            
+            if (it == closenessIndex.end()) { //you are a fitsingleton
+                
+            }else { //you are a fit seq with distances
+                
+            }
+        }
+        
+        
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiRefMatrix", "assignReferences");
+        exit(1);
+    }
+}
+/***********************************************************************/
+OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c, string fit, string fitnc, string fitf, string fitdf, string betweend, string betweendf) : OptiData(c) {
+    
+    string refdistfile, refnamefile, refcountfile, refformat, refdistformat, fitdistfile, fitnamefile, fitcountfile, fitformat, fitdistformat, betweendistfile, betweendistformat;
+    
+    refdistfile = d; refdistformat = df; refformat = f; fitdistfile = fit; fitdistformat = fitdf; fitformat = fitf; betweendistfile = betweend; betweendistformat = betweendf;
     
     numFitSingletons = 0;
     numRefSingletons = 0;
@@ -31,7 +123,7 @@ OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c,
     else if (fitformat == "count") { fitcountfile = fitnc; fitnamefile = ""; }
     else { fitcountfile = ""; fitnamefile = ""; }
     
-    readFiles();
+    readFiles(refdistfile, refnamefile, refcountfile, refformat, refdistformat, fitdistfile, fitnamefile, fitcountfile, fitformat, fitdistformat, betweendistfile, betweendistformat);
 }
 /***********************************************************************/
 //given matrix indexes of unfitted seqs, pull out their dists and create optimatrix
@@ -297,7 +389,7 @@ ListVector* OptiRefMatrix::getFitListSingle() {
 }
 /***********************************************************************/
 //lets create separate reads for single and combined files.  Will produce some dup code
-int OptiRefMatrix::readFiles(){
+int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refcountfile, string refformat, string refdistformat, string fitdistfile, string fitnamefile, string fitcountfile, string fitformat, string fitdistformat, string betweendistfile, string betweendistformat){
     try {
         vector<bool> singleton;
         //read reference file to find singletons

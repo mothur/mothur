@@ -18,11 +18,13 @@ class OptiRefMatrix : public OptiData {
     
 public:
     
-    OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat
+    OptiRefMatrix(double, string, string, string, string, vector<string>); //cutoff, distfile, name or count, format, distformat, names of fitseqs - files for denovo
+    OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
     ~OptiRefMatrix(){ }
     
     vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&);
     OptiData* extractUnFitted(set<int>&);
+    int reDefineReferences(set<string>); //change "who" is reference and who needs to be fitted. Avoids costly reread
     
     long long getNumFitSingletons() { return numFitSingletons; } //user singletons
     long long getNumDists()    { return (numFitDists+numRefDists+numBetweenDists); } //all distances under cutoff
@@ -44,18 +46,19 @@ public:
 
 protected:
     
-    string refdistfile, refnamefile, refcountfile, refformat, refdistformat, fitdistfile, fitnamefile, fitcountfile, fitformat, fitdistformat, betweendistfile, betweendistformat, method;
+    string method;
     bool square;
     long long numFitDists, numRefDists, numRefSingletons, numFitSingletons, numBetweenDists, numSingletons;
-    long long length, refEnd, refSingletonsEnd, numFitSeqs;  //refEnd is index of first fit seq
+    long long refEnd, refSingletonsEnd, numFitSeqs;  //refEnd is index of first fit seq
     
     int readPhylip(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap);
     int readColumn(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap);
-    int readFiles();
+    int readFiles(string, string, string, string, string, string, string, string, string, string, string, string);
     
     map<int, int> readColumnSingletons(vector<bool>& singleton, string namefile, string countfile, string distFile, int&, map<string, int>&);
     void readColumnSingletons(vector<bool>& singleton, string distFile, map<string, int>& nameAssignment);
     map<int, int> readPhylipSingletons(vector<bool>& singleton, string distFile, int&,  map<string, int>& nameAssignment);
+    void assignReferences(vector<string>);
     
 };
 
