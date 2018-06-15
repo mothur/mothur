@@ -441,11 +441,16 @@ int ClusterFitCommand::execute(){
             
             OptiData* matrix = new OptiRefMatrix(refdistfile, refDupsFile, refNameOrCount, refformat, cutoff, distfile, fitDupsFile, nameOrCount, "column", comboDistFile, "column");
         
-            runRefOptiCluster(matrix, metric, list, counts, outputName);
+            string listFile = runRefOptiCluster(matrix, metric, list, counts, outputName);
             
             if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
             
             outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
+            
+            string dupsFile = countfile; string dupsFormat = "count";
+            if (namefile != "") { dupsFile = namefile; dupsFormat = "name"; }
+            
+            runSensSpec(listFile, columnfile, dupsFile, dupsFormat);
             
             m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to fit sequences to reference OTUs.\n");
         }
@@ -471,7 +476,7 @@ int ClusterFitCommand::execute(){
     }
 }
 //**********************************************************************************************************************
-int ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& metric, ListVector*& refList, map<string, int>& counts, string outStepFile){
+string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& metric, ListVector*& refList, map<string, int>& counts, string outStepFile){
     try {
         OptiFitCluster cluster(matrix, metric, 0);
         tag = cluster.getTag();
@@ -538,8 +543,19 @@ int ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& metr
         listFile.close();
         
         delete list;
+
+        return listFileName;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterFitCommand", "runOptiCluster");
+        exit(1);
+    }
+    
+}
+//**********************************************************************************************************************
+void ClusterFitCommand::runSensSpec(string listFileName, string distFileName, string dupsFile, string dupsFormat) {
+    try {
         
-        string distFileName = columnfile;
         if (method != "open") {
             //extract only distances related to the list file
             string inputString = "list=" + listFileName;
@@ -557,7 +573,7 @@ int ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& metr
             
             string accnosFileName = filenames["accnos"][0];
             
-            inputString = "column=" + columnfile + ", accnos=" + accnosFileName;
+            inputString = "column=" + distFileName + ", accnos=" + accnosFileName;
             m->mothurOut("/n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
             m->mothurOut("Running command: get.dists(" + inputString + ")\n");
             current->setMothurCalling(true);
@@ -573,9 +589,7 @@ int ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& metr
             distFileName = filenames["column"][0];
             
             inputString = "accnos=" + accnosFileName;
-            if (namefile != "")         {  inputString += ", name=" + namefile; }
-            else if (countfile != "")   { inputString += ", count=" + countfile; }
-            
+            inputString += ", " + dupsFormat + "=" + dupsFile;
             
             m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
             current->setMothurCalling(true);
@@ -585,20 +599,16 @@ int ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& metr
             
             filenames = getSeqsCommand->getOutputFiles();
             
-            if (namefile != "")         {  namefile = filenames["name"][0];     }
-            else if (countfile != "")   { countfile = filenames["count"][0];    }
+            if (dupsFormat == "name")         {  dupsFile = filenames["name"][0];       }
+            else if (dupsFormat == "count")   { dupsFile = filenames["count"][0];       }
             
             delete getSeqsCommand;
             current->setMothurCalling(false);
-            
         }
-        
+
         string inputString = "cutoff=" + toString(cutoff) + ", list=" + listFileName;
-        if (distFileName != "") { inputString += ", column=" + distFileName;  }
-        
-        if (namefile != "")         {  inputString += ", name=" + namefile; }
-        else if (countfile != "")   { inputString += ", count=" + countfile; }
-        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
+        inputString += ", column=" + distFileName;
+        inputString += ", " + dupsFormat + "=" + dupsFile;
         
         m->mothurOut("\nRunning command: sens.spec(" + inputString + ")\n");
         current->setMothurCalling(true);
@@ -616,15 +626,14 @@ int ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& metr
         outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
         m->mothurOut("/******************************************/\n\n");
-        
-        return 0;
+
     }
     catch(exception& e) {
-        m->errorOut(e, "ClusterFitCommand", "runOptiCluster");
+        m->errorOut(e, "ClusterFitCommand", "runSensSpec");
         exit(1);
     }
-    
 }
+
 //**********************************************************************************************************************
 void ClusterFitCommand::outputSteps(string outputName, bool printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int iter) {
     try {

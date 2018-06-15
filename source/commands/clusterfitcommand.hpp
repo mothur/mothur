@@ -56,9 +56,10 @@ private:
     vector<string> outputNames;
     unsigned long loops;
     
-    int runRefOptiCluster(OptiData*&, ClusterMetric*&, ListVector*&, map<string, int>&, string);
+    string runRefOptiCluster(OptiData*&, ClusterMetric*&, ListVector*&, map<string, int>&, string);
     void createReferenceNameCount();
     string calcDists();
+    void runSensSpec(string listFileName, string distFileName, string dupsFile, string dupsFormat);
     void outputSteps(string outputName, bool printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int);
 };
 
