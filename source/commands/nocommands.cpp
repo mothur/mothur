@@ -16,13 +16,14 @@ NoCommand::NoCommand(string option)  {}
 //**********************************************************************************************************************
 
 int NoCommand::execute(){
-	//Could choose to give more help here?fdsah
-	cout << "Invalid command.\n";
+    MothurOut* m = MothurOut::getInstance();
+	//Could choose to give more help here?
+	m->mothurOut("[ERROR]: Invalid command.\n");
    
 	CommandFactory* valid =  CommandFactory::getInstance();
 	valid->printCommands(cout);
 	
-	return 0;
+	return 2;
 }
 
 //**********************************************************************************************************************

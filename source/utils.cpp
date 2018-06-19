@@ -763,7 +763,7 @@ vector<bool> Utils::isGZ(string filename){
         if (getExtension(filename) != ".gz") { return results; } // results[0] = false; results[1] = false;
 
         bool ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
-        if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
+        if (!ableToOpen) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
 
         char c;
@@ -794,7 +794,8 @@ vector<bool> Utils::isGZ(string filename){
 
 int Utils::renameFile(string oldName, string newName){
     try {
-
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: renaming " + oldName + " to " + newName + "\n"); }
+        
         if (oldName == newName) { return 0; }
 
         ifstream inTest;
@@ -803,12 +804,26 @@ int Utils::renameFile(string oldName, string newName){
 
 #if defined NON_WINDOWS
         if (exist) { //you could open it so you want to delete it
+            if(m->getDebug()) { m->mothurOut("[DEBUG]: removing old copy of " + newName + "\n"); }
             string command = "rm " + newName;
             system(command.c_str());
         }
-
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: mv " + oldName + " to " + newName + "\n"); }
+        
         string command = "mv " + oldName + " " + newName;
-        system(command.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command mv " + oldName + " " + newName + "\n"); }
+        
+        int returnCode = system(command.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: system command mv " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
+        
+        if (returnCode != 0) {
+            int renameOk = rename(oldName.c_str(), newName.c_str());
+        
+            if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
+        }
 #else
         mothurRemove(newName);
         int renameOk = rename(oldName.c_str(), newName.c_str());
@@ -4540,18 +4555,18 @@ bool Utils::isContainingOnlyDigits(string input) {
 
  The word "Chloroplast" in the taxon string gets matched to the lineage Chloroplastida in the taxonomy (above) and wipes out all of the green algae.*/
 
-bool Utils::findTaxon(string tax, string searchTax) {
+bool Utils::findTaxon(string tax, string stax) {
     try {
         string taxon = "";
         int taxLength = tax.length();
+        string searchTax = stax;
+        if (searchTax[searchTax.length()-1] == ';') { searchTax = stax.substr(0, searchTax.length()-1); }
 
-        for(int i=0;i<taxLength;i++){
-            int pos = tax.find(searchTax);
-            if (pos != string::npos) {  //we found a match, but is it complete
-                int endOfTaxon = pos + searchTax.length();
-                if (tax[endOfTaxon] == ';') {  //we found a complete match
-                    return true;
-                }
+        int pos = tax.find(searchTax);
+        if (pos != string::npos) {  //we found a match, but is it complete
+            int endOfTaxon = pos + searchTax.length();
+            if (tax[endOfTaxon] == ';') {  //we found a complete match
+                return true;
             }
         }
         return false;

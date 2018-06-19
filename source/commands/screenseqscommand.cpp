@@ -467,7 +467,7 @@ int ScreenSeqsCommand::execute(){
         //don't write or keep if blank
         bool wroteAccnos = false;
         if (util.isBlank(badAccnosFile)) { m->mothurOut("[NOTE]: no sequences were bad, removing " + badAccnosFile + "\n\n"); util.mothurRemove(badAccnosFile);  }
-        else { outputNames.push_back(badAccnosFile); outputTypes["accnos"].push_back(badAccnosFile); }
+        else { outputNames.push_back(badAccnosFile); outputTypes["accnos"].push_back(badAccnosFile); wroteAccnos = true;}
         
         if (wroteAccnos) {
             //use remove.seqs to create new name, group and count file

@@ -83,6 +83,7 @@ bool InteractEngine::getInput(){
             
             //allow user to omit the () on the quit command
             if (input == "quit") { input = "quit()"; }
+            if (input == "help") { input = "help()"; }
             
             CommandOptionParser parser(input);
             commandName = parser.getCommandString();
@@ -104,9 +105,7 @@ bool InteractEngine::getInput(){
                 mout->setControl_pressed(false);
                 mout->setExecuting(false);
                 
-            }else {
-                mout->mothurOut("Invalid.\n");
-            }
+            }else { mout->mothurOut("[ERROR]: Invalid.\n"); }
         }
 		return 1;
 	}
@@ -116,7 +115,7 @@ bool InteractEngine::getInput(){
 	}
 }
 /***********************************************************************/
-string Engine::getCommand()  {
+string InteractEngine::getCommand()  {
 	try {
 	
 		#if defined NON_WINDOWS
@@ -127,8 +126,6 @@ string Engine::getCommand()  {
 				if(nextCommand != NULL) {  add_history(nextCommand);  }	
 				else{ //^D causes null string and we want it to quit mothur
 					nextCommand = strdup("quit");
-					//mout->appendLogBuffer(nextCommand);
-                    //mout->appendLogBuffer("\n");
 				}	
 				
 				mout->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
@@ -156,7 +153,7 @@ string Engine::getCommand()  {
 						
 	}
 	catch(exception& e) {
-		mout->errorOut(e, "Engine", "getCommand");
+		mout->errorOut(e, "InteractEngine", "getCommand");
 		exit(1);
 	}
 }
@@ -224,6 +221,7 @@ bool BatchEngine::getInput(){
 				
 				//allow user to omit the () on the quit command
 				if (input == "quit") { input = "quit()"; }
+                if (input == "help") { input = "help()"; }
 
 				CommandOptionParser parser(input);
 				commandName = parser.getCommandString();
@@ -245,9 +243,7 @@ bool BatchEngine::getInput(){
                     mout->setControl_pressed(false);
                     mout->setExecuting(false);
 										
-				}else {		
-					mout->mothurOut("Invalid.\n");
-				}
+				}else {	 mout->mothurOut("[ERROR]: Invalid.\n"); }
 				
 			}
 			util.gobble(inputBatchFile);
@@ -340,6 +336,7 @@ bool ScriptEngine::getInput(){
 				
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
+            if (input == "help") { input = "help()"; }
 
 			CommandOptionParser parser(input);
 			commandName = parser.getCommandString();
@@ -361,7 +358,7 @@ bool ScriptEngine::getInput(){
                 mout->setControl_pressed(false);
                 mout->setExecuting(false);
                                 
-            }else {	mout->mothurOut("Invalid.\n"); }
+            }else {	mout->mothurOut("[ERROR]: Invalid.\n"); }
 		}
 		
 		return 1;
