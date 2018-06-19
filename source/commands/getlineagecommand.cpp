@@ -1066,7 +1066,7 @@ int GetLineageCommand::readTax(){
         }
 		in.close();
 		out.close();
-		names.insert(name); out << name << '\t' << tax << endl;
+		
 		if (names.size() == 0) { m->mothurOut("Your taxonomy file does not contain any sequences from " + taxons + ".\n");  }
 		outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
 			
