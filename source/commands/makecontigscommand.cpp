@@ -828,8 +828,6 @@ struct groupContigsData {
     int start, end;
     vector< vector<string> > fileInputs;
     set<string> badNames;
-    map<string, int> groupCounts;
-    map<string, string> groupMap;
     map<int, string> file2Groups;
     contigsData* bundle;
     long long count;
@@ -2099,11 +2097,11 @@ void driverContigsGroups(groupContigsData* gparams) {
 
             gparams->count += dataBundle->count;
             gparams->badNames.insert(dataBundle->badNames.begin(), dataBundle->badNames.end());
-            gparams->groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
+            gparams->bundle->groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
             for (map<string, int>::iterator it = dataBundle->groupCounts.begin(); it != dataBundle->groupCounts.end(); it++) {
-                map<string, int>::iterator itMine = gparams->groupCounts.find(it->first);
-                if (itMine != gparams->groupCounts.end()) { itMine->second += it->second; }
-                else { gparams->groupCounts[it->first] = it->second; }
+                map<string, int>::iterator itMine = gparams->bundle->groupCounts.find(it->first);
+                if (itMine != gparams->bundle->groupCounts.end()) { itMine->second += it->second; }
+                else { gparams->bundle->groupCounts[it->first] = it->second; }
             }
             gparams->bundle->m->mothurOut("Done.\n\nIt took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(dataBundle->count) + " reads.\n\n");
             delete dataBundle;
@@ -2209,9 +2207,9 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                 delete data[i]->bundle->scrapQFileName;
             }
             badNames.insert(data[i]->badNames.begin(), data[i]->badNames.end());
-            groupMap.insert(data[i]->groupMap.begin(), data[i]->groupMap.end());
+            groupMap.insert(data[i]->bundle->groupMap.begin(), data[i]->bundle->groupMap.end());
             //merge counts
-            for (map<string, int>::iterator it = data[i]->groupCounts.begin(); it != data[i]->groupCounts.end(); it++) {
+            for (map<string, int>::iterator it = data[i]->bundle->groupCounts.begin(); it != data[i]->bundle->groupCounts.end(); it++) {
                 map<string, int>::iterator itMine = groupCounts.find(it->first);
                 if (itMine != groupCounts.end()) { itMine->second += it->second; }
                 else { groupCounts[it->first] = it->second; }
