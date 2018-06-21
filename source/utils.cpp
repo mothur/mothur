@@ -777,7 +777,7 @@ vector<bool> Utils::isGZ(string filename){
         if (getExtension(filename) != ".gz") { return results; } // results[0] = false; results[1] = false;
 
         bool ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
-        if (ableToOpen == 1) { return results; } // results[0] = false; results[1] = false;
+        if (!ableToOpen) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
 
         char c;
@@ -4587,18 +4587,18 @@ bool Utils::isContainingOnlyDigits(string input) {
 
  The word "Chloroplast" in the taxon string gets matched to the lineage Chloroplastida in the taxonomy (above) and wipes out all of the green algae.*/
 
-bool Utils::findTaxon(string tax, string searchTax) {
+bool Utils::findTaxon(string tax, string stax) {
     try {
         string taxon = "";
         int taxLength = tax.length();
+        string searchTax = stax;
+        if (searchTax[searchTax.length()-1] == ';') { searchTax = stax.substr(0, searchTax.length()-1); }
 
-        for(int i=0;i<taxLength;i++){
-            int pos = tax.find(searchTax);
-            if (pos != string::npos) {  //we found a match, but is it complete
-                int endOfTaxon = pos + searchTax.length();
-                if (tax[endOfTaxon] == ';') {  //we found a complete match
-                    return true;
-                }
+        int pos = tax.find(searchTax);
+        if (pos != string::npos) {  //we found a match, but is it complete
+            int endOfTaxon = pos + searchTax.length();
+            if (tax[endOfTaxon] == ';') {  //we found a complete match
+                return true;
             }
         }
         return false;
