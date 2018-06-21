@@ -103,6 +103,7 @@ public:
 #ifdef USE_BOOST
     bool openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&);
     bool openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&, string);
+    string getline(boost::iostreams::filtering_istream& fileHandle);
 #endif
     
     int printVsearchFile(vector<seqPriorityNode>&, string, string, string); //sorts and prints by abundance adding /ab=xxx/

@@ -1410,7 +1410,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
         bool ignore = false;
         Utils util;
         if (delim == '@') { //fastq files
-            bool tignore;
+            bool tignore = false;
             FastqRead fread(inFF, tignore, format);  util.gobble(inFF);
             FastqRead rread(inRF, ignore, format); util.gobble(inRF);
             if (!checkName(fread, rread, nameType, offByOneTrimLength)) {
@@ -1479,6 +1479,10 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
                 if (rQual->getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
             }
             if (tfSeq.getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
+        }
+        
+        if (ignore) {
+            cout << "here" << endl; exit(1);
         }
         return ignore;
 

@@ -1227,6 +1227,28 @@ string Utils::getline(ifstream& fileHandle) {
         exit(1);
     }
 }
+#ifdef USE_BOOST
+/***********************************************************************/
+string Utils::getline(boost::iostreams::filtering_istream& fileHandle) {
+    try {
+        string line = "";
+        while (fileHandle)	{
+            //get next character
+            char c = fileHandle.get();
+            
+            //are you at the end of the line
+            if ((c == '\n') || (c == '\r') || (c == '\f') || (c == EOF)){ break; }
+            else {		line += c;		}
+        }
+        
+        return line;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getline");
+        exit(1);
+    }
+}
+#endif
 /**********************************************************************/
 string Utils::getPathName(string longName){
     try {

@@ -97,13 +97,13 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
         if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
 
         if (!m->getControl_pressed()) {
-            string qScoreString = ""; std::getline(qFile, qScoreString); util.gobble(qFile);
+            string qScoreString = util.getline(qFile); util.gobble(qFile);
 
             if (m->getDebug()) { m->mothurOut("[DEBUG]: scores = '" + qScoreString + "'\n.");  }
 
             while(qFile.peek() != '>' && qFile.peek() != EOF){
                 if (m->getControl_pressed()) { break; }
-                string temp = ""; std::getline(qFile, temp); util.gobble(qFile);
+                string temp = util.getline(qFile); util.gobble(qFile);
                 
                 qScoreString +=  ' ' + temp;
             }
