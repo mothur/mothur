@@ -2414,6 +2414,7 @@ int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfi
             taxonomy = getline(in); gobble(in);
 
             checkName(name);
+            cout << name << endl;
             //are there confidence scores, if so remove them
             if (removeConfidence) {  if (taxonomy.find_first_of('(') != -1) {  removeConfidences(taxonomy);	} }
             map<string, string>::iterator itTax = taxMap.find(name);
@@ -3384,6 +3385,22 @@ bool Utils::isNumeric1(string stringToCheck){
         exit(1);
     }
 
+}
+/***********************************************************************/
+bool Utils::isPositiveNumeric(string stringToCheck){
+    try {
+        bool numeric = false;
+        
+        if (stringToCheck == "") { numeric = false;  }
+        else if(stringToCheck.find_first_not_of("0123456789.") == string::npos) { numeric = true; }
+        
+        return numeric;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "isPositiveNumeric");
+        exit(1);
+    }
+    
 }
 /***********************************************************************/
 bool Utils::allSpaces(string stringToCheck){
@@ -4742,7 +4759,7 @@ bool Utils::hasConfidenceScore(string& taxon, float& confidence) {
 
         if ((openParen != string::npos) && (closeParen != string::npos)) {
             string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
-            if (isNumeric1(confidenceScore)) {  //its a confidence
+            if (isPositiveNumeric(confidenceScore)) {  //its a confidence
                 taxon = taxon.substr(0, openParen); //rip off confidence
                 mothurConvert(confidenceScore, confidence);
                 return true;
@@ -4783,7 +4800,7 @@ float Utils::removeConfidences(string& tax) {
                 int pos2 = taxon.find_last_of(')');
                 if (pos2 != -1) {
                     string temp = taxon.substr(pos+1, (pos2-(pos+1)));
-                    if (isNumeric1(temp)) {
+                    if (isPositiveNumeric(temp)) {
                         taxon = taxon.substr(0, pos); //rip off confidence
                         confidenceScore = temp;
                     }

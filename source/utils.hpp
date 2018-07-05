@@ -165,6 +165,7 @@ public:
     float max(vector<float> v) {  float max = 0; vector<float>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     double max(vector<double> v) {  double max = 0; vector<double>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     long long max(vector<long long> v) {  long long max = 0; vector<long long>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
+    bool isPositiveNumeric(string);
     
     //type conversion
     bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
