@@ -2189,7 +2189,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             delete threadQTrimWriter;
             delete threadQScrapWriter;
         }
-        long long num = dataBundle->count;
+        long long num = groupDataBundle->count;
         badNames.insert(dataBundle->badNames.begin(), dataBundle->badNames.end());
         groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
         for (map<string, int>::iterator it = dataBundle->groupCounts.begin(); it != dataBundle->groupCounts.end(); it++) {
