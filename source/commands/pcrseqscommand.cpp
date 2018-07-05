@@ -843,7 +843,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         driverPcr(dataBundle);
         numFastaSeqs = dataBundle->count;
         
-        set<string> badNames = dataBundle->badSeqNames;
+        badSeqNames = dataBundle->badSeqNames;
         map<string, vector<int> > locations = dataBundle->locations;
         bool adjustNeeded = dataBundle->adjustNeeded;
         int pstart = -1; int pend = -1;
@@ -863,7 +863,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
                 if (data[i]->pstart < pstart)   { pstart = data[i]->pstart;     }
             } //smallest start
             
-            badNames.insert(data[i]->badSeqNames.begin(), data[i]->badSeqNames.end());
+            badSeqNames.insert(data[i]->badSeqNames.begin(), data[i]->badSeqNames.end());
             locations.insert(data[i]->locations.begin(), data[i]->locations.end());
             
             delete data[i];
