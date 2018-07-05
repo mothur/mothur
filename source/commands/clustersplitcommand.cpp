@@ -668,11 +668,11 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
         //go through users set and make them floats so we can sort them
         for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
             double temp = -10.0;
-            
+            cout << *it << endl;
             if ((*it != "unique") && (convertTestFloat(*it, temp) ))	{	util.mothurConvert(*it, temp);	}
             else if (*it == "unique")										{	temp = -1.0;		}
             
-            double ttemp = temp * 1000; ttemp = ceil(temp);
+            //double ttemp = temp * 1000; ttemp = ceil(temp);
             
             if (temp < cutoff) {
                 orderFloat.push_back(temp);
@@ -1099,8 +1099,8 @@ string runOptiCluster(string thisDistFile, string thisNamefile, double& smallest
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(smallestCutoff));
-        params->cutoff = params->util.ceilDist(params->cutoff, params->precision);
-        params->labels.insert(toString(params->cutoff));
+        //params->cutoff = params->util.ceilDist(params->cutoff, params->precision);
+        params->labels.insert(toString(smallestCutoff));
         
         ofstream listFile;
         params->util.openOutputFile(listFileName,	listFile);

@@ -532,7 +532,7 @@ int ScreenSeqsCommand::execute(){
                     variables["[extension]"] = util.getExtension(qualfile);
                     string outQual = getOutputFileName("qfile", variables);
                     util.renameFile(filenames["qfile"][0], outQual);
-                    outputNames.push_back(outQual); outputTypes["name"].push_back(outQual);
+                    outputNames.push_back(outQual); outputTypes["qfile"].push_back(outQual);
                 }
                 
                 if (taxonomy != "") {
@@ -542,7 +542,7 @@ int ScreenSeqsCommand::execute(){
                     variables["[extension]"] = util.getExtension(taxonomy);
                     string outTax = getOutputFileName("taxonomy", variables);
                     util.renameFile(filenames["taxonomy"][0], outTax);
-                    outputNames.push_back(outTax); outputTypes["count"].push_back(outTax);
+                    outputNames.push_back(outTax); outputTypes["taxonomy"].push_back(outTax);
                 }
             }
         }

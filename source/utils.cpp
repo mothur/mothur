@@ -2414,7 +2414,7 @@ int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfi
             taxonomy = getline(in); gobble(in);
 
             checkName(name);
-            cout << name << endl;
+            
             //are there confidence scores, if so remove them
             if (removeConfidence) {  if (taxonomy.find_first_of('(') != -1) {  removeConfidences(taxonomy);	} }
             map<string, string>::iterator itTax = taxMap.find(name);

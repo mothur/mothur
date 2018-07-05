@@ -10,65 +10,7 @@
 #include "progress.hpp"
 #include "counttable.h"
 
-
-//OptiRefMatrix(double, string, string, string, string, set<string>); //cutoff, distfile, name or count, format, distformat, names of fitseqs - files for denovo
-/***********************************************************************/
-OptiRefMatrix::OptiRefMatrix(double c, string distFile, string dupsFile, string dupsFormat, string distFormat, vector<string> seqToFit) :  OptiData(c) {
-    
-    numFitSingletons = 0;
-    numRefSingletons = 0;
-    numSingletons = 0;
-    numBetweenDists = 0;
-    numFitDists = 0;
-    numRefDists = 0;
-    numFitSeqs = 0;
-    
-    square = false;
-    bool hasName = false;
-    string namefile, countfile;
-    if (dupsFormat == "name") { namefile = dupsFile; countfile = ""; hasName = true; }
-    else if (dupsFormat == "count") { countfile = dupsFile; namefile = ""; }
-    else { countfile = ""; namefile = ""; }
-    
-    vector<bool> singleton;
-    map<int, int> singletonIndexSwap;
-    map<string, int> nameAssignment;
-    int count = 0;
-    
-    if (distFormat == "column")        {  singletonIndexSwap = readColumnSingletons(singleton, namefile, countfile, distFile, count, nameAssignment);     }
-    else if (distFormat == "phylip")   {  singletonIndexSwap = readPhylipSingletons(singleton, distFile, count, nameAssignment);                          }
-    
-    int nonSingletonCount = 0;
-    for (int i = 0; i < singleton.size(); i++) {
-        if (!singleton[i]) { //if you are not a singleton
-            singletonIndexSwap[i] = nonSingletonCount;
-            nonSingletonCount++;
-        }else { singletons.push_back(nameMap[i]); }
-    }
-    
-    closeness.resize(nonSingletonCount);
-    
-    map<string, string> names;
-    if (namefile != "") {
-        //update names for reference
-        util.readNames(namefile, names);
-        for (int i = 0; i < numRefSingletons; i++) {
-            singletons[i] = names[singletons[i]];
-        }
-    }
-    
-    //read fit distances
-    if (distFormat == "column")        {  readColumn(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
-    else if (distFormat == "phylip")   {  readPhylip(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
-    
-    assignReferences(seqToFit);
-    
-    //still need to set class variables
-    //numFitDists, numRefDists, numRefSingletons, numFitSingletons, numBetweenDists, numSingletons, refEnd, refSingletonsEnd, numFitSeqs;
-    
-}
-/***********************************************************************/
-
+/***********************************************************************
 void OptiRefMatrix::assignReferences(vector<string> unfitted) {
     try {
         
@@ -90,8 +32,6 @@ void OptiRefMatrix::assignReferences(vector<string> unfitted) {
             }
         }
         
-        
-        
     }
     catch(exception& e) {
         m->errorOut(e, "OptiRefMatrix", "assignReferences");
@@ -112,6 +52,8 @@ OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c,
     numFitDists = 0;
     numRefDists = 0;
     numFitSeqs = 0;
+    
+    fitPercent = 0;
     
     square = false;
     
@@ -245,7 +187,7 @@ bool OptiRefMatrix::isCloseFit(int i, int toFind, bool& isFit){
         else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
         
         bool found = false;
-        if (toFind >= refEnd) { //are you a fit seq
+        if (!isRef[toFind]) { //are you a fit seq
             if (closeness[i].count(toFind) != 0) {  //are you close
                 found = true;
             }
@@ -262,7 +204,9 @@ bool OptiRefMatrix::isCloseFit(int i, int toFind, bool& isFit){
 vector<int> OptiRefMatrix::getRefSeqs() {
     try {
         vector<int> refSeqsIndexes;
-        for (int i = 0; i < refEnd; i++) { refSeqsIndexes.push_back(i); }
+        for (int i = 0; i < isRef.size(); i++) {
+            if (isRef[i]) { refSeqsIndexes.push_back(i); }
+        }
         return refSeqsIndexes;
     }
     catch(exception& e) {
@@ -274,7 +218,9 @@ vector<int> OptiRefMatrix::getRefSeqs() {
 vector<int> OptiRefMatrix::getFitSeqs() {
     try {
         vector<int> fitSeqsIndexes;
-        for (int i = refEnd; i < closeness.size(); i++) { fitSeqsIndexes.push_back(i); }
+        for (int i = 0; i < isRef.size(); i++) {
+            if (!isRef[i]) { fitSeqsIndexes.push_back(i); }
+        }
         return fitSeqsIndexes;
     }
     catch(exception& e) {
@@ -292,7 +238,7 @@ int OptiRefMatrix::getNumFitClose(int index) {
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
-                if ((*it) >= refEnd) {  numClose++; } //you are a fit seq
+                if (!isRef[*it]) {  numClose++; } //you are a fit seq
             }
         }
         
@@ -313,7 +259,7 @@ int OptiRefMatrix::getNumRefClose(int index) {
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
-                if ((*it) < refEnd) {  numClose++; } //you are a ref seq
+                if (isRef[*it]) {  numClose++; } //you are a ref seq
             }
         }
         
@@ -334,7 +280,7 @@ set<int> OptiRefMatrix::getCloseFitSeqs(int index){
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
-                if ((*it) >= refEnd) {  closeSeqs.insert(*it); } //you are a fit seq
+                if (!isRef[*it]) {  closeSeqs.insert(*it); } //you are a fit seq
             }
         }
         
@@ -355,9 +301,7 @@ set<int> OptiRefMatrix::getCloseRefSeqs(int index){
         else {
             //reference seqs all have indexes less than refEnd
             for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
-                if ((*it) < refEnd) {
-                    closeSeqs.insert(*it);
-                } //you are a ref seq
+                if (isRef[*it]) { closeSeqs.insert(*it); } //you are a ref seq
             }
         }
         
@@ -377,7 +321,7 @@ ListVector* OptiRefMatrix::getFitListSingle() {
         else {
             singlelist = new ListVector();
             
-            for (int i = refSingletonsEnd; i < singletons.size(); i++) { singlelist->push_back(singletons[i]); }
+            for (int i = 0; i < isSingleRef.size(); i++) { if (!isRef[i]) { singlelist->push_back(singletons[i]); } }
         }
         
         return singlelist;
@@ -407,7 +351,11 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
         
         if (fitdistformat == "column")        {  fitSingletonIndexSwap = readColumnSingletons(singleton, fitnamefile, fitcountfile, fitdistfile, count, nameAssignment);     }
         else if (fitdistformat == "phylip")   {  fitSingletonIndexSwap = readPhylipSingletons(singleton, fitdistfile, count, nameAssignment);                                }
-                
+        
+        
+        fitPercent = ((count-refSeqsEnd) / (float) count) * 100;
+        if (fitPercent < 1) { fitPercent = 1; }
+        
         //read bewtween file to update singletons
         readColumnSingletons(singleton, betweendistfile, nameAssignment);
         
@@ -426,8 +374,8 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
             }else { singletons.push_back(nameMap[i]); }
         }
         refSingletonIndexSwap.clear();
-        refEnd = nonSingletonCount; // reference sequences are stored in beginning of closeness, fit seqs stored after
-        refSingletonsEnd = singletons.size();
+        long long refEnd = nonSingletonCount; // reference sequences are stored in beginning of closeness, fit seqs stored after
+        long long refSingletonsEnd = singletons.size();
         
         for (int i = refSeqsEnd; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
@@ -440,6 +388,10 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
         
         numSingletons = singletons.size();
         closeness.resize(nonSingletonCount);
+        isRef.resize(nonSingletonCount, true);
+        for (long long i = refEnd; i < nonSingletonCount; i++) { isRef[i] = false; } //you are a fitseq
+        isSingleRef.resize(numSingletons, true);
+        for (long long i = refSingletonsEnd; i < numSingletons; i++) { isSingleRef[i] = false; } //you are a fitseq
         
         map<string, string> names;
         if (refnamefile != "") {
@@ -455,7 +407,7 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
             map<string, string> fitnames;
             //update names for fit seqs
             util.readNames(fitnamefile, fitnames);
-            for (int i = numRefSingletons; i < numSingletons; i++) {
+            for (long long i = numRefSingletons; i < numSingletons; i++) {
                 singletons[i] = fitnames[singletons[i]];
             }
             
