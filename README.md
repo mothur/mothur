@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/mothur/mothur.svg?branch=master)](https://travis-ci.org/mothur/mothur)
 
-# README
+# mothur
 
 Welcome to the mothur project, initiated by Dr. Patrick Schloss and his software development team in the Department of Microbiology &amp; Immunology at The University of Michigan. This project seeks to develop a single piece of open-source, expandable software to fill the bioinformatics needs of the microbial ecology community. mothur is available under the GPL license.
 
