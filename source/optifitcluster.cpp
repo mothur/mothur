@@ -19,12 +19,13 @@ OptiFitCluster::OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns) :
     numComboSeqs = 0; numComboSingletons = 0; combotruePositives = 0; combofalsePositives = 0; combofalseNegatives = 0; combotrueNegatives = 0;
 }
 /***********************************************************************/
-int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string> bls, string meth) {
+int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string> bls, string meth, bool denov) {
     try {
         long long reftruePositives, reftrueNegatives, reffalsePositives, reffalseNegatives, numRefSeqs, numRefSingletons;
         numRefSeqs = 0; numRefSingletons = 0; reftruePositives = 0; reffalsePositives = 0; reffalseNegatives = 0; reftrueNegatives = 0;
         
         if (meth == "closed") { closed = true; }
+        denovo = denov;
         
         vector< vector< int> > translatedBins;
         randomizeSeqs = matrix->getTranslatedBins(existingBins, translatedBins); //otus in existingBins, otus with matrix names
@@ -198,7 +199,7 @@ bool OptiFitCluster::update(double& listMetric) {
                     double newComboMetric = metric->getValue(tp[1], tn[1], fp[1], fn[1]); //score when sequence is moved
                     double newFitMetric = metric->getValue(tp[0], tn[0], fp[0], fn[0]); //score when sequence is moved
                     //new best
-                    if ((newFitMetric > bestMetric[0]) || (newComboMetric > bestMetric[1])) { //fit is better and combo is not worse
+                    if ((newFitMetric > bestMetric[0]) || (newComboMetric > bestMetric[1])) { 
                         //if (newComboMetric > bestMetric[1]) {
                             bestMetric[0] = newFitMetric; bestBin[0] = (*it); bestTp[0] = tp[0]; bestTn[0] = tn[0]; bestFp[0] = fp[0]; bestFn[0] = fn[0];
                             bestMetric[1] = newComboMetric; bestBin[1] = (*it); bestTp[1] = tp[1]; bestTn[1] = tn[1]; bestFp[1] = fp[1]; bestFn[1] = fn[1];
@@ -386,10 +387,10 @@ ListVector* OptiFitCluster::getList() {
 ListVector* OptiFitCluster::getFittedList(string label) {
     try {
         ListVector* list = new ListVector();
-        vector<string> newLabels;
         
         map<int, string> newBins;
         set<int> unFitted;
+        long long numListSeqs = 0;
         for (int i = 0; i < randomizeSeqs.size(); i++) { //build otus
             
             if (m->getControl_pressed()) { break; }
@@ -402,6 +403,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
             map<int, string>::iterator itBinLabels = binLabels.find(binNumber); //do we have a label for this bin.  If the seq maps to existing bin then we should, otherwise we couldn't "fit" this sequence
             
             if (itBinLabels != binLabels.end()) {
+                numListSeqs++;
                 map<int, string>::iterator itBin = newBins.find(binNumber); // have we seen this otu yet?
                 
                 if (itBin == newBins.end()) { //create bin
@@ -412,30 +414,25 @@ ListVector* OptiFitCluster::getFittedList(string label) {
             }else { unFitted.insert(seqNumber); }
         }
         
-        for (map<int, string>::iterator itBin = newBins.begin(); itBin != newBins.end(); itBin++) {
-            list->push_back(itBin->second);
-            newLabels.push_back(binLabels[itBin->first]);
-        }
-        
-        list->setLabels(newLabels);
-        long long numUnFitted = (numFitSeqs - list->getNumSeqs()) + matrix->getNumFitSingletons();
+        long long numUnFitted = (numFitSeqs - numListSeqs) + matrix->getNumSingletons();
+        long long numSingletonBins = 0;
         
         if ((label != "") && (numUnFitted != 0)) {
             
-            m->mothurOut("\nFitted " + toString(list->getNumSeqs()) + " sequences to existing OTUs.\n");
+            m->mothurOut("\nFitted " + toString(numListSeqs) + " sequences to " + toString(newBins.size()) + " existing OTUs.\n");
             
             if (!closed) { //cluster the unfitted seqs separately
                 m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs.\n");
                 
                 m->mothurOut("\n**************** Clustering the unfitted sequences ****************\n");
                 
-                OptiData* unFittedMatrix = matrix->extractUnFitted(unFitted);
+                OptiData* unFittedMatrix = matrix->extractMatrixSubset(unFitted);
                 
                 ListVector* unfittedList = clusterUnfitted(unFittedMatrix, label);
                 
                 if (unfittedList != NULL) {
                     
-                    m->mothurOut("The unfitted sequences clustered into " + toString(unfittedList->getNumBins()+unFittedMatrix->getNumSingletons()+ matrix->getNumFitSingletons()) + " new OTUs.\n");
+                    m->mothurOut("The unfitted sequences clustered into " + toString(unfittedList->getNumBins()) + " new OTUs.\n"); //+unFittedMatrix->getNumSingletons()+ matrix->getNumFitSingletons()
                     
                     for (int i = 0; i < unfittedList->getNumBins(); i++) {
                         string bin = unfittedList->get(i);
@@ -455,24 +452,59 @@ ListVector* OptiFitCluster::getFittedList(string label) {
                             list->push_back(singleton->get(i));
                         }
                     }
+                    numSingletonBins += singleton->getNumBins();
                     delete singleton;
                 }
             
                 //add in singletons
                 ListVector* unFitsingleton = unFittedMatrix->getListSingle();
                 
-                if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+                if (unFitsingleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
                     for (int i = 0; i < unFitsingleton->getNumBins(); i++) {
                         if (unFitsingleton->get(i) != "") {
                             list->push_back(unFitsingleton->get(i));
                         }
                     }
+                    numSingletonBins += unFitsingleton->getNumBins();
                     delete unFitsingleton;
                 }
                 
                 delete unFittedMatrix;
-            }else { m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs, disgarding.\n");  }
-        }else { if (label != "") { m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");  } }
+                m->mothurOut(toString(numSingletonBins) + " singleton sequences were unable to be fitted existing OTUs.\n");
+            }else { m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs, disgarding. \n");  }
+        }else {
+            if (label != "") {
+                m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");
+            }
+        }
+        
+        if (denovo) { //add in refs
+            vector<int> refs = matrix->getRefSeqs();
+            
+            for (int i = 0; i < refs.size(); i++) {
+                map<int, int>::iterator it = seqBin.find(refs[i]);
+                
+                int seqNumber = it->first;
+                int binNumber = it->second;
+                
+                map<int, string>::iterator itBin = newBins.find(binNumber); // have we seen this otu yet?
+                
+                if (itBin == newBins.end()) { //create bin
+                    newBins[binNumber] = matrix->getName(seqNumber);
+                }else { //append bin
+                    newBins[binNumber] += "," + matrix->getName(seqNumber);
+                }
+            }
+        }
+        
+        vector<string> newLabels = list->getLabels();
+        
+        for (map<int, string>::iterator itBin = newBins.begin(); itBin != newBins.end(); itBin++) {
+            list->push_back(itBin->second);
+            newLabels.push_back(binLabels[itBin->first]);
+        }
+        
+        list->setLabels(newLabels);
     
         return list;
     }

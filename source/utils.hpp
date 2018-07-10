@@ -27,6 +27,7 @@ public:
     
     //random operations
     int getRandomIndex(int); //highest
+    long long getRandomIndex(long long); //highest
     int getRandomNumber();
     float randomUniform();
     float randomExp();

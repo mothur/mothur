@@ -36,8 +36,9 @@ public:
     virtual vector< set<int> > getBlastOverlap() { vector< set<int> > blank; return blank; }
     virtual string getOverlapName(int) { return ""; } //name from nameMap index
     
+    virtual void randomizeRefs() {}
     virtual vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&) { vector<int> temp; return temp;  }
-    virtual OptiData* extractUnFitted(set<int>&) { OptiData* temp = NULL; return temp;  }
+    virtual OptiData* extractMatrixSubset(set<int>&) { OptiData* temp = NULL; return temp;  }
     virtual long long getNumFitSingletons() { return 0; } //user singletons
     //virtual long long getNumRefSingletons() { return 0; } //reference singletons
     

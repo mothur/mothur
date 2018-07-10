@@ -446,7 +446,7 @@ int TrimSeqsCommand::execute(){
             
         int startTime = time(NULL);
         
-        int numSeqs = createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, trimCountFile, scrapCountFile, outputGroupFileName);
+        long long numSeqs = createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, trimCountFile, scrapCountFile, outputGroupFileName);
         
         m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to trim " + toString(numSeqs) + " sequences.\n");
 		
@@ -951,6 +951,8 @@ int driverTrim(trimData* params) {
         if (params->reorient) { delete rtrimOligos; }
 		inFASTA.close();
 		if(params->qFileName != "")	{	qFile.close();		}
+        
+        return params->count;
     }
 	catch(exception& e) {
 		params->m->errorOut(e, "TrimSeqsCommand", "driverTrim");
@@ -959,7 +961,7 @@ int driverTrim(trimData* params) {
 }
 
 /**************************************************************************************************/
-int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName, string groupFile) {
+long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName, string groupFile) {
 	try {
         //create array of worker threads
         vector<thread*> workerThreads;

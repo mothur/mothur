@@ -18,12 +18,13 @@ class OptiRefMatrix : public OptiData {
     
 public:
     
-    OptiRefMatrix(string, string, string, string, double, int); //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign fit statice
+    OptiRefMatrix(string, string, string, string, double, float); //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
     OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
     ~OptiRefMatrix(){ }
     
     vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&);
-    OptiData* extractUnFitted(set<int>&);
+    OptiData* extractMatrixSubset(set<int>&);
+    void randomizeRefs();
     
     long long getNumFitSingletons() { return numFitSingletons; } //user singletons
     long long getNumDists()    { return (numFitDists+numRefDists+numBetweenDists); } //all distances under cutoff
@@ -47,11 +48,12 @@ protected:
     string method;
     bool square;
     long long numFitDists, numRefDists, numRefSingletons, numFitSingletons, numBetweenDists, numSingletons, numFitSeqs;
-    int fitPercent;
+    float fitPercent;
     
     int readPhylip(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap);
     int readColumn(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap);
     int readFiles(string, string, string, string, string, string, string, string, string, string, string, string);
+    int readFiles(string, string, string, string);
     
     map<int, int> readColumnSingletons(vector<bool>& singleton, string namefile, string countfile, string distFile, int&, map<string, int>&);
     void readColumnSingletons(vector<bool>& singleton, string distFile, map<string, int>& nameAssignment);

@@ -203,6 +203,23 @@ void Utils::mothurRandomShuffle(vector< vector<double> >& randomize){
 
 }
 /***********************************************************************/
+long long Utils::getRandomIndex(long long highest){
+    try {
+        
+        if (highest == 0) {  return 0; }
+        
+        uniform_int_distribution<long long> dis(0, highest);
+        
+        long long random = dis(mersenne_twister_engine);
+        
+        return random;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getRandomIndex");
+        exit(1);
+    }
+}
+/***********************************************************************/
 
 int Utils::getRandomIndex(int highest){
     try {

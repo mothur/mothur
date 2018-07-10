@@ -51,12 +51,14 @@ private:
     
     string method, fileroot, tag, outputDir, inputDir, metric, initialize, metricName;
     double cutoff, stableMetric;
-    float adjust;
+    float adjust, fitPercent;
     int precision, length, maxIters, processors;
     vector<string> outputNames;
     unsigned long loops;
     
     string runRefOptiCluster(OptiData*&, ClusterMetric*&, ListVector*&, map<string, int>&, string);
+    string runDenovoOptiCluster(OptiData*&, ClusterMetric*&, map<string, int>&, string);
+    ListVector* clusterRefs(OptiData*& refsMatrix, ClusterMetric*&);
     void createReferenceNameCount();
     string calcDists();
     void runSensSpec(string listFileName, string distFileName, string dupsFile, string dupsFormat);

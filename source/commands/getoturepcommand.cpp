@@ -788,7 +788,8 @@ string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
             if (reps.size() == 0) { m->mothurOut("[ERROR]: no rep found, file mismatch?? Quitting.\n"); m->setControl_pressed(true); }
             else if (reps.size() == 1) { rep = reps[0]; }
             else { //tie
-                int index = util.getRandomIndex(reps.size()-1);
+                int maxIndex = reps.size()-1;
+                int index = util.getRandomIndex(maxIndex);
                 rep = reps[index];
             }
         }

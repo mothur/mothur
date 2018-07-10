@@ -37,7 +37,7 @@ public:
     OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns);
     ~OptiFitCluster() {}
     
-    int initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string>, string);
+    int initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string>, string, bool);
     bool update(double&); //returns whether list changed and MCC
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
     string getTag() { string tag = "optifit_" + metric->getName(); return tag; }
@@ -62,7 +62,7 @@ protected:
     map<int, string> binLabels; //for fitting - maps binNumber to existing reference label
     set<int> fitSeqs; //matrix indexes for movable sequences
     long long maxRefBinNumber;
-    bool closed;
+    bool closed, denovo;
     
     long long fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives, numFitSeqs, insertLocation, numFitSingletons;
     long long combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives, numComboSeqs, numComboSingletons;
