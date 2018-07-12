@@ -1260,12 +1260,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 		
 		#else
             
-        if (processors == 1) { //save time
-			//fastaFilePos.push_back(0); qfileFilePos.push_back(0);
-			//fastaFilePos.push_back(1000); qfileFilePos.push_back(1000);
-            lines.push_back(linePair(0, 1000));
-            if (qfilename != "") {  qLines.push_back(linePair(0, 1000)); }
-        }else{
+        
             long long numFastaSeqs = 0;
             fastaFilePos = util.setFilePosFasta(filename, numFastaSeqs); 
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
@@ -1287,7 +1282,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
                 lines.push_back(linePair(fastaFilePos[startIndex], numSeqsPerProcessor));
                 if (qfilename != "") {  qLines.push_back(linePair(qfileFilePos[startIndex], numSeqsPerProcessor)); }
             }
-        }
+        
             if(qfilename == "")	{	qLines = lines;	} //files with duds
 			return 1;
 		

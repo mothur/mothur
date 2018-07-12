@@ -2484,12 +2484,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
 #else
 
-        if (processors == 1) { //save time
-            //fastaFilePos.push_back(0); qfileFilePos.push_back(0);
-            //fastaFilePos.push_back(1000); qfileFilePos.push_back(1000);
-            lines.push_back(linePair(0, 1000)); lines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
-            qLines.push_back(linePair(0, 1000)); qLines.push_back(linePair(0, 1000));  //qual[0], qual[1] - forward and reverse
-        }else{
+        
             long long numFastaSeqs = 0;
             fastaFilePos = util.setFilePosFasta(fasta[0], numFastaSeqs, delim); //forward
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
@@ -2552,8 +2547,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 }
 
             }else { qLines = lines;	} //files with duds
-        }
+    
         if(qual.size() == 0)	{	qLines = lines;	} //files with duds
+        
         return 1;
 
 #endif
