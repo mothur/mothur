@@ -37,7 +37,9 @@ public:
     virtual string getOverlapName(int) { return ""; } //name from nameMap index
     
     virtual void randomizeRefs() {}
+    virtual vector<string> getRefSingletonNames() { vector<string> temp; return temp;  }
     virtual vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&) { vector<int> temp; return temp;  }
+    virtual OptiData* extractRefMatrix() { OptiData* temp = NULL; return temp;  }
     virtual OptiData* extractMatrixSubset(set<int>&) { OptiData* temp = NULL; return temp;  }
     virtual long long getNumFitSingletons() { return 0; } //user singletons
     //virtual long long getNumRefSingletons() { return 0; } //reference singletons

@@ -60,6 +60,84 @@ OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c,
     readFiles(refdistfile, refnamefile, refcountfile, refformat, refdistformat, fitdistfile, fitnamefile, fitcountfile, fitformat, fitdistformat, betweendistfile, betweendistformat);
 }
 /***********************************************************************/
+//Since we are extracting a subset of the seqs some reads that may not have been singletons
+OptiData* OptiRefMatrix::extractRefMatrix() {
+    try {
+        set<int> seqs; for (int i = 0; i < isRef.size(); i++) { if (isRef[i]) { seqs.insert(i); } }
+            
+        vector<string> subsetNameMap;
+        vector<string> subsetSingletons;
+        vector< set<int> > subsetCloseness;
+        map<int, int> thisNameMap;
+        map<int, int> nonSingletonNameMap;
+        vector<bool> singleton; singleton.resize(seqs.size(), true);
+        int count = 0;
+        
+        for (set<int>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+            int seqNum = *it;
+            thisNameMap[seqNum] = count;
+            nonSingletonNameMap[count] = seqNum;
+            
+            set<int> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
+            for (set<int>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                int thisSeq = *itClose;
+                
+                //is this seq in the set of unfitted?
+                if (seqs.count(thisSeq) != 0) { singleton[thisNameMap[seqNum]] = false; }
+            }
+            count++;
+        }
+        
+        int nonSingletonCount = 0;
+        for (int i = 0; i < singleton.size(); i++) {
+            if (!singleton[i]) { //if you are not a singleton
+                nonSingletonNameMap[i] = nonSingletonCount;
+                nonSingletonCount++;
+            }else { seqs.erase(nonSingletonNameMap[i]);  subsetSingletons.push_back(getName(nonSingletonNameMap[i])); } //remove from unfitted
+        }
+        singleton.clear();
+        
+        subsetCloseness.resize(nonSingletonCount);
+        for (set<int>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            int seqNum = *it;
+            
+            set<int> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
+            set<int> thisSeqsCloseUnFittedSeqs;
+            for (set<int>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                int thisSeq = *itClose;
+                
+                //is this seq in the set of unfitted?
+                if (seqs.count(thisSeq) != 0) { thisSeqsCloseUnFittedSeqs.insert(nonSingletonNameMap[thisNameMap[thisSeq]]); }
+            }
+            
+            if (!thisSeqsCloseUnFittedSeqs.empty()) {
+                subsetCloseness[nonSingletonNameMap[thisNameMap[seqNum]]] = thisSeqsCloseUnFittedSeqs;
+                subsetNameMap.push_back(getName(seqNum));
+            }
+            
+        }
+        
+        for (int i = 0; i < isSingleRef.size(); i++) { if (isSingleRef[i]) { subsetSingletons.push_back(singletons[i]); } }
+            
+        OptiData* unfittedMatrix = new OptiMatrix(subsetCloseness, subsetNameMap, subsetSingletons, cutoff);
+        
+        return unfittedMatrix;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiRefMatrix", "extractRefMatrix");
+        exit(1);
+    }
+}
+/***********************************************************************/
 //given matrix indexes of seqs, pull out their dists and create optimatrix
 OptiData* OptiRefMatrix::extractMatrixSubset(set<int> & seqs) {
     try {
@@ -193,6 +271,7 @@ bool OptiRefMatrix::isCloseFit(int i, int toFind, bool& isFit){
     }
 }
 /***********************************************************************/
+//does not include singletons, only reads in closeness
 vector<int> OptiRefMatrix::getRefSeqs() {
     try {
         vector<int> refSeqsIndexes;
@@ -203,6 +282,22 @@ vector<int> OptiRefMatrix::getRefSeqs() {
     }
     catch(exception& e) {
         m->errorOut(e, "OptiRefMatrix", "getRefSeqs");
+        exit(1);
+    }
+}
+/***********************************************************************/
+vector<string> OptiRefMatrix::getRefSingletonNames() {
+    try {
+        vector<string> refSeqsNames;
+    
+        for (int i = 0; i < isSingleRef.size(); i++) {
+            if (isSingleRef[i]) { refSeqsNames.push_back(singletons[i]); }
+        }
+        
+        return refSeqsNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiRefMatrix", "getRefSingletonNames");
         exit(1);
     }
 }
@@ -342,46 +437,52 @@ void OptiRefMatrix::randomizeRefs() {
         }
         
         //initilize isRef to true
-        isRef.resize(refSingletonCutoff, true);
-        isSingleRef.resize(singleSize, true);
-        numFitSingletons = 0;
-        numFitSeqs = 0;
+        isRef.clear(); isRef.resize(refSingletonCutoff, true);
+        isSingleRef.clear(); isSingleRef.resize(singleSize, true);
+        
         
         //set isRef values
         for (set<long long>::iterator it = fitSeqsIndexes.begin(); it != fitSeqsIndexes.end(); it++) {
             if (m->getControl_pressed()) { break; }
             
             long long thisSeq = *it;
-            if (thisSeq < refSingletonCutoff) { //you are a non singleton seq in the clossness
+            if (thisSeq < refSingletonCutoff) { //you are a non singleton seq in the closeness
                 isRef[thisSeq] = false;
-                numFitSeqs++;
             }else { //thisSeq is a singleton
                 isSingleRef[thisSeq-refSingletonCutoff] = false;
-                numFitSingletons++;
             }
         }
-        
-        //reset counts
-        numRefSingletons = singleSize - numFitSingletons;
-        long long numRefSeqs = refSingletonCutoff - numFitSeqs;
         
         //find number of fitDists, refDists and between dists
         numRefDists = 0;
         numFitDists = 0;
         numBetweenDists = 0;
+        numFitSingletons = 0;
+        numFitSeqs = 0;
+        numRefSingletons = 0;
         
         for (int i = 0; i < closeness.size(); i++) {
             if (m->getControl_pressed()) { break; }
             
             bool thisSeqIsRef = isRef[i];
+            long long thisSeqsNumRefDists = 0;
+            long long thisSeqsNumFitDists = 0;
+        
             for (set<int>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
                 int newB = *it;
                 
-                if ((thisSeqIsRef) && (isRef[newB])) {  numRefDists++; } //both refs
+                if ((thisSeqIsRef) && (isRef[newB])) {  thisSeqsNumRefDists++; } //both refs
                 else if ((thisSeqIsRef) && (!isRef[newB])) { numBetweenDists++; } // ref to fit dist
                 else if ((!thisSeqIsRef) && (isRef[newB])) { numBetweenDists++; } // fit to ref dist
-                else if ((!thisSeqIsRef) && (!isRef[newB])) { numFitDists++; } // both fit
+                else if ((!thisSeqIsRef) && (!isRef[newB])) { thisSeqsNumFitDists++; } // both fit
             }
+            
+            //a refSingleton or Fitsingleton may not be a true singleton (no valid dists in matrix), but may be a refSeq with no distances to other refs but distances to fitseqs. a fitsingleton may have dists to refs but no dists to other fitseqs.
+            
+            //you are a ref with no refdists, so you are a refsingleton
+            if ((thisSeqIsRef) && (thisSeqsNumRefDists == 0)) {  numRefSingletons++; }
+            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists == 0)) {  numFitSingletons++; }
+            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists != 0)) {  numFitSeqs++; }
         }
     }
     catch(exception& e) {
@@ -421,7 +522,6 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         }
         
         int nonSingletonCount = 0;
-        numRefSingletons = 0; numFitSingletons = 0;
         for (int i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
@@ -436,13 +536,11 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
                 
                 if (fitSeqsIndexes.count(i) != 0) { //you are a fit seq singleton
                     isSingleRef.push_back(false);
-                    numFitSingletons++;
-                }else { isSingleRef.push_back(true); numRefSingletons++; } //its a singleton reference
+                }else { isSingleRef.push_back(true); } //its a singleton reference
             }
         }
         
         singleton.clear();
-        numFitSeqs = numToSelect;
         numSingletons = singletons.size();
         closeness.resize(nonSingletonCount);
         
@@ -450,7 +548,7 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         if (namefile != "") {
             //update names for reference
             util.readNames(namefile, names);
-            for (int i = 0; i < numRefSingletons; i++) {
+            for (int i = 0; i < numSingletons; i++) {
                 singletons[i] = names[singletons[i]];
             }
         }
@@ -460,6 +558,39 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         if (namefile != "") { hasName = true; }
         if (distFormat == "column")        {  readColumn(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
         else if (distFormat == "phylip")   {  readPhylip(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
+        
+        //find number of fitDists, refDists and between dists
+        numRefDists = 0;
+        numFitDists = 0;
+        numBetweenDists = 0;
+        numRefSingletons = 0;
+        numFitSingletons = 0;
+        numFitSeqs = 0;
+        
+        for (int i = 0; i < closeness.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            bool thisSeqIsRef = isRef[i];
+            long long thisSeqsNumRefDists = 0;
+            long long thisSeqsNumFitDists = 0;
+            
+            for (set<int>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
+                int newB = *it;
+                
+                if ((thisSeqIsRef) && (isRef[newB])) {  thisSeqsNumRefDists++; } //both refs
+                else if ((thisSeqIsRef) && (!isRef[newB])) { numBetweenDists++; } // ref to fit dist
+                else if ((!thisSeqIsRef) && (isRef[newB])) { numBetweenDists++; } // fit to ref dist
+                else if ((!thisSeqIsRef) && (!isRef[newB])) { thisSeqsNumFitDists++; } // both fit
+            }
+            
+            //a refSingleton or Fitsingleton may not be a true singleton (no valid dists in matrix), but may be a refSeq with no distances to other refs but distances to fitseqs. a fitsingleton may have dists to refs but no dists to other fitseqs.
+            
+            //you are a ref with no refdists, so you are a refsingleton
+            if ((thisSeqIsRef) && (thisSeqsNumRefDists == 0)) {  numRefSingletons++; }
+            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists == 0)) {  numFitSingletons++; }
+            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists != 0)) {  numFitSeqs++; }
+        }
+
 
         return 0;
     }

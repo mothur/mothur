@@ -802,8 +802,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        if (processors == 1) { lines.push_back(linePair(0, 1000)); }
-        else {
+        
             positions = util.setFilePosFasta(fastafile, numFastaSeqs);
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
@@ -814,7 +813,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
                 if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
                 lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
             }
-        }
+        
 #endif
         
         //create array of worker threads

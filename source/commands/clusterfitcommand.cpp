@@ -401,7 +401,6 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
 //**********************************************************************************************************************
 ClusterFitCommand::~ClusterFitCommand(){}
 //**********************************************************************************************************************
-
 int ClusterFitCommand::execute(){
     try {
         
@@ -428,7 +427,7 @@ int ClusterFitCommand::execute(){
         map<string, int> counts;
         string dupsFile = countfile; nameOrCount = "count";
         if (namefile != "") { dupsFile = namefile; nameOrCount = "name"; }
-        else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+        else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); cout << "total number of unique seqs = " << counts.size() << endl; }
         
         if (outputDir == "") { outputDir += util.hasPath(distfile); }
         fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
@@ -512,8 +511,9 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
         bool printHeaders = true;
         
-        for (int i = 0; i < 10; i++) {
-
+        
+        for (int i = 0; i < 5; i++) {
+            
             OptiFitCluster cluster(matrix, metric, 0);
             tag = cluster.getTag();
             
@@ -522,12 +522,11 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
             double delta = 1;
             
             //get "ref" seqs for initialize inputs
-            vector<int> temp = matrix->getRefSeqs(); set<int> refSeqs(temp.begin(), temp.end());
-            
-            OptiData* refMatrix = matrix->extractMatrixSubset(refSeqs);
+            OptiData* refMatrix = matrix->extractRefMatrix();
             
             ListVector* refList = clusterRefs(refMatrix, metric);
             
+            refList->print(cout);
             delete refMatrix;
             
             vector<vector<string> > otus;
@@ -557,7 +556,8 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
             long long numFitBins = cluster.getNumFitBins();
             vector<double> fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
             
-            m->mothurOut("\nFitting " + toString(matrix->getNumFitSeqs()) + " sequences to reference otus.\n");
+            m->mothurOut("\nFitting " + toString(matrix->getNumFitSeqs()+matrix->getNumFitSingletons()) + " sequences to reference otus.\n");
+            cout << "fitseqs = " << matrix->getNumFitSeqs() << " fitsingletons = " << matrix->getNumFitSingletons() << endl;
             
             outputSteps(outStepFile, true, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, 0);
             
@@ -606,7 +606,7 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
 /***********************************************************************/
 ListVector* ClusterFitCommand::clusterRefs(OptiData*& refsMatrix, ClusterMetric*& metric) {
     try {
-        m->mothurOut("\nClustering " + toString(refsMatrix->getNumSeqs()) + " reference sequences.\n");
+        m->mothurOut("\nClustering " + toString(refsMatrix->getNumSeqs()+refsMatrix->getNumSingletons()) + " reference sequences.\n");
         
         ListVector* list = NULL;
         

@@ -24,7 +24,9 @@ public:
     
     vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&);
     OptiData* extractMatrixSubset(set<int>&);
+    OptiData* extractRefMatrix();
     void randomizeRefs();
+    vector<string> getRefSingletonNames();
     
     long long getNumFitSingletons() { return numFitSingletons; } //user singletons
     long long getNumDists()    { return (numFitDists+numRefDists+numBetweenDists); } //all distances under cutoff
@@ -47,6 +49,7 @@ protected:
     
     string method;
     bool square;
+    //a refSingleton or Fitsingleton may not be a true singleton (no valid dists in matrix), but may be a refSeq with no distances to other refs but distances to fitseqs. a fitsingleton may have dists to refs but no dists to other fitseqs.
     long long numFitDists, numRefDists, numRefSingletons, numFitSingletons, numBetweenDists, numSingletons, numFitSeqs;
     float fitPercent;
     
