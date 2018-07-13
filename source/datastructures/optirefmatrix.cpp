@@ -316,6 +316,22 @@ vector<int> OptiRefMatrix::getFitSeqs() {
     }
 }
 /***********************************************************************/
+long long OptiRefMatrix::getNumFitTrueSingletons() {
+    try {
+        long long numFitTrueSingletons = 0;
+        
+        for (int i = 0; i < isSingleRef.size(); i++) {
+            if (!isSingleRef[i]) { numFitTrueSingletons++; }
+        }
+        
+        return numFitTrueSingletons;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiData", "getNumFitTrueSingletons");
+        exit(1);
+    }
+}
+/***********************************************************************/
 int OptiRefMatrix::getNumFitClose(int index) {
     try {
         int numClose = 0;
@@ -614,23 +630,26 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
         
         int refSeqsEnd = count;
         
+        numRefSingletons = 0;
+        for (int i = 0; i < refSeqsEnd; i++) { if (singleton[i]) { numRefSingletons++; } }
+        
         //read fit file to find singletons
         map<int, int> fitSingletonIndexSwap;
         
         if (fitdistformat == "column")        {  fitSingletonIndexSwap = readColumnSingletons(singleton, fitnamefile, fitcountfile, fitdistfile, count, nameAssignment);     }
         else if (fitdistformat == "phylip")   {  fitSingletonIndexSwap = readPhylipSingletons(singleton, fitdistfile, count, nameAssignment);                                }
         
+        numFitSingletons = 0;
+        for (int i = refSeqsEnd; i < singleton.size(); i++) {  if (singleton[i]) { numFitSingletons++; }  }
+
         fitPercent = ((count-refSeqsEnd) / (float) count);
         if (fitPercent < 0.001) { fitPercent = 0.001; } //minumum of 0.1%
         
         //read bewtween file to update singletons
         readColumnSingletons(singleton, betweendistfile, nameAssignment);
         
-        numRefSingletons = 0;
-        for (int i = 0; i < refSeqsEnd; i++) { if (singleton[i]) { numRefSingletons++; } }
-        
-        numFitSingletons = 0; numFitSeqs = 0;
-        for (int i = refSeqsEnd; i < singleton.size(); i++) {  if (singleton[i]) { numFitSingletons++; }else { numFitSeqs++; }  }
+        numFitSeqs = 0;
+        for (int i = refSeqsEnd; i < singleton.size(); i++) {  if (!singleton[i]) { numFitSeqs++; }  }
         
         int nonSingletonCount = 0;
         map<int, int> singletonIndexSwap;

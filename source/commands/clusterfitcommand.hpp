@@ -53,7 +53,7 @@ private:
     double cutoff, stableMetric;
     float adjust, fitPercent;
     int precision, length, maxIters, processors;
-    vector<string> outputNames;
+    vector<string> outputNames, listFiles;
     unsigned long loops;
     
     string runRefOptiCluster(OptiData*&, ClusterMetric*&, ListVector*&, map<string, int>&, string);
@@ -61,8 +61,8 @@ private:
     ListVector* clusterRefs(OptiData*& refsMatrix, ClusterMetric*&);
     void createReferenceNameCount();
     string calcDists();
-    void runSensSpec(string listFileName, string distFileName, string dupsFile, string dupsFormat);
-    void outputSteps(string outputName, bool printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int);
+    string runSensSpec(string listFileName, string distFileName, string dupsFile, string dupsFormat, ClusterMetric*&, string);
+    void outputSteps(string outputName, bool& printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int, bool, int);
 };
 
 #endif /* clusterfitcommand_hpp */

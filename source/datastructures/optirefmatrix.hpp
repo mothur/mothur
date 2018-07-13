@@ -28,6 +28,7 @@ public:
     void randomizeRefs();
     vector<string> getRefSingletonNames();
     
+    long long getNumFitTrueSingletons(); //reads that are true singletons (no valid dists in matrix) and are flagged as fit
     long long getNumFitSingletons() { return numFitSingletons; } //user singletons
     long long getNumDists()    { return (numFitDists+numRefDists+numBetweenDists); } //all distances under cutoff
     long long getNumFitDists() { return numFitDists; } //user distances under cutoff

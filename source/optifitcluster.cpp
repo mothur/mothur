@@ -75,7 +75,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
             long long numCloseSeqs = (matrix->getNumFitClose(randomizeSeqs[i])); //does not include self
             fitfalseNegatives += numCloseSeqs;
         }
-        numFitSeqs = randomizeSeqs.size();
+        numFitSeqs = matrix->getNumFitSeqs();
         
         //cout << numFitSeqs << '\t' << randomizeSeqs.size() <<endl;
         fitfalseNegatives /= 2; //square matrix
@@ -84,7 +84,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         //double fitValue = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
         
         //cout << "fit intial mcc " << fitValue << '\t' << fittruePositives << '\t' << fittrueNegatives << '\t' << fitfalsePositives << '\t' << fitfalseNegatives << endl;
-        numComboSeqs = numRefSeqs + numFitSeqs;
+        numComboSeqs = numRefSeqs + randomizeSeqs.size();
         
         combofalseNegatives = matrix->getNumDists() - reftruePositives; //number of distance in matrix for reference seqs - reftruePositives
         combotrueNegatives = numComboSeqs * (numComboSeqs-1)/2 - (reffalsePositives + reffalseNegatives + reftruePositives);
@@ -414,7 +414,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
             }else { unFitted.insert(seqNumber); }
         }
         
-        long long numUnFitted = (numFitSeqs - numListSeqs) + matrix->getNumSingletons();
+        long long numUnFitted = (numFitSeqs - numListSeqs) + matrix->getNumFitTrueSingletons();
         long long numSingletonBins = 0;
         
         if ((label != "") && (numUnFitted != 0)) {
@@ -470,8 +470,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
                 }
                 
                 delete unFittedMatrix;
-                m->mothurOut(toString(numSingletonBins) + " singleton sequences were unable to be fitted existing OTUs.\n");
-            }else { m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs, disgarding. \n");  }
+            }else { m->mothurOut(toString((numFitSeqs - numListSeqs)) + " sequences were unable to be fitted existing OTUs, disgarding.\n");  }
         }else {
             if (label != "") {
                 m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");

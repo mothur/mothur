@@ -306,8 +306,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
         //must read each time because cutoff changes
         string nameOrCount = "";
         string thisNamefile = "";
-        map<string, int> counts;
-        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); }
         else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
         
         string distfile = columnfile;

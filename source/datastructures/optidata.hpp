@@ -49,6 +49,7 @@ public:
     
     //virtual ListVector* getRefListSingle();
     virtual ListVector* getFitListSingle() { ListVector* list = NULL; return list; }
+    virtual long long getNumFitTrueSingletons() { return 0; }
     
     virtual vector<int> getRefSeqs() { vector<int> temp; return temp;  }
     virtual vector<int> getFitSeqs() { vector<int> temp; return temp;  }
