@@ -77,7 +77,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         }
         numFitSeqs = matrix->getNumFitSeqs();
         
-        //cout << numFitSeqs << '\t' << randomizeSeqs.size() <<endl;
+        cout << "fit seqs vs. randomized = " << numFitSeqs << '\t' << randomizeSeqs.size() <<endl;
         fitfalseNegatives /= 2; //square matrix
         fittrueNegatives = numFitSeqs * (numFitSeqs-1)/2 - (fitfalsePositives + fitfalseNegatives + fittruePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
         
@@ -85,7 +85,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         
         //cout << "fit intial mcc " << fitValue << '\t' << fittruePositives << '\t' << fittrueNegatives << '\t' << fitfalsePositives << '\t' << fitfalseNegatives << endl;
         numComboSeqs = numRefSeqs + randomizeSeqs.size();
-        
+        cout << "combo seqs = " << numComboSeqs  <<endl;
         combofalseNegatives = matrix->getNumDists() - reftruePositives; //number of distance in matrix for reference seqs - reftruePositives
         combotrueNegatives = numComboSeqs * (numComboSeqs-1)/2 - (reffalsePositives + reffalseNegatives + reftruePositives);
         combotruePositives = reftruePositives;
