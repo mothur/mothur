@@ -64,7 +64,7 @@ protected:
     long long maxRefBinNumber;
     bool closed, denovo;
     
-    long long fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives, numFitSeqs, insertLocation, numFitSingletons;
+    long long fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives, numFitSeqs, insertLocation, numFitSingletons; 
     long long combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives, numComboSeqs, numComboSingletons;
     
     int findInsert();

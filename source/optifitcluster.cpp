@@ -15,7 +15,7 @@ OptiFitCluster::OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns) :
     maxRefBinNumber = 0;
     closed = false;
 
-    numFitSeqs = 0; numFitSingletons = 0; fittruePositives = 0; fitfalsePositives = 0; fitfalseNegatives = 0; fittrueNegatives = 0;
+    numFitSeqs = 0;  fittruePositives = 0; fitfalsePositives = 0; fitfalseNegatives = 0; fittrueNegatives = 0; numFitSingletons = 0;
     numComboSeqs = 0; numComboSingletons = 0; combotruePositives = 0; combofalsePositives = 0; combofalseNegatives = 0; combotrueNegatives = 0;
 }
 /***********************************************************************/
@@ -65,6 +65,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         
         //add fit seqs as singletons
         int numRefBins = translatedBins.size();
+        numFitSingletons = 0;
         //put every fit seq in own bin
         for (int i = 0; i < randomizeSeqs.size(); i++) {
             vector<int> thisBin;
@@ -74,10 +75,10 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
             
             long long numCloseSeqs = (matrix->getNumFitClose(randomizeSeqs[i])); //does not include self
             fitfalseNegatives += numCloseSeqs;
+            if (numCloseSeqs == 0) { numFitSingletons++; }
         }
-        numFitSeqs = matrix->getNumFitSeqs();
+        numFitSeqs = randomizeSeqs.size();
         
-        cout << "fit seqs vs. randomized = " << numFitSeqs << '\t' << randomizeSeqs.size() <<endl;
         fitfalseNegatives /= 2; //square matrix
         fittrueNegatives = numFitSeqs * (numFitSeqs-1)/2 - (fitfalsePositives + fitfalseNegatives + fittruePositives); //since everyone is a singleton no one clusters together. True negative = num far apart
         
@@ -85,7 +86,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         
         //cout << "fit intial mcc " << fitValue << '\t' << fittruePositives << '\t' << fittrueNegatives << '\t' << fitfalsePositives << '\t' << fitfalseNegatives << endl;
         numComboSeqs = numRefSeqs + randomizeSeqs.size();
-        cout << "combo seqs = " << numComboSeqs  <<endl;
+        
         combofalseNegatives = matrix->getNumDists() - reftruePositives; //number of distance in matrix for reference seqs - reftruePositives
         combotrueNegatives = numComboSeqs * (numComboSeqs-1)/2 - (reffalsePositives + reffalseNegatives + reftruePositives);
         combotruePositives = reftruePositives;
@@ -322,7 +323,7 @@ vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long lon
 vector<double> OptiFitCluster::getFitStats(long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
         long long singletn = 0;
-        if (!closed) { singletn = matrix->getNumFitSingletons(); }
+        if (!closed) { singletn = matrix->getNumFitSingletons() - numFitSingletons; } //don't want to count fitSingletons in randomseqs twice.
         long long tempnumSeqs = numFitSeqs + singletn;
         
         tp = fittruePositives;
