@@ -539,29 +539,7 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
             
             numSelected = fitSeqsIndexes.size();
         }
-        //GQY1XT001B9X2U,GQY1XT001EHL10,GQY1XT001CCIKR,GQY1XT001C44N8	GQY1XT001CGNFH,GQY1XT001EHCCH	GQY1XT001CFWVZ,GQY1XT001DHF2X	GQY1XT001BGXA5,GQY1XT001APUDR	GQY1XT001B0XU3	GQY1XT001CPKJY	GQY1XT001DC1IC	GQY1XT001ASJ0W	GQY1XT001AJQ84	GQY1XT001AEGCJ	GQY1XT001CFHYQ
-        /*fitSeqsIndexes.insert(nameAssignment["GQY1XT001B9X2U"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001EHL10"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001CCIKR"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001C44N8"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001CGNFH"]);
-        
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001EHCCH"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001CFWVZ"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001DHF2X"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001BGXA5"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001APUDR"]);
-        
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001B0XU3"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001CPKJY"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001DC1IC"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001ASJ0W"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001AJQ84"]);
-        
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001AEGCJ"]);
-        fitSeqsIndexes.insert(nameAssignment["GQY1XT001CFHYQ"]);*/
-        //numSelected = fitSeqsIndexes.size();
-        
+                
         int nonSingletonCount = 0;
         for (int i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton

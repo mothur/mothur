@@ -52,7 +52,7 @@ private:
     string method, fileroot, tag, outputDir, inputDir, metric, initialize, metricName;
     double cutoff, stableMetric;
     float adjust, fitPercent;
-    int precision, length, maxIters, processors;
+    int precision, length, maxIters, processors, denovoIters;
     vector<string> outputNames, listFiles;
     unsigned long loops;
     

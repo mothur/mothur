@@ -51,6 +51,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.0001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
+        CommandParameter pdenovoiters("denovoiters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pdenovoiters);
         CommandParameter pfitpercent("fitpercent", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pfitpercent);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -69,7 +70,7 @@ vector<string> ClusterFitCommand::setParameters(){
 string ClusterFitCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refphylip, refname, refcount, fasta, name, count, column, method, cutoff, precent, metric, iters, initialize.\n";
+        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refphylip, refname, refcount, fasta, name, count, column, method, cutoff, precent, metric, iters, initialize, denovoiters.\n";
         helpString += "The refcolumn parameter allow you to enter your reference data distance file, to reduce processing time. \n";
         helpString += "The refphylip parameter allow you to enter your reference data distance file, to reduce processing time. \n";
         helpString += "The column parameter allow you to enter your data distance file, to reduce processing time. \n";
@@ -81,6 +82,7 @@ string ClusterFitCommand::getHelpString(){
         helpString += "The refname parameter allows you to enter your reference name file. \n";
         helpString += "The refcount parameter allows you to enter your reference count file.\nA refcount or refname file is required if your reference distance file is in column format.\n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
+        helpString += "The denovoiters parameter allow you to set the number of randomizations to perform. \n";
         helpString += "The fitpercent parameter allow you to set percentage of reads to be fitted. Default=10. Max=100, min=0.01.\n";
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
         helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its own OTU, or oneotu meaning all sequences are assigned to one otu. Default=singleton.\n";
@@ -381,7 +383,14 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             temp = validParameter.valid(parameters, "iters");		if (temp == "not found")  { temp = "100"; }
             util.mothurConvert(temp, maxIters);
             
-            temp = validParameter.valid(parameters, "fitpercent");		if (temp == "not found")  { temp = "10.0"; }
+            temp = validParameter.valid(parameters, "denovoiters");
+            if (temp == "not found")  {
+                if (selfReference) { temp = "10"; }
+                else { temp = "1";  }
+            }
+            util.mothurConvert(temp, denovoIters);
+            
+            temp = validParameter.valid(parameters, "fitpercent");		if (temp == "not found")  { temp = "50.0"; }
             util.mothurConvert(temp, fitPercent);
             
             if ((fitPercent > 100) || (fitPercent < 0.01)) { abort=true; m->mothurOut("[ERROR]: fitpercent must be less than 100, and more than 0.01.\n"); }
@@ -504,7 +513,7 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
         m->mothurOut("\nClustering " + distfile + "\n");
         bool printStepsHeader = true;
         
-        for (int i = 0; i < maxIters; i++) {
+        for (int i = 0; i < denovoIters; i++) {
             
             OptiFitCluster cluster(matrix, metric, 0);
             tag = cluster.getTag();
@@ -549,9 +558,11 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
             
             m->mothurOut("\nFitting " + toString(matrix->getNumFitSeqs()+matrix->getNumFitSingletons()+matrix->getNumFitTrueSingletons()) + " sequences to reference otus.\n");
             
+            m->mothurOut("\n\nlist\tstate\titer\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");  
+            
             outputSteps(outStepFile, printStepsHeader, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, 0, false, 0);
             
-            while ((delta > stableMetric) && (iters < 100)) { //
+            while ((delta > stableMetric) && (iters < maxIters)) { //
                 
                 if (m->getControl_pressed()) { break; }
                 double oldMetric = listVectorMetric;
@@ -580,6 +591,7 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
             
             ListVector* list = cluster.getFittedList(toString(cutoff));
             list->setLabel(toString(cutoff));
+            list->setLabels(nullVector);
             
             if(countfile != "") { list->print(listFile, counts); }
             else { list->print(listFile); }
@@ -628,7 +640,7 @@ ListVector* ClusterFitCommand::clusterRefs(OptiData*& refsMatrix, ClusterMetric*
         for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
         m->mothurOutEndLine();
         
-        while ((delta > 0.0001) && (iters < 100)) {
+        while ((delta > 0.0001) && (iters < maxIters)) {
             
             long start = time(NULL);
             
@@ -698,7 +710,7 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         bool printStepsHeader = true;
         outputSteps(outStepFile, printStepsHeader, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, 0, true, 0);
         
-        while ((delta > stableMetric) && (iters < 100)) { //
+        while ((delta > stableMetric) && (iters < maxIters)) { //
             
             if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
@@ -742,14 +754,14 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
     
 }
 //**********************************************************************************************************************
-string ClusterFitCommand::runSensSpec(string listFileName, string distFileName, string dupsFile, string dupsFormat, ClusterMetric*& userMetric, string listFile) {
+string ClusterFitCommand::runSensSpec(string listFileName, string distFName, string dupsfile, string dupsFormat, ClusterMetric*& userMetric, string listFile) {
     try {
         
         ofstream sensSpecFile;
         map<string, string> variables;
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listFile));
         string sensSpecFileName = getOutputFileName("sensspec",variables);
-        util.openOutputFileAppend(sensSpecFileName, sensSpecFile);
+        util.openOutputFile(sensSpecFileName, sensSpecFile);
         outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
         
         sensSpecFile << "iter\tlabel\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
@@ -757,9 +769,11 @@ string ClusterFitCommand::runSensSpec(string listFileName, string distFileName, 
         
         double bestStat = 0; int bestResult = 0;
         
-        for (int i = 0; i < maxIters; i++) {
+        for (int i = 0; i < listFiles.size(); i++) {
             
             string thislistFileName = listFiles[i];
+            string thisDistFile = distFName;
+            string thisDupsFile = dupsfile;
             
             if (method != "open") {
                 //extract only distances related to the list file
@@ -778,7 +792,7 @@ string ClusterFitCommand::runSensSpec(string listFileName, string distFileName, 
                 
                 string accnosFileName = filenames["accnos"][0];
                 
-                inputString = "column=" + distFileName + ", accnos=" + accnosFileName;
+                inputString = "column=" + thisDistFile + ", accnos=" + accnosFileName;
                 m->mothurOut("/n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
                 m->mothurOut("Running command: get.dists(" + inputString + ")\n");
                 current->setMothurCalling(true);
@@ -791,10 +805,10 @@ string ClusterFitCommand::runSensSpec(string listFileName, string distFileName, 
                 delete getDistsCommand;
                 current->setMothurCalling(false);
                 
-                distFileName = filenames["column"][0];
+                thisDistFile = filenames["column"][0];
                 
                 inputString = "accnos=" + accnosFileName;
-                inputString += ", " + dupsFormat + "=" + dupsFile;
+                inputString += ", " + dupsFormat + "=" + thisDupsFile;
                 
                 m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
                 current->setMothurCalling(true);
@@ -804,8 +818,10 @@ string ClusterFitCommand::runSensSpec(string listFileName, string distFileName, 
                 
                 filenames = getSeqsCommand->getOutputFiles();
                 
-                if (dupsFormat == "name")         {  dupsFile = filenames["name"][0];       }
-                else if (dupsFormat == "count")   { dupsFile = filenames["count"][0];       }
+                if (dupsFormat == "name")         {  thisDupsFile = filenames["name"][0];       }
+                else if (dupsFormat == "count")   { thisDupsFile = filenames["count"][0];       }
+                
+                util.mothurRemove(accnosFileName);
                 
                 delete getSeqsCommand;
                 current->setMothurCalling(false);
@@ -817,7 +833,7 @@ string ClusterFitCommand::runSensSpec(string listFileName, string distFileName, 
             string label = list->getLabel();
             int numBins = list->getNumBins();
         
-            OptiMatrix matrix(distFileName, dupsFile, dupsFormat, "column", cutoff, false);
+            OptiMatrix matrix(thisDistFile, thisDupsFile, dupsFormat, "column", cutoff, false);
             SensSpecCalc senscalc(matrix, list);
             long long truePositives, trueNegatives, falsePositives, falseNegatives;
             senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
@@ -902,8 +918,6 @@ void ClusterFitCommand::outputSteps(string outputName, bool& printHeaders, long 
                 outStep << toString(denovoIter+1) + "\tfit\t" + toString(iter) + "\t" + toString(cutoff) + "\t" + toString(numFitBins) + "\t" + toString(cutoff) + "\t" << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
                 for (int i = 0; i < fitresults.size(); i++) {  outStep << fitresults[i] << "\t"; } outStep << endl;
             }else {
-                if (printHeaders) {  m->mothurOut("\n\nlist\tstate\titer\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");  }
-                
                 m->mothurOut(toString(denovoIter+1) + "\t" + "combo\t" + toString(iter) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
                 for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  } m->mothurOutEndLine();
                 
