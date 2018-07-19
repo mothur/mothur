@@ -27,7 +27,7 @@ protected:
     ClusterMetric* metric;
     FakeOptiMatrix testMatrix;
     
-    using OptiCluster::setVariables;
+    //using OptiCluster::setVariables;
     using OptiCluster::initialize;
     using OptiCluster::update;
     using OptiCluster::getCloseFarCounts;
