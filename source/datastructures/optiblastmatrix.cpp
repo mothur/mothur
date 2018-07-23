@@ -22,7 +22,7 @@ OptiBlastMatrix::OptiBlastMatrix(string d, string nc, string f, bool s, double c
     readBlast();
 }
 /***********************************************************************/
-string OptiBlastMatrix::getOverlapName(int index) {
+string OptiBlastMatrix::getOverlapName(long long index) {
     try {
         if (index > blastOverlap.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return ""; }
         string name = overlapNameMap[index];
@@ -37,12 +37,16 @@ string OptiBlastMatrix::getOverlapName(int index) {
 int OptiBlastMatrix::readBlast(){
     try {
         Utils util;
-        map<string, int> nameAssignment;
-        if (namefile != "") { nameAssignment = util.readNames(namefile); }
-        else if (countfile != "") {  CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
+        map<string, long long> nameAssignment;
+        if (namefile != "") { util.readNames(namefile, nameAssignment); }
+        else if (countfile != "") {
+            CountTable ct; ct.readTable(countfile, false, true);
+            map<string, int> temp = ct.getNameMap();
+            for (map<string, int>::iterator it = temp.begin(); it!= temp.end(); it++) {  nameAssignment[it->first] = it->second; }
+        }
         else { readBlastNames(nameAssignment);  }
         int count = 0;
-        for (map<string, int>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
+        for (map<string, long long>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
             it->second = count; count++;
             nameMap.push_back(it->first);
             overlapNameMap.push_back(it->first);
@@ -79,8 +83,8 @@ int OptiBlastMatrix::readBlast(){
             if (firstName == secondName) {   refScore = score;  }
             else{
                 //convert name to number
-                map<string,int>::iterator itA = nameAssignment.find(firstName);
-                map<string,int>::iterator itB = nameAssignment.find(secondName);
+                map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
                 if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
                 
@@ -120,8 +124,8 @@ int OptiBlastMatrix::readBlast(){
                     if (firstName == secondName) {  refScore = score; }
                     else{
                         //convert name to number
-                        map<string,int>::iterator itA = nameAssignment.find(firstName);
-                        map<string,int>::iterator itB = nameAssignment.find(secondName);
+                        map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                        map<string,long long>::iterator itB = nameAssignment.find(secondName);
                         if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
                         if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
                         
@@ -149,8 +153,8 @@ int OptiBlastMatrix::readBlast(){
                         distance = 1.0 - (it->second / refScore);
                         
                         //do we already have the distance calculated for b->a
-                        map<string,int>::iterator itA = nameAssignment.find(currentRow);
-                        map<string,int>::iterator itB = nameAssignment.find(it->first);
+                        map<string,long long>::iterator itA = nameAssignment.find(currentRow);
+                        map<string,long long>::iterator itB = nameAssignment.find(it->first);
                         itDist = dists[itB->second].find(itA->first);
                         
                         //if we have it then compare
@@ -186,8 +190,8 @@ int OptiBlastMatrix::readBlast(){
                     else{ //add this row to thisRowsBlastScores
                         
                         //convert name to number
-                        map<string,int>::iterator itA = nameAssignment.find(firstName);
-                        map<string,int>::iterator itB = nameAssignment.find(secondName);
+                        map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                        map<string,long long>::iterator itB = nameAssignment.find(secondName);
                         if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
                         if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
                         
@@ -218,8 +222,8 @@ int OptiBlastMatrix::readBlast(){
             distance = 1.0 - (it->second / refScore);
             
             //do we already have the distance calculated for b->a
-            map<string,int>::iterator itA = nameAssignment.find(currentRow);
-            map<string,int>::iterator itB = nameAssignment.find(it->first);
+            map<string,long long>::iterator itA = nameAssignment.find(currentRow);
+            map<string,long long>::iterator itB = nameAssignment.find(it->first);
             itDist = dists[itB->second].find(itA->first);
             
             //if we have it then compare
@@ -296,8 +300,8 @@ int OptiBlastMatrix::readBlast(){
             if (firstName == secondName) {   refScore = score;  }
             else{
                 //convert name to number
-                map<string,int>::iterator itA = nameAssignment.find(firstName);
-                map<string,int>::iterator itB = nameAssignment.find(secondName);
+                map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
                 if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
                 
@@ -349,8 +353,8 @@ int OptiBlastMatrix::readBlast(){
                     if (firstName == secondName) {  refScore = score; }
                     else{
                         //convert name to number
-                        map<string,int>::iterator itA = nameAssignment.find(firstName);
-                        map<string,int>::iterator itB = nameAssignment.find(secondName);
+                        map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                        map<string,long long>::iterator itB = nameAssignment.find(secondName);
                         if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
                         if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
                         
@@ -389,8 +393,8 @@ int OptiBlastMatrix::readBlast(){
                         distance = 1.0 - (it->second / refScore);
                         
                         //do we already have the distance calculated for b->a
-                        map<string,int>::iterator itA = nameAssignment.find(currentRow);
-                        map<string,int>::iterator itB = nameAssignment.find(it->first);
+                        map<string,long long>::iterator itA = nameAssignment.find(currentRow);
+                        map<string,long long>::iterator itB = nameAssignment.find(it->first);
                         itDist = dists[itB->second].find(itA->first);
                         
                         //if we have it then compare
@@ -427,8 +431,8 @@ int OptiBlastMatrix::readBlast(){
                     else{ //add this row to thisRowsBlastScores
                         
                         //convert name to number
-                        map<string,int>::iterator itA = nameAssignment.find(firstName);
-                        map<string,int>::iterator itB = nameAssignment.find(secondName);
+                        map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                        map<string,long long>::iterator itB = nameAssignment.find(secondName);
                         if(itA == nameAssignment.end()){  m->mothurOut("AError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
                         if(itB == nameAssignment.end()){  m->mothurOut("BError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
                         
@@ -461,8 +465,8 @@ int OptiBlastMatrix::readBlast(){
             distance = 1.0 - (it->second / refScore);
             
             //do we already have the distance calculated for b->a
-            map<string,int>::iterator itA = nameAssignment.find(currentRow);
-            map<string,int>::iterator itB = nameAssignment.find(it->first);
+            map<string,long long>::iterator itA = nameAssignment.find(currentRow);
+            map<string,long long>::iterator itB = nameAssignment.find(it->first);
             itDist = dists[itB->second].find(itA->first);
             
             //if we have it then compare
@@ -503,7 +507,7 @@ int OptiBlastMatrix::readBlast(){
     }
 }
 /*********************************************************************************************/
-int OptiBlastMatrix::readBlastNames(map<string, int>& nameAssignment) {
+int OptiBlastMatrix::readBlastNames(map<string, long long>& nameAssignment) {
     try {
         m->mothurOut("Reading names... "); cout.flush();
         
@@ -522,7 +526,7 @@ int OptiBlastMatrix::readBlastNames(map<string, int>& nameAssignment) {
         //save name in nameMap
         nameAssignment[prevName] = num; num++;
         
-        map<string, int>::iterator it;
+        map<string, long long>::iterator it;
         while (!in.eof()) {
             if (m->getControl_pressed()) { in.close(); return 0; }
             

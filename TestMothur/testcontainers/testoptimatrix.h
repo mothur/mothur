@@ -19,9 +19,10 @@ public:
     TestOptiMatrix();
     ~TestOptiMatrix();
     
-    using OptiMatrix::getCloseSeqs;
+    using OptiData::getCloseSeqs;
     using OptiMatrix::readPhylip;
     using OptiMatrix::readColumn;
+    using OptiData::print;
     
     string columnFile, phylipFile;
     vector<string> filenames;

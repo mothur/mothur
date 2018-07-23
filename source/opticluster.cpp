@@ -20,7 +20,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
         
         bins.resize(numSeqs); //place seqs in own bin
         
-        vector<int> temp;
+        vector<long long> temp;
         bins.push_back(temp);
         seqBin[numSeqs] = -1;
         insertLocation = numSeqs;
@@ -40,7 +40,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
             if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
             
             //for each sequence (singletons removed on read)
-            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+            for (map<long long, long long>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
                 if (it->second == -1) { }
                 else {
                     long long numCloseSeqs = (matrix->getNumClose(it->first)); //does not include self
@@ -61,7 +61,7 @@ int OptiCluster::initialize(double& value, bool randomize, string initialize) {
             if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
             
             //for each sequence (singletons removed on read)
-            for (map<int, int>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
+            for (map<long long, long long>::iterator it = seqBin.begin(); it != seqBin.end(); it++) {
                 if (it->second == -1) { }
                 else {
                     long long numCloseSeqs = (matrix->getNumClose(it->first)); //does not include self
@@ -93,10 +93,10 @@ bool OptiCluster::update(double& listMetric) {
             
             if (m->getControl_pressed()) { break; }
             
-            map<int, int>::iterator it = seqBin.find(randomizeSeqs[i]);
+            map<long long, long long>::iterator it = seqBin.find(randomizeSeqs[i]);
             
-            int seqNumber = it->first;
-            int binNumber = it->second;
+            long long seqNumber = it->first;
+            long long binNumber = it->second;
             
             if (binNumber == -1) { }
             else {
@@ -125,12 +125,12 @@ bool OptiCluster::update(double& listMetric) {
                     }
                 }
                 
-                set<int> binsToTry;
-                set<int> closeSeqs = matrix->getCloseSeqs(seqNumber);
-                for (set<int>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) {  binsToTry.insert(seqBin[*itClose]); }
+                set<long long> binsToTry;
+                set<long long> closeSeqs = matrix->getCloseSeqs(seqNumber);
+                for (set<long long>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) {  binsToTry.insert(seqBin[*itClose]); }
                 
                 //merge into each "close" otu
-                for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
+                for (set<long long>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                     fn+=cCount; tn+=fCount; fp-=fCount; tp-=cCount; //move out of old bin
                     results = getCloseFarCounts(seqNumber, *it);
@@ -171,7 +171,7 @@ bool OptiCluster::update(double& listMetric) {
     }
 }
 /***********************************************************************/
-vector<long long> OptiCluster::getCloseFarCounts(int seq, int newBin) {
+vector<long long> OptiCluster::getCloseFarCounts(long long seq, long long newBin) {
     try {
         vector<long long> results; results.push_back(0); results.push_back(0);
         
@@ -274,11 +274,11 @@ long long OptiCluster::getNumBins() {
 }
 
 /***********************************************************************/
-int OptiCluster::findInsert() {
+long long OptiCluster::findInsert() {
     try {
         
         //initially there are bins for each sequence (excluding singletons removed on read)
-        for (int i = 0; i < bins.size(); i++) {
+        for (long long i = 0; i < bins.size(); i++) {
             
             if (m->getControl_pressed()) { break; }
             

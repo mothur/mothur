@@ -36,6 +36,7 @@ public:
     vector<float> randomDirichlet(vector<float> alphas);
     double getRandomDouble0to1();
     void mothurRandomShuffle(vector<int>&);
+    void mothurRandomShuffle(vector<long long>&);
     void mothurRandomShuffle(vector< vector<double> >&);
     void mothurRandomShuffle(vector<string>&);
     void mothurRandomShuffle(vector<item>&);
@@ -129,6 +130,7 @@ public:
     int readAccnos(string, vector<string>&, string);
     vector<consTax> readConsTax(string);
     int readConsTax(string, map<int, consTax2>&);
+    void readNames(string, map<string, long long>&);
     map<string, int> readNames(string);
     map<string, int> readNames(string, unsigned long int&);
     int readNames(string, map<string, string>&, map<string, int>&);

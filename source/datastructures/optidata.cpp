@@ -8,9 +8,27 @@
 
 #include "optidata.hpp"
 
-
 /***********************************************************************/
-int OptiData::getNumClose(int index) {
+long long OptiData::print(ostream& out) {
+    try {
+        long long count = 0;
+        for (long long i = 0; i < closeness.size(); i++) {
+            for(set<long long>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++){
+                out << *it << '\t';
+                count++;
+            }
+            out << endl;
+        }
+        out << endl;
+        return count;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiData", "print");
+        exit(1);
+    }
+}
+/***********************************************************************/
+long long OptiData::getNumClose(long long index) {
     try {
         if (index < 0) { return 0; }
         else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return 0; }
@@ -22,7 +40,7 @@ int OptiData::getNumClose(int index) {
     }
 }
 /***********************************************************************/
-bool OptiData::isClose(int i, int toFind){
+bool OptiData::isClose(long long i, long long toFind){
     try {
         if (i < 0) { return false; }
         else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
@@ -37,10 +55,10 @@ bool OptiData::isClose(int i, int toFind){
     }
 }
 /***********************************************************************/
-set<int> OptiData::getCloseSeqs(int i){
+set<long long> OptiData::getCloseSeqs(long long i){
     try {
-        if (i < 0) { set<int> temp; return temp; }
-        else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); set<int> temp; return temp; }
+        if (i < 0) { set<long long> temp; return temp; }
+        else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); set<long long> temp; return temp; }
         
         return closeness[i];
     }
@@ -52,9 +70,9 @@ set<int> OptiData::getCloseSeqs(int i){
 /***********************************************************************/
 //maps unique name to index in distance matrix
 //used by sensspec to get translate the list file name to the index name for closeness shirt
-map<string, int> OptiData::getNameIndexMap() {
+map<string, long long> OptiData::getNameIndexMap() {
     try {
-        map<string, int> nameIndexes;
+        map<string, long long> nameIndexes;
         for (int i = 0; i < nameMap.size(); i++) {
             vector<string> thisBinsSeqs; util.splitAtComma(nameMap[i], thisBinsSeqs);
             if (i < closeness.size()) {  nameIndexes[thisBinsSeqs[0]] = i;  }
@@ -68,7 +86,7 @@ map<string, int> OptiData::getNameIndexMap() {
     }
 }
 /***********************************************************************/
-string OptiData::getName(int index) {
+string OptiData::getName(long long index) {
     try {
         if (index < 0) { return ""; }
         else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return ""; }
@@ -77,25 +95,6 @@ string OptiData::getName(int index) {
     }
     catch(exception& e) {
         m->errorOut(e, "OptiData", "getName");
-        exit(1);
-    }
-}
-/***********************************************************************/
-long int OptiData::print(ostream& out) {
-    try {
-        long int count = 0;
-        for (int i = 0; i < closeness.size(); i++) {
-            for(set<int>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++){
-                out << *it << '\t';
-                count++;
-            }
-            out << endl;
-        }
-        out << endl;
-        return count;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "OptiData", "print");
         exit(1);
     }
 }

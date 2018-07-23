@@ -25,7 +25,8 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
     current->setMothurCalling(true);
     
     Command* dist2Command = new DistanceCommand(inputString);
-    dist2Command->execute();
+    
+    int returnValue = dist2Command->execute();
     
     map<string, vector<string> > outputFilenames = dist2Command->getOutputFiles();
     
@@ -88,14 +89,14 @@ TEST(TestOptiMatrix, readColumn) {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
-    //EXPECT_EQ(112,(matrix.print(cout)));
+    EXPECT_EQ(160,(matrix.print(cout)));
 }
 
 TEST(TestOptiMatrix, readPhylip) {
     TestOptiMatrix testOMatrix;
     OptiMatrix pmatrix(testOMatrix.phylipFile, "", "", "phylip", 0.03, false);
 
-    //EXPECT_EQ(112,(pmatrix.print(cout)));
+    EXPECT_EQ(160,(pmatrix.print(cout)));
 }
 
 /**************************************************************************************************/

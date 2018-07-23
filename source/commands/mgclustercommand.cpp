@@ -422,26 +422,26 @@ int MGClusterCommand::runOptiCluster(){
         list->setLabel(toString(cutoff));
         
         if (merge) {
-            vector< set<int> > overlap = matrix->getBlastOverlap();
+            vector< set<long long> > overlap = matrix->getBlastOverlap();
         
             //assign each sequence to bins
-            map<string, int> seqToBin;
-            for (int i = 0; i < list->getNumBins(); i++) {
+            map<string, long long> seqToBin;
+            for (long long i = 0; i < list->getNumBins(); i++) {
                 if (m->getControl_pressed()) { break; }
                 string bin = list->get(i);
                 vector<string> names; util.splitAtComma(bin, names);
-                for (int j = 0; j < names.size(); j++) { seqToBin[names[j]] = i; }
+                for (long long j = 0; j < names.size(); j++) { seqToBin[names[j]] = i; }
             }
             
             //merge overlapping bins
-            int mergedBinCount = 0;
-            for (int i = 0; i < overlap.size(); i++) {
-                set<int> temp = overlap[i]; overlap[i].clear();
-                for (set<int>::iterator itOverlap = temp.begin(); itOverlap != temp.end(); itOverlap++) {
+            long long mergedBinCount = 0;
+            for (long long i = 0; i < overlap.size(); i++) {
+                set<long long> temp = overlap[i]; overlap[i].clear();
+                for (set<long long>::iterator itOverlap = temp.begin(); itOverlap != temp.end(); itOverlap++) {
                     string firstName = matrix->getOverlapName(i);
                     string secondName = matrix->getOverlapName(*itOverlap);
-                    int binKeep = seqToBin[firstName];
-                    int binRemove = seqToBin[secondName];
+                    long long binKeep = seqToBin[firstName];
+                    long long binRemove = seqToBin[secondName];
                     
                     if(binKeep != binRemove) {
                         //save names in old bin

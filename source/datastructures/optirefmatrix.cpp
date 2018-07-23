@@ -63,27 +63,27 @@ OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c,
 //Since we are extracting a subset of the seqs some reads that may not have been singletons
 OptiData* OptiRefMatrix::extractRefMatrix() {
     try {
-        set<int> seqs; for (int i = 0; i < isRef.size(); i++) { if (isRef[i]) { seqs.insert(i); } }
+        set<long long> seqs; for (long long i = 0; i < isRef.size(); i++) { if (isRef[i]) { seqs.insert(i); } }
             
         vector<string> subsetNameMap;
         vector<string> subsetSingletons;
-        vector< set<int> > subsetCloseness;
-        map<int, int> thisNameMap;
-        map<int, int> nonSingletonNameMap;
+        vector< set<long long> > subsetCloseness;
+        map<long long, long long> thisNameMap;
+        map<long long, long long> nonSingletonNameMap;
         vector<bool> singleton; singleton.resize(seqs.size(), true);
         int count = 0;
         
-        for (set<int>::iterator it = seqs.begin(); it != seqs.end(); it++) {
-            int seqNum = *it;
+        for (set<long long>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+            long long seqNum = *it;
             thisNameMap[seqNum] = count;
             nonSingletonNameMap[count] = seqNum;
             
-            set<int> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
-            for (set<int>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
+            set<long long> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
+            for (set<long long>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
                 
                 if (m->getControl_pressed()) { break; }
                 
-                int thisSeq = *itClose;
+                long long thisSeq = *itClose;
                 
                 //is this seq in the set of unfitted?
                 if (seqs.count(thisSeq) != 0) { singleton[thisNameMap[seqNum]] = false; }
@@ -92,7 +92,7 @@ OptiData* OptiRefMatrix::extractRefMatrix() {
         }
         
         int nonSingletonCount = 0;
-        for (int i = 0; i < singleton.size(); i++) {
+        for (long long i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
                 nonSingletonNameMap[i] = nonSingletonCount;
                 nonSingletonCount++;
@@ -101,19 +101,19 @@ OptiData* OptiRefMatrix::extractRefMatrix() {
         singleton.clear();
         
         subsetCloseness.resize(nonSingletonCount);
-        for (set<int>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+        for (set<long long>::iterator it = seqs.begin(); it != seqs.end(); it++) {
             
             if (m->getControl_pressed()) { break; }
             
-            int seqNum = *it;
+            long long seqNum = *it;
             
-            set<int> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
-            set<int> thisSeqsCloseUnFittedSeqs;
-            for (set<int>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
+            set<long long> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
+            set<long long> thisSeqsCloseUnFittedSeqs;
+            for (set<long long>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
                 
                 if (m->getControl_pressed()) { break; }
                 
-                int thisSeq = *itClose;
+                long long thisSeq = *itClose;
                 
                 //is this seq in the set of unfitted?
                 if (seqs.count(thisSeq) != 0) { thisSeqsCloseUnFittedSeqs.insert(nonSingletonNameMap[thisNameMap[thisSeq]]); }
@@ -139,27 +139,27 @@ OptiData* OptiRefMatrix::extractRefMatrix() {
 }
 /***********************************************************************/
 //given matrix indexes of seqs, pull out their dists and create optimatrix
-OptiData* OptiRefMatrix::extractMatrixSubset(set<int> & seqs) {
+OptiData* OptiRefMatrix::extractMatrixSubset(set<long long> & seqs) {
     try {
         vector<string> subsetNameMap;
         vector<string> subsetSingletons;
-        vector< set<int> > subsetCloseness;
-        map<int, int> thisNameMap;
-        map<int, int> nonSingletonNameMap;
+        vector< set<long long> > subsetCloseness;
+        map<long long, long long> thisNameMap;
+        map<long long, long long> nonSingletonNameMap;
         vector<bool> singleton; singleton.resize(seqs.size(), true);
         int count = 0;
         
-        for (set<int>::iterator it = seqs.begin(); it != seqs.end(); it++) {
-            int seqNum = *it;
+        for (set<long long>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+            long long seqNum = *it;
             thisNameMap[seqNum] = count;
             nonSingletonNameMap[count] = seqNum;
             
-            set<int> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
-            for (set<int>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
+            set<long long> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
+            for (set<long long>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
                 
                 if (m->getControl_pressed()) { break; }
                 
-                int thisSeq = *itClose;
+                long long thisSeq = *itClose;
                 
                 //is this seq in the set of unfitted?
                 if (seqs.count(thisSeq) != 0) { singleton[thisNameMap[seqNum]] = false; }
@@ -168,7 +168,7 @@ OptiData* OptiRefMatrix::extractMatrixSubset(set<int> & seqs) {
         }
         
         int nonSingletonCount = 0;
-        for (int i = 0; i < singleton.size(); i++) {
+        for (long long i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are a singleton
                 nonSingletonNameMap[i] = nonSingletonCount;
                 nonSingletonCount++;
@@ -177,19 +177,19 @@ OptiData* OptiRefMatrix::extractMatrixSubset(set<int> & seqs) {
         singleton.clear();
         
         subsetCloseness.resize(nonSingletonCount);
-        for (set<int>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+        for (set<long long>::iterator it = seqs.begin(); it != seqs.end(); it++) {
             
             if (m->getControl_pressed()) { break; }
             
-            int seqNum = *it;
+            long long seqNum = *it;
             
-            set<int> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
-            set<int> thisSeqsCloseUnFittedSeqs;
-            for (set<int>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
+            set<long long> thisSeqsCloseSeqs = getCloseSeqs(seqNum);
+            set<long long> thisSeqsCloseUnFittedSeqs;
+            for (set<long long>::iterator itClose = thisSeqsCloseSeqs.begin(); itClose != thisSeqsCloseSeqs.end(); itClose++) {
                 
                 if (m->getControl_pressed()) { break; }
                 
-                int thisSeq = *itClose;
+                long long thisSeq = *itClose;
                 
                 //is this seq in the set of unfitted?
                 if (seqs.count(thisSeq) != 0) { thisSeqsCloseUnFittedSeqs.insert(nonSingletonNameMap[thisNameMap[thisSeq]]); }
@@ -212,13 +212,13 @@ OptiData* OptiRefMatrix::extractMatrixSubset(set<int> & seqs) {
     }
 }
 /***********************************************************************/
-vector<int> OptiRefMatrix::getTranslatedBins(vector<vector<string> > & binNames, vector<vector<int> > & fixedBins) {
+vector<long long> OptiRefMatrix::getTranslatedBins(vector<vector<string> > & binNames, vector<vector<long long> > & fixedBins) {
     try {
         fixedBins.clear();
         
-        map<string, int> nameIndexes;
+        map<string, long long> nameIndexes;
         set<string> unique;
-        for (int i = 0; i < nameMap.size(); i++) { //vector of string representing the sequences in the matrix from the name file.
+        for (long long i = 0; i < nameMap.size(); i++) { //vector of string representing the sequences in the matrix from the name file.
             vector<string> thisSeqsReps; util.splitAtComma(nameMap[i], thisSeqsReps); //split redundant names
             if (i < closeness.size()) {  nameIndexes[thisSeqsReps[0]] = i;  } //this is a sequence with distances in the matrix
             if (thisSeqsReps.size() == 1) { //you are unique
@@ -226,16 +226,16 @@ vector<int> OptiRefMatrix::getTranslatedBins(vector<vector<string> > & binNames,
             }
         }
         
-        for (int i = 0; i < numRefSingletons; i++) {
+        for (long long i = 0; i < numRefSingletons; i++) {
             vector<string> thisSeqsReps; util.splitAtComma(singletons[i], thisSeqsReps); //split redundant names
             nameIndexes[thisSeqsReps[0]] = -1;
             if (thisSeqsReps.size() == 1) { unique.insert(thisSeqsReps[0]); }
         }
         
-        for (int i = 0; i < binNames.size(); i++) { //for each OTU
-            vector<int> thisBinsSeqs;
-            for (int j = 0; j < binNames[i].size(); j++) { //for each sequence
-                map<string, int>::iterator it = nameIndexes.find(binNames[i][j]);
+        for (long long i = 0; i < binNames.size(); i++) { //for each OTU
+            vector<long long> thisBinsSeqs;
+            for (long long j = 0; j < binNames[i].size(); j++) { //for each sequence
+                map<string, long long>::iterator it = nameIndexes.find(binNames[i][j]);
                 
                 if (it == nameIndexes.end()) { }//not in distance matrix, but needs a value in fixedBins. 2 reasons for making it here: you are a redundant name in the listfile, you do not have any distances
                 else { thisBinsSeqs.push_back(it->second);  } //"name" of sequence in matrix
@@ -251,7 +251,7 @@ vector<int> OptiRefMatrix::getTranslatedBins(vector<vector<string> > & binNames,
     }
 }
 /***********************************************************************/
-bool OptiRefMatrix::isCloseFit(int i, int toFind, bool& isFit){
+bool OptiRefMatrix::isCloseFit(long long i, long long toFind, bool& isFit){
     try {
         if (i < 0) { return false; }
         else if (i > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true); return false; }
@@ -272,10 +272,10 @@ bool OptiRefMatrix::isCloseFit(int i, int toFind, bool& isFit){
 }
 /***********************************************************************/
 //does not include singletons, only reads in closeness
-vector<int> OptiRefMatrix::getRefSeqs() {
+vector<long long> OptiRefMatrix::getRefSeqs() {
     try {
-        vector<int> refSeqsIndexes;
-        for (int i = 0; i < isRef.size(); i++) {
+        vector<long long> refSeqsIndexes;
+        for (long long i = 0; i < isRef.size(); i++) {
             if (isRef[i]) { refSeqsIndexes.push_back(i); }
         }
         return refSeqsIndexes;
@@ -290,7 +290,7 @@ vector<string> OptiRefMatrix::getRefSingletonNames() {
     try {
         vector<string> refSeqsNames;
     
-        for (int i = 0; i < isSingleRef.size(); i++) {
+        for (long long i = 0; i < isSingleRef.size(); i++) {
             if (isSingleRef[i]) { refSeqsNames.push_back(singletons[i]); }
         }
         
@@ -302,10 +302,10 @@ vector<string> OptiRefMatrix::getRefSingletonNames() {
     }
 }
 /***********************************************************************/
-vector<int> OptiRefMatrix::getFitSeqs() {
+vector<long long> OptiRefMatrix::getFitSeqs() {
     try {
-        vector<int> fitSeqsIndexes;
-        for (int i = 0; i < isRef.size(); i++) {
+        vector<long long> fitSeqsIndexes;
+        for (long long i = 0; i < isRef.size(); i++) {
             if (!isRef[i]) { fitSeqsIndexes.push_back(i);  }
         }
         return fitSeqsIndexes;
@@ -320,7 +320,7 @@ long long OptiRefMatrix::getNumFitTrueSingletons() {
     try {
         long long numFitTrueSingletons = 0;
         
-        for (int i = 0; i < isSingleRef.size(); i++) {
+        for (long long i = 0; i < isSingleRef.size(); i++) {
             if (!isSingleRef[i]) { numFitTrueSingletons++; }
         }
         
@@ -332,15 +332,15 @@ long long OptiRefMatrix::getNumFitTrueSingletons() {
     }
 }
 /***********************************************************************/
-int OptiRefMatrix::getNumFitClose(int index) {
+long long OptiRefMatrix::getNumFitClose(long long index) {
     try {
-        int numClose = 0;
+        long long numClose = 0;
         
         if (index < 0) { }
         else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
         else {
             //reference seqs all have indexes less than refEnd
-            for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
+            for (set<long long>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
                 if (!isRef[*it]) {  numClose++; } //you are a fit seq
             }
         }
@@ -353,15 +353,15 @@ int OptiRefMatrix::getNumFitClose(int index) {
     }
 }
 /***********************************************************************/
-int OptiRefMatrix::getNumRefClose(int index) {
+long long OptiRefMatrix::getNumRefClose(long long index) {
     try {
-        int numClose = 0;
+        long long numClose = 0;
         
         if (index < 0) { }
         else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
         else {
             //reference seqs all have indexes less than refEnd
-            for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
+            for (set<long long>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
                 if (isRef[*it]) {  numClose++; } //you are a ref seq
             }
         }
@@ -374,15 +374,15 @@ int OptiRefMatrix::getNumRefClose(int index) {
     }
 }
 /***********************************************************************/
-set<int> OptiRefMatrix::getCloseFitSeqs(int index){
+set<long long> OptiRefMatrix::getCloseFitSeqs(long long index){
     try {
-        set<int> closeSeqs;
+        set<long long> closeSeqs;
         
         if (index < 0) { }
         else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  } //
         else {
             //reference seqs all have indexes less than refEnd
-            for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
+            for (set<long long>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
                 if (!isRef[*it]) {  closeSeqs.insert(*it); } //you are a fit seq
             }
         }
@@ -395,15 +395,15 @@ set<int> OptiRefMatrix::getCloseFitSeqs(int index){
     }
 }
 /***********************************************************************/
-set<int> OptiRefMatrix::getCloseRefSeqs(int index){
+set<long long> OptiRefMatrix::getCloseRefSeqs(long long index){
     try {
-        set<int> closeSeqs;
+        set<long long> closeSeqs;
         
         if (index < 0) { }
         else if (index > closeness.size()) { m->mothurOut("[ERROR]: index is not valid.\n"); m->setControl_pressed(true);  }
         else {
             //reference seqs all have indexes less than refEnd
-            for (set<int>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
+            for (set<long long>::iterator it = closeness[index].begin(); it != closeness[index].end(); it++) {
                 if (isRef[*it]) { closeSeqs.insert(*it); } //you are a ref seq
             }
         }
@@ -477,15 +477,15 @@ void OptiRefMatrix::randomizeRefs() {
         numFitSeqs = 0;
         numRefSingletons = 0;
         
-        for (int i = 0; i < closeness.size(); i++) {
+        for (long long i = 0; i < closeness.size(); i++) {
             if (m->getControl_pressed()) { break; }
             
             bool thisSeqIsRef = isRef[i];
             long long thisSeqsNumRefDists = 0;
             long long thisSeqsNumFitDists = 0;
         
-            for (set<int>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
-                int newB = *it;
+            for (set<long long>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
+                long long newB = *it;
                 
                 if ((thisSeqIsRef) && (isRef[newB])) {  thisSeqsNumRefDists++; } //both refs
                 else if ((thisSeqIsRef) && (!isRef[newB])) { numBetweenDists++; } // ref to fit dist
@@ -520,12 +520,12 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         
         //read file to find singletons
         vector<bool> singleton;
-        map<int, int> singletonIndexSwap;
-        map<string, int> nameAssignment;
-        int count = 0;
+        map<long long, long long> singletonIndexSwap;
+        map<string, long long> nameAssignment;
+        long long count = 0;
         
         if (distFormat == "column")        {  singletonIndexSwap = readColumnSingletons(singleton, namefile, countfile, distFile, count, nameAssignment);     }
-        else if (distFormat == "phylip")   {  singletonIndexSwap = readPhylipSingletons(singleton, distFile, count, nameAssignment);                                }
+        else if (distFormat == "phylip")   {  singletonIndexSwap = readPhylipSingletons(singleton, distFile, count, nameAssignment);                          }
         
         //randomly select the "fit" seqs
         long long numToSelect = nameAssignment.size() * fitPercent;
@@ -586,15 +586,15 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         numFitSingletons = 0;
         numFitSeqs = 0;
         
-        for (int i = 0; i < closeness.size(); i++) {
+        for (long long i = 0; i < closeness.size(); i++) {
             if (m->getControl_pressed()) { break; }
             
             bool thisSeqIsRef = isRef[i];
             long long thisSeqsNumRefDists = 0;
             long long thisSeqsNumFitDists = 0;
             
-            for (set<int>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
-                int newB = *it;
+            for (set<long long>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
+                long long newB = *it;
                 
                 if ((thisSeqIsRef) && (isRef[newB])) {  thisSeqsNumRefDists++; } //both refs
                 else if ((thisSeqIsRef) && (!isRef[newB])) { numBetweenDists++; } // ref to fit dist
@@ -627,26 +627,26 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
     try {
         vector<bool> singleton;
         //read reference file to find singletons
-        map<int, int> refSingletonIndexSwap;
-        map<string, int> nameAssignment;
-        int count = 0;
+        map<long long, long long> refSingletonIndexSwap;
+        map<string, long long> nameAssignment;
+        long long count = 0;
         
         if (refdistformat == "column")        {  refSingletonIndexSwap = readColumnSingletons(singleton, refnamefile, refcountfile, refdistfile, count, nameAssignment);     }
         else if (refdistformat == "phylip")   {  refSingletonIndexSwap = readPhylipSingletons(singleton, refdistfile, count, nameAssignment);                                }
         
-        int refSeqsEnd = count;
+        long long refSeqsEnd = count;
         
         numRefSingletons = 0;
-        for (int i = 0; i < refSeqsEnd; i++) { if (singleton[i]) { numRefSingletons++; } }
+        for (long long i = 0; i < refSeqsEnd; i++) { if (singleton[i]) { numRefSingletons++; } }
         
         //read fit file to find singletons
-        map<int, int> fitSingletonIndexSwap;
+        map<long long, long long> fitSingletonIndexSwap;
         
         if (fitdistformat == "column")        {  fitSingletonIndexSwap = readColumnSingletons(singleton, fitnamefile, fitcountfile, fitdistfile, count, nameAssignment);     }
         else if (fitdistformat == "phylip")   {  fitSingletonIndexSwap = readPhylipSingletons(singleton, fitdistfile, count, nameAssignment);                                }
         
         numFitSingletons = 0;
-        for (int i = refSeqsEnd; i < singleton.size(); i++) {  if (singleton[i]) { numFitSingletons++; }  }
+        for (long long i = refSeqsEnd; i < singleton.size(); i++) {  if (singleton[i]) { numFitSingletons++; }  }
 
         fitPercent = ((count-refSeqsEnd) / (float) count);
         if (fitPercent < 0.001) { fitPercent = 0.001; } //minumum of 0.1%
@@ -655,11 +655,11 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
         readColumnSingletons(singleton, betweendistfile, nameAssignment);
         
         numFitSeqs = 0;
-        for (int i = refSeqsEnd; i < singleton.size(); i++) {  if (!singleton[i]) { numFitSeqs++; }  }
+        for (long long i = refSeqsEnd; i < singleton.size(); i++) {  if (!singleton[i]) { numFitSeqs++; }  }
         
-        int nonSingletonCount = 0;
-        map<int, int> singletonIndexSwap;
-        for (int i = 0; i < refSeqsEnd; i++) {
+        long long nonSingletonCount = 0;
+        map<long long, long long> singletonIndexSwap;
+        for (long long i = 0; i < refSeqsEnd; i++) {
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
@@ -669,7 +669,7 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
         long long refEnd = nonSingletonCount; // reference sequences are stored in beginning of closeness, fit seqs stored after
         long long refSingletonsEnd = singletons.size();
         
-        for (int i = refSeqsEnd; i < singleton.size(); i++) {
+        for (long long i = refSeqsEnd; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
@@ -737,7 +737,7 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
 /***********************************************************************/
 //when running in combined mode the singleton parameter must have room for all the reads
 //reading the in between file, so we already know "who" is in the file and that it's in column format since mothur created it.
-void OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string distFile, map<string, int>& nameAssignment){
+void OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string distFile, map<string, long long>& nameAssignment){
     try {
         string firstName, secondName;
         double distance;
@@ -758,14 +758,14 @@ void OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string distFil
             if (distance == -1) { distance = 1000000; }
             
             if(distance < cutoff){
-                map<string,int>::iterator itA = nameAssignment.find(firstName);
-                map<string,int>::iterator itB = nameAssignment.find(secondName);
+                map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 
                 if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the name or count file, please correct\n"); exit(1);  }
                 if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the name or count file, please correct\n"); exit(1);  }
                 
-                int indexA = (itA->second);
-                int indexB = (itB->second);
+                long long indexA = (itA->second);
+                long long indexB = (itB->second);
                 
                 singleton[indexA] = false;
                 singleton[indexB] = false;
@@ -780,16 +780,20 @@ void OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string distFil
     }
 }
 /***********************************************************************/
-map<int, int> OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string namefile, string countfile, string distFile, int& count, map<string, int>& nameAssignment){
+map<long long, long long> OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string namefile, string countfile, string distFile, long long& count, map<string, long long>& nameAssignment){
     try {
         bool readingRef = false;
         if (count == 0) { readingRef = true; }
         
-        map<string, int> thisFilesNameAssignment;
-        if (namefile != "") { thisFilesNameAssignment = util.readNames(namefile); }
-        else  {  CountTable ct; ct.readTable(countfile, false, true); thisFilesNameAssignment = ct.getNameMap(); }
+        map<string, long long> thisFilesNameAssignment;
+        if (namefile != "") { util.readNames(namefile, thisFilesNameAssignment); }
+        else  {
+            CountTable ct; ct.readTable(countfile, false, true);
+            map<string, int> temp = ct.getNameMap();
+            for (map<string, int>::iterator it = temp.begin(); it!= temp.end(); it++) {  thisFilesNameAssignment[it->first] = it->second; }
+        }
             
-        for (map<string, int>::iterator it = thisFilesNameAssignment.begin(); it!= thisFilesNameAssignment.end(); it++) {
+        for (map<string, long long>::iterator it = thisFilesNameAssignment.begin(); it!= thisFilesNameAssignment.end(); it++) {
             it->second = count; count++;
             nameMap.push_back(it->first);
             nameAssignment[it->first] = it->second; //add thisFilesNameAssignment to nameAssignment
@@ -800,7 +804,7 @@ map<int, int> OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, strin
         
         string firstName, secondName;
         double distance;
-        map<int, int> singletonIndexSwap;
+        map<long long, long long> singletonIndexSwap;
         singleton.resize(count, true); //resize will only set new elements to true
         
         while(fileHandle){  //let's assume it's a triangular matrix...
@@ -816,14 +820,14 @@ map<int, int> OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, strin
             if (distance == -1) { distance = 1000000; }
             
             if(distance < cutoff){
-                map<string,int>::iterator itA = nameAssignment.find(firstName);
-                map<string,int>::iterator itB = nameAssignment.find(secondName);
+                map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 
                 if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the name or count file, please correct\n"); exit(1);  }
                 if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the name or count file, please correct\n"); exit(1);  }
                 
-                int indexA = (itA->second);
-                int indexB = (itB->second);
+                long long indexA = (itA->second);
+                long long indexB = (itB->second);
                 singleton[indexA] = false;
                 singleton[indexB] = false;
                 singletonIndexSwap[indexA] = indexA;
@@ -841,15 +845,15 @@ map<int, int> OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, strin
 }
 /***********************************************************************/
 
-map<int, int> OptiRefMatrix::readPhylipSingletons(vector<bool>& singleton, string distFile, int& count, map<string, int>& nameAssignment){
+map<long long, long long> OptiRefMatrix::readPhylipSingletons(vector<bool>& singleton, string distFile, long long& count, map<string, long long>& nameAssignment){
     try {
         bool readingRef = false;
         if (count == 0) { readingRef = true; }
         
         float distance;
-        int nseqs;
+        long long nseqs;
         string name;
-        map<int, int> singletonIndexSwap;
+        map<long long, long long> singletonIndexSwap;
         
         ifstream fileHandle;
         string numTest;
@@ -872,12 +876,12 @@ map<int, int> OptiRefMatrix::readPhylipSingletons(vector<bool>& singleton, strin
         singleton.resize((count+nseqs), true);
         if(square == 0){
             
-            for(int i=1;i<nseqs;i++){
+            for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  break; }
                 
                 fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;  nameAssignment[name] = i;
                 
-                for(int j=0;j<i;j++){
+                for(long long j=0;j<i;j++){
                     
                     fileHandle >> distance;
                     
@@ -890,12 +894,12 @@ map<int, int> OptiRefMatrix::readPhylipSingletons(vector<bool>& singleton, strin
                 }
             }
         }else{
-            for(int i=1;i<nseqs;i++){
+            for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  break; }
                 
                 fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i; nameAssignment[name] = i;
                 
-                for(int j=0;j<nseqs;j++){
+                for(long long j=0;j<nseqs;j++){
                     fileHandle >> distance;
                     
                     if (distance == -1) { distance = 1000000; }
@@ -919,9 +923,9 @@ map<int, int> OptiRefMatrix::readPhylipSingletons(vector<bool>& singleton, strin
     }
 }
 /***********************************************************************/
-int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap){
+int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>& names, map<string, long long>& nameAssignment, map<long long, long long>& singletonIndexSwap){
     try {
-        int nseqs;
+        long long nseqs;
         string name;
         double distance;
         
@@ -935,9 +939,9 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
         
         string line = "";
         if(!square){
-            int index = 0;
+            long long index = 0;
             
-            for(int i=1;i<nseqs;i++){
+            for(long long i=1;i<nseqs;i++){
                 
                 if (m->getControl_pressed()) {  break; }
                 
@@ -946,15 +950,15 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                 if (hasName) { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
-                for(int j=0;j<i;j++){
+                for(long long j=0;j<i;j++){
                     
                     in >> distance; util.gobble(in);
                     
                     if (distance == -1) { distance = 1000000; } 
                     
                     if(distance < cutoff){
-                        int newB = singletonIndexSwap[j];
-                        int newA = singletonIndexSwap[i];
+                        long long newB = singletonIndexSwap[j];
+                        long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
                         
@@ -968,11 +972,11 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                 }
             }
         }else{
-            int index = nseqs;
+            long long index = nseqs;
             
-            for(int i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
+            for(long long i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
             
-            for(int i=1;i<nseqs;i++){
+            for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  break; }
                 
                 in >> name; util.gobble(in);
@@ -980,14 +984,14 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                 if (hasName) { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
-                for(int j=0;j<nseqs;j++){
+                for(long long j=0;j<nseqs;j++){
                     in >> distance; util.gobble(in);
                     
                     if (distance == -1) { distance = 1000000; }
                     
                     if(distance < cutoff && j < i){
-                        int newB = singletonIndexSwap[j];
-                        int newA = singletonIndexSwap[i];
+                        long long newB = singletonIndexSwap[j];
+                        long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
                         
@@ -1012,13 +1016,12 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
 }
 /***********************************************************************/
 
-int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap){
+int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>& names, map<string, long long>& nameAssignment, map<long long, long long>& singletonIndexSwap){
     try {
         string firstName, secondName;
         double distance;
         
-        ifstream in;
-        util.openInputFile(distFile, in);
+        ifstream in; util.openInputFile(distFile, in);
         
         while(in){  //let's assume it's a triangular matrix...
             
@@ -1033,17 +1036,17 @@ int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>
             if (distance == -1) { distance = 1000000; }
             
             if(distance < cutoff){
-                map<string,int>::iterator itA = nameAssignment.find(firstName);
-                map<string,int>::iterator itB = nameAssignment.find(secondName);
+                map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 
                 if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the name or count file, please correct\n"); exit(1);  }
                 if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the name or count file, please correct\n"); exit(1);  }
                 
-                int indexA = (itA->second);
-                int indexB = (itB->second);
+                long long indexA = (itA->second);
+                long long indexB = (itB->second);
                 
-                int newB = singletonIndexSwap[indexB];
-                int newA = singletonIndexSwap[indexA];
+                long long newB = singletonIndexSwap[indexB];
+                long long newA = singletonIndexSwap[indexA];
                 closeness[newA].insert(newB);
                 closeness[newB].insert(newA);
                 

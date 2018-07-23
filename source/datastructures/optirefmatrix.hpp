@@ -22,8 +22,8 @@ public:
     OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
     ~OptiRefMatrix(){ }
     
-    vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&);
-    OptiData* extractMatrixSubset(set<int>&);
+    vector<long long> getTranslatedBins(vector<vector<string> >&, vector< vector<long long> >&);
+    OptiData* extractMatrixSubset(set<long long>&);
     OptiData* extractRefMatrix();
     void randomizeRefs();
     vector<string> getRefSingletonNames();
@@ -36,15 +36,15 @@ public:
     
     ListVector* getFitListSingle();
     
-    vector<int> getRefSeqs(); //every ref seq in matrix. Includes some that would have been singletons if not for the betweendistfile
-    vector<int> getFitSeqs(); //every fit seq in matrix. Includes some that would have been singletons if not for the betweendistfile
+    vector<long long> getRefSeqs(); //every ref seq in matrix. Includes some that would have been singletons if not for the betweendistfile
+    vector<long long> getFitSeqs(); //every fit seq in matrix. Includes some that would have been singletons if not for the betweendistfile
     
     long long getNumFitSeqs() { return numFitSeqs; } //only Fit seqs that are in fitdistfile and not singletons
-    int getNumFitClose(int);
-    int getNumRefClose(int);
-    set<int> getCloseFitSeqs(int);
-    set<int> getCloseRefSeqs(int);
-    bool isCloseFit(int, int, bool&);
+    long long getNumFitClose(long long);
+    long long getNumRefClose(long long);
+    set<long long> getCloseFitSeqs(long long);
+    set<long long> getCloseRefSeqs(long long);
+    bool isCloseFit(long long, long long, bool&);
 
 protected:
     
@@ -54,14 +54,14 @@ protected:
     long long numFitDists, numRefDists, numRefSingletons, numFitSingletons, numBetweenDists, numSingletons, numFitSeqs;
     float fitPercent;
     
-    int readPhylip(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap);
-    int readColumn(string distFile, bool hasName, map<string, string>& names, map<string, int>& nameAssignment, map<int, int>& singletonIndexSwap);
+    int readPhylip(string distFile, bool hasName, map<string, string>& names, map<string, long long>& nameAssignment, map<long long, long long>& singletonIndexSwap);
+    int readColumn(string distFile, bool hasName, map<string, string>& names, map<string, long long>& nameAssignment, map<long long, long long>& singletonIndexSwap);
     int readFiles(string, string, string, string, string, string, string, string, string, string, string, string);
     int readFiles(string, string, string, string);
     
-    map<int, int> readColumnSingletons(vector<bool>& singleton, string namefile, string countfile, string distFile, int&, map<string, int>&);
-    void readColumnSingletons(vector<bool>& singleton, string distFile, map<string, int>& nameAssignment);
-    map<int, int> readPhylipSingletons(vector<bool>& singleton, string distFile, int&,  map<string, int>& nameAssignment);
+    map<long long, long long> readColumnSingletons(vector<bool>& singleton, string namefile, string countfile, string distFile, long long&, map<string, long long>&);
+    void readColumnSingletons(vector<bool>& singleton, string distFile, map<string, long long>& nameAssignment);
+    map<long long, long long> readPhylipSingletons(vector<bool>& singleton, string distFile, long long&,  map<string, long long>& nameAssignment);
     //void assignReferences(vector<string>);
     
     vector<bool> isRef;

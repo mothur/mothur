@@ -58,14 +58,14 @@ void TestDataSet::createCountTable() {
 /***********************************************************************/
 
 vector<string> TestDataSet::getSubsetFNGFiles() {
-    vector<string> filenames; filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/tempSeqs.txt"); filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/tempNames.txt"); filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/tempGroup.txt");
+    vector<string> filenames; filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.fasta"); filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.names"); filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.groups");
     
     return filenames;
 }
 /***********************************************************************/
 string TestDataSet::getSubsetFNGDistFile() {
     
-    return "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/tempSeqs.dist";
+    return "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.dist";
 }
 /***********************************************************************/
 void TestDataSet::fillSeqs() {
@@ -73,7 +73,7 @@ void TestDataSet::fillSeqs() {
     
     //read info from stable file
     //string testfile = m->getTestFilePath() + "testFile.fasta";
-     string testfile ="/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.fasta";
+     string testfile ="/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.fasta";
     
     ifstream in;
     util.openInputFile(testfile, in);
@@ -91,7 +91,7 @@ void TestDataSet::fillNames() {
     nameMap.clear();
     
     //read info from stable file
-    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.names";
+    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.names";
     util.readNames(testfile, nameMap);
 }
 /***********************************************************************/
@@ -99,7 +99,7 @@ void TestDataSet::fillGroup() {
     if (gMap != NULL) { delete gMap; gMap = NULL; }
     
     //read info from stable file
-    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.groups";
+    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.groups";
     
     gMap = new GroupMap();
     gMap->readMap(testfile);
@@ -110,7 +110,7 @@ void TestDataSet::fillLookup() {
     lookup.clear();
     
     //read info from stable file
-    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.opti_mcc.shared";
+    string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.opti_mcc.shared";
 
     InputData input(testfile, "sharedfile", nullVector);
     SharedRAbundVectors* shared = input.getSharedRAbundVectors();

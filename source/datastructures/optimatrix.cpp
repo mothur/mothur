@@ -12,7 +12,7 @@
 
 
 /***********************************************************************/
-OptiMatrix::OptiMatrix(vector< set<int> > close, vector<string> name, vector<string> single, double c) : OptiData(c) {
+OptiMatrix::OptiMatrix(vector< set<long long> > close, vector<string> name, vector<string> single, double c) : OptiData(c) {
     closeness = close;
     nameMap = name;
     singletons = single;

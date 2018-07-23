@@ -14,7 +14,7 @@
 SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
     try {
         m = MothurOut::getInstance();
-        map<string, int> nameIndex = matrix.getNameIndexMap();
+        map<string, long long> nameIndex = matrix.getNameIndexMap();
         
         if (list != NULL) {
             //for each bin
@@ -27,8 +27,8 @@ SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
                 vector<int> newNames;
                 for (int j = 0; j < bnames.size(); j++) {
                     string name = bnames[j];
-                    map<string, int>::iterator itSeq1 = nameIndex.find(name);
-                    int seq1Index = -1;
+                    map<string, long long>::iterator itSeq1 = nameIndex.find(name);
+                    long long seq1Index = -1;
                     if (itSeq1 != nameIndex.end()) { seq1Index = itSeq1->second; } //you have distances in the matrix
                     
                     newNames.push_back(seq1Index); 

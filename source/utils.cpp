@@ -115,6 +115,17 @@ void Utils::mothurRandomShuffle(vector<int>& randomize){
 
 }
 /***********************************************************************/
+void Utils::mothurRandomShuffle(vector<long long>& randomize){
+    try {
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurRandomShuffle");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 void Utils::mothurRandomShuffle(OrderVector& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
@@ -2816,6 +2827,61 @@ map<string, int> Utils::readNames(string namefile) {
         exit(1);
     }
 }
+/**********************************************************************************************************************/
+void Utils::readNames(string namefile, map<string, long long>& nameMap) {
+    try {
+        //open input file
+        ifstream in; openInputFile(namefile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+            
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) {
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    long long num = getNumNames(secondCol);
+                    nameMap[firstCol] = num;
+                    pairDone = false;
+                }
+            }
+        }
+        in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) {
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    long long num = getNumNames(secondCol);
+                    nameMap[firstCol] = num;
+                    pairDone = false;
+                }
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "readNames");
+        exit(1);
+    }
+}
+
 /**********************************************************************************************************************/
 map<string, int> Utils::readNames(string namefile, unsigned long int& numSeqs) {
     try {

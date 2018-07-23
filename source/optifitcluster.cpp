@@ -27,14 +27,14 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         if (meth == "closed") { closed = true; }
         denovo = denov;
         
-        vector< vector< int> > translatedBins;
+        vector< vector< long long> > translatedBins;
         randomizeSeqs = matrix->getTranslatedBins(existingBins, translatedBins); //otus in existingBins, otus with matrix names
         
         for (int i = 0; i < randomizeSeqs.size(); i++) { fitSeqs.insert(randomizeSeqs[i]); }
         
         int binNumber = 0;
         int placeHolderIndex = -1;
-        for (int i = 0; i < translatedBins.size(); i++) {
+        for (long long i = 0; i < translatedBins.size(); i++) {
             binLabels[binNumber] = bls[i];
             bins.push_back(translatedBins[i]);
             numRefSeqs += translatedBins[i].size();
@@ -67,8 +67,8 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         int numRefBins = translatedBins.size();
         numFitSingletons = 0;
         //put every fit seq in own bin
-        for (int i = 0; i < randomizeSeqs.size(); i++) {
-            vector<int> thisBin;
+        for (long long i = 0; i < randomizeSeqs.size(); i++) {
+            vector<long long> thisBin;
             thisBin.push_back(randomizeSeqs[i]);
             bins.push_back(thisBin);
             seqBin[randomizeSeqs[i]] = numRefBins+i;
@@ -99,7 +99,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         //add insert location
         seqBin[bins.size()] = -1;
         insertLocation = bins.size();
-        vector<int> temp;
+        vector<long long> temp;
         bins.push_back(temp);
         
         if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
@@ -123,7 +123,7 @@ bool OptiFitCluster::update(double& listMetric) {
             
             if (m->getControl_pressed()) { break; }
             
-            map<int, int>::iterator it = seqBin.find(randomizeSeqs[i]);
+            map<long long, long long>::iterator it = seqBin.find(randomizeSeqs[i]);
             
             int seqNumber = it->first;
             int binNumber = it->second;
@@ -177,12 +177,12 @@ bool OptiFitCluster::update(double& listMetric) {
                     }
                 }
                 
-                set<int> binsToTry;
-                set<int> closeSeqs = matrix->getCloseRefSeqs(seqNumber);
-                for (set<int>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) { binsToTry.insert(seqBin[*itClose]); }
+                set<long long> binsToTry;
+                set<long long> closeSeqs = matrix->getCloseRefSeqs(seqNumber);
+                for (set<long long>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) { binsToTry.insert(seqBin[*itClose]); }
                 
                 //merge into each "close" otu
-                for (set<int>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
+                for (set<long long>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     //reset tn, tp,fp,fn values to original bin
                     tn[0] = fittrueNegatives; tp[0] = fittruePositives; fp[0] = fitfalsePositives; fn[0] = fitfalseNegatives;
                     tn[1] = combotrueNegatives; tp[1] = combotruePositives; fp[1] = combofalsePositives; fn[1] = combofalseNegatives;
@@ -245,7 +245,7 @@ bool OptiFitCluster::update(double& listMetric) {
     }
 }
 /***********************************************************************/
-vector<long long> OptiFitCluster::getCloseFarCounts(int seq, int newBin) {
+vector<long long> OptiFitCluster::getCloseFarCounts(long long seq, long long newBin) {
     try {
         vector<long long> results; results.push_back(0); results.push_back(0);
         
@@ -266,7 +266,7 @@ vector<long long> OptiFitCluster::getCloseFarCounts(int seq, int newBin) {
     }
 }
 /***********************************************************************/
-vector<long long> OptiFitCluster::getCloseFarFitCounts(int seq, int newBin) {
+vector<long long> OptiFitCluster::getCloseFarFitCounts(long long seq, long long newBin) {
     try {
         vector<long long> results; results.push_back(0); results.push_back(0);
         
@@ -389,23 +389,23 @@ ListVector* OptiFitCluster::getFittedList(string label) {
     try {
         ListVector* list = new ListVector();
         
-        map<int, string> newBins;
-        set<int> unFitted;
+        map<long long, string> newBins;
+        set<long long> unFitted;
         long long numListSeqs = 0;
-        for (int i = 0; i < randomizeSeqs.size(); i++) { //build otus
+        for (long long i = 0; i < randomizeSeqs.size(); i++) { //build otus
             
             if (m->getControl_pressed()) { break; }
             
-            map<int, int>::iterator it = seqBin.find(randomizeSeqs[i]);
+            map<long long, long long>::iterator it = seqBin.find(randomizeSeqs[i]);
             
-            int seqNumber = it->first;
-            int binNumber = it->second;
+            long long seqNumber = it->first;
+            long long binNumber = it->second;
             
-            map<int, string>::iterator itBinLabels = binLabels.find(binNumber); //do we have a label for this bin.  If the seq maps to existing bin then we should, otherwise we couldn't "fit" this sequence
+            map<long long, string>::iterator itBinLabels = binLabels.find(binNumber); //do we have a label for this bin.  If the seq maps to existing bin then we should, otherwise we couldn't "fit" this sequence
             
             if (itBinLabels != binLabels.end()) {
                 numListSeqs++;
-                map<int, string>::iterator itBin = newBins.find(binNumber); // have we seen this otu yet?
+                map<long long, string>::iterator itBin = newBins.find(binNumber); // have we seen this otu yet?
                 
                 if (itBin == newBins.end()) { //create bin
                     newBins[binNumber] = matrix->getName(seqNumber);
@@ -479,15 +479,15 @@ ListVector* OptiFitCluster::getFittedList(string label) {
         }
         
         if (denovo) { //add in refs
-            vector<int> refs = matrix->getRefSeqs();
+            vector<long long> refs = matrix->getRefSeqs();
             
-            for (int i = 0; i < refs.size(); i++) {
-                map<int, int>::iterator it = seqBin.find(refs[i]);
+            for (long long i = 0; i < refs.size(); i++) {
+                map<long long, long long>::iterator it = seqBin.find(refs[i]);
                 
-                int seqNumber = it->first;
-                int binNumber = it->second;
+                long long seqNumber = it->first;
+                long long binNumber = it->second;
                 
-                map<int, string>::iterator itBin = newBins.find(binNumber); // have we seen this otu yet?
+                map<long long, string>::iterator itBin = newBins.find(binNumber); // have we seen this otu yet?
                 
                 if (itBin == newBins.end()) { //create bin
                     newBins[binNumber] = matrix->getName(seqNumber);
@@ -499,7 +499,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
         
         vector<string> newLabels = list->getLabels();
         
-        for (map<int, string>::iterator itBin = newBins.begin(); itBin != newBins.end(); itBin++) {
+        for (map<long long, string>::iterator itBin = newBins.begin(); itBin != newBins.end(); itBin++) {
             list->push_back(itBin->second);
             newLabels.push_back(binLabels[itBin->first]);
         }

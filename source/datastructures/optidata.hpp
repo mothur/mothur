@@ -26,11 +26,11 @@ public:
     OptiData(double c)  { m = MothurOut::getInstance(); cutoff = c; }
     virtual ~OptiData(){}
     
-    set<int> getCloseSeqs(int i);// { return closeness[i]; }
-    bool isClose(int, int);
-    int getNumClose(int);
-    map<string, int> getNameIndexMap();
-    string getName(int); //name from nameMap index
+    set<long long> getCloseSeqs(long long i);// { return closeness[i]; }
+    bool isClose(long long, long long);
+    long long getNumClose(long long);
+    map<string, long long> getNameIndexMap();
+    string getName(long long); //name from nameMap index
     
     long long getNumSeqs() { return closeness.size(); }
     long long getNumSingletons() { return singletons.size(); }
@@ -38,43 +38,40 @@ public:
     ListVector* getListSingle();
     
     //for mgcluster - reading blast files
-    virtual vector< set<int> > getBlastOverlap() { vector< set<int> > blank; return blank; }
-    virtual string getOverlapName(int) { return ""; } //name from nameMap index
+    virtual vector< set<long long> > getBlastOverlap() { vector< set<long long> > blank; return blank; }
+    virtual string getOverlapName(long long) { return ""; } //name from nameMap index
     
     virtual void randomizeRefs() {}
     virtual vector<string> getRefSingletonNames() { vector<string> temp; return temp;  }
-    virtual vector<int> getTranslatedBins(vector<vector<string> >&, vector< vector<int> >&) { vector<int> temp; return temp;  }
+    virtual vector<long long> getTranslatedBins(vector<vector<string> >&, vector< vector<long long> >&) { vector<long long> temp; return temp;  }
     virtual OptiData* extractRefMatrix() { OptiData* temp = NULL; return temp;  }
-    virtual OptiData* extractMatrixSubset(set<int>&) { OptiData* temp = NULL; return temp;  }
+    virtual OptiData* extractMatrixSubset(set<long long>&) { OptiData* temp = NULL; return temp;  }
     virtual long long getNumFitSingletons() { return 0; } //user singletons
-    //virtual long long getNumRefSingletons() { return 0; } //reference singletons
     
     virtual long long getNumFitDists() { return 0; } //user distances under cutoff
     virtual long long getNumRefDists() { return 0; } //ref distances under cutoff
     
-    //virtual ListVector* getRefListSingle();
     virtual ListVector* getFitListSingle() { ListVector* list = NULL; return list; }
     virtual long long getNumFitTrueSingletons() { return 0; }
     
-    virtual vector<int> getRefSeqs() { vector<int> temp; return temp;  }
-    virtual vector<int> getFitSeqs() { vector<int> temp; return temp;  }
+    virtual vector<long long> getRefSeqs() { vector<long long> temp; return temp;  }
+    virtual vector<long long> getFitSeqs() { vector<long long> temp; return temp;  }
     virtual long long getNumFitSeqs() { return 0; }
-    virtual int getNumFitClose(int) { return 0;  }
-    virtual int getNumRefClose(int) { return 0;  }
-    virtual set<int> getCloseFitSeqs(int i) { set<int> temp; return temp;  }
-    virtual set<int> getCloseRefSeqs(int i) { set<int> temp; return temp;  }
-    virtual bool isCloseFit(int j, int i, bool&) { return false; }
+    virtual long long getNumFitClose(long long) { return 0;  }
+    virtual long long getNumRefClose(long long) { return 0;  }
+    virtual set<long long> getCloseFitSeqs(long long i) { set<long long> temp; return temp;  }
+    virtual set<long long> getCloseRefSeqs(long long i) { set<long long> temp; return temp;  }
+    virtual bool isCloseFit(long long j, long long i, bool&) { return false; }
+    virtual long long print(ostream&);
     
 protected:
     
     Utils util;
     MothurOut* m;
-    vector< set<int> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
+    vector< set<long long> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
     vector<string> singletons; //name of seqs with NO distances in matrix, if name file is given then it contains 2nd column of namefile
     vector<string> nameMap;  //name of seqs with distances in matrix, if name file is given then it contains 2nd column of namefile
     double cutoff;
-    
-    long int print(ostream&);
     
 };
 

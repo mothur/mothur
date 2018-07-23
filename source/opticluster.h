@@ -55,18 +55,17 @@ public:
 protected:
     MothurOut* m;
     Utils util;
-    map<int, int> seqBin; //sequence# -> bin#
+    map<long long, long long> seqBin; //sequence# -> bin#
     OptiData* matrix;
     vector<int> randomizeSeqs;
-    vector< vector<int> > bins; //bin[0] -> seqs in bin[0]
-    map<int, string> binLabels; //for fitting - maps binNumber to existing reference label
-    set<string> immovableNames;
-    set<int> namesSeqs; //matrix indexes for movable sequences
+    vector< vector<long long> > bins; //bin[0] -> seqs in bin[0]
+    map<long long, string> binLabels; //for fitting - maps binNumber to existing reference label
+    
     ClusterMetric* metric;
     long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, numSingletons;
     
-    int findInsert();
-    vector<long long> getCloseFarCounts(int seq, int newBin);
+    long long findInsert();
+    vector<long long> getCloseFarCounts(long long seq, long long newBin);
     vector<double> getFitStats( long long&,  long long&,  long long&,  long long&);
     
 };

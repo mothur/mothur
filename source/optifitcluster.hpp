@@ -56,11 +56,11 @@ protected:
     ClusterMetric* metric;
     OptiData* matrix;
     
-    map<int, int> seqBin; //sequence# -> bin#
-    vector<int> randomizeSeqs;
-    vector< vector<int> > bins; //bin[0] -> seqs in bin[0]
-    map<int, string> binLabels; //for fitting - maps binNumber to existing reference label
-    set<int> fitSeqs; //matrix indexes for movable sequences
+    map<long long, long long> seqBin; //sequence# -> bin#
+    vector<long long> randomizeSeqs;
+    vector< vector<long long> > bins; //bin[0] -> seqs in bin[0]
+    map<long long, string> binLabels; //for fitting - maps binNumber to existing reference label
+    set<long long> fitSeqs; //matrix indexes for movable sequences
     long long maxRefBinNumber;
     bool closed, denovo;
     
@@ -68,8 +68,8 @@ protected:
     long long combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives, numComboSeqs, numComboSingletons;
     
     int findInsert();
-    vector<long long> getCloseFarCounts(int seq, int newBin);
-    vector<long long> getCloseFarFitCounts(int seq, int newBin);
+    vector<long long> getCloseFarCounts(long long seq, long long newBin);
+    vector<long long> getCloseFarFitCounts(long long seq, long long newBin);
     ListVector* clusterUnfitted(OptiData*, string);
     
 };
