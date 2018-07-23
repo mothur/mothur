@@ -1610,7 +1610,7 @@ bool Utils::isUTF_8(string& input){
 
             //try to convert it
             // Get the line length (at least for the valid part)
-            int length = utf8::distance(input.begin(), end_it);
+            //int length = utf8::distance(input.begin(), end_it);
             m->mothurOut("[WARNING]: trying to convert " + input + " to UTF-8 format..."); cout.flush();
 
             // Convert it to utf-16
@@ -4646,7 +4646,7 @@ bool Utils::isContainingOnlyDigits(string input) {
 bool Utils::findTaxon(string tax, string stax) {
     try {
         string taxon = "";
-        int taxLength = tax.length();
+        //int taxLength = tax.length();
         string searchTax = stax;
         if (searchTax[searchTax.length()-1] == ';') { searchTax = stax.substr(0, searchTax.length()-1); }
 

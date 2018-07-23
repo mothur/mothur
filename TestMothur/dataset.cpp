@@ -19,6 +19,7 @@ void TestDataSet::createCountTable() {
     fillGroup();
     fillNames();
     ct = new CountTable();
+    
     for (map<string, string>::iterator itNameMap = nameMap.begin(); itNameMap !=nameMap.end(); itNameMap++) {
         string firstCol = itNameMap->first;
         string secondCol = itNameMap->second;
@@ -111,8 +112,9 @@ void TestDataSet::fillLookup() {
     //read info from stable file
     string testfile = "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/testFile.opti_mcc.shared";
 
-    InputData input(testfile, "sharedfile");
-    lookup = input.getSharedRAbundVectors();
+    InputData input(testfile, "sharedfile", nullVector);
+    SharedRAbundVectors* shared = input.getSharedRAbundVectors();
+    lookup = shared->getSharedRAbundVectors();
 }
 /***********************************************************************/
 

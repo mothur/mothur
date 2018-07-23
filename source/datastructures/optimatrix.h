@@ -14,16 +14,15 @@
 
 class OptiMatrix : public OptiData {
     
-#ifdef UNIT_TEST
-    friend class TestOptiMatrix;
-    friend class FakeOptiMatrix;
-#endif
-
     
 public:
     
-    OptiMatrix(vector< set<int> >, vector<string>, vector<string>, double);
-    OptiMatrix(string, string, string, string, double, bool);
+#ifdef UNIT_TEST
+    OptiMatrix() : OptiData(0.03) { };
+#endif
+    
+    OptiMatrix(vector< set<int> >, vector<string>, vector<string>, double); //closeness, namemap, singleton, cutoff
+    OptiMatrix(string, string, string, string, double, bool); //distfile, dupsFile, dupsFormat, distFormat, cutoff, sim
     ~OptiMatrix(){ }
     
 protected:

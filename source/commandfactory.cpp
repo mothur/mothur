@@ -156,7 +156,7 @@
 #include "clusterfitcommand.hpp"
 
 //needed for testing project
-//CommandFactory* CommandFactory::_uniqueInstance;
+CommandFactory* CommandFactory::_uniqueInstance;
 
 /*******************************************************/
 

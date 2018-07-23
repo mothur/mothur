@@ -408,7 +408,7 @@ struct trimFlowData {
 };
 //***************************************************************************************************************
 
-int driverCreateTrim(trimFlowData* params){
+void driverCreateTrim(trimFlowData* params){
 	
 	try {
         ifstream flowFile; params->util.openInputFile(params->flowFileName, flowFile);

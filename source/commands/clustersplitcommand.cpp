@@ -1356,7 +1356,6 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
             
             oldList = *list;
             
-            time_t start = time(NULL);
             double saveCutoff = params->cutoff;
             
             while (matrix->getSmallDist() < params->cutoff && matrix->getNNodes() > 0){

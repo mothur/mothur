@@ -16,6 +16,11 @@
 
 class OptiData {
     
+#ifdef UNIT_TEST
+    friend class TestOptiMatrix;
+    friend class FakeOptiMatrix;
+#endif
+    
 public:
     
     OptiData(double c)  { m = MothurOut::getInstance(); cutoff = c; }

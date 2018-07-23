@@ -9,7 +9,7 @@
 #ifndef testclustercalcs_hpp
 #define testclustercalcs_hpp
 
-#include "gtest.h"
+#include "gtest/gtest.h"
 #include "mcc.hpp"
 #include "sensitivity.hpp"
 #include "specificity.hpp"

@@ -1913,7 +1913,6 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
         
         int n = (int)A.size();
         vector<float> vv(n, 0.0);
-        double temp;
         int imax;
         
         d = 1.0;

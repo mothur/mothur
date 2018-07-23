@@ -509,7 +509,7 @@ int GetSeqsCommand::readFasta(){
         
         if (m->getDebug()) { set<string> temp; sanity["fasta"] = temp; }
 		
-        set<string> uniqueNames;
+        set<string> uniqueNames; int line = 0; int redundNum = 0;
 		while(!in.eof()){
 		
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
@@ -525,6 +525,7 @@ int GetSeqsCommand::readFasta(){
             name = currSeq.getName();
             
 			if (name != "") {
+                line++;
 				//if this name is in the accnos file
 				if (names.count(name) != 0) {
                     if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
@@ -537,6 +538,9 @@ int GetSeqsCommand::readFasta(){
                         if (m->getDebug()) { sanity["fasta"].insert(name); }
                     }else {
                         m->mothurOut("[WARNING]: " + name + " is in your fasta file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                        cout << "seq number = " << line << endl;
+                        
+                        redundNum++;
                     }
                 }
 			}
@@ -545,7 +549,7 @@ int GetSeqsCommand::readFasta(){
 		in.close();	
 		out.close();
 		
-		
+        cout << "redund Num = " << redundNum << endl;
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName); 
 		

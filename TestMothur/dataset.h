@@ -12,8 +12,9 @@
 #include "sequence.hpp"
 #include "counttable.h"
 #include "groupmap.h"
-#include "sharedrabundvector.h"
+#include "sharedrabundvector.hpp"
 #include "fastqdataset.h"
+#include "utils.hpp"
 
 class TestDataSet  {
     
@@ -30,6 +31,7 @@ public:
     
 private:
     MothurOut* m;
+    Utils util;
     TestFastqDataSet fastqData;
     vector<Sequence> seqs;
     map<string, string> nameMap;

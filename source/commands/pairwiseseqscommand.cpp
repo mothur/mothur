@@ -260,7 +260,6 @@ int PairwiseSeqsCommand::execute(){
         
         long long numSeqs = alignDB.getNumSeqs();
 
-        int startTime = time(NULL);
         string outputFile = "";
         
         map<string, string> variables;

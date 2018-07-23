@@ -36,7 +36,7 @@ public:
 #ifdef UNIT_TEST
     friend class TestOptiCluster;
     OptiCluster() : Cluster() { m = MothurOut::getInstance(); truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0;  } //for testing class
-    //void setVariables(OptiData* mt, ClusterMetric* met) { matrix = mt; metric = met; }
+    void setVariables(OptiData* mt, ClusterMetric* met) { matrix = mt; metric = met; }
 #endif
     
     OptiCluster(OptiData* mt, ClusterMetric* met, long long ns) : Cluster() {

@@ -173,7 +173,6 @@ HelpCommand::HelpCommand(string option)  {
 //**********************************************************************************************************************
 int HelpCommand::execute(){
 	try {
-        
         if (commandName != "") {
             if (validCommands->isValidCommand(commandName)) {
                 Command* command;
