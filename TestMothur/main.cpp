@@ -14,6 +14,7 @@
 #include "currentfile.h"
 #include "gtest/gtest.h"
 
+
 #define UNIT_TEST
 
 int main(int argc, char **argv) {
@@ -30,6 +31,7 @@ int main(int argc, char **argv) {
     current->setTestFilePath(pathname);
     
     ::testing::InitGoogleTest(&argc, argv);
+    
     return RUN_ALL_TESTS();
 }
 

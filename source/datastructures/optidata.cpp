@@ -13,6 +13,7 @@ long long OptiData::print(ostream& out) {
     try {
         long long count = 0;
         for (long long i = 0; i < closeness.size(); i++) {
+            out << i << '\t' << getName(i) << '\t';
             for(set<long long>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++){
                 out << *it << '\t';
                 count++;

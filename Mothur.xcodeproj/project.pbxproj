@@ -3877,6 +3877,7 @@
 					"-lboost_iostreams",
 					"-lz",
 					"-pthreads",
+					/usr/local/lib/gmock_main.a,
 					/usr/local/lib/gtest.a,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3923,6 +3924,7 @@
 					"-lboost_iostreams",
 					"-lz",
 					"-pthreads",
+					/usr/local/lib/gmock_main.a,
 					/usr/local/lib/gtest.a,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";

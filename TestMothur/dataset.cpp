@@ -68,6 +68,11 @@ string TestDataSet::getSubsetFNGDistFile() {
     return "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.dist";
 }
 /***********************************************************************/
+string TestDataSet::getSubsetFNGPhylipDistFile() {
+    
+    return "/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.phylip.dist";
+}
+/***********************************************************************/
 void TestDataSet::fillSeqs() {
     seqs.clear();
     

@@ -11,6 +11,8 @@
 
 #include "optimatrix.h"
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
+
 
 class TestOptiMatrix : public OptiMatrix {
     
@@ -23,6 +25,7 @@ public:
     using OptiMatrix::readPhylip;
     using OptiMatrix::readColumn;
     using OptiData::print;
+    using OptiData::getNumClose;
     
     string columnFile, phylipFile;
     vector<string> filenames;

@@ -28,6 +28,7 @@ public:
     vector<SharedRAbundVector*> getLookup()     { fillLookup(); return lookup;          }
     vector<string> getSubsetFNGFiles();  //Fasta, name, group returned - containing 100 seqs
     string getSubsetFNGDistFile();
+    string getSubsetFNGPhylipDistFile();
     
 private:
     MothurOut* m;

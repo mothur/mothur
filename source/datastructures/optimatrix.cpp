@@ -34,9 +34,9 @@ int OptiMatrix::readPhylip(){
     try {
         nameMap.clear();
         float distance;
-        int square, nseqs;
+        long long square, nseqs;
         string name;
-        map<int, int> singletonIndexSwap;
+        map<long long, long long> singletonIndexSwap;
         
         ifstream fileHandle;
         string numTest;
@@ -46,7 +46,7 @@ int OptiMatrix::readPhylip(){
         nameMap.push_back(name);
         singletonIndexSwap[0] = 0;
         
-        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n");  exit(1); }
         else { convert(numTest, nseqs); }
         
         //square test
@@ -60,12 +60,12 @@ int OptiMatrix::readPhylip(){
         ///////////////////// Read to eliminate singletons ///////////////////////
         if(square == 0){
             
-            for(int i=1;i<nseqs;i++){
+            for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  fileHandle.close();  return 0; }
                 
                 fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;
                 
-                for(int j=0;j<i;j++){
+                for(long long j=0;j<i;j++){
                     
                     fileHandle >> distance;
                     
@@ -78,12 +78,12 @@ int OptiMatrix::readPhylip(){
                 }
             }
         }else{
-            for(int i=1;i<nseqs;i++){
+            for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                 
                 fileHandle >> name; nameMap.push_back(name); singletonIndexSwap[i] = i;
                 
-                for(int j=0;j<nseqs;j++){
+                for(long long j=0;j<nseqs;j++){
                     fileHandle >> distance;
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -98,8 +98,8 @@ int OptiMatrix::readPhylip(){
         fileHandle.close();
         //////////////////////////////////////////////////////////////////////////
        
-        int nonSingletonCount = 0;
-        for (int i = 0; i < singleton.size(); i++) {
+        long long nonSingletonCount = 0;
+        for (long long i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
@@ -112,7 +112,7 @@ int OptiMatrix::readPhylip(){
         map<string, string> names;
         if (namefile != "") {
             util.readNames(namefile, names);
-            for (int i = 0; i < singletons.size(); i++) {
+            for (long long i = 0; i < singletons.size(); i++) {
                 singletons[i] = names[singletons[i]];
             }
         }
@@ -132,7 +132,7 @@ int OptiMatrix::readPhylip(){
             reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
             int index = 0;
             
-            for(int i=1;i<nseqs;i++){
+            for(long long i=1;i<nseqs;i++){
                 
                 if (m->getControl_pressed()) {  in.close();  delete reading; return 0; }
                 
@@ -141,15 +141,15 @@ int OptiMatrix::readPhylip(){
                 if (namefile != "") { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
-                for(int j=0;j<i;j++){
+                for(long long j=0;j<i;j++){
                     
                     in >> distance; util.gobble(in);
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff){
-                        int newB = singletonIndexSwap[j];
-                        int newA = singletonIndexSwap[i];
+                        long long newB = singletonIndexSwap[j];
+                        long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
                     }
@@ -158,11 +158,11 @@ int OptiMatrix::readPhylip(){
             }
         }else{
             reading = new Progress("Reading matrix:     ", nseqs * nseqs);
-            int index = nseqs;
+            long long index = nseqs;
             
-            for(int i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
+            for(long long i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
             
-            for(int i=1;i<nseqs;i++){
+            for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  in.close();  delete reading; return 0; }
                 
                 in >> name; util.gobble(in);
@@ -170,14 +170,14 @@ int OptiMatrix::readPhylip(){
                 if (namefile != "") { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
-                for(int j=0;j<nseqs;j++){
+                for(long long j=0;j<nseqs;j++){
                     in >> distance; util.gobble(in);
 
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance < cutoff && j < i){
-                        int newB = singletonIndexSwap[j];
-                        int newA = singletonIndexSwap[i];
+                        long long newB = singletonIndexSwap[j];
+                        long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
                     }
@@ -202,11 +202,15 @@ int OptiMatrix::readPhylip(){
 int OptiMatrix::readColumn(){
     try {
         Utils util;
-        map<string, int> nameAssignment;
-        if (namefile != "") { nameAssignment = util.readNames(namefile); }
-        else  {  CountTable ct; ct.readTable(countfile, false, true); nameAssignment = ct.getNameMap(); }
+        map<string, long long> nameAssignment;
+        if (namefile != "") { util.readNames(namefile, nameAssignment); }
+        else  {
+            CountTable ct; ct.readTable(countfile, false, true);
+            map<string, int> temp = ct.getNameMap();
+            for (map<string, int>::iterator it = temp.begin(); it!= temp.end(); it++) {  nameAssignment[it->first] = it->second; }
+        }
         int count = 0;
-        for (map<string, int>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
+        for (map<string, long long>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
             it->second = count; count++;
             nameMap.push_back(it->first);
         }
@@ -218,7 +222,7 @@ int OptiMatrix::readColumn(){
         ifstream fileHandle;
         util.openInputFile(distFile, fileHandle);
         vector<bool> singleton; singleton.resize(nameAssignment.size(), true);
-        map<int, int> singletonIndexSwap;
+        map<long long, long long> singletonIndexSwap;
         while(fileHandle){  //let's assume it's a triangular matrix...
             
             fileHandle >> firstName; util.gobble(fileHandle);
@@ -233,14 +237,14 @@ int OptiMatrix::readColumn(){
             else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
             
             if(distance < cutoff){
-                map<string,int>::iterator itA = nameAssignment.find(firstName);
-                map<string,int>::iterator itB = nameAssignment.find(secondName);
+                map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 
                 if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the name or count file, please correct\n"); exit(1);  }
                 if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the name or count file, please correct\n"); exit(1);  }
 
-                int indexA = (itA->second);
-                int indexB = (itB->second);
+                long long indexA = (itA->second);
+                long long indexB = (itB->second);
                 singleton[indexA] = false;
                 singleton[indexB] = false;
                 singletonIndexSwap[indexA] = indexA;
@@ -250,8 +254,8 @@ int OptiMatrix::readColumn(){
         fileHandle.close();
         //////////////////////////////////////////////////////////////////////////
         
-        int nonSingletonCount = 0;
-        for (int i = 0; i < singleton.size(); i++) {
+        long long nonSingletonCount = 0;
+        for (long long i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
                 nonSingletonCount++;
@@ -264,7 +268,7 @@ int OptiMatrix::readColumn(){
         map<string, string> names;
         if (namefile != "") {
             util.readNames(namefile, names);
-            for (int i = 0; i < singletons.size(); i++) {
+            for (long long i = 0; i < singletons.size(); i++) {
                 singletons[i] = names[singletons[i]];
             }
         }
@@ -286,17 +290,17 @@ int OptiMatrix::readColumn(){
             else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
             
             if(distance < cutoff){
-                map<string,int>::iterator itA = nameAssignment.find(firstName);
-                map<string,int>::iterator itB = nameAssignment.find(secondName);
+                map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 
                 if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the name or count file, please correct\n"); exit(1);  }
                 if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the name or count file, please correct\n"); exit(1);  }
 
-                int indexA = (itA->second);
-                int indexB = (itB->second);
+                long long indexA = (itA->second);
+                long long indexB = (itB->second);
                 
-                int newB = singletonIndexSwap[indexB];
-                int newA = singletonIndexSwap[indexA];
+                long long newB = singletonIndexSwap[indexB];
+                long long newA = singletonIndexSwap[indexA];
                 closeness[newA].insert(newB);
                 closeness[newB].insert(newA);
                 
