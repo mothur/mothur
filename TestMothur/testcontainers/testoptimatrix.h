@@ -29,6 +29,7 @@ public:
     
     string columnFile, phylipFile;
     vector<string> filenames;
+
     
 };
 

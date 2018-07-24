@@ -29,6 +29,7 @@ public:
     vector<string> getSubsetFNGFiles();  //Fasta, name, group returned - containing 100 seqs
     string getSubsetFNGDistFile();
     string getSubsetFNGPhylipDistFile();
+    vector<string> getOptiRefFiles(); //fasta, count, column, phylip, list, betweendist
     
 private:
     MothurOut* m;

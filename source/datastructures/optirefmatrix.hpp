@@ -18,6 +18,10 @@ class OptiRefMatrix : public OptiData {
     
 public:
     
+#ifdef UNIT_TEST
+    OptiRefMatrix() : OptiData(0.03) { };
+#endif
+    
     OptiRefMatrix(string, string, string, string, double, float); //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
     OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
     ~OptiRefMatrix(){ }

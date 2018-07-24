@@ -1,44 +1,84 @@
 //
-//  testoptimatrix.cpp
+//  testoptirefmatrix.cpp
 //  Mothur
 //
-//  Created by Sarah Westcott on 6/6/16.
-//  Copyright (c) 2016 Schloss Lab. All rights reserved.
+//  Created by Sarah Westcott on 7/24/18.
+//  Copyright © 2018 Schloss Lab. All rights reserved.
 //
 
-#include "testoptimatrix.h"
+#include "testoptirefmatrix.hpp"
 #include "dataset.h"
 
 /**************************************************************************************************/
-TestOptiMatrix::TestOptiMatrix() {  //setup
+TestOptiRefMatrix::TestOptiRefMatrix() {  //setup
+    m = MothurOut::getInstance();
     TestDataSet data;
     filenames = data.getSubsetFNGFiles(); //Fasta, name, group returned
     columnFile = data.getSubsetFNGDistFile();
     phylipFile = data.getSubsetFNGPhylipDistFile();
+    reffilenames = data.getOptiRefFiles(); //fasta, count, column, phylip, list, betweendist returned
 }
 /**************************************************************************************************/
-TestOptiMatrix::~TestOptiMatrix() {}
+TestOptiRefMatrix::~TestOptiRefMatrix() {}
 /**************************************************************************************************/
-////distfile, dupsFile, dupsFormat, distFormat, cutoff, sim
-TEST(TestOptiMatrix, readColumn) {
-    TestOptiMatrix testOMatrix;
-    OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
+
+//distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
+TEST(TestOptiRefMatrix, readColumnDenovo) {
+    TestOptiRefMatrix testOMatrix;
+    MothurOut* m;
+    m = MothurOut::getInstance();
+    m->setRandomSeed(123456); //stabilize radomization
     
-    //EXPECT_EQ(160,(matrix.print(cout)));
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    
+    EXPECT_EQ(160,(matrix.print(cout)));
     EXPECT_EQ(160,(matrix.getNumDists()));
+    EXPECT_EQ(34,(matrix.getNumFitDists()));
+    EXPECT_EQ(54,(matrix.getNumRefDists()));
 }
 
-TEST(TestOptiMatrix, readPhylip) {
-    TestOptiMatrix testOMatrix;
-    OptiMatrix pmatrix(testOMatrix.phylipFile, "", "", "phylip", 0.03, false);
+//refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
+TEST(TestOptiRefMatrix, readColumnReference) {
+    TestOptiRefMatrix testOMatrix;
+    
+    OptiRefMatrix matrix(testOMatrix.reffilenames[2], testOMatrix.reffilenames[1], "count", "column", 0.03, testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", testOMatrix.reffilenames[5], "column");
+    
+    EXPECT_EQ(113772,(matrix.print(cout)));
+    EXPECT_EQ(56886,(matrix.getNumDists())); //unique dists 56886*2=113772
+    EXPECT_EQ(80,(matrix.getNumFitDists()));
+    EXPECT_EQ(56675,(matrix.getNumRefDists()));
+    
+    long long sanityCheck = matrix.getNumDists() - (matrix.getNumFitDists() + matrix.getNumRefDists());
+    EXPECT_EQ(131,sanityCheck);
+}
 
+/*
+//refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
+TEST(TestOptiRefMatrix, readPhylipReference) {
+    TestOptiRefMatrix testOMatrix;
+    OptiMatrix pmatrix(testOMatrix.phylipFile, "", "", "phylip", 0.03, false);
+    
     //EXPECT_EQ(160,(pmatrix.print(cout)));
     EXPECT_EQ(160,(pmatrix.getNumDists()));
     
 }
 
-TEST(TestOptiMatrix, getNumCLose) {
-    TestOptiMatrix testOMatrix;
+//distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
+TEST(TestOptiRefMatrix, readPhylipDenovo) {
+    TestOptiRefMatrix testOMatrix;
+    MothurOut* m;
+    m = MothurOut::getInstance();
+    m->setRandomSeed(123456); //stabilize radomization
+
+    OptiMatrix pmatrix(testOMatrix.phylipFile, "", "", "phylip", 0.03, false);
+    
+    //EXPECT_EQ(160,(pmatrix.print(cout)));
+    EXPECT_EQ(160,(pmatrix.getNumDists()));
+    
+}
+
+TEST(TestOptiRefMatrix, getNumCLose) {
+    TestOptiRefMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
     EXPECT_EQ(1,(matrix.getNumClose(0)));
@@ -48,8 +88,8 @@ TEST(TestOptiMatrix, getNumCLose) {
     EXPECT_EQ(2,(matrix.getNumClose(20)));
 }
 
-TEST(TestOptiMatrix, isClose) {
-    TestOptiMatrix testOMatrix;
+TEST(TestOptiRefMatrix, isClose) {
+    TestOptiRefMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
     //check closeness
@@ -67,8 +107,8 @@ TEST(TestOptiMatrix, isClose) {
     EXPECT_EQ(false,(matrix.isClose(12, 36)));
 }
 
-TEST(TestOptiMatrix, getCloseSeqs) {
-    TestOptiMatrix testOMatrix;
+TEST(TestOptiRefMatrix, getCloseSeqs) {
+    TestOptiRefMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
     //11	GQY1XT001B04KZ,GQY1XT001EBRFH	17	32	52	55	57
@@ -86,7 +126,7 @@ TEST(TestOptiMatrix, getCloseSeqs) {
     for (set<long long>::iterator it = temp.begin(); it != temp.end(); it++) { ReturnResults += toString(*it); }
     
     EXPECT_EQ(Expected_ReturnResults, ReturnResults);
-
+    
     //31	GQY1XT001CVCKG,GQY1XT001BO8Z9	20	27
     Expected_ReturnResults = ""; Expected_ReturnResults += "20"; Expected_ReturnResults += "27";
     temp = matrix.getCloseSeqs(31);
@@ -94,7 +134,7 @@ TEST(TestOptiMatrix, getCloseSeqs) {
     for (set<long long>::iterator it = temp.begin(); it != temp.end(); it++) { ReturnResults += toString(*it); }
     
     EXPECT_EQ(Expected_ReturnResults, ReturnResults);
-
+    
     //41	GQY1XT001DY3E7	19	29
     Expected_ReturnResults = ""; Expected_ReturnResults += "19"; Expected_ReturnResults += "29";
     temp = matrix.getCloseSeqs(41);
@@ -102,7 +142,7 @@ TEST(TestOptiMatrix, getCloseSeqs) {
     for (set<long long>::iterator it = temp.begin(); it != temp.end(); it++) { ReturnResults += toString(*it); }
     
     EXPECT_EQ(Expected_ReturnResults, ReturnResults);
-
+    
     //51	GQY1XT001EN363,GQY1XT001B0ZKY,GQY1XT001BCPXE,GQY1XT001BEKE1,GQY1XT001D25E1,GQY1XT001EWORZ,GQY1XT001AQB9P,GQY1XT001CEFI4	49
     Expected_ReturnResults = ""; Expected_ReturnResults += "49";
     temp = matrix.getCloseSeqs(51);
@@ -112,8 +152,8 @@ TEST(TestOptiMatrix, getCloseSeqs) {
     EXPECT_EQ(Expected_ReturnResults, ReturnResults);
 }
 
-TEST(TestOptiMatrix, getNameIndexMap) {
-    TestOptiMatrix testOMatrix;
+TEST(TestOptiRefMatrix, getNameIndexMap) {
+    TestOptiRefMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
     //maps names to index in closeness matrix
@@ -133,8 +173,8 @@ TEST(TestOptiMatrix, getNameIndexMap) {
     EXPECT_EQ("GQY1XT001EJAUJ",(matrix.getName(48)));
 }
 
-TEST(TestOptiMatrix, getListSingle) {
-    TestOptiMatrix testOMatrix;
+TEST(TestOptiRefMatrix, getListSingle) {
+    TestOptiRefMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
     //maps names to index in closeness matrix
@@ -146,16 +186,17 @@ TEST(TestOptiMatrix, getListSingle) {
     
     bin = listSingle->get(10);
     EXPECT_EQ("GQY1XT001BRLCO", bin);
-
+    
     bin = listSingle->get(18);
     EXPECT_EQ("GQY1XT001CKAUI", bin);
-
+    
     bin = listSingle->get(3);
     EXPECT_EQ("GQY1XT001AOSH9,GQY1XT001BLJ4I,GQY1XT001BNIJQ,GQY1XT001CT9JB,GQY1XT001DCPGQ,GQY1XT001DY88Y,GQY1XT001AHO0L,GQY1XT001DRMZK,GQY1XT001DIXY7,GQY1XT001CDBZ1,GQY1XT001B8C47,GQY1XT001A71WZ,GQY1XT001D41QJ,GQY1XT001BAMTS", bin);
-
+    
     bin = listSingle->get(7);
     EXPECT_EQ("GQY1XT001B8UKY", bin);
 }
+ */
 /**************************************************************************************************/
 
 

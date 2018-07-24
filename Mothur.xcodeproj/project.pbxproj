@@ -384,6 +384,7 @@
 		48910D4B1D58CBA300F60EDB /* optimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D491D58CBA300F60EDB /* optimatrix.cpp */; };
 		48910D511D58E26C00F60EDB /* testopticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D4D1D58E26C00F60EDB /* testopticluster.cpp */; };
 		48910D521D58E26C00F60EDB /* distcdataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D501D58E26C00F60EDB /* distcdataset.cpp */; };
+		489387F62107A60C00284329 /* testoptirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489387F42107A60C00284329 /* testoptirefmatrix.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		489AF68F2106188E0028155E /* sensspeccalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B01D2A2016470F006BE140 /* sensspeccalc.cpp */; };
 		489AF690210618A80028155E /* optiblastmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */; };
@@ -909,6 +910,8 @@
 		48910D4E1D58E26C00F60EDB /* testopticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testopticluster.h; sourceTree = "<group>"; };
 		48910D4F1D58E26C00F60EDB /* distcdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distcdataset.h; sourceTree = "<group>"; };
 		48910D501D58E26C00F60EDB /* distcdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distcdataset.cpp; sourceTree = "<group>"; };
+		489387F42107A60C00284329 /* testoptirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testoptirefmatrix.cpp; sourceTree = "<group>"; };
+		489387F52107A60C00284329 /* testoptirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testoptirefmatrix.hpp; sourceTree = "<group>"; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = TestMothur/testcommands/testrenamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1916,6 +1919,8 @@
 				480E8DB01CAB12ED00A0D137 /* testfastqread.h */,
 				48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */,
 				48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */,
+				489387F42107A60C00284329 /* testoptirefmatrix.cpp */,
+				489387F52107A60C00284329 /* testoptirefmatrix.hpp */,
 				48C728641B66A77800D40830 /* testsequence.cpp */,
 				48C728761B6AB4EE00D40830 /* testsequence.h */,
 			);
@@ -2836,6 +2841,7 @@
 				481FB5C71AC1B74F0076CFF3 /* getsabundcommand.cpp in Sources */,
 				481FB5A51AC1B7300076CFF3 /* clusterdoturcommand.cpp in Sources */,
 				481FB6271AC1B7EA0076CFF3 /* alignmentdb.cpp in Sources */,
+				489387F62107A60C00284329 /* testoptirefmatrix.cpp in Sources */,
 				481FB6351AC1B7EA0076CFF3 /* kmerdb.cpp in Sources */,
 				481FB5721AC1B6D40076CFF3 /* simpson.cpp in Sources */,
 				481FB55D1AC1B6690076CFF3 /* sharedchao1.cpp in Sources */,

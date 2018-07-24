@@ -11,8 +11,6 @@
 
 /**************************************************************************************************/
 TestClusterCalcs::TestClusterCalcs(string metricName) {  //setup
-    m = MothurOut::getInstance();
-    
     if (metricName == "mcc")             { metric = new MCC();              }
     else if (metricName == "sens")       { metric = new Sensitivity();      }
     else if (metricName == "spec")       { metric = new Specificity();      }

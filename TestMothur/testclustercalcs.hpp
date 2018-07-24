@@ -38,7 +38,6 @@ public:
     ClusterMetric* metric;
     
 private:
-    MothurOut* m;
     
    
 };

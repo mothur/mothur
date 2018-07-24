@@ -58,7 +58,23 @@ void TestDataSet::createCountTable() {
 /***********************************************************************/
 
 vector<string> TestDataSet::getSubsetFNGFiles() {
-    vector<string> filenames; filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.fasta"); filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.names"); filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.groups");
+    vector<string> filenames;
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.fasta");
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.names");
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.groups");
+    
+    return filenames;
+}
+/***********************************************************************/
+
+vector<string> TestDataSet::getOptiRefFiles() {
+    vector<string> filenames;
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/silva.v4.unique.fasta");
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/silva.v4.count_table");
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/silva.v4.unique.dist");
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/silva.v4.unique.phylip.dist");
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/silva.v4.unique.opti_mcc.list");
+    filenames.push_back("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/test.fit.dist");
     
     return filenames;
 }

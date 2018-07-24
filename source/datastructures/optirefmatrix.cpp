@@ -769,7 +769,6 @@ void OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string distFil
                 
                 singleton[indexA] = false;
                 singleton[indexB] = false;
-                numBetweenDists++;
             }
         }
         fileHandle.close();
