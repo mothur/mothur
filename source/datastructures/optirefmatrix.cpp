@@ -251,6 +251,7 @@ vector<long long> OptiRefMatrix::getTranslatedBins(vector<vector<string> > & bin
     }
 }
 /***********************************************************************/
+//assumes that i is a fitSeq
 bool OptiRefMatrix::isCloseFit(long long i, long long toFind, bool& isFit){
     try {
         if (i < 0) { return false; }
@@ -532,6 +533,7 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         long long numSelected = 0;
         long long totalSeqs = nameAssignment.size();
         set<long long> fitSeqsIndexes;
+        
         while (numSelected < numToSelect) {
             if (m->getControl_pressed()) { break; }
             
@@ -582,9 +584,9 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         numRefDists = 0;
         numFitDists = 0;
         numBetweenDists = 0;
-        numRefSingletons = 0;
         numFitSingletons = 0;
         numFitSeqs = 0;
+        numRefSingletons = 0;
         
         for (long long i = 0; i < closeness.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -612,7 +614,6 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
             numRefDists += thisSeqsNumRefDists;
             numFitDists += thisSeqsNumFitDists;
         }
-
 
         return 0;
     }
@@ -861,6 +862,7 @@ map<long long, long long> OptiRefMatrix::readPhylipSingletons(vector<bool>& sing
         fileHandle >> numTest >> name;
         nameMap.push_back(name);
         singletonIndexSwap[0] = 0;
+        nameAssignment[name] = 0;
         
         if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n"); m->setControl_pressed(true); return singletonIndexSwap; }
         else { convert(numTest, nseqs); }
@@ -928,17 +930,27 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
         string name;
         double distance;
         
-        ifstream in;
+        ifstream in; string numTest;
         util.openInputFile(distFile, in);
         
-        in >> nseqs >> name;
+        in >> numTest >> name;
         
         if (hasName) { name = names[name]; } //redundant names
         nameMap[singletonIndexSwap[0]] = name;
         
+        
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n"); m->setControl_pressed(true); return 0; }
+        else { convert(numTest, nseqs); }
+        
+        //square test
+        char d;
+        while((d=in.get()) != EOF){
+            if(isalnum(d)){ square = true; in.putback(d); for(int i=0;i<nseqs;i++){ in >> distance;  } break; }
+            if(d == '\n'){ square = false; break; }
+        }
+        
         string line = "";
         if(!square){
-            long long index = 0;
             
             for(long long i=1;i<nseqs;i++){
                 
@@ -967,12 +979,9 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                         else if ((!isRef[newA]) && (!isRef[newB])) { numFitDists++; } // both fit
                         
                     }
-                    index++;
                 }
             }
         }else{
-            long long index = nseqs;
-            
             for(long long i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
             
             for(long long i=1;i<nseqs;i++){
@@ -1000,7 +1009,6 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                         else if ((!isRef[newA]) && (!isRef[newB])) { numFitDists++; } // both fit
 
                     }
-                    index++;
                 }
             }
         }
