@@ -218,10 +218,6 @@ LefseCommand::LefseCommand(string option)  {
 			if (temp == "not found") { temp = "T"; }
 			normMillion = util.isTrue(temp);
             
-            //temp = validParameter.validFile(parameters, "subject", false);
-			//if (temp == "not found") { temp = "F"; }
-			//subject = util.isTrue(temp);
-
             temp = validParameter.valid(parameters, "lda");
 			if (temp == "not found") { temp = "2.0"; }
 			util.mothurConvert(temp, ldaThreshold);
@@ -233,10 +229,6 @@ LefseCommand::LefseCommand(string option)  {
             temp = validParameter.valid(parameters, "fboots");
 			if (temp == "not found") { temp = "0.67"; }
 			util.mothurConvert(temp, fBoots);
-            
-            //temp = validParameter.validFile(parameters, "wilcsamename", false);
-			//if (temp == "not found") { temp = "F"; }
-			//wilcsamename = util.isTrue(temp);
             
             temp = validParameter.valid(parameters, "curv");
 			if (temp == "not found") { temp = "F"; }

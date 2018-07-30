@@ -64,7 +64,7 @@ void TestFastqDataSet::fillReverseFastq() {
         
         if (count < 2000) {
             FastqRead read(in, ignore, format); util.gobble(in);
-            if (!ignore) { ffastqReads.push_back(read);  count++; }
+            if (!ignore) { rfastqReads.push_back(read);  count++; }
         }else { break; }
         
     }

@@ -395,18 +395,18 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "match");		if (temp == "not found"){	temp = "1.0";			}
+			temp = validParameter.valid(parameters, "match");		if (temp == "not found"){	temp = "1.0";			}
 			util.mothurConvert(temp, match);
 
-			temp = validParameter.validFile(parameters, "mismatch");		if (temp == "not found"){	temp = "-1.0";			}
+			temp = validParameter.valid(parameters, "mismatch");		if (temp == "not found"){	temp = "-1.0";			}
 			util.mothurConvert(temp, misMatch);
             if (misMatch > 0) { m->mothurOut("[ERROR]: mismatch must be negative.\n"); abort=true; }
 
-			temp = validParameter.validFile(parameters, "gapopen");		if (temp == "not found"){	temp = "-2.0";			}
+			temp = validParameter.valid(parameters, "gapopen");		if (temp == "not found"){	temp = "-2.0";			}
 			util.mothurConvert(temp, gapOpen);
             if (gapOpen > 0) { m->mothurOut("[ERROR]: gapopen must be negative.\n"); abort=true; }
 
-			temp = validParameter.validFile(parameters, "gapextend");	if (temp == "not found"){	temp = "-1.0";			}
+			temp = validParameter.valid(parameters, "gapextend");	if (temp == "not found"){	temp = "-1.0";			}
 			util.mothurConvert(temp, gapExtend);
             if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
 
@@ -445,7 +445,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             temp = validParameter.valid(parameters, "trimoverlap");		if (temp == "not found") { temp = "F"; }
 			trimOverlap = util.isTrue(temp);
 
-			align = validParameter.validFile(parameters, "align");		if (align == "not found"){	align = "needleman";	}
+			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh") && (align != "kmer")) { m->mothurOut(align + " is not a valid alignment method. Options are kmer, needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
 
             format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
