@@ -25,11 +25,13 @@
 /**************************************************************************************************/
 
 class Sequence {
-public:
     
-    #ifdef UNIT_TEST
-        friend class TestSequence;
-    #endif
+#ifdef UNIT_TEST
+    friend class TestSequence;
+#endif
+
+    
+public:
     
 	Sequence();
 	Sequence(string, string);
@@ -42,25 +44,24 @@ public:
     ~Sequence() {}
 	
 	void setName(string);
+    string getName();
 	void setUnaligned(string);
-	void setPairwise(string);
+    string getUnaligned();
 	void setAligned(string);
+    string getAligned();
     void setComment(string);
-	void setLength();
-	void reverseComplement();
-	void trim(int);
-	
-	string convert2ints();
-	string getName();
-	string getAligned();
-	string getPairwise();
-	string getUnaligned();
-	string getInlineSeq();
     string getComment();
+	void setPairwise(string);
+	string getPairwise();
+	
+	string getInlineSeq();
     int getNumNs();
 	int getNumBases();
 	int getStartPos();
 	int getEndPos();
+    
+    void reverseComplement();
+    void trim(int);
 	void padToPos(int);
 	void padFromPos(int);
     int filterToPos(int); //any character before the pos is changed to . and aligned and unaligned strings changed
@@ -69,12 +70,14 @@ public:
 	int getAmbigBases();
 	void removeAmbigBases();
 	int getLongHomoPolymer();
-	bool getIsAligned();
+    string convert2ints();
+    
 	void printSequence(ostream&);
     void printSequence(OutputWriter*);
     void printUnAlignedSequence(ostream&);
 	
-private:
+protected:
+    
 	MothurOut* m;
 	void initialize();
 	string getSequenceString(ifstream&, int&);
@@ -88,6 +91,8 @@ private:
     string getSequenceName(boost::iostreams::filtering_istream&);
     #endif
     string getSequenceName(istringstream&);
+    
+    
 	string name;
 	string unaligned;
 	string aligned;
@@ -95,7 +100,6 @@ private:
     string comment;
 	int numBases;
 	int alignmentLength;
-	bool isAligned;
 	int longHomoPolymer;
 	int ambigBases;
 	int startPos, endPos;

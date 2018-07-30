@@ -20,11 +20,8 @@ public:
     TestTrimOligos();
     ~TestTrimOligos();
     
-    MothurOut* m;
+    FakeOligos oligos;
     
-    Sequence* fseq;
-    //using TrimOligos::compareDNASeq(string, string);
-    //using TrimOligos::countDiffs(string, string);
     
 };
 

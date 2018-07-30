@@ -474,7 +474,6 @@ void Sequence::initialize(){
 	
 	numBases = 0;
 	alignmentLength = 0;
-	isAligned = 0;
 	startPos = -1;
 	endPos = -1;
 	longHomoPolymer = -1;
@@ -538,7 +537,6 @@ void Sequence::setAligned(string sequence){
 			}
 		}
 	}
-	isAligned = 1;
 }
 
 //********************************************************************************************************************
@@ -575,8 +573,7 @@ string Sequence::getName(){
 //********************************************************************************************************************
 
 string Sequence::getAligned(){
-	if(isAligned == 0)	{ return unaligned; }
-	else				{  return aligned;  }
+	 return aligned;
 }
 
 //********************************************************************************************************************
@@ -620,9 +617,7 @@ int Sequence::getNumNs(){
 void Sequence::printSequence(OutputWriter* out){
     string seqOutput = ">";
     seqOutput += name + '\t' + comment + '\n';
-    if(isAligned){ seqOutput += aligned + '\n'; }
-    else{ seqOutput += unaligned + '\n'; }
-    
+    seqOutput += aligned + '\n';
     out->write(seqOutput);
 }
 //********************************************************************************************************************
@@ -630,12 +625,7 @@ void Sequence::printSequence(OutputWriter* out){
 void Sequence::printSequence(ostream& out){
 
 	out << ">" << name << comment << endl;
-	if(isAligned){
-		out << aligned << endl;
-	}
-	else{
-		out << unaligned << endl;
-	}
+    out << aligned << endl;
 }
 //********************************************************************************************************************
 
@@ -669,7 +659,7 @@ int Sequence::getAmbigBases(){
 
 void Sequence::removeAmbigBases(){
 	
-	for(int j=0;j<alignmentLength;j++){
+	for(int j=getStartPos();j<getEndPos();j++){
 		if(aligned[j] != 'A' && aligned[j] != 'T' && aligned[j] != 'G' && aligned[j] != 'C'){
 			aligned[j] = '-';
 		}
@@ -700,38 +690,28 @@ int Sequence::getLongHomoPolymer(){
 //********************************************************************************************************************
 
 int Sequence::getStartPos(){
+    bool isAligned = false;
 	if(startPos == -1){
 		for(int j = 0; j < alignmentLength; j++) {
 			if((aligned[j] != '.')&&(aligned[j] != '-')){
 				startPos = j + 1;
 				break;
-			}
+            }else { isAligned = true; }
 		}
 	}
-	if(isAligned == 0){	startPos = 1;	}
+    
+	if(!isAligned){	startPos = 1;	}
 
 	return startPos;
 }
 
 //********************************************************************************************************************
 
-void Sequence::padToPos(int start){
-
-	for(int j = startPos-1; j < start-1; j++) {
-		aligned[j] = '.';
-	}
-	startPos = start;
-
-}
-//********************************************************************************************************************
-
 int Sequence::filterToPos(int start){
     
     if (start > aligned.length()) { start = aligned.length(); m->mothurOut("[ERROR]: start to large.\n"); }
     
-	for(int j = 0; j < start; j++) {
-		aligned[j] = '.';
-	}
+	for(int j = 0; j < start; j++) { aligned[j] = '.'; }
 	
     //things like ......----------AT become ................AT
     for(int j = start; j < aligned.length(); j++) {
@@ -762,37 +742,43 @@ int Sequence::filterFromPos(int end){
     
     return 0;
 }
+
 //********************************************************************************************************************
 
 int Sequence::getEndPos(){
+    bool isAligned = false;
 	if(endPos == -1){
 		for(int j=alignmentLength-1;j>=0;j--){
 			if((aligned[j] != '.')&&(aligned[j] != '-')){
 				endPos = j + 1;
 				break;
-			}
+            }else { isAligned = true; }
 		}
 	}
-	if(isAligned == 0){	endPos = numBases;	}
+	if(!isAligned){	endPos = numBases;	}
 	
 	return endPos;
+}
+//********************************************************************************************************************
+
+void Sequence::padToPos(int start){
+    
+    for(int j = getStartPos()-1; j < start-1; j++) {
+        aligned[j] = '.';
+    }
+    startPos = start;
+    
 }
 
 //********************************************************************************************************************
 
 void Sequence::padFromPos(int end){
 	
-	for(int j = end; j < endPos; j++) {
+	for(int j = end; j < getEndPos(); j++) {
 		aligned[j] = '.';
 	}
 	endPos = end;
 	
-}
-
-//********************************************************************************************************************
-
-bool Sequence::getIsAligned(){
-	return isAligned;
 }
 //********************************************************************************************************************
 
@@ -823,10 +809,8 @@ void Sequence::trim(int length){
 	if(numBases > length){
 		unaligned = unaligned.substr(0,length);
 		numBases = length;
-        aligned = "";
-        isAligned = 0;
+        setAligned(unaligned);
 	}
-	
 }
 
 ///**************************************************************************************************/

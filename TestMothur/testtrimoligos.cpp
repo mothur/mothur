@@ -11,18 +11,9 @@
 
 /**************************************************************************************************/
 TestTrimOligos::TestTrimOligos() {  //setup
-    m = MothurOut::getInstance();
-    
-    //set up barcodes, primers, pairedBarcodes and pairedPrimers
-    
-    //Set up vector of seqs with barcodes and primers
-    
-    //Set up vector of seqs with pairedbarcodes and pairedprimers
-    
 }
 /**************************************************************************************************/
 TestTrimOligos::~TestTrimOligos() {
-    
 }
 /**************************************************************************************************/
 

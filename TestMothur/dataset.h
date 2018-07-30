@@ -26,10 +26,12 @@ public:
     GroupMap* getGroupMap()                     { fillGroup(); return gMap;             }
     CountTable* getCountTable()                 { createCountTable(); return ct;        }
     vector<SharedRAbundVector*> getLookup()     { fillLookup(); return lookup;          }
+    
     vector<string> getSubsetFNGFiles();  //Fasta, name, group returned - containing 100 seqs
     string getSubsetFNGDistFile();
     string getSubsetFNGPhylipDistFile();
     vector<string> getOptiRefFiles(); //fasta, count, column, phylip, list, betweendist
+    vector<string> getOligosFiles(); //single, paired, indexes, comboNamesTest
     
 private:
     MothurOut* m;
@@ -40,6 +42,8 @@ private:
     CountTable* ct;
     GroupMap* gMap;
     vector<SharedRAbundVector*> lookup;
+    string testDir;
+    
     void fillNames();
     void fillSeqs();
     void fillGroup();
