@@ -359,6 +359,9 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
                 }
             }
 		}
+        
+        pairedOligos = false;
+        createGroup = false;
 
 	}
 	catch(exception& e) {
@@ -373,13 +376,6 @@ int TrimSeqsCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        pairedOligos = false;
-		numFPrimers = 0;  //this needs to be initialized
-		numRPrimers = 0;
-        numSpacers = 0;
-        numLinkers = 0;
-		createGroup = false;
-        
         map<string, string> variables; 
 		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFile));
         variables["[tag]"] = "trim";
@@ -393,10 +389,8 @@ int TrimSeqsCommand::execute(){
 		outputNames.push_back(scrapSeqFile); outputTypes["fasta"].push_back(scrapSeqFile);
 		
 		if (qFileName != "") {
-			outputNames.push_back(trimQualFile);
-			outputNames.push_back(scrapQualFile);
-			outputTypes["qfile"].push_back(trimQualFile);
-			outputTypes["qfile"].push_back(scrapQualFile); 
+			outputNames.push_back(trimQualFile); outputNames.push_back(scrapQualFile);
+			outputTypes["qfile"].push_back(trimQualFile); outputTypes["qfile"].push_back(scrapQualFile);
 		}
 		
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(nameFile));
@@ -407,10 +401,8 @@ int TrimSeqsCommand::execute(){
 		
 		if (nameFile != "") {
 			util.readNames(nameFile, nameMap);
-			outputNames.push_back(trimNameFile);
-			outputNames.push_back(scrapNameFile);
-			outputTypes["name"].push_back(trimNameFile);
-			outputTypes["name"].push_back(scrapNameFile); 
+			outputNames.push_back(trimNameFile); outputNames.push_back(scrapNameFile);
+			outputTypes["name"].push_back(trimNameFile); outputTypes["name"].push_back(scrapNameFile);
 		}
         
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
@@ -423,30 +415,15 @@ int TrimSeqsCommand::execute(){
             CountTable ct;
             ct.readTable(countfile, true, false);
             nameCount = ct.getNameMap();
-			outputNames.push_back(trimCountFile);
-			outputNames.push_back(scrapCountFile);
-			outputTypes["count"].push_back(trimCountFile);
-			outputTypes["count"].push_back(scrapCountFile); 
+			outputNames.push_back(trimCountFile); outputNames.push_back(scrapCountFile);
+			outputTypes["count"].push_back(trimCountFile); outputTypes["count"].push_back(scrapCountFile);
 		}
 
 		if (m->getControl_pressed()) { return 0; }
 		
-		string outputGroupFileName;
-		if(oligoFile != ""){
-			createGroup = getOligos();
-			if ((createGroup) && (countfile == "")){
-                map<string, string> myvariables; 
-                myvariables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFile));
-				outputGroupFileName = getOutputFileName("group",myvariables);
-				outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
-			}
-		}
-        
-        if (m->getControl_pressed()) { return 0; }
-            
         int startTime = time(NULL);
         
-        long long numSeqs = createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, trimCountFile, scrapCountFile, outputGroupFileName);
+        long long numSeqs = createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, trimCountFile, scrapCountFile);
         
         m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to trim " + toString(numSeqs) + " sequences.\n");
 		
@@ -562,6 +539,7 @@ bool cullAmbigs(Sequence& seq, int maxAmbig){
 struct trimData {
     unsigned long long start, end;
     MothurOut* m;
+    Oligos oligos;
     string filename, qFileName;
     OutputWriter* trimFileName;
     OutputWriter* scrapFileName;
@@ -580,8 +558,6 @@ struct trimData {
     vector<string>  linker;
     vector<string>  spacer;
     map<string, int> combos;
-    vector<string> primerNameVector;
-    vector<string> barcodeNameVector;
     map<string, int> groupCounts;
     map<string, string> nameMap;
     map<string, string> groupMap;
@@ -606,25 +582,23 @@ struct trimData {
         nameMap = nm;
 
     }
-    void setOligosOptions(int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, map<int, oligosPair> pbr, map<int, oligosPair> ppr, bool po,
-                          vector<string> priNameVector, vector<string> barNameVector, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
+    void setOligosOptions(Oligos olig, int pd, int bd, int ld, int sd, int td, bool po, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
                           int WindowStep, int WindowSize, int WindowAverage, bool trim, double Threshold, double Average, double RollAverage, bool lt,
                           int minL, int maxA, int maxH, int maxL, bool fli, bool reo) {
+        oligos = olig;
         pdiffs = pd;
         bdiffs = bd;
         ldiffs = ld;
         sdiffs = sd;
         tdiffs = td;
-        barcodes = bar;
-        pairedPrimers = ppr;
-        pairedBarcodes = pbr;
+        barcodes = oligos.getBarcodes();
+        pairedPrimers = oligos.getPairedPrimers();
+        pairedBarcodes = oligos.getPairedBarcodes();
         pairedOligos = po;
-        primers = pri;
-        revPrimer = revP;
-        linker = li;
-        spacer = spa;
-        primerNameVector = priNameVector;
-        barcodeNameVector = barNameVector;
+        primers = oligos.getPrimers();
+        revPrimer = oligos.getReversePrimers();
+        linker = oligos.getLinkers();
+        spacer = oligos.getSpacers();
         
         createGroup = cGroup;
         allFiles = aFiles;
@@ -894,7 +868,8 @@ int driverTrim(trimData* params) {
                 if(trashCode.length() == 0){
                     string thisGroup = "";
                     if (params->createGroup) {
-                        if(numBarcodes != 0){
+                        thisGroup = params->oligos.getGroupName(barcodeIndex, primerIndex);
+                        /*if(numBarcodes != 0){
                             thisGroup = params->barcodeNameVector[barcodeIndex];
                             if (numFPrimers != 0) {
                                 if (params->primerNameVector[primerIndex] != "") {
@@ -902,7 +877,7 @@ int driverTrim(trimData* params) {
                                     else                { thisGroup = params->primerNameVector[primerIndex];        }
                                 }
                             }
-                        }
+                        }*/
                     }
                     
                     int pos = thisGroup.find("ignore");
@@ -961,8 +936,30 @@ int driverTrim(trimData* params) {
 }
 
 /**************************************************************************************************/
-long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName, string groupFile) {
+long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName) {
 	try {
+        string groupFile;
+        Oligos oligos;
+        if(oligoFile != ""){
+            oligos.read(oligoFile);
+            
+            if (m->getControl_pressed()) { return 0; } //error in reading oligos
+            
+            if (oligos.hasPairedBarcodes()) { pairedOligos = true; }
+            else { pairedOligos = false; }
+            
+            vector<string> groupNames = oligos.getGroupNames();
+            if (groupNames.size() == 0) { allFiles = 0;   }
+            else { createGroup = true; }
+
+            if ((createGroup) && (countfile == "")){
+                map<string, string> myvariables;
+                myvariables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFile));
+                groupFile = getOutputFileName("group",myvariables);
+                outputNames.push_back(groupFile); outputTypes["group"].push_back(groupFile);
+            }
+        }
+        
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<trimData*> data;
@@ -987,8 +984,7 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
             }
             //string fn, string qn, OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend, map<string, string> nm, map<string, int> ncoun
             trimData* dataBundle = new trimData(filename, qFileName, threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, lines[i+1].start, lines[i+1].end, qLines[i+1].start, qLines[i+1].end, nameMap, nameCount);
-            dataBundle->setOligosOptions(pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
-                                           primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
+            dataBundle->setOligosOptions(oligos, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, pairedOligos, createGroup, allFiles, keepforward, keepFirst, removeLast,
                                            qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage, logtransform,
                                            minLength, maxAmbig, maxHomoP, maxLength, flip, reorient);
             data.push_back(dataBundle);
@@ -1006,8 +1002,8 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
         }
         //string fn, string qn, OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend, map<string, string> nm, map<string, int> ncoun
         trimData* dataBundle = new trimData(filename, qFileName, threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, lines[0].start, lines[0].end, qLines[0].start, qLines[0].end, nameMap, nameCount);
-        dataBundle->setOligosOptions(pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
-                                     primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
+        dataBundle->setOligosOptions(oligos, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, pairedOligos,
+                                    createGroup, allFiles, keepforward, keepFirst, removeLast,
                                      qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage, logtransform,
                                      minLength, maxAmbig, maxHomoP, maxLength, flip, reorient);
 
@@ -1259,7 +1255,6 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 		return processors;
 		
 		#else
-            
         
             long long numFastaSeqs = 0;
             fastaFilePos = util.setFilePosFasta(filename, numFastaSeqs); 
@@ -1290,221 +1285,6 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "setLines");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-bool TrimSeqsCommand::getOligos(){
-	try {
-        
-		ifstream inOligos;
-		util.openInputFile(oligoFile, inOligos);
-		
-		ofstream test;
-		
-		string type, oligo, roligo, group;
-        bool hasPrimer = false; bool hasPairedBarcodes = false;
-
-		int indexPrimer = 0;
-		int indexBarcode = 0;
-        int indexPairedPrimer = 0;
-		int indexPairedBarcode = 0;
-        set<string> uniquePrimers;
-        set<string> uniqueBarcodes;
-        vector<string> tempAllFileNames; tempAllFileNames.resize(3, "");
-		
-		while(!inOligos.eof()){
-
-			inOligos >> type; 
-            
-		 	if (m->getDebug()) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
-            
-			if(type[0] == '#'){
-				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				util.gobble(inOligos);
-			}
-			else{
-				util.gobble(inOligos);
-				//make type case insensitive
-				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
-				
-				inOligos >> oligo;
-                
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
-				
-				for(int i=0;i<oligo.length();i++){
-					oligo[i] = toupper(oligo[i]);
-					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
-				}
-				
-				if(type == "FORWARD"){
-					group = "";
-					
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{	
-						char c = inOligos.get(); 
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					} 
-					
-					//check for repeat barcodes
-					map<string, int>::iterator itPrime = primers.find(oligo);
-					if (itPrime != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-					
-                    if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
-                    
-					primers[oligo]=indexPrimer; indexPrimer++;		
-					primerNameVector.push_back(group);
-				}
-                else if (type == "PRIMER"){
-                    util.gobble(inOligos);
-					
-                    inOligos >> roligo;
-                    
-                    for(int i=0;i<roligo.length();i++){
-                        roligo[i] = toupper(roligo[i]);
-                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
-                    }
-                    roligo = util.reverseOligo(roligo);
-                    
-                    group = "";
-                    
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
-                    
-                    oligosPair newPrimer(oligo, roligo);
-                    
-                     if (m->getDebug()) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
-					
-					//check for repeat barcodes
-                    string tempPair = oligo+roligo;
-                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already."); m->mothurOutEndLine();  }
-                    else { uniquePrimers.insert(tempPair); }
-					
-                    if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
-                    
-					pairedPrimers[indexPairedPrimer]=newPrimer; indexPairedPrimer++;
-					primerNameVector.push_back(group);
-                    hasPrimer = true;
-                }
-				else if(type == "REVERSE"){
-					//Sequence oligoRC("reverse", oligo);
-					//oligoRC.reverseComplement();
-                    string oligoRC = util.reverseOligo(oligo);
-					revPrimer.push_back(oligoRC);
-				}
-				else if(type == "BARCODE"){
-					inOligos >> group;
-                    
-                    //barcode lines can look like   BARCODE   atgcatgc   groupName  - for 454 seqs
-                    //or                            BARCODE   atgcatgc   atgcatgc    groupName  - for illumina data that has forward and reverse info
-                    
-                    string temp = "";
-                    while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	temp += c;  }
-					}
-					
-                    //then this is illumina data with 4 columns
-                    if (temp != "") {
-                        hasPairedBarcodes = true;
-                        string reverseBarcode = group; //reverseOligo(group); //reverse barcode
-                        group = temp;
-                        
-                        for(int i=0;i<reverseBarcode.length();i++){
-                            reverseBarcode[i] = toupper(reverseBarcode[i]);
-                            if(reverseBarcode[i] == 'U')	{	reverseBarcode[i] = 'T';	}
-                        }
-                        
-                        reverseBarcode = util.reverseOligo(reverseBarcode);
-                        oligosPair newPair(oligo, reverseBarcode);
-                        
-                        if (m->getDebug()) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
-                        
-                        //check for repeat barcodes
-                        string tempPair = oligo+reverseBarcode;
-                        if (uniqueBarcodes.count(tempPair) != 0) { m->mothurOut("barcode pair " + newPair.forward + " " + newPair.reverse +  " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
-                        else { uniqueBarcodes.insert(tempPair); }
-                        
-                        pairedBarcodes[indexPairedBarcode]=newPair; indexPairedBarcode++;
-                        barcodeNameVector.push_back(group);
-                    }else {				
-                        //check for repeat barcodes
-                        map<string, int>::iterator itBar = barcodes.find(oligo);
-                        if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-                        
-                        barcodes[oligo]=indexBarcode; indexBarcode++;
-                        barcodeNameVector.push_back(group);
-                    }
-				}else if(type == "LINKER"){
-					linker.push_back(oligo);
-				}else if(type == "SPACER"){
-					spacer.push_back(oligo);
-				}
-				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); }
-			}
-			util.gobble(inOligos);
-		}	
-		inOligos.close();
-		
-        if (hasPairedBarcodes || hasPrimer) {
-            pairedOligos = true;
-            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
-        }
-        
-		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = false;	}
-        
-		//add in potential combos
-		if(barcodeNameVector.size() == 0){
-			barcodes[""] = 0;
-			barcodeNameVector.push_back("");			
-		}
-		
-		if(primerNameVector.size() == 0){
-			primers[""] = 0;
-			primerNameVector.push_back("");			
-		}
-		
-        numFPrimers = primers.size();
-        if (pairedOligos) { numFPrimers  = pairedPrimers.size(); }
-		numRPrimers = revPrimer.size();
-        numLinkers = linker.size();
-        numSpacers = spacer.size();
-		
-		bool allBlank = true;
-		for (int i = 0; i < barcodeNameVector.size(); i++) {
-			if (barcodeNameVector[i] != "") {
-				allBlank = false;
-				break;
-			}
-		}
-		for (int i = 0; i < primerNameVector.size(); i++) {
-			if (primerNameVector[i] != "") {
-				allBlank = false;
-				break;
-			}
-		}
-
-		if (allBlank) {
-			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
-			allFiles = false;
-			return false;
-		}
-		
-		return true;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "getOligos");
 		exit(1);
 	}
 }
