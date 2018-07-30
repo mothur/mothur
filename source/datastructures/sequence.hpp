@@ -36,10 +36,6 @@ public:
 	Sequence(ifstream&);
     Sequence(ifstream&, string&, bool);
 	Sequence(istringstream&);
-	//these constructors just set the unaligned string to save space
-	Sequence(string, string, string);  
-	Sequence(ifstream&, string);
-	Sequence(istringstream&, string);
     #ifdef USE_BOOST
     Sequence(boost::iostreams::filtering_istream&);
     #endif

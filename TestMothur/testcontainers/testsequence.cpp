@@ -8,53 +8,40 @@
 
 
 #include "testsequence.h"
-/*
-TEST_CASE("Testing Sequence Class") {
-    Sequence seq;
-    TestSequence seq2;
+#include "dataset.h"
+
+/**************************************************************************************************/
+TestSequence::TestSequence() {  //setup
+    m = MothurOut::getInstance();
     
-    SECTION("test constructor - string, string") {
-        INFO("Using TestSeq, atgcatgc") // Only appears on a FAIL
-        Sequence seq2("TestSeq", "atgcatgc");
-        CAPTURE(seq2.getInlineSeq()); // Displays this variable on a FAIL
+    TestDataSet data;
+    vector<string> filenames = data.getSubsetFNGFiles();
+    fastafile = filenames[0];
+    
+}
+/**************************************************************************************************/
+TestSequence::~TestSequence() {}//teardown
+/**************************************************************************************************/
+TEST(TestSequence, SequenceConstructors) {
+    
+    Sequence seq("testSeq", "ATGCGTCATC");
+    EXPECT_EQ(seq.getAligned(), "ATGCGTCATC");
+    EXPECT_EQ(seq.getName(), "testSeq");
+    EXPECT_EQ(seq.getUnaligned(), "ATGCGTCATC");
+    
+    Sequence seq1;
+    EXPECT_EQ(seq1.getAligned(), "");
+    EXPECT_EQ(seq1.getName(), "");
+    EXPECT_EQ(seq1.getUnaligned(), "");
+    
         
-        CHECK(seq2.getInlineSeq() == "TestSeq\tatgcatgc");
-    }
-    
-    SECTION("setting / getting name") {
-        INFO("Using TestSeq") // Only appears on a FAIL
-        seq.setName("TestSeq");
-        CAPTURE(seq.getName()); // Displays this variable on a FAIL
-        
-        CHECK(seq.getName() == "TestSeq");
-    }
-    
-    SECTION("test setAligned / get Aligned") {
-        INFO("Using ..atgc--atgc..") // Only appears on a FAIL
-        seq.setAligned("..atgc--atgc..");
-        CAPTURE(seq.getAligned()); // Displays this variable on a FAIL
-        
-        CHECK(seq.getAligned() == "..atgc--atgc..");
-    }
-    
-    SECTION("test setUnaligned / getUnaligned") {
-        INFO("Using ..atgc--atgc..") // Only appears on a FAIL
-        seq.setUnaligned("..atgc--atgc..");
-        CAPTURE(seq.getUnaligned()); // Displays this variable on a FAIL
-        
-        CHECK(seq.getUnaligned() == "atgcatgc");
-    }
-    
-    SECTION("test initialize") {
-        INFO("No data") // Only appears on a FAIL
-        seq2.initialize();
-        CAPTURE(seq.getUnaligned()); // Displays this variable on a FAIL
-        
-        CHECK(seq.getUnaligned() == "");
-    }
-    
-    
-   //more tests need to be added - just a start to set up testing project and model
 }
 
-*/
+TEST(TestSequence, getNumBases) {
+    TestSequence testSeq;
+    
+    
+}
+/**************************************************************************************************/
+
+

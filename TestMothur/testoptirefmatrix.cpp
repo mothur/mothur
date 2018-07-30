@@ -30,7 +30,7 @@ TEST(TestOptiRefMatrix, readColumnDenovo) {
     TestOptiRefMatrix testOMatrix;
     OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
     
-    EXPECT_EQ(160,(matrix.print(cout)));
+    //EXPECT_EQ(160,(matrix.print(cout)));
     EXPECT_EQ(160,(matrix.getNumDists()));
     EXPECT_EQ(34,(matrix.getNumFitDists()));
     EXPECT_EQ(54,(matrix.getNumRefDists()));
