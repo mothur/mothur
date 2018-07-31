@@ -28,6 +28,9 @@
  ::testing::GTEST_FLAG(filter) = "Test_*";
  ::testing::GTEST_FLAG(filter) = "Test_Calcs*";
  
+ Test_TrimOligos
+ 
+ 
 */
 
 CommandFactory* CommandFactory::_uniqueInstance;
@@ -48,10 +51,11 @@ int main(int argc, char **argv) {
     
     current->setTestFilePath(pathname);
     
-    ::testing::GTEST_FLAG(filter) = "Test_*";
+    ::testing::GTEST_FLAG(filter) = "Test_TrimOligos*";
     ::testing::InitGoogleTest(&argc, argv);
     
-    return RUN_ALL_TESTS();
+    int value = RUN_ALL_TESTS();
+    return value;
 }
 
 #endif

@@ -386,6 +386,7 @@
 		48910D521D58E26C00F60EDB /* distcdataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D501D58E26C00F60EDB /* distcdataset.cpp */; };
 		489387F62107A60C00284329 /* testoptirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489387F42107A60C00284329 /* testoptirefmatrix.cpp */; };
 		489387F9210F633E00284329 /* testOligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489387F7210F633E00284329 /* testOligos.cpp */; };
+		489387FA2110C79200284329 /* testtrimoligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
 		489AF68F2106188E0028155E /* sensspeccalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B01D2A2016470F006BE140 /* sensspeccalc.cpp */; };
 		489AF690210618A80028155E /* optiblastmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */; };
@@ -3176,6 +3177,7 @@
 				481FB5D61AC1B75C0076CFF3 /* mantelcommand.cpp in Sources */,
 				481FB57E1AC1B6EA0076CFF3 /* unweighted.cpp in Sources */,
 				481FB60F1AC1B7AC0076CFF3 /* sortseqscommand.cpp in Sources */,
+				489387FA2110C79200284329 /* testtrimoligos.cpp in Sources */,
 				481FB67D1AC1B88F0076CFF3 /* treereader.cpp in Sources */,
 				481FB6131AC1B7AC0076CFF3 /* sracommand.cpp in Sources */,
 				48C728671B66AB8800D40830 /* pcrseqscommand.cpp in Sources */,
