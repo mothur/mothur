@@ -22,7 +22,7 @@ TestSequence::TestSequence() {  //setup
 /**************************************************************************************************/
 TestSequence::~TestSequence() {}//teardown
 /**************************************************************************************************/
-TEST(TestSequence, SequenceConstructors) {
+TEST(TestContainer_Sequence, SequenceConstructors) {
     
     Sequence seq("testSeq", "ATGCGTCATC");
     EXPECT_EQ(seq.getAligned(), "ATGCGTCATC");
@@ -37,7 +37,7 @@ TEST(TestSequence, SequenceConstructors) {
         
 }
 
-TEST(TestSequence, setGets) {
+TEST(TestContainer_Sequence, setGets) {
     
     Sequence seq; seq.setName("mothurSeq");
     EXPECT_EQ("mothurSeq", seq.getName());

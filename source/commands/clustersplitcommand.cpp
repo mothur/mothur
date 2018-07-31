@@ -668,7 +668,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
         //go through users set and make them floats so we can sort them
         for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
             double temp = -10.0;
-            cout << *it << endl;
+            
             if ((*it != "unique") && (convertTestFloat(*it, temp) ))	{	util.mothurConvert(*it, temp);	}
             else if (*it == "unique")										{	temp = -1.0;		}
             

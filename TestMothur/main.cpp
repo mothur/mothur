@@ -12,14 +12,32 @@
 
 #include "mothurout.h"
 #include "currentfile.h"
+#include "commandfactory.hpp"
 #include "gtest/gtest.h"
 
+/* Test Naming Structure:
+ 
+ Test_OptionalSubCategory_TestClass
+ 
+ Test_Container_Sequence
+ Test_Calcs_ClusterCalcs
+ 
+ Makes it easy to filter tests
+ 
+ ::testing::GTEST_FLAG(filter) = "Test_Container_*";
+ ::testing::GTEST_FLAG(filter) = "Test_*";
+ ::testing::GTEST_FLAG(filter) = "Test_Calcs*";
+ 
+*/
 
-#define UNIT_TEST
+CommandFactory* CommandFactory::_uniqueInstance;
+CurrentFile* CurrentFile::instance;
+MothurOut* MothurOut::_uniqueInstance;
 
 int main(int argc, char **argv) {
     MothurOut* m; m = MothurOut::getInstance();
     CurrentFile* current; current = CurrentFile::getInstance();
+    
     current->setTestFilePath("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/");
     string pathname = current->getProgramPath();
     if (pathname != "") {
@@ -30,11 +48,10 @@ int main(int argc, char **argv) {
     
     current->setTestFilePath(pathname);
     
+    ::testing::GTEST_FLAG(filter) = "Test_*";
     ::testing::InitGoogleTest(&argc, argv);
     
-    int value = RUN_ALL_TESTS();
-    
-    return value;
+    return RUN_ALL_TESTS();
 }
 
 #endif

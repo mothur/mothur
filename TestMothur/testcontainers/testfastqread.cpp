@@ -23,7 +23,7 @@ TestFastqRead::~TestFastqRead() {
 }
 /**************************************************************************************************/
 //Using ATGCGTCATC & 40 39 38 37 36 35 34 33 32 31
-TEST(TestFastqRead, FastqReadConstructor) {
+TEST(Test_Container_FastqRead, FastqReadConstructor) {
     TestFastqRead testFastq;
     
     vector<int> scores; for (int i = 31; i < 41; i++) { scores.push_back(i); }
@@ -35,7 +35,7 @@ TEST(TestFastqRead, FastqReadConstructor) {
     EXPECT_EQ(read.getScores()[0], 31);
 }
 
-TEST(TestFastqRead, FastqReadFromFileConstructor) {
+TEST(Test_Container_FastqRead, FastqReadFromFileConstructor) {
     TestFastqRead testFastq;
         
     ifstream in; bool ignore; string format = "illumina1.8+";

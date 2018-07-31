@@ -22,7 +22,7 @@ public:
     TestOptiCluster();
     ~TestOptiCluster();
     
-protected:
+
     MothurOut* m;
     ClusterMetric* metric;
     FakeOptiMatrix testMatrix;
@@ -31,11 +31,6 @@ protected:
     using OptiCluster::initialize;
     using OptiCluster::update;
     using OptiCluster::getCloseFarCounts;
-    
-    FRIEND_TEST(TestOptiCluster, myInitialize);
-    FRIEND_TEST(TestOptiCluster, getCloseFarCounts);
-    FRIEND_TEST(TestOptiCluster, myUpdate);
-
 };
 
 #endif /* defined(__Mothur__testopticluster__) */

@@ -1481,11 +1481,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             if (tfSeq.getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
         }
         
-        if (ignore) {
-            cout << "here" << endl; exit(1);
-        }
         return ignore;
-
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "read");

@@ -20,7 +20,7 @@ TestOptiMatrix::TestOptiMatrix() {  //setup
 TestOptiMatrix::~TestOptiMatrix() {}
 /**************************************************************************************************/
 ////distfile, dupsFile, dupsFormat, distFormat, cutoff, sim
-TEST(TestOptiMatrix, readColumn) {
+TEST(Test_Container_OptiMatrix, readColumn) {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
@@ -28,7 +28,7 @@ TEST(TestOptiMatrix, readColumn) {
     EXPECT_EQ(160,(matrix.getNumDists()));
 }
 
-TEST(TestOptiMatrix, readPhylip) {
+TEST(Test_Container_OptiMatrix, readPhylip) {
     TestOptiMatrix testOMatrix;
     OptiMatrix pmatrix(testOMatrix.phylipFile, "", "", "phylip", 0.03, false);
 
@@ -37,7 +37,7 @@ TEST(TestOptiMatrix, readPhylip) {
     
 }
 
-TEST(TestOptiMatrix, getNumCLose) {
+TEST(Test_Container_OptiMatrix, getNumCLose) {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
@@ -48,7 +48,7 @@ TEST(TestOptiMatrix, getNumCLose) {
     EXPECT_EQ(2,(matrix.getNumClose(20)));
 }
 
-TEST(TestOptiMatrix, isClose) {
+TEST(Test_Container_OptiMatrix, isClose) {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
@@ -67,7 +67,7 @@ TEST(TestOptiMatrix, isClose) {
     EXPECT_EQ(false,(matrix.isClose(12, 36)));
 }
 
-TEST(TestOptiMatrix, getCloseSeqs) {
+TEST(Test_Container_OptiMatrix, getCloseSeqs) {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
@@ -112,7 +112,7 @@ TEST(TestOptiMatrix, getCloseSeqs) {
     EXPECT_EQ(Expected_ReturnResults, ReturnResults);
 }
 
-TEST(TestOptiMatrix, getNameIndexMap) {
+TEST(Test_Container_OptiMatrix, getNameIndexMap) {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     
@@ -133,7 +133,7 @@ TEST(TestOptiMatrix, getNameIndexMap) {
     EXPECT_EQ("GQY1XT001EJAUJ",(matrix.getName(48)));
 }
 
-TEST(TestOptiMatrix, getListSingle) {
+TEST(Test_Container_OptiMatrix, getListSingle) {
     TestOptiMatrix testOMatrix;
     OptiMatrix matrix(testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", 0.03, false);
     

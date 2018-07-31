@@ -8,9 +8,6 @@
 
 #include "currentfile.h"
 
-//needed for testing project
-CurrentFile* CurrentFile::instance;
-
 /*********************************************************************************************/
 set<string> CurrentFile::getCurrentTypes()  {
     try {

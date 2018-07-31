@@ -31,85 +31,85 @@ TestClusterCalcs::TestClusterCalcs(string metricName) {  //setup
 TestClusterCalcs::~TestClusterCalcs() { delete metric; }
 /**************************************************************************************************/
 
-TEST(TestClusterCalcs, mcc) {
+TEST(Test_Calc_ClusterCalcs, mcc) {
     TestClusterCalcs test("mcc");
     double result = test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn);
     ASSERT_NEAR(0.791646, result, 0.0001); //metric value
 }
 
-TEST(TestClusterCalcs, sens) {
+TEST(Test_Calc_ClusterCalcs, sens) {
     TestClusterCalcs test("sens");
     ASSERT_NEAR(0.699235, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, spec) {
+TEST(Test_Calc_ClusterCalcs, spec) {
     TestClusterCalcs test("spec");
     ASSERT_NEAR(0.999951, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, tptn) {
+TEST(Test_Calc_ClusterCalcs, tptn) {
     TestClusterCalcs test("tptn");
     ASSERT_NEAR(0.9997691, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, tp) {
+TEST(Test_Calc_ClusterCalcs, tp) {
     TestClusterCalcs test("tp");
     ASSERT_NEAR(0.000423, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, tn) {
+TEST(Test_Calc_ClusterCalcs, tn) {
     TestClusterCalcs test("tn");
     ASSERT_NEAR(0.9993461, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, fp) {
+TEST(Test_Calc_ClusterCalcs, fp) {
     TestClusterCalcs test("fp");
     ASSERT_NEAR(0.999951, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, fn) {
+TEST(Test_Calc_ClusterCalcs, fn) {
     TestClusterCalcs test("fn");
     ASSERT_NEAR(0.999818, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, f1score) {
+TEST(Test_Calc_ClusterCalcs, f1score) {
     TestClusterCalcs test("f1score");
     ASSERT_NEAR(0.7856801, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, accuracy) {
+TEST(Test_Calc_ClusterCalcs, accuracy) {
     TestClusterCalcs test("accuracy");
     ASSERT_NEAR(0.999769, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, ppv) {
+TEST(Test_Calc_ClusterCalcs, ppv) {
     TestClusterCalcs test("ppv");
     ASSERT_NEAR(0.896514, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, npv) {
+TEST(Test_Calc_ClusterCalcs, npv) {
     TestClusterCalcs test("npv");
     ASSERT_NEAR(0.9998179, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, fdr) {
+TEST(Test_Calc_ClusterCalcs, fdr) {
     TestClusterCalcs test("fdr");
     ASSERT_NEAR(0.896514, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     
 }
 
-TEST(TestClusterCalcs, fpfn) {
+TEST(Test_Calc_ClusterCalcs, fpfn) {
     TestClusterCalcs test("fpfn");
     ASSERT_NEAR(0.999769, test.metric->getValue(test.fake.tp,test.fake.tn,test.fake.fp,test.fake.fn), 0.0001); //metric value
     

@@ -20,7 +20,7 @@ TestOligos::~TestOligos() {
 }
 /**************************************************************************************************/
 
-TEST(TestOligos, Constructors) {
+TEST(Test_Container_Oligos, Constructors) {
     TestOligos test;
     
     Oligos oligos;
@@ -95,14 +95,23 @@ TEST(TestOligos, Constructors) {
     EXPECT_EQ("ACTYAAAKGAATTGACGG", testPrimer.reverse);
 }
 
-TEST(TestOligos, testComboNames) {
+TEST(Test_Container_Oligos, testComboNames) {
     TestOligos test;
     
-    //read with reverseCompliment of reverse primer or barcode
     Oligos pairedOligos(test.oligosfiles[1]);
     
-    string groupName = "F01R2A.V3";
-    EXPECT_EQ(groupName, pairedOligos.getGroupName(0,0));
+    EXPECT_EQ("F01R2A.V3", pairedOligos.getGroupName(0,0));
+    EXPECT_EQ("F01R2D.V5", pairedOligos.getGroupName(3,1));
     
+    Oligos singleOligos(test.oligosfiles[0]);
+    
+    EXPECT_EQ("F003D000", singleOligos.getGroupName(0,0));
+    EXPECT_EQ("F003D006", singleOligos.getGroupName(3,1));
+
+    Oligos indexedOligos(test.oligosfiles[2]);
+    EXPECT_EQ("Mock3.testPrimer", indexedOligos.getGroupName(0,0));
+    EXPECT_EQ("CKD_f31.testPrimer2", indexedOligos.getGroupName(1,1));
+    EXPECT_EQ("CKD_f31.testPrimer", indexedOligos.getGroupName(1,0));
+    EXPECT_EQ("Mock3.testPrimer2", indexedOligos.getGroupName(0,1));
 }
 /**************************************************************************************************/

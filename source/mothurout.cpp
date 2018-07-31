@@ -12,9 +12,6 @@
 #include "sharedordervector.h"
 #include "counttable.h"
 
-//needed for testing project
-MothurOut* MothurOut::_uniqueInstance;
-
 /******************************************************/
 MothurOut* MothurOut::getInstance() {
 	if( _uniqueInstance == 0) {

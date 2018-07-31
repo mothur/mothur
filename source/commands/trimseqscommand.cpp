@@ -867,18 +867,7 @@ int driverTrim(trimData* params) {
                 
                 if(trashCode.length() == 0){
                     string thisGroup = "";
-                    if (params->createGroup) {
-                        thisGroup = params->oligos.getGroupName(barcodeIndex, primerIndex);
-                        /*if(numBarcodes != 0){
-                            thisGroup = params->barcodeNameVector[barcodeIndex];
-                            if (numFPrimers != 0) {
-                                if (params->primerNameVector[primerIndex] != "") {
-                                    if(thisGroup != "") { thisGroup += "." + params->primerNameVector[primerIndex]; }
-                                    else                { thisGroup = params->primerNameVector[primerIndex];        }
-                                }
-                            }
-                        }*/
-                    }
+                    if (params->createGroup) { thisGroup = params->oligos.getGroupName(barcodeIndex, primerIndex); }
                     
                     int pos = thisGroup.find("ignore");
                     if (pos == string::npos) {

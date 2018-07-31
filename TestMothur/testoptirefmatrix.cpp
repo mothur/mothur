@@ -23,7 +23,7 @@ TestOptiRefMatrix::~TestOptiRefMatrix() {}
 /**************************************************************************************************/
 
 //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
-TEST(TestOptiRefMatrix, readColumnDenovo) {
+TEST(Test_Container_OptiRefMatrix, readColumnDenovo) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
     
@@ -47,7 +47,7 @@ TEST(TestOptiRefMatrix, readColumnDenovo) {
 }
 
 //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
-TEST(TestOptiRefMatrix, readPhylipDenovo) {
+TEST(Test_Container_OptiRefMatrix, readPhylipDenovo) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
     
@@ -71,7 +71,7 @@ TEST(TestOptiRefMatrix, readPhylipDenovo) {
 }
 
 //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
-TEST(TestOptiRefMatrix, readColumnReference) {
+TEST(Test_Container_OptiRefMatrix, readColumnReference) {
     TestOptiRefMatrix testOMatrix;
     
     OptiRefMatrix matrix(testOMatrix.reffilenames[2], testOMatrix.reffilenames[1], "count", "column", 0.03, testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", testOMatrix.reffilenames[5], "column");
@@ -86,7 +86,7 @@ TEST(TestOptiRefMatrix, readColumnReference) {
 }
 
 //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
-TEST(TestOptiRefMatrix, readPhylipReference) {
+TEST(Test_Container_OptiRefMatrix, readPhylipReference) {
     TestOptiRefMatrix testOMatrix;
     
     OptiRefMatrix matrix(testOMatrix.reffilenames[3], testOMatrix.reffilenames[1], "count", "phylip", 0.03, testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", testOMatrix.reffilenames[5], "column");
@@ -100,7 +100,7 @@ TEST(TestOptiRefMatrix, readPhylipReference) {
     EXPECT_EQ(131,sanityCheck); //number of inbetween dists
 }
 
-TEST(TestOptiRefMatrix, getNumCLose) {
+TEST(Test_Container_OptiRefMatrix, getNumCLose) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
     
@@ -126,7 +126,7 @@ TEST(TestOptiRefMatrix, getNumCLose) {
     EXPECT_EQ(2,(matrix.getNumRefClose(20)));
 }
 
-TEST(TestOptiRefMatrix, isCloseFit) {
+TEST(Test_Container_OptiRefMatrix, isCloseFit) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
     
@@ -169,7 +169,7 @@ TEST(TestOptiRefMatrix, isCloseFit) {
 }
 
 
-TEST(TestOptiRefMatrix, getCloseFitSeqs) {
+TEST(Test_Container_OptiRefMatrix, getCloseFitSeqs) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
  
@@ -219,7 +219,7 @@ TEST(TestOptiRefMatrix, getCloseFitSeqs) {
     EXPECT_EQ(Expected_ReturnResults, ReturnResults);
 }
 
-TEST(TestOptiRefMatrix, extractRefMatrix) {
+TEST(Test_Container_OptiRefMatrix, extractRefMatrix) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
  
@@ -227,11 +227,11 @@ TEST(TestOptiRefMatrix, extractRefMatrix) {
     OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
     OptiData* refMatrix = matrix.extractRefMatrix();
     
-    EXPECT_EQ(54,(refMatrix->print(cout)));
+    //EXPECT_EQ(54,(refMatrix->print(cout)));
     EXPECT_EQ(54,(refMatrix->getNumDists()));
 }
 
-TEST(TestOptiRefMatrix, extractMatrixSubset) {
+TEST(Test_Container_OptiRefMatrix, extractMatrixSubset) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
     
@@ -242,12 +242,12 @@ TEST(TestOptiRefMatrix, extractMatrixSubset) {
     for (long long i = 0; i < temp.size(); i++) { fitSeqs.insert(temp[i]); }
     OptiData* fitMatrix = matrix.extractMatrixSubset(fitSeqs);
     
-    EXPECT_EQ(34,(fitMatrix->print(cout)));
+    //EXPECT_EQ(34,(fitMatrix->print(cout)));
     EXPECT_EQ(34,(fitMatrix->getNumDists()));
 }
 
 
-TEST(TestOptiRefMatrix, getFitListSingle) {
+TEST(Test_Container_OptiRefMatrix, getFitListSingle) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
     
@@ -274,7 +274,7 @@ TEST(TestOptiRefMatrix, getFitListSingle) {
     EXPECT_EQ("GQY1XT001C4UVG", bin);
 }
 
-TEST(TestOptiRefMatrix, randomizeRefs) {
+TEST(Test_Container_OptiRefMatrix, randomizeRefs) {
     MothurOut* m; m = MothurOut::getInstance();
     m->setRandomSeed(123456); //stabilize radomization
     
