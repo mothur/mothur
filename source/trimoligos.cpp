@@ -1876,7 +1876,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                     success[0] = 0; success[1] = 0; success[2] = 0; success[3] = 0;
                     break;
                 }
-            }else if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
+            }else if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length())))) {
                 group = it->first;
                 forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
                 reverseSeq.setUnaligned(rawRSequence.substr(roligo.length()));
@@ -2537,7 +2537,8 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
                 break;
             }
             
-            if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
+            string rawSeqFragment = rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length());
+            if(compareDNASeq(oligo, rawSeqFragment)){
                 seq.setUnaligned(rawSequence.substr(0,rawSequence.length()-oligo.length()));
                 success[0] = 0; success[1] = 0;
                 break;
@@ -2570,7 +2571,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs));
+                alignment->alignPrimer(oligo, rawRSequence.substr(0, oligo.length()+pdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
@@ -3010,30 +3011,28 @@ bool TrimOligos::stripSpacer(Sequence& seq){
 //******************************************************************/
 bool TrimOligos::compareDNASeq(string oligo, string seq){
     try {
-        bool success = 1;
+        bool success = true;
         int length = oligo.length();
         
         for(int i=0;i<length;i++){
             
             if(oligo[i] != seq[i]){
-                if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C')	{	success = 0; }
-                else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))	{	success = 0;	}
-                else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))	{	success = 0;	}
-                else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))	{	success = 0;	}
-                else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))	{	success = 0;	}
-                else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-                else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))	{	success = 0;	}
-                else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))	{	success = 0;	}
-                else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-                else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-                else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	success = 0;	}
-                else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	success = 0;	}	
+                if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C')	{	success = false; }
+                else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))	{	success = false;	}
+                else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))	{	success = false;	}
+                else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))	{	success = false;	}
+                else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))	{	success = false;	}
+                else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))	{	success = false;	}
+                else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))	{	success = false;	}
+                else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))	{	success = false;	}
+                else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))	{	success = false;	}
+                else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))	{	success = false;	}
+                else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	success = false;	}
+                else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	success = false;	}
                 
-                if(success == 0)	{	break;	}
+                if(success == false)	{	break;	}
             }
-            else{
-                success = 1;
-            }
+            else{ success = true; }
         }
         
         return success;
