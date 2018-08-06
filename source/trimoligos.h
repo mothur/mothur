@@ -45,11 +45,11 @@ class TrimOligos {
 		vector<int> stripReverse(Sequence&);
 		vector<int> stripReverse(Sequence&, QualityScores&);
     
-        bool stripLinker(Sequence&);
-        bool stripLinker(Sequence&, QualityScores&);
+        int stripLinker(Sequence&);
+        int stripLinker(Sequence&, QualityScores&);
     
-        bool stripSpacer(Sequence&);
-        bool stripSpacer(Sequence&, QualityScores&);
+        int stripSpacer(Sequence&);
+        int stripSpacer(Sequence&, QualityScores&);
     
         //seq, primerStart, primerEnd
         vector<int> findForward(Sequence&, int&, int&);

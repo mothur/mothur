@@ -45,8 +45,12 @@ public:
         barcodeNameVector.push_back("F003D148"); barcodeNameVector.push_back("F003D150"); barcodeNameVector.push_back("MOCK.GQY1XT001");
         
         revPrimer.push_back("ATTACCGCGGCTGCTGG");
-        revPrimer.push_back("CCCGTCAATTCMTTTRAGT");
-        revPrimer.push_back("ACRACACGAGCTGACGAC");
+        
+        linker.push_back("TGAC");
+        linker.push_back("TTGG");
+        
+        spacer.push_back("CCAAC");
+        spacer.push_back("CACTG");
     }
     
     void loadPaired() {

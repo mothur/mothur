@@ -637,8 +637,7 @@ int driverPcr(pcrData* params){
                                             thisSeqsLocations.push_back((mapAligned[primerEnd-1]+1));
                                         }
                                     }
-                                }
-                                else                {
+                                }else                {
                                     if (params->keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
                                     else            {
                                         currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));
@@ -650,8 +649,8 @@ int driverPcr(pcrData* params){
                                 }
                                 isAligned(currSeq.getAligned(), mapAligned);
                             }else {
-                                if (!params->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd)); }
-                                else                { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart)); }
+                                if (!params->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd));     }
+                                else                        { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart));   }
                             }
                         }
                     }
@@ -746,7 +745,7 @@ int driverPcr(pcrData* params){
                 //trimming removed all bases
                 if (currSeq.getUnaligned() == "") { goodSeq = false; }
                 
-                if(goodSeq == 1)    {
+                if(goodSeq)    {
                     currSeq.printSequence(params->goodFasta);
                     if (thisPStart != -1)   { locations.insert(thisPStart);  }
                     if (thisSeqsLocations.size() != 0) { params->locations[currSeq.getName()] = thisSeqsLocations; }

@@ -191,6 +191,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
             for (int j = 0; j < rawSequence.length()-olength; j++){
                 if (m->getControl_pressed()) { primerStart = 0; primerEnd = 0; return success; }
                 string rawChunk = rawSequence.substr(j, olength);
+                
                 if(compareDNASeq(oligo, rawChunk)) {
                     primerStart = j;
                     primerEnd = primerStart + olength;
@@ -340,6 +341,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
                         for(int k=oligo.length()-1;k>=0;k--){ if(oligo[k] != '-'){	alnLength = k+1;	break;	} }
                         oligo = oligo.substr(0,alnLength);
                         temp = temp.substr(0,alnLength);
+                        
                         int numDiff = countDiffs(oligo, temp);
                         if (alnLength == 0) { numDiff = rdiffs + 1000; }
                         
@@ -2617,10 +2619,10 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
     }
 }
 //******************************************************************/
-bool TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
+int TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
     try {
         string rawSequence = seq.getUnaligned();
-        bool success = ldiffs + 1;	//guilty until proven innocent
+        int success = ldiffs + 1;	//guilty until proven innocent
         
         for(int i=0;i<linker.size();i++){
             string oligo = linker[i];
@@ -2632,9 +2634,7 @@ bool TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
             
             if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
                 seq.setUnaligned(rawSequence.substr(oligo.length()));
-                if(qual.getName() != ""){
-                    qual.trimQScores(oligo.length(), -1);
-                }
+                if(qual.getName() != ""){ qual.trimQScores(oligo.length(), -1);  }
                 success = 0;
                 break;
             }
@@ -2718,11 +2718,11 @@ bool TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
     }
 }
 //******************************************************************/
-bool TrimOligos::stripLinker(Sequence& seq){
+int TrimOligos::stripLinker(Sequence& seq){
     try {
         
         string rawSequence = seq.getUnaligned();
-        bool success = ldiffs +1;	//guilty until proven innocent
+        int success = ldiffs +1;	//guilty until proven innocent
         
         for(int i=0;i<linker.size();i++){
             string oligo = linker[i];
@@ -2756,21 +2756,18 @@ bool TrimOligos::stripLinker(Sequence& seq){
                 string oligo = linker[i];
                 // int length = oligo.length();
                 
-                if(rawSequence.length() < maxLinkerLength){	//let's just assume that the barcodes are the same length
-                    success = ldiffs + 1000;
-                    break;
-                }
+                if(rawSequence.length() < maxLinkerLength){ success = ldiffs + 1000; break; }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+ldiffs));
+                string temp = rawSequence.substr(0,oligo.length()+ldiffs);
+                alignment->alignPrimer(oligo, temp);
                 oligo = alignment->getSeqAAln();
-                string temp = alignment->getSeqBAln();
+                temp = alignment->getSeqBAln();
                 
                 int alnLength = oligo.length();
                 
-                for(int i=oligo.length()-1;i>=0;i--){
-                    if(oligo[i] != '-'){	alnLength = i+1;	break;	}
-                }
+                for(int i=oligo.length()-1;i>=0;i--){ if(oligo[i] != '-'){	alnLength = i+1;	break;	} }
+                
                 oligo = oligo.substr(0,alnLength);
                 temp = temp.substr(0,alnLength);
                 
@@ -2813,10 +2810,10 @@ bool TrimOligos::stripLinker(Sequence& seq){
 }
 
 //******************************************************************/
-bool TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
+int TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
     try {
         string rawSequence = seq.getUnaligned();
-        bool success = sdiffs+1;	//guilty until proven innocent
+        int success = sdiffs+1;	//guilty until proven innocent
         
         for(int i=0;i<spacer.size();i++){
             string oligo = spacer[i];
@@ -2914,11 +2911,11 @@ bool TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
     }
 }
 //******************************************************************/
-bool TrimOligos::stripSpacer(Sequence& seq){
+int TrimOligos::stripSpacer(Sequence& seq){
     try {
         
         string rawSequence = seq.getUnaligned();
-        bool success = sdiffs+1;	//guilty until proven innocent
+        int success = sdiffs+1;	//guilty until proven innocent
         
         for(int i=0;i<spacer.size();i++){
             string oligo = spacer[i];
