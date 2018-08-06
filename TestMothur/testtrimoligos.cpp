@@ -772,7 +772,6 @@ TEST(Test_TrimOligos, SingleDirectionReverseOligos) { //ATTACCGCGGCTGCTGG
     
     testOligos = "CCGTCAATTCMTTTRAGT";
     EXPECT_EQ("ACTYAAAKGAATTGACGG"  , noDiffSingleTrim.reverseOligo(testOligos));
-    
 }
 
 

@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     
     current->setTestFilePath(pathname);
     
-    ::testing::GTEST_FLAG(filter) = "Test_TrimOligos*";
+    ::testing::GTEST_FLAG(filter) = "Test_Integration*";
     ::testing::InitGoogleTest(&argc, argv);
     
     int value = RUN_ALL_TESTS();

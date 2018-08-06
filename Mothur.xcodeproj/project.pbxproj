@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
+		4803D5A72118B352001C63B5 /* miseqsop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5A52118B352001C63B5 /* miseqsop.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -852,6 +853,8 @@
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = newcommandtemplate.h; path = source/commands/newcommandtemplate.h; sourceTree = SOURCE_ROOT; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getcoremicrobiomecommand.cpp; path = source/commands/getcoremicrobiomecommand.cpp; sourceTree = SOURCE_ROOT; };
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getcoremicrobiomecommand.h; path = source/commands/getcoremicrobiomecommand.h; sourceTree = SOURCE_ROOT; };
+		4803D5A52118B352001C63B5 /* miseqsop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = miseqsop.cpp; path = IntegrationTests/miseqsop.cpp; sourceTree = "<group>"; };
+		4803D5A62118B352001C63B5 /* miseqsop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = miseqsop.hpp; path = IntegrationTests/miseqsop.hpp; sourceTree = "<group>"; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testclustercalcs.cpp; sourceTree = "<group>"; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testclustercalcs.hpp; sourceTree = "<group>"; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -1857,6 +1860,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		4803D5A42118B2AA001C63B5 /* Integration */ = {
+			isa = PBXGroup;
+			children = (
+				4803D5A62118B352001C63B5 /* miseqsop.hpp */,
+				4803D5A52118B352001C63B5 /* miseqsop.cpp */,
+			);
+			name = Integration;
+			sourceTree = "<group>";
+		};
 		480D1E2B1EA6858700BF9C77 /* fakes */ = {
 			isa = PBXGroup;
 			children = (
@@ -1892,6 +1904,7 @@
 				48D6E9671CA42389008DF76B /* testvsearchfileparser.h */,
 				481FB5221AC0AA010076CFF3 /* testcontainers */,
 				481FB5211AC0A9B40076CFF3 /* testcommands */,
+				4803D5A42118B2AA001C63B5 /* Integration */,
 			);
 			path = TestMothur;
 			sourceTree = "<group>";
@@ -3160,6 +3173,7 @@
 				481FB60B1AC1B7AC0076CFF3 /* sffmultiplecommand.cpp in Sources */,
 				481FB59F1AC1B71B0076CFF3 /* classifyrfsharedcommand.cpp in Sources */,
 				481FB5F51AC1B77E0076CFF3 /* primerdesigncommand.cpp in Sources */,
+				4803D5A72118B352001C63B5 /* miseqsop.cpp in Sources */,
 				481FB5B41AC1B7300076CFF3 /* distancecommand.cpp in Sources */,
 				481FB5391AC1B5E90076CFF3 /* ace.cpp in Sources */,
 				481FB5751AC1B6EA0076CFF3 /* soergel.cpp in Sources */,

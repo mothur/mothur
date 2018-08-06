@@ -144,9 +144,8 @@ AlignCommand::AlignCommand(string option)  {
 			else {
 				string path;
 
-				it = parameters.find("reference");
-
 				//user has given a template file
+                it = parameters.find("reference");
 				if(it != parameters.end()){ 
 					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
@@ -154,6 +153,10 @@ AlignCommand::AlignCommand(string option)  {
 				}
 			}
 
+            templateFileName = validParameter.validFile(parameters, "reference");
+            if (templateFileName == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required for the align.seqs command, aborting.\n"); abort = true;
+            }else if (templateFileName == "not open") { abort = true; }
+            
 			candidateFileName = validParameter.valid(parameters, "fasta");
 			if (candidateFileName == "not found") { 
 				//if there is a current fasta file, use it
@@ -212,11 +215,6 @@ AlignCommand::AlignCommand(string option)  {
 			
 			temp = validParameter.valid(parameters, "flip");			if (temp == "not found"){	temp = "t";				}
 			flip = util.isTrue(temp);
-			
-			//this has to go after save so that if the user sets save=t and provides no reference we abort
-			templateFileName = validParameter.validFile(parameters, "reference");
-			if (templateFileName == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required for the align.seqs command, aborting.\n"); abort = true;
-			}else if (templateFileName == "not open") { abort = true; }	
 			
 			temp = validParameter.valid(parameters, "threshold");	if (temp == "not found"){	temp = "0.50";			}
 			util.mothurConvert(temp, threshold); 
