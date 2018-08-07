@@ -36,7 +36,7 @@ public:
 	
 private:
 	CommandFactory* commandFactory;
-	string name;
+	string name, outputDir;
 	bool abort, append;
 	vector<string> outputNames;
 		

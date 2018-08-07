@@ -70,6 +70,10 @@ SetLogFileCommand::SetLogFileCommand(string option)  {
 			
 			string temp = validParameter.valid(parameters, "append");		if (temp == "not found") {  temp = "F";  }
 			append = util.isTrue(temp);
+            
+            outputDir = validParameter.valid(parameters, "outputdir");
+            if (outputDir == "not found"){ outputDir = util.hasPath(name); }
+            
 		}
 	}
 	catch(exception& e) {
@@ -87,7 +91,7 @@ int SetLogFileCommand::execute(){
         
         string directory = util.hasPath(name);
         if (directory == "") {
-            m->setLogFileName(name, append);
+            m->setLogFileName(outputDir+name, append);
         }else if (util.dirCheck(directory)) {
             m->setLogFileName(name, append);
         }

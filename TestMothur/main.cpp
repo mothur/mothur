@@ -37,12 +37,15 @@ CommandFactory* CommandFactory::_uniqueInstance;
 CurrentFile* CurrentFile::instance;
 MothurOut* MothurOut::_uniqueInstance;
 
+
+
 int main(int argc, char **argv) {
     MothurOut* m; m = MothurOut::getInstance();
     CurrentFile* current; current = CurrentFile::getInstance();
     
     current->setTestFilePath("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/");
     string pathname = current->getProgramPath();
+    
     if (pathname != "") {
         //add / to name if needed
         string lastChar = pathname.substr(pathname.length()-1);
@@ -53,6 +56,10 @@ int main(int argc, char **argv) {
     
     ::testing::GTEST_FLAG(filter) = "Test_Integration*";
     ::testing::InitGoogleTest(&argc, argv);
+    
+#ifndef UNIT_TEST
+    #define UNIT_TEST
+#endif
     
     int value = RUN_ALL_TESTS();
     return value;
