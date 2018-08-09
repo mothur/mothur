@@ -177,7 +177,7 @@ TEST(Test_Container_SharedRabundFloatVector, GetSabundVector) {
     EXPECT_EQ(sabund.getNumBins(), 10);
     EXPECT_EQ(sabund.getNumSeqs(), 40);
     EXPECT_EQ(sabund.getMaxRank(), 4);
-    EXPECT_EQ(sabund.get(5), 4);
+    EXPECT_EQ(sabund.get(4), 10);
     
 }
 
