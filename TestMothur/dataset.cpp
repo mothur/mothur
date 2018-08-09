@@ -68,6 +68,12 @@ vector<string> TestDataSet::getSubsetFNGFiles() {
 }
 /***********************************************************************/
 
+string TestDataSet::getSharedFile() {
+    return testDir+"test.opti_mcc.shared";
+}
+
+/***********************************************************************/
+
 vector<string> TestDataSet::getOptiRefFiles() {
     vector<string> filenames;
     filenames.push_back(testDir+"silva.v4.unique.fasta");

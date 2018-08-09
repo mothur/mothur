@@ -32,6 +32,7 @@ public:
     string getSubsetFNGPhylipDistFile();
     vector<string> getOptiRefFiles(); //fasta, count, column, phylip, list, betweendist
     vector<string> getOligosFiles(); //single, paired, indexes, comboNamesTest
+    string getSharedFile(); //shared
     
 private:
     MothurOut* m;
