@@ -235,11 +235,7 @@ AlignCommand::AlignCommand(string option)  {
 }
 //**********************************************************************************************************************
 AlignCommand::~AlignCommand(){	
-
-	if (!abort) {
-		for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-		delete templateDB;
-	}
+	if (!abort) { delete templateDB; }
 }
 //**********************************************************************************************************************
 
@@ -265,27 +261,7 @@ int AlignCommand::execute(){
             numFlipped.push_back(0); //numflipped because reverse was better
             numFlipped.push_back(0); //total number of sequences with over 50% of bases removed
 			
-			long long numFastaSeqs = 0;
-			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-
-			vector<unsigned long long> positions; 
-		#if defined NON_WINDOWS
-			positions = util.divideFile(candidateFileNames[s], processors);
-			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
-		#else
-            positions = util.setFilePosFasta(candidateFileNames[s], numFastaSeqs);
-            if (numFastaSeqs < processors) { processors = numFastaSeqs; m->mothurOut("Reducing processors to " + toString(numFastaSeqs) + ".\n");  }
-            
-            //figure out how many sequences you have to process
-            int numSeqsPerProcessor = numFastaSeqs / processors;
-            for (int i = 0; i < processors; i++) {
-                int startIndex =  i * numSeqsPerProcessor;
-                if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-                lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
-            }
-		#endif
-			
-            numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
+            long long numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
 				
 			if (m->getControl_pressed()) { util.mothurRemove(accnosFileName); util.mothurRemove(alignFileName); util.mothurRemove(reportFileName); outputTypes.clear();  return 0; }
 			
@@ -515,6 +491,26 @@ void alignDriver(alignStruct* params) {
 //void alignDriver(linePair* filePos, string alignFName, string reportFName, string accnosFName, string filename, vector<long long>& numFlipped,MothurOut* m, string align, float match, float misMatch, float gapOpen, float gapExtend, float threshold, bool flip, AlignmentDB* templateDB, string search, long long& count) {
 long long AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename, vector<long long>& numFlipped) {
 	try {
+        
+        vector<linePair> lines;
+        vector<unsigned long long> positions;
+#if defined NON_WINDOWS
+        positions = util.divideFile(filename, processors);
+        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
+#else
+        long long numFastaSeqs = 0;
+        positions = util.setFilePosFasta(filename, numFastaSeqs);
+        if (numFastaSeqs < processors) { processors = numFastaSeqs; m->mothurOut("Reducing processors to " + toString(numFastaSeqs) + ".\n");  }
+        
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = numFastaSeqs / processors;
+        for (int i = 0; i < processors; i++) {
+            int startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
+#endif
+
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<alignStruct*> data;
@@ -539,7 +535,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedOutputAccnosFile);
 
             
-            alignStruct* dataBundle = new alignStruct(*lines[i+1], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename,
+            alignStruct* dataBundle = new alignStruct(lines[i+1], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename,
                                                         align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
             data.push_back(dataBundle);
 
@@ -550,7 +546,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         OutputWriter* threadReportWriter = new OutputWriter(synchronizedOutputReportFile);
         OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedOutputAccnosFile);
         
-        alignStruct* dataBundle = new alignStruct(*lines[0], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename,
+        alignStruct* dataBundle = new alignStruct(lines[0], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename,
                                                   align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
         alignDriver(dataBundle);
         numFlipped[0] = dataBundle->flippedResults[0];

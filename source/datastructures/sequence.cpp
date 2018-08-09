@@ -747,6 +747,8 @@ int Sequence::filterFromPos(int end){
 
 int Sequence::getEndPos(){
     bool isAligned = false;
+    if (alignmentLength != numBases) { isAligned = true; }
+    
 	if(endPos == -1){
 		for(int j=alignmentLength-1;j>=0;j--){
 			if((aligned[j] != '.')&&(aligned[j] != '-')){

@@ -10,6 +10,7 @@
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		4803D5A72118B352001C63B5 /* miseqsop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5A52118B352001C63B5 /* miseqsop.cpp */; };
+		4803D5AA211C9867001C63B5 /* testintegrationalignseqs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -855,6 +856,8 @@
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getcoremicrobiomecommand.h; path = source/commands/getcoremicrobiomecommand.h; sourceTree = SOURCE_ROOT; };
 		4803D5A52118B352001C63B5 /* miseqsop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = miseqsop.cpp; path = IntegrationTests/miseqsop.cpp; sourceTree = "<group>"; };
 		4803D5A62118B352001C63B5 /* miseqsop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = miseqsop.hpp; path = IntegrationTests/miseqsop.hpp; sourceTree = "<group>"; };
+		4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testintegrationalignseqs.cpp; path = TestMothur/IntegrationTests/testintegrationalignseqs.cpp; sourceTree = SOURCE_ROOT; };
+		4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testintegrationalignseqs.hpp; path = TestMothur/IntegrationTests/testintegrationalignseqs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testclustercalcs.cpp; sourceTree = "<group>"; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testclustercalcs.hpp; sourceTree = "<group>"; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -1865,6 +1868,8 @@
 			children = (
 				4803D5A62118B352001C63B5 /* miseqsop.hpp */,
 				4803D5A52118B352001C63B5 /* miseqsop.cpp */,
+				4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */,
+				4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */,
 			);
 			name = Integration;
 			sourceTree = "<group>";
@@ -3026,6 +3031,7 @@
 				48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */,
 				481FB5911AC1B71B0076CFF3 /* amovacommand.cpp in Sources */,
 				4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */,
+				4803D5AA211C9867001C63B5 /* testintegrationalignseqs.cpp in Sources */,
 				48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */,
 				481FB58A1AC1B6FF0076CFF3 /* myPerseus.cpp in Sources */,
 				487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */,

@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     
     current->setTestFilePath(pathname);
     
-    ::testing::GTEST_FLAG(filter) = "Test_Integration*";
+    ::testing::GTEST_FLAG(filter) = "Test_Integration_AlignSeqs*"; //Test_Command_BiomInfo
     ::testing::InitGoogleTest(&argc, argv);
     
 #ifndef UNIT_TEST

@@ -76,7 +76,7 @@ TestMiSeqSOP::~TestMiSeqSOP() {
 }
 /**************************************************************************************************/
 
-TEST(Test_Integration, MISEQMakeContigs2Precluster) {
+TEST(Test_Integration_MISEQSOP, MISEQMakeContigs2Precluster) {
     TestMiSeqSOP test;
     
     test.m->mothurOut("/******************************************/\n");
@@ -182,7 +182,7 @@ TEST(Test_Integration, MISEQMakeContigs2Precluster) {
 
 }
 
-TEST(Test_Integration, RemoveChimerasContaminants) {
+TEST(Test_Integration_MISEQSOP, RemoveChimerasContaminants) {
     TestMiSeqSOP test;
     
     test.m->mothurOut("/******************************************/\n");
@@ -247,7 +247,7 @@ TEST(Test_Integration, RemoveChimerasContaminants) {
     test.m->mothurOut("/******************************************/\n");
 }
 
-TEST(Test_Integration, AssessingErrorRates) {
+TEST(Test_Integration_MISEQSOP, AssessingErrorRates) {
     TestMiSeqSOP test;
     
     test.m->mothurOut("/******************************************/\n");
@@ -320,7 +320,7 @@ TEST(Test_Integration, AssessingErrorRates) {
     test.m->mothurOut("/******************************************/\n");
 }
 
-TEST(Test_Integration, PreparingForAnalysis) {
+TEST(Test_Integration_MISEQSOP, PreparingForAnalysis) {
     TestMiSeqSOP test;
     
     test.m->mothurOut("/******************************************/\n");
@@ -450,7 +450,7 @@ TEST(Test_Integration, PreparingForAnalysis) {
     test.m->mothurOut("/******************************************/\n");
 }
 
-TEST(Test_Integration, OTUBasedAnalysis) {
+TEST(Test_Integration_MISEQSOP, OTUBasedAnalysis) {
     TestMiSeqSOP test;
     
     test.m->mothurOut("/******************************************/\n");
@@ -627,7 +627,7 @@ TEST(Test_Integration, OTUBasedAnalysis) {
     test.m->mothurOut("/******************************************/\n");
 }
 
-TEST(Test_Integration, PhylogenyBasedAnalysis) {
+TEST(Test_Integration_MISEQSOP, PhylogenyBasedAnalysis) {
     TestMiSeqSOP test;
     
     test.m->mothurOut("/******************************************/\n");
