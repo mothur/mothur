@@ -78,8 +78,6 @@ TEST(Test_Container_SharedRabundVector, Constructors) {
 }
 
 TEST(Test_Container_SharedRabundVector, GetsSets) {
-    TestSharedRabundVector test;
-    
     vector<int> abunds(10, 5);
     SharedRAbundVector temp(abunds);
     EXPECT_EQ(temp.getNumBins(), 10);
@@ -98,8 +96,6 @@ TEST(Test_Container_SharedRabundVector, GetsSets) {
 }
 
 TEST(Test_Container_SharedRabundVector, Increment) {
-    TestSharedRabundVector test;
-    
     vector<int> abunds(10, 5);
     SharedRAbundVector temp(abunds);
     EXPECT_EQ(temp.getNumBins(), 10);
@@ -112,8 +108,6 @@ TEST(Test_Container_SharedRabundVector, Increment) {
 }
 
 TEST(Test_Container_SharedRabundVector, PushBack) {
-    TestSharedRabundVector test;
-    
     vector<int> abunds(10, 5);
     SharedRAbundVector temp(abunds);
     EXPECT_EQ(temp.getNumBins(), 10);
@@ -127,8 +121,6 @@ TEST(Test_Container_SharedRabundVector, PushBack) {
 }
 
 TEST(Test_Container_SharedRabundVector, ResizeSize) {
-    TestSharedRabundVector test;
-    
     vector<int> abunds(10, 5);
     SharedRAbundVector temp(abunds);
     EXPECT_EQ(temp.getNumBins(), 10);
@@ -148,8 +140,6 @@ TEST(Test_Container_SharedRabundVector, ResizeSize) {
 }
 
 TEST(Test_Container_SharedRabundVector, ClearRemove) {
-    TestSharedRabundVector test;
-    
     vector<int> abunds(10, 5);
     SharedRAbundVector temp(abunds);
     EXPECT_EQ(temp.getNumBins(), 10);
@@ -169,8 +159,6 @@ TEST(Test_Container_SharedRabundVector, ClearRemove) {
 }
 
 TEST(Test_Container_SharedRabundVector, GetRabundVector) {
-    TestSharedRabundVector test;
-    
     vector<int> abunds(10, 10);
     SharedRAbundVector temp(abunds);
     EXPECT_EQ(temp.getNumBins(), 10);
@@ -181,12 +169,9 @@ TEST(Test_Container_SharedRabundVector, GetRabundVector) {
     EXPECT_EQ(rabund.getNumBins(), 10);
     EXPECT_EQ(rabund.getNumSeqs(), 100);
     EXPECT_EQ(rabund.getMaxRank(), 10);
-    
 }
 
 TEST(Test_Container_SharedRabundVector, GetSabundVector) {
-    TestSharedRabundVector test;
-    
     vector<int> abunds(10, 5);
     SharedRAbundVector temp(abunds);
     EXPECT_EQ(temp.getNumBins(), 10);
@@ -198,12 +183,9 @@ TEST(Test_Container_SharedRabundVector, GetSabundVector) {
     EXPECT_EQ(sabund.getNumSeqs(), 50);
     EXPECT_EQ(sabund.getMaxRank(), 5);
     EXPECT_EQ(sabund.get(5), 10);
-    
 }
 
 TEST(Test_Container_SharedRabundVector, RAbundFloatVector) {
-    TestSharedRabundVector test;
-    
     vector<int> abunds(10, 5);
     SharedRAbundVector temp(abunds);
     EXPECT_EQ(temp.getNumBins(), 10);
@@ -218,7 +200,6 @@ TEST(Test_Container_SharedRabundVector, RAbundFloatVector) {
     EXPECT_EQ(rabundFloat.getNumBins(), 10.0);
     EXPECT_EQ(rabundFloat.getNumSeqs(), 57.5);
     EXPECT_EQ(rabundFloat.getMaxRank(), 12.5);
-    
 }
 
 /**************************************************************************************************/

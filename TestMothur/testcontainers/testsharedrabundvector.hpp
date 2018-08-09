@@ -10,7 +10,6 @@
 #define testsharedrabundvector_hpp
 
 #include "sharedrabundvector.hpp"
-#include "rabundfloatvector.hpp"
 #include "gtest/gtest.h"
 
 
@@ -23,9 +22,6 @@ public:
     
     MothurOut* m;
     string sharedFile;
-    
-    using SharedRAbundVector::data;
-        
 };
 
 

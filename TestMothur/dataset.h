@@ -33,6 +33,7 @@ public:
     vector<string> getOptiRefFiles(); //fasta, count, column, phylip, list, betweendist
     vector<string> getOligosFiles(); //single, paired, indexes, comboNamesTest
     string getSharedFile(); //shared
+    string getRelabundFile(); //relabund
     
 private:
     MothurOut* m;

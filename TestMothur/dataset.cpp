@@ -71,6 +71,11 @@ vector<string> TestDataSet::getSubsetFNGFiles() {
 string TestDataSet::getSharedFile() {
     return testDir+"test.opti_mcc.shared";
 }
+/***********************************************************************/
+
+string TestDataSet::getRelabundFile() {
+    return testDir+"test.opti_mcc.relabund";
+}
 
 /***********************************************************************/
 

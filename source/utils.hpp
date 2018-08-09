@@ -164,6 +164,7 @@ public:
     float roundDist(float, int);
     int sum(vector<int> v) { return (accumulate(v.begin(), v.end(), 0)); }
     double sum(vector<double> v ) { return (accumulate(v.begin(), v.end(), 0.0)); }
+    float sum(vector<float> v ) { return (accumulate(v.begin(), v.end(), 0.0)); }
     int max(vector<int> v) {  int max = 0; vector<int>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     float max(vector<float> v) {  float max = 0; vector<float>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     double max(vector<double> v) {  double max = 0; vector<double>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
