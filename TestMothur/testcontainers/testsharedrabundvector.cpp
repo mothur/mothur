@@ -75,6 +75,7 @@ TEST(Test_Container_SharedRabundVector, Constructors) {
     EXPECT_EQ(temp3.getNumSeqs(), 18);
     EXPECT_EQ(temp3.getMaxRank(), 5);
     EXPECT_EQ(temp3.getGroup(), "F003D004");
+    in.close();
 }
 
 TEST(Test_Container_SharedRabundVector, GetsSets) {

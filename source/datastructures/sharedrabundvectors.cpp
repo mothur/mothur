@@ -231,14 +231,15 @@ int SharedRAbundVectors::push_back(SharedRAbundVector* thisLookup){
     try {
         
         if (numBins == 0) {  numBins = thisLookup->getNumBins();  }
+        else if (numBins != thisLookup->getNumBins()) { m->mothurOut("[ERROR]: Number of bins does not match. Expected " + toString(numBins) + " found " + toString(thisLookup->getNumBins()) + ".\n"); m->setControl_pressed(true); return 0; }
+        
         lookup.push_back(thisLookup);
         sort(lookup.begin(), lookup.end(), compareRAbunds);
         if (label == "") { label = thisLookup->getLabel(); }
         groupNames.clear();
         for (int i = 0; i < lookup.size(); i ++) { groupNames[lookup[i]->getGroup()] = i; }
         
-        return lookup.size();
-        
+        return ((int)lookup.size());
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundVectors", "push_back");
@@ -282,6 +283,7 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
             binLabel = potentialLabel;
         }
         currentLabels.push_back(binLabel);
+        numBins++;
         
         return lookup.size();
     }

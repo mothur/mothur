@@ -75,6 +75,7 @@ TEST(Test_Container_SharedRabundFloatVector, Constructors) {
     ASSERT_NEAR(temp3.getNumSeqs(), 1, 0.001);
     ASSERT_NEAR(temp3.getMaxRank(), 0.277778, 0.001);
     EXPECT_EQ(temp3.getGroup(), "F003D004");
+    in.close();
 }
 
 TEST(Test_Container_SharedRabundFloatVector, GetsSets) {
