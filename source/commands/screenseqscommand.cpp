@@ -532,7 +532,7 @@ int ScreenSeqsCommand::execute(){
                     variables["[extension]"] = util.getExtension(qualfile);
                     string outQual = getOutputFileName("qfile", variables);
                     util.renameFile(filenames["qfile"][0], outQual);
-                    outputNames.push_back(outQual); outputTypes["name"].push_back(outQual);
+                    outputNames.push_back(outQual); outputTypes["qfile"].push_back(outQual);
                 }
                 
                 if (taxonomy != "") {
@@ -542,7 +542,7 @@ int ScreenSeqsCommand::execute(){
                     variables["[extension]"] = util.getExtension(taxonomy);
                     string outTax = getOutputFileName("taxonomy", variables);
                     util.renameFile(filenames["taxonomy"][0], outTax);
-                    outputNames.push_back(outTax); outputTypes["count"].push_back(outTax);
+                    outputNames.push_back(outTax); outputTypes["taxonomy"].push_back(outTax);
                 }
             }
         }
@@ -812,7 +812,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; util.gobble(in2);
+                in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs >> expectedErrors;; util.gobble(in2);
                 
                 if (badSeqNames.count(name) == 0) { //are you good?
                     out2 << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << '\t' << expectedErrors << endl;
@@ -871,7 +871,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             if(minLength > length)                          {	goodSeq = false;	trashCode += "<length|"; }
             if(maxLength != -1 && maxLength < length)		{	goodSeq = false;	trashCode += ">length|"; }
             
-            if(goodSeq == 1){
+            if(goodSeq){
                 out << name << '\t' << start  << '\t' << end  << '\t' << length  << '\t' << ambigs  << '\t' << polymer  << '\t' << numReps << endl;	
             }
             else{ badSeqNames[name] = trashCode; }

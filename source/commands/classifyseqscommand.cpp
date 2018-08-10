@@ -705,9 +705,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         positions = util.divideFile(filename, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 #else
-        if (processors == 1) {
-            lines.push_back(new linePair(0, 1000));
-        }else {
+        
             positions = util.setFilePosFasta(filename, num);
             if (num < processors) { processors = num; }
             
@@ -718,7 +716,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
                 if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
                 lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
             }
-        }
+       
 #endif
         auto synchronizedAccnosFile = std::make_shared<SynchronizedOutputFile>(accnos);
         auto synchronizedTaxFile = std::make_shared<SynchronizedOutputFile>(taxFileName);

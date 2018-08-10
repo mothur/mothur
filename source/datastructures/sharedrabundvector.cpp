@@ -176,7 +176,14 @@ int SharedRAbundVector::remove(int bin){
     }
 }
 /***********************************************************************/
-void SharedRAbundVector::resize(int size){ data.resize(size); }
+void SharedRAbundVector::resize(int size){
+    data.resize(size);
+    
+    vector<int>::iterator it = max_element(data.begin(), data.end());
+    maxRank = *it;
+    numSeqs = util.sum(data);
+    numBins = size;
+}
 /***********************************************************************/
 int SharedRAbundVector::size(){ return data.size(); }
 /***********************************************************************/
@@ -215,6 +222,15 @@ RAbundVector SharedRAbundVector::getRAbundVector(){
     RAbundVector rav;
     for(int i = 0; i < data.size(); i++) { if (data[i] != 0) {  rav.push_back(int(data[i])); } }
     rav.setLabel(label);
+    return rav;
+}
+/***********************************************************************/
+
+RAbundFloatVector SharedRAbundVector::getRAbundFloatVector(){
+    RAbundFloatVector rav;
+    for(int i = 0; i < data.size(); i++) { if (data[i] != 0) {  rav.push_back(float(data[i])); } }
+    rav.setLabel(label);
+    rav.setGroup(group);
     return rav;
 }
 /***********************************************************************/

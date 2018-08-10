@@ -14,8 +14,7 @@
 string MothurChimera::createFilter(vector<Sequence*> seqs, float t) {
 	try {
 		filterString = "";
-		int threshold = int (t * seqs.size());
-//cout << "threshhold = " << threshold << endl;
+        int threshold = int (t * seqs.size());
 		
 		vector<int> gaps;	gaps.resize(seqs[0]->getAligned().length(), 0);
 		vector<int> a;		a.resize(seqs[0]->getAligned().length(), 0);
@@ -53,7 +52,6 @@ string MothurChimera::createFilter(vector<Sequence*> seqs, float t) {
 			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
 			
 			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	numColRemoved++;  }
-			//cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
 		}
 
 		if (threshold != 0.0) {  m->mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  m->mothurOutEndLine();  }

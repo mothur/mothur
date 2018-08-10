@@ -672,7 +672,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
             if ((*it != "unique") && (convertTestFloat(*it, temp) ))	{	util.mothurConvert(*it, temp);	}
             else if (*it == "unique")										{	temp = -1.0;		}
             
-            double ttemp = temp * 1000; ttemp = ceil(temp);
+            //double ttemp = temp * 1000; ttemp = ceil(temp);
             
             if (temp < cutoff) {
                 orderFloat.push_back(temp);
@@ -704,6 +704,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 			ofstream outFilled;
 			util.openOutputFile(filledInList, outFilled);
             bool printHeaders = true;
+            
             
 			//for each label needed
 			for(int l = 0; l < orderFloat.size(); l++){
@@ -1098,8 +1099,8 @@ string runOptiCluster(string thisDistFile, string thisNamefile, double& smallest
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(smallestCutoff));
-        params->cutoff = params->util.ceilDist(params->cutoff, params->precision);
-        params->labels.insert(toString(params->cutoff));
+        //params->cutoff = params->util.ceilDist(params->cutoff, params->precision);
+        params->labels.insert(toString(smallestCutoff));
         
         ofstream listFile;
         params->util.openOutputFile(listFileName,	listFile);
@@ -1209,12 +1210,11 @@ int vsearchDriver(string inputFile, string ucClusteredFile, string logfile, doub
             vsearchParameters.push_back(sizeorder);
         }
         
-        if (params->m->getDebug()) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
+        if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: "); for(int i = 0; i < vsearchParameters.size(); i++)  { params->m->mothurOut(toString(vsearchParameters[i]) + "\t"); } params->m->mothurOut("\n");  }
         
         string commandString = "";
         for (int i = 0; i < vsearchParameters.size(); i++) {    commandString += toString(vsearchParameters[i]) + " "; }
         
-        //cout << "commandString = " << commandString << endl;
 #if defined NON_WINDOWS
 #else
         commandString = "\"" + commandString + "\"";
@@ -1322,7 +1322,6 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
             }else { read->read(nameMap); }
             
             list = read->getListVector();
-            oldList = *list;
             matrix = read->getDMatrix();
             
             if(params->useCount) {
@@ -1355,7 +1354,8 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
             float rndPreviousDist = 0.00000;
             bool printHeaders = true;
             
-            time_t start = time(NULL);
+            oldList = *list;
+            
             double saveCutoff = params->cutoff;
             
             while (matrix->getSmallDist() < params->cutoff && matrix->getNNodes() > 0){
@@ -1379,6 +1379,7 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
                     if (params->labels.count("unique") == 0) {  params->labels.insert("unique");  }
                 }
                 else if(rndDist != rndPreviousDist){
+                    oldList.setPrintedLabels(printHeaders);
                     oldList.setLabel(toString(rndPreviousDist,  params->length-1));
                     oldList.setPrintedLabels(printHeaders);
                     oldList.print(listFile); printHeaders = false;

@@ -366,7 +366,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
                 uniques++;
             }else {
                 error = true;
-                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); 
+                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct.\n");  
             }
         }
         in.close();
@@ -393,7 +393,7 @@ int CountTable::printTable(string file) {
         ofstream out;
         util.openOutputFile(file, out); 
 		out << "Representative_Sequence\ttotal";
-        for (int i = 0; i < groups.size(); i++) { out << '\t' << groups[i]; }
+        if (hasGroups) {  for (int i = 0; i < groups.size(); i++) { out << '\t' << groups[i]; }  }
         out << endl;
         
         map<int, string> reverse; //use this to preserve order

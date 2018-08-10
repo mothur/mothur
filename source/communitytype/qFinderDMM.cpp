@@ -14,20 +14,14 @@
 
 qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
     try {
-        //cout << "here" << endl;
+        
         numPartitions = p;
         countMatrix = cm;
         numSamples = (int)countMatrix.size();
         numOTUs = (int)countMatrix[0].size();
         
-       // if (m->getDebug()) { m->mothurOut("before kmeans\n"); }
         findkMeans();
-       //if (m->getDebug()) { m->mothurOut("done kMeans\n"); }
-        
         optimizeLambda();
-        
-        
-         //if (m->getDebug()) { m->mothurOut("done optimizeLambda\n"); }
         
         double change = 1.0000;
         currNLL = 0.0000;
@@ -36,20 +30,16 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
         
         while(change > 1.0e-6 && iter < 100){
             
-           // if (m->getDebug()) { m->mothurOut("Calc_Z: \n"); }
             calculatePiK();
             
             optimizeLambda();
-            
-              // if (m->getDebug()) { m->mothurOut("Iter: " + toString(iter) + "\n"); }
             
             for(int i=0;i<numPartitions;i++){
                 weights[i] = 0.0000;
                 for(int j=0;j<numSamples;j++){
                     weights[i] += zMatrix[i][j];
                 }
-                           // printf("w_%d=%.3f\t",i,weights[i]);
-                
+               
             }
             
             double nLL = getNegativeLogLikelihood();
@@ -57,12 +47,9 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
             change = abs(nLL - currNLL);
             
             currNLL = nLL;
-            
-                  //  printf("NLL=%.5f\tDelta=%.4e\n",currNLL, change);
-            
+           
             iter++;
         }
-        //if (m->getDebug()) { m->mothurOut("done while loop\n"); }
         error.resize(numPartitions);
         
         logDeterminant = 0.0000;
@@ -78,12 +65,9 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
             if(currentPartition > 0){
                 logDeterminant += (2.0 * log(numSamples) - log(weights[currentPartition]));
             }
-            //if (m->getDebug()) { m->mothurOut("before hession\n"); }
-            vector<vector<double> > hessian = getHessian();
-            //if (m->getDebug()) { m->mothurOut("after hession\n"); }
+           vector<vector<double> > hessian = getHessian();
             vector<vector<double> > invHessian = l.getInverse(hessian);
-            //if (m->getDebug()) { m->mothurOut("after inverse\n"); }
-            for(int i=0;i<numOTUs;i++){
+           for(int i=0;i<numOTUs;i++){
                 logDeterminant += log(abs(hessian[i][i]));
                 error[currentPartition][i] = invHessian[i][i];
             }
@@ -451,19 +435,15 @@ int qFinderDMM::lineMinimizeFletcher(vector<double>& x, vector<double>& p, doubl
 
 int qFinderDMM::bfgs2_Solver(vector<double>& x){
     try{
-//        cout << "bfgs2_Solver" << endl;
+
         int bfgsIter = 0;
         double step = 1.0e-6;
         double delta_f = 0.0000;//f-f0;
 
         vector<double> gradient;
         double f = negativeLogEvidenceLambdaPi(x);
-        
-//        cout << "after negLE" << endl;
-        
+    
         negativeLogDerivEvidenceLambdaPi(x, gradient);
-
-//        cout << "after negLDE" << endl;
 
         vector<double> x0 = x;
         vector<double> g0 = gradient;
@@ -485,7 +465,6 @@ int qFinderDMM::bfgs2_Solver(vector<double>& x){
 
         int maxIter = 5000;
         
-//        cout << "before while" << endl;
         
         while(g0norm > 0.001 && bfgsIter++ < maxIter){
             if (m->getControl_pressed()) {  return 0; }
@@ -580,7 +559,7 @@ int qFinderDMM::bfgs2_Solver(vector<double>& x){
             pNorm = sqrt(pNorm);
 
         }
-//        cout << "bfgsIter:\t" << bfgsIter << endl;
+
 
         return bfgsIter;
     }
@@ -644,7 +623,6 @@ double qFinderDMM::negativeLogEvidenceLambdaPi(vector<double>& x){
 
 void qFinderDMM::negativeLogDerivEvidenceLambdaPi(vector<double>& x, vector<double>& df){
     try{
-//        cout << "\tstart negativeLogDerivEvidenceLambdaPi" << endl;
         
         vector<double> storeVector(numSamples, 0.0000);
         vector<double> derivative(numOTUs, 0.0000);
@@ -662,20 +640,11 @@ void qFinderDMM::negativeLogDerivEvidenceLambdaPi(vector<double>& x, vector<doub
         
         for(int i=0;i<numOTUs;i++){
             if (m->getControl_pressed()) {  return; }
-//            cout << "start i loop" << endl;
-//            
-//            cout << i << '\t' << alpha[i] << '\t' << x[i] << '\t' << exp(x[i]) << '\t' << store << endl;
             
             alpha[i] = exp(x[i]);
             store += alpha[i];
             
-//            cout << "before derivative" << endl;
-            
             derivative[i] = weight * psi(alpha[i]);
-
-//            cout << "after derivative" << endl;
-
-//            cout << i << '\t' << alpha[i] << '\t' << psi(alpha[i]) << '\t' << derivative[i] << endl;
 
             for(int j=0;j<numSamples;j++){
                 double X = countMatrix[j][i];
@@ -684,7 +653,6 @@ void qFinderDMM::negativeLogDerivEvidenceLambdaPi(vector<double>& x, vector<doub
                 derivative[i] -= zMatrix[currentPartition][j] * psi(alphaX);
                 storeVector[j] += alphaX;
             }
-//            cout << "end i loop" << endl;
         }
 
         double sumStore = 0.0000;
@@ -698,10 +666,7 @@ void qFinderDMM::negativeLogDerivEvidenceLambdaPi(vector<double>& x, vector<doub
         
         for(int i=0;i<numOTUs;i++){
             df[i] = alpha[i] * (nu + derivative[i] - store + sumStore) - eta;
-//            cout << i << '\t' << df[i] << endl;
         }
-//        cout << df.size() << endl;
-//        cout << "\tend negativeLogDerivEvidenceLambdaPi" << endl;
     }
     catch(exception& e){
          m->errorOut(e, "qFinderDMM", "negativeLogDerivEvidenceLambdaPi");

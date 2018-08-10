@@ -295,9 +295,7 @@ string ChimeraReAligner::getNewAlignment(string query){
 				q = gapChar;
 				currentRow--;
 			}
-			else{
-				cout << "you shouldn't be here..." << endl;
-			}
+            else{ m->mothurOut("[ERROR]: Unexpected case in ChimeraReAligner::getNewAlignment, aborting.\n"); m->setControl_pressed(true); }
 
 			queryAlignment[alignmentPosition] = q;
 			alignmentPosition++;

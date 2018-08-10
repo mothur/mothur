@@ -32,24 +32,6 @@ Sequence::Sequence(string newName, string sequence) {
 		exit(1);
 	}			
 }
-/***********************************************************************/
-Sequence::Sequence(string newName, string sequence, string justUnAligned) {
-	try {
-		m = MothurOut::getInstance();
-		initialize();	
-		name = newName;
-        
-        util.checkName(name);
-		
-		//setUnaligned removes any gap characters for us
-		setUnaligned(sequence);
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Sequence", "Sequence");
-		exit(1);
-	}			
-}
-
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
 Sequence::Sequence(istringstream& fastaString){
@@ -95,52 +77,6 @@ Sequence::Sequence(istringstream& fastaString){
 		exit(1);
 	}								
 }
-//********************************************************************************************************************
-//this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
-Sequence::Sequence(istringstream& fastaString, string JustUnaligned){
-	try {
-		m = MothurOut::getInstance();
-	
-		initialize();
-		name = getSequenceName(fastaString);
-		
-		if (!m->getControl_pressed()) { 
-			string sequence;
-		
-			//read comments
-			while ((name[0] == '#') && fastaString) { 
-				while (!fastaString.eof())	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				sequence = getCommentString(fastaString);
-				
-				if (fastaString) {  
-					fastaString >> name;  
-					name = name.substr(1);	
-				}else { 
-					name = "";
-					break;
-				}
-			}
-			
-			//while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){ break;	}	} // get rest of line if there's any crap there
-            comment = getCommentString(fastaString);
-			
-			int numAmbig = 0;
-			sequence = getSequenceString(fastaString, numAmbig);
-			
-			//setUnaligned removes any gap characters for us						
-			setUnaligned(sequence);	
-			
-			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
-			
-		}
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Sequence", "Sequence");
-		exit(1);
-	}								
-}
-
 
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
@@ -282,50 +218,6 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
 		}
         
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Sequence", "Sequence");
-		exit(1);
-	}							
-}
-//********************************************************************************************************************
-//this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
-Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
-	try {
-		m = MothurOut::getInstance();
-		initialize();
-		name = getSequenceName(fastaFile);
-		
-		if (!m->getControl_pressed()) { 
-			string sequence;
-			
-			//read comments
-			while ((name[0] == '#') && fastaFile) { 
-				while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				sequence = getCommentString(fastaFile);
-				
-				if (fastaFile) {  
-					fastaFile >> name;  
-					name = name.substr(1);	
-				}else { 
-					name = "";
-					break;
-				}
-			}
-			
-			//while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	 break;	}	} // get rest of line if there's any crap there
-            comment = getCommentString(fastaFile);
-			
-			int numAmbig = 0;
-			sequence = getSequenceString(fastaFile, numAmbig);
-			
-			//setUnaligned removes any gap characters for us						
-			setUnaligned(sequence);	
-			
-			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
-			
-		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Sequence", "Sequence");
@@ -582,7 +474,6 @@ void Sequence::initialize(){
 	
 	numBases = 0;
 	alignmentLength = 0;
-	isAligned = 0;
 	startPos = -1;
 	endPos = -1;
 	longHomoPolymer = -1;
@@ -646,7 +537,6 @@ void Sequence::setAligned(string sequence){
 			}
 		}
 	}
-	isAligned = 1;
 }
 
 //********************************************************************************************************************
@@ -683,8 +573,7 @@ string Sequence::getName(){
 //********************************************************************************************************************
 
 string Sequence::getAligned(){
-	if(isAligned == 0)	{ return unaligned; }
-	else				{  return aligned;  }
+	 return aligned;
 }
 
 //********************************************************************************************************************
@@ -728,9 +617,7 @@ int Sequence::getNumNs(){
 void Sequence::printSequence(OutputWriter* out){
     string seqOutput = ">";
     seqOutput += name + '\t' + comment + '\n';
-    if(isAligned){ seqOutput += aligned + '\n'; }
-    else{ seqOutput += unaligned + '\n'; }
-    
+    seqOutput += aligned + '\n';
     out->write(seqOutput);
 }
 //********************************************************************************************************************
@@ -738,12 +625,7 @@ void Sequence::printSequence(OutputWriter* out){
 void Sequence::printSequence(ostream& out){
 
 	out << ">" << name << comment << endl;
-	if(isAligned){
-		out << aligned << endl;
-	}
-	else{
-		out << unaligned << endl;
-	}
+    out << aligned << endl;
 }
 //********************************************************************************************************************
 
@@ -777,7 +659,7 @@ int Sequence::getAmbigBases(){
 
 void Sequence::removeAmbigBases(){
 	
-	for(int j=0;j<alignmentLength;j++){
+	for(int j=getStartPos();j<getEndPos();j++){
 		if(aligned[j] != 'A' && aligned[j] != 'T' && aligned[j] != 'G' && aligned[j] != 'C'){
 			aligned[j] = '-';
 		}
@@ -808,38 +690,28 @@ int Sequence::getLongHomoPolymer(){
 //********************************************************************************************************************
 
 int Sequence::getStartPos(){
+    bool isAligned = false;
 	if(startPos == -1){
 		for(int j = 0; j < alignmentLength; j++) {
 			if((aligned[j] != '.')&&(aligned[j] != '-')){
 				startPos = j + 1;
 				break;
-			}
+            }else { isAligned = true; }
 		}
 	}
-	if(isAligned == 0){	startPos = 1;	}
+    
+	if(!isAligned){	startPos = 1;	}
 
 	return startPos;
 }
 
 //********************************************************************************************************************
 
-void Sequence::padToPos(int start){
-
-	for(int j = startPos-1; j < start-1; j++) {
-		aligned[j] = '.';
-	}
-	startPos = start;
-
-}
-//********************************************************************************************************************
-
 int Sequence::filterToPos(int start){
     
     if (start > aligned.length()) { start = aligned.length(); m->mothurOut("[ERROR]: start to large.\n"); }
     
-	for(int j = 0; j < start; j++) {
-		aligned[j] = '.';
-	}
+	for(int j = 0; j < start; j++) { aligned[j] = '.'; }
 	
     //things like ......----------AT become ................AT
     for(int j = start; j < aligned.length(); j++) {
@@ -870,37 +742,45 @@ int Sequence::filterFromPos(int end){
     
     return 0;
 }
+
 //********************************************************************************************************************
 
 int Sequence::getEndPos(){
+    bool isAligned = false;
+    if (alignmentLength != numBases) { isAligned = true; }
+    
 	if(endPos == -1){
 		for(int j=alignmentLength-1;j>=0;j--){
 			if((aligned[j] != '.')&&(aligned[j] != '-')){
 				endPos = j + 1;
 				break;
-			}
+            }else { isAligned = true; }
 		}
 	}
-	if(isAligned == 0){	endPos = numBases;	}
+	if(!isAligned){	endPos = numBases;	}
 	
 	return endPos;
+}
+//********************************************************************************************************************
+
+void Sequence::padToPos(int start){
+    
+    for(int j = getStartPos()-1; j < start-1; j++) {
+        aligned[j] = '.';
+    }
+    startPos = start;
+    
 }
 
 //********************************************************************************************************************
 
 void Sequence::padFromPos(int end){
-	//cout << end << '\t' << endPos << endl;
-	for(int j = end; j < endPos; j++) {
+	
+	for(int j = end; j < getEndPos(); j++) {
 		aligned[j] = '.';
 	}
 	endPos = end;
 	
-}
-
-//********************************************************************************************************************
-
-bool Sequence::getIsAligned(){
-	return isAligned;
 }
 //********************************************************************************************************************
 
@@ -931,10 +811,8 @@ void Sequence::trim(int length){
 	if(numBases > length){
 		unaligned = unaligned.substr(0,length);
 		numBases = length;
-        aligned = "";
-        isAligned = 0;
+        setAligned(unaligned);
 	}
-	
 }
 
 ///**************************************************************************************************/

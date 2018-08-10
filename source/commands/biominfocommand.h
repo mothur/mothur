@@ -36,7 +36,7 @@ public:
     int execute();
     void help() { m->mothurOut(getHelpString()); }
     
-private:
+protected:
     void printSharedData(SharedRAbundVectors*, ofstream&);
     int createFilesFromBiom();
     string getTag(string&);

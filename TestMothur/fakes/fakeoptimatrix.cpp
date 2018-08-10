@@ -9,7 +9,7 @@
 #include "fakeoptimatrix.hpp"
 
 /***********************************************************************/
-FakeOptiMatrix::FakeOptiMatrix() : OptiMatrix() {
+FakeOptiMatrix::FakeOptiMatrix() : OptiData(0.03) {
     try {
         m = MothurOut::getInstance();
         

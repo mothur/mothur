@@ -11,6 +11,20 @@
 #include "sharedordervector.h"
 
 /***********************************************************************/
+string getLabelTag(string label){
+    
+    string tag = "";
+    
+    //remove OTU or phylo tag
+    string newLabel1 = "";
+    for (int i = 0; i < label.length(); i++) {
+        if(label[i]>47 && label[i]<58) { //is a digit
+        }else {  tag += label[i];  }
+    }
+    
+    return tag;
+}
+/***********************************************************************/
 Utils::Utils(){
     try {
 
@@ -101,6 +115,17 @@ void Utils::mothurRandomShuffle(vector<int>& randomize){
 
 }
 /***********************************************************************/
+void Utils::mothurRandomShuffle(vector<long long>& randomize){
+    try {
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurRandomShuffle");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 void Utils::mothurRandomShuffle(OrderVector& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
@@ -187,6 +212,23 @@ void Utils::mothurRandomShuffle(vector< vector<double> >& randomize){
         exit(1);
     }
 
+}
+/***********************************************************************/
+long long Utils::getRandomIndex(long long highest){
+    try {
+        
+        if (highest == 0) {  return 0; }
+        
+        uniform_int_distribution<long long> dis(0, highest);
+        
+        long long random = dis(mersenne_twister_engine);
+        
+        return random;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getRandomIndex");
+        exit(1);
+    }
 }
 /***********************************************************************/
 
@@ -1213,6 +1255,28 @@ string Utils::getline(ifstream& fileHandle) {
         exit(1);
     }
 }
+#ifdef USE_BOOST
+/***********************************************************************/
+string Utils::getline(boost::iostreams::filtering_istream& fileHandle) {
+    try {
+        string line = "";
+        while (fileHandle)	{
+            //get next character
+            char c = fileHandle.get();
+            
+            //are you at the end of the line
+            if ((c == '\n') || (c == '\r') || (c == '\f') || (c == EOF)){ break; }
+            else {		line += c;		}
+        }
+        
+        return line;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getline");
+        exit(1);
+    }
+}
+#endif
 /**********************************************************************/
 string Utils::getPathName(string longName){
     try {
@@ -1354,16 +1418,18 @@ int Utils::getOTUNames(vector<string>& currentLabels, int numBins, string tagHea
 
             for (int i = 0; i < numBins; i++) {
                 string binLabel = tagHeader;
-                if (i < currentLabels.size()) { //label exists, check leading zeros length
-                    string sbinNumber = getSimpleLabel(currentLabels[i]);
-                    int tempBinNumber; mothurConvert(sbinNumber, tempBinNumber);
-                    if (tempBinNumber > maxLabelNumber) { maxLabelNumber = tempBinNumber; }
-                    if (sbinNumber.length() < snumBins.length()) {
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                if (i < currentLabels.size()) { //label exists
+                    if (getLabelTag(currentLabels[i]) == tagHeader) { //adjust 0's??
+                        string sbinNumber = getSimpleLabel(currentLabels[i]);
+                        int tempBinNumber; mothurConvert(sbinNumber, tempBinNumber);
+                        if (tempBinNumber > maxLabelNumber) { maxLabelNumber = tempBinNumber; }
+                        if (sbinNumber.length() < snumBins.length()) {
+                            int diff = snumBins.length() - sbinNumber.length();
+                            for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                        }
+                        binLabel += sbinNumber;
+                        currentLabels[i] = binLabel;
                     }
-                    binLabel += sbinNumber;
-                    currentLabels[i] = binLabel;
                 }else{ //create new label
                     string sbinNumber = toString(maxLabelNumber+1); maxLabelNumber++;
                     if (sbinNumber.length() < snumBins.length()) {
@@ -1555,7 +1621,7 @@ bool Utils::isUTF_8(string& input){
 
             //try to convert it
             // Get the line length (at least for the valid part)
-            int length = utf8::distance(input.begin(), end_it);
+            //int length = utf8::distance(input.begin(), end_it);
             m->mothurOut("[WARNING]: trying to convert " + input + " to UTF-8 format..."); cout.flush();
 
             // Convert it to utf-16
@@ -1828,7 +1894,7 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, long long&
                 while(isspace(d) && (d != in.eof()))		{ d=in.get(); count++;}
             }
             positions.push_back(count-1);
-            //cout << count-1 << endl;
+            
         }
         in.close();
 
@@ -1883,7 +1949,6 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, unsigned l
                 while(isspace(d) && (d != in.eof()))		{ d=in.get(); count++;}
             }
             positions.push_back(count-1);
-            //cout << count-1 << endl;
         }
         in.close();
 
@@ -2254,7 +2319,7 @@ vector<string> Utils::splitWhiteSpace(string& rest, char buffer[], int size){
                 if (rest != "") { pieces.push_back(rest);  rest = ""; }
                 while (i < size) {  //gobble white space
                     if (isspace(buffer[i])) { i++; }
-                    else { rest = buffer[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                    else { rest = buffer[i];  break; }
                 }
             }
         }
@@ -2278,7 +2343,7 @@ vector<string> Utils::splitWhiteSpace(string input){
                 if (rest != "") { pieces.push_back(rest);  rest = ""; }
                 while (i < input.length()) {  //gobble white space
                     if (isspace(input[i])) { i++; }
-                    else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                    else { rest = input[i];  break; }
                 }
             }
         }
@@ -2305,7 +2370,7 @@ int Utils::splitWhiteSpace(string input, vector<float>& pieces, int index){
                 if (rest != "") { float tdist; mothurConvert(rest, tdist); pieces.push_back(tdist); count++; rest = ""; }
                 while (i < input.length()) {  //gobble white space
                     if (isspace(input[i])) { i++; }
-                    else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                    else { rest = input[i];  break; }
                 }
                 if (count > index) { return 0; }
             }
@@ -2346,7 +2411,7 @@ vector<string> Utils::splitWhiteSpaceWithQuotes(string input){
                     if (rest != "") { pieces.push_back(rest);  rest = ""; }
                     while (i < input.length()) {  //gobble white space
                         if (isspace(input[i])) { i++; }
-                        else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                        else { rest = input[i];  break; } 
                     }
                 }
             }
@@ -2377,6 +2442,7 @@ int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfi
             taxonomy = getline(in); gobble(in);
 
             checkName(name);
+            
             //are there confidence scores, if so remove them
             if (removeConfidence) {  if (taxonomy.find_first_of('(') != -1) {  removeConfidences(taxonomy);	} }
             map<string, string>::iterator itTax = taxMap.find(name);
@@ -2761,6 +2827,61 @@ map<string, int> Utils::readNames(string namefile) {
         exit(1);
     }
 }
+/**********************************************************************************************************************/
+void Utils::readNames(string namefile, map<string, long long>& nameMap) {
+    try {
+        //open input file
+        ifstream in; openInputFile(namefile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+            
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) {
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    long long num = getNumNames(secondCol);
+                    nameMap[firstCol] = num;
+                    pairDone = false;
+                }
+            }
+        }
+        in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) {
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    long long num = getNumNames(secondCol);
+                    nameMap[firstCol] = num;
+                    pairDone = false;
+                }
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "readNames");
+        exit(1);
+    }
+}
+
 /**********************************************************************************************************************/
 map<string, int> Utils::readNames(string namefile, unsigned long int& numSeqs) {
     try {
@@ -3349,6 +3470,22 @@ bool Utils::isNumeric1(string stringToCheck){
 
 }
 /***********************************************************************/
+bool Utils::isPositiveNumeric(string stringToCheck){
+    try {
+        bool numeric = false;
+        
+        if (stringToCheck == "") { numeric = false;  }
+        else if(stringToCheck.find_first_not_of("0123456789.") == string::npos) { numeric = true; }
+        
+        return numeric;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "isPositiveNumeric");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 bool Utils::allSpaces(string stringToCheck){
     try {
 
@@ -3692,6 +3829,23 @@ int Utils::factorial(int num){
         exit(1);
     }
 }
+/***********************************************************************/
+int Utils::getAlignmentLength(string file){
+    try {
+        ifstream in; openInputFile(file, in);
+        
+        Sequence seq(in);
+        
+        in.close();
+        
+        return seq.getAlignLength();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getAlignmentLength");
+        exit(1);
+    }
+}
+
 /***********************************************************************/
 
 int Utils::getNumSeqs(ifstream& file){
@@ -4558,7 +4712,7 @@ bool Utils::isContainingOnlyDigits(string input) {
 bool Utils::findTaxon(string tax, string stax) {
     try {
         string taxon = "";
-        int taxLength = tax.length();
+        //int taxLength = tax.length();
         string searchTax = stax;
         if (searchTax[searchTax.length()-1] == ';') { searchTax = stax.substr(0, searchTax.length()-1); }
 
@@ -4688,7 +4842,7 @@ bool Utils::hasConfidenceScore(string& taxon, float& confidence) {
 
         if ((openParen != string::npos) && (closeParen != string::npos)) {
             string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
-            if (isNumeric1(confidenceScore)) {  //its a confidence
+            if (isPositiveNumeric(confidenceScore)) {  //its a confidence
                 taxon = taxon.substr(0, openParen); //rip off confidence
                 mothurConvert(confidenceScore, confidence);
                 return true;
@@ -4729,7 +4883,7 @@ float Utils::removeConfidences(string& tax) {
                 int pos2 = taxon.find_last_of(')');
                 if (pos2 != -1) {
                     string temp = taxon.substr(pos+1, (pos2-(pos+1)));
-                    if (isNumeric1(temp)) {
+                    if (isPositiveNumeric(temp)) {
                         taxon = taxon.substr(0, pos); //rip off confidence
                         confidenceScore = temp;
                     }

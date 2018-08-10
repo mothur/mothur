@@ -264,7 +264,7 @@ int MakeLookupCommand::execute(){
             else{
                 
                 flowFile >> flowQuery >> dummy;
-                if(flowQuery != errorQuery){    cout << flowQuery << " != " << errorQuery << endl;  }
+                if(flowQuery != errorQuery){    m->mothurOut("[ERROR]: " + flowQuery + " != " + errorQuery + "\n");  }
                 
                 map<string, vector<double> >::iterator it = refFlowgrams.find(referenceName);       //  * compare sequence to its closest reference
                 if (it == refFlowgrams.end()) {
@@ -452,8 +452,6 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         int numQueryFlows = (int)flowgram.size();
         int numRefFlows = (int)refFlow.size();
         
-            //cout << numQueryFlows << '\t' << numRefFlows << endl;
-        
         vector<vector<double> > scoreMatrix; scoreMatrix.resize(numQueryFlows+1);
         vector<vector<char> > directMatrix; directMatrix.resize(numQueryFlows+1);
         
@@ -464,10 +462,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
             
             scoreMatrix[i][0] = i * gapOpening;
             directMatrix[i][0] = 'u';
-        }
-        
-            //cout << numQueryFlows << '\t' << numRefFlows << endl;
-        
+        }        
         
         for(int i=0;i<=numRefFlows;i++){
             scoreMatrix[0][i] = i * gapOpening;

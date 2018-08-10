@@ -19,14 +19,14 @@ TestOptiCluster::TestOptiCluster()  {  //setup
 /**************************************************************************************************/
 TestOptiCluster::~TestOptiCluster() { delete metric; }
 /**************************************************************************************************/
-TEST(TestOptiCluster, myInitialize) {
+TEST(Test_Cluster_OptiCluster, myInitialize) {
     TestOptiCluster test;
     double initialMetricValue;
     
     EXPECT_EQ(0,(test.initialize(initialMetricValue, true, "singleton")));
 }
 
-TEST(TestOptiCluster, myUpdate) {
+TEST(Test_Cluster_OptiCluster, myUpdate) {
     TestOptiCluster test;
     double initialMetricValue;
     test.initialize(initialMetricValue, false, "singleton"); //no randomization
@@ -41,7 +41,7 @@ TEST(TestOptiCluster, myUpdate) {
     ASSERT_NEAR(1, initialMetricValue, 0.00001); //metric value
 }
 
-TEST(TestOptiCluster, getCloseFarCounts) {
+TEST(Test_Cluster_OptiCluster, getCloseFarCounts) {
     TestOptiCluster test;
     double initialMetricValue;
     test.initialize(initialMetricValue, false, "singleton"); //no randomization
