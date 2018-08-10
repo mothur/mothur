@@ -576,6 +576,7 @@ int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
             }
 
             out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << '\t' << expectedErrors << endl;
+
         }
         in.close();
         out.close();
