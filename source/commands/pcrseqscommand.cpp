@@ -719,7 +719,7 @@ int driverPcr(pcrData* params){
                             else {
                                 if (params->keepdots)   { currSeq.filterFromPos(params->end); }
                                 else {
-                                    string seqString = currSeq.getAligned().substr(0, params->end);
+                                    string seqString = currSeq.getAligned().substr(0, (params->end-1));
                                     currSeq.setAligned(seqString);
                                 }
                             }
