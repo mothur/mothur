@@ -856,16 +856,16 @@
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = newcommandtemplate.h; path = source/commands/newcommandtemplate.h; sourceTree = SOURCE_ROOT; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getcoremicrobiomecommand.cpp; path = source/commands/getcoremicrobiomecommand.cpp; sourceTree = SOURCE_ROOT; };
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getcoremicrobiomecommand.h; path = source/commands/getcoremicrobiomecommand.h; sourceTree = SOURCE_ROOT; };
-		4803D5A52118B352001C63B5 /* miseqsop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = miseqsop.cpp; path = IntegrationTests/miseqsop.cpp; sourceTree = "<group>"; };
-		4803D5A62118B352001C63B5 /* miseqsop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = miseqsop.hpp; path = IntegrationTests/miseqsop.hpp; sourceTree = "<group>"; };
+		4803D5A52118B352001C63B5 /* miseqsop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = miseqsop.cpp; path = TestMothur/IntegrationTests/miseqsop.cpp; sourceTree = SOURCE_ROOT; };
+		4803D5A62118B352001C63B5 /* miseqsop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = miseqsop.hpp; path = TestMothur/IntegrationTests/miseqsop.hpp; sourceTree = SOURCE_ROOT; };
 		4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testintegrationalignseqs.cpp; path = TestMothur/IntegrationTests/testintegrationalignseqs.cpp; sourceTree = SOURCE_ROOT; };
 		4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testintegrationalignseqs.hpp; path = TestMothur/IntegrationTests/testintegrationalignseqs.hpp; sourceTree = SOURCE_ROOT; };
-		4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundvector.cpp; path = testcontainers/testsharedrabundvector.cpp; sourceTree = "<group>"; };
-		4803D5AC211CA67F001C63B5 /* testsharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvector.hpp; path = testcontainers/testsharedrabundvector.hpp; sourceTree = "<group>"; };
-		4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundfloatvector.cpp; path = testcontainers/testsharedrabundfloatvector.cpp; sourceTree = "<group>"; };
-		4803D5AF211CD839001C63B5 /* testsharedrabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundfloatvector.hpp; path = testcontainers/testsharedrabundfloatvector.hpp; sourceTree = "<group>"; };
-		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testclustercalcs.cpp; sourceTree = "<group>"; };
-		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testclustercalcs.hpp; sourceTree = "<group>"; };
+		4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundvector.cpp; path = TestMothur/testcontainers/testsharedrabundvector.cpp; sourceTree = SOURCE_ROOT; };
+		4803D5AC211CA67F001C63B5 /* testsharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvector.hpp; path = TestMothur/testcontainers/testsharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
+		4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundfloatvector.cpp; path = TestMothur/testcontainers/testsharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
+		4803D5AF211CD839001C63B5 /* testsharedrabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundfloatvector.hpp; path = TestMothur/testcontainers/testsharedrabundfloatvector.hpp; sourceTree = SOURCE_ROOT; };
+		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
+		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fakeoptimatrix.cpp; path = TestMothur/fakes/fakeoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E301EA92D5500BF9C77 /* fakeoptimatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakeoptimatrix.hpp; path = fakes/fakeoptimatrix.hpp; sourceTree = "<group>"; };
@@ -885,10 +885,10 @@
 		4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testtrimoligos.cpp; path = TestMothur/testtrimoligos.cpp; sourceTree = SOURCE_ROOT; };
 		4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testtrimoligos.hpp; path = TestMothur/testtrimoligos.hpp; sourceTree = SOURCE_ROOT; };
 		484F21691BA1C5F8001C1B5F /* makefile-internal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "makefile-internal"; sourceTree = SOURCE_ROOT; };
-		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = testcontainers/testoptimatrix.cpp; sourceTree = "<group>"; };
-		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = testcontainers/testoptimatrix.h; sourceTree = "<group>"; };
-		48576EA61D05F59300BBC9C0 /* distpdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distpdataset.cpp; sourceTree = "<group>"; };
-		48576EA71D05F59300BBC9C0 /* distpdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distpdataset.h; sourceTree = "<group>"; };
+		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = TestMothur/testcontainers/testoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
+		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = TestMothur/testcontainers/testoptimatrix.h; sourceTree = SOURCE_ROOT; };
+		48576EA61D05F59300BBC9C0 /* distpdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = distpdataset.cpp; path = TestMothur/distpdataset.cpp; sourceTree = SOURCE_ROOT; };
+		48576EA71D05F59300BBC9C0 /* distpdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = distpdataset.h; path = TestMothur/distpdataset.h; sourceTree = SOURCE_ROOT; };
 		485B0E061F264F2E00CA5F57 /* sharedrabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvector.cpp; path = source/datastructures/sharedrabundvector.cpp; sourceTree = SOURCE_ROOT; };
 		485B0E071F264F2E00CA5F57 /* sharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvector.hpp; path = source/datastructures/sharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
 		485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvector.cpp; path = source/datastructures/sharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
@@ -920,14 +920,14 @@
 		48910D491D58CBA300F60EDB /* optimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optimatrix.cpp; path = source/datastructures/optimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48910D4A1D58CBA300F60EDB /* optimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = optimatrix.h; path = source/datastructures/optimatrix.h; sourceTree = "<group>"; };
 		48910D4C1D58CBFC00F60EDB /* opticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = opticluster.h; path = source/opticluster.h; sourceTree = SOURCE_ROOT; };
-		48910D4D1D58E26C00F60EDB /* testopticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testopticluster.cpp; sourceTree = "<group>"; };
-		48910D4E1D58E26C00F60EDB /* testopticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testopticluster.h; sourceTree = "<group>"; };
-		48910D4F1D58E26C00F60EDB /* distcdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distcdataset.h; sourceTree = "<group>"; };
-		48910D501D58E26C00F60EDB /* distcdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distcdataset.cpp; sourceTree = "<group>"; };
-		489387F42107A60C00284329 /* testoptirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testoptirefmatrix.cpp; sourceTree = "<group>"; };
-		489387F52107A60C00284329 /* testoptirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testoptirefmatrix.hpp; sourceTree = "<group>"; };
-		489387F7210F633E00284329 /* testOligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testOligos.cpp; path = testcontainers/testOligos.cpp; sourceTree = "<group>"; };
-		489387F8210F633E00284329 /* testOligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testOligos.hpp; path = testcontainers/testOligos.hpp; sourceTree = "<group>"; };
+		48910D4D1D58E26C00F60EDB /* testopticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testopticluster.cpp; path = TestMothur/testopticluster.cpp; sourceTree = SOURCE_ROOT; };
+		48910D4E1D58E26C00F60EDB /* testopticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testopticluster.h; path = TestMothur/testopticluster.h; sourceTree = SOURCE_ROOT; };
+		48910D4F1D58E26C00F60EDB /* distcdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = distcdataset.h; path = TestMothur/distcdataset.h; sourceTree = SOURCE_ROOT; };
+		48910D501D58E26C00F60EDB /* distcdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = distcdataset.cpp; path = TestMothur/distcdataset.cpp; sourceTree = SOURCE_ROOT; };
+		489387F42107A60C00284329 /* testoptirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptirefmatrix.cpp; path = TestMothur/testoptirefmatrix.cpp; sourceTree = SOURCE_ROOT; };
+		489387F52107A60C00284329 /* testoptirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testoptirefmatrix.hpp; path = TestMothur/testoptirefmatrix.hpp; sourceTree = SOURCE_ROOT; };
+		489387F7210F633E00284329 /* testOligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testOligos.cpp; path = TestMothur/testcontainers/testOligos.cpp; sourceTree = SOURCE_ROOT; };
+		489387F8210F633E00284329 /* testOligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testOligos.hpp; path = TestMothur/testcontainers/testOligos.hpp; sourceTree = SOURCE_ROOT; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = TestMothur/testcommands/testrenamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1878,7 +1878,8 @@
 				4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */,
 			);
 			name = Integration;
-			sourceTree = "<group>";
+			path = TestMothur;
+			sourceTree = SOURCE_ROOT;
 		};
 		480D1E2B1EA6858700BF9C77 /* fakes */ = {
 			isa = PBXGroup;
@@ -1889,7 +1890,8 @@
 				480D1E301EA92D5500BF9C77 /* fakeoptimatrix.hpp */,
 			);
 			name = fakes;
-			sourceTree = "<group>";
+			path = TestMothur;
+			sourceTree = SOURCE_ROOT;
 		};
 		481FB51A1AC0A63E0076CFF3 /* TestMothur */ = {
 			isa = PBXGroup;
@@ -1938,7 +1940,8 @@
 				481FB52D1AC1B0CB0076CFF3 /* testsetseedcommand.cpp */,
 			);
 			name = testcommands;
-			sourceTree = "<group>";
+			path = TestMothur;
+			sourceTree = SOURCE_ROOT;
 		};
 		481FB5221AC0AA010076CFF3 /* testcontainers */ = {
 			isa = PBXGroup;
@@ -1959,7 +1962,8 @@
 				4803D5AC211CA67F001C63B5 /* testsharedrabundvector.hpp */,
 			);
 			name = testcontainers;
-			sourceTree = "<group>";
+			path = TestMothur;
+			sourceTree = SOURCE_ROOT;
 		};
 		48789AEE206176EF00A7D848 /* utf8 */ = {
 			isa = PBXGroup;
@@ -2196,7 +2200,8 @@
 				48F06CCC1D74BEC4004A45DD /* testphylotree.hpp */,
 			);
 			name = testclassifier;
-			sourceTree = "<group>";
+			path = TestMothur;
+			sourceTree = SOURCE_ROOT;
 		};
 		7B17437A17AF6F02004C161B /* svm */ = {
 			isa = PBXGroup;
