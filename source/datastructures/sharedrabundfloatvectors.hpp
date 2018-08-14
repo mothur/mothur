@@ -47,7 +47,6 @@ public:
     string getOTUName(int);
     void setOTUName(int, string);
 
-    
     int push_back(SharedRAbundFloatVector*);
     void removeGroups(vector<string> g);
     int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize

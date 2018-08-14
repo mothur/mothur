@@ -14,6 +14,7 @@
 		4803D5AD211CA67F001C63B5 /* testsharedrabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */; };
 		4803D5B0211CD839001C63B5 /* testsharedrabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */; };
 		4803D5B3211DDA5A001C63B5 /* testsharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B1211DDA5A001C63B5 /* testsharedrabundvectors.cpp */; };
+		4803D5B621231D9D001C63B5 /* testsharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -865,8 +866,10 @@
 		4803D5AC211CA67F001C63B5 /* testsharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvector.hpp; path = TestMothur/testcontainers/testsharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
 		4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundfloatvector.cpp; path = TestMothur/testcontainers/testsharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
 		4803D5AF211CD839001C63B5 /* testsharedrabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundfloatvector.hpp; path = TestMothur/testcontainers/testsharedrabundfloatvector.hpp; sourceTree = SOURCE_ROOT; };
-		4803D5B1211DDA5A001C63B5 /* testsharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundvectors.cpp; path = testcontainers/testsharedrabundvectors.cpp; sourceTree = "<group>"; };
-		4803D5B2211DDA5A001C63B5 /* testsharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvectors.hpp; path = testcontainers/testsharedrabundvectors.hpp; sourceTree = "<group>"; };
+		4803D5B1211DDA5A001C63B5 /* testsharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundvectors.cpp; path = TestMothur/testcontainers/testsharedrabundvectors.cpp; sourceTree = SOURCE_ROOT; };
+		4803D5B2211DDA5A001C63B5 /* testsharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvectors.hpp; path = TestMothur/testcontainers/testsharedrabundvectors.hpp; sourceTree = SOURCE_ROOT; };
+		4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundfloatvectors.cpp; path = TestMothur/testcontainers/testsharedrabundfloatvectors.cpp; sourceTree = SOURCE_ROOT; };
+		4803D5B521231D9D001C63B5 /* testsharedrabundfloatvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundfloatvectors.hpp; path = TestMothur/testcontainers/testsharedrabundfloatvectors.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -1961,6 +1964,8 @@
 				48C728761B6AB4EE00D40830 /* testsequence.h */,
 				4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */,
 				4803D5AF211CD839001C63B5 /* testsharedrabundfloatvector.hpp */,
+				4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */,
+				4803D5B521231D9D001C63B5 /* testsharedrabundfloatvectors.hpp */,
 				4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */,
 				4803D5AC211CA67F001C63B5 /* testsharedrabundvector.hpp */,
 				4803D5B1211DDA5A001C63B5 /* testsharedrabundvectors.cpp */,
@@ -3125,6 +3130,7 @@
 				481FB5791AC1B6EA0076CFF3 /* structchi2.cpp in Sources */,
 				481FB63B1AC1B7EA0076CFF3 /* rabundvector.cpp in Sources */,
 				481FB5A91AC1B7300076CFF3 /* collectsharedcommand.cpp in Sources */,
+				4803D5B621231D9D001C63B5 /* testsharedrabundfloatvectors.cpp in Sources */,
 				481FB6211AC1B7BA0076CFF3 /* communitytype.cpp in Sources */,
 				48910D521D58E26C00F60EDB /* distcdataset.cpp in Sources */,
 				48C1DDC61D25C1BC00B5BA9D /* (null) in Sources */,

@@ -127,7 +127,6 @@ TEST(Test_Container_SharedRabundVectors, PushBack) {
     vector<int> otuAbunds(11, 2); string otuLabel = "Otu59";
     fileRead.push_back(otuAbunds, otuLabel);
     EXPECT_EQ(fileRead.getNumBins(), 59);
-    
 }
 
 TEST(Test_Container_SharedRabundVectors, eliminateZeroOTUS) {
