@@ -263,9 +263,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
             else{  success[0] = minDiff; success[1] = 0; return success; }
         }
         
-        primerStart = 0; primerEnd = 0;
         return success;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "TrimOligos", "stripForward");
@@ -365,9 +363,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
             else{  success[0] = minDiff; success[1] = 0; return success; }
         }
         
-        primerStart = 0; primerEnd = 0;
         return success;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "TrimOligos", "findReverse");

@@ -204,7 +204,7 @@ TEST(Test_Container_SharedRabundFloatVectors, GetSabundVector) {
     SharedRAbundFloatVectors fileRead(in, userGroups, nextLabel, labelTag);
     
     SAbundVector temp = fileRead.getSAbundVector();
-    EXPECT_EQ(temp.get(5), 0); //number of OTUs with abundance of 5
+    EXPECT_EQ(temp.get(0), 0); //number of OTUs with abundance of 5
     EXPECT_EQ(temp.get(1), 1); //number of OTUs with abundance of 1
     EXPECT_EQ(temp.getMaxRank(), 1);
 }

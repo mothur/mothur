@@ -647,7 +647,6 @@ TEST(Test_Integration_MISEQSOP, PhylogenyBasedAnalysis) {
     Command* setLogfileCommand = new SetLogFileCommand(inputs);
     setLogfileCommand->execute();
     delete setLogfileCommand;
-
     
     //phylo.diversity
     inputs = test.setDirInputs + ", tree=final.phylip.tre, count=final.count_table, rarefy=T";

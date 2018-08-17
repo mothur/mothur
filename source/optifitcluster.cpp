@@ -232,7 +232,7 @@ bool OptiFitCluster::update(double& listMetric) {
         
         listMetric = metric->getValue(combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives);
         
-        double fitListMetric = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
+        //double fitListMetric = metric->getValue(fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives);
         
         if (m->getDebug()) { ListVector* list = getList(); list->print(cout); delete list; }
         

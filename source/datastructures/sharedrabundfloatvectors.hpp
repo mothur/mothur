@@ -52,8 +52,8 @@ public:
     int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize
     void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundFloatVectors.\n"); }
     void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; currentLabels.clear(); }
-    int size() { return lookup.size();  }
-    int getNumGroups() { return lookup.size(); }
+    int size() { return (int)lookup.size();  }
+    int getNumGroups() { return (int)lookup.size(); }
     int getNumBins() { return numBins; }
     float getNumSeqs(string); //group
     float getNumSeqsSmallestGroup();

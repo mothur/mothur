@@ -32,7 +32,7 @@ public:
 		
 		string seqA = A.getAligned();
 		string seqB = B.getAligned();
-		int alignLength = seqA.length();
+		int alignLength = (int)seqA.length();
 
 		// this assumes that sequences start and end with '.'s instead of'-'s.
 		for(int i=0;i<alignLength;i++){

@@ -222,7 +222,7 @@ int AnosimCommand::execute(){
 			for(map<string, vector<int> >::iterator itA=origGroupSampleMap.begin();itA!=origGroupSampleMap.end();itA++){
 				map<string, vector<int> >::iterator itB = itA;
 				itB++;
-				for(itB;itB!=origGroupSampleMap.end();itB++){
+				for(;itB!=origGroupSampleMap.end();itB++){
 					
 					map<string, vector<int> > subGroupSampleMap;
 					
@@ -356,7 +356,7 @@ double AnosimCommand::calcR(vector<vector<double> > rankMatrix, map<string, vect
 				int A = itA->second[i];
 				map<string, vector<int> >::iterator itB = itA;
 				itB++;
-				for(itB;itB!=groupSampleMap.end();itB++){
+				for(;itB!=groupSampleMap.end();itB++){
 					for(int j=0;j<itB->second.size();j++){
 						int B = itB->second[j];
 						if(A>B)	{	between += rankMatrix[A][B];	}

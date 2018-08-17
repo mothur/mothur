@@ -378,16 +378,14 @@ int ClusterCommand::execute(){
             if (sim)	{ inputString += ", sim=T";		}
 			else		{ inputString += ", sim=F";		}
 
-			
-			m->mothurOutEndLine(); 
-			m->mothurOut("/------------------------------------------------------------/"); m->mothurOutEndLine(); 
-			m->mothurOut("Running command: cluster.classic(" + inputString + ")"); m->mothurOutEndLine(); 
+			m->mothurOut("\n/------------------------------------------------------------/\n");
+			m->mothurOut("Running command: cluster.classic(" + inputString + ")\n");
 			
 			Command* clusterClassicCommand = new ClusterDoturCommand(inputString);
 			clusterClassicCommand->execute();
 			delete clusterClassicCommand;
 			
-			m->mothurOut("/------------------------------------------------------------/"); m->mothurOutEndLine();  
+			m->mothurOut("/------------------------------------------------------------/\n");
 
 			return 0;
 		}
@@ -401,7 +399,7 @@ int ClusterCommand::execute(){
         
 		if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
         
-        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
+        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster\n"); 
         
 		//set list file as new current listfile
 		string currentName = "";

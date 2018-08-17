@@ -15,6 +15,7 @@
 		4803D5B0211CD839001C63B5 /* testsharedrabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */; };
 		4803D5B3211DDA5A001C63B5 /* testsharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B1211DDA5A001C63B5 /* testsharedrabundvectors.cpp */; };
 		4803D5B621231D9D001C63B5 /* testsharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */; };
+		4803D5B921271B47001C63B5 /* 454sop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B721271B47001C63B5 /* 454sop.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -870,6 +871,8 @@
 		4803D5B2211DDA5A001C63B5 /* testsharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvectors.hpp; path = TestMothur/testcontainers/testsharedrabundvectors.hpp; sourceTree = SOURCE_ROOT; };
 		4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundfloatvectors.cpp; path = TestMothur/testcontainers/testsharedrabundfloatvectors.cpp; sourceTree = SOURCE_ROOT; };
 		4803D5B521231D9D001C63B5 /* testsharedrabundfloatvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundfloatvectors.hpp; path = TestMothur/testcontainers/testsharedrabundfloatvectors.hpp; sourceTree = SOURCE_ROOT; };
+		4803D5B721271B47001C63B5 /* 454sop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 454sop.cpp; path = TestMothur/IntegrationTests/454sop.cpp; sourceTree = SOURCE_ROOT; };
+		4803D5B821271B47001C63B5 /* 454sop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = 454sop.hpp; path = IntegrationTests/454sop.hpp; sourceTree = "<group>"; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -1880,6 +1883,8 @@
 			children = (
 				4803D5A62118B352001C63B5 /* miseqsop.hpp */,
 				4803D5A52118B352001C63B5 /* miseqsop.cpp */,
+				4803D5B721271B47001C63B5 /* 454sop.cpp */,
+				4803D5B821271B47001C63B5 /* 454sop.hpp */,
 				4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */,
 				4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */,
 			);
@@ -3105,6 +3110,7 @@
 				488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */,
 				481FB53F1AC1B6000076CFF3 /* canberra.cpp in Sources */,
 				48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */,
+				4803D5B921271B47001C63B5 /* 454sop.cpp in Sources */,
 				481FB5BD1AC1B74F0076CFF3 /* getlabelcommand.cpp in Sources */,
 				481FB5B91AC1B74F0076CFF3 /* getcurrentcommand.cpp in Sources */,
 				481FB5991AC1B71B0076CFF3 /* chimeraperseuscommand.cpp in Sources */,
@@ -3710,7 +3716,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.40.3\\\"\"",
@@ -3743,7 +3749,7 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.40.3\\\"\"",
@@ -3787,7 +3793,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.40.4\\\"\"",
@@ -3820,12 +3826,16 @@
 					"-DUSE_BOOST",
 					"-DUSE_READLINE",
 					"$(OTHER_CFLAGS)",
+					"-fprofile-arcs",
+					"-ftest-coverage",
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
 					"-lboost_iostreams",
 					"-lz",
 					"-pthreads",
+					"-fprofile-arcs",
+					"-ftest-coverage",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
@@ -3855,7 +3865,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.40.4\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
@@ -3889,12 +3899,16 @@
 					"-DBIT_VERSION",
 					"-DUSE_BOOST",
 					"$(OTHER_CFLAGS)",
+					"-fprofile-arcs",
+					"-ftest-coverage",
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
 					"-lboost_iostreams",
 					"-lz",
 					"-pthreads",
+					"-fprofile-arcs",
+					"-ftest-coverage",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
@@ -3922,7 +3936,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -3942,6 +3956,8 @@
 					"-pthreads",
 					/usr/local/lib/gmock_main.a,
 					/usr/local/lib/gtest.a,
+					"-fprofile-arcs",
+					"-ftest-coverage",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -3970,7 +3986,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.40.5\\\"\"",
 					"RELEASE_DATE=\"\\\"06/20/2018\\\"\"",
@@ -3989,6 +4005,8 @@
 					"-pthreads",
 					/usr/local/lib/gmock_main.a,
 					/usr/local/lib/gtest.a,
+					"-fprofile-arcs",
+					"-ftest-coverage",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

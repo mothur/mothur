@@ -49,7 +49,7 @@ public:
     int getNumBins() { return numBins; }
     int getNumSeqsSmallestGroup();
     vector<string> getNamesGroups(); //same order as Rabunds
-    int getNumGroups() { return lookup.size(); }
+    int getNumGroups() { return (int)lookup.size(); }
     int getNumSeqs(string); //group
 
     int push_back(vector<int>, string binLabel=""); //add otu. mothur assumes abunds are in same order as groups.
@@ -58,7 +58,7 @@ public:
     int removeOTU(int bin);
     void removeGroups(vector<string> g);
     int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize
-    int size() { return lookup.size(); }
+    int size() { return (int)lookup.size(); }
     void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundVectors.\n"); m->setControl_pressed(true); }
     void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; }
     void print(ostream&);

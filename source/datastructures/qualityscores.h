@@ -47,7 +47,7 @@ public:
 	void updateForwardMap(vector<vector<int> >&, int, int, int);
 	void updateReverseMap(vector<vector<int> >&, int, int, int);
     void setName(string n);
-    void setScores(vector<int> qs) { qScores = qs; seqLength = qScores.size(); }
+    void setScores(vector<int> qs) { qScores = qs; seqLength = (int)qScores.size(); }
     vector<int> getScores() { return qScores; }
 
 private:
