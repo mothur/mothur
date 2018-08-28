@@ -3826,16 +3826,13 @@
 					"-DUSE_BOOST",
 					"-DUSE_READLINE",
 					"$(OTHER_CFLAGS)",
-					"-fprofile-arcs",
-					"-ftest-coverage",
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
 					"-lboost_iostreams",
 					"-lz",
 					"-pthreads",
-					"-fprofile-arcs",
-					"-ftest-coverage",
+					"-v",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
@@ -3899,16 +3896,13 @@
 					"-DBIT_VERSION",
 					"-DUSE_BOOST",
 					"$(OTHER_CFLAGS)",
-					"-fprofile-arcs",
-					"-ftest-coverage",
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
 					"-lboost_iostreams",
 					"-lz",
 					"-pthreads",
-					"-fprofile-arcs",
-					"-ftest-coverage",
+					"-v",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
@@ -3921,7 +3915,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
@@ -3956,8 +3950,7 @@
 					"-pthreads",
 					/usr/local/lib/gmock_main.a,
 					/usr/local/lib/gtest.a,
-					"-fprofile-arcs",
-					"-ftest-coverage",
+					"-v",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -3970,7 +3963,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "compiler-default";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
@@ -4005,8 +3998,7 @@
 					"-pthreads",
 					/usr/local/lib/gmock_main.a,
 					/usr/local/lib/gtest.a,
-					"-fprofile-arcs",
-					"-ftest-coverage",
+					"-v",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
