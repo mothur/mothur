@@ -12,7 +12,9 @@
 
 #include "command.hpp"
 #include "counttable.h"
+
 #include "tree.h"
+
 
 class PhyloDiversityCommand : public Command {
 	

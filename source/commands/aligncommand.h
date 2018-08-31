@@ -14,20 +14,18 @@
 #include "alignment.hpp"
 #include "alignmentdb.h"
 #include "sequence.hpp"
+
 #include "gotohoverlap.hpp"
 #include "needlemanoverlap.hpp"
 #include "blastalign.hpp"
 #include "noalign.hpp"
+
 #include "nast.hpp"
 #include "nastreport.hpp"
 
 //test
 class AlignCommand : public Command {
 	
-#ifdef UNIT_TEST
-    friend class TestAlignSeqsIntegration;
-#endif
-    
 public:
 	AlignCommand(string);	
 	AlignCommand();
@@ -45,7 +43,10 @@ public:
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	
-protected:
+private:
+	vector<int> processIDS;   //processid
+	vector<linePair*> lines;
+	
 	AlignmentDB* templateDB;
 
 	long long createProcesses(string, string, string, string, vector<long long>&);

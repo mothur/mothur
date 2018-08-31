@@ -125,14 +125,14 @@ Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree
 
 int Classify::readTaxonomy(string file) {
 	try {
+		
 		phyloTree = new PhyloTree();
 		string name, taxInfo;
 		
 		m->mothurOut("\nReading in the " + file + " taxonomy...\t");	cout.flush();
         if (m->getDebug()) { m->mothurOut("[DEBUG]: Taxonomies read in...\n"); }
         
-        taxonomy.clear();
-        
+        taxonomy.clear(); 
         Utils util; util.readTax(file, taxonomy, true);
         
         for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {
@@ -146,7 +146,8 @@ int Classify::readTaxonomy(string file) {
 		
 		phyloTree->setUp(file);
 
-		m->mothurOut("DONE.\n"); cout.flush();
+		m->mothurOut("DONE.");
+		m->mothurOutEndLine();	cout.flush();
 		
 		return phyloTree->getNumSeqs();
 	

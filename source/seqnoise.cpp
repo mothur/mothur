@@ -732,7 +732,12 @@ int seqNoise::countDiffs(vector<int> query, vector<int> ref){
 				j--;
 			}
 		}
-				
+		
+		//	cout << diffs << endl;
+		//	cout << alignA << endl;
+		//	cout << alignB << endl;
+		//	cout << endl;
+		
 		return diffs;
 	}
 	catch(exception& e) {
@@ -821,6 +826,7 @@ int seqNoise::writeOutput(string fastaFileName, string namesFileName, string uMa
 			if(finalTau[i] > 0){
 				
 				if(maxSequenceIndex[i] != centroids[i] && distances[maxSequenceIndex[i]*numSeqs + centroids[i]] == 0){
+					//				cout << uniqueNames[centroids[i]] << '\t' << uniqueNames[maxSequenceIndex[i]] << '\t' << count << endl;
 					centroids[i] = maxSequenceIndex[i];
 				}
 				

@@ -155,6 +155,8 @@
 #include "mergecountcommand.hpp"
 #include "clusterfitcommand.hpp"
 
+//needed for testing project
+//CommandFactory* CommandFactory::_uniqueInstance;
 
 /*******************************************************/
 

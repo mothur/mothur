@@ -508,4 +508,1596 @@ call_getopt_long(int argc, char **argv,
     return c;
 }
 
+void
+test1()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "-bcd";
+    argc++; *p++ = "-d";
+    argc++; *p++ = "-e";
+    argc++; *p++ = "-f";
+    argc++; *p++ = "-g";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 'a');
+    assert(option_index == 0);
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 'b');
+    assert(option_index == 0);
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 'c');
+    assert(option_index == 0);
+    assert(optind == 3);
+    assert(optarg == &argv[2][3]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 'd');
+    assert(option_index == 0);
+    assert(optind == 5);
+    assert(optarg == argv[4]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == '?');
+    assert(option_index == 0);
+    assert(optind == 6);
+    assert(optarg == 0);
+    assert(optopt == 'f');
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == '?');
+    assert(option_index == 0);
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 'g');
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == -1);
+    assert(option_index == 0);
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 'g');      /* no changed */
+}
+
+void
+test2()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "--verbose";
+    argc++; *p++ = "--brief";
+    argc++; *p++ = "--add";
+    argc++; *p++ = "add_argument";
+    argc++; *p++ = "--add=add_argument";
+    argc++; *p++ = "--append";
+    argc++; *p++ = "--delete=del_argument";
+    argc++; *p++ = "--create=cre_argument";
+    argc++; *p++ = "--create";
+    argc++; *p++ = "files...";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 0);
+    assert(option_index == 0);
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(long_options[option_index].name, "verbose") == 0);
+    assert(*long_options[option_index].flag == 1);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 0);
+    assert(option_index == 1);
+    assert(optind == 3);
+    assert(optarg == 0);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(long_options[option_index].name, "brief") == 0);
+    assert(*long_options[option_index].flag == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 'a');
+    assert(option_index == 2);
+    assert(optind == 5);
+    assert(optarg == argv[4]);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(long_options[option_index].name, "add") == 0);
+    assert(long_options[option_index].flag == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 'a');
+    assert(option_index == 2);
+    assert(optind == 6);
+    assert(optarg == argv[5]+6);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(long_options[option_index].name, "add") == 0);
+    assert(long_options[option_index].flag == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 0);
+    assert(option_index == 3);
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(long_options[option_index].name, "append") == 0);
+    assert(long_options[option_index].flag == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 0);
+    assert(option_index == 4);
+    assert(optind == 8);
+    assert(optarg == argv[7]+9);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(long_options[option_index].name, "delete") == 0);
+    assert(long_options[option_index].flag == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 0);
+    assert(option_index == 5);
+    assert(optind == 9);
+    assert(optarg == argv[8]+9);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(long_options[option_index].name, "create") == 0);
+    assert(long_options[option_index].flag == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == 0);
+    assert(option_index == 5);
+    assert(optind == 10);
+    assert(optarg == 0);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(long_options[option_index].name, "create") == 0);
+    assert(long_options[option_index].flag == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == -1);
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 10);
+    assert(optarg == 0);
+    assert(optopt == 'g');      /* no changed */
+    assert(strcmp(argv[optind], "files...") == 0);
+
+}
+
+void
+test3()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "--delete";  /* required argument has no argument */
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == '?');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);        /* changed */
+    assert(optarg == 0);
+    assert(optopt == 0);       /* changed */
+    assert(argv[optind] == 0);
+
+    /* */
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "--file";  /* not option */
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    assert(c == '?');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+    assert(argv[optind] == 0);
+}
+
+void
+test4()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "a1";
+    argc++; *p++ = "a2";
+    argc++; *p++ = "-b";
+    argc++; *p++ = "b";
+    argc++; *p++ = "-efg";      /* some options in a argument */
+    argc++; *p++ = "g";
+    argc++; *p++ = "-c";
+    argc++; *p++ = "c";
+    argc++; *p++ = "d";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:efg:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "a1") == 0);
+    assert(strcmp(*p++, "a2") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "b") == 0);
+    assert(strcmp(*p++, "-efg") == 0);
+    assert(strcmp(*p++, "g") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'a');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:efg:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "a1") == 0);
+    assert(strcmp(*p++, "a2") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "b") == 0);
+    assert(strcmp(*p++, "-efg") == 0);
+    assert(strcmp(*p++, "g") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'b');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 5);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:efg:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "a1") == 0);
+    assert(strcmp(*p++, "a2") == 0);
+    assert(strcmp(*p++, "b") == 0);
+    assert(strcmp(*p++, "-efg") == 0);
+    assert(strcmp(*p++, "g") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'e');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 6);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:efg:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "a1") == 0);
+    assert(strcmp(*p++, "a2") == 0);
+    assert(strcmp(*p++, "b") == 0);
+    assert(strcmp(*p++, "-efg") == 0);
+    assert(strcmp(*p++, "g") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'f');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 6);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:efg:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "a1") == 0);
+    assert(strcmp(*p++, "a2") == 0);
+    assert(strcmp(*p++, "b") == 0);
+    assert(strcmp(*p++, "-efg") == 0);
+    assert(strcmp(*p++, "g") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'g');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 8);
+    assert(optarg == argv[7]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:efg:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "-efg") == 0);
+    assert(strcmp(*p++, "g") == 0);
+    assert(strcmp(*p++, "a1") == 0);
+    assert(strcmp(*p++, "a2") == 0);
+    assert(strcmp(*p++, "b") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 10);
+    assert(optarg == argv[9]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:efg:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "-efg") == 0);
+    assert(strcmp(*p++, "g") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "a1") == 0);
+    assert(strcmp(*p++, "a2") == 0);
+    assert(strcmp(*p++, "b") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+}
+
+void
+test5()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "-";
+    argc++; *p++ = "-b";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(*p == 0);
+
+    assert(c == 'a');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(*p == 0);
+
+    assert(c == 'b');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 4);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 3);
+    assert(optarg == 0);
+    assert(optopt == 0);
+}
+
+void
+test6()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "-";
+    argc++; *p++ = "-";
+    argc++; *p++ = "-b";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(*p == 0);
+
+    assert(c == 'a');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(*p == 0);
+
+    assert(c == 'b');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 5);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-b") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 3);
+    assert(optarg == 0);
+    assert(optopt == 0);
+}
+
+void
+test7()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "-";
+    argc++; *p++ = "-";
+    argc++; *p++ = "-c";
+    argc++; *p++ = "c";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(*p == 0);
+
+    assert(c == 'a');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 6);
+    assert(optarg == argv[5]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 4);
+    assert(optarg == 0);
+    assert(optopt == 0);
+}
+
+void
+test8()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "-c";
+    argc++; *p++ = "c";
+    argc++; *p++ = "--";
+    argc++; *p++ = "-d";
+    argc++; *p++ = "d";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'a');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 4);
+    assert(optarg == argv[3]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 5);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'd');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 7);
+    assert(optarg == argv[6]);
+    assert(optopt == 0);
+}
+
+void
+test9()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "-";
+    argc++; *p++ = "-";
+    argc++; *p++ = "-c";
+    argc++; *p++ = "c";
+    argc++; *p++ = "--";
+    argc++; *p++ = "-d";
+    argc++; *p++ = "d";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'a');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 6);
+    assert(optarg == argv[5]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 5);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc:d:", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "c") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'd');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 9);
+    assert(optarg == argv[8]);
+    assert(optopt == 0);
+}
+
+void
+test10()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "-cc";
+    argc++; *p++ = "-d";
+    argc++; *p++ = "d";
+    argc++; *p++ = "-c";        /* no argument */
+    argc++; *p++ = "-d";        /* at last */
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-cc") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'a');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-cc") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 3);
+    assert(optarg == argv[2]+2);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-cc") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'd');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 4);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-cc") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 6);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-cc") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'd');
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-cc") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "-c") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 5);  /* no changed */
+    assert(optind == 6);
+    assert(optarg == 0);
+    assert(optopt == 0);
+}
+
+void
+test11()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "--verbose";
+    argc++; *p++ = "--create=c";
+    argc++; *p++ = "--change";
+    argc++; *p++ = "d";
+    argc++; *p++ = "--create";  /* no argument */
+    argc++; *p++ = "--change";  /* at last */
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 0);
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 5);
+    assert(optind == 3);
+    assert(optarg == argv[2]+9);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 6);
+    assert(optind == 4);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 5);
+    assert(optind == 6);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 6);
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 6);
+    assert(optind == 6);
+    assert(optarg == 0);
+    assert(optopt == 0);
+}
+
+void
+test12()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "--verbose";
+    argc++; *p++ = "--create=c";
+    argc++; *p++ = "files...";
+    argc++; *p++ = "--delete";  /* required argument */
+    argc++; *p++ = "d";
+    argc++; *p++ = "--create";  /* no argument */
+    argc++; *p++ = "--change";  /* at last */
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 0);
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 5);
+    assert(optind == 3);
+    assert(optarg == argv[2]+9);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 4);
+    assert(optind == 6);
+    assert(optarg == argv[5]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 5);
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 6);
+    assert(optind == 8);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--create") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 6);
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 0);
+}
+
+void
+test13()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "--verbose";
+    argc++; *p++ = "--create=c";
+    argc++; *p++ = "files...";
+    argc++; *p++ = "--delete";
+    argc++; *p++ = "d";
+    argc++; *p++ = "--";        /* option terminator */
+    argc++; *p++ = "--change";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 0);
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 5);
+    assert(optind == 3);
+    assert(optarg == argv[2]+9);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == 0);
+    assert(option_index == 4);
+    assert(optind == 6);
+    assert(optarg == argv[5]);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc::d::", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "--verbose") == 0);
+    assert(strcmp(*p++, "--create=c") == 0);
+    assert(strcmp(*p++, "--delete") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "--") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(strcmp(*p++, "--change") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 4);
+    assert(optind == 6);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+}
+
+void
+test14()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-o5";
+    argc++; *p++ = "files...";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "o[567]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-o5") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(*p == 0);
+
+    assert(c == 'o');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == argv[1]+2);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-o5") == 0);
+    assert(strcmp(*p++, "files...") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+}
+
+void
+test15()
+{
+    optind = 0;
+    argc = 0;
+    p = argv;
+
+    argc++; *p++ = "command_name";
+    argc++; *p++ = "-a";
+    argc++; *p++ = "-ccd";
+    argc++; *p++ = "-ce";
+    argc++; *p++ = "-d";
+    argc++; *p++ = "d";
+    argc++; *p++ = "-cdd";
+    argc++; *p++ = "-d";
+    *p = 0;
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'a');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 2);
+    assert(optarg == argv[2]+2);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'd');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 3);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 4);
+    assert(optarg == argv[3]+2);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'd');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 5);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'c');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 6);
+    assert(optarg == argv[6]+2);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'd');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(*p == 0);
+
+    assert(c == 'd');
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 8);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+
+    /*************************/
+    c = call_getopt_long(argc, argv, "abc[cde]d[fgh]", long_options, &option_index);
+
+    p = argv;
+    assert(strcmp(*p++, "command_name") == 0);
+    assert(strcmp(*p++, "-a") == 0);
+    assert(strcmp(*p++, "-ccd") == 0);
+    assert(strcmp(*p++, "-ce") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "-cdd") == 0);
+    assert(strcmp(*p++, "-d") == 0);
+    assert(strcmp(*p++, "d") == 0);
+    assert(*p == 0);
+
+    assert(c == -1);
+    assert(option_index == 4);  /* no changed */
+    assert(optind == 7);
+    assert(optarg == 0);
+    assert(optopt == 0);
+
+
+}
+
+/*
+int
+main()
+{
+    opterr = 0;
+    optopt = 0;
+
+    test1();
+    test2();
+    test3();
+    test4();
+    test5();
+    test6();
+    test7();
+    test8();
+    test9();
+    test10();
+    test11();
+    test12();
+    test13();
+#ifndef USE_GNU
+    test14();
+    test15();
+#endif
+
+    return 0;
+}
+ 
+ */
+
 #endif

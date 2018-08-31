@@ -9,7 +9,7 @@
 #ifndef testclustercalcs_hpp
 #define testclustercalcs_hpp
 
-#include "gtest/gtest.h"
+#include "gtest.h"
 #include "mcc.hpp"
 #include "sensitivity.hpp"
 #include "specificity.hpp"
@@ -38,6 +38,7 @@ public:
     ClusterMetric* metric;
     
 private:
+    MothurOut* m;
     
    
 };

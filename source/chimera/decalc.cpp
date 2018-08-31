@@ -70,16 +70,24 @@ void DeCalculator::runMask(Sequence* seq) {
 //num is query's spot in querySeqs
 void DeCalculator::trimSeqs(Sequence* query, Sequence* subject, map<int, int>& trim) {
 	try {
+		
 		string q = query->getAligned();
 		string s = subject->getAligned();
 		
 		int front = 0;
-		for (int i = 0; i < q.length(); i++) { if (isalpha(q[i]) && isalpha(s[i])) { front = i; break;  } }
-	
+		for (int i = 0; i < q.length(); i++) {
+//cout << "query = " << q[i] << " subject = " << s[i] << endl;
+			if (isalpha(q[i]) && isalpha(s[i])) { front = i; break;  }
+		}
+//cout << endl << endl;		
 		int back = 0;		
-		for (int i = q.length(); i >= 0; i--) { if (isalpha(q[i]) && isalpha(s[i])) { back = i; break;  } }
+		for (int i = q.length(); i >= 0; i--) {
+//cout << "query = " << q[i] << " subject = " << s[i] << endl;
+			if (isalpha(q[i]) && isalpha(s[i])) { back = i; break;  }
+		}
 		
 		trim[front] = back;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DeCalculator", "trimSeqs");
@@ -89,6 +97,7 @@ void DeCalculator::trimSeqs(Sequence* query, Sequence* subject, map<int, int>& t
 //***************************************************************************************************************
 vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int& size, int increment) {
 	try {
+		
 		vector<int> win; 
 		
 		int cutoff = back - front;  //back - front 
@@ -97,13 +106,54 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 		if (size == 0) {  if (cutoff > 1200) {  size = 300; }
 							else{  size = (cutoff / 4); }  } 
 		else if (size > (cutoff / 4)) { 
-				m->mothurOut("[WARNING]: You have selected too large a window size for sequence " + query->getName() + ".  I will choose an appropriate window size.\n");
+				m->mothurOut("You have selected too large a window size for sequence " + query->getName() + ".  I will choose an appropriate window size."); m->mothurOutEndLine();
 				size = (cutoff / 4); 
 		}
 	
+	/*	string seq = query->getAligned().substr(front, cutoff);
+			
+		//count bases
+		int numBases = 0;
+		for (int l = 0; l < seq.length(); l++) {  if (isalpha(seq[l])) { numBases++; }  }
+//cout << "num Bases = " << numBases << endl;			
+		//save start of seq
+		win.push_back(front);
+//cout << front << '\t';		
+		//move ahead increment bases at a time until all bases are in a window
+		int countBases = 0;
+		int totalBases = 0;  //used to eliminate window of blanks at end of sequence
+			
+		seq = query->getAligned();
+		for (int m = front; m < (back - size) ; m++) {
+				
+			//count number of bases you see
+			if (isalpha(seq[m])) { countBases++;  }
+				
+			//if you have seen enough bases to make a new window
+			if (countBases >= increment) {
+				//total bases is the number of bases in a window already.
+				totalBases += countBases;
+//cout << "total bases = " << totalBases << endl;
+				win.push_back(m);  //save spot in alignment
+//cout << m << '\t';
+				countBases = 0;				//reset bases you've seen in this window
+			}
+				
+			//no need to continue if all your bases are in a window
+			if (totalBases == numBases) {   break;  }
+		}
+	
+
+		//get last window if needed
+		if (totalBases < numBases) {   win.push_back(back-size);  }
+//cout << endl << endl;
+*/	
+		
 		//this follows wigeon, but we may want to consider that it chops off the end values if the sequence cannot be evenly divided into steps
 		for (int i = front; i < (back - size) ; i+=increment) {  win.push_back(i);  }
-        
+
+
+	
 		return win;
 	
 	}
@@ -112,6 +162,7 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 		exit(1);
 	}
 }
+
 //***************************************************************************************************************
 vector<float> DeCalculator::calcObserved(Sequence* query, Sequence* subject, vector<int> window, int size) {
 	try {
@@ -127,10 +178,21 @@ vector<float> DeCalculator::calcObserved(Sequence* query, Sequence* subject, vec
 			for (int b = 0; b < seqFrag.length(); b++) {
 				//if at least one is a base and they are not equal
 				if( (isalpha(seqFrag[b]) || isalpha(seqFragsub[b])) && (seqFrag[b] != seqFragsub[b]) ) { diff++; }
-            }
+				
+				//ignore gaps
+				//if((!isalpha(seqFrag[b])) && (!isalpha(seqFragsub[b]))) { gaps++; }
+			}
                
 			//percentage of mismatched bases
-			float dist = diff / (float) (seqFrag.length()) * 100;
+			float dist;
+			
+			//if the whole fragment is 0 distance = 0
+			//if ((seqFrag.length()-gaps) == 0)  { dist =  0.0; }
+               
+			//percentage of mismatched bases
+			//else {  dist = diff / (float) (seqFrag.length()-gaps) * 100;   } 
+			
+			dist = diff / (float) (seqFrag.length()) * 100;	
 			
 			temp.push_back(dist);
 		}
@@ -366,10 +428,12 @@ vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vecto
 				float de = calcDE(obsi, exp);
 								
 				float dist = calcDist(query, subject, front, back); 
-				
+	//cout << i << '\t' <<  j << '\t' << dist << '\t' << de << endl;			
 				dist = ceil(dist);
-
-                quan[dist].push_back(de);
+				
+				//quanMember newScore(de, i, j);
+				
+				quan[dist].push_back(de);
 
 				delete subject;
 			}
@@ -416,12 +480,171 @@ void DeCalculator::removeObviousOutliers(vector< vector<float> >& quantiles, int
 			}
 			quantiles[i] = temp;
 		}
+
+/*
+		//find contributer with most offending score related to it
+		int largestContrib = findLargestContrib(seen);
+	
+		//while you still have guys to eliminate
+		while (contributions.size() > 0) {
+		
+			m->mothurOut("Removing scores contributed by sequence " + toString(largestContrib) + " in your template file."); m->mothurOutEndLine();
+			
+			//remove from quantiles all scores that were made using this largestContrib
+			for (int i = 0; i < quantiles.size(); i++) {
+//cout << "before remove " << quantiles[i].size() << '\t';
+				removeContrib(largestContrib, quantiles[i]);
+//cout << "after remove " << quantiles[i].size() << endl;
+			}
+//cout << count << " largest contrib = " << largestContrib << endl;  count++;
+			//remove from contributions all scores that were made using this largestContrib
+			removeContrib(largestContrib, contributions);
+			
+			//"erase" largestContrib
+			seen[largestContrib] = -1;
+			
+			//get next largestContrib
+			largestContrib = findLargestContrib(seen);
+		}
+ABOVE IS ATTEMPT #1		
+**************************************************************************************************
+BELOW IS ATTEMPT #2		
+		vector<int> marked = returnObviousOutliers(quantiles, num);
+		vector<int> copyMarked = marked;
+		
+		//find the 99% of marked
+		sort(copyMarked.begin(), copyMarked.end());
+		int high = copyMarked[int(copyMarked.size() * 0.99)];
+cout << "high = " << high << endl;		
+		
+		for(int i = 0; i < marked.size(); i++) {
+			if (marked[i] > high) { 
+				m->mothurOut("Removing scores contributed by sequence " + toString(marked[i]) + " in your template file."); m->mothurOutEndLine();
+				for (int i = 0; i < quantiles.size(); i++) {
+					removeContrib(marked[i], quantiles[i]);
+				}
+			}
+
+		}
+		
+		
+		//adjust quantiles
+		for (int i = 0; i < quantiles.size(); i++) {
+			vector<float> temp;
+			
+			if (quantiles[i].size() == 0) {
+				//in case this is not a distance found in your template files
+				for (int g = 0; g < 6; g++) {
+					temp.push_back(0.0);
+				}
+			}else{
+				
+				sort(quantiles[i].begin(), quantiles[i].end(), compareQuanMembers);
+				
+				//save 10%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.10)].score);
+				//save 25%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.25)].score);
+				//save 50%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.5)].score);
+				//save 75%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.75)].score);
+				//save 95%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.95)].score);
+				//save 99%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.99)].score);
+				
+			}
+			
+			quan[i] = temp;
+			
+		}
+*/
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DeCalculator", "removeObviousOutliers");
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+//put quanMember in the vector based on how far they are from the 99% or 1%.  Biggest offenders in front.
+/*vector<quanMember> DeCalculator::sortContrib(map<quanMember*, float> quan) {
+	try{
+		
+		vector<quanMember> newQuan;
+		map<quanMember*, float>::iterator it;
+		
+		while (quan.size() > 0) {
+			
+			 map<quanMember*, float>::iterator largest = quan.begin(); 
+			  
+			//find biggest member
+			for (it = quan.begin(); it != quan.end(); it++) {
+				if (it->second > largest->second) {  largest = it;  }
+			}
+cout << largest->second << '\t' << largest->first->score << '\t' << largest->first->member1 << '\t' << largest->first->member2 << endl;
+			//save it 
+			newQuan.push_back(*(largest->first));
+		
+			//erase from quan
+			quan.erase(largest);
+		}
+		
+		return newQuan;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeCalculator", "sortContrib");
+		exit(1);
+	}
+}
+
+***************************************************************************************************************
+//used by removeObviousOutliers which was attempt to increase sensitivity of chimera detection...not currently used...
+int DeCalculator::findLargestContrib(vector<int> seen) {
+	try{
+		
+		int largest = 0;
+		
+		int largestContribs;
+		
+		for (int i = 0; i < seen.size(); i++)  {  
+			
+			if (seen[i] > largest) {
+				largestContribs = i;
+				largest = seen[i];
+			}
+		}
+		
+		return largestContribs;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeCalculator", "findLargestContribs");
+		exit(1);
+	}
+}
+***************************************************************************************************************
+void DeCalculator::removeContrib(int bad, vector<quanMember>& quan) {
+	try{
+	
+		vector<quanMember> newQuan;
+		for (int i = 0; i < quan.size(); i++)  {  
+			if ((quan[i].member1 != bad) && (quan[i].member2 != bad) ) {  
+				newQuan.push_back(quan[i]);  
+			}
+		}
+		
+		quan = newQuan;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeCalculator", "removeContrib");
+		exit(1);
+	}
+}
+*/
 //***************************************************************************************************************
 float DeCalculator::findAverage(vector<float> myVector) {
 	try{
@@ -575,6 +798,7 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 				dists.push_back(distsLeft[i]);
 				seen[thisTemplate[distsLeft[i].index]->getName()] = thisTemplate[distsLeft[i].index]->getName();
 				lastLeft =  distsLeft[i].dist;
+//				cout << "loop-left\t" << db[distsLeft[i].index]->getName() << '\t' << distsLeft[i].dist << endl;
 			}
 
 			//add right if you havent already
@@ -583,6 +807,7 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 				dists.push_back(distsRight[i]);
 				seen[thisTemplate[distsRight[i].index]->getName()] = thisTemplate[distsRight[i].index]->getName();
 				lastRight =  distsRight[i].dist;
+//				cout << "loop-right\t" << db[distsRight[i].index]->getName() << '\t' << distsRight[i].dist << endl;
 			}
 			
 			if (i == numWanted) { break; }
@@ -608,10 +833,13 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 			}
 		}
 		
+		//cout << numWanted << endl;
 		for (int i = 0; i < dists.size(); i++) {
+//			cout << db[dists[i].index]->getName() << '\t' << dists[i].dist << endl;
 
 			if ((thisTemplate[dists[i].index]->getName() != querySeq.getName()) && (((1.0-dists[i].dist)*100) >= minSim)) {
 				Sequence temp(thisTemplate[dists[i].index]->getName(), thisTemplate[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
+				//cout << querySeq->getName() << '\t' << thisTemplate[dists[i].index]->getName()  << '\t' << dists[i].dist << endl;
 				seqsMatches.push_back(temp);
 			}
 

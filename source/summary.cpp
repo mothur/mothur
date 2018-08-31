@@ -670,14 +670,13 @@ void driverContigsSummarySummarize(seqSumData* params) {
         bool done = false;
         string name;
         int length, OLength, thisOStart, thisOEnd, numMisMatches, numns; //Name	Length	Overlap_Length	Overlap_Start	Overlap_End	MisMatches	Num_Ns
-        double expectedErrors;
         
         while (!done) {
             
             if (params->m->getControl_pressed()) { break; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns >> expectedErrors; params->util.gobble(in);
+            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns; params->util.gobble(in);
             
             if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(thisOStart) + "\t" + toString(thisOEnd) + "\t" + toString(length) + "\n"); }
             

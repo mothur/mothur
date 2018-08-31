@@ -10,8 +10,7 @@
 #define testtrimoligos_hpp
 
 #include "trimoligos.h"
-#include "gtest/gtest.h"
-#include "fakeoligos.h"
+
 
 class TestTrimOligos : public TrimOligos {
     
@@ -21,8 +20,11 @@ public:
     TestTrimOligos();
     ~TestTrimOligos();
     
-    FakeOligos oligos;
+    MothurOut* m;
     
+    Sequence* fseq;
+    //using TrimOligos::compareDNASeq(string, string);
+    //using TrimOligos::countDiffs(string, string);
     
 };
 

@@ -23,7 +23,6 @@ public:
     
 private:
     MothurOut* m;
-    Utils util;
     vector<FastqRead> ffastqReads;
     vector<FastqRead> rfastqReads; 
     void fillForwardFastq();

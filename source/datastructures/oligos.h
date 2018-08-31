@@ -50,12 +50,12 @@ public:
     //for printing and other formatting uses
     vector<string> getBarcodes(string); //get barcodes for a group. For paired barcodes will return forward.reverse
     vector<string> getPrimers(string); //get primers for a group. For paired primers will return forward.reverse
-    string getGroupName(int, int);
     string getBarcodeName(int);
     string getPrimerName(int);
+    string getGroupName(int, int);
     
 		
-protected:
+private:
     
     set<string> uniqueNames; 
     vector<string> Groups;
@@ -84,7 +84,6 @@ protected:
     
     int readOligos();
     string reverseOligo(string);
-    
 };
 
 /**************************************************************************************************/

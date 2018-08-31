@@ -408,7 +408,7 @@ struct trimFlowData {
 };
 //***************************************************************************************************************
 
-void driverCreateTrim(trimFlowData* params){
+int driverCreateTrim(trimFlowData* params){
 	
 	try {
         ifstream flowFile; params->util.openInputFile(params->flowFileName, flowFile);
@@ -547,7 +547,7 @@ void driverCreateTrim(trimFlowData* params){
                 
                 int thisBarcodeIndex = 0;
                 int thisPrimerIndex = 0;
-               
+                //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                 if(numBarcodes != 0){
                     vector<int> results = rtrimOligos->stripBarcode(savedSeq, thisBarcodeIndex);
                     if (params->pairedOligos) {
@@ -561,7 +561,7 @@ void driverCreateTrim(trimFlowData* params){
                     if(thisSuccess > params->bdiffs)		{ thisTrashCode += "b"; }
                     else{ thisCurrentSeqsDiffs += thisSuccess;  }
                 }
-               
+                //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                 if(numFPrimers != 0){
                     vector<int> results = rtrimOligos->stripForward(savedSeq, thisPrimerIndex);
                     if (params->pairedOligos) {

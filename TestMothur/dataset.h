@@ -12,9 +12,8 @@
 #include "sequence.hpp"
 #include "counttable.h"
 #include "groupmap.h"
-#include "sharedrabundvector.hpp"
+#include "sharedrabundvector.h"
 #include "fastqdataset.h"
-#include "utils.hpp"
 
 class TestDataSet  {
     
@@ -26,26 +25,17 @@ public:
     GroupMap* getGroupMap()                     { fillGroup(); return gMap;             }
     CountTable* getCountTable()                 { createCountTable(); return ct;        }
     vector<SharedRAbundVector*> getLookup()     { fillLookup(); return lookup;          }
-    
     vector<string> getSubsetFNGFiles();  //Fasta, name, group returned - containing 100 seqs
     string getSubsetFNGDistFile();
-    string getSubsetFNGPhylipDistFile();
-    vector<string> getOptiRefFiles(); //fasta, count, column, phylip, list, betweendist
-    vector<string> getOligosFiles(); //single, paired, indexes, comboNamesTest
-    string getSharedFile(); //shared
-    string getRelabundFile(); //relabund
     
 private:
     MothurOut* m;
-    Utils util;
     TestFastqDataSet fastqData;
     vector<Sequence> seqs;
     map<string, string> nameMap;
     CountTable* ct;
     GroupMap* gMap;
     vector<SharedRAbundVector*> lookup;
-    string testDir;
-    
     void fillNames();
     void fillSeqs();
     void fillGroup();

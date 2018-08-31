@@ -31,7 +31,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(vector<float> rav) :  DataVecto
 
 /***********************************************************************/
 
-SharedRAbundFloatVector::SharedRAbundFloatVector(vector<float> rav, float mr, int nb, float ns) :  DataVector(), group(""){
+SharedRAbundFloatVector::SharedRAbundFloatVector(vector<float> rav, int mr, int nb, int ns) :  DataVector(), group(""){
     try {
         numBins = nb;
         maxRank = mr;
@@ -154,15 +154,7 @@ float SharedRAbundFloatVector::remove(int bin){
     }
 }
 /***********************************************************************/
-void SharedRAbundFloatVector::resize(int size){
-    data.resize(size);
-    
-    vector<float>::iterator it = max_element(data.begin(), data.end());
-    maxRank = *it;
-    numSeqs = util.sum(data);
-    numBins = size;
-
-}
+void SharedRAbundFloatVector::resize(int size){ data.resize(size); }
 /***********************************************************************/
 int SharedRAbundFloatVector::size(){ return data.size(); }
 /***********************************************************************/
@@ -200,14 +192,6 @@ float SharedRAbundFloatVector::getMaxRank(){
 RAbundVector SharedRAbundFloatVector::getRAbundVector(){
     RAbundVector rav;
     for(int i = 0; i < data.size(); i++) { rav.push_back(int(data[i])); }
-    rav.setLabel(label);
-    return rav;
-}
-/***********************************************************************/
-
-RAbundFloatVector SharedRAbundFloatVector::getRAbundFloatVector(){
-    RAbundFloatVector rav;
-    for(int i = 0; i < data.size(); i++) { rav.push_back(data[i]); }
     rav.setLabel(label);
     return rav;
 }

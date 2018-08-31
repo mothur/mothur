@@ -43,7 +43,7 @@ class SharedRAbundFloatVector : public DataVector {
 public:
     SharedRAbundFloatVector();
     SharedRAbundFloatVector(int);
-    SharedRAbundFloatVector(vector<float>, float, int, float); //maxRank, numbins, numSeqs
+    SharedRAbundFloatVector(vector<float>, int, int, int);
     SharedRAbundFloatVector(vector<float>);
     SharedRAbundFloatVector(const SharedRAbundFloatVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs), group(bv.group) {};
     SharedRAbundFloatVector(ifstream&);
@@ -76,9 +76,9 @@ public:
     
 private:
     vector<float> data;
-    float maxRank;
+    int maxRank;
     int numBins;
-    float numSeqs;
+    int numSeqs;
     string group;
 };
 

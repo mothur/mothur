@@ -10,25 +10,19 @@
 #define __Mothur__testbiominfocommand__
 
 #include "biominfocommand.h"
-#include "gtest/gtest.h"
 
 class TestBiomInfoCommand : public BiomInfoCommand {
     
 public:
     
-    TestBiomInfoCommand();
-    ~TestBiomInfoCommand();
-    
-    MothurOut* m;
-    
-    using BiomInfoCommand::getDims;
+    using BiomInfoCommand::getTag;
     using BiomInfoCommand::getName;
     using BiomInfoCommand::getTaxonomy;
     using BiomInfoCommand::readRows;
+    using BiomInfoCommand::getDims;
     using BiomInfoCommand::readData;
     using BiomInfoCommand::getNamesAndTaxonomies;
-    
-    
+
 };
 
 

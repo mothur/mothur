@@ -130,24 +130,24 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					if((i-leftIndex) <= (rightIndex-i)){		//	the left gap is closer - > move stuff left there's
 	
 						if(leftRoom >= insertLength){			//	enough room to the left to move
-			
+			//cout << "lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);
 							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-						
+			//cout << "lr candAln = " << candAln.length() << '\t' << leftIndex << '\t'  << endl;				
 							string leftCandidateString = candAln.substr(0,(leftIndex-insertLength+1));
 							string rightCandidateString = candAln.substr((leftIndex+1));
 							candAln = leftCandidateString + rightCandidateString;
 							
 						}else{									//	not enough room to the left, have to steal some space to the right
 						
-			
+			//cout << "in else lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);	
 							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-							
+			//cout << " in else lr candAln = " << candAln.length() << '\t' << " leftIndex = " << leftIndex << " leftroom = " << leftRoom << " rightIndex = " << rightIndex << '\t' << " rightroom = " << rightRoom << '\t' << endl;					
 							string leftCandidateString = candAln.substr(0,(leftIndex-leftRoom+1));
 							string insertString = candAln.substr((leftIndex+1),(rightIndex-leftIndex-1));
 							string rightCandidateString = candAln.substr((rightIndex+(insertLength-leftRoom)));
@@ -156,12 +156,12 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 						}
 					}else{										//	the right gap is closer - > move stuff right there's
 						if(rightRoom >= insertLength){			//	enough room to the right to move
-			
+			//cout << "rr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);
 							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-							
+			//cout << "rr candAln = " << candAln.length() << '\t' << i << '\t' << rightIndex << '\t' << rightIndex+insertLength << endl;				
 							string leftCandidateString = candAln.substr(0,rightIndex);
 							string rightCandidateString = candAln.substr((rightIndex+insertLength));
 							candAln = leftCandidateString + rightCandidateString;	
@@ -169,12 +169,12 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 						}
 						else{									//	not enough room to the right, have to steal some 	
 							//	space to the left lets move left and then right...
-					
+					//cout << "in else rr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);
 							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-								
+					//cout << "in else rr candAln = " << candAln.length() << '\t' << '\t' << (leftIndex-(insertLength-rightRoom)+1) << '\t' <<  (leftIndex+1,rightIndex-leftIndex-1) << '\t' << (rightIndex+rightRoom) << endl;				
 							string leftCandidateString = candAln.substr(0,(leftIndex-(insertLength-rightRoom)+1));
 							string insertString = candAln.substr((leftIndex+1),(rightIndex-leftIndex-1));
 							string rightCandidateString = candAln.substr((rightIndex+rightRoom));
@@ -189,11 +189,13 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 				}
 				else{
 			//	there could be a case where there isn't enough room in either direction to move stuff
-					string leftTemplateString = newTemplateAlign.substr(0,i);
+//cout << "in else else newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << (i+leftRoom+rightRoom) << endl;
+					string leftTemplateString = newTemplateAlign.substr(0,i);	
 					string rightTemplateString = newTemplateAlign.substr((i+leftRoom+rightRoom));
 					newTemplateAlign = leftTemplateString + rightTemplateString;
 					longAlignmentLength = newTemplateAlign.length();
 							
+		//cout << "in else else newTemplateAlign = " << candAln.length() << '\t' << (leftIndex-leftRoom+1) << '\t' << (leftIndex+1) << '\t' << (rightIndex-leftIndex-1) << '\t' << (rightIndex+rightRoom) << endl;	
 					string leftCandidateString = candAln.substr(0,(leftIndex-leftRoom+1));
 					string insertString = candAln.substr((leftIndex+1),(rightIndex-leftIndex-1));
 					string rightCandidateString = candAln.substr((rightIndex+rightRoom));
@@ -201,7 +203,9 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					
 					i -= (leftRoom + rightRoom);
 				}
-						
+			
+//				i -= insertLength;
+				
 				//if i is negative, we want to remove the extra gaps to the right
 				if (i < 0) { m->mothurOut("i is negative"); m->mothurOutEndLine(); } 
 			} 
@@ -217,6 +221,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 
 void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis et al.
 	try { 
+	//cout << candidateSeq->getName() << endl;
 		string candPair = candidateSeq->getPairwise();
 		string candAln = "";
 		
@@ -245,6 +250,7 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 		string lastLoop = "";
 		
 		while(pairwiseAlignIndex<pairwiseLength){
+	//cout << pairwiseAlignIndex << '\t' << fullAlignIndex << '\t' << pairwiseLength << endl;
 			if(isalpha(tempPair[pairwiseAlignIndex]) && isalpha(tempAln[fullAlignIndex])
 			   && isalpha(candPair[pairwiseAlignIndex])){
 				//  the template and candidate pairwise and template aligned have characters
@@ -351,6 +357,7 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 		}												//	2 of Desantis et al.
 
 		candidateSeq->setAligned(candAln);
+	//cout << "here" << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Nast", "regapSequences");

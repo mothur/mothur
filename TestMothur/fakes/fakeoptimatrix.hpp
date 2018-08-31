@@ -9,9 +9,9 @@
 #ifndef fakeoptimatrix_hpp
 #define fakeoptimatrix_hpp
 
-#include "optidata.hpp"
+#include "optimatrix.h"
 
-class FakeOptiMatrix : public OptiData {
+class FakeOptiMatrix : public OptiMatrix {
     
 public:
     FakeOptiMatrix(); 

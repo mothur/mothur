@@ -254,6 +254,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 			if(rc!=-1){		T->tree[rc].setParent(n);		}
 		}
 		
+		//T->printTree(); cout << endl;
 		return 0;
 	
 	}

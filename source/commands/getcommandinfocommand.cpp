@@ -103,6 +103,7 @@ int GetCommandInfoCommand::execute(){
 				
 				//general info
 				out << "commandName=" << thisCommand->getCommandName() << endl;
+				//cout << thisCommand->getCommandName() << " current citation = " << thisCommand->getCitation() << endl;
 				out << "commandCategory=" << thisCommand->getCommandCategory() << endl;
 				
 				//remove /n from help string since gui reads line by line
@@ -129,6 +130,10 @@ int GetCommandInfoCommand::execute(){
 				
 				if (thisOutputTypes.size() == 0) { out << "outputTypesNames=0" << endl; }
 				else {
+					//string types = "";
+					//for (itTypes = thisOutputTypes.begin(); itTypes != thisOutputTypes.end(); itTypes++) {	types += itTypes->first + "-";	}
+					//rip off last -
+					//types = types.substr(0, types.length()-1);
 					out << "outputTypesNames=" << thisOutputTypes.size() << endl;
                     
                     for (itTypes = thisOutputTypes.begin(); itTypes != thisOutputTypes.end(); itTypes++) {

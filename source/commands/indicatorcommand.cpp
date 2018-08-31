@@ -284,7 +284,7 @@ int IndicatorCommand::execute(){
             }
             ct.createTable(nameMap, groupMap, gps);
 			
-			if ((designfile != "") && (Treenames.size() != namesSeqs.size())) {  m->mothurOut("[ERROR]: You design file does not match your tree, aborting.\n"); mismatch = true; }
+			if ((designfile != "") && (Treenames.size() != namesSeqs.size())) { cout << namesSeqs.size() << '\t' << Treenames.size() << endl; m->mothurOut("[ERROR]: You design file does not match your tree, aborting.\n"); mismatch = true; }
 					
 			if (mismatch) { //cleanup and exit
 				if (designfile != "") { delete designMap; }  return 0;
@@ -616,9 +616,12 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			else { out << "<" << (1/(float)iters) << endl; }
 			
 			if (pValues[j] <= 0.05) {
+				cout << currentLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
 				string pValueString = "<" + toString((1/(float)iters)); 
-				if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); }
-				m->mothurOut(currentLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString + "\n");
+				if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
+                else { cout << "<" << (1/(float)iters); }
+				m->mothurOutJustToLog(currentLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
+                m->mothurOutEndLine();
 			}
 		}
 		
@@ -841,9 +844,12 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				}
 				
 				if (pValues[j] <= 0.05) {
+					cout << i+1 << '\t' << currentLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j];
 					string pValueString = "\t<" + toString((1/(float)iters));
-					if (pValues[j] > (1/(float)iters)) { pValueString = toString('\t' + pValues[j]); }
-					m->mothurOut(toString(i+1) + "\t" + currentLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString + "\n");
+					if (pValues[j] > (1/(float)iters)) { pValueString = toString('\t' + pValues[j]); cout << '\t' << pValues[j];}
+					else { cout << "\t<" << (1/(float)iters); }
+					m->mothurOutJustToLog(toString(i) + "\t" + currentLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
+					m->mothurOutEndLine(); 
 				}
 			}
 			out << endl;

@@ -32,6 +32,8 @@ public:
     using RenameFileCommand::outputfile;
     using RenameFileCommand::deleteOld;
     
+
+    
 };
 
 

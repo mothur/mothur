@@ -515,7 +515,7 @@ void PhyloTree::printTreeNodes(string treefilename) {
 TaxNode PhyloTree::get(int i ){
 	try {
 		if (i < tree.size()) {  return tree[i];	 }
-		else {  m->mothurOut("Mismatch with taxonomy and template files. Cannot continue.\n");  exit(1); }
+		else {  cout << i << '\t' << tree.size() << endl ; m->mothurOut("Mismatch with taxonomy and template files. Cannot continue."); m->mothurOutEndLine(); exit(1); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "get");

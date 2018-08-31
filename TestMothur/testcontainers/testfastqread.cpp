@@ -22,28 +22,44 @@ TestFastqRead::~TestFastqRead() {
      //teardown
 }
 /**************************************************************************************************/
-//Using ATGCGTCATC & 40 39 38 37 36 35 34 33 32 31
-TEST(Test_Container_FastqRead, FastqReadConstructor) {
+/*
+TEST_CASE("Testing FastqRead Class") {
+    
     TestFastqRead testFastq;
     
-    vector<int> scores; for (int i = 31; i < 41; i++) { scores.push_back(i); }
-    Sequence seq("testSeq", "ATGCGTCATC");
-    QualityScores qual("testSeq", scores);
-    FastqRead read(seq, qual);
-    
-    EXPECT_EQ(read.getSeq(), "ATGCGTCATC");
-    EXPECT_EQ(read.getScores()[0], 31);
-}
-
-TEST(Test_Container_FastqRead, FastqReadFromFileConstructor) {
-    TestFastqRead testFastq;
+    SECTION("Testing (Sequence, Quality) Constructor ") {
+        INFO("Using ATGCGTCATC & 40 39 38 37 36 35 34 33 32 31") // Only appears on a FAIL
         
-    ifstream in; bool ignore; string format = "illumina1.8+";
-    Utils util; util.openInputFile(testFastq.filenames[0], in);
+        vector<int> scores; for (int i = 31; i < 41; i++) { scores.push_back(i); }
+        Sequence seq("testSeq", "ATGCGTCATC");
+        QualityScores qual("testSeq", scores);
+        FastqRead read(seq, qual);
         
-    FastqRead read(in, ignore, format);
+        CAPTURE(read.getSeq()); // Displays this variable on a FAIL
+        
+        CHECK(read.getSeq() == "ATGCGTCATC");
+        
+        CAPTURE(read.getScores()[0]); // Displays this variable on a FAIL
+        
+        CHECK(read.getScores()[0] == 31);
+    }
     
-    EXPECT_EQ(read.getSeq(), (testFastq.reads[0]).getSeq());
-    EXPECT_EQ(read.getScores()[0], testFastq.reads[0].getScores()[0]);
-}
+    SECTION("Testing Fastq Read From File Constructor ") {
+        INFO("Using first first read in F8D0") // Only appears on a FAIL
+        
+        ifstream in; bool ignore; string format = "illumina1.8+";
+        testFastq.util.openInputFile(testFastq.filenames[0], in);
+        
+        FastqRead read(in, ignore, format);
+        
+        CAPTURE(read.getSeq()); // Displays this variable on a FAIL
+        
+        CHECK(read.getSeq() == (testFastq.reads[0]).getSeq());
+        
+        CAPTURE(read.getScores()[0]); // Displays this variable on a FAIL
+        
+        CHECK(read.getScores()[0] == testFastq.reads[0].getScores()[0]);
+    }
+ 
+}*/
 /**************************************************************************************************/

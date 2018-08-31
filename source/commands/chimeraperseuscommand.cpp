@@ -296,7 +296,7 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			temp = validParameter.valid(parameters, "cutoff");	if (temp == "not found"){	temp = "0.33";	}
 			util.mothurConvert(temp, beta);
             
-			temp = validParameter.valid(parameters, "dereplicate");	
+			temp = validParameter.validFile(parameters, "dereplicate");	
 			if (temp == "not found") { temp = "false";			}
 			dups = util.isTrue(temp);
 		}

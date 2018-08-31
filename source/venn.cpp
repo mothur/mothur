@@ -640,19 +640,20 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					//get estimates for numA
 					data = singleCalc->getValues(sabundA);
 					numA = data[0];
-		
+	//cout << "num a = " << numA << endl;	
  			
 					//get estimates for numB
 					data = singleCalc->getValues(sabundB);
 					numB = data[0];
- 					
+ 	//cout << "num b = " << numB << endl;				
 					//get estimates for numC
 					data = singleCalc->getValues(sabundC);
 					numC = data[0];
-					
+	//cout << "num c = " << numC << endl;				
 					//get estimates for numD
 					data = singleCalc->getValues(sabundD);
 					numD = data[0];
+//cout << "num d = " << numD << endl;	
                     
                     ofstream outShared;
                     if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
@@ -680,7 +681,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
                         outShared << endl;
                     }
-			
+	//cout << "num ab = " << sharedAB << endl;			
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[2]);
 					data = vCalcs[i]->getValues(subset, labels);
@@ -693,7 +694,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
                         outShared << endl;
                     }
-				
+	//cout << "num ac = " << sharedAC << endl;				
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
@@ -706,7 +707,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
                         outShared << endl;
                     }
-			
+	//cout << "num ad = " << sharedAD << endl;			
 					subset.clear();
 					subset.push_back(lookup[1]); subset.push_back(lookup[2]);
 					data = vCalcs[i]->getValues(subset, labels);
@@ -719,7 +720,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
                         outShared << endl;
                     }
-					
+	//cout << "num bc = " << sharedBC << endl;				
 					subset.clear();
 					subset.push_back(lookup[1]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
@@ -732,7 +733,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
                         outShared << endl;
                     }
-							
+		//cout << "num bd = " << sharedBD << endl;						
 					subset.clear();
 					subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
@@ -746,7 +747,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         outShared << endl;
                     }
 						
-				
+	//cout << "num cd = " << sharedCD << endl;				
 					//get estimates for combos of 3
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[2]);
@@ -760,7 +761,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
                         outShared << endl;
                     }
-						
+		//cout << "num abc = " << sharedABC << endl;					
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
@@ -773,7 +774,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
                         outShared << endl;
                     }
-				
+			//cout << "num acd = " << sharedACD << endl;	
 					subset.clear();
 					subset.push_back(lookup[1]); subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset,labels);
@@ -786,7 +787,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         outShared << labels[labels.size()-1]; 
                         outShared << endl;
                     }
-				
+		//cout << "num bcd = " << sharedBCD << endl;		
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
@@ -799,7 +800,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         outShared << labels[labels.size()-1]; 
                         outShared << endl;
                     }
-
+//cout << "num abd = " << sharedABD << endl;
 					//get estimate for all four
 					data = vCalcs[i]->getValues(lookup, labels);
 					sharedABCD = data[0];
@@ -812,7 +813,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                         outShared << endl;
                         outShared.close();
                     }
-		
+		//cout << "num abcd = " << sharedABCD << endl << endl;	
 					int sharedVal, sharedABCVal, sharedABDVal, sharedACDVal, sharedBCDVal, sharedABVal, sharedACVal, sharedADVal, sharedBCVal, sharedBDVal, sharedCDVal, numSeqsA, numSeqsB, numSeqsC, numSeqsD;
 												
 					if (nseqs) {
@@ -922,26 +923,29 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 									
 					//make adjustments
 					sharedABC = sharedABC - sharedABCD;
-				
+			//cout << "num abc = " << sharedABC << endl;		
 					sharedABD = sharedABD - sharedABCD;
-				
+				//cout << "num abd = " << sharedABD << endl;
 					sharedACD = sharedACD - sharedABCD;
-				
+				//cout << "num acd = " << sharedACD << endl;
 					sharedBCD = sharedBCD - sharedABCD;
-				
+				//cout << "num bcd = " << sharedBCD << endl;
 					
-					sharedAB = sharedAB - sharedABC - sharedABCD - sharedABD;
-					sharedAC = sharedAC - sharedABC - sharedABCD - sharedACD;
-					sharedAD = sharedAD - sharedABD - sharedABCD - sharedACD;
-					sharedBC = sharedBC - sharedABC - sharedABCD - sharedBCD;
-					sharedBD = sharedBD - sharedABD - sharedABCD - sharedBCD;
-					sharedCD = sharedCD - sharedACD - sharedABCD - sharedBCD;
+					sharedAB = sharedAB - sharedABC - sharedABCD - sharedABD;  //cout << "num ab = " << sharedAB << endl;
+					sharedAC = sharedAC - sharedABC - sharedABCD - sharedACD;  //cout << "num ac = " << sharedAC << endl;
+					sharedAD = sharedAD - sharedABD - sharedABCD - sharedACD;  //cout << "num ad = " << sharedAD << endl;				
+					sharedBC = sharedBC - sharedABC - sharedABCD - sharedBCD;  //cout << "num bc = " << sharedBC << endl;
+					sharedBD = sharedBD - sharedABD - sharedABCD - sharedBCD; // cout << "num bd = " << sharedBD << endl; 
+					sharedCD = sharedCD - sharedACD - sharedABCD - sharedBCD;  //cout << "num cd = " << sharedCD << endl;
 					
 					numA = numA - sharedAB - sharedAC - sharedAD - sharedABCD - sharedABC - sharedACD - sharedABD;
+			//cout << "num a = " << numA << endl;		
 					numB = numB - sharedAB - sharedBC - sharedBD - sharedABCD - sharedABC - sharedABD - sharedBCD;
+			//cout << "num b = " << numB << endl;		
 					numC = numC - sharedAC - sharedBC - sharedCD - sharedABCD - sharedABC - sharedACD - sharedBCD;
+			//cout << "num c = " << numC << endl;		
 					numD = numD - sharedAD - sharedBD - sharedCD - sharedABCD - sharedBCD - sharedACD - sharedABD;
-				
+			//cout << "num d = " << numD << endl;		
 					
 					//draw circles
 					outsvg << "<ellipse fill=\"red\" stroke=\"black\" opacity=\".35\" transform=\"rotate(-45 " +  toString(int(0.51 * width)) +  " " +  toString(int(0.27 * height)) +  ") \" cx=\"" +  toString(int(0.51 * width)) +  "\" cy=\"" +  toString(int(0.27 * height)) +  "\" rx=\"" +  toString(int(0.29 * width)) +  "\" ry=\"" +  toString(int(0.14 * height)) +  "\"/>\n "; 

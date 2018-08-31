@@ -10,7 +10,6 @@
 #define __Mothur__testfastqread__
 
 #include "fastqread.h"
-#include "gtest/gtest.h"
 
 class TestFastqRead : public FastqRead {
     
