@@ -397,13 +397,15 @@ int process(string group, string newMapFile, preClusterData* params){
         ofstream out;
         params->util.openOutputFile(newMapFile, out);
 
+				out << "ideal_seq\terror_seq\tabundance\tdiffs\tsequence" << endl;
+
         int count = 0;
         long long numSeqs = params->alignSeqs.size();
 
-            map<int, string> mapFile;
-            map<int, int> originalCount;
-            map<int, int>::iterator itCount;
-            for (int i = 0; i < numSeqs; i++) { mapFile[i] = ""; originalCount[i] = params->alignSeqs[i]->numIdentical; }
+        map<int, string> mapFile;
+        map<int, int> originalCount;
+        map<int, int>::iterator itCount;
+        for (int i = 0; i < numSeqs; i++) { mapFile[i] = ""; originalCount[i] = params->alignSeqs[i]->numIdentical; }
 
 
         if (params->topdown) {
@@ -412,7 +414,7 @@ int process(string group, string newMapFile, preClusterData* params){
 
                 if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
 
-                    string chunk = params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+                    string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
 
                     //try to merge it with all smaller seqs
                     for (int j = i+1; j < numSeqs; j++) {
@@ -430,7 +432,7 @@ int process(string group, string newMapFile, preClusterData* params){
                                 params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
                                 params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
 
-                                chunk += params->alignSeqs[j]->seq.getName() + "\t" + toString(params->alignSeqs[j]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
+                                chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(params->alignSeqs[j]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
 
                                 params->alignSeqs[j]->active = 0;
                                 params->alignSeqs[j]->numIdentical = 0;
@@ -443,50 +445,52 @@ int process(string group, string newMapFile, preClusterData* params){
                     //remove from active list
                     params->alignSeqs[i]->active = 0;
 
-                    out << "ideal_seq_" << (i+1) << '\t' << params->alignSeqs[i]->numIdentical << endl << chunk << endl;
+                    out << chunk;
 
                 }//end if active i
                 if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
             }
         }else {
-
-            //think about running through twice...
-            for (int i = 0; i < numSeqs; i++) {
-
-                //try to merge it into larger seqs
-                for (int j = i+1; j < numSeqs; j++) {
-
-                    if (params->m->getControl_pressed()) { out.close(); return 0; }
-
-                    if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
-                        //are you within "diff" bases
-                        int mismatch = params->length;
-                        if (params->method == "unaligned") { mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(), params->alignSeqs[j]->seq.getAligned(), params); }
-                        else { mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq, params->alignSeqs[j]->filteredSeq, params); }
-
-                        if (mismatch <= params->diffs) {
-                            //merge
-                            params->alignSeqs[j]->names += ',' + params->alignSeqs[i]->names;
-                            params->alignSeqs[j]->numIdentical += params->alignSeqs[i]->numIdentical;
-
-                            mapFile[j] = params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n" + mapFile[i];
-                            params->alignSeqs[i]->numIdentical = 0;
-                            originalCount.erase(i);
-                            mapFile[i] = "";
-                            count++;
-                            j+=numSeqs; //exit search, we merged this one in.
-                        }
-                    }//end abundance check
-                }//end for loop j
-
-                if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
-            }
-
-            for (int i = 0; i < numSeqs; i++) {
-                if (params->alignSeqs[i]->numIdentical != 0) {
-                    out << "ideal_seq_" << (i+1) << '\t' << params->alignSeqs[i]->numIdentical << endl  << params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n" << mapFile[i] << endl;
-                }
-            }
+						//
+						// we'll come back to this method in the future when we bring in other denoising
+ 						// strategies
+						//
+            // for (int i = 0; i < numSeqs; i++) {
+						//
+            //     //try to merge it into larger seqs
+            //     for (int j = i+1; j < numSeqs; j++) {
+						//
+            //         if (params->m->getControl_pressed()) { out.close(); return 0; }
+						//
+            //         if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
+            //             //are you within "diff" bases
+            //             int mismatch = params->length;
+            //             if (params->method == "unaligned") { mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(), params->alignSeqs[j]->seq.getAligned(), params); }
+            //             else { mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq, params->alignSeqs[j]->filteredSeq, params); }
+						//
+            //             if (mismatch <= params->diffs) {
+            //                 //merge
+            //                 params->alignSeqs[j]->names += ',' + params->alignSeqs[i]->names;
+            //                 params->alignSeqs[j]->numIdentical += params->alignSeqs[i]->numIdentical;
+						//
+            //                 mapFile[j] = params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n" + mapFile[i];
+            //                 params->alignSeqs[i]->numIdentical = 0;
+            //                 originalCount.erase(i);
+            //                 mapFile[i] = "";
+            //                 count++;
+            //                 j+=numSeqs; //exit search, we merged this one in.
+            //             }
+            //         }//end abundance check
+            //     }//end for loop j
+						//
+            //     if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
+            // }
+						//
+            // for (int i = 0; i < numSeqs; i++) {
+            //     if (params->alignSeqs[i]->numIdentical != 0) {
+            //         out << "ideal_seq_" << (i+1) << '\t' << params->alignSeqs[i]->numIdentical << endl  << params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n" << mapFile[i] << endl;
+            //     }
+            // }
 
         }
         out.close();
