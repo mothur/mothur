@@ -18,7 +18,7 @@
 #include "sabundvector.hpp"
 #include "counttable.h"
 #include "opticluster.h"
-#include "optiblastmatrix.hpp"
+#include "optimatrix.h"
 
 /**********************************************************************/
 

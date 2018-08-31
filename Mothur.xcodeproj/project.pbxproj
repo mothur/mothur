@@ -9,10 +9,6 @@
 /* Begin PBXBuildFile section */
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
-		4803D5A72118B352001C63B5 /* miseqsop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5A52118B352001C63B5 /* miseqsop.cpp */; };
-		4803D5AA211C9867001C63B5 /* testintegrationalignseqs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */; };
-		4803D5AD211CA67F001C63B5 /* testsharedrabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */; };
-		4803D5B0211CD839001C63B5 /* testsharedrabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -388,18 +384,7 @@
 		48910D4B1D58CBA300F60EDB /* optimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D491D58CBA300F60EDB /* optimatrix.cpp */; };
 		48910D511D58E26C00F60EDB /* testopticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D4D1D58E26C00F60EDB /* testopticluster.cpp */; };
 		48910D521D58E26C00F60EDB /* distcdataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D501D58E26C00F60EDB /* distcdataset.cpp */; };
-		489387F62107A60C00284329 /* testoptirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489387F42107A60C00284329 /* testoptirefmatrix.cpp */; };
-		489387F9210F633E00284329 /* testOligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489387F7210F633E00284329 /* testOligos.cpp */; };
-		489387FA2110C79200284329 /* testtrimoligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */; };
 		4893DE2918EEF28100C615DF /* (null) in Sources */ = {isa = PBXBuildFile; };
-		489AF68F2106188E0028155E /* sensspeccalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B01D2A2016470F006BE140 /* sensspeccalc.cpp */; };
-		489AF690210618A80028155E /* optiblastmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */; };
-		489AF691210619140028155E /* sharedrabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 485B0E061F264F2E00CA5F57 /* sharedrabundvector.cpp */; };
-		489AF692210619170028155E /* sharedrabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */; };
-		489AF6932106192E0028155E /* clusterfitcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B01D2720163594006BE140 /* clusterfitcommand.cpp */; };
-		489AF694210619410028155E /* optirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */; };
-		489AF6952106194A0028155E /* optifitcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */; };
-		489AF6962106195E0028155E /* optidata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C720A48EF700FF9F6E /* optidata.cpp */; };
 		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48B01D2920163594006BE140 /* clusterfitcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B01D2720163594006BE140 /* clusterfitcommand.cpp */; };
@@ -435,6 +420,13 @@
 		48E543EC1E8F15B800FF6AB8 /* opticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D451D58CAD700F60EDB /* opticluster.cpp */; };
 		48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D491D58CBA300F60EDB /* optimatrix.cpp */; };
 		48E543EE1E92B91100FF6AB8 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
+		48E544341E92C49700FF6AB8 /* gtest-port.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544131E92C49700FF6AB8 /* gtest-port.cc */; };
+		48E544361E92C49700FF6AB8 /* gtest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544151E92C49700FF6AB8 /* gtest.cc */; };
+		48E544371E92C49700FF6AB8 /* gtest-death-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544161E92C49700FF6AB8 /* gtest-death-test.cc */; };
+		48E544381E92C49700FF6AB8 /* gtest-test-part.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544171E92C49700FF6AB8 /* gtest-test-part.cc */; };
+		48E5443A1E92C49700FF6AB8 /* gtest-filepath.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E5441E1E92C49700FF6AB8 /* gtest-filepath.cc */; };
+		48E5443B1E92C49700FF6AB8 /* gtest-printers.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544291E92C49700FF6AB8 /* gtest-printers.cc */; };
+		48E5443C1E92C49700FF6AB8 /* gtest-typed-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 48E544321E92C49700FF6AB8 /* gtest-typed-test.cc */; };
 		48E544411E9C292900FF6AB8 /* mcc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5443F1E9C292900FF6AB8 /* mcc.cpp */; };
 		48E544421E9C292900FF6AB8 /* mcc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5443F1E9C292900FF6AB8 /* mcc.cpp */; };
 		48E544451E9C2B1000FF6AB8 /* sensitivity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E544431E9C2B1000FF6AB8 /* sensitivity.cpp */; };
@@ -467,10 +459,6 @@
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
-		48FB99C5209B69FA00FF9F6E /* optirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */; };
-		48FB99C920A48EF700FF9F6E /* optidata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C720A48EF700FF9F6E /* optidata.cpp */; };
-		48FB99CC20A4AD7D00FF9F6E /* optiblastmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */; };
-		48FB99CF20A4F3FB00FF9F6E /* optifitcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */; };
 		835FE03E19F00A4D005AA754 /* svm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B21820117AD77BD00286E6A /* svm.cpp */; };
@@ -856,16 +844,8 @@
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = newcommandtemplate.h; path = source/commands/newcommandtemplate.h; sourceTree = SOURCE_ROOT; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getcoremicrobiomecommand.cpp; path = source/commands/getcoremicrobiomecommand.cpp; sourceTree = SOURCE_ROOT; };
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getcoremicrobiomecommand.h; path = source/commands/getcoremicrobiomecommand.h; sourceTree = SOURCE_ROOT; };
-		4803D5A52118B352001C63B5 /* miseqsop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = miseqsop.cpp; path = TestMothur/IntegrationTests/miseqsop.cpp; sourceTree = SOURCE_ROOT; };
-		4803D5A62118B352001C63B5 /* miseqsop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = miseqsop.hpp; path = TestMothur/IntegrationTests/miseqsop.hpp; sourceTree = SOURCE_ROOT; };
-		4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testintegrationalignseqs.cpp; path = TestMothur/IntegrationTests/testintegrationalignseqs.cpp; sourceTree = SOURCE_ROOT; };
-		4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testintegrationalignseqs.hpp; path = TestMothur/IntegrationTests/testintegrationalignseqs.hpp; sourceTree = SOURCE_ROOT; };
-		4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundvector.cpp; path = TestMothur/testcontainers/testsharedrabundvector.cpp; sourceTree = SOURCE_ROOT; };
-		4803D5AC211CA67F001C63B5 /* testsharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvector.hpp; path = TestMothur/testcontainers/testsharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
-		4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundfloatvector.cpp; path = TestMothur/testcontainers/testsharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
-		4803D5AF211CD839001C63B5 /* testsharedrabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundfloatvector.hpp; path = TestMothur/testcontainers/testsharedrabundfloatvector.hpp; sourceTree = SOURCE_ROOT; };
-		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
-		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
+		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testclustercalcs.cpp; sourceTree = "<group>"; };
+		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testclustercalcs.hpp; sourceTree = "<group>"; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fakeoptimatrix.cpp; path = TestMothur/fakes/fakeoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E301EA92D5500BF9C77 /* fakeoptimatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakeoptimatrix.hpp; path = fakes/fakeoptimatrix.hpp; sourceTree = "<group>"; };
@@ -885,10 +865,10 @@
 		4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testtrimoligos.cpp; path = TestMothur/testtrimoligos.cpp; sourceTree = SOURCE_ROOT; };
 		4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testtrimoligos.hpp; path = TestMothur/testtrimoligos.hpp; sourceTree = SOURCE_ROOT; };
 		484F21691BA1C5F8001C1B5F /* makefile-internal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "makefile-internal"; sourceTree = SOURCE_ROOT; };
-		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = TestMothur/testcontainers/testoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
-		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = TestMothur/testcontainers/testoptimatrix.h; sourceTree = SOURCE_ROOT; };
-		48576EA61D05F59300BBC9C0 /* distpdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = distpdataset.cpp; path = TestMothur/distpdataset.cpp; sourceTree = SOURCE_ROOT; };
-		48576EA71D05F59300BBC9C0 /* distpdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = distpdataset.h; path = TestMothur/distpdataset.h; sourceTree = SOURCE_ROOT; };
+		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = testcontainers/testoptimatrix.cpp; sourceTree = "<group>"; };
+		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = testcontainers/testoptimatrix.h; sourceTree = "<group>"; };
+		48576EA61D05F59300BBC9C0 /* distpdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distpdataset.cpp; sourceTree = "<group>"; };
+		48576EA71D05F59300BBC9C0 /* distpdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distpdataset.h; sourceTree = "<group>"; };
 		485B0E061F264F2E00CA5F57 /* sharedrabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvector.cpp; path = source/datastructures/sharedrabundvector.cpp; sourceTree = SOURCE_ROOT; };
 		485B0E071F264F2E00CA5F57 /* sharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvector.hpp; path = source/datastructures/sharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
 		485B0E0C1F27C40500CA5F57 /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvector.cpp; path = source/datastructures/sharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
@@ -916,18 +896,14 @@
 		4889EA211E8962D50054E0BB /* summary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = summary.hpp; path = source/summary.hpp; sourceTree = SOURCE_ROOT; };
 		48910D411D5243E500F60EDB /* mergecountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergecountcommand.cpp; path = source/commands/mergecountcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48910D421D5243E500F60EDB /* mergecountcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergecountcommand.hpp; path = source/commands/mergecountcommand.hpp; sourceTree = SOURCE_ROOT; };
-		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = SOURCE_ROOT; };
+		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = "<group>"; };
 		48910D491D58CBA300F60EDB /* optimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optimatrix.cpp; path = source/datastructures/optimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48910D4A1D58CBA300F60EDB /* optimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = optimatrix.h; path = source/datastructures/optimatrix.h; sourceTree = "<group>"; };
-		48910D4C1D58CBFC00F60EDB /* opticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = opticluster.h; path = source/opticluster.h; sourceTree = SOURCE_ROOT; };
-		48910D4D1D58E26C00F60EDB /* testopticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testopticluster.cpp; path = TestMothur/testopticluster.cpp; sourceTree = SOURCE_ROOT; };
-		48910D4E1D58E26C00F60EDB /* testopticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testopticluster.h; path = TestMothur/testopticluster.h; sourceTree = SOURCE_ROOT; };
-		48910D4F1D58E26C00F60EDB /* distcdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = distcdataset.h; path = TestMothur/distcdataset.h; sourceTree = SOURCE_ROOT; };
-		48910D501D58E26C00F60EDB /* distcdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = distcdataset.cpp; path = TestMothur/distcdataset.cpp; sourceTree = SOURCE_ROOT; };
-		489387F42107A60C00284329 /* testoptirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptirefmatrix.cpp; path = TestMothur/testoptirefmatrix.cpp; sourceTree = SOURCE_ROOT; };
-		489387F52107A60C00284329 /* testoptirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testoptirefmatrix.hpp; path = TestMothur/testoptirefmatrix.hpp; sourceTree = SOURCE_ROOT; };
-		489387F7210F633E00284329 /* testOligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testOligos.cpp; path = TestMothur/testcontainers/testOligos.cpp; sourceTree = SOURCE_ROOT; };
-		489387F8210F633E00284329 /* testOligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testOligos.hpp; path = TestMothur/testcontainers/testOligos.hpp; sourceTree = SOURCE_ROOT; };
+		48910D4C1D58CBFC00F60EDB /* opticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = opticluster.h; path = source/opticluster.h; sourceTree = "<group>"; };
+		48910D4D1D58E26C00F60EDB /* testopticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testopticluster.cpp; sourceTree = "<group>"; };
+		48910D4E1D58E26C00F60EDB /* testopticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testopticluster.h; sourceTree = "<group>"; };
+		48910D4F1D58E26C00F60EDB /* distcdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distcdataset.h; sourceTree = "<group>"; };
+		48910D501D58E26C00F60EDB /* distcdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distcdataset.cpp; sourceTree = "<group>"; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = TestMothur/testcommands/testrenamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -968,6 +944,39 @@
 		48D6E96A1CA4262A008DF76B /* dataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dataset.h; path = TestMothur/dataset.h; sourceTree = SOURCE_ROOT; };
 		48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makefilecommand.cpp; path = source/commands/makefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = SOURCE_ROOT; };
+		48E544101E92C49700FF6AB8 /* gtest-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-internal.h"; path = "TestMothur/gtest-internal.h"; sourceTree = SOURCE_ROOT; };
+		48E544111E92C49700FF6AB8 /* gtest-port.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-port.h"; path = "TestMothur/gtest-port.h"; sourceTree = SOURCE_ROOT; };
+		48E544121E92C49700FF6AB8 /* gtest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest.h; path = TestMothur/gtest.h; sourceTree = SOURCE_ROOT; };
+		48E544131E92C49700FF6AB8 /* gtest-port.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-port.cc"; path = "TestMothur/gtest-port.cc"; sourceTree = SOURCE_ROOT; };
+		48E544151E92C49700FF6AB8 /* gtest.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest.cc; path = TestMothur/gtest.cc; sourceTree = SOURCE_ROOT; };
+		48E544161E92C49700FF6AB8 /* gtest-death-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-death-test.cc"; path = "TestMothur/gtest-death-test.cc"; sourceTree = SOURCE_ROOT; };
+		48E544171E92C49700FF6AB8 /* gtest-test-part.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-test-part.cc"; path = "TestMothur/gtest-test-part.cc"; sourceTree = SOURCE_ROOT; };
+		48E544181E92C49700FF6AB8 /* custom */ = {isa = PBXFileReference; lastKnownFileType = folder; path = custom; sourceTree = "<group>"; };
+		48E5441A1E92C49700FF6AB8 /* gtest_pred_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest_pred_impl.h; path = TestMothur/gtest_pred_impl.h; sourceTree = SOURCE_ROOT; };
+		48E5441B1E92C49700FF6AB8 /* gtest_prod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest_prod.h; path = TestMothur/gtest_prod.h; sourceTree = SOURCE_ROOT; };
+		48E5441C1E92C49700FF6AB8 /* gtest-death-test-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-death-test-internal.h"; path = "TestMothur/gtest-death-test-internal.h"; sourceTree = SOURCE_ROOT; };
+		48E5441D1E92C49700FF6AB8 /* gtest-death-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-death-test.h"; path = "TestMothur/gtest-death-test.h"; sourceTree = SOURCE_ROOT; };
+		48E5441E1E92C49700FF6AB8 /* gtest-filepath.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-filepath.cc"; path = "TestMothur/gtest-filepath.cc"; sourceTree = SOURCE_ROOT; };
+		48E5441F1E92C49700FF6AB8 /* gtest-filepath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-filepath.h"; path = "TestMothur/gtest-filepath.h"; sourceTree = SOURCE_ROOT; };
+		48E544211E92C49700FF6AB8 /* gtest-linked_ptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-linked_ptr.h"; path = "TestMothur/gtest-linked_ptr.h"; sourceTree = SOURCE_ROOT; };
+		48E544221E92C49700FF6AB8 /* gtest-message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-message.h"; path = "TestMothur/gtest-message.h"; sourceTree = SOURCE_ROOT; };
+		48E544231E92C49700FF6AB8 /* gtest-param-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-param-test.h"; path = "TestMothur/gtest-param-test.h"; sourceTree = SOURCE_ROOT; };
+		48E544241E92C49700FF6AB8 /* gtest-param-test.h.pump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "gtest-param-test.h.pump"; path = "TestMothur/gtest-param-test.h.pump"; sourceTree = SOURCE_ROOT; };
+		48E544251E92C49700FF6AB8 /* gtest-param-util-generated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-param-util-generated.h"; path = "TestMothur/gtest-param-util-generated.h"; sourceTree = SOURCE_ROOT; };
+		48E544261E92C49700FF6AB8 /* gtest-param-util-generated.h.pump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "gtest-param-util-generated.h.pump"; path = "TestMothur/gtest-param-util-generated.h.pump"; sourceTree = SOURCE_ROOT; };
+		48E544271E92C49700FF6AB8 /* gtest-param-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-param-util.h"; path = "TestMothur/gtest-param-util.h"; sourceTree = SOURCE_ROOT; };
+		48E544281E92C49700FF6AB8 /* gtest-port-arch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-port-arch.h"; path = "TestMothur/gtest-port-arch.h"; sourceTree = SOURCE_ROOT; };
+		48E544291E92C49700FF6AB8 /* gtest-printers.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-printers.cc"; path = "TestMothur/gtest-printers.cc"; sourceTree = SOURCE_ROOT; };
+		48E5442A1E92C49700FF6AB8 /* gtest-printers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-printers.h"; path = "TestMothur/gtest-printers.h"; sourceTree = SOURCE_ROOT; };
+		48E5442B1E92C49700FF6AB8 /* gtest-spi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-spi.h"; path = "TestMothur/gtest-spi.h"; sourceTree = SOURCE_ROOT; };
+		48E5442C1E92C49700FF6AB8 /* gtest-string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-string.h"; path = "TestMothur/gtest-string.h"; sourceTree = SOURCE_ROOT; };
+		48E5442D1E92C49700FF6AB8 /* gtest-test-part.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-test-part.h"; path = "TestMothur/gtest-test-part.h"; sourceTree = SOURCE_ROOT; };
+		48E5442E1E92C49700FF6AB8 /* gtest-tuple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-tuple.h"; path = "TestMothur/gtest-tuple.h"; sourceTree = SOURCE_ROOT; };
+		48E5442F1E92C49700FF6AB8 /* gtest-tuple.h.pump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "gtest-tuple.h.pump"; path = "TestMothur/gtest-tuple.h.pump"; sourceTree = SOURCE_ROOT; };
+		48E544301E92C49700FF6AB8 /* gtest-type-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-type-util.h"; path = "TestMothur/gtest-type-util.h"; sourceTree = SOURCE_ROOT; };
+		48E544311E92C49700FF6AB8 /* gtest-type-util.h.pump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "gtest-type-util.h.pump"; path = "TestMothur/gtest-type-util.h.pump"; sourceTree = SOURCE_ROOT; };
+		48E544321E92C49700FF6AB8 /* gtest-typed-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-typed-test.cc"; path = "TestMothur/gtest-typed-test.cc"; sourceTree = SOURCE_ROOT; };
+		48E544331E92C49700FF6AB8 /* gtest-typed-test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-typed-test.h"; path = "TestMothur/gtest-typed-test.h"; sourceTree = SOURCE_ROOT; };
 		48E5443F1E9C292900FF6AB8 /* mcc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mcc.cpp; path = source/calculators/mcc.cpp; sourceTree = SOURCE_ROOT; };
 		48E544401E9C292900FF6AB8 /* mcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mcc.hpp; path = source/calculators/mcc.hpp; sourceTree = SOURCE_ROOT; };
 		48E544431E9C2B1000FF6AB8 /* sensitivity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sensitivity.cpp; path = source/calculators/sensitivity.cpp; sourceTree = SOURCE_ROOT; };
@@ -1001,14 +1010,6 @@
 		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
 		48F06CCC1D74BEC4004A45DD /* testphylotree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testphylotree.hpp; path = testclassifier/testphylotree.hpp; sourceTree = "<group>"; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = SOURCE_ROOT; };
-		48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optirefmatrix.cpp; path = source/datastructures/optirefmatrix.cpp; sourceTree = SOURCE_ROOT; };
-		48FB99C4209B69FA00FF9F6E /* optirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optirefmatrix.hpp; path = source/datastructures/optirefmatrix.hpp; sourceTree = SOURCE_ROOT; };
-		48FB99C720A48EF700FF9F6E /* optidata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optidata.cpp; path = source/datastructures/optidata.cpp; sourceTree = "<group>"; };
-		48FB99C820A48EF700FF9F6E /* optidata.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optidata.hpp; path = source/datastructures/optidata.hpp; sourceTree = SOURCE_ROOT; };
-		48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optiblastmatrix.cpp; path = source/datastructures/optiblastmatrix.cpp; sourceTree = SOURCE_ROOT; };
-		48FB99CB20A4AD7D00FF9F6E /* optiblastmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optiblastmatrix.hpp; path = source/datastructures/optiblastmatrix.hpp; sourceTree = "<group>"; };
-		48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optifitcluster.cpp; path = source/optifitcluster.cpp; sourceTree = SOURCE_ROOT; };
-		48FB99CE20A4F3FB00FF9F6E /* optifitcluster.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optifitcluster.hpp; path = source/optifitcluster.hpp; sourceTree = SOURCE_ROOT; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = classifysvmsharedcommand.cpp; path = source/commands/classifysvmsharedcommand.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = classifysvmsharedcommand.h; path = source/commands/classifysvmsharedcommand.h; sourceTree = SOURCE_ROOT; };
 		7B21820117AD77BD00286E6A /* svm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = svm.cpp; path = source/svm/svm.cpp; sourceTree = SOURCE_ROOT; };
@@ -1801,8 +1802,6 @@
 				A7E9B76512D37EC400DA6239 /* needlemanoverlap.cpp */,
 				A7E9B76612D37EC400DA6239 /* needlemanoverlap.hpp */,
 				A7E9B77012D37EC400DA6239 /* observable.h */,
-				48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */,
-				48FB99CE20A4F3FB00FF9F6E /* optifitcluster.hpp */,
 				48910D4C1D58CBFC00F60EDB /* opticluster.h */,
 				48910D451D58CAD700F60EDB /* opticluster.cpp */,
 				A7E9B77512D37EC400DA6239 /* optionparser.cpp */,
@@ -1869,18 +1868,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4803D5A42118B2AA001C63B5 /* Integration */ = {
-			isa = PBXGroup;
-			children = (
-				4803D5A62118B352001C63B5 /* miseqsop.hpp */,
-				4803D5A52118B352001C63B5 /* miseqsop.cpp */,
-				4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */,
-				4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */,
-			);
-			name = Integration;
-			path = TestMothur;
-			sourceTree = SOURCE_ROOT;
-		};
 		480D1E2B1EA6858700BF9C77 /* fakes */ = {
 			isa = PBXGroup;
 			children = (
@@ -1890,14 +1877,46 @@
 				480D1E301EA92D5500BF9C77 /* fakeoptimatrix.hpp */,
 			);
 			name = fakes;
-			path = TestMothur;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		481FB51A1AC0A63E0076CFF3 /* TestMothur */ = {
 			isa = PBXGroup;
 			children = (
 				481FB51B1AC0A63E0076CFF3 /* main.cpp */,
 				480D1E2B1EA6858700BF9C77 /* fakes */,
+				48E544101E92C49700FF6AB8 /* gtest-internal.h */,
+				48E544111E92C49700FF6AB8 /* gtest-port.h */,
+				48E544121E92C49700FF6AB8 /* gtest.h */,
+				48E544131E92C49700FF6AB8 /* gtest-port.cc */,
+				48E544151E92C49700FF6AB8 /* gtest.cc */,
+				48E544161E92C49700FF6AB8 /* gtest-death-test.cc */,
+				48E544171E92C49700FF6AB8 /* gtest-test-part.cc */,
+				48E544181E92C49700FF6AB8 /* custom */,
+				48E5441A1E92C49700FF6AB8 /* gtest_pred_impl.h */,
+				48E5441B1E92C49700FF6AB8 /* gtest_prod.h */,
+				48E5441C1E92C49700FF6AB8 /* gtest-death-test-internal.h */,
+				48E5441D1E92C49700FF6AB8 /* gtest-death-test.h */,
+				48E5441E1E92C49700FF6AB8 /* gtest-filepath.cc */,
+				48E5441F1E92C49700FF6AB8 /* gtest-filepath.h */,
+				48E544211E92C49700FF6AB8 /* gtest-linked_ptr.h */,
+				48E544221E92C49700FF6AB8 /* gtest-message.h */,
+				48E544231E92C49700FF6AB8 /* gtest-param-test.h */,
+				48E544241E92C49700FF6AB8 /* gtest-param-test.h.pump */,
+				48E544251E92C49700FF6AB8 /* gtest-param-util-generated.h */,
+				48E544261E92C49700FF6AB8 /* gtest-param-util-generated.h.pump */,
+				48E544271E92C49700FF6AB8 /* gtest-param-util.h */,
+				48E544281E92C49700FF6AB8 /* gtest-port-arch.h */,
+				48E544291E92C49700FF6AB8 /* gtest-printers.cc */,
+				48E5442A1E92C49700FF6AB8 /* gtest-printers.h */,
+				48E5442B1E92C49700FF6AB8 /* gtest-spi.h */,
+				48E5442C1E92C49700FF6AB8 /* gtest-string.h */,
+				48E5442D1E92C49700FF6AB8 /* gtest-test-part.h */,
+				48E5442E1E92C49700FF6AB8 /* gtest-tuple.h */,
+				48E5442F1E92C49700FF6AB8 /* gtest-tuple.h.pump */,
+				48E544301E92C49700FF6AB8 /* gtest-type-util.h */,
+				48E544311E92C49700FF6AB8 /* gtest-type-util.h.pump */,
+				48E544321E92C49700FF6AB8 /* gtest-typed-test.cc */,
+				48E544331E92C49700FF6AB8 /* gtest-typed-test.h */,
 				48F06CCA1D74BC6F004A45DD /* testclassifier */,
 				48D6E9691CA4262A008DF76B /* dataset.cpp */,
 				48D6E96A1CA4262A008DF76B /* dataset.h */,
@@ -1917,7 +1936,6 @@
 				48D6E9671CA42389008DF76B /* testvsearchfileparser.h */,
 				481FB5221AC0AA010076CFF3 /* testcontainers */,
 				481FB5211AC0A9B40076CFF3 /* testcommands */,
-				4803D5A42118B2AA001C63B5 /* Integration */,
 			);
 			path = TestMothur;
 			sourceTree = "<group>";
@@ -1940,30 +1958,20 @@
 				481FB52D1AC1B0CB0076CFF3 /* testsetseedcommand.cpp */,
 			);
 			name = testcommands;
-			path = TestMothur;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		481FB5221AC0AA010076CFF3 /* testcontainers */ = {
 			isa = PBXGroup;
 			children = (
 				480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */,
 				480E8DB01CAB12ED00A0D137 /* testfastqread.h */,
-				489387F7210F633E00284329 /* testOligos.cpp */,
-				489387F8210F633E00284329 /* testOligos.hpp */,
 				48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */,
 				48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */,
-				489387F42107A60C00284329 /* testoptirefmatrix.cpp */,
-				489387F52107A60C00284329 /* testoptirefmatrix.hpp */,
 				48C728641B66A77800D40830 /* testsequence.cpp */,
 				48C728761B6AB4EE00D40830 /* testsequence.h */,
-				4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */,
-				4803D5AF211CD839001C63B5 /* testsharedrabundfloatvector.hpp */,
-				4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */,
-				4803D5AC211CA67F001C63B5 /* testsharedrabundvector.hpp */,
 			);
 			name = testcontainers;
-			path = TestMothur;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		48789AEE206176EF00A7D848 /* utf8 */ = {
 			isa = PBXGroup;
@@ -2200,8 +2208,7 @@
 				48F06CCC1D74BEC4004A45DD /* testphylotree.hpp */,
 			);
 			name = testclassifier;
-			path = TestMothur;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		7B17437A17AF6F02004C161B /* svm */ = {
 			isa = PBXGroup;
@@ -2609,14 +2616,8 @@
 				A7E9B76012D37EC400DA6239 /* nameassignment.hpp */,
 				48705ABE19BE32C50075E977 /* oligos.h */,
 				48705ABD19BE32C50075E977 /* oligos.cpp */,
-				48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */,
-				48FB99CB20A4AD7D00FF9F6E /* optiblastmatrix.hpp */,
-				48FB99C720A48EF700FF9F6E /* optidata.cpp */,
-				48FB99C820A48EF700FF9F6E /* optidata.hpp */,
 				48910D491D58CBA300F60EDB /* optimatrix.cpp */,
 				48910D4A1D58CBA300F60EDB /* optimatrix.h */,
-				48FB99C4209B69FA00FF9F6E /* optirefmatrix.hpp */,
-				48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */,
 				A7E9B77712D37EC400DA6239 /* ordervector.cpp */,
 				A7E9B77812D37EC400DA6239 /* ordervector.hpp */,
 				A7E9B79F12D37EC400DA6239 /* qualityscores.cpp */,
@@ -2880,7 +2881,6 @@
 				481FB5C71AC1B74F0076CFF3 /* getsabundcommand.cpp in Sources */,
 				481FB5A51AC1B7300076CFF3 /* clusterdoturcommand.cpp in Sources */,
 				481FB6271AC1B7EA0076CFF3 /* alignmentdb.cpp in Sources */,
-				489387F62107A60C00284329 /* testoptirefmatrix.cpp in Sources */,
 				481FB6351AC1B7EA0076CFF3 /* kmerdb.cpp in Sources */,
 				481FB5721AC1B6D40076CFF3 /* simpson.cpp in Sources */,
 				481FB55D1AC1B6690076CFF3 /* sharedchao1.cpp in Sources */,
@@ -2947,7 +2947,6 @@
 				481FB59C1AC1B71B0076CFF3 /* chopseqscommand.cpp in Sources */,
 				481FB5DE1AC1B77E0076CFF3 /* mergesfffilecommand.cpp in Sources */,
 				481FB6421AC1B7EA0076CFF3 /* sharedlistvector.cpp in Sources */,
-				489AF6952106194A0028155E /* optifitcluster.cpp in Sources */,
 				481FB5A71AC1B7300076CFF3 /* clustersplitcommand.cpp in Sources */,
 				481FB65C1AC1B82C0076CFF3 /* mothurmetastats.cpp in Sources */,
 				481FB5EB1AC1B77E0076CFF3 /* parsefastaqcommand.cpp in Sources */,
@@ -2960,6 +2959,7 @@
 				48E543EC1E8F15B800FF6AB8 /* opticluster.cpp in Sources */,
 				481FB52E1AC1B0CB0076CFF3 /* testsetseedcommand.cpp in Sources */,
 				481FB65A1AC1B8100076CFF3 /* wilcox.cpp in Sources */,
+				48E5443C1E92C49700FF6AB8 /* gtest-typed-test.cc in Sources */,
 				481FB6251AC1B7EA0076CFF3 /* alignment.cpp in Sources */,
 				481FB5C51AC1B74F0076CFF3 /* getrabundcommand.cpp in Sources */,
 				481FB56E1AC1B6C30076CFF3 /* sharedsorest.cpp in Sources */,
@@ -2986,10 +2986,10 @@
 				481FB5461AC1B6190076CFF3 /* hamming.cpp in Sources */,
 				481FB6891AC1BA760076CFF3 /* phylosummary.cpp in Sources */,
 				481FB6881AC1B8B80076CFF3 /* weightedlinkage.cpp in Sources */,
-				489AF68F2106188E0028155E /* sensspeccalc.cpp in Sources */,
 				480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */,
 				481FB61E1AC1B7AC0076CFF3 /* unifracweightedcommand.cpp in Sources */,
 				48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */,
+				48E544341E92C49700FF6AB8 /* gtest-port.cc in Sources */,
 				48B44EF31FB9EF8200789C45 /* utils.cpp in Sources */,
 				481FB5951AC1B71B0076CFF3 /* chimerabellerophoncommand.cpp in Sources */,
 				481FB68D1AC1BA9E0076CFF3 /* classify.cpp in Sources */,
@@ -2997,7 +2997,6 @@
 				48C728751B6AB4CD00D40830 /* testgetgroupscommand.cpp in Sources */,
 				481FB6391AC1B7EA0076CFF3 /* ordervector.cpp in Sources */,
 				481FB59A1AC1B71B0076CFF3 /* chimeraslayercommand.cpp in Sources */,
-				489AF691210619140028155E /* sharedrabundvector.cpp in Sources */,
 				48E543EB1E8F15A500FF6AB8 /* summary.cpp in Sources */,
 				481FB5901AC1B71B0076CFF3 /* aligncommand.cpp in Sources */,
 				481FB6081AC1B7970076CFF3 /* setdircommand.cpp in Sources */,
@@ -3029,12 +3028,10 @@
 				481FB5D41AC1B75C0076CFF3 /* listseqscommand.cpp in Sources */,
 				481FB6521AC1B8100076CFF3 /* fileoutput.cpp in Sources */,
 				481FB6851AC1B8B80076CFF3 /* validcalculator.cpp in Sources */,
-				489AF690210618A80028155E /* optiblastmatrix.cpp in Sources */,
 				481FB56D1AC1B6C10076CFF3 /* sharedsorclass.cpp in Sources */,
 				481FB5931AC1B71B0076CFF3 /* binsequencecommand.cpp in Sources */,
 				481FB6861AC1B8B80076CFF3 /* validparameter.cpp in Sources */,
 				481FB6431AC1B7EA0076CFF3 /* sharedordervector.cpp in Sources */,
-				4803D5AD211CA67F001C63B5 /* testsharedrabundvector.cpp in Sources */,
 				481FB5301AC1B5C80076CFF3 /* calcsparcc.cpp in Sources */,
 				481FB5B01AC1B7300076CFF3 /* deconvolutecommand.cpp in Sources */,
 				481FB6001AC1B7970076CFF3 /* renameseqscommand.cpp in Sources */,
@@ -3047,7 +3044,6 @@
 				48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */,
 				481FB5911AC1B71B0076CFF3 /* amovacommand.cpp in Sources */,
 				4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */,
-				4803D5AA211C9867001C63B5 /* testintegrationalignseqs.cpp in Sources */,
 				48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */,
 				481FB58A1AC1B6FF0076CFF3 /* myPerseus.cpp in Sources */,
 				487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */,
@@ -3105,6 +3101,7 @@
 				481FB5AA1AC1B7300076CFF3 /* consensusseqscommand.cpp in Sources */,
 				481FB5AE1AC1B7300076CFF3 /* countseqscommand.cpp in Sources */,
 				48C7287A1B728D6B00D40830 /* biominfocommand.cpp in Sources */,
+				48E544361E92C49700FF6AB8 /* gtest.cc in Sources */,
 				481FB5811AC1B6EA0076CFF3 /* whittaker.cpp in Sources */,
 				481FB58E1AC1B7060076CFF3 /* completelinkage.cpp in Sources */,
 				481FB6301AC1B7EA0076CFF3 /* flowdata.cpp in Sources */,
@@ -3122,11 +3119,9 @@
 				481FB6211AC1B7BA0076CFF3 /* communitytype.cpp in Sources */,
 				48910D521D58E26C00F60EDB /* distcdataset.cpp in Sources */,
 				48C1DDC61D25C1BC00B5BA9D /* (null) in Sources */,
-				489AF6962106195E0028155E /* optidata.cpp in Sources */,
 				48E544711E9D3B2D00FF6AB8 /* accuracy.cpp in Sources */,
 				481FB5621AC1B69E0076CFF3 /* sharedkstest.cpp in Sources */,
 				481FB5E91AC1B77E0076CFF3 /* otuhierarchycommand.cpp in Sources */,
-				489387F9210F633E00284329 /* testOligos.cpp in Sources */,
 				481FB5351AC1B5D90076CFF3 /* fasta.cpp in Sources */,
 				481FB6321AC1B7EA0076CFF3 /* groupmap.cpp in Sources */,
 				481FB5FF1AC1B7970076CFF3 /* removeseqscommand.cpp in Sources */,
@@ -3140,7 +3135,6 @@
 				481FB5DB1AC1B75C0076CFF3 /* makelefsecommand.cpp in Sources */,
 				48E544561E9C2DF500FF6AB8 /* tn.cpp in Sources */,
 				481FB6371AC1B7EA0076CFF3 /* nameassignment.cpp in Sources */,
-				489AF694210619410028155E /* optirefmatrix.cpp in Sources */,
 				481FB5D21AC1B75C0076CFF3 /* libshuffcommand.cpp in Sources */,
 				481FB5561AC1B6520076CFF3 /* shannon.cpp in Sources */,
 				481FB6591AC1B8100076CFF3 /* linearalgebra.cpp in Sources */,
@@ -3150,6 +3144,7 @@
 				481FB5BA1AC1B74F0076CFF3 /* getdistscommand.cpp in Sources */,
 				481FB6191AC1B7AC0076CFF3 /* systemcommand.cpp in Sources */,
 				481FB6611AC1B8450076CFF3 /* nastreport.cpp in Sources */,
+				48E5443B1E92C49700FF6AB8 /* gtest-printers.cc in Sources */,
 				48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */,
 				481FB6181AC1B7AC0076CFF3 /* summarytaxcommand.cpp in Sources */,
 				481FB5CD1AC1B74F0076CFF3 /* helpcommand.cpp in Sources */,
@@ -3177,7 +3172,6 @@
 				481FB5571AC1B6550076CFF3 /* shannoneven.cpp in Sources */,
 				481FB5D11AC1B75C0076CFF3 /* lefsecommand.cpp in Sources */,
 				481FB6561AC1B8100076CFF3 /* heatmapsim.cpp in Sources */,
-				489AF6932106192E0028155E /* clusterfitcommand.cpp in Sources */,
 				481FB5EA1AC1B77E0076CFF3 /* pairwiseseqscommand.cpp in Sources */,
 				481FB63D1AC1B7EA0076CFF3 /* reportfile.cpp in Sources */,
 				481FB5F11AC1B77E0076CFF3 /* phylodiversitycommand.cpp in Sources */,
@@ -3195,7 +3189,6 @@
 				481FB60B1AC1B7AC0076CFF3 /* sffmultiplecommand.cpp in Sources */,
 				481FB59F1AC1B71B0076CFF3 /* classifyrfsharedcommand.cpp in Sources */,
 				481FB5F51AC1B77E0076CFF3 /* primerdesigncommand.cpp in Sources */,
-				4803D5A72118B352001C63B5 /* miseqsop.cpp in Sources */,
 				481FB5B41AC1B7300076CFF3 /* distancecommand.cpp in Sources */,
 				481FB5391AC1B5E90076CFF3 /* ace.cpp in Sources */,
 				481FB5751AC1B6EA0076CFF3 /* soergel.cpp in Sources */,
@@ -3205,6 +3198,7 @@
 				481FB6801AC1B8960076CFF3 /* slibshuff.cpp in Sources */,
 				481FB67B1AC1B88F0076CFF3 /* readphylipvector.cpp in Sources */,
 				481FB64C1AC1B7F40076CFF3 /* tree.cpp in Sources */,
+				48E5443A1E92C49700FF6AB8 /* gtest-filepath.cc in Sources */,
 				481FB6631AC1B8450076CFF3 /* needlemanoverlap.cpp in Sources */,
 				481FB6931AC1BAA60076CFF3 /* taxonomynode.cpp in Sources */,
 				481FB60E1AC1B7AC0076CFF3 /* shhhseqscommand.cpp in Sources */,
@@ -3213,7 +3207,6 @@
 				481FB5D61AC1B75C0076CFF3 /* mantelcommand.cpp in Sources */,
 				481FB57E1AC1B6EA0076CFF3 /* unweighted.cpp in Sources */,
 				481FB60F1AC1B7AC0076CFF3 /* sortseqscommand.cpp in Sources */,
-				489387FA2110C79200284329 /* testtrimoligos.cpp in Sources */,
 				481FB67D1AC1B88F0076CFF3 /* treereader.cpp in Sources */,
 				481FB6131AC1B7AC0076CFF3 /* sracommand.cpp in Sources */,
 				48C728671B66AB8800D40830 /* pcrseqscommand.cpp in Sources */,
@@ -3230,8 +3223,10 @@
 				481FB6101AC1B7AC0076CFF3 /* sparcccommand.cpp in Sources */,
 				481FB5E81AC1B77E0076CFF3 /* otuassociationcommand.cpp in Sources */,
 				481FB5B31AC1B7300076CFF3 /* deuniquetreecommand.cpp in Sources */,
+				48E544381E92C49700FF6AB8 /* gtest-test-part.cc in Sources */,
 				481FB5D91AC1B75C0076CFF3 /* makefastqcommand.cpp in Sources */,
 				481FB5A21AC1B71B0076CFF3 /* clearcutcommand.cpp in Sources */,
+				48E544371E92C49700FF6AB8 /* gtest-death-test.cc in Sources */,
 				48D6E9681CA42389008DF76B /* testvsearchfileparser.cpp in Sources */,
 				481FB5851AC1B6FF0076CFF3 /* chimeracheckrdp.cpp in Sources */,
 				481FB55C1AC1B6660076CFF3 /* sharedbraycurtis.cpp in Sources */,
@@ -3252,7 +3247,6 @@
 				481FB5B71AC1B74F0076CFF3 /* getcommandinfocommand.cpp in Sources */,
 				48BDDA761ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */,
 				481FB5711AC1B6D40076CFF3 /* shen.cpp in Sources */,
-				4803D5B0211CD839001C63B5 /* testsharedrabundfloatvector.cpp in Sources */,
 				481FB6501AC1B8100076CFF3 /* dlibshuff.cpp in Sources */,
 				481FB64D1AC1B7F40076CFF3 /* treemap.cpp in Sources */,
 				481FB67F1AC1B8960076CFF3 /* singlelinkage.cpp in Sources */,
@@ -3266,7 +3260,6 @@
 				481FB6711AC1B8820076CFF3 /* rarefact.cpp in Sources */,
 				481FB5841AC1B6FF0076CFF3 /* mothurchimera.cpp in Sources */,
 				481FB6121AC1B7AC0076CFF3 /* splitgroupscommand.cpp in Sources */,
-				489AF692210619170028155E /* sharedrabundfloatvector.cpp in Sources */,
 				481FB6921AC1BAA60076CFF3 /* taxonomyequalizer.cpp in Sources */,
 				481FB68A1AC1BA9E0076CFF3 /* alignnode.cpp in Sources */,
 				481FB58B1AC1B6FF0076CFF3 /* pintail.cpp in Sources */,
@@ -3305,7 +3298,6 @@
 				A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */,
 				A7E9B89212D37EC400DA6239 /* canberra.cpp in Sources */,
 				A7E9B89312D37EC400DA6239 /* catchallcommand.cpp in Sources */,
-				48FB99C5209B69FA00FF9F6E /* optirefmatrix.cpp in Sources */,
 				A7E9B89412D37EC400DA6239 /* ccode.cpp in Sources */,
 				A7E9B89512D37EC400DA6239 /* chao1.cpp in Sources */,
 				A7E9B89612D37EC400DA6239 /* mothurchimera.cpp in Sources */,
@@ -3315,7 +3307,6 @@
 				48E981CF189C38FB0042BE9D /* (null) in Sources */,
 				A7E9B89A12D37EC400DA6239 /* chimeracheckrdp.cpp in Sources */,
 				A7E9B89B12D37EC400DA6239 /* chimerapintailcommand.cpp in Sources */,
-				48FB99CF20A4F3FB00FF9F6E /* optifitcluster.cpp in Sources */,
 				A7E9B89C12D37EC400DA6239 /* chimerarealigner.cpp in Sources */,
 				A7E9B89E12D37EC400DA6239 /* chimeraslayer.cpp in Sources */,
 				A7E9B89F12D37EC400DA6239 /* chimeraslayercommand.cpp in Sources */,
@@ -3373,7 +3364,6 @@
 				A7E9B8D012D37EC400DA6239 /* getlineagecommand.cpp in Sources */,
 				A7E9B8D112D37EC400DA6239 /* getlistcountcommand.cpp in Sources */,
 				A7E9B8D212D37EC400DA6239 /* getopt_long.cpp in Sources */,
-				48FB99C920A48EF700FF9F6E /* optidata.cpp in Sources */,
 				A7E9B8D312D37EC400DA6239 /* getoturepcommand.cpp in Sources */,
 				A7E9B8D512D37EC400DA6239 /* getrabundcommand.cpp in Sources */,
 				A7E9B8D612D37EC400DA6239 /* getrelabundcommand.cpp in Sources */,
@@ -3481,7 +3471,6 @@
 				A7E9B93A12D37EC400DA6239 /* secondarystructurecommand.cpp in Sources */,
 				A7E9B93B12D37EC400DA6239 /* sensspeccommand.cpp in Sources */,
 				A7E9B93C12D37EC400DA6239 /* seqerrorcommand.cpp in Sources */,
-				48FB99CC20A4AD7D00FF9F6E /* optiblastmatrix.cpp in Sources */,
 				A7E9B93D12D37EC400DA6239 /* seqsummarycommand.cpp in Sources */,
 				A7E9B93E12D37EC400DA6239 /* sequence.cpp in Sources */,
 				A7E9B93F12D37EC400DA6239 /* sequencedb.cpp in Sources */,
@@ -3686,7 +3675,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				"CLANG_WARN_CXX0X_EXTENSIONS[arch=*]" = NO;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
@@ -3723,7 +3712,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3756,10 +3745,9 @@
 			buildSettings = {
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -3826,10 +3814,9 @@
 			buildSettings = {
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_CXX0X_EXTENSIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -3898,8 +3885,8 @@
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_BOOL_CONVERSION = NO;
+				CLANG_WARN_CONSTANT_CONVERSION = NO;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = NO;
 				CLANG_WARN_ENUM_CONVERSION = NO;
@@ -3916,24 +3903,16 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"-lreadline",
-					"-lboost_iostreams",
-					"-lz",
-					"-pthreads",
-					/usr/local/lib/gmock_main.a,
-					/usr/local/lib/gtest.a,
-				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "${PROJECT_DIR}/gtest /usr/local/include";
+				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include";
 			};
 			name = Debug;
 		};
@@ -3945,8 +3924,8 @@
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_BOOL_CONVERSION = NO;
+				CLANG_WARN_CONSTANT_CONVERSION = NO;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = NO;
 				CLANG_WARN_ENUM_CONVERSION = NO;
@@ -3960,24 +3939,16 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.40.5\\\"\"",
-					"RELEASE_DATE=\"\\\"06/20/2018\\\"\"",
+					"VERSION=\"\\\"1.37.6\\\"\"",
+					"RELEASE_DATE=\"\\\"06/20/2016\\\"\"",
 				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"-lreadline",
-					"-lboost_iostreams",
-					"-lz",
-					"-pthreads",
-					/usr/local/lib/gmock_main.a,
-					/usr/local/lib/gtest.a,
-				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include";

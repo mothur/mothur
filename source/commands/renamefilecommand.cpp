@@ -632,29 +632,29 @@ int RenameFileCommand::execute(){
 }
 //**********************************************************************************************************************
                          
-string RenameFileCommand::getNewName(string inputFileName, string type){
+string RenameFileCommand::getNewName(string name, string type){
     try {
         string newName = outputfile;
-        inputFileName = util.getFullPathName(inputFileName);
+        name = util.getFullPathName(name);
         
         if (mothurGenerated) {
-            string extension = util.getExtension(inputFileName);
+            string extension = util.getExtension(name);
             string basicName = "final";
             string tag = "";
             
             if (prefix == "") {
-                int pos = inputFileName.find_first_of(".");
-                if (pos != string::npos) { basicName = inputFileName.substr(0, pos); }
+                int pos = name.find_first_of(".");
+                if (pos != string::npos) { basicName = name.substr(0, pos); }
             }else { basicName = prefix; }
             
             if ((type == "shared") || (type == "list") || (type == "relabund") || (type == "rabund") || (type == "sabund")) {
                 vector<string> tags; tags.push_back(".an."); tags.push_back(".tx.");  tags.push_back(".agc."); tags.push_back(".dgc."); tags.push_back(".nn."); tags.push_back(".fn."); tags.push_back(".wn."); tags.push_back(".opti_");
                 
                 for (int i = 0; i < tags.size(); i++) {
-                    int pos2 = inputFileName.find(tags[i]);
+                    int pos2 = name.find(tags[i]);
                     if (pos2 != string::npos) {
-                        int pos3 = inputFileName.substr(pos2+1).find_first_of('.');
-                        tag = inputFileName.substr(pos2+1, pos3);
+                        int pos3 = name.substr(pos2+1).find_first_of('.');
+                        tag = name.substr(pos2+1, pos3);
                         break;
                     }
                 }
@@ -662,10 +662,7 @@ string RenameFileCommand::getNewName(string inputFileName, string type){
                 extension = ".cons.taxonomy";
             }
             
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
-            
-            newName = thisOutputDir + basicName;
+            newName = basicName;
             if (tag != "") { newName += "." + tag; }
             newName += extension;
         }

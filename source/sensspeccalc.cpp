@@ -11,15 +11,16 @@
 
 //***************************************************************************************************************
 //removes anyone with no valid dists and changes name to matrix short names
-SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
+SensSpecCalc::SensSpecCalc(OptiMatrix& matrix, ListVector* list){
     try {
         m = MothurOut::getInstance();
-        map<string, long long> nameIndex = matrix.getNameIndexMap();
+        map<string, int> nameIndex = matrix.getNameIndexMap();
         
         if (list != NULL) {
             //for each bin
             for (int i = 0; i < list->getNumBins(); i++) {
                 
+                //parse out names that are in accnos file
                 string binnames = list->get(i);
                 vector<string> bnames;
                 util.splitAtComma(binnames, bnames);
@@ -27,11 +28,12 @@ SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
                 vector<int> newNames;
                 for (int j = 0; j < bnames.size(); j++) {
                     string name = bnames[j];
-                    map<string, long long>::iterator itSeq1 = nameIndex.find(name);
-                    long long seq1Index = -1;
+                    map<string, int>::iterator itSeq1 = nameIndex.find(name);
+                    int seq1Index = -1;
                     if (itSeq1 != nameIndex.end()) { seq1Index = itSeq1->second; } //you have distances in the matrix
                     
-                    newNames.push_back(seq1Index); 
+                    //if that name is in the .accnos file, add it
+                    if (seq1Index != -1) {  newNames.push_back(seq1Index);  }
                 }
                 
                 //if there are names in this bin add to new list
@@ -45,7 +47,7 @@ SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
     }
 }
 //***************************************************************************************************************
-void SensSpecCalc::getResults(OptiData& matrix, long long& tp, long long& tn, long long& fp, long long& fn){
+void SensSpecCalc::getResults(OptiMatrix& matrix, long long& tp, long long& tn, long long& fp, long long& fn){
     try {
         tp = 0; tn = 0; fp = 0; fn = 0;
         
@@ -61,7 +63,6 @@ void SensSpecCalc::getResults(OptiData& matrix, long long& tp, long long& tn, lo
         }
         long long numSeqs = matrix.getNumSeqs() + matrix.getNumSingletons();
         long long numDists = matrix.getNumDists(); //square matrix
-        
         fn = (numDists/2) - tp;
         tn = numSeqs * (numSeqs-1)/2  - (fp + fn + tp);
     }

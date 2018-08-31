@@ -15,10 +15,10 @@
 class SensSpecCalc {
     
 public:
-    SensSpecCalc(OptiData& matrix, ListVector* list);
+    SensSpecCalc(OptiMatrix& matrix, ListVector* list);
     ~SensSpecCalc(){}
     
-    void getResults(OptiData& matrix, long long& tp, long long& tn, long long& fp, long long& fn);
+    void getResults(OptiMatrix& matrix, long long& tp, long long& tn, long long& fp, long long& fn);
     
 private:
     Utils util;

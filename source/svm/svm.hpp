@@ -665,7 +665,7 @@ public:
         k(_k), obs(_obs),
         cache(_obs.size(), NULL) {}
     ~KernelFunctionCache() {
-        
+        //cout << "deleting KernelFunctionCache cache" << endl;
         for (int i = 0; i < cache.size(); i++) {
             if ( !rowNotCached(i) ) {
                 delete cache[i];

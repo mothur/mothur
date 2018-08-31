@@ -101,7 +101,7 @@ int getRoot(Tree* t, bool includeRoot, int v, vector<string> grouping, map< vect
             
             //while you aren't at root
             while(t->tree[index].getParent() != -1){
-                
+                //cout << index << endl;
                 if (m->getControl_pressed()) {  return 0; }
                 
                 //am I the root for this grouping? if so I want to stop "early"
@@ -135,7 +135,7 @@ int getRoot(Tree* t, bool includeRoot, int v, vector<string> grouping, map< vect
             while(t->tree[index].getParent() != -1){
                 int parent = t->tree[index].getParent();
                 rootForGrouping[grouping].insert(parent);
-                
+                //cout << parent << " in root" << endl;
                 index = parent;
             }
         }
@@ -204,7 +204,7 @@ void driverUnweighted(unweightedData* params) {
                         totalBL += abs(params->t->tree[i].getBranchLength());
                     }
                 }
-                
+                //cout << UniqueBL << '\t' << totalBL << endl;
                 UW = (UniqueBL / totalBL);
                 
                 if (isnan(UW) || isinf(UW)) { UW = 0; }

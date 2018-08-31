@@ -34,7 +34,7 @@ bool AverageLinkage::updateDistance(PDistCell& colCell, PDistCell& rowCell) {
 			saveRow = smallRow;
 			saveCol = smallCol;
 		}
-		
+		//cout << "colcell.dist = " << colCell.dist << '\t' << smallRow << '\t' << smallCol << '\t' << rowCell.dist << endl;
 		colCell.dist = (colBin * colCell.dist + rowBin * rowCell.dist) / totalBin;
         
 		return(true);

@@ -10,7 +10,7 @@
 #define __Mothur__testopticluster__
 
 
-#include "gtest/gtest.h"
+#include "gtest.h"
 #include "opticluster.h"
 #include "fakeoptimatrix.hpp"
 
@@ -22,7 +22,7 @@ public:
     TestOptiCluster();
     ~TestOptiCluster();
     
-
+protected:
     MothurOut* m;
     ClusterMetric* metric;
     FakeOptiMatrix testMatrix;
@@ -31,6 +31,11 @@ public:
     using OptiCluster::initialize;
     using OptiCluster::update;
     using OptiCluster::getCloseFarCounts;
+    
+    FRIEND_TEST(TestOptiCluster, myInitialize);
+    FRIEND_TEST(TestOptiCluster, getCloseFarCounts);
+    FRIEND_TEST(TestOptiCluster, myUpdate);
+
 };
 
 #endif /* defined(__Mothur__testopticluster__) */

@@ -1078,6 +1078,7 @@ int RemoveLineageCommand::readConsTax(){
 		util.openInputFile(constaxonomy, in);
 		string otuLabel, tax;
         int numReps;
+        bool wroteSomething = false;
         
         //read headers
         string headers = util.getline(in);

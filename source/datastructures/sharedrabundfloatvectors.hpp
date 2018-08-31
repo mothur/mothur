@@ -34,7 +34,7 @@ public:
         setOTUNames(bv.getOTUNames());
         eliminateZeroOTUS();
     }
-    ~SharedRAbundFloatVectors() { clear(); }
+    ~SharedRAbundFloatVectors() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); }
     
     void setLabels(string l);
     float getOTUTotal(int bin);

@@ -54,14 +54,14 @@ private:
 	SequenceDB alignDB;
 	
 	void createProcesses(string);
-    bool sanityCheck();
-    
-	string fastaFileName, align, calc, outputDir, output, oldfastafile, column;
+		
+	string fastaFileName, align, calc, outputDir, output;
 	float match, misMatch, gapOpen, gapExtend, cutoff;
-	int processors, longestBase, numDistsBelowCutoff;
-	vector<string> Estimators, outputNames;
+	int processors, longestBase;
+	vector<string> fastaFileNames, Estimators;
+	vector<string> outputNames;
 	
-	bool abort, countends, compress, fitCalc;
+	bool abort, countends, compress;
 };
 
 #endif

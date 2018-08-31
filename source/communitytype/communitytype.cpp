@@ -489,9 +489,21 @@ int CommunityTypeFinder::findkMeans(){
             }
             
             iteration++;
+            //        cout << "K means: " << iteration << '\t' << maxChange << endl;
+            
         }
         
-        for(int i=0;i<numPartitions;i++){ weights[i] = 0.0000; for(int j=0;j<numSamples;j++){  weights[i] += zMatrix[i][j]; } }
+        //    cout << "Iter:-1";
+        for(int i=0;i<numPartitions;i++){
+            weights[i] = 0.0000;
+            
+            for(int j=0;j<numSamples;j++){
+                weights[i] += zMatrix[i][j];
+            }
+            //        printf("\tw_%d=%.3f", i, weights[i]);
+        }
+        //    cout << endl;
+        
         
         for(int i=0;i<numOTUs;i++){
             if (m->getControl_pressed()) {  return 0; }
@@ -639,6 +651,8 @@ vector<vector<double> > CommunityTypeFinder::calcCenters(vector<vector<double> >
     try {
         //for each partition
         //choose sample with smallest sum of squared dists
+        //       cout << "Here" << clusterMap.size() << endl;
+        //       for(map<int, int>::iterator it = clusterMap.begin(); it != clusterMap.end(); it++) { cout << it->first << '\t' << it->second <<endl; }
         vector<vector<double> > centers; centers.resize(numPartitions);
         vector<double>  sums;  sums.resize(numSamples, 0.0);
         map<int, vector<int> > partition2Samples; //maps partitions to samples in the partition

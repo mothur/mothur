@@ -11,58 +11,24 @@
 
 
 #include "mothurout.h"
-#include "currentfile.h"
-#include "commandfactory.hpp"
-#include "gtest/gtest.h"
+#include "gtest.h"
 
-/* Test Naming Structure:
- 
- Test_OptionalSubCategory_TestClass
- 
- Test_Container_Sequence
- Test_Calcs_ClusterCalcs
- 
- Makes it easy to filter tests
- 
- ::testing::GTEST_FLAG(filter) = "Test_Container_*";
- ::testing::GTEST_FLAG(filter) = "Test_*";
- ::testing::GTEST_FLAG(filter) = "Test_Calcs*";
- 
- Test_TrimOligos
- 
- 
-*/
-
-CommandFactory* CommandFactory::_uniqueInstance;
-CurrentFile* CurrentFile::instance;
-MothurOut* MothurOut::_uniqueInstance;
-
-
+#define UNIT_TEST
 
 int main(int argc, char **argv) {
     MothurOut* m; m = MothurOut::getInstance();
-    CurrentFile* current; current = CurrentFile::getInstance();
-    
-    current->setTestFilePath("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/");
-    string pathname = current->getProgramPath();
-    
+    m->setTestFilePath("/Users/sarahwestcott/Desktop/mothur/TestMothur/TestFiles/");
+    string pathname = m->mothurProgramPath;
     if (pathname != "") {
         //add / to name if needed
         string lastChar = pathname.substr(pathname.length()-1);
         if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
     }
     
-    current->setTestFilePath(pathname);
+    m->setTestFilePath(pathname);
     
-    ::testing::GTEST_FLAG(filter) = "Test_Container_SharedRabundFloatVector*"; //Test_Command_BiomInfo
     ::testing::InitGoogleTest(&argc, argv);
-    
-#ifndef UNIT_TEST
-    #define UNIT_TEST
-#endif
-    
-    int value = RUN_ALL_TESTS();
-    return value;
+    return RUN_ALL_TESTS();
 }
 
 #endif

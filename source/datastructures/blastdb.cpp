@@ -208,7 +208,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
-
+//		cout << seq->getUnaligned() << endl;
 		//	the goal here is to quickly survey the database to find the closest match.  To do this we are using the default
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
@@ -238,18 +238,22 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		
 		while(!m8FileHandle.eof()){
 			m8FileHandle >> dummy >> templateAccession >> searchScore >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-
+//			cout << dummy << '\t' << templateAccession << '\t' << searchScore << '\t' << numBases << '\t' << mismatch << '\t' << gap << '\t' << startQuery << '\t' << endQuery << '\t' << startRef << '\t' << endRef << '\t' << eScore << '\t' << score << endl; 
+			
+			//get rest of junk in line
+			//while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}else{ cout << c; }	} //
+				//cout << endl;
 			util.gobble(m8FileHandle);
 			if (searchScore >= minPerID) { 
 				topMatches.push_back(templateAccession);
 				//Scores.push_back(searchScore);
 			}
-
+//cout << templateAccession << endl;
 		}
 		m8FileHandle.close();
 		util.mothurRemove((queryFileName+pid+toString(randNumber)));
 		util.mothurRemove((blastFileName+pid+toString(randNumber)));
-		
+//cout << "\n" ;		
 		return topMatches;
 	}
 	catch(exception& e) {
@@ -293,9 +297,10 @@ void BlastDB::generateDB() {
 			//wrap entire string in ""
 			formatdbCommand = "\"" + formatdbCommand + "\"";
 		#endif
-		
+		//cout << formatdbCommand << endl;
 		system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot
+		//m->mothurOut("DONE."); m->mothurOutEndLine();	m->mothurOutEndLine(); cout.flush();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "BlastDB", "generateDB");

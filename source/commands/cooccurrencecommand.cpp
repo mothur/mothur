@@ -145,7 +145,7 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
 
 			
-			metric = validParameter.valid(parameters, "metric");				if (metric == "not found") { metric = "cscore"; }
+			metric = validParameter.validFile(parameters, "metric");				if (metric == "not found") { metric = "cscore"; }
 			
 			if ((metric != "cscore") && (metric != "checker") && (metric != "combo") && (metric != "vratio")) {
 				m->mothurOut("[ERROR]: " + metric + " is not a valid metric option for the cooccurrence command. Choices are cscore, checker, combo, vratio."); m->mothurOutEndLine(); abort = true; 

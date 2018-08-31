@@ -388,6 +388,8 @@ int ShhherCommand::execute(){
 		getSingleLookUp();	if (m->getControl_pressed()) { return 0; }
 		getJointLookUp();	if (m->getControl_pressed()) { return 0; }
 		
+        int numFiles = flowFileVector.size();
+		
         driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName);
 
 		if(compositeFASTAFileName != ""){

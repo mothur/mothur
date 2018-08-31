@@ -31,7 +31,7 @@ int DesignMap::read(string file) {
         
         vector<string> columnHeaders;
         vector<string> tempColumnHeaders;
-        if ((temp == "group") || (temp == "Group")) {
+        if (temp == "group") {
             string headers = util.getline(in); util.gobble(in);
             columnHeaders = util.splitWhiteSpace(headers);
             columnHeaders.insert(columnHeaders.begin(), "group");

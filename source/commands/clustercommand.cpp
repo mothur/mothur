@@ -608,11 +608,14 @@ int ClusterCommand::vsearchDriver(string inputFile, string ucClusteredFile, stri
             vsearchParameters.push_back(sizeorder);
          }
 
-        if (m->getDebug()) {  m->mothurOut("[DEBUG]: "); for(int i = 0; i < vsearchParameters.size(); i++)  { m->mothurOut(toString(vsearchParameters[i]) + "\t"); } m->mothurOut("\n");  }
+        if (m->getDebug()) {  for(int i = 0; i < vsearchParameters.size(); i++)  { cout << vsearchParameters[i]; } cout << endl;  }
         
         string commandString = "";
         for (int i = 0; i < vsearchParameters.size(); i++) {    commandString += toString(vsearchParameters[i]) + " "; }
  
+        //cout << "commandString = " << commandString << endl;
+        //exit(1);
+        
 #if defined NON_WINDOWS
 #else
         commandString = "\"" + commandString + "\"";
@@ -811,13 +814,11 @@ void ClusterCommand::printData(string label, map<string, int>& counts, bool& ph)
         }
         
 		oldList.setLabel(label);
-        oldList.setPrintedLabels(ph); ph = false;
         if(countfile != "") {
             oldList.print(listFile, counts);
         }else {
             oldList.print(listFile);
         }
-        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterCommand", "printData");
@@ -864,7 +865,7 @@ int ClusterCommand::runOptiCluster(){
         if (format == "phylip") { distfile = phylipfile; }
         
         
-        OptiData* matrix; matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
+        OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
     
         ClusterMetric* metric = NULL;
         if (metricName == "mcc")             { metric = new MCC();              }
@@ -883,7 +884,7 @@ int ClusterCommand::runOptiCluster(){
         else if (metricName == "fpfn")       { metric = new FPFN();             }
         
         
-        OptiCluster cluster(matrix, metric, 0);
+        OptiCluster cluster(&matrix, metric, 0);
         tag = cluster.getTag();
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
@@ -945,7 +946,7 @@ int ClusterCommand::runOptiCluster(){
         }
         m->mothurOutEndLine(); m->mothurOutEndLine();
         
-        if (m->getControl_pressed()) { delete matrix; delete metric; metric = NULL; return 0; }
+        if (m->getControl_pressed()) { delete metric; metric = NULL; return 0; }
         
         ListVector* list = cluster.getList();
         list->setLabel(toString(cutoff));
@@ -988,8 +989,6 @@ int ClusterCommand::runOptiCluster(){
         for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; }
         sensFile << '\n';
         sensFile.close();
-        
-        delete matrix;
         
         return 0;
         

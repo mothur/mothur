@@ -187,7 +187,9 @@ SharedListVector* InputData::getSharedListVector(){
 			util.gobble(fileHandle);
 			return SharedList;
 		}
-		else{ return NULL; }
+		else{
+			return NULL;
+		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "getSharedListVector");
@@ -229,7 +231,9 @@ SharedListVector* InputData::getSharedListVector(string label){
 			in.close();
 			return SharedList;
 			
-		}else{ return NULL; }
+		}else{
+			return NULL;
+		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "getSharedListVector");

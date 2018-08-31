@@ -559,14 +559,13 @@ int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
         
         map<string, string>::iterator it;
         int length, OLength, thisOStart, thisOEnd, numMisMatches, numNs;
-        double expectedErrors;
         string name;
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs >> expectedErrors; util.gobble(in);
+            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; util.gobble(in);
             
             it = oldMap.find(name);
             if (it == oldMap.end()) {
@@ -575,8 +574,7 @@ int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
                 name = it->second;
             }
 
-            out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << '\t' << expectedErrors << endl;
-
+            out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;
         }
         in.close();
         out.close();

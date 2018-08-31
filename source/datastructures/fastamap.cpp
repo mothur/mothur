@@ -29,7 +29,8 @@ void FastaMap::readFastaFile(string inFileName) {
 			name = currSeq.getName();
 			
 			if (name != "") {
-				sequence = currSeq.getAligned();
+				if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
+				else						{	sequence = currSeq.getUnaligned();	}
 				
 				itName = seqmap.find(name);
 				if (itName == seqmap.end()) { seqmap[name] = sequence;  }
@@ -85,7 +86,8 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 		name = currSeq.getName();
 		
 		if (name != "") {
-			sequence = currSeq.getAligned();
+			if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
+			else						{	sequence = currSeq.getUnaligned();	}
 			
 			itName = seqmap.find(name);
 			if (itName == seqmap.end()) { seqmap[name] = sequence;  }

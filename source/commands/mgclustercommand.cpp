@@ -303,6 +303,7 @@ int MGClusterCommand::execute(){
 void MGClusterCommand::printData(ListVector* mergedList, map<string, int>& counts, bool& ph){
 	try {
         mergedList->setPrintedLabels(ph); ph = false;
+        
         if (countfile != "") {
             mergedList->print(listFile, counts);
         }else { mergedList->print(listFile, true); }
@@ -336,7 +337,9 @@ int MGClusterCommand::runOptiCluster(){
         
         time_t start = time(NULL);
         
-        OptiData* matrix; matrix = new OptiBlastMatrix(distfile, thisNamefile, nameOrCount, false, cutoff, length, penalty, minWanted);
+        OptiMatrix matrix;
+        matrix.setBlastVariables(length, penalty, minWanted);
+        matrix.readFile(distfile, thisNamefile, nameOrCount, "blast", cutoff, false);
         
         ClusterMetric* metricCalc = NULL;
         if (metric == "mcc")             { metricCalc = new MCC();              }
@@ -354,7 +357,7 @@ int MGClusterCommand::runOptiCluster(){
         else if (metric == "fdr")        { metricCalc = new FDR();              }
         else if (metric == "fpfn")       { metricCalc = new FPFN();             }
         
-        OptiCluster cluster(matrix, metricCalc, 0);
+        OptiCluster cluster(&matrix, metricCalc, 0);
         string tag = cluster.getTag();
         
         map<string, string> variables;
@@ -422,26 +425,26 @@ int MGClusterCommand::runOptiCluster(){
         list->setLabel(toString(cutoff));
         
         if (merge) {
-            vector< set<long long> > overlap = matrix->getBlastOverlap();
+            vector< set<int> > overlap = matrix.getBlastOverlap();
         
             //assign each sequence to bins
-            map<string, long long> seqToBin;
-            for (long long i = 0; i < list->getNumBins(); i++) {
+            map<string, int> seqToBin;
+            for (int i = 0; i < list->getNumBins(); i++) {
                 if (m->getControl_pressed()) { break; }
                 string bin = list->get(i);
                 vector<string> names; util.splitAtComma(bin, names);
-                for (long long j = 0; j < names.size(); j++) { seqToBin[names[j]] = i; }
+                for (int j = 0; j < names.size(); j++) { seqToBin[names[j]] = i; }
             }
             
             //merge overlapping bins
-            long long mergedBinCount = 0;
-            for (long long i = 0; i < overlap.size(); i++) {
-                set<long long> temp = overlap[i]; overlap[i].clear();
-                for (set<long long>::iterator itOverlap = temp.begin(); itOverlap != temp.end(); itOverlap++) {
-                    string firstName = matrix->getOverlapName(i);
-                    string secondName = matrix->getOverlapName(*itOverlap);
-                    long long binKeep = seqToBin[firstName];
-                    long long binRemove = seqToBin[secondName];
+            int mergedBinCount = 0;
+            for (int i = 0; i < overlap.size(); i++) {
+                set<int> temp = overlap[i]; overlap[i].clear();
+                for (set<int>::iterator itOverlap = temp.begin(); itOverlap != temp.end(); itOverlap++) {
+                    string firstName = matrix.getOverlapName(i);
+                    string secondName = matrix.getOverlapName(*itOverlap);
+                    int binKeep = seqToBin[firstName];
+                    int binRemove = seqToBin[secondName];
                     
                     if(binKeep != binRemove) {
                         //save names in old bin
@@ -502,10 +505,8 @@ int MGClusterCommand::runOptiCluster(){
         sensFile << '\n';
         sensFile.close();
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster.\n");
+        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster."); m->mothurOutEndLine();
 
-        delete metricCalc; delete matrix;
-        
         return 0;
     }
     catch(exception& e) {

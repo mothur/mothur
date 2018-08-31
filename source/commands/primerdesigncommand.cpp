@@ -896,7 +896,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
 
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            if (m->getControl_pressed()) {  break; }
+            if (m->getControl_pressed()) {  cout << " control pressed " << "\n"; break; }
             
             primerCountsData* dataBundle = new primerCountsData(fastafile, nameMap, lines[i+1].start, lines[i+1].end, seq2Bin, numBins);
             data.push_back(dataBundle);
@@ -916,7 +916,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
             workerThreads[i]->join();
             total += data[i]->total;
             
-            if (m->getControl_pressed()) {  break; }
+            if (m->getControl_pressed()) {  cout << " control pressed " << "\n"; break; }
             
             if (data[i]->alignedLength != alignedLength) {  m->mothurOut("[ERROR]: your sequences are not all the same length. primer.design requires sequences to be aligned.\n"); m->setControl_pressed(true); }
             
