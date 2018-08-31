@@ -37,7 +37,6 @@ double LinearAlgebra::erfcc(double x){
             t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
             t*(-0.82215223+t*0.17087277))))))))); 
         
-        //cout << "in erfcc " << t << '\t' << ans<< endl;
         return (x >= 0.0 ? ans : 2.0 - ans);
     }
 	catch(exception& e) {
@@ -1871,13 +1870,13 @@ void LinearAlgebra::ludcmp(vector<vector<double> >& A, vector<int>& index, doubl
 
 void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vector<double>& b){
     try {
-        //if(m->debug){   m->mothurOut("lubksb\n");    }
+        
         double total;
         int n = (int)A.size();
         int ii = 0;
         
         for(int i=0;i<n;i++){
-            //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
+            
             if (m->getControl_pressed()) { break; }
             int ip = index[i];
             total = b[ip];
@@ -1885,7 +1884,7 @@ void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vecto
             
             if (ii != 0) {
                 for(int j=ii-1;j<i;j++){
-                    //if(m->debug){   m->mothurOut("j loop " + toString(j) + "\n");    }
+                    
                     total -= A[i][j] * b[j];
                 }
             }
@@ -1893,13 +1892,13 @@ void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vecto
             b[i] = total;
         }
         for(int i=n-1;i>=0;i--){
-            //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
+            
             total = b[i];
             for(int j=i+1;j<n;j++){ total -= A[i][j] * b[j];   }
             b[i] = total / A[i][i];
-            //if (A[i][i] == 0) { cout << "ohno!!" << endl; }
+            
         }
-        //if(m->debug){   m->mothurOut("end lubksb\n");    }
+        
     }
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "lubksb");
@@ -1910,18 +1909,16 @@ void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vecto
 
 void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float& d){
     try {
-        //if(m->debug){   m->mothurOut("ludcmp\n");    }
         double tiny = 1e-20;
         
         int n = (int)A.size();
         vector<float> vv(n, 0.0);
-        double temp;
         int imax;
         
         d = 1.0;
         
         for(int i=0;i<n;i++){
-            //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
+            
             float big = 0.0;
             for(int j=0;j<n;j++){
                 float thisValue = fabs(A[i][j]);
@@ -1934,9 +1931,9 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
         
         for(int j=0;j<n;j++){
             if (m->getControl_pressed()) { break; }
-            //if(m->debug){   m->mothurOut("j loop " + toString(j) + "\n");    }
+            
             for(int i=0;i<j;i++){
-                //if(m->debug){   m->mothurOut("i loop " + toString(i) + "\n");    }
+                
                 float sum = A[i][j];
                 for(int k=0;k<i;k++){   sum -= A[i][k] * A[k][j];   }
                 A[i][j] = sum;
@@ -1944,7 +1941,7 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
             
             float big = 0.0;
             for(int i=j;i<n;i++){
-                //if(m->debug){   m->mothurOut("j loop " + toString(j) + "\n");    }
+                
                 float sum = A[i][j];
                 for(int k=0;k<j;k++){   sum -= A[i][k] * A[k][j];   }
                 A[i][j] = sum;
@@ -1972,7 +1969,7 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
                 for(int i=j+1;i<n;i++){ A[i][j] *= dum; }
             }
         }
-        //if(m->debug){   m->mothurOut("end ludcmp\n");    }
+        
     }
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "ludcmp");
@@ -2120,12 +2117,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
             }
             scaling.push_back(temp);
         }
-        /*
-         cout << "scaling = " << endl;
-         for (int i = 0; i < scaling.size(); i++) {
-         for (int j = 0; j < scaling[i].size(); j++) { cout << scaling[i][j] << '\t'; }
-         cout << endl;
-         }*/
+        
         
         //X <- sqrt(fac) * ((x - group.means[g, ]) %*% scaling)
         vector< vector<double> > X = randCov; //[numOTUS][numSampled]
@@ -2147,22 +2139,11 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         else                        { Xcopy = X;                    }
         linear.svd(Xcopy, d, v); //Xcopy gets the results we want for v below, because R's version is [numSampled][numOTUS]
         
-        /*cout << "Xcopy = " << endl;
-        for (int i = 0; i < Xcopy.size(); i++) {
-            for (int j = 0; j < Xcopy[i].size(); j++) { cout << Xcopy[i][j] << '\t'; }
-            cout << endl;
-        }
-        cout << "v = " << endl;
-        for (int i = 0; i < v.size(); i++) {
-            for (int j = 0; j < v[i].size(); j++) { cout << v[i][j] << '\t'; }
-            cout << endl;
-        }
-         */
         
         int rank = 0;
         set<int> goodColumns;
-        //cout << "d = " << endl;
-        for (int i = 0; i < d.size(); i++) {  if (d[i] > 0.0000000001) { rank++; goodColumns.insert(i); } } //cout << d[i] << endl;
+        
+        for (int i = 0; i < d.size(); i++) {  if (d[i] > 0.0000000001) { rank++; goodColumns.insert(i); } }
         
         if (rank == 0) {
             ignore=true; //m->mothurOut("[ERROR]: rank = 0: variables are numerically const\n"); m->setControl_pressed(true);
@@ -2198,12 +2179,6 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
          */
         if (transpose) {
             Xcopy = linear.transpose(v);
-            /*
-            cout << "Xcopy = " << endl;
-            for (int i = 0; i < Xcopy.size(); i++) {
-                for (int j = 0; j < Xcopy[i].size(); j++) { cout << Xcopy[i][j] << '\t'; }
-                cout << endl;
-            }*/
         }
         v.clear(); //store "good" columns - X.s$v[, 1L:rank]
         v.resize(Xcopy.size()); //[numOTUS]["good" columns]
@@ -2220,19 +2195,13 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         
         scaling = linear.matrix_mult(linear.matrix_mult(scaling, v), diagRanks); //([numOTUS][numOTUS]*[numOTUS]["good" columns]) = [numOTUS]["good" columns] then ([numOTUS]["good" columns] * ["good" columns]["good" columns] = scaling = [numOTUS]["good" columns]
         
-        /*cout << "scaling = " << endl;
-        for (int i = 0; i < scaling.size(); i++) {
-            for (int j = 0; j < scaling[i].size(); j++) { cout << scaling[i][j] << '\t'; }
-            cout << endl;
-        }*/
+        
         
         //Note: linear.matrix_mult [1][numGroups] * [numGroups][numOTUs] - columns in first must match rows in second, returns matrix[1][numOTUs]
         vector< vector<double> > prior; prior.push_back(proportions);
         vector< vector<double> >  xbar = linear.matrix_mult(prior, means);
         vector<double> xBar = xbar[0]; //length numOTUs
         
-        /*cout << "xbar" << endl;
-        for (int j = 0; j < numOtus; j++) {  cout << xBar[j] <<'\t'; }cout <<  endl;*/
         //fac <- 1/(ng - 1)
         fac = 1 / (double) (numGroups-1);
         //scale(group.means, center = xbar, scale = FALSE) %*% scaling
@@ -2253,13 +2222,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         for (int i = 0; i < X.size(); i++) {
             for (int j = 0; j < X[i].size(); j++) {  X[i][j] *= temp[j];  }
         }
-        /*
-        cout << "X = " << endl;
-        for (int i = 0; i < X.size(); i++) {
-            for (int j = 0; j < X[i].size(); j++) { cout << X[i][j] << '\t'; }
-            cout << endl;
-        }
-        */
+        
         
         d.clear(); v.clear();
         //we want to transpose so results are in Xcopy, but if that makes rows > columns then we don't since svd requires rows < cols.
@@ -2267,20 +2230,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         if (X.size() > X[0].size()) {   Xcopy = X;  transpose=true;     }
         else                        {   Xcopy = linear.transpose(X);    }
         linear.svd(Xcopy, d, v); //Xcopy gets the results we want for v below
-        /*cout << "Xcopy = " << endl;
-        for (int i = 0; i < Xcopy.size(); i++) {
-            for (int j = 0; j < Xcopy[i].size(); j++) { cout << Xcopy[i][j] << '\t'; }
-            cout << endl;
-        }
         
-        cout << "v = " << endl;
-        for (int i = 0; i < v.size(); i++) {
-            for (int j = 0; j < v[i].size(); j++) { cout << v[i][j] << '\t'; }
-            cout << endl;
-        }
-        
-        cout << "d = " << endl;
-        for (int i = 0; i < d.size(); i++) { cout << d[i] << endl; }*/
         
         //rank <- sum(X.s$d > tol * X.s$d[1L])
         //X.s$d[1L] = larger value in d vector
@@ -2304,11 +2254,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         
         scaling = linear.matrix_mult(scaling, v); //[numOTUS]["good" columns] * ["good"columns][new "good" columns]
         
-        /*cout << "scaling = " << endl;
-        for (int i = 0; i < scaling.size(); i++) {
-            for (int j = 0; j < scaling[i].size(); j++) { cout << scaling[i][j] << '\t'; }
-            cout << endl;
-        }*/
+        
         ignore=false;
         return scaling;
     }

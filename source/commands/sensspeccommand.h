@@ -41,7 +41,7 @@ private:
 	vector< vector< int> > preProcessList(OptiMatrix& matrix, ListVector*);
 	int processListFile();
 	void setUpOutput();
-	void outputStatistics(string, string);
+	void outputStatistics(string, string, int);
 
 	string listFile, distFile, sensSpecFileName, phylipfile, columnfile, namefile, countfile;
 	string outputDir;

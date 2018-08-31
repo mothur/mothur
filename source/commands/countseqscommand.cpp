@@ -8,7 +8,6 @@
  */
 
 #include "countseqscommand.h"
-
 #include "counttable.h"
 #include "inputdata.h"
 

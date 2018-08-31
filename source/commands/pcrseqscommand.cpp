@@ -637,8 +637,7 @@ int driverPcr(pcrData* params){
                                             thisSeqsLocations.push_back((mapAligned[primerEnd-1]+1));
                                         }
                                     }
-                                }
-                                else                {
+                                }else                {
                                     if (params->keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
                                     else            {
                                         currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));
@@ -650,8 +649,8 @@ int driverPcr(pcrData* params){
                                 }
                                 isAligned(currSeq.getAligned(), mapAligned);
                             }else {
-                                if (!params->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd)); }
-                                else                { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart)); }
+                                if (!params->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd));     }
+                                else                        { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart));   }
                             }
                         }
                     }
@@ -720,7 +719,7 @@ int driverPcr(pcrData* params){
                             else {
                                 if (params->keepdots)   { currSeq.filterFromPos(params->end); }
                                 else {
-                                    string seqString = currSeq.getAligned().substr(0, params->end);
+                                    string seqString = currSeq.getAligned().substr(0, (params->end-1));
                                     currSeq.setAligned(seqString);
                                 }
                             }
@@ -746,7 +745,7 @@ int driverPcr(pcrData* params){
                 //trimming removed all bases
                 if (currSeq.getUnaligned() == "") { goodSeq = false; }
                 
-                if(goodSeq == 1)    {
+                if(goodSeq)    {
                     currSeq.printSequence(params->goodFasta);
                     if (thisPStart != -1)   { locations.insert(thisPStart);  }
                     if (thisSeqsLocations.size() != 0) { params->locations[currSeq.getName()] = thisSeqsLocations; }
@@ -802,8 +801,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        if (processors == 1) { lines.push_back(linePair(0, 1000)); }
-        else {
+        
             positions = util.setFilePosFasta(fastafile, numFastaSeqs);
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
             
@@ -814,7 +812,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
                 if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
                 lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
             }
-        }
+        
 #endif
         
         //create array of worker threads
@@ -843,7 +841,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         driverPcr(dataBundle);
         numFastaSeqs = dataBundle->count;
         
-        set<string> badNames = dataBundle->badSeqNames;
+        badSeqNames = dataBundle->badSeqNames;
         map<string, vector<int> > locations = dataBundle->locations;
         bool adjustNeeded = dataBundle->adjustNeeded;
         int pstart = -1; int pend = -1;
@@ -863,7 +861,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
                 if (data[i]->pstart < pstart)   { pstart = data[i]->pstart;     }
             } //smallest start
             
-            badNames.insert(data[i]->badSeqNames.begin(), data[i]->badSeqNames.end());
+            badSeqNames.insert(data[i]->badSeqNames.begin(), data[i]->badSeqNames.end());
             locations.insert(data[i]->locations.begin(), data[i]->locations.end());
             
             delete data[i];

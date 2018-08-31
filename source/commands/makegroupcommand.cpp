@@ -192,7 +192,7 @@ int MakeGroupCommand::execute(){
 			
 			while (!in.eof()) {
 				
-				Sequence seq(in, "no align"); util.gobble(in);
+				Sequence seq(in); util.gobble(in);
 				
 				if (m->getControl_pressed()) { outputTypes.clear();  in.close(); out.close(); util.mothurRemove(filename); return 0; }
 				

@@ -8,6 +8,21 @@
  */
 
 #include "sensspeccommand.h"
+#include "calculator.h"
+#include "mcc.hpp"
+#include "sensitivity.hpp"
+#include "specificity.hpp"
+#include "fdr.hpp"
+#include "npv.hpp"
+#include "ppv.hpp"
+#include "f1score.hpp"
+#include "tp.hpp"
+#include "fp.hpp"
+#include "fpfn.hpp"
+#include "tptn.hpp"
+#include "tn.hpp"
+#include "fn.hpp"
+#include "accuracy.hpp"
 
 //**********************************************************************************************************************
 vector<string> SensSpecCommand::setParameters(){
@@ -291,8 +306,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
         //must read each time because cutoff changes
         string nameOrCount = "";
         string thisNamefile = "";
-        map<string, int> counts;
-        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); }
         else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
         
         string distfile = columnfile;
@@ -301,7 +315,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
         OptiMatrix matrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
         SensSpecCalc senscalc(matrix, list);
         senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
-		outputStatistics(label, origCutoff);
+		outputStatistics(label, origCutoff, list->getNumBins());
 
 		return 0;
 	}
@@ -397,7 +411,8 @@ void SensSpecCommand::setUpOutput(){
 		util.openOutputFile(sensSpecFileName, sensSpecFile);
         outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
 
-		sensSpecFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+		sensSpecFile << "label\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        m->mothurOut("label\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
 
 		sensSpecFile.close();
 	}
@@ -407,44 +422,34 @@ void SensSpecCommand::setUpOutput(){
 	}
 }
 //***************************************************************************************************************
-void SensSpecCommand::outputStatistics(string label, string cutoff){
+void SensSpecCommand::outputStatistics(string label, string cutoff, int numBins){
 	try{
 		long long tp =  truePositives;
 		long long fp =  falsePositives;
 		long long tn =  trueNegatives;
 		long long fn =  falseNegatives;
 
-		long long p = tp + fn;
-		long long n = fp + tn;
-		long long pPrime = tp + fp;
-		long long nPrime = tn + fn;
-
-		double sensitivity = tp / (double) p;
-		double specificity = tn / (double)n;
-		double positivePredictiveValue = tp / (double)pPrime;
-		double negativePredictiveValue = tn / (double)nPrime;
-		double falseDiscoveryRate = fp / (double)pPrime;
-
-		double accuracy = (tp + tn) / (double)(p + n);
-		double matthewsCorrCoef = (tp * tn - fp * fn) / (double)sqrt(p * n * pPrime * nPrime);	if(p == 0 || n == 0){	matthewsCorrCoef = 0;	}
-		double f1Score = 2.0 * tp / (double)(p + pPrime);
-
-
-		if(p == 0)			{	sensitivity = 0;	matthewsCorrCoef = 0;	}
-		if(n == 0)			{	specificity = 0;	matthewsCorrCoef = 0;	}
-		if(p + n == 0)		{	accuracy = 0;								}
-		if(p + pPrime == 0)	{	f1Score = 0;								}
-		if(pPrime == 0)		{	positivePredictiveValue = 0;	falseDiscoveryRate = 0;	matthewsCorrCoef = 0;	}
-		if(nPrime == 0)		{	negativePredictiveValue = 0;	matthewsCorrCoef = 0;							}
+        Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
+        Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
+        PPV ppv;            double positivePredictiveValue = ppv.getValue(tp, tn, fp, fn);
+        NPV npv;            double negativePredictiveValue = npv.getValue(tp, tn, fp, fn);
+        FDR fdr;            double falseDiscoveryRate = fdr.getValue(tp, tn, fp, fn);
+        Accuracy acc;       double accuracy = acc.getValue(tp, tn, fp, fn);
+        MCC mcc;            double matthewsCorrCoef = mcc.getValue(tp, tn, fp, fn);
+        F1Score f1;         double f1Score = f1.getValue(tp, tn, fp, fn); 
 
 		ofstream sensSpecFile;
 		util.openOutputFileAppend(sensSpecFileName, sensSpecFile);
 
-		sensSpecFile << label << '\t' << cutoff << '\t';
+		sensSpecFile << label << '\t' << cutoff << '\t' << numBins << '\t';
 		sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
 		sensSpecFile << setprecision(4);
 		sensSpecFile << sensitivity << '\t' << specificity << '\t' << positivePredictiveValue << '\t' << negativePredictiveValue << '\t';
 		sensSpecFile << falseDiscoveryRate << '\t' << accuracy << '\t' << matthewsCorrCoef << '\t' << f1Score << endl;
+        
+        m->mothurOut(label + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
+        m->mothurOut(toString(sensitivity) + "\t" + toString(specificity) + "\t" + toString(positivePredictiveValue) + "\t" + toString(negativePredictiveValue) + "\t");
+        m->mothurOut(toString(falseDiscoveryRate) + "\t" + toString(accuracy) + "\t" + toString(matthewsCorrCoef) + "\t" + toString(f1Score) + "\n\n");
 
 		sensSpecFile.close();
 	}

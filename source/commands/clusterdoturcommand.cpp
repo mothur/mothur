@@ -262,8 +262,7 @@ int ClusterDoturCommand::execute(){
 		float rndPreviousDist = 0.00000;
 		oldRAbund = *rabund;
 		oldList = *list;
-
-		bool printHeaders = true;
+        bool printHeaders = true;
 		
 		int estart = time(NULL);
 	
@@ -345,13 +344,13 @@ void ClusterDoturCommand::printData(string label, map<string, int>& counts, bool
 		oldRAbund.getSAbundVector().print(cout);
 		
 		oldList.setLabel(label);
-        
+        oldList.setPrintedLabels(ph);
         if(countfile != "") {
             oldList.print(listFile, counts);
         }else {
             oldList.print(listFile, true);
         }
-
+        ph = false;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterDoturCommand", "printData");

@@ -436,7 +436,7 @@ void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
 							}
 						}else{
 							copy->tree[parent].setParent(-1);
-							//cout << "issues with making subtree" << endl;
+							
 						}
 						removedLeaves.insert(sibIndex);
 						removedLeaves.insert(i);
@@ -879,8 +879,7 @@ int Tree::findRoot() {
 		for (int i = 0; i < numNodes; i++) {
 			//you found the root
 			if (tree[i].getParent() == -1) { return i; }
-			//cout << "i = " << i << endl;
-			//cout << "i's parent = " << tree[i].getParent() << endl;  
+			
 		}
 		return -1;
 	}

@@ -364,7 +364,6 @@ int MergeSfffilesCommand::readCommonHeader(ifstream& in, CommonHeader& header){
             char buffer6 [2];
             in.read(buffer6, 2);
             header.keyLength = be_int2(*(unsigned short *)(&buffer6));
-            //cout << "header key length = " << header.keyLength << endl;
             
             //read number of flow reads
             char buffer7 [2];
@@ -387,10 +386,9 @@ int MergeSfffilesCommand::readCommonHeader(ifstream& in, CommonHeader& header){
             char* tempBuffer2 = new char[header.keyLength];
             in.read(&(*tempBuffer2), header.keyLength);
             header.keySequence = tempBuffer2;
-            //cout << "key sequence " <<header.keySequence << endl;
+            
             if (header.keySequence.length() > header.keyLength) { header.keySequence = header.keySequence.substr(0, header.keyLength);  }
             delete[] tempBuffer2;
-            //cout << "key sequence " <<header.keySequence << endl;
             
             /* Pad to 8 chars */
             unsigned long long spotInFile = in.tellg();

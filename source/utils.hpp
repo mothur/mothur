@@ -27,6 +27,7 @@ public:
     
     //random operations
     int getRandomIndex(int); //highest
+    long long getRandomIndex(long long); //highest
     int getRandomNumber();
     float randomUniform();
     float randomExp();
@@ -35,6 +36,7 @@ public:
     vector<float> randomDirichlet(vector<float> alphas);
     double getRandomDouble0to1();
     void mothurRandomShuffle(vector<int>&);
+    void mothurRandomShuffle(vector<long long>&);
     void mothurRandomShuffle(vector< vector<double> >&);
     void mothurRandomShuffle(vector<string>&);
     void mothurRandomShuffle(vector<item>&);
@@ -87,6 +89,7 @@ public:
     int getTimeStamp(string filename);
     string hasPath(string);
     bool isBlank(string);
+    int getAlignmentLength(string);
     
     vector<bool> isGZ(string); //checks existence and format - will fail for either or both.
     bool mkDir(string&); //completes path, appends appropriate / or \. //returns true it exits or if we can make it
@@ -102,6 +105,7 @@ public:
 #ifdef USE_BOOST
     bool openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&);
     bool openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&, string);
+    string getline(boost::iostreams::filtering_istream& fileHandle);
 #endif
     
     int printVsearchFile(vector<seqPriorityNode>&, string, string, string); //sorts and prints by abundance adding /ab=xxx/
@@ -126,6 +130,7 @@ public:
     int readAccnos(string, vector<string>&, string);
     vector<consTax> readConsTax(string);
     int readConsTax(string, map<int, consTax2>&);
+    void readNames(string, map<string, long long>&);
     map<string, int> readNames(string);
     map<string, int> readNames(string, unsigned long int&);
     int readNames(string, map<string, string>&, map<string, int>&);
@@ -159,10 +164,12 @@ public:
     float roundDist(float, int);
     int sum(vector<int> v) { return (accumulate(v.begin(), v.end(), 0)); }
     double sum(vector<double> v ) { return (accumulate(v.begin(), v.end(), 0.0)); }
+    float sum(vector<float> v ) { return (accumulate(v.begin(), v.end(), 0.0)); }
     int max(vector<int> v) {  int max = 0; vector<int>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     float max(vector<float> v) {  float max = 0; vector<float>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     double max(vector<double> v) {  double max = 0; vector<double>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     long long max(vector<long long> v) {  long long max = 0; vector<long long>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
+    bool isPositiveNumeric(string);
     
     //type conversion
     bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.

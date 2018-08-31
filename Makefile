@@ -13,7 +13,7 @@
 # USEBOOST - link with boost libraries. Must install boost. Allows the make.contigs command to read .gz files.
 # BOOST_LIBRARY_DIR - location of boost libraries
 # BOOST_INCLUDE_DIR - location of boost include files
-# MOTHUR_FILES - default location for mothur to look for input files at runtime. Most often used for reference files.
+# MOTHUR_FILES - The MOTHUR_FILES parameter is optional, but allows you to set a default location for mothur to look for input files it can't find. This is often used for reference files you want to store in one location separate from your data.
 
 PREFIX := ${CURDIR} 
 

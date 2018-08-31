@@ -78,8 +78,6 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator decalc) {
 		query = temp[temp.size()-1];
 		for (int i = 0; i < temp.size()-1; i++) {  refSeqs[i] = temp[i]; }
 		
-		//for (int i = 0; i < refSeqs.size(); i++) { cout << refSeqs[i]->getName() << endl ; }//<< refSeqs[i]->getAligned() << endl
-
 		vector< vector<score_struct> > matrix = buildScoreMatrix(query.getAligned().length(), refSeqs.size()); //builds and initializes
 		
 		if (m->getControl_pressed()) { return chimera;  }
@@ -99,32 +97,11 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator decalc) {
 		int traceEnd = path[path.size()-1].col;	
 		string queryInRange = query.getAligned();
 		queryInRange = queryInRange.substr(traceStart, (traceEnd-traceStart+1));
-//		cout << queryInRange << endl;
+
 		string chimeraSeq = constructChimericSeq(trace, refSeqs);
-//		cout << chimeraSeq << endl;
-		
-//		cout << queryInRange.length() << endl;
-//		cout << chimeraSeq.length() << endl;
 		
 		percentIdenticalQueryChimera = computePercentID(queryInRange, chimeraSeq);
-		
-//		cout << percentIdenticalQueryChimera << endl;
-	/*	
-		vector<trace_struct> trace = extractHighestPath(matrix);
 				
-		//cout << "traces\n";
-		//for(int i=0;i<trace.size();i++){
-		//	cout << trace[i].col << '\t' << trace[i].oldCol << '\t' << refSeqs[trace[i].row]->getName() << endl;
-		//}
-		
-		if (trace.size() > 1) {		chimera = "yes";	}
-		else { chimera = "no";	return chimera; }
-		
-		int traceStart = trace[0].col;
-		int traceEnd = trace[trace.size()-1].oldCol;	
-		string queryInRange = query->getAligned();
-		queryInRange = queryInRange.substr(traceStart, (traceEnd-traceStart));*/
-		
 		if (m->getControl_pressed()) { return chimera;  }
 		
 		//save output results
@@ -133,7 +110,6 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator decalc) {
 			int regionEnd = trace[i].oldCol;
 			int seqIndex = trace[i].row;
 			
-//			cout << regionStart << '\t' << regionEnd << '\t' << seqIndex << endl;
 			results temp;
 			
 			temp.parent = refSeqs[seqIndex].getName();
@@ -157,8 +133,6 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator decalc) {
 			
 			temp.queryToParentLocal = computePercentID(queryInRegion, parentInRegion);
 			
-			//cout << query->getName() << '\t' << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << ", " <<  temp.divR << endl;
-
 			outputResults.push_back(temp);
 		}
 		
@@ -201,9 +175,7 @@ vector<Sequence> Maligner::minCoverageFilter(vector<Sequence> ref){
 			//if coverage above minimum
 			if (coverage > minCoverage) {
 				newRefs.push_back(ref[i]);
-			}//else {
-				//delete ref[i];
-			//}
+			}
 		}
 		
 		return newRefs;
@@ -219,8 +191,6 @@ int Maligner::computeChimeraPenalty() {
 	try {
 		
 		int numAllowable = ((1.0 - (1.0/minDivR)) * query.getNumBases());
-
-//		if(numAllowable < 1){	numAllowable = 1;	}
 		
 		int penalty = int(numAllowable + 1) * misMatchPenalty;
 
@@ -338,8 +308,6 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequenc
 		int numCols = query.getAligned().length();
 		int numRows = seqs.size();
 		
-//		cout << numRows << endl;
-		
 		//initialize first col
 		string queryAligned = query.getAligned();
 		for (int i = 0; i < numRows; i++) {
@@ -392,34 +360,8 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequenc
 						ms[i][j].prev = prevIndex;
 					}
 				}
-//				cout << i << '\t' << j << '\t' << queryAligned[j] << '\t' << subjectAligned[j] << '\t' << matchMisMatchScore << '\t' << ms[i][j].score << endl;
-
 			}
-			
 		}
-		
-		
-		
-		
-		
-//		cout << numRows << '\t' << numCols << endl;
-//		for(int i=0;i<numRows;i++){
-//			cout << seqs[i]->getName();
-//			for(int j=0;j<numCols;j++){
-//				cout << '\t' << ms[i][j].score;
-//			}
-//			cout << endl;
-//		}
-//		cout << endl;
-//		
-//		for(int i=0;i<numRows;i++){
-//			cout << seqs[i]->getName();
-//			for(int j=0;j<numCols;j++){
-//				cout << '\t' << ms[i][j].prev;
-//			}
-//			cout << endl;
-//		}
-		
 		
 	}
 	catch(exception& e) {
@@ -454,8 +396,6 @@ vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 		int rowIndex = highestStruct.row;
 		int pos = highestStruct.col;
 		int score = highestStruct.score;
-
-//		cout << rowIndex << '\t' << pos << '\t' << score << endl;
 		
 		while (pos >= 0 && score > 0) {
 			score_struct temp = ms[rowIndex][pos];
@@ -488,7 +428,6 @@ vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> p
 		for (int i = 1; i < path.size(); i++) {
 			
 			int next_region_index = path[i].row;
-			//cout << i << '\t' << next_region_index << endl;
 
 			if (next_region_index != region_index) {
 				
@@ -521,149 +460,6 @@ vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> p
 		exit(1);
 	}
 }
-
-/***************************************************************************************************************
-
-vector<trace_struct> Maligner::extractHighestPath(vector<vector<score_struct> > ms) {
-	try {
-	
-		
-		//get matrix dimensions
-		int numCols = query->getAligned().length();
-		int numRows = ms.size();
-	
-	
-		//find highest score scoring matrix
-		vector<score_struct> highestStruct;
-		int highestScore = 0;
-		
-		for (int i = 0; i < numRows; i++) {
-			for (int j = 0; j < numCols; j++) {
-				if (ms[i][j].score > highestScore) {
-					highestScore = ms[i][j].score;
-					highestStruct.resize(0);
-					highestStruct.push_back(ms[i][j]);
-				}
-				else if(ms[i][j].score == highestScore){
-					highestStruct.push_back(ms[i][j]);
-				}
-			}
-		}
-			
-		//cout << endl << highestScore << '\t' << highestStruct.size() << '\t' << highestStruct[0].row << endl;	
-		
-		vector<trace_struct> maxTrace;
-		double maxPercentIdenticalQueryAntiChimera = 0;
-		
-		for(int i=0;i<highestStruct.size();i++){
-			
-			vector<score_struct> path;
-
-			int rowIndex = highestStruct[i].row;
-			int pos = highestStruct[i].col;
-			int score = highestStruct[i].score;
-					
-			while (pos >= 0 && score > 0) {
-				score_struct temp = ms[rowIndex][pos];
-				score = temp.score;
-				
-				if (score > 0) {	path.push_back(temp);	}
-				
-				rowIndex = temp.prev;
-				pos--;
-			}
-
-			reverse(path.begin(), path.end());
-
-			vector<trace_struct> trace = mapTraceRegionsToAlignment(path, refSeqs);
-		
-			//cout << "traces\n";
-			//for(int j=0;j<trace.size();j++){
-			//	cout << trace[j].col << '\t' << trace[j].oldCol << '\t' << refSeqs[trace[j].row]->getName() << endl;
-			//}
-						
-			int traceStart = path[0].col;
-			int traceEnd = path[path.size()-1].col;	
-//			cout << "traceStart/End\t" << traceStart << '\t' << traceEnd << endl;
-			
-			string queryInRange = query->getAligned();
-			queryInRange = queryInRange.substr(traceStart, (traceEnd-traceStart+1));
-//			cout << "here" << endl;
-			string chimeraSeq = constructChimericSeq(trace, refSeqs);
-			string antiChimeraSeq = constructAntiChimericSeq(trace, refSeqs);
-		
-			percentIdenticalQueryChimera = computePercentID(queryInRange, chimeraSeq);			
-			double percentIdenticalQueryAntiChimera = computePercentID(queryInRange, antiChimeraSeq);
-//			cout << i << '\t' << percentIdenticalQueryChimera << '\t' << percentIdenticalQueryAntiChimera << endl;
-			
-			if(percentIdenticalQueryAntiChimera > maxPercentIdenticalQueryAntiChimera){
-				maxPercentIdenticalQueryAntiChimera = percentIdenticalQueryAntiChimera;
-				maxTrace = trace;
-			}
-		}
-//		cout << maxPercentIdenticalQueryAntiChimera << endl;
-		return maxTrace;
-	
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Maligner", "extractHighestPath");
-		exit(1);
-	}
-}
-
-***************************************************************************************************************
-
-vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> path, vector<Sequence*> seqs) {
-	try {
-		vector<trace_struct> trace;
-		
-		int region_index = path[0].row;
-		int region_start = path[0].col;
-	
-		for (int i = 1; i < path.size(); i++) {
-		
-			int next_region_index = path[i].row;
-			
-			if (next_region_index != region_index) {
-				
-				// add trace region
-				int col_index = path[i].col;
-				trace_struct temp;
-				temp.col = region_start;
-				temp.oldCol = col_index-1;
-				temp.row = region_index;
-				
-				trace.push_back(temp);
-							
-				region_index = path[i].row;
-				region_start = col_index;
-			}
-		}
-	
-		// get last one
-		trace_struct temp;
-		temp.col = region_start;
-		temp.oldCol = path[path.size()-1].col;
-		temp.row = region_index;
-		trace.push_back(temp);
-
-//		cout << endl;
-//		cout << trace.size() << endl;
-//		for(int i=0;i<trace.size();i++){
-//			cout << seqs[trace[i].row]->getName() << endl;
-//		}
-//		cout << endl;
-		
-		return trace;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Maligner", "mapTraceRegionsToAlignment");
-		exit(1);
-	}
-}
-*/
 //***************************************************************************************************************
 
 string Maligner::constructChimericSeq(vector<trace_struct> trace, vector<Sequence> seqs) {
@@ -671,15 +467,11 @@ string Maligner::constructChimericSeq(vector<trace_struct> trace, vector<Sequenc
 		string chimera = "";
 		
 		for (int i = 0; i < trace.size(); i++) {
-//			cout << i << '\t' << trace[i].row << '\t' << trace[i].col << '\t' << trace[i].oldCol << endl;
-			
 			string seqAlign = seqs[trace[i].row].getAligned();
 			seqAlign = seqAlign.substr(trace[i].col, (trace[i].oldCol-trace[i].col+1));
 			chimera += seqAlign;
 		}
-//		cout << chimera << endl;
-//		if (chimera != "") { chimera = chimera.substr(0, (chimera.length()-1)); }	//this was introducing a fence post error
-//		cout << chimera << endl;
+
 		return chimera;
 	}
 	catch(exception& e) {
@@ -695,7 +487,6 @@ string Maligner::constructAntiChimericSeq(vector<trace_struct> trace, vector<Seq
 		string antiChimera = "";
 		
 		for (int i = 0; i < trace.size(); i++) {
-//			cout << i << '\t' << (trace.size() - i - 1) << '\t' << trace[i].row << '\t' << trace[i].col << '\t' << trace[i].oldCol << endl;
 			
 			int oppositeIndex = trace.size() - i - 1;
 			
@@ -723,7 +514,7 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 			return -1.0;
 		}
 
-//		cout << queryAlign.length() << endl;
+
 		int numIdentical = 0;
 		int countA = 0;
 		int countB = 0;
@@ -746,24 +537,17 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 						numIdentical++;
 					}
 				}
-//				cout << queryAlign[i] << '\t' << chimera[i] << '\t' << countA << '\t' << countB << endl;
+
 
 			}
 		}
-		
-//		cout << "pat\t" << countA << '\t' << countB << '\t' << numIdentical << endl;
-
 		
 		float numBases = (countA + countB) /(float) 2;
 		
 		if (numBases == 0) { return 0; }
 	
-//		cout << numIdentical << '\t' << numBases << endl;
-		
 		float percentIdentical = (numIdentical/(float)numBases) * 100;
-		
-//		cout << percentIdentical << endl;
-		
+				
 		return percentIdentical;
 		
 	}

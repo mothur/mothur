@@ -323,6 +323,7 @@ int UnifracUnweightedCommand::execute() {
         if ((Groups.size() == 0) || (Groups.size() < 2)) {  Groups = ct->getNamesOfGroups();  } //must have at least 2 groups to compare
 		Unweighted unweighted(includeRoot, Groups);
         util.getCombos(groupComb, Groups, numComp);
+        numGroups = Groups.size();
         
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
         
@@ -444,6 +445,7 @@ int UnifracUnweightedCommand::execute() {
 /**************************************************************************************************/
 int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& dists, int treeNum) {
 	try {
+        
         //we need to find the average distance and standard deviation for each groups distance
         //finds sum
         vector<double> averages = util.getAverages(dists);
@@ -664,7 +666,7 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
         Unweighted unweighted(includeRoot, Groups);
         
         vector< vector<string> > namesOfGroupCombos;
-        int numGroups = Groups.size();
+        numGroups = Groups.size();
         for (int a=0; a<numGroups; a++) {
             for (int l = 0; l < a; l++) {
                 vector<string> groups; groups.push_back(Groups[a]); groups.push_back(Groups[l]);
@@ -816,7 +818,7 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 		ofstream out;
 		util.openOutputFile(phylipFileName, out);
 		
-        int numGroups = Groups.size();
+        numGroups = Groups.size();
 		if ((outputForm == "lt") || (outputForm == "square")) {
 			//output numSeqs
 			out << numGroups << endl;
@@ -842,29 +844,21 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 		for (int r=0; r<numGroups; r++) {
 			//output name
 			string name = Groups[r];
-			if (name.length() < 10) { //pad with spaces to make compatible
-				while (name.length() < 10) {  name += " ";  }
-			}
+            //pad with spaces to make compatible
+			if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
 			
-			if (outputForm == "lt") {
+			if (outputForm == "lt") { //output distances
 				out << name;
-			
-				//output distances
-				for (int l = 0; l < r; l++) {	out  << '\t' << dists[r][l];  }
-				out << endl;
-			}else if (outputForm == "square") {
+				for (int l = 0; l < r; l++) {	out  << '\t' << dists[r][l];  }   out << endl;
+			}else if (outputForm == "square") {  //output distances
 				out << name;
-				
-				//output distances
-				for (int l = 0; l < numGroups; l++) {	out  << '\t' << dists[r][l];  }
-				out << endl;
+				for (int l = 0; l < numGroups; l++) {	out  << '\t' << dists[r][l];  }  out << endl;
 			}else{
 				//output distances
 				for (int l = 0; l < r; l++) {	
 					string otherName = Groups[l];
-					if (otherName.length() < 10) { //pad with spaces to make compatible
-						while (otherName.length() < 10) {  otherName += " ";  }
-					}
+                    //pad with spaces to make compatible
+					if (otherName.length() < 10) { while (otherName.length() < 10) {  otherName += " ";  } }
 					
 					out  << name << '\t' << otherName << '\t' << dists[r][l] << endl;
 				}

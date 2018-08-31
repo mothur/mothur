@@ -576,7 +576,6 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 
 			}
 			
-//			cout << query->getAligned() << endl;
 			//get sequence that were given from maligner results
 			vector<SeqCompare> seqs;
 			map<string, float> removeDups;
@@ -587,8 +586,6 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 
 				float dist = (Results[j].regionEnd - Results[j].regionStart + 1) * Results[j].queryToParentLocal;
 				//only add if you are not a duplicate
-//				cout << Results[j].parent << '\t' << Results[j].regionEnd << '\t' << Results[j].regionStart << '\t' << Results[j].regionEnd - Results[j].regionStart +1 << '\t' << Results[j].queryToParentLocal << '\t' << dist << endl;
-				
 				
 				if(Results[j].queryToParentLocal >= 90){	//local match has to be over 90% similarity
 				
@@ -630,13 +627,9 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		
 			//put seqs into vector to send to slayer
 			
-//			cout << query->getAligned() << endl;
+
 			vector<Sequence> seqsForSlayer;
-			for (int k = 0; k < seqs.size(); k++) {  
-//				cout << seqs[k].seq->getAligned() << endl;
-				seqsForSlayer.push_back(seqs[k].seq);	
-//				cout << seqs[k].seq->getName() << endl;
-			}
+			for (int k = 0; k < seqs.size(); k++) { seqsForSlayer.push_back(seqs[k].seq);	 }
 			
 			if (m->getControl_pressed()) {  return 0;  }
 
@@ -651,7 +644,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			//free memory
 			//for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
 		}
-		//cout << endl << endl;
+		
 		return 0;
 	}
 	catch(exception& e) {
@@ -817,7 +810,7 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 		string queryUnAligned = q.getUnaligned();
 		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
 		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
-//cout << "whole length = " << queryUnAligned.length() << '\t' << "left length = " << leftQuery.length() << '\t' << "right length = "<< rightQuery.length() << endl;	
+	
 		Sequence* queryLeft = new Sequence(q.getName(), leftQuery);
 		Sequence* queryRight = new Sequence(q.getName(), rightQuery);
 		
@@ -825,14 +818,6 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1, minSim);
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1, minSim);
 				
-		
-		//cout << q->getName() << '\t' << leftQuery << '\t' << "leftMatches = " << tempIndexesLeft.size() << '\t' << rightQuery	<< " rightMatches = " << tempIndexesRight.size() << endl;
-//		vector<int> smaller;
-//		vector<int> larger;
-//		
-//		if (tempIndexesRight.size() < tempIndexesLeft.size()) { smaller = tempIndexesRight;  larger = tempIndexesLeft;  }
-//		else { smaller = tempIndexesLeft;  larger = tempIndexesRight;  } 
-		
 		//merge results		
 		map<int, int> seen;
 		map<int, int>::iterator it;
@@ -883,18 +868,17 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 			}
 		}
 		//string qname = q->getName().substr(0, q->getName().find_last_of('_'));	
-		//cout << qname << endl;	
+			
 		
 		if (mergedResults.size() == 0) { numNoParents++; }
 		
 		for (int i = 0; i < mergedResults.size(); i++) {
-			//cout << q->getName() << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
+			
 			if (db[mergedResults[i]]->getName() != q.getName()) { 
 				Sequence temp(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
 			}
 		}
-		//cout << endl << endl;
 
 		delete queryRight;
 		delete queryLeft;
@@ -974,7 +958,7 @@ vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, i
 		}
 		
 		for (int i = 0; i < mergedResults.size(); i++) {
-			//cout << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
+			
 			if (db[mergedResults[i]]->getName() != q.getName()) { 
 				Sequence temp(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
@@ -982,7 +966,6 @@ vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, i
 			}
 		}
 
-		//cout << endl;		
 		delete queryRight;
 		delete queryLeft;
 		

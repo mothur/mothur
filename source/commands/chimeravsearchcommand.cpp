@@ -94,7 +94,7 @@ string ChimeraVsearchCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ChimeraVsearchCommand::ChimeraVsearchCommand(){
+ChimeraVsearchCommand::ChimeraVsearchCommand() : Command(){
     try {
         abort = true; calledHelp = true;
         setParameters();
@@ -110,7 +110,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(){
     }
 }
 //***************************************************************************************************************
-ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
+ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
     try {
         abort = false; calledHelp = false; hasName=false; hasCount=false;
         
@@ -343,11 +343,11 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
             vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
             if (m->getDebug()) {
                 m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
-                Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
+                Command* newCommand = new SystemCommand("which vsearch\n");
                 newCommand->execute();
                 delete newCommand;
                 m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
-                newCommand = new SystemCommand("which mothur"); m->mothurOutEndLine();
+                newCommand = new SystemCommand("which mothur\n");
                 newCommand->execute();
                 delete newCommand;
             }
@@ -369,7 +369,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option)  {
                 uLocation += programName;
                 ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
                 
-                if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable."); m->mothurOutEndLine(); abort = true; }
+                if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  abort = true; }
                 else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
             }else {  vsearchLocation = vsearchCommand; }
             
@@ -1024,8 +1024,11 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         alns = "\"" + alns + "\"";
         
         vector<char*> cPara;
-        
-        string vsearchCommand = vsearchLocation;
+        string vsearchCommand = "";
+#ifdef UNIT_TEST
+        vsearchCommand = "./";
+#endif
+        vsearchCommand += vsearchLocation;
         vsearchCommand = "\"" + vsearchCommand + "\" ";
         
         char* tempVsearch;
@@ -1181,7 +1184,6 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
 #endif
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
-        //cout << "commandString = " << commandString << endl;
         
         system(commandString.c_str());
         
