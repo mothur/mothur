@@ -192,6 +192,17 @@ void Utils::mothurRandomShuffle(vector<PCell*>& randomize){
 
 }
 /***********************************************************************/
+void Utils::mothurRandomShuffle(vector<colDist>& randomize){
+    try {
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurRandomShuffle");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 void Utils::mothurRandomShuffle(vector<PDistCellMin>& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);

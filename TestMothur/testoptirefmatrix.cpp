@@ -92,9 +92,9 @@ TEST(Test_Container_OptiRefMatrix, readPhylipReference) {
     OptiRefMatrix matrix(testOMatrix.reffilenames[3], testOMatrix.reffilenames[1], "count", "phylip", 0.03, testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", testOMatrix.reffilenames[5], "column");
     
     //EXPECT_EQ(113772,(matrix.print(cout)));
-    EXPECT_EQ(56886,(matrix.getNumDists())); //unique dists 56886*2=113772
+    EXPECT_EQ(56893,(matrix.getNumDists())); //unique dists 56886*2=113772
     EXPECT_EQ(80,(matrix.getNumFitDists()));
-    EXPECT_EQ(56675,(matrix.getNumRefDists()));
+    EXPECT_EQ(56682,(matrix.getNumRefDists()));
     
     long long sanityCheck = matrix.getNumDists() - (matrix.getNumFitDists() + matrix.getNumRefDists());
     EXPECT_EQ(131,sanityCheck); //number of inbetween dists

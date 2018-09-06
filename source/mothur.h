@@ -175,7 +175,14 @@ struct PDistCellMin{
     //PDistCell* cell;
     PDistCellMin(ull r, ull c) :  col(c), row(r) {}
 };
+/***********************************************************************/
 
+struct colDist {
+    int col;
+    int row;
+    float dist;
+    colDist(int r, int c, double d) : row(r), col(c), dist(d) {}
+};
 /**********************************************************/
 struct CommonHeader {
 	unsigned int magicNumber;

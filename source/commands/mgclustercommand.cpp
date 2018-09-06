@@ -603,7 +603,7 @@ int MGClusterCommand::runMothurCluster(){
         
         
         //cluster using cluster classes
-        while (distMatrix->getSmallDist() < cutoff && distMatrix->getNNodes() > 0){
+        while (distMatrix->getSmallDist() <= cutoff && distMatrix->getNNodes() > 0){
             
             if (m->getDebug()) {  cout << "numNodes=" << distMatrix->getNNodes() << " smallDist = " << distMatrix->getSmallDist() << endl; }
             

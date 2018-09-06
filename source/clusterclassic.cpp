@@ -61,13 +61,8 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		
 		//initialize distance matrix to cutoff
 		dMatrix.resize(nseqs);
-		//colDist temp(0, 0, aboveCutoff);
-		//rowSmallDists.resize(nseqs, temp);
-		for (int i = 1; i < nseqs; i++) {			
-			dMatrix[i].resize(i, aboveCutoff);		
-		}												
-														
-		
+		for (int i = 1; i < nseqs; i++) {	 dMatrix[i].resize(i, aboveCutoff);	 }
+        
 		char d;
 		while((d=fileHandle.get()) != EOF){
 
@@ -113,12 +108,10 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if (distance == -1) { distance = 1000000; }
 										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 								
-										//if(distance < cutoff){
-											dMatrix[i][j] = distance;
-											if (distance < smallDist) { smallDist = distance; }
-											//if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
-											//if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
-										//}
+										
+                                        dMatrix[i][j] = distance;
+                                        if (distance < smallDist) { smallDist = distance; }
+											
 										index++;
 										reading->update(index);
 								}
@@ -135,18 +128,15 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if (distance == -1) { distance = 1000000; }
 										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 										
-										//if(distance < cutoff){
-											if (distance < smallDist) { smallDist = distance; }
+                                    
+                                        if (distance < smallDist) { smallDist = distance; }
+                                    
+                                        int row = nameMap->get(matrixNames[i]);
+                                        int col = nameMap->get(matrixNames[j]);
+                                    
+                                        if (row < col) {  dMatrix[col][row] = distance; }
+                                        else { dMatrix[row][col] = distance; }
 											
-											int row = nameMap->get(matrixNames[i]);
-											int col = nameMap->get(matrixNames[j]);
-											
-											if (row < col) {  dMatrix[col][row] = distance; }
-											else { dMatrix[row][col] = distance; }
-											
-											//if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
-											//if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
-										//}
 										index++;
 										reading->update(index);
 								}
@@ -177,8 +167,6 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 											if (distance < smallDist) { smallDist = distance; }
 											
 											dMatrix[i][j] = distance;
-											//if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
-											//if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
 										}
 										index++;
 										reading->update(index);
@@ -204,9 +192,6 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 											
 											if (row < col) {  dMatrix[col][row] = distance; }
 											else { dMatrix[row][col] = distance; }
-											
-											//if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
-											//if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
 										}
 										index++;
 										reading->update(index);
@@ -313,13 +298,10 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                         
-                        //if(distance < cutoff){
+                        
                         dMatrix[i][j] = distance;
                         if (distance < smallDist) { smallDist = distance; }
-                        //if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
-                        //if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
-                        //}
-                        index++;
+                                                index++;
                         reading->update(index);
                     }
                     
@@ -448,29 +430,27 @@ double ClusterClassic::getSmallCell() {
 				if (dMatrix[i][j] < smallDist) {
 					mins.clear();
 					colDist temp(i, j, dMatrix[i][j]);
-					mins.push_back(temp); 
+					mins.push_back(temp);
+                    //cout << "adding " << i << '\t' << j << " to mins\n";
 					smallDist = dMatrix[i][j];
 				}else if (dMatrix[i][j] == smallDist) {
 					colDist temp(i, j, dMatrix[i][j]);
-					mins.push_back(temp); 
+					mins.push_back(temp);
+                    //cout << "adding " << i << '\t' << j << " to mins\n";
 
 				}
 			}
 		}
-		Utils util;
-		if (mins.size() > 0) {
-			int zrand = 0;
-			if (mins.size() > 1) {
-				//pick random number between 0 and mins.size()
-                int maxIndex = mins.size()-1;
-				zrand = util.getRandomIndex(maxIndex);
-			}
-			
-			smallRow = mins[zrand].row;
-			smallCol = mins[zrand].col;
-		
-		}
-	
+        
+        if (mins.size() != 0) {
+            Utils util; util.mothurRandomShuffle(mins);  //randomize the order of the iterators in the mins vector
+        
+            smallRow = mins[0].row;
+            smallCol = mins[0].col;
+        }
+        
+        //cout << "num mins = " << mins.size() << endl;
+        
 		//eliminate smallCell
 		if (smallRow < smallCol) { dMatrix[smallCol][smallRow] = aboveCutoff; }
 		else { dMatrix[smallRow][smallCol] = aboveCutoff; }
@@ -517,6 +497,8 @@ void ClusterClassic::update(double& cutOFF){
 		
 		int r, c;
 		r = smallRow; c = smallCol;
+        
+        //cout << "smallest row / col = " << smallRow << '\t' << smallCol << endl;
 				
 		for(int i=0;i<nseqs;i++){
 			if(i != r && i != c){

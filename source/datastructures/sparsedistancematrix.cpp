@@ -64,8 +64,12 @@ int SparseDistanceMatrix::rmCell(ull row, ull col){
         //find the columns entry for this cell as well
         for (int i = 0; i < seqVec[vrow].size(); i++) {  if (seqVec[vrow][i].index == row) { vcol = i;  break; }  }
         
+        
+        //cout << "removeing nodes: " << vrow << '-' << seqVec[vrow][vcol].index << " and " << row << '-' << seqVec[row][col].index << endl;
         seqVec[vrow].erase(seqVec[vrow].begin()+vcol);
         seqVec[row].erase(seqVec[row].begin()+col);
+        
+        //print();
  
 		return(0);
     }
@@ -119,6 +123,8 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
 	try {
         if (!sorted) { sortSeqVec(); sorted = true; }
         
+        //print();
+        
         vector<PDistCellMin> mins;
         smallDist = 1e6;
        
@@ -136,11 +142,13 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
                         mins.clear();
                         smallDist = dist;
                         PDistCellMin temp(i, seqVec[i][j].index);
-                        mins.push_back(temp);  
+                        mins.push_back(temp);
+                        //cout << "adding " << i << '\t' << seqVec[i][j].index << " to mins\n";
                     }
                     else if(dist == smallDist){  //if a subsequent distance is the same as mins distance add the new iterator to the mins vector
                         PDistCellMin temp(i, seqVec[i][j].index);
-                        mins.push_back(temp); 
+                        mins.push_back(temp);
+                        //cout << "adding " << i << '\t' << seqVec[i][j].index << " to mins\n";
                     }
                 }else { j+=seqVec[i].size(); } //stop looking 
 			}
@@ -150,6 +158,8 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
         
         row = mins[0].row;
         ull col = mins[0].col;
+        
+        //cout << "num mins = " << mins.size() << endl;
 
 		return col;
 	}
@@ -157,6 +167,23 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
 		m->errorOut(e, "SparseDistanceMatrix", "getSmallestCell");
 		exit(1);
 	}
+}
+/***********************************************************************/
+
+void SparseDistanceMatrix::print(){
+    try {
+        cout << endl;
+        //saves time in getSmallestCell, by making it so you dont search the repeats
+        for (int i = 0; i < seqVec.size(); i++) {
+            cout << i << '\t';
+            for (int j = 0; j < seqVec[i].size(); j++) {   cout <<  seqVec[i][j].index << '\t' ;  } cout << endl;
+        }
+        cout << endl;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SparseDistanceMatrix", "sortSeqVec");
+        exit(1);
+    }
 }
 /***********************************************************************/
 

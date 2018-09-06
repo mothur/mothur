@@ -135,7 +135,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 						
 						if (distance == -1) { distance = 1000000; }
 						
-						if(distance < cutoff){
+						if(distance <= cutoff){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 					}
@@ -152,7 +152,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 						
 						if (distance == -1) { distance = 1000000; }
 						
-						if(distance < cutoff){
+						if(distance <= cutoff){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 					}
@@ -174,7 +174,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					
 						if (distance == -1) { distance = 1000000; }
 						
-						if(distance < cutoff && j < i){
+						if(distance <= cutoff && j < i){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 					}
@@ -189,7 +189,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
                         
 						if (distance == -1) { distance = 1000000; }
 						
-						if(distance < cutoff && j < i){
+						if(distance <= cutoff && j < i){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 						
@@ -313,7 +313,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 						
 						if (distance == -1) { distance = 1000000; }
 						
-						if(distance < cutoff){
+						if(distance <= cutoff){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 					}
@@ -329,7 +329,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 						
 						if (distance == -1) { distance = 1000000; }
 						
-						if(distance < cutoff){
+						if(distance <= cutoff){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 					}
@@ -351,7 +351,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
                         
 						if (distance == -1) { distance = 1000000; }
 						
-						if(distance < cutoff && j < i){
+						if(distance <= cutoff && j < i){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 					}
@@ -364,7 +364,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
                         
 						if (distance == -1) { distance = 1000000; }
 						
-						if(distance < cutoff && j < i){
+						if(distance <= cutoff && j < i){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 						

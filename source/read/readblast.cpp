@@ -88,7 +88,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
 				
 				//if there is a valid overlap, add it
-				if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+				if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                     seqDist overlapValue(itA->second, itB->second, thisoverlap);
                     overlap.push_back(overlapValue);
 				}
@@ -132,7 +132,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
 						
 						//if there is a valid overlap, add it
-						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                             seqDist overlapValue(itA->second, itB->second, thisoverlap);
                             overlap.push_back(overlapValue);
 						}
@@ -157,7 +157,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 							else{	distance = min(itDist->second, distance);  }
 
 							//is this distance below cutoff
-							if (distance < cutoff) {
+							if (distance <= cutoff) {
                                 if (itA->second < it->first) {
                                     PDistCell value(it->first, distance);
                                     matrix->addCell(itA->second, value);
@@ -194,7 +194,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
 						
 						//if there is a valid overlap, add it
-						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                             seqDist overlapValue(itA->second, itB->second, thisoverlap);
                             overlap.push_back(overlapValue);
 						}
@@ -221,7 +221,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				else{	distance = min(itDist->second, distance);  }
 				
 				//is this distance below cutoff
-				if (distance < cutoff) {
+				if (distance <= cutoff) {
                     if (itA->second < it->first) {
                         PDistCell value(it->first, distance);
                         matrix->addCell(itA->second, value);
