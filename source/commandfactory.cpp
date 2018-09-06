@@ -346,7 +346,7 @@ CommandFactory::~CommandFactory(){
 int CommandFactory::checkForRedirects(string optionString) {
     try {
         Utils util;
-        int pos = optionString.find("outputdir");
+        int pos = (int)optionString.find("outputdir");
         if (pos != string::npos) { //user has set outputdir in command option string
             string outputOption = "";
             bool foundEquals = false;
@@ -362,7 +362,7 @@ int CommandFactory::checkForRedirects(string optionString) {
             }
         }
 
-        pos = optionString.find("inputdir");
+        pos = (int)optionString.find("inputdir");
         if (pos != string::npos) { //user has set inputdir in command option string
             string intputOption = "";
             bool foundEquals = false;
@@ -378,7 +378,7 @@ int CommandFactory::checkForRedirects(string optionString) {
             }
         }
 
-        pos = optionString.find("seed=");
+        pos = (int)optionString.find("seed=");
         if (pos != string::npos) { //user has set seed in command option string
             string intputOption = "";
             bool foundEquals = false;
@@ -390,7 +390,7 @@ int CommandFactory::checkForRedirects(string optionString) {
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
             bool seed = false; int random;
             if (intputOption == "clear") {
-                random = time(NULL);
+                random = (int)time(NULL);
                 seed = true;
             }else {
                 if (util.isNumeric1(intputOption)) { util.mothurConvert(intputOption, random); seed=true; }
@@ -400,7 +400,7 @@ int CommandFactory::checkForRedirects(string optionString) {
             if (seed)  { m->mothurOut("Setting random seed to " + toString(random) + ".\n\n"); m->setRandomSeed(random); }
         }
         
-        pos = optionString.find("mothurcalling=true");
+        pos = (int)optionString.find("mothurcalling=true");
         if (pos != string::npos) { //user has set seed in command option string
             current->setMothurCalling(true);
         }else { current->setMothurCalling(false);  }

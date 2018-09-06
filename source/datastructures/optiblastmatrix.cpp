@@ -94,7 +94,7 @@ int OptiBlastMatrix::readBlast(){
                 thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
                 
                 //if there is a valid overlap, add it
-                if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+                if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                     int indexA = (itA->second);
                     int indexB = (itB->second);
                     overlapSingleton[indexA] = false;
@@ -136,7 +136,7 @@ int OptiBlastMatrix::readBlast(){
                         thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
                         
                         //if there is a valid overlap, add it
-                        if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+                        if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                             int indexA = (itA->second);
                             int indexB = (itB->second);
                             overlapSingleton[indexA] = false;
@@ -165,7 +165,7 @@ int OptiBlastMatrix::readBlast(){
                             else{	distance = min(itDist->second, distance);  }
                             
                             //is this distance below cutoff
-                            if (distance < cutoff) {
+                            if (distance <= cutoff) {
                                 int indexA = (itA->second);
                                 int indexB = (itB->second);
                                 singleton[indexA] = false;
@@ -201,7 +201,7 @@ int OptiBlastMatrix::readBlast(){
                         thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
                         
                         //if there is a valid overlap, add it
-                        if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+                        if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                             int indexA = (itA->second);
                             int indexB = (itB->second);
                             overlapSingleton[indexA] = false;
@@ -234,7 +234,7 @@ int OptiBlastMatrix::readBlast(){
                 else{	distance = min(itDist->second, distance);  }
                 
                 //is this distance below cutoff
-                if (distance < cutoff) {
+                if (distance <= cutoff) {
                     int indexA = (itA->second);
                     int indexB = (itB->second);
                     singleton[indexA] = false;
@@ -319,7 +319,7 @@ int OptiBlastMatrix::readBlast(){
                 thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
                 
                 //if there is a valid overlap, add it
-                if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+                if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                     int indexA = (itA->second);
                     int indexB = (itB->second);
                     
@@ -373,7 +373,7 @@ int OptiBlastMatrix::readBlast(){
                         thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
                         
                         //if there is a valid overlap, add it
-                        if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+                        if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                             int indexA = (itA->second);
                             int indexB = (itB->second);
                             
@@ -405,7 +405,7 @@ int OptiBlastMatrix::readBlast(){
                             else{	distance = min(itDist->second, distance);  }
                             
                             //is this distance below cutoff
-                            if (distance < cutoff) {
+                            if (distance <= cutoff) {
                                 int indexA = (itA->second);
                                 int indexB = (itB->second);
                                 
@@ -442,7 +442,7 @@ int OptiBlastMatrix::readBlast(){
                         thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
                         
                         //if there is a valid overlap, add it
-                        if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+                        if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                             int indexA = (itA->second);
                             int indexB = (itB->second);
                             
@@ -477,7 +477,7 @@ int OptiBlastMatrix::readBlast(){
                 else{	distance = min(itDist->second, distance);  }
                 
                 //is this distance below cutoff
-                if (distance < cutoff) {
+                if (distance <= cutoff) {
                     int indexA = (itA->second);
                     int indexB = (itB->second);
                     

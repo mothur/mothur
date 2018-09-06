@@ -40,13 +40,6 @@ private:
 	void updateMap();
 	void print();
 	
-	struct colDist {
-		int col;
-		int row;
-		float dist;
-		colDist(int r, int c, double d) : row(r), col(c), dist(d) {}
-	};
-	
 	RAbundVector* rabund;
 	ListVector* list;
 	vector< vector<float> > dMatrix;	

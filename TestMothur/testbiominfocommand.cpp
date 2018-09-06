@@ -62,7 +62,7 @@ TEST(Test_Command_BiomInfo, readData) {
     vector<string> groupNames; groupNames.push_back("A"); groupNames.push_back("B"); groupNames.push_back("C");
     int numOtus = 28;
     
-    EXPECT_EQ(2, testTrim.readData(matrixFormat, input, matrixElementType, groupNames, numOtus)->getOTUTotal(9));
+    EXPECT_EQ(12, testTrim.readData(matrixFormat, input, matrixElementType, groupNames, numOtus)->getOTUTotal(9));
 }
 
 /**************************************************************************************************/

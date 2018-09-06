@@ -63,7 +63,7 @@ class CountTable {
         int copy(CountTable*);
     
         bool hasGroupInfo() { return hasGroups; }
-        int getNumGroups() { return groups.size(); }
+        int getNumGroups() { return (int)groups.size(); }
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
         bool setNamesOfGroups(vector<string>);
         int addGroup(string);
@@ -76,7 +76,7 @@ class CountTable {
         int push_back(string, vector<int>); //add a sequence with group info
         int remove(string); //remove seq
         int get(string); //returns unique sequence index for reading distance matrices like NameAssignment
-        int size() { return indexNameMap.size(); }
+        int size() { return (int)indexNameMap.size(); }
     
         vector<string> getGroups(string); //returns vector of groups represented by this sequences
         vector<int> getGroupCounts(string);  //returns group counts for a seq passed in, if no group info is in file vector is blank. Order is the same as the groups returned by getGroups function.

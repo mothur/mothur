@@ -350,7 +350,7 @@ int SplitMatrix::splitDistanceLarge(){
 			
 			if (m->getControl_pressed()) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  util.mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
 					
-			if(dist < cutoff){
+			if(dist <= cutoff){
 				
 				int groupIDA = -1;
 				int groupIDB = -1;
@@ -772,7 +772,7 @@ int SplitMatrix::splitDistanceRAM(){
 			
 			if (m->getControl_pressed()) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  util.mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
 					
-			if(dist < cutoff){
+			if(dist <= cutoff){
 				
 				int groupIDA = -1;
 				int groupIDB = -1;

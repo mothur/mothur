@@ -33,8 +33,6 @@ TEST(Test_Container_Sequence, SequenceConstructors) {
     EXPECT_EQ(seq1.getAligned(), "");
     EXPECT_EQ(seq1.getName(), "");
     EXPECT_EQ(seq1.getUnaligned(), "");
-    
-        
 }
 
 TEST(Test_Container_Sequence, setGets) {

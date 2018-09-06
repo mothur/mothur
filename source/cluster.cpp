@@ -65,10 +65,12 @@ bool Cluster::update(double& cutOFF){
         
 		vector<int> foundCol(nColCells, 0);
         
+        //cout << "smallest row / col = " << smallRow << '\t' << smallCol  << '\t' << "numRowCells = " << nRowCells << " numColCells = " << nColCells << endl;
+        
 		int search;
 		bool changed;
         
-		for (int i=nRowCells-1;i>=0;i--) {
+		for (int i=nRowCells-1;i>=0;i--) {  //matrix indexes sorted from largest to smallest, so start at smallest index
             if (m->getControl_pressed()) { break; }
              
 			//if you are not the smallCell
@@ -76,10 +78,10 @@ bool Cluster::update(double& cutOFF){
                 search = dMatrix->seqVec[smallRow][i].index;
                 
 				bool merged = false;
-				for (int j=0;j<nColCells;j++) {
+				for (int j=0;j<nColCells;j++) {  //go through each distance the smallCol has looking for matching distance to find
                     
 					if (dMatrix->seqVec[smallCol][j].index != smallRow) {  //if you are not the smallest distance
-						if (dMatrix->seqVec[smallCol][j].index == search) {
+						if (dMatrix->seqVec[smallCol][j].index == search) {  //we found a distance for the merge
 							foundCol[j] = 1;
 							merged = true;
 							changed = updateDistance(dMatrix->seqVec[smallCol][j], dMatrix->seqVec[smallRow][i]);
@@ -98,36 +100,54 @@ bool Cluster::update(double& cutOFF){
                                 for (int k = foundCol.size()-1; k > location; k--) { foundCol[k] = foundCol[k-1]; }
                                 foundCol[location] = 1;
                             }
-                            j+=nColCells;
+                            j+=nColCells;  //jump out of loop and remove cell below
                         } 
-					}	
+                    }
 				}
 				//if not merged it you need it for warning 
 				if ((!merged) && (method == "average" || method == "weighted")) {   if (cutOFF > dMatrix->seqVec[smallRow][i].dist) {   cutOFF = dMatrix->seqVec[smallRow][i].dist; } }
-				dMatrix->rmCell(smallRow, i);
+                if ((method == "nearest") && (!merged)) { //you are a row dist without a column dist, add you as a column dist
+                    PDistCell value(search, dMatrix->seqVec[smallRow][i].dist); //create a distance for the missing value
+                    int location = dMatrix->addCellSorted(smallCol, value); nColCells++;
+                    foundCol.push_back(0); //add a new found column
+                    //adjust value
+                    for (int k = foundCol.size()-1; k > location; k--) { foundCol[k] = foundCol[k-1]; }
+                    foundCol[location] = 1;
+                }
+                dMatrix->rmCell(smallRow, i);  
 			}
 		}
 		clusterBins();
 		clusterNames();
         
-		// Special handling for singlelinkage case, not sure whether this
-		// could be avoided
-		for (int i=nColCells-1;i>=0;i--) {
-			if (foundCol[i] == 0) {
-                if (adjust != -1.0) { //adjust
-                    PDistCell value(smallCol, adjust); //create a distance for the missing value
-                    changed = updateDistance(dMatrix->seqVec[smallCol][i], value);
-                    dMatrix->updateCellCompliment(smallCol, i);
-                }else {
-                    if (method == "average" || method == "weighted") {
-                        if (dMatrix->seqVec[smallCol][i].index != smallRow) { //if you are not hte smallest distance 
-                            if (cutOFF > dMatrix->seqVec[smallCol][i].dist) {   cutOFF = dMatrix->seqVec[smallCol][i].dist;   }
-                        }
+        if (method == "nearest") {
+            for (int i=nColCells-1;i>=0;i--) { //remove any unfound dists from merged column, need special case for nn, since unfound dists mean above the cutoff -> keep smaller dist in col
+                if (foundCol[i] == 0) {  //not found
+                    if (dMatrix->seqVec[smallCol][i].index == smallRow) { //you are smallest distance
+                        dMatrix->rmCell(smallCol, i);
+                        break;
                     }
                 }
-                dMatrix->rmCell(smallCol, i);
-			}
-		}
+            }
+        }else {
+            for (int i=nColCells-1;i>=0;i--) { //remove any unfound dists from merged column, need special case for nn, since unfound dists mean above the cutoff -> keep smaller dist in col
+                if (foundCol[i] == 0) {  //not found
+                    if (adjust != -1.0) { //adjust
+                        PDistCell value(smallCol, adjust); //create a distance for the missing value
+                        changed = updateDistance(dMatrix->seqVec[smallCol][i], value);
+                        dMatrix->updateCellCompliment(smallCol, i);
+                    }else {
+                        if (method == "average" || method == "weighted") {
+                            if (dMatrix->seqVec[smallCol][i].index != smallRow) { //if you are not hte smallest distance
+                                if (cutOFF > dMatrix->seqVec[smallCol][i].dist) {   cutOFF = dMatrix->seqVec[smallCol][i].dist;   }
+                            }
+                        }
+                    }
+                    dMatrix->rmCell(smallCol, i);
+                }
+            }
+        }
+        //dMatrix->print();
         return changed;
 	}
 	catch(exception& e) {

@@ -50,7 +50,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 
 			if (distance == -1) { distance = 1000000; }
 		
-			if((distance < cutoff) && (itA != itB)){
+			if((distance <= cutoff) && (itA != itB)){
 				if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
 					refRow = itA->second;
 					refCol = itB->second;
@@ -134,11 +134,11 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 				rowMap.clear();
 				
 				//save row you just read
-				if (dist < cutoff) {
+				if (dist <= cutoff) {
 					rowMap[second] = dist;
 				}
 			}else{
-				if (dist < cutoff) {
+				if (dist <= cutoff) {
 					rowMap[second] = dist;
 				}
 			}
@@ -213,7 +213,7 @@ int FormatColumnMatrix::read(CountTable* nameMap){
             
 			if (distance == -1) { distance = 1000000; }
             
-			if((distance < cutoff) && (itA != itB)){
+			if((distance <= cutoff) && (itA != itB)){
 				if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
 					refRow = itA;
 					refCol = itB;
@@ -297,11 +297,11 @@ int FormatColumnMatrix::read(CountTable* nameMap){
 				rowMap.clear();
 				
 				//save row you just read
-				if (dist < cutoff) {
+				if (dist <= cutoff) {
 					rowMap[second] = dist;
 				}
 			}else{
-				if (dist < cutoff) {
+				if (dist <= cutoff) {
 					rowMap[second] = dist;
 				}
 			}

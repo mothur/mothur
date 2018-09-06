@@ -378,16 +378,14 @@ int ClusterCommand::execute(){
             if (sim)	{ inputString += ", sim=T";		}
 			else		{ inputString += ", sim=F";		}
 
-			
-			m->mothurOutEndLine(); 
-			m->mothurOut("/------------------------------------------------------------/"); m->mothurOutEndLine(); 
-			m->mothurOut("Running command: cluster.classic(" + inputString + ")"); m->mothurOutEndLine(); 
+			m->mothurOut("\n/------------------------------------------------------------/\n");
+			m->mothurOut("Running command: cluster.classic(" + inputString + ")\n");
 			
 			Command* clusterClassicCommand = new ClusterDoturCommand(inputString);
 			clusterClassicCommand->execute();
 			delete clusterClassicCommand;
 			
-			m->mothurOut("/------------------------------------------------------------/"); m->mothurOutEndLine();  
+			m->mothurOut("/------------------------------------------------------------/\n");
 
 			return 0;
 		}
@@ -401,7 +399,7 @@ int ClusterCommand::execute(){
         
 		if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
         
-        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
+        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster\n"); 
         
 		//set list file as new current listfile
 		string currentName = "";
@@ -714,7 +712,7 @@ int ClusterCommand::runMothurCluster(){
         double saveCutoff = cutoff;
         bool printHeaders = true;
         
-        while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+        while ((matrix->getSmallDist() <= cutoff) && (matrix->getNNodes() > 0)){
             
             if (m->getControl_pressed()) { //clean up
                 delete list; delete matrix; delete rabund; delete cluster;
@@ -730,19 +728,14 @@ int ClusterCommand::runMothurCluster(){
                 print_start = false;
             }
             
-            loops++;
-            
             cluster->update(cutoff);
             
             float dist = matrix->getSmallDist();
             float rndDist = util.ceilDist(dist, precision);
+            //cout << loops << '\t' << dist << '\t' << oldList.getNumBins() << '\t' << matrix->getNNodes() << endl; loops++;
             
-            if(previousDist <= 0.0000 && dist != previousDist){
-                printData("unique", counts, printHeaders);
-            }
-            else if(rndDist != rndPreviousDist){
-                printData(toString(rndPreviousDist,  length-1), counts, printHeaders);
-            }
+            if(previousDist <= 0.0000 && dist != previousDist)  {  printData("unique", counts, printHeaders);                               }
+            else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
             
             previousDist = dist;
             rndPreviousDist = rndDist;
@@ -757,12 +750,8 @@ int ClusterCommand::runMothurCluster(){
             print_start = false;
         }
         
-        if(previousDist <= 0.0000){
-            printData("unique", counts, printHeaders);
-        }
-        else if(rndPreviousDist<cutoff){
-            printData(toString(rndPreviousDist, length-1), counts, printHeaders);
-        }
+        if(previousDist <= 0.0000)          { printData("unique", counts, printHeaders);                            }
+        else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist, length-1), counts, printHeaders); }
         
         delete matrix;
         delete list;

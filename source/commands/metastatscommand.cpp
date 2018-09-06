@@ -229,7 +229,7 @@ int MetaStatsCommand::execute(){
 		set<string> userLabels = labels;
 		
         if (Sets.size() == 0) { Sets = designMap->getCategory();  }
-		int numGroups = Sets.size();
+		int numGroups = (int)Sets.size();
 		for (int a=0; a<numGroups; a++) { 
 			for (int l = 0; l < a; l++) {	
 				vector<string> groups; groups.push_back(Sets[a]); groups.push_back(Sets[l]);

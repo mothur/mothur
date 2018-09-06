@@ -53,9 +53,9 @@ public:
     string getDefaultClass() { return defaultClass; }
     
     //number of treatments / columns in file
-    int getNumCategories() { return namesOfCategories.size(); }
+    int getNumCategories() { return (int)namesOfCategories.size(); }
     //number of groups / rows in file
-    int getNumGroups()  {  return designMap.size();  }
+    int getNumGroups()  {  return (int)designMap.size();  }
     
     //options to select groups based on values
     vector<string> getNamesGroups() { return groups; }

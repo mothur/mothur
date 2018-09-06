@@ -42,6 +42,7 @@ public:
     void mothurRandomShuffle(vector<item>&);
     void mothurRandomShuffle(vector<PCell*>&);
     void mothurRandomShuffle(vector<PDistCellMin>&);
+    void mothurRandomShuffle(vector<colDist>&);
     void mothurRandomShuffle(OrderVector&);
     void mothurRandomShuffle(SharedOrderVector&);
     void mothurRandomShuffle(vector<SharedRAbundVector*>&);

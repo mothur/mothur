@@ -758,7 +758,7 @@ void OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string distFil
             
             if (distance == -1) { distance = 1000000; }
             
-            if(distance < cutoff){
+            if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);
                 map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 
@@ -819,7 +819,7 @@ map<long long, long long> OptiRefMatrix::readColumnSingletons(vector<bool>& sing
             
             if (distance == -1) { distance = 1000000; }
             
-            if(distance < cutoff){
+            if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);
                 map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 
@@ -888,7 +888,7 @@ map<long long, long long> OptiRefMatrix::readPhylipSingletons(vector<bool>& sing
                     
                     if (distance == -1) { distance = 1000000; }
                     
-                    if(distance < cutoff){
+                    if(distance <= cutoff){
                         singleton[i] = false;
                         singleton[j] = false;
                     }
@@ -905,7 +905,7 @@ map<long long, long long> OptiRefMatrix::readPhylipSingletons(vector<bool>& sing
                     
                     if (distance == -1) { distance = 1000000; }
                     
-                    if(distance < cutoff && j < i){
+                    if(distance <= cutoff && j < i){
                         singleton[i] = false;
                         singleton[j] = false;
                     }
@@ -967,7 +967,7 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                     
                     if (distance == -1) { distance = 1000000; } 
                     
-                    if(distance < cutoff){
+                    if(distance <= cutoff){
                         long long newB = singletonIndexSwap[j];
                         long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
@@ -997,7 +997,7 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                     
                     if (distance == -1) { distance = 1000000; }
                     
-                    if(distance < cutoff && j < i){
+                    if(distance <= cutoff && j < i){
                         long long newB = singletonIndexSwap[j];
                         long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
@@ -1042,7 +1042,7 @@ int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>
             
             if (distance == -1) { distance = 1000000; }
             
-            if(distance < cutoff){
+            if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);
                 map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 

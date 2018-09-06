@@ -40,16 +40,16 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
                 templateSequences.push_back(temp);
                 
                 //save longest base
-                if (temp.getUnaligned().length() >= longest)  { longest = (temp.getUnaligned().length()+1); }
+                if (temp.getUnaligned().length() >= longest)  { longest = ((int)temp.getUnaligned().length()+1); }
                 
                 if (tempLength != 0) {
                     if (tempLength != temp.getAligned().length()) { m->mothurOut("[ERROR]: template is not aligned, aborting.\n"); m->setControl_pressed(true); }
-                }else { tempLength = temp.getAligned().length(); }
+                }else { tempLength = (int)temp.getAligned().length(); }
             }
         }
         fastaFile.close();
         
-        numSeqs = templateSequences.size();
+        numSeqs = (int)templateSequences.size();
         //all of this is elsewhere already!
         
         m->mothurOut("DONE.\n");

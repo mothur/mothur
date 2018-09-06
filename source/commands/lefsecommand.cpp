@@ -563,7 +563,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
         map<string, set<string> >::iterator itB;
         for(map<string, set<string> >::iterator it=class2SubClasses.begin();it!=class2SubClasses.end();it++){
             itB = it;itB++;
-            for(itB;itB!=class2SubClasses.end();itB++){
+            for(;itB!=class2SubClasses.end();itB++){
                 if (m->getControl_pressed()) { return false; }
                 bool first = true;
                 int dirCmp = 0; // not set?? dir_cmp = "not_set" # 0=notset or none, 1=true, 2=false.

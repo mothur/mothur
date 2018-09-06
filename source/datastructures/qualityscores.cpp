@@ -311,7 +311,7 @@ void QualityScores::printQScores(OutputWriter* qFile){
 
         string outputQualString = ">";  outputQualString += seqName + '\t' + toString(expected_errors) + '\n';
 
-        for(int i=0;i<seqLength;i++){ outputQualString += qScores[i] + ' '; } outputQualString += '\n';
+        for(int i=0;i<seqLength;i++){ outputQualString += toString(qScores[i]) + ' '; } outputQualString += '\n';
 
         qFile->write(outputQualString);
     }

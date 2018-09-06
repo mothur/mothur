@@ -71,7 +71,7 @@ int OptiMatrix::readPhylip(){
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
-                    if(distance < cutoff){
+                    if(distance <= cutoff){
                         singleton[i] = false;
                         singleton[j] = false;
                     }
@@ -88,7 +88,7 @@ int OptiMatrix::readPhylip(){
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
-                    if(distance < cutoff && j < i){
+                    if(distance <= cutoff && j < i){
                         singleton[i] = false;
                         singleton[j] = false;
                     }
@@ -147,7 +147,7 @@ int OptiMatrix::readPhylip(){
                     
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
-                    if(distance < cutoff){
+                    if(distance <= cutoff){
                         long long newB = singletonIndexSwap[j];
                         long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
@@ -175,7 +175,7 @@ int OptiMatrix::readPhylip(){
 
                     if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
-                    if(distance < cutoff && j < i){
+                    if(distance <= cutoff && j < i){
                         long long newB = singletonIndexSwap[j];
                         long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
@@ -236,7 +236,7 @@ int OptiMatrix::readColumn(){
             if (distance == -1) { distance = 1000000; }
             else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
             
-            if(distance < cutoff){
+            if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);
                 map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 
@@ -289,7 +289,7 @@ int OptiMatrix::readColumn(){
             if (distance == -1) { distance = 1000000; }
             else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
             
-            if(distance < cutoff){
+            if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);
                 map<string,long long>::iterator itB = nameAssignment.find(secondName);
                 

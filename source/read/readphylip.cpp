@@ -100,7 +100,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                         if (distance == -1) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                 
-                                                        if(distance < cutoff){
+                                                        if(distance <= cutoff){
                                                             PDistCell value(i, distance);
                                                             DMatrix->addCell(j, value);
                                                         }
@@ -120,7 +120,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                         if (distance == -1) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                         
-                                                        if(distance < cutoff){
+                                                        if(distance <= cutoff){
                                                             PDistCell value(nameMap->get(matrixNames[i]), distance);
                                                             DMatrix->addCell(nameMap->get(matrixNames[j]), value);
                                                         }
@@ -152,7 +152,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                         if (distance == -1) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                         
-                                                        if(distance < cutoff && j < i){
+                                                        if(distance <= cutoff && j < i){
                                                             PDistCell value(i, distance);
                                                             DMatrix->addCell(j, value);
                                                         }
@@ -172,7 +172,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                        if (distance == -1) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
                                                         
-														if(distance < cutoff && j < i){
+														if(distance <= cutoff && j < i){
                                                             PDistCell value(nameMap->get(matrixNames[i]), distance);
                                                             DMatrix->addCell(nameMap->get(matrixNames[j]), value);
                                                         }
@@ -272,7 +272,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                         
-                        if(distance < cutoff){
+                        if(distance <= cutoff){
                             PDistCell value(i, distance);
                             DMatrix->addCell(j, value);
                         }
@@ -290,7 +290,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                         
-                        if(distance < cutoff){
+                        if(distance <= cutoff){
                             int iIndex = countTable->get(matrixNames[i]);
                             int jIndex = countTable->get(matrixNames[j]);
                             
@@ -320,8 +320,6 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                 fileHandle >> name;                
                 matrixNames.push_back(name);
                 
-                
-                
                 if(countTable == NULL){
                     list->set(i, name);
                     for(int j=0;j<nseqs;j++){
@@ -332,7 +330,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                         
-                        if(distance < cutoff && j < i){
+                        if(distance <= cutoff && j < i){
                             PDistCell value(i, distance);
                             DMatrix->addCell(j, value);
                         }
@@ -350,7 +348,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
                         
-                        if(distance < cutoff && j < i){
+                        if(distance <= cutoff && j < i){
                             int iIndex = countTable->get(matrixNames[i]);
                             int jIndex = countTable->get(matrixNames[j]);
                             

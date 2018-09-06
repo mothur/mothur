@@ -150,7 +150,7 @@ void SharedRAbundFloatVectors::print(ostream& output){
 /***********************************************************************/
 string SharedRAbundFloatVectors::getOTUName(int bin){
     try {
-        if (currentLabels.size() < bin) {  }
+        if (currentLabels.size() > bin) {  }
         else { getOTUNames(); }
         return currentLabels[bin];
     }
@@ -162,10 +162,10 @@ string SharedRAbundFloatVectors::getOTUName(int bin){
 /***********************************************************************/
 void SharedRAbundFloatVectors::setOTUName(int bin, string otuName){
     try {
-        if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+        if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
         else {
             getOTUNames(); //fills currentLabels if needed
-            if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+            if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
             else {
                 m->setControl_pressed(true);
                 m->mothurOut("[ERROR]: " + toString(bin) + " bin does not exist\n");

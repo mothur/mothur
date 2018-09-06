@@ -168,7 +168,7 @@ void SharedRAbundVectors::setOTUNames(vector<string> names){
 /***********************************************************************/
 string SharedRAbundVectors::getOTUName(int bin){
     try {
-        if (currentLabels.size() < bin) {  }
+        if (currentLabels.size() > bin) {  }
         else { getOTUNames(); }
         return currentLabels[bin];
     }
@@ -180,10 +180,10 @@ string SharedRAbundVectors::getOTUName(int bin){
 /***********************************************************************/
 void SharedRAbundVectors::setOTUName(int bin, string otuName){
     try {
-        if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+        if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
         else {
             getOTUNames(); //fills currentLabels if needed
-            if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+            if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
             else {
                 m->setControl_pressed(true);
                 m->mothurOut("[ERROR]: " + toString(bin) + " bin does not exist\n");
@@ -231,14 +231,15 @@ int SharedRAbundVectors::push_back(SharedRAbundVector* thisLookup){
     try {
         
         if (numBins == 0) {  numBins = thisLookup->getNumBins();  }
+        else if (numBins != thisLookup->getNumBins()) { m->mothurOut("[ERROR]: Number of bins does not match. Expected " + toString(numBins) + " found " + toString(thisLookup->getNumBins()) + ".\n"); m->setControl_pressed(true); return 0; }
+        
         lookup.push_back(thisLookup);
         sort(lookup.begin(), lookup.end(), compareRAbunds);
         if (label == "") { label = thisLookup->getLabel(); }
         groupNames.clear();
         for (int i = 0; i < lookup.size(); i ++) { groupNames[lookup[i]->getGroup()] = i; }
         
-        return lookup.size();
-        
+        return ((int)lookup.size());
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundVectors", "push_back");
@@ -282,6 +283,7 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
             binLabel = potentialLabel;
         }
         currentLabels.push_back(binLabel);
+        numBins++;
         
         return lookup.size();
     }

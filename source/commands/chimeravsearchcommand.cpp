@@ -1026,7 +1026,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         vector<char*> cPara;
         string vsearchCommand = "";
 #ifdef UNIT_TEST
-        vsearchCommand = "./";
+        //vsearchCommand = "./";
 #endif
         vsearchCommand += vsearchLocation;
         vsearchCommand = "\"" + vsearchCommand + "\" ";

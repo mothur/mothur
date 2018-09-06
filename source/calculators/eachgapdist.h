@@ -28,7 +28,7 @@ public:
 		string seqA = A.getAligned();
 		string seqB = B.getAligned();
 
-		int alignLength = seqA.length();
+		int alignLength = (int)seqA.length();
 		
 		for(int i=0; i<alignLength; i++){
 			if(seqA[i] != '.' || seqB[i] != '.'){

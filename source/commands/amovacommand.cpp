@@ -247,7 +247,7 @@ int AmovaCommand::execute(){
 			
 			for(itA=origGroupSampleMap.begin();itA!=origGroupSampleMap.end();itA++){
 				itB = itA;itB++;
-				for(itB;itB!=origGroupSampleMap.end();itB++){
+                for(;itB!=origGroupSampleMap.end();itB++){
 					
 					map<string, vector<int> > pairwiseGroupSampleMap;
 					pairwiseGroupSampleMap[itA->first] = itA->second;
