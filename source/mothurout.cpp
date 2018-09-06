@@ -53,7 +53,7 @@ void MothurOut::setLogFileName(string filename, bool append)  {
 /*********************************************************************************************/
 void MothurOut::closeLog()  {
 	try {
-        if (buffer != "") { mothurOut(buffer); buffer = "";  }
+        if (buffer != "") { string output = buffer; buffer = ""; mothurOut(output);   }
         if (numErrors != 0) {
             if (!silenceLog) {
                 out << "\n\n************************************************************\n";
@@ -204,6 +204,7 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
             logger() << buffer << endl;
             outputFile << buffer << endl;
         }
+        buffer = "";
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutEndLine");
