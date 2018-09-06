@@ -771,7 +771,7 @@ int GetLineageCommand::readShared(){
         
         bool wroteSomething = false;
         int numSelected = 0;
-        
+        bool printHeaders = true;
         for (int i = 0; i < lookup->getNumBins();) {
             
             if (m->getControl_pressed()) {  delete lookup; return 0; }
@@ -793,7 +793,7 @@ int GetLineageCommand::readShared(){
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-        lookup->print(out);
+        lookup->print(out, printHeaders);
 		out.close();
         
         delete lookup;

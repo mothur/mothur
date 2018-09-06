@@ -54,7 +54,7 @@ private:
 	int getSubSampleRabund();
 	int getSubSampleSabund();
 	int getSubSampleFasta();
-	int processShared(SharedRAbundVectors*&);
+	int processShared(SharedRAbundVectors*&, bool&);
 	int processRabund(RAbundVector*&, ofstream&);
 	int processSabund(SAbundVector*&, ofstream&);
 	int processList(ListVector*&, set<string>&);

@@ -235,7 +235,7 @@ int NormalizeSharedCommand::execute(){
 				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
 			}
 			
-			
+			bool printHeaders = true;
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
@@ -244,7 +244,7 @@ int NormalizeSharedCommand::execute(){
 				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 					
 					m->mothurOut(lookup->getLabel()+"\n"); 
-					normalize(lookup);
+					normalize(lookup, printHeaders);
 					
 					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				}
@@ -256,7 +256,7 @@ int NormalizeSharedCommand::execute(){
 					lookup = input.getSharedRAbundVectors(lastLabel);
 					m->mothurOut(lookup->getLabel()+"\n"); 
 					
-					normalize(lookup);
+					normalize(lookup, printHeaders);
 					
 					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 					
@@ -294,7 +294,7 @@ int NormalizeSharedCommand::execute(){
 				delete lookup;
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()+"\n"); 
-				normalize(lookup);
+				normalize(lookup, printHeaders);
 				delete lookup;
 			}
 			
@@ -325,6 +325,7 @@ int NormalizeSharedCommand::execute(){
 				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
 			}
 			
+            bool printHeaders = true;
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
@@ -334,7 +335,7 @@ int NormalizeSharedCommand::execute(){
 					
 					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
 					
-					normalize(lookupFloat);
+					normalize(lookupFloat, printHeaders);
 					
 					processedLabels.insert(lookupFloat->getLabel());
 					userLabels.erase(lookupFloat->getLabel());
@@ -348,7 +349,7 @@ int NormalizeSharedCommand::execute(){
 					
 					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
 		
-					normalize(lookupFloat);
+					normalize(lookupFloat, printHeaders);
 					
 					processedLabels.insert(lookupFloat->getLabel());
 					userLabels.erase(lookupFloat->getLabel());
@@ -389,7 +390,7 @@ int NormalizeSharedCommand::execute(){
 				
 				m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
 				
-				normalize(lookupFloat);
+				normalize(lookupFloat, printHeaders);
 				
 				delete lookupFloat;
 			}
@@ -420,7 +421,7 @@ int NormalizeSharedCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
+int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp, bool& printHeaders){
 	try {
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
         map<string, string> variables; 
@@ -489,7 +490,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
 				
 		thisLookUp->eliminateZeroOTUS();
-        thisLookUp->print(out);
+        thisLookUp->print(out, printHeaders);
 		out.close();
 		
 		return 0;
@@ -501,7 +502,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp){
 }
 //**********************************************************************************************************************
 
-int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
+int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp, bool& printHeaders){
 	try {
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
         map<string, string> variables; 
@@ -563,7 +564,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp){
 		
 		
         thisLookUp->eliminateZeroOTUS();
-        thisLookUp->print(out);
+        thisLookUp->print(out, printHeaders);
         out.close();
 	
 		return 0;

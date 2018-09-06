@@ -29,7 +29,7 @@ public:
 
 	virtual int size() = 0;
     virtual void clear() = 0;
-	virtual void print(ostream&) = 0;
+	
     virtual RAbundVector getRAbundVector() = 0;
 	virtual SAbundVector getSAbundVector() = 0;
     virtual OrderVector getOrderVector(map<string,int>* hold = NULL) = 0;
@@ -38,6 +38,8 @@ public:
     virtual void print(ostream&, map<string, int>&) {}
     virtual void print(ostream&, bool) { m->mothurOut("[ERROR]: no print function\n"); }
     virtual void printHeaders(ostream&) {};
+    virtual void print(ostream&, bool&) {}
+    virtual void print(ostream&) {}
     
     void setLabel(string l)		{	label = l;			}
     string getLabel()			{	return label;		}

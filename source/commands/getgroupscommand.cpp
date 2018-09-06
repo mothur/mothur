@@ -566,6 +566,7 @@ int GetGroupsCommand::readShared(){
         variables["[extension]"] = util.getExtension(sharedfile);
 		
 		bool wroteSomething = false;
+        bool printHeaders = true;
 		while(lookup != NULL) {
 			
             variables["[tag]"] = lookup->getLabel();
@@ -577,7 +578,7 @@ int GetGroupsCommand::readShared(){
 			
             if (m->getControl_pressed()) { out.close();  util.mothurRemove(outputFileName);  delete lookup; return 0; }
 			
-            lookup->print(out);
+            lookup->print(out, printHeaders);
             wroteSomething = true;
 			
 			//get next line to process

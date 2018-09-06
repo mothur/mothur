@@ -338,7 +338,6 @@ void ClusterDoturCommand::printData(string label, map<string, int>& counts, bool
 		oldRAbund.getSAbundVector().print(cout);
 		
 		oldList.setLabel(label);
-        oldList.setPrintedLabels(ph);
         if(countfile != "") {
             oldList.print(listFile, counts);
         }else {

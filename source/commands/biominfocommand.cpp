@@ -254,6 +254,7 @@ int BiomInfoCommand::createFilesFromBiom() {
         bool atComma = false;
         string line = "";
         string matrixElementType = "";
+        bool printHeaders = true;
         
         while (!in.eof()) { //split file by tags, so each "line" will have something like "id":"/Users/SarahsWork/Desktop/release/final.tx.1.subsample.1.pick.shared-1"
             if (m->getControl_pressed()) { break; }
@@ -441,7 +442,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             SharedRAbundVectors* lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
             lookup->setOTUNames(otuNames);
             m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()+"\n"); 
-            lookup->print(out);
+            lookup->print(out, printHeaders);
             
             if (conTaxonomy.size() != 0) {
                 //sanity check

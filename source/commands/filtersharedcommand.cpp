@@ -476,8 +476,8 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         
         ofstream out;
 		util.openOutputFile(outputFileName, out);
-		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        sharedLookup->print(out);
+		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);  bool printHeaders = true;
+        sharedLookup->print(out, printHeaders);
 		out.close();
         
         m->mothurOut("\nRemoved " + toString(numRemoved) + " OTUs.\n");

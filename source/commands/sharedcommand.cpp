@@ -463,6 +463,7 @@ int SharedCommand::createSharedFromBiom() {
 
         if (m->getControl_pressed()) {  out.close(); util.mothurRemove(filename); return 0; }
 
+        bool printHeaders = true;
         it = fileLines.find("data");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
         else {
@@ -473,7 +474,7 @@ int SharedCommand::createSharedFromBiom() {
             lookup->eliminateZeroOTUS();
 
             m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()+"\n"); 
-            printSharedData(lookup, out);
+            printSharedData(lookup, out, printHeaders);
         }
 
         if (m->getControl_pressed()) {  util.mothurRemove(filename); return 0; }
@@ -802,6 +803,7 @@ int SharedCommand::createSharedFromListGroup() {
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
+        bool printHeaders = true;
     
         while((SharedList != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
             if (m->getControl_pressed()) {
@@ -837,10 +839,10 @@ int SharedCommand::createSharedFromListGroup() {
                     util.openOutputFile(filename, out2);
 
                     lookup->eliminateZeroOTUS();
-                    printSharedData(lookup, out2);
+                    printSharedData(lookup, out2, printHeaders);
                     out2.close();
                 }else {
-                    printSharedData(lookup, out); //prints info to the .shared file
+                    printSharedData(lookup, out, printHeaders); //prints info to the .shared file
                 }
                 delete lookup;
 
@@ -878,10 +880,10 @@ int SharedCommand::createSharedFromListGroup() {
                     util.openOutputFile(filename, out2);
 
                     lookup->eliminateZeroOTUS();
-                    printSharedData(lookup, out2);
+                    printSharedData(lookup, out2, printHeaders);
                     out2.close();
                 }else {
-                    printSharedData(lookup, out); //prints info to the .shared file
+                    printSharedData(lookup, out, printHeaders); //prints info to the .shared file
                 }
                 delete lookup;
 
@@ -936,10 +938,10 @@ int SharedCommand::createSharedFromListGroup() {
                 util.openOutputFile(filename, out2);
 
                 lookup->eliminateZeroOTUS();
-                printSharedData(lookup, out2);
+                printSharedData(lookup, out2, printHeaders);
                 out2.close();
             }else {
-                printSharedData(lookup, out); //prints info to the .shared file
+                printSharedData(lookup, out, printHeaders); //prints info to the .shared file
             }
             delete lookup;
             delete SharedList;
@@ -962,11 +964,11 @@ int SharedCommand::createSharedFromListGroup() {
 	}
 }
 //**********************************************************************************************************************
-void SharedCommand::printSharedData(SharedRAbundVectors*& thislookup, ofstream& out) {
+void SharedCommand::printSharedData(SharedRAbundVectors*& thislookup, ofstream& out, bool& printHeaders) {
 	try {
 
 		if (order.size() == 0) { //user has not specified an order so do aplabetically
-            thislookup->print(out);
+            thislookup->print(out, printHeaders);
 		}else{
 			//create a map from groupName to each sharedrabund
 			map<string, SharedRAbundVector*> myMap;

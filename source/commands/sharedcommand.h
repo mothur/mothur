@@ -40,7 +40,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	void printSharedData(SharedRAbundVectors*&, ofstream&);
+	void printSharedData(SharedRAbundVectors*&, ofstream&, bool&);
 	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
 	int ListGroupSameSeqs(vector<string>&, SharedListVector*);
