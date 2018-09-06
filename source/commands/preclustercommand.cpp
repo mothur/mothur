@@ -16,20 +16,20 @@ vector<string> PreClusterCommand::setParameters(){
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
+    CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pdiffs("diffs", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-        CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
-        CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
-        CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
-        CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
-        CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
-
-        CommandParameter pmethod("method", "String", "", "simple", "", "", "","",false,false); parameters.push_back(pmethod);
+    CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
+    CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
+    CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
+    CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
+    CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
+    CommandParameter palpha("alpha", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(palpha);
+    CommandParameter pmethod("method", "String", "", "simple", "", "", "","",false,false); parameters.push_back(pmethod);
 
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+    CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
 		vector<string> myArray;
@@ -50,14 +50,16 @@ string PreClusterCommand::getHelpString(){
 		helpString += "The pre.cluster command parameters are fasta, name, group, count, method, processors and diffs. The fasta parameter is required. \n";
 		helpString += "The name parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n";
 		helpString += "The group parameter allows you to provide a group file so you can cluster by group. \n";
-        helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
+    helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
-        helpString += "The method parameter allows you to specify the algorithm to use to complete the preclusterign step. Possible methods include simple, tree, unoise, and deblur.  Default=simple.\n";
-        helpString += "The align parameter allows you to specify the alignment align_method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
-        helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
-        helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
-        helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
-        helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
+    helpString += "The method parameter allows you to specify the algorithm to use to complete the preclusterign step. Possible methods include simple, tree, unoise, and deblur.  Default=simple.\n";
+    helpString += "The align parameter allows you to specify the alignment align_method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+    helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
+    helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
+    helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
+    helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
+    helpString += "The alpha parameter allows you to specify the alpha value for the beta formula, which is used in the unoise algorithm. The default is 2.0.\n";
+
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
 		helpString += "Example pre.cluster(fasta=amazon.fasta, diffs=2).\n";
@@ -247,6 +249,10 @@ PreClusterCommand::PreClusterCommand(string option) {
       util.mothurConvert(temp, gapExtend);
       if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
 
+      temp = validParameter.valid(parameters, "alpha");	if (temp == "not found"){	temp = "2.0";			}
+      util.mothurConvert(temp, alpha);
+      if (alpha < 0) { m->mothurOut("[ERROR]: alpha must be positive.\n"); abort=true; }
+
       align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 
       align_method = "unaligned";
@@ -281,7 +287,9 @@ struct seqPNode {
 /************************************************************/
 
 inline bool comparePriorityTopDown(seqPNode* first, seqPNode* second) {
-  if (first->numIdentical > second->numIdentical) { return true;  }
+  if (first->numIdentical > second->numIdentical){
+ 		return true;
+	}
   return false;
 }
 
@@ -295,7 +303,7 @@ struct preClusterData {
   int start, end, count, diffs, length;
   vector<string> groups;
   bool hasCount, hasName;
-  float match, misMatch, gapOpen, gapExtend;
+  float match, misMatch, gapOpen, gapExtend, alpha;
   Utils util;
   vector<string> outputNames;
   map<string, vector<string> > outputTypes;
@@ -323,7 +331,7 @@ struct preClusterData {
     m = MothurOut::getInstance();
   }
 
-  void setVariables(int st, int en, int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx) {
+  void setVariables(int st, int en, int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx, float a) {
     start = st;
     end = en;
     diffs = d;
@@ -334,6 +342,7 @@ struct preClusterData {
     misMatch = misma;
     gapExtend = gpEx;
     gapOpen = gpOp;
+		alpha = a;
     length = 0;
 
     if (align_method == "unaligned") {
@@ -427,7 +436,7 @@ int process(string group, string newMapFile, preClusterData* params){
 
 	          if (params->m->getControl_pressed()) { out.close(); return 0; }
 
-	          if (params->alignSeqs[j]->active & (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet
+	          if (params->alignSeqs[j]->active && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet
 	            //are you within "diff" bases
 	            int mismatch = params->length;
 	            if (params->align_method == "unaligned") {
@@ -459,14 +468,73 @@ int process(string group, string newMapFile, preClusterData* params){
 		      out << chunk;
 
 		     }//end if active i
-	      if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
+	      if(i % 100 == 0)	{
+					params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");
+				}
 	    }
+ 		} else if(params->pc_method == "unoise") {
 
-		  out.close();
+			int maxDiffs = int((log2(originalCount[0])-1) / params->alpha + 1);
 
-		  if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
+			vector<double> beta(maxDiffs, 0);
+			for(int i=0;i<beta.size();i++){
+				beta[i] = pow(0.5, params->alpha * i + 1.0);
+			}
 
+			params->diffs = maxDiffs;
+
+	    for (int i = 0; i < numSeqs; i++) {
+
+	      if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
+
+	        string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+
+	        //try to merge it with all smaller seqs
+	        for (int j = i+1; j < numSeqs; j++) {
+
+	          if (params->m->getControl_pressed()) { out.close(); return 0; }
+
+	          if (params->alignSeqs[j]->active && originalCount[j] < originalCount[i]) {  //this sequence has not been merged yet
+
+	            int mismatch = params->length;
+							double skew = (double)originalCount[j]/(double)originalCount[i];
+
+	            if (params->align_method == "unaligned") {
+								mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
+	 																				params->alignSeqs[j]->seq.getAligned(), params);
+							} else {
+								mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq,
+																					params->alignSeqs[j]->filteredSeq, params);
+							}
+
+	            if (mismatch <= maxDiffs && skew <= beta[mismatch]) { //merge
+	              params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
+	              params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
+
+	              chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(params->alignSeqs[j]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
+
+	              params->alignSeqs[j]->active = 0;
+	              params->alignSeqs[j]->numIdentical = 0;
+	              params->alignSeqs[j]->diffs = mismatch;
+	              count++;
+	            }
+	          }//end if j active
+	        }//end for loop j
+
+		      //remove from active list
+		      params->alignSeqs[i]->active = 0;
+
+		      out << chunk;
+
+		    }//end if active i
+	      if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
+
+	    }
 		}
+
+	  out.close();
+
+	  if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
 
 		return count;
   }
@@ -555,7 +623,6 @@ vector<seqPNode*> readFASTA(CountTable ct, preClusterData* params, long long& nu
 
         //sort seqs by number of identical seqs
         sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);
-
         num = alignSeqs.size();
 
         return alignSeqs;
@@ -658,7 +725,7 @@ int PreClusterCommand::execute(){
             if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
 
             preClusterData* params = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, NULL, NULL, newMapFile, nullVector);
-            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend);
+            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha);
 
             //reads fasta file and return number of seqs
             long long numSeqs = 0; params->alignSeqs = readFASTA(ct, params, numSeqs); //fills alignSeqs and makes all seqs active
@@ -988,7 +1055,7 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
             OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 
             preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadFastaWriter, threadNameWriter, newMFile, groups);
-            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend);
+            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new thread(driverGroups, dataBundle));
@@ -998,7 +1065,7 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
         OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 
         preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadFastaWriter, threadNameWriter, newMFile, groups);
-        dataBundle->setVariables(lines[0].start, lines[0].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend);
+        dataBundle->setVariables(lines[0].start, lines[0].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha);
 
         driverGroups(dataBundle);
 

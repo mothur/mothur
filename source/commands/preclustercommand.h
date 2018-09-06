@@ -46,15 +46,15 @@ public:
 	void help() { m->mothurOut(getHelpString()); }
 
 private:
-    CountTable ct;
+  CountTable ct;
 	int diffs, length, processors;
-    float match, misMatch, gapOpen, gapExtend;
+  float match, misMatch, gapOpen, gapExtend, alpha;
 	bool abort, bygroup;
 	string fastafile, namefile, outputDir, groupfile, countfile, pc_method, align_method, align;
 	vector<string> outputNames;
 
 	void createProcessesGroups(string, string, string);
-    int mergeGroupCounts(string, string, string);
+  int mergeGroupCounts(string, string, string);
 };
 
 
