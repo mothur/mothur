@@ -26,6 +26,7 @@ vector<string> PreClusterCommand::setParameters(){
     CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
     CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
     CommandParameter palpha("alpha", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(palpha);
+    CommandParameter pdelta("delta", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(pdelta);
     CommandParameter pmethod("method", "String", "", "simple", "", "", "","",false,false); parameters.push_back(pmethod);
 
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -59,6 +60,7 @@ string PreClusterCommand::getHelpString(){
     helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
     helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
     helpString += "The alpha parameter allows you to specify the alpha value for the beta formula, which is used in the unoise algorithm. The default is 2.0.\n";
+    helpString += "The delta parameter allows you to specify the delta value, which describes the amount of amplification between rounds of PCR. It is used in the tree algorithm. The default is 2.0.\n";
 
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
@@ -253,6 +255,10 @@ PreClusterCommand::PreClusterCommand(string option) {
       util.mothurConvert(temp, alpha);
       if (alpha < 0) { m->mothurOut("[ERROR]: alpha must be positive.\n"); abort=true; }
 
+      temp = validParameter.valid(parameters, "delta");	if (temp == "not found"){	temp = "2.0";			}
+      util.mothurConvert(temp, delta);
+      if (delta < 0) { m->mothurOut("[ERROR]: delta must be positive.\n"); abort=true; }
+
       align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 
       align_method = "unaligned";
@@ -303,7 +309,7 @@ struct preClusterData {
   int start, end, count, diffs, length;
   vector<string> groups;
   bool hasCount, hasName;
-  float match, misMatch, gapOpen, gapExtend, alpha;
+  float match, misMatch, gapOpen, gapExtend, alpha, delta;
   Utils util;
   vector<string> outputNames;
   map<string, vector<string> > outputTypes;
@@ -331,7 +337,7 @@ struct preClusterData {
     m = MothurOut::getInstance();
   }
 
-  void setVariables(int st, int en, int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx, float a) {
+  void setVariables(int st, int en, int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx, float a, float del) {
     start = st;
     end = en;
     diffs = d;
@@ -343,6 +349,7 @@ struct preClusterData {
     gapExtend = gpEx;
     gapOpen = gpOp;
 		alpha = a;
+		delta = del;
     length = 0;
 
     if (align_method == "unaligned") {
@@ -385,7 +392,7 @@ int calcMisMatches(string seq1, string seq2, preClusterData* params){
       //count number of diffs
       for (int i = startPos; i <= endPos; i++) {
         if (seq2[i] != seq1[i]) { numBad++; }
-        if (numBad > params->diffs) { return params->length;  } //to far to cluster
+        if (numBad > params->diffs) { return params->length;  } //too far to cluster
       }
 
     } else {
@@ -393,7 +400,7 @@ int calcMisMatches(string seq1, string seq2, preClusterData* params){
       for (int i = 0; i < seq1.length(); i++) {
         //do they match
         if (seq1[i] != seq2[i]) { numBad++; }
-        if (numBad > params->diffs) { return params->length;  } //to far to cluster
+        if (numBad > params->diffs) { return params->length;  } //too far to cluster
       }
     }
     return numBad;
@@ -414,12 +421,9 @@ int process(string group, string newMapFile, preClusterData* params){
     int count = 0;
     long long numSeqs = params->alignSeqs.size();
 
-    map<int, string> mapFile;
-    map<int, int> originalCount;
-    map<int, int>::iterator itCount;
+    vector<int> originalCount(numSeqs);
 
     for (int i = 0; i < numSeqs; i++) {
-			mapFile[i] = "";
 			originalCount[i] = params->alignSeqs[i]->numIdentical;
 		}
 
@@ -429,7 +433,7 @@ int process(string group, string newMapFile, preClusterData* params){
 
 	      if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
 
-	        string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+	        string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
 
 	        //try to merge it with all smaller seqs
 	        for (int j = i+1; j < numSeqs; j++) {
@@ -452,7 +456,7 @@ int process(string group, string newMapFile, preClusterData* params){
 	              params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
 	              params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
 
-	              chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(params->alignSeqs[j]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
+	              chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(originalCount[j]) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
 
 	              params->alignSeqs[j]->active = 0;
 	              params->alignSeqs[j]->numIdentical = 0;
@@ -472,6 +476,9 @@ int process(string group, string newMapFile, preClusterData* params){
 					params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");
 				}
 	    }
+
+			if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
+
  		} else if(params->pc_method == "unoise") {
 
 			int maxDiffs = int((log2(originalCount[0])-1) / params->alpha + 1);
@@ -487,7 +494,7 @@ int process(string group, string newMapFile, preClusterData* params){
 
 	      if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
 
-	        string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(params->alignSeqs[i]->numIdentical) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+	        string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
 
 	        //try to merge it with all smaller seqs
 	        for (int j = i+1; j < numSeqs; j++) {
@@ -511,7 +518,7 @@ int process(string group, string newMapFile, preClusterData* params){
 	              params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
 	              params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
 
-	              chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(params->alignSeqs[j]->numIdentical) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
+	              chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(originalCount[j]) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
 
 	              params->alignSeqs[j]->active = 0;
 	              params->alignSeqs[j]->numIdentical = 0;
@@ -530,11 +537,150 @@ int process(string group, string newMapFile, preClusterData* params){
 	      if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
 
 	    }
+
+	  	if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + 	toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
+
+		} else if(params->pc_method == "tree") {
+
+			if(params->delta > 1){
+				params->diffs = (int)(log(params->alignSeqs[0]->numIdentical)/log(params->delta) + 1);
+			} else {
+				params->diffs = params->length;
+			}
+
+			params->m->mothurOutJustToScreen("Determining which sequences can be merged...");
+			cout.flush();
+
+			vector<vector<bool> > mergable(numSeqs);
+			vector<vector<int> > mismatches(numSeqs);
+
+			mergable[0].resize(numSeqs, FALSE);
+			mismatches[0].resize(numSeqs, 1000);
+
+	    for (int i = 1; i < numSeqs; i++) {
+				mergable[i].resize(numSeqs, FALSE);
+				mismatches[i].resize(numSeqs, 1000);
+
+        for (int j = 0; j < i; j++) {
+
+          if (params->m->getControl_pressed()) { out.close(); return 0; }
+
+          int mismatch = params->length;
+
+					if(originalCount[j] > originalCount[i] * params->delta){
+	          if (params->align_method == "unaligned") {
+							mismatches[i][j] = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
+																					params->alignSeqs[j]->seq.getAligned(), params);
+						} else {
+							mismatches[i][j] = calcMisMatches(params->alignSeqs[i]->filteredSeq,
+																				params->alignSeqs[j]->filteredSeq, params);
+						}
+
+						mergable[i][j] = (mismatches[i][j] == 1);
+					}
+        }
+      }
+			params->m->mothurOutJustToScreen(" done\n");
+
+			vector<int> cluster(numSeqs, -1);
+
+			params->m->mothurOutJustToScreen("Clusterng sequences...");
+			cout.flush();
+
+
+			for(int i=0;i<numSeqs;i++){
+
+        if (params->m->getControl_pressed()) { out.close(); return 0; }
+
+				vector<int> indices_to_merge;
+
+				for(int j=0;j<numSeqs;j++){
+					if(mergable[j][i] == TRUE){	indices_to_merge.push_back(j); }
+				}
+
+				while(indices_to_merge.size() != 0){
+					for(int j=0;j<numSeqs;j++){
+						bool to_merge = mergable[j][i];
+
+						if(!to_merge){
+							for(int k=0;k<indices_to_merge.size();k++){
+
+								if(mergable[j][indices_to_merge[k]]){
+									to_merge = TRUE;
+									break;
+								}
+
+							}
+						}
+						mergable[i][j] = to_merge;
+						mergable[j][i] = mergable[i][j];
+
+						if (params->m->getControl_pressed()) { out.close(); return 0; }
+					}
+
+					cluster[i] = i;
+
+					for(int k=0;k<indices_to_merge.size();k++){
+						cluster[indices_to_merge[k]] = i;
+
+						for(int l=0;l<numSeqs;l++){
+							mergable[indices_to_merge[k]][l] = FALSE;
+							mergable[l][indices_to_merge[k]] = FALSE;
+						}
+
+		        if (params->m->getControl_pressed()) { out.close(); return 0; }
+					}
+					mergable[i][i] = FALSE;
+
+					indices_to_merge.clear();
+
+					for(int j=0;j<numSeqs;j++){
+						if(mergable[j][i] == TRUE){	indices_to_merge.push_back(j); }
+					}
+
+					if (params->m->getControl_pressed()) { out.close(); return 0; }
+				}
+			}
+
+			params->m->mothurOutJustToScreen("done.\n");
+
+			vector<string> chunk(numSeqs, "");
+
+			for(int i=0;i<numSeqs;i++){
+
+				if(i == cluster[i] || cluster[i] == -1){
+
+	        chunk[i] = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+
+				} else {
+
+	        params->alignSeqs[cluster[i]]->names += ',' + params->alignSeqs[i]->names;
+	        params->alignSeqs[cluster[i]]->numIdentical += params->alignSeqs[i]->numIdentical;
+
+        	chunk[cluster[i]] += params->alignSeqs[cluster[i]]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(mismatches[i][cluster[i]]) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+
+        	params->alignSeqs[i]->active = 0;
+        	params->alignSeqs[i]->numIdentical = 0;
+
+        	count++;
+
+				}
+			}
+
+			for(int i=0;i<numSeqs;i++){
+				if(chunk[i] != ""){
+					out << chunk[i];
+				}
+			}
+
+	  } else {
+
+			cout << "fail!\n";
+
 		}
 
 	  out.close();
 
-	  if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
 
 		return count;
   }
@@ -725,7 +871,7 @@ int PreClusterCommand::execute(){
             if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
 
             preClusterData* params = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, NULL, NULL, newMapFile, nullVector);
-            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha);
+            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta);
 
             //reads fasta file and return number of seqs
             long long numSeqs = 0; params->alignSeqs = readFASTA(ct, params, numSeqs); //fills alignSeqs and makes all seqs active
@@ -1055,7 +1201,7 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
             OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 
             preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadFastaWriter, threadNameWriter, newMFile, groups);
-            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha);
+            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new thread(driverGroups, dataBundle));
@@ -1065,7 +1211,7 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
         OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 
         preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadFastaWriter, threadNameWriter, newMFile, groups);
-        dataBundle->setVariables(lines[0].start, lines[0].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha);
+        dataBundle->setVariables(lines[0].start, lines[0].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta);
 
         driverGroups(dataBundle);
 

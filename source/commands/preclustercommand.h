@@ -48,7 +48,7 @@ public:
 private:
   CountTable ct;
 	int diffs, length, processors;
-  float match, misMatch, gapOpen, gapExtend, alpha;
+  float match, misMatch, gapOpen, gapExtend, alpha, delta;
 	bool abort, bygroup;
 	string fastafile, namefile, outputDir, groupfile, countfile, pc_method, align_method, align;
 	vector<string> outputNames;
