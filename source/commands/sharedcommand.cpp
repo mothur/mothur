@@ -43,7 +43,7 @@ vector<string> SharedCommand::setParameters(){
 string SharedCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The make.shared command reads a list and group file or a biom file and creates a shared file. If a list and group are provided a rabund file is created for each group.\n";
+		helpString += "The make.shared command reads a list and group / count file or a biom file, or simply a count file and creates a shared file. If a list and group are provided a rabund file is created for each group.\n";
 		helpString += "The make.shared command parameters are list, group, biom, groups, count and label. list and group or count are required unless a current file is available or you provide a biom file.\n";
         helpString += "The count parameter allows you to provide a count file containing the group info for the list file.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include, group names should be separated by dashes. ex. groups=A-B-C. Default is all groups in your groupfile.\n";
@@ -192,17 +192,21 @@ SharedCommand::SharedCommand(string option)  {
                  if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting."); m->mothurOutEndLine(); abort=true; }
              }
 
-            if ((biomfile == "") && (listfile == "")) {
+            if ((biomfile == "") && (listfile == "") && (countfile == "")) { //you must provide at least one of the following
 				//is there are current file available for either of these?
-				//give priority to list, then biom
+				//give priority to list, then biom, then count
 				listfile = current->getListFile();
 				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else {
 					biomfile = current->getBiomFile();
-					if (biomfile != "") {  m->mothurOut("Using " + biomfile + " as input file for the biom parameter."); m->mothurOutEndLine(); }
+                    if (biomfile != "") {  m->mothurOut("Using " + biomfile + " as input file for the biom parameter.\n"); }
 					else {
-						m->mothurOut("No valid current files. You must provide a list or biom file before you can use the make.shared command."); m->mothurOutEndLine();
-						abort = true;
+                        countfile = current->getCountFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
+                        else {
+                            m->mothurOut("[ERROR]: No valid current files. You must provide a list or biom or count file before you can use the make.shared command.\n");  abort = true;
+                        }
+
 					}
 				}
 			}
@@ -216,7 +220,7 @@ SharedCommand::SharedCommand(string option)  {
 						countfile = current->getCountFile();
                         if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
                         else {
-                            m->mothurOut("You need to provide a groupfile or countfile if you are going to use the list format."); m->mothurOutEndLine();
+                            m->mothurOut("[ERROR]: You need to provide a groupfile or countfile if you are going to use the list format."); m->mothurOutEndLine();
                             abort = true;
                         }
 					}
@@ -240,6 +244,12 @@ SharedCommand::SharedCommand(string option)  {
 				 if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
 				 else { allLines = 1;  }
 			 }
+            
+            if ((listfile == "") && (biomfile == "") && (countfile != "")) { //building a shared file from a count file, require label
+                if (labels.size() == 0) {
+                    m->mothurOut("[ERROR]: You must provide a label when converting a count file to a shared file, please correct.\n");  abort = true;
+                }
+            }
 		}
 
 	}
@@ -255,8 +265,9 @@ int SharedCommand::execute(){
 
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
-        if (listfile != "") {  createSharedFromListGroup();  }
-        else {   createSharedFromBiom();  }
+        if (listfile != "")                                                 {  createSharedFromListGroup();  }
+        else if (biomfile != "")                                            {  createSharedFromBiom();       }
+        else if ((listfile == "") && (countfile != ""))                     {  createSharedFromCount();      }
 
         if (m->getControl_pressed()) {
 			for (int i = 0; i < outputNames.size(); i++) {
@@ -285,6 +296,37 @@ int SharedCommand::execute(){
 		m->errorOut(e, "SharedCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int SharedCommand::createSharedFromCount() {
+    try {
+        //getting output filename
+        string filename = countfile;
+        if (outputDir == "") { outputDir += util.hasPath(filename); }
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+        filename = getOutputFileName("shared",variables);
+        outputNames.push_back(filename); outputTypes["shared"].push_back(filename);
+        
+        ofstream out; bool printHeaders = true;
+        util.openOutputFile(filename, out);
+        
+        CountTable ct;  ct.readTable(countfile, true, false);
+        
+        SharedRAbundVectors* lookup = ct.getShared(Groups);
+        lookup->setLabels(*labels.begin());
+        lookup->print(out, printHeaders);
+        
+        out.close();
+        delete lookup;
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedCommand", "createSharedFromCount");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int SharedCommand::createSharedFromBiom() {

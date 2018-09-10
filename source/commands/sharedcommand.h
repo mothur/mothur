@@ -46,6 +46,7 @@ private:
 	int ListGroupSameSeqs(vector<string>&, SharedListVector*);
     int createSharedFromListGroup();
     int createSharedFromBiom();
+    int createSharedFromCount();
     string getTag(string&);
     vector<string> readRows(string, int&);
     int getDims(string, int&, int&);

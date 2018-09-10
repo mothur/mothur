@@ -40,6 +40,7 @@
 #include "listvector.hpp"
 #include "groupmap.h"
 #include "sequence.hpp"
+#include "sharedrabundvectors.hpp"
 
 class CountTable {
     
@@ -92,6 +93,8 @@ class CountTable {
         vector<string> getNamesOfSeqs(string);
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
         ListVector getListVector();
+        SharedRAbundVectors* getShared();
+        SharedRAbundVectors* getShared(vector<string>); //set of groups selected
         map<string, int> getNameMap();  //sequenceName -> total number of sequences it represents
     
     private:

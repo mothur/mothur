@@ -257,11 +257,14 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
             
             //find label prefix
             string prefix = "Otu";
-            if (currentLabels[currentLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
+            if (currentLabels.size() != 0) {
+                if (currentLabels[currentLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
             
-            string tempLabel = currentLabels[currentLabels.size()-1];
-            string simpleLastLabel = util.getSimpleLabel(tempLabel);
-            util.mothurConvert(simpleLastLabel, otuNum); otuNum++;
+                string tempLabel = currentLabels[currentLabels.size()-1];
+                string simpleLastLabel = util.getSimpleLabel(tempLabel);
+                util.mothurConvert(simpleLastLabel, otuNum); otuNum++;
+            }
+            
             string potentialLabel = toString(otuNum);
             
             while (notDone) {

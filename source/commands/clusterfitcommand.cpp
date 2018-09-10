@@ -793,7 +793,7 @@ string ClusterFitCommand::runSensSpec(string listFileName, string distFName, str
                 string accnosFileName = filenames["accnos"][0];
                 
                 inputString = "column=" + thisDistFile + ", accnos=" + accnosFileName;
-                m->mothurOut("/n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
+                m->mothurOut("\n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
                 m->mothurOut("Running command: get.dists(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 
