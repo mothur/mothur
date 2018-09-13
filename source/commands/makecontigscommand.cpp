@@ -2187,7 +2187,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         }
         long long num = groupDataBundle->count;
         badNames.insert(dataBundle->badNames.begin(), dataBundle->badNames.end());
-        groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
+        groupMap.insert(groupDataBundle->bundle->groupMap.begin(), groupDataBundle->bundle->groupMap.end());
         for (map<string, int>::iterator it = dataBundle->groupCounts.begin(); it != dataBundle->groupCounts.end(); it++) {
             map<string, int>::iterator itMine = groupCounts.find(it->first);
             if (itMine != groupCounts.end()) { itMine->second += it->second; }
