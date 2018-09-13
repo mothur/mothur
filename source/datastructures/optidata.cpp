@@ -76,9 +76,8 @@ map<string, long long> OptiData::getNameIndexMap() {
         map<string, long long> nameIndexes;
         for (int i = 0; i < nameMap.size(); i++) {
             vector<string> thisBinsSeqs; util.splitAtComma(nameMap[i], thisBinsSeqs);
-            if (i < closeness.size()) {  nameIndexes[thisBinsSeqs[0]] = i;  }
+            if (i < closeness.size()) { nameIndexes[thisBinsSeqs[0]] = i;  }
         }
-        
         return nameIndexes;
     }
     catch(exception& e) {

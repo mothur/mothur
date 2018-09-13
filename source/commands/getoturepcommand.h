@@ -20,6 +20,7 @@
 #include "optimatrix.h"
 #include "nameassignment.hpp"
 #include "countseqscommand.h"
+#include "getseqscommand.h"
 
 typedef map<int, float> SeqMap;
 

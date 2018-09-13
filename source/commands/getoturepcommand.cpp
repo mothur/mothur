@@ -392,29 +392,52 @@ int GetOTURepCommand::execute(){
 		int error;
 		list = NULL;
         
-        if ((namefile != "") && (groupfile != "")) { //create count file for simplicity
-            current->setMothurCalling(true);
-            
-            string inputString = "name=" + namefile + ", group=" + groupfile;
-            
-            m->mothurOut("/nRunning command: count.seqs(" + inputString + ")\n");
-            current->setMothurCalling(true);
-            
-            Command* countSeqsCommand = new CountSeqsCommand(inputString);
-            countSeqsCommand->execute();
-            
-            countfile = countSeqsCommand->getOutputFiles()["count"][0];
-            namefile = ""; groupfile = "";
-            
-            delete countSeqsCommand;
-            current->setMothurCalling(false);
-            
-            current->setCountFile(countfile);
-            ct.readTable(countfile, true, false);
-            if (ct.hasGroupInfo()) { hasGroups = true; }  
+        if (method == "distance") {
+            if ((namefile != "") && (groupfile != "")) { //create count file for simplicity
+                current->setMothurCalling(true);
+                m->mothurOut("/******************************************/\n");
+                string inputString = "name=" + namefile + ", group=" + groupfile;
+                
+                m->mothurOut("/nRunning command: count.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* countSeqsCommand = new CountSeqsCommand(inputString);
+                countSeqsCommand->execute();
+                
+                countfile = countSeqsCommand->getOutputFiles()["count"][0];
+                namefile = ""; groupfile = "";
+                
+                delete countSeqsCommand;
+                
+                current->setCountFile(countfile);
+                ct.readTable(countfile, true, false);
+                if (ct.hasGroupInfo()) { hasGroups = true; }
+                
+                ofstream out;
+                util.openOutputFile("temp.accnos", out); vector<string> uniqueNames = ct.getNamesOfSeqs();
+                for (int i = 0; i < uniqueNames.size(); i++) { out << uniqueNames[i] << endl; } out.close();
+                
+                inputString = "list=" + listfile + ", accnos=temp.accnos";
+                
+                m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* getSeqsCommand = new GetSeqsCommand(inputString);
+                getSeqsCommand->execute();
+                
+                string templistfile = getSeqsCommand->getOutputFiles()["list"][0];
+                string newName = util.getRootName(listfile) + "unique.list";
+                util.renameFile(templistfile, newName);  listfile = newName;
+                namefile = ""; groupfile = ""; util.mothurRemove("temp.accnos");
+                
+                delete getSeqsCommand;
+                current->setMothurCalling(false);
+                
+                m->mothurOut("/******************************************/\n");
+            }
+            readDist();
         }
-        
-        if (method=="distance") { readDist(); }
+       
         if (namefile != "") { nameMap = util.readNames(namefile); }
         
         if (m->getControl_pressed()) { return 0; }
@@ -707,12 +730,12 @@ string GetOTURepCommand::findRep(vector<string> names, string group) {
                             }
                             for (int j = 1; j < numRep; j++) { binTranslated.push_back(matrixIndex); } //inflate redundants
                         }else {
-                            if (namefile == "") { binTranslated.push_back(itNameIndex->second);  } //will be unique and in matrix, possible rep
+                            if (namefile == "") { binTranslated.push_back(matrixIndex);  } //will be unique and in matrix, possible rep
                             else {//name file, no group because if group file was present we could be usingthe count file
                                 map<string, int>::iterator itNameFile = nameMap.find(names[i]);
                                 
                                 if (itNameFile == nameMap.end()) { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct.\n");  m->setControl_pressed(true); }
-                                else{ binTranslated.push_back(itNameIndex->second); }
+                                else{ binTranslated.push_back(matrixIndex); }
                             }
                         }
                     }
