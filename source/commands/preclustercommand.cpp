@@ -27,7 +27,12 @@ vector<string> PreClusterCommand::setParameters(){
     CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
     CommandParameter palpha("alpha", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(palpha);
     CommandParameter pdelta("delta", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(pdelta);
-    CommandParameter pmethod("method", "String", "", "simple", "", "", "","",false,false); parameters.push_back(pmethod);
+    CommandParameter pmethod("method", "Multiple", "simple-unoise-tree-deblur", "simple", "", "", "","",false,false); parameters.push_back(pmethod);
+
+    CommandParameter perror_rate("error_rate", "Number", "", "0.005", "", "", "","",false,false); parameters.push_back(perror_rate);
+    CommandParameter pindel_prob("indel_prob", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(pindel_prob);
+    CommandParameter pmax_indels("max_indels", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pmax_indels);
+    CommandParameter perror_dist("error_dist", "String", "", "1-0.06-0.02-0.02-0.01-0.005-0.005-0.005-0.001-0.001-0.001-0.0005", "", "", "","",false,false); parameters.push_back(perror_dist);
 
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
     CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -61,6 +66,10 @@ string PreClusterCommand::getHelpString(){
     helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
     helpString += "The alpha parameter allows you to specify the alpha value for the beta formula, which is used in the unoise algorithm. The default is 2.0.\n";
     helpString += "The delta parameter allows you to specify the delta value, which describes the amount of amplification between rounds of PCR. It is used in the tree algorithm. The default is 2.0.\n";
+		helpString += "The error_rate parameter is used with the deblur algorithm and is the expected mean error rate, as a fraction, of the data going into this command.\n";
+		helpString += "The indel_prob parameter is used with the deblur algorithm and is the expected fraction of sequences that have an insertion or deletion, of the data going into this command.\n";
+		helpString += "The max_indels parameter is used with the deblur algorithm and is the maximum number of insertions or deletions you expect to be in the data going into this command.\n";
+		helpString += "The error_dist parameter is used with the deblur algorithm and is the fraction of sequences you expect to have 0, 1, 2, 3, etc. errors. Should start with 1 and be separated by hyphens (e.g. 1-0.06-0.02-0.02-0.01-0.005-0.005-0.005-0.001-0.001-0.001-0.0005). Alternatively, you can use error_dist=binomial and the command will determine the distribution for you\n";
 
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
@@ -259,6 +268,37 @@ PreClusterCommand::PreClusterCommand(string option) {
       util.mothurConvert(temp, delta);
       if (delta < 0) { m->mothurOut("[ERROR]: delta must be positive.\n"); abort=true; }
 
+      temp = validParameter.valid(parameters, "error_dist");
+			if (temp == "not found"){
+				error_dist = {1, 0.06, 0.02, 0.02, 0.01, 0.005, 0.005, 0.005, 0.001, 0.001, 0.001, 0.0005};
+			} else if(temp == "binomial"){
+				error_dist = {-100};
+			} else {
+				string probability;
+				istringstream probabilityStream(temp);
+				while (getline(probabilityStream, probability, '-')){
+					error_dist.push_back(stof(probability));
+				}
+			}
+
+				// vector<double>
+
+      temp = validParameter.valid(parameters, "error_rate");	if (temp == "not found"){	temp = "0.005";			}
+      util.mothurConvert(temp, error_rate);
+      if (error_rate < 0) { m->mothurOut("[ERROR]: error_rate must be positive.\n"); abort=true; }
+      else if (error_rate > 1) { m->mothurOut("[ERROR]: error_rate is a fraction and should be less than 1.\n"); abort=true; }
+
+      temp = validParameter.valid(parameters, "indel_prob");	if (temp == "not found"){	temp = "0.01";			}
+      util.mothurConvert(temp, indel_prob);
+      if (indel_prob < 0) { m->mothurOut("[ERROR]: indel_prob must be positive.\n"); abort=true; }
+      else if (indel_prob > 1) { m->mothurOut("[ERROR]: indel_prob is a fraction and should be less than 1.\n"); abort=true; }
+
+      temp = validParameter.valid(parameters, "max_indels");	if (temp == "not found"){	temp = "3";			}
+      util.mothurConvert(temp, max_indels);
+      if (indel_prob < 0) { m->mothurOut("[ERROR]: max_indels must be positive.\n"); abort=true; }
+
+
+
       align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 
       align_method = "unaligned";
@@ -309,12 +349,17 @@ struct preClusterData {
   int start, end, count, diffs, length;
   vector<string> groups;
   bool hasCount, hasName;
-  float match, misMatch, gapOpen, gapExtend, alpha, delta;
+  float match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels;
   Utils util;
+	vector<float> error_dist;
   vector<string> outputNames;
   map<string, vector<string> > outputTypes;
   vector<seqPNode*> alignSeqs; //maps the number of identical seqs to a sequence
   Alignment* alignment;
+
+				// double error_rate = 0.005;error_rate
+				// double indel_prob = 0.01;indel_prob
+				// double max_indels = 3;max_indels
 
   ~preClusterData() { if (alignment != NULL) { delete alignment; } }
 
@@ -337,7 +382,7 @@ struct preClusterData {
     m = MothurOut::getInstance();
   }
 
-  void setVariables(int st, int en, int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx, float a, float del) {
+  void setVariables(int st, int en, int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx, float a, float del, float me, float ip, float mi, vector<float> ed) {
     start = st;
     end = en;
     diffs = d;
@@ -350,6 +395,10 @@ struct preClusterData {
     gapOpen = gpOp;
 		alpha = a;
 		delta = del;
+		error_rate = me;
+		indel_prob = ip;
+		max_indels = mi;
+		error_dist = ed;
     length = 0;
 
     if (align_method == "unaligned") {
@@ -369,6 +418,7 @@ struct preClusterData {
 };
 
 /**************************************************************************************************/
+
 int calcMisMatches(string seq1, string seq2, preClusterData* params){
   try {
     int numBad = 0;
@@ -410,13 +460,69 @@ int calcMisMatches(string seq1, string seq2, preClusterData* params){
       exit(1);
   }
 }
+
 /**************************************************************************************************/
+
+vector<int> calcMisMatchesIndels(string seq1, string seq2, preClusterData* params){
+  try {
+
+
+    int numSubstitutions = 0;
+		int numInDels = 0;
+
+    if (params->align_method == "unaligned") {
+      //align to eachother
+      Sequence seqI("seq1", seq1);
+      Sequence seqJ("seq2", seq2);
+
+      //align seq2 to seq1 - less abundant to more abundant
+      params->alignment->align(seqJ.getUnaligned(), seqI.getUnaligned());
+      seq2 = params->alignment->getSeqAAln();
+      seq1 = params->alignment->getSeqBAln();
+
+      //chop gap ends
+      int startPos = 0;
+      int endPos = seq2.length()-1;
+      for (int i = 0; i < seq2.length(); i++)		{  if (isalpha(seq2[i])) { startPos = i; break; } }
+      for (int i = seq2.length()-1; i >= 0; i--){  if (isalpha(seq2[i])) { endPos = i; break;	} 	}
+
+      //count number of diffs
+      for (int i = startPos; i <= endPos; i++) {
+
+        if (seq2[i] != seq1[i] && (isalpha(seq1[i]) && isalpha(seq2[i]))) { numSubstitutions++; }
+				else if(seq2[i] != seq1[i] && (isalpha(seq1[i]) || isalpha(seq2[i]))){ numInDels++;	}
+
+        if (numSubstitutions > params->diffs) { numSubstitutions = params->length; break; }
+      }
+
+    } else {
+      //count diffs
+      for (int i = 0; i < seq1.length(); i++) {
+        //do they match
+        if (seq2[i] != seq1[i] && (isalpha(seq1[i]) && isalpha(seq2[i]))) { numSubstitutions++; }
+				else if(seq2[i] != seq1[i] && (isalpha(seq1[i]) || isalpha(seq2[i]))){ numInDels++;	}
+
+        if (numSubstitutions > params->diffs) { numSubstitutions = params->length; break; }
+      }
+    }
+    return vector<int>{numSubstitutions, numInDels};
+  }
+  catch(exception& e) {
+      params->m->errorOut(e, "PreClusterCommand", "calcMisMatchesIndels");
+      exit(1);
+  }
+}
+
+/**************************************************************************************************/
+
 int process(string group, string newMapFile, preClusterData* params){
   try {
     ofstream out;
-    params->util.openOutputFile(newMapFile, out);
 
-		out << "ideal_seq\terror_seq\tabundance\tdiffs\tsequence" << endl;
+		if(params->pc_method != "deblur"){
+	    params->util.openOutputFile(newMapFile, out);
+			out << "ideal_seq\terror_seq\tabundance\tdiffs\tsequence" << endl;
+		}
 
     int count = 0;
     long long numSeqs = params->alignSeqs.size();
@@ -673,14 +779,118 @@ int process(string group, string newMapFile, preClusterData* params){
 				}
 			}
 
-	  } else {
+	  } else if(params->pc_method == "deblur") {
+
+			vector<int> seq_lengths(numSeqs, 0);
+			vector<double> weights(numSeqs, 0);
+			for(int i=0;i<numSeqs;i++){
+				seq_lengths[i] = params->alignSeqs[i]->seq.getNumBases();
+				weights[i] = (double)params->alignSeqs[i]->numIdentical;
+			}
+			sort(seq_lengths.begin(), seq_lengths.end());
+			int median_length = seq_lengths[floor(0.5*numSeqs)];
+
+			if(params->error_dist[0] == -100){ //construct the binomial distribution
+
+				params->error_dist.clear();
+
+				for(int i=0;i<100;i++){
+
+					double choose = 1;
+					double k = 1;
+
+					for(int j=1;j<=i;j++){
+						choose *= (median_length - j + 1);
+						k *= j;
+					}
+					choose = choose/k;
+
+					double a = pow(params->error_rate, i);
+					double b = pow(1 - params->error_rate, median_length - i);
+
+					if(a != 0 && b != 0){
+						params->error_dist.push_back(choose * a * b);
+						if(params->error_dist[i] < 0.1 / weights[0]){ break;	}
+					} else {
+						break;
+					}
+				}
+				params->error_dist[0] = 1;
+			}
+
+			double mod_factor = pow((1-params->error_rate), median_length);
+
+			int max_h_dist = params->error_dist.size();
+			for(int i=0;i<max_h_dist;i++){
+				params->error_dist[i] /= (double)mod_factor;
+			}
+			params->diffs = max_h_dist;
+
+			for(int i=0;i<numSeqs;i++){
+
+        if (params->m->getControl_pressed()) { out.close(); return 0; }
+
+				if(i % 100 == 0){ cout << i << endl; }
+
+				if(weights[i] <= 0){	continue;	}
+
+				vector<double> expected_bad_reads(max_h_dist, 0);
+ 				for(int j=0;j<max_h_dist;j++){
+ 					expected_bad_reads[j] = params->error_dist[j] * weights[i];
+				}
+
+				if(expected_bad_reads[1] < 0.1){	continue;	}
+
+				for(int j=0;j<numSeqs;j++){
+
+        	if (params->m->getControl_pressed()) { out.close(); return 0; }
+
+					if(i == j) { continue; }
+					if(weights[j] <= 0){	continue;	}
+
+					vector<int> nSubsInDels(2, 0);
+          if (params->align_method == "unaligned") {
+						nSubsInDels = calcMisMatchesIndels(params->alignSeqs[i]->seq.getAligned(),
+																				params->alignSeqs[j]->seq.getAligned(), params);
+					} else {
+						nSubsInDels = calcMisMatchesIndels(params->alignSeqs[i]->filteredSeq,
+																				params->alignSeqs[j]->filteredSeq, params);
+					}
+
+					if(nSubsInDels[0] >= max_h_dist) { continue; }
+
+					double correction = expected_bad_reads[nSubsInDels[0]];
+
+					if(nSubsInDels[1] > params->max_indels){
+						correction = 0;
+					} else if(nSubsInDels[1] > 0){
+						correction = correction * params->indel_prob;
+					}
+
+					weights[j] -= correction;
+				}
+			}
+
+			for(int i=0;i<numSeqs;i++){
+				if(weights[i] <= 0){
+					params->alignSeqs[i]->numIdentical = 0;
+					params->alignSeqs[i]->active = 0;
+				} else {
+					params->alignSeqs[i]->numIdentical = round(weights[i]);
+				}
+
+				if(params->alignSeqs[i]->numIdentical == 0) { count++; }
+			}
+
+		} else {
 
 			cout << "fail!\n";
 
 		}
 
-	  out.close();
-
+		if(params->pc_method != "deblur"){
+	  	out.close();
+		}
 
 		return count;
   }
@@ -871,7 +1081,7 @@ int PreClusterCommand::execute(){
             if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
 
             preClusterData* params = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, NULL, NULL, newMapFile, nullVector);
-            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta);
+            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
 
             //reads fasta file and return number of seqs
             long long numSeqs = 0; params->alignSeqs = readFASTA(ct, params, numSeqs); //fills alignSeqs and makes all seqs active
@@ -883,7 +1093,9 @@ int PreClusterCommand::execute(){
 			if (diffs > length) { m->mothurOut("Error: diffs is set to " + toString(diffs) + " which is greater than your sequence length of " + toString(length) + ".\n");   return 0;  }
 
 			int count = process("", newMapFile, params);
-			outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
+			if(params->pc_method != "deblur"){
+				outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
+			}
 
 			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
 
@@ -1201,7 +1413,7 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
             OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 
             preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadFastaWriter, threadNameWriter, newMFile, groups);
-            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta);
+            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new thread(driverGroups, dataBundle));
@@ -1211,7 +1423,7 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
         OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 
         preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadFastaWriter, threadNameWriter, newMFile, groups);
-        dataBundle->setVariables(lines[0].start, lines[0].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta);
+        dataBundle->setVariables(lines[0].start, lines[0].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
 
         driverGroups(dataBundle);
 
