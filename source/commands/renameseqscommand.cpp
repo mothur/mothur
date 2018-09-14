@@ -391,8 +391,8 @@ int RenameSeqsCommand::execute() {
                     }else if (countfile != "") {
                         if (hasGroups) {
                             vector<string> groups = countTable->getGroups(seq.getName());
-                            if (group.size() == 0)      {   group = "not found";    }
-                            else if (group.size() == 1) {   group = groups[0];      }
+                            if (groups.size() == 0)      {   group = "not found";    }
+                            else if (groups.size() == 1) {   group = groups[0];      }
                             else                        {   group = "Multi";        }
                         }
                     }
