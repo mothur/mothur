@@ -647,12 +647,7 @@ int process(string group, string newMapFile, preClusterData* params){
 	  	if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + 	toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
 
 		} else if(params->pc_method == "tree") {
-
-			if(params->delta > 1){
-				params->diffs = (int)(log(params->alignSeqs[0]->numIdentical)/log(params->delta) + 1);
-			} else {
-				params->diffs = params->length;
-			}
+			params->diffs = 1;
 
 			params->m->mothurOutJustToScreen("Determining which sequences can be merged...");
 			cout.flush();
