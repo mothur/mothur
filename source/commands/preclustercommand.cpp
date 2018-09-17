@@ -1057,8 +1057,7 @@ int PreClusterCommand::execute(){
 			createProcessesGroups(newFastaFile, newNamesFile, newMapFile);
 
 			if (countfile != "") {
-					cout << "here\n";
-    			// mergeGroupCounts(newCountFile, newNamesFile, newFastaFile);
+				mergeGroupCounts(newCountFile, newNamesFile, newFastaFile);
       } else {
         //run unique.seqs for deconvolute results
         string inputString = "fasta=" + newFastaFile;
@@ -1322,7 +1321,7 @@ long long driverGroups(preClusterData* params){
 			params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(params->alignSeqs.size()) + ".\n");
 			params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
 			printData(params->groups[i], params);
-            for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
+      for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
 
 			params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(num) + " sequences.\n");
 		}
@@ -1344,36 +1343,51 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
 		ifstream inNames;
     util.openInputFile(newname, inNames);
 
-    string group, first, second;
-    set<string> uniqueNames;
+		if(pc_method != "deblur"){
+	    string group, first, second;
+	    set<string> uniqueNames;
 
-    while (!inNames.eof()) {
+	    while (!inNames.eof()) {
 
-      if (m->getControl_pressed()) { break; }
+	      if (m->getControl_pressed()) { break; }
 
-      inNames >> group; util.gobble(inNames);
-      inNames >> first; util.gobble(inNames);
-      inNames >> second; util.gobble(inNames);
+	      inNames >> group; util.gobble(inNames);
+	      inNames >> first; util.gobble(inNames);
+	      inNames >> second; util.gobble(inNames);
 
-      vector<string> names;
-      util.splitAtComma(second, names);
+	      vector<string> names;
+	      util.splitAtComma(second, names);
 
-      uniqueNames.insert(first);
+	      uniqueNames.insert(first);
 
-	    int total = ct.getGroupCount(first, group);
+	      int total = ct.getGroupCount(first, group);
+	      for (int i = 1; i < names.size(); i++) {
+	          total += ct.getGroupCount(names[i], group);
+	          ct.setAbund(names[i], group, 0);
+	      }
+	      ct.setAbund(first, group, total);
+	    }
+	    inNames.close();
 
-			// if(method != "deblur"){
-	    //   for (int i = 1; i < names.size(); i++) {
-	    //       total += ct.getGroupCount(names[i], group);
-	    //       ct.setAbund(names[i], group, 0);
-	    //   }
-			// } else {
-				int count = stoi(second);
-        total += count;
-			// }
-      ct.setAbund(first, group, total);
-    }
-    inNames.close();
+		} else { //for deblur
+
+	    string group, unique_sequence;
+			int count;
+
+			ct.clearTable();
+
+	    while (!inNames.eof()) {
+
+	      if (m->getControl_pressed()) { break; }
+
+	      inNames >> group; util.gobble(inNames);
+	      inNames >> unique_sequence; util.gobble(inNames);
+	      inNames >> count; util.gobble(inNames);
+
+				ct.setAbund(unique_sequence, group, count);
+
+			}
+		}
 
     vector<string> namesOfSeqs = ct.getNamesOfSeqs();
     for (int i = 0; i < namesOfSeqs.size(); i++) {
@@ -1383,7 +1397,7 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
     }
 
     ct.printTable(newcount);
-    util.mothurRemove(newname);
+    // util.mothurRemove(newname);
 
     if (bygroup) { //if by group, must remove the duplicate seqs that are named the same
       ifstream in;
