@@ -61,7 +61,7 @@ class CountTable {
         int printSeq(ofstream&, string);
         bool testGroups(string file); //used to check if file has group data without reading it
         bool testGroups(string file, vector<string>&); //used to check if file has group data without reading it, return groups if found.
-        int copy(CountTable*);
+        int copy(CountTable*); //copy countable
     
         bool hasGroupInfo() { return hasGroups; }
         int getNumGroups() { return (int)groups.size(); }
@@ -89,8 +89,8 @@ class CountTable {
         int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
         int getGroupIndex(string); //returns index in getGroupCounts vector of specific group
     
-        vector<string> getNamesOfSeqs();
-        vector<string> getNamesOfSeqs(string);
+        vector<string> getNamesOfSeqs(); //return names of all seqeunce in table
+        vector<string> getNamesOfSeqs(string); //returns names of seqs in specific group in table
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
         ListVector getListVector();
         SharedRAbundVectors* getShared();
@@ -107,7 +107,7 @@ class CountTable {
         vector< vector<int> > counts;
         vector<int> totals;
         vector<int> totalGroups;
-        map<string, int> indexNameMap;
+        map<string, int> indexNameMap; //maps seqName -> vector index in counts. seq1 -> 1 would mean seq1's counts are stored in counts[1].
         map<string, int> indexGroupMap;
     
 };

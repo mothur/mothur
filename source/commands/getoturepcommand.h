@@ -21,6 +21,8 @@
 #include "nameassignment.hpp"
 #include "countseqscommand.h"
 #include "getseqscommand.h"
+#include "calculator.h"
+#include "mcc.hpp"
 
 typedef map<int, float> SeqMap;
 

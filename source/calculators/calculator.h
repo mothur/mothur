@@ -51,7 +51,10 @@ protected:
 };
 
 /**************************************************************************************************/
-
+//True Negative - far, cluster apart
+//True Positive - close, cluster together
+//False Negative - close, cluster apart
+//False Positve - far, cluster together
 
 class ClusterMetric {
     

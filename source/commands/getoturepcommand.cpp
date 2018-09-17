@@ -71,13 +71,12 @@ string GetOTURepCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, count, large, weighted, cutoff, precision, groups, sorted, method and label.  The list parameter is required, as well as phylip or column and name if you are using method=distance. If method=abundance a name or count file is required.\n";
-		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
+		helpString += "The label parameter allows you to select what distance you would like a output files created for. Example label=0.03. If no label is provided the first label is used.\n";
 		helpString += "The phylip or column parameter is required for method=distance, but only one may be used.  If you use a column file the name or count filename is required. \n";
-        helpString += "The method parameter allows you to select the method of selecting the representative sequence. Choices are distance and abundance.  The distance method finds the sequence with the smallest maximum distance to the other sequences. If tie occurs the sequence with smallest average distance is selected.  The abundance method chooses the most abundant sequence in the OTU as the representative.\n";
-		helpString += "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n";
-		helpString += "The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n";
+        helpString += "The method parameter allows you to select the method of selecting the representative sequence. Choices are distance and abundance.  The distance method finds the sequence with the largest number of close sequences in the OTU. If tie occurs, a sequence is randomly selected from the ties.  The abundance method chooses the most abundant sequence in the OTU as the representative.\n";
+		helpString += "If you do not provide a cutoff value 0.03 is assumed. If you do not provide a precision value then 100 is assumed.\n";
+		helpString += "The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile).\n";
 		helpString += "Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n";
-		helpString += "The default value for label is all labels in your inputfile.\n";
 		helpString += "The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n";
 		helpString += "The weighted parameter allows you to indicate that want to find the weighted representative. You must provide a namesfile to set weighted to true.  The default value is false.\n";
 		helpString += "The representative is found by selecting the sequence with the most \"close\" sequences in the OTU. If a tie occurs a seqeunce is chosen at random from the ties.\n";
@@ -334,12 +333,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; allLines = 1;  }
-			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
+			if (label == "not found") { label = "";   }
 						
 			sorted = validParameter.valid(parameters, "sorted");		if (sorted == "not found"){	sorted = "";	}
 			if (sorted == "none") { sorted=""; }
@@ -373,7 +367,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			
 			temp = validParameter.valid(parameters, "precision");			if (temp == "not found") { temp = "100"; } util.mothurConvert(temp, precision);
 			
-			temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "1.0"; } util.mothurConvert(temp, cutoff);
+			temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "0.03"; } util.mothurConvert(temp, cutoff);
 			
 		}
 	}
@@ -446,81 +440,27 @@ int GetOTURepCommand::execute(){
             //read in group map info.
             groupMap = new GroupMap(groupfile);
             int error = groupMap->readMap();
-            if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile."); m->mothurOutEndLine(); groupfile = "";  }
+            if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile.\n");  groupfile = "";  }
         }
         
         InputData input(listfile, "list", Groups);
         list = input.getListVector();
         string lastLabel = list->getLabel();
         
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-        
-        if (m->getControl_pressed()) {  delete list; return 0; }
-        
-        while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            
-            if (allLines == 1 || labels.count(list->getLabel()) == 1){
-                m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
-                error = process(list);
-                if (error == 1) { return 0; } //there is an error in hte input files, abort command
-                
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear(); delete list; return 0; }
-                
-                processedLabels.insert(list->getLabel());
-                userLabels.erase(list->getLabel());
-            }
-            
-            if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = list->getLabel();
-                
-                delete list;
-                list = input.getListVector(lastLabel);
-                m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
-                error = process(list);
-                if (error == 1) { return 0; } //there is an error in hte input files, abort command
-                
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear(); delete list; return 0; }
-
-                processedLabels.insert(list->getLabel());
-                userLabels.erase(list->getLabel());
-                
-                //restore real lastlabel to save below
-                list->setLabel(saveLabel);
-            }
-            
+        if (label == "") { m->mothurOut("You did not provide a label, using " + lastLabel + ".\n");  }
+        else if ( lastLabel == label) {} //do nothing, this is the list we want
+        else {
+            delete list;
+            list = input.getListVector(label);
             lastLabel = list->getLabel();
-            
+        }
+        if (list == NULL) { m->mothurOut("[ERROR]: Unable to read list file, aborting.\n");  m->setControl_pressed(true); }
+        else {
+            m->mothurOut(lastLabel + "\t" + toString(list->getNumBins()) + "\n");
+            process(list);
             delete list;
-            list = input.getListVector();
         }
         
-        //output error messages about any remaining user labels
-        bool needToRun = false;
-        for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + (*it));
-            if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                needToRun = true;
-            }else {
-                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-            }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            if (list != NULL) {	delete list;	}
-            list = input.getListVector(lastLabel);
-            m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
-            error = process(list);
-            delete list;
-            if (error == 1) { return 0; } //there is an error in hte input files, abort command
-            
-            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear(); delete list; return 0; }
-
-        }
-
         if (fastafile != "") {
             //read fastafile
             FastaMap* fasta = new FastaMap();
@@ -740,6 +680,11 @@ string GetOTURepCommand::findRep(vector<string> names, string group) {
                         }
                     }
                 }
+                
+                //True Negative - far, cluster apart
+                //True Positive - close, cluster together
+                //False Negative - close, cluster apart
+                //False Positve - far, cluster together
                 vector<int> numCloseInBin; numCloseInBin.resize(binTranslated.size(), 0);
                 
                 for (size_t i=0; i < binTranslated.size(); i++) {
