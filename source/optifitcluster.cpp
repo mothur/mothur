@@ -323,7 +323,7 @@ vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long lon
 vector<double> OptiFitCluster::getFitStats(long long& tp,  long long& tn,  long long& fp,  long long& fn) {
     try {
         long long singletn = 0;
-        if (!closed) { singletn = matrix->getNumFitSingletons() - numFitSingletons; } //don't want to count fitSingletons in randomseqs twice.
+        if (!closed) { singletn = matrix->getNumFitSingletons() - numFitSingletons; } //don't want to count fitSingletons in randomseqs twice. numFitSingletons are reads that have no dists to other fit seqs, but have dists to ref seqs (not truly singletons, but made so by the randomization)
         long long tempnumSeqs = numFitSeqs + singletn;
         
         tp = fittruePositives;
@@ -415,7 +415,9 @@ ListVector* OptiFitCluster::getFittedList(string label) {
             }else { unFitted.insert(seqNumber); }
         }
         
-        long long numUnFitted = (numFitSeqs - numListSeqs) + matrix->getNumFitTrueSingletons();
+        //numFitSeqs does not include any kind of singleton
+        long long numUnFitted = (numFitSeqs - numListSeqs); //getNumFitTrueSingletons are fit reads that have no dists in the matrix. This can be confusing, think of it like this: there are true singletons, meaning we don't care if you are a ref or fit and you have no dists below the cutoff. This means you will be in your own OTU no matter what we do. There are fitSIngletons, meaning you are a fit sequence and have no dists below the cutoff that coorespond to other fit seqs ( NOTE: you may or may not have dists to ref seqs or you could be a true singleton or a just a singleton because of the references chosen).
+        
         long long numSingletonBins = 0;
         
         if ((label != "") && (numUnFitted != 0)) {
@@ -423,7 +425,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
             m->mothurOut("\nFitted " + toString(numListSeqs) + " sequences to " + toString(newBins.size()) + " existing OTUs.\n");
             
             if (!closed) { //cluster the unfitted seqs separately
-                m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs.\n");
+                m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs, excluding singletons.\n");
                 
                 m->mothurOut("\n**************** Clustering the unfitted sequences ****************\n");
                 
@@ -471,7 +473,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
                 }
                 
                 delete unFittedMatrix;
-            }else { m->mothurOut(toString((numFitSeqs - numListSeqs)) + " sequences were unable to be fitted existing OTUs, disgarding.\n");  }
+            }else { m->mothurOut("Disregarding sequences that were unable to be fitted existing OTUs.\n");  }
         }else {
             if (label != "") {
                 m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");
