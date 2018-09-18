@@ -45,7 +45,7 @@ class MothurOut {
         bool getQuietMode()                             { return quietMode;                             }
         void setQuietMode(bool t)                       { quietMode = t;                                }
         int getNumErrors()                              { return numErrors;                             }
-        int resetCommandErrors()                        { numCommandErrors = 0; numCommandWarnings = 0; }
+        void resetCommandErrors()                        { numCommandErrors = 0; numCommandWarnings = 0;}
         string getLogFileName()                         { return logFileName;                           }
 		void setLogFileName(string f, bool append);
     
