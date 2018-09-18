@@ -712,11 +712,11 @@ int process(string group, string newMapFile, preClusterData* params){
 			vector<vector<bool> > mergable(numSeqs);
 			vector<vector<int> > mismatches(numSeqs);
 
-			mergable[0].resize(numSeqs, FALSE);
+			mergable[0].resize(numSeqs, false);
 			mismatches[0].resize(numSeqs, 1000);
 
 	    for (int i = 1; i < numSeqs; i++) {
-				mergable[i].resize(numSeqs, FALSE);
+				mergable[i].resize(numSeqs, false);
 				mismatches[i].resize(numSeqs, 1000);
 
         for (int j = 0; j < i; j++) {
@@ -753,7 +753,7 @@ int process(string group, string newMapFile, preClusterData* params){
 				vector<int> indices_to_merge;
 
 				for(int j=0;j<numSeqs;j++){
-					if(mergable[j][i] == TRUE){	indices_to_merge.push_back(j); }
+					if(mergable[j][i] == true){	indices_to_merge.push_back(j); }
 				}
 
 				while(indices_to_merge.size() != 0){
@@ -764,7 +764,7 @@ int process(string group, string newMapFile, preClusterData* params){
 							for(int k=0;k<indices_to_merge.size();k++){
 
 								if(mergable[j][indices_to_merge[k]]){
-									to_merge = TRUE;
+									to_merge = true;
 									break;
 								}
 
@@ -782,18 +782,18 @@ int process(string group, string newMapFile, preClusterData* params){
 						cluster[indices_to_merge[k]] = i;
 
 						for(int l=0;l<numSeqs;l++){
-							mergable[indices_to_merge[k]][l] = FALSE;
-							mergable[l][indices_to_merge[k]] = FALSE;
+							mergable[indices_to_merge[k]][l] = false;
+							mergable[l][indices_to_merge[k]] = false;
 						}
 
 		        if (params->m->getControl_pressed()) { out.close(); return 0; }
 					}
-					mergable[i][i] = FALSE;
+					mergable[i][i] = false;
 
 					indices_to_merge.clear();
 
 					for(int j=0;j<numSeqs;j++){
-						if(mergable[j][i] == TRUE){	indices_to_merge.push_back(j); }
+						if(mergable[j][i] == true){	indices_to_merge.push_back(j); }
 					}
 
 					if (params->m->getControl_pressed()) { out.close(); return 0; }
