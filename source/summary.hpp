@@ -14,16 +14,16 @@
 #include "counttable.h"
 
 class Summary {
-    
+
 public:
-    
+
 #ifdef UNIT_TEST
     friend class TestSummary;
 #endif
-    
+
     Summary(int p) { processors = p; m = MothurOut::getInstance(); total = 0; numUniques = 0; hasNameOrCount = false; nameCountNumUniques = 0; type = "count"; }
     ~Summary() {}
-    
+
     long long summarizeFasta(string f, string n, string o); //provide fasta file to summarize (paralellized) and optional nameorCountfile and optional outputfile for individual seqs info. To skip nameCount or output file, n="" and / or o=""
     long long summarizeFasta(string f, string o); //provide fasta file to summarize (paralellized) and optional outputfile for individual seqs info. To skip output file, o=""
     long long summarizeFastaSummary(string f); //provide summary of fasta file to summarize (paralellized)
@@ -45,7 +45,7 @@ public:
     long long getLength(double value) { return (getValue(seqLength, value)); } // 25 = min length of 25% of sequences
     vector<long long> getHomop() { return (getValues(longHomoPolymer)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
     long long getHomop(double value) { return (getValue(longHomoPolymer, value)); }
-    
+
     //contigs
     vector<long long> getOStart() { return (getValues(ostartPosition)); } //contigs overlap start - returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
     long long getOStart(double value) { return (getValue(ostartPosition, value)); } //contigs overlap start - 2.5 = 2.5% of sequences of sequences start before, 25 = location 25% of sequences start before
@@ -63,13 +63,13 @@ public:
     long long getScores(double value) { return (getValue(scores, value)); }
     vector<long long> getNumInserts() { return (getValues(inserts)); } //returns vector of 8 locations. (min, 2.5, 25, 50, 75, 97.5, max, mean)
     long long getNumInserts(double value) { return (getValue(inserts, value)); } //25 = max abigous bases 25% of sequences contain
+		int getMaxAbundance();
 
-    
     long long getTotalSeqs() { return total; }
     long long getUniqueSeqs() { return numUniques; }
-    
+
 private:
-    
+
     MothurOut* m;
     Utils util;
     int processors;
@@ -93,7 +93,7 @@ private:
     map<string, int> nameMap;
     map<string, int>::iterator itFindName;
     map<int, long long>::iterator it;
-    
+
     void processNameCount(string n); //determines whether name or count and fills nameMap, ignored if n = ""
     vector<long long> getValues(map<int, long long>& positions);
     long long getValue(map<int, long long>& positions, double);
@@ -102,7 +102,7 @@ private:
     bool isCountFile(string);
 
 
-    
+
 };
 /**************************************************************************************************/
 struct seqSumData {
@@ -130,8 +130,8 @@ struct seqSumData {
     bool hasNameMap;
     map<string, int> nameMap;
     Utils util;
-    
-    
+
+
     seqSumData(){}
     //FastaSummarize - output file created
     seqSumData(string f, string sum, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
@@ -145,7 +145,7 @@ struct seqSumData {
         total = 0;
         summaryFile = sum;
     }
-    
+
     //FastaSummarySummarize - no output files
     seqSumData(string f, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
         filename = f;

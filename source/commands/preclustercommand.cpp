@@ -9,7 +9,7 @@
 
 #include "preclustercommand.h"
 #include "deconvolutecommand.h"
-
+#include "summary.hpp"
 
 //**********************************************************************************************************************
 vector<string> PreClusterCommand::setParameters(){
@@ -213,7 +213,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			else if (groupfile == "not open") { abort = true; groupfile =  ""; }
 			else {   current->setGroupFile(groupfile); bygroup = true;  }
 
-            countfile = validParameter.validFile(parameters, "count");
+      countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not found") { countfile =  "";   }
 			else if (countfile == "not open") { abort = true; countfile =  ""; }
 			else {
@@ -309,6 +309,66 @@ PreClusterCommand::PreClusterCommand(string option) {
               if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
           }
       }
+
+
+			if(pc_method == "tree"){
+
+				diffs = 1;
+
+			} else {
+
+				Summary summary_data(processors);
+				if(countfile != ""){
+					summary_data.summarizeFasta(fastafile, countfile, "");
+				} else if(namefile != ""){
+					summary_data.summarizeFasta(fastafile, namefile, "");
+				}
+				int median_length = summary_data.getLength()[3];
+				int max_abund = summary_data.getMaxAbundance();
+
+
+				if(pc_method == "unoise"){
+
+					diffs = int((log2(max_abund)-1) / alpha + 1);
+
+				} else if(pc_method == "deblur"){
+
+					if(error_dist[0] == -100){ //construct the binomial distribution
+
+						error_dist.clear();
+
+						for(int i=0;i<100;i++){
+
+							double choose = 1;
+							double k = 1;
+
+							for(int j=1;j<=i;j++){
+								choose *= (median_length - j + 1);
+								k *= j;
+							}
+							choose = choose/k;
+
+							double a = pow(error_rate, i);
+							double b = pow(1 - error_rate, median_length - i);
+
+							if(a != 0 && b != 0){
+								error_dist.push_back(choose * a * b);
+								if(error_dist[i] < 0.1 / max_abund){ break;	}
+							} else {
+								break;
+							}
+						}
+						error_dist[0] = 1;
+					}
+
+					double mod_factor = pow((1-error_rate), median_length);
+
+					for(int i=0;i<error_dist.size();i++){
+						error_dist[i] /= (double)mod_factor;
+					}
+					diffs = error_dist.size();
+				}
+			}
 		}
 
 	}
@@ -587,14 +647,11 @@ int process(string group, string newMapFile, preClusterData* params){
 
  		} else if(params->pc_method == "unoise") {
 
-			int maxDiffs = int((log2(originalCount[0])-1) / params->alpha + 1);
-
-			vector<double> beta(maxDiffs, 0);
+			vector<double> beta(params->diffs, 0);
 			for(int i=0;i<beta.size();i++){
 				beta[i] = pow(0.5, params->alpha * i + 1.0);
 			}
 
-			params->diffs = maxDiffs;
 
 	    for (int i = 0; i < numSeqs; i++) {
 
@@ -620,7 +677,7 @@ int process(string group, string newMapFile, preClusterData* params){
 																					params->alignSeqs[j]->filteredSeq, params);
 							}
 
-	            if (mismatch <= maxDiffs && skew <= beta[mismatch]) { //merge
+	            if (mismatch <= params->diffs && skew <= beta[mismatch]) { //merge
 	              params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
 	              params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
 
@@ -776,50 +833,10 @@ int process(string group, string newMapFile, preClusterData* params){
 
 	  } else if(params->pc_method == "deblur") {
 
-			vector<int> seq_lengths(numSeqs, 0);
 			vector<double> weights(numSeqs, 0);
 			for(int i=0;i<numSeqs;i++){
-				seq_lengths[i] = params->alignSeqs[i]->seq.getNumBases();
 				weights[i] = (double)params->alignSeqs[i]->numIdentical;
 			}
-			sort(seq_lengths.begin(), seq_lengths.end());
-			int median_length = seq_lengths[floor(0.5*numSeqs)];
-
-			if(params->error_dist[0] == -100){ //construct the binomial distribution
-
-				params->error_dist.clear();
-
-				for(int i=0;i<100;i++){
-
-					double choose = 1;
-					double k = 1;
-
-					for(int j=1;j<=i;j++){
-						choose *= (median_length - j + 1);
-						k *= j;
-					}
-					choose = choose/k;
-
-					double a = pow(params->error_rate, i);
-					double b = pow(1 - params->error_rate, median_length - i);
-
-					if(a != 0 && b != 0){
-						params->error_dist.push_back(choose * a * b);
-						if(params->error_dist[i] < 0.1 / weights[0]){ break;	}
-					} else {
-						break;
-					}
-				}
-				params->error_dist[0] = 1;
-			}
-
-			double mod_factor = pow((1-params->error_rate), median_length);
-
-			int max_h_dist = params->error_dist.size();
-			for(int i=0;i<max_h_dist;i++){
-				params->error_dist[i] /= (double)mod_factor;
-			}
-			params->diffs = max_h_dist;
 
 			for(int i=0;i<numSeqs;i++){
 
@@ -829,6 +846,7 @@ int process(string group, string newMapFile, preClusterData* params){
 
 				if(weights[i] <= 0){	continue;	}
 
+				int max_h_dist = params->error_dist.size();
 				vector<double> expected_bad_reads(max_h_dist, 0);
  				for(int j=0;j<max_h_dist;j++){
  					expected_bad_reads[j] = params->error_dist[j] * weights[i];
@@ -1205,8 +1223,8 @@ vector<seqPNode*> loadSeqs(map<string, string>& thisName, vector<Sequence>& this
         return alignSeqs;
     }
     catch(exception& e) {
-        m->errorOut(e, "PreClusterCommand", "loadSeqs");
-        exit(1);
+      m->errorOut(e, "PreClusterCommand", "loadSeqs");
+      exit(1);
     }
 }
 
