@@ -847,7 +847,7 @@ int RemoveLineageCommand::readShared(){
         if (m->getControl_pressed()) { delete lookup; return 0; }
         
         vector<string> newLabels;
-        bool wroteSomething = false;
+        bool wroteSomething = false; bool printHeaders = true;
         int numRemoved = 0;
         for (int i = 0; i < lookup->getNumBins();) {
             
@@ -870,7 +870,7 @@ int RemoveLineageCommand::readShared(){
         ofstream out;
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        lookup->print(out);
+        lookup->print(out, printHeaders);
 		out.close();
         
         if (wroteSomething == false) { m->mothurOut("Your file only contains OTUs from " + taxons + "."); m->mothurOutEndLine();  }

@@ -68,8 +68,8 @@ protected:
     map<long long, long long> readPhylipSingletons(vector<bool>& singleton, string distFile, long long&,  map<string, long long>& nameAssignment);
     //void assignReferences(vector<string>);
     
-    vector<bool> isRef;
-    vector<bool> isSingleRef;
+    vector<bool> isRef; //same size as closeness, this tells us whether a seq with distances in the matrix is a reference
+    vector<bool> isSingleRef; ////same size as singletons, this tells us whether a seq WITHOUT distances in the matrix (singleton) is a reference
     
 };
 

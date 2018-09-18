@@ -53,7 +53,6 @@ vector<string> GetOTURepCommand::setParameters(){
 		CommandParameter pweighted("weighted", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pweighted);
 		CommandParameter psorted("sorted", "Multiple", "none-name-bin-size-group", "none", "", "", "","",false,false); parameters.push_back(psorted);
         CommandParameter pmethod("method", "Multiple", "distance-abundance", "distance", "", "", "","",false,false); parameters.push_back(pmethod);
-		CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -72,17 +71,15 @@ string GetOTURepCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, count, large, weighted, cutoff, precision, groups, sorted, method and label.  The list parameter is required, as well as phylip or column and name if you are using method=distance. If method=abundance a name or count file is required.\n";
-		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
+		helpString += "The label parameter allows you to select what distance you would like a output files created for. Example label=0.03. If no label is provided the first label is used.\n";
 		helpString += "The phylip or column parameter is required for method=distance, but only one may be used.  If you use a column file the name or count filename is required. \n";
-        helpString += "The method parameter allows you to select the method of selecting the representative sequence. Choices are distance and abundance.  The distance method finds the sequence with the smallest maximum distance to the other sequences. If tie occurs the sequence with smallest average distance is selected.  The abundance method chooses the most abundant sequence in the OTU as the representative.\n";
-		helpString += "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n";
-		helpString += "The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n";
+        helpString += "The method parameter allows you to select the method of selecting the representative sequence. Choices are distance and abundance.  The distance method finds the sequence with the largest number of close sequences in the OTU. If tie occurs, a sequence is randomly selected from the ties.  The abundance method chooses the most abundant sequence in the OTU as the representative.\n";
+		helpString += "If you do not provide a cutoff value 0.03 is assumed. If you do not provide a precision value then 100 is assumed.\n";
+		helpString += "The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile).\n";
 		helpString += "Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n";
-		helpString += "The default value for label is all labels in your inputfile.\n";
 		helpString += "The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n";
-		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
 		helpString += "The weighted parameter allows you to indicate that want to find the weighted representative. You must provide a namesfile to set weighted to true.  The default value is false.\n";
-		helpString += "The representative is found by selecting the sequence that has the smallest total distance to all other sequences in the OTU. If a tie occurs the smallest average distance is used.\n";
+		helpString += "The representative is found by selecting the sequence with the most \"close\" sequences in the OTU. If a tie occurs a seqeunce is chosen at random from the ties.\n";
 		helpString += "For weighted = false, mothur assumes the distance file contains only unique sequences, the list file may contain all sequences, but only the uniques are considered to become the representative. If your distance file contains all the sequences it would become weighted=true.\n";
 		helpString += "For weighted = true, mothur assumes the distance file contains only unique sequences, the list file must contain all sequences, all sequences are considered to become the representative, but unique name will be used in the output for consistency.\n";
 		helpString += "If your distance file contains all the sequence and you do not provide a name file, the weighted representative will be given, unless your listfile is unique. If you provide a namefile, then you can select weighted or unweighted.\n";
@@ -336,12 +333,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; allLines = 1;  }
-			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
+			if (label == "not found") { label = "";   }
 						
 			sorted = validParameter.valid(parameters, "sorted");		if (sorted == "not found"){	sorted = "";	}
 			if (sorted == "none") { sorted=""; }
@@ -369,20 +361,14 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				}
 			}
 			
-			string temp = validParameter.valid(parameters, "large");		if (temp == "not found") {	temp = "F";	}
-			large = util.isTrue(temp);
+			string temp = validParameter.valid(parameters, "weighted");		if (temp == "not found") {	 temp = "f"; 	} weighted = util.isTrue(temp);
 			
-			temp = validParameter.valid(parameters, "weighted");		if (temp == "not found") {	 temp = "f"; 	}
-			weighted = util.isTrue(temp);
+			if ((weighted) && (namefile == "")) { m->mothurOut("You cannot set weighted to true unless you provide a namesfile.\n"); abort = true; }
 			
-			if ((weighted) && (namefile == "")) { m->mothurOut("You cannot set weighted to true unless you provide a namesfile."); m->mothurOutEndLine(); abort = true; }
+			temp = validParameter.valid(parameters, "precision");			if (temp == "not found") { temp = "100"; } util.mothurConvert(temp, precision);
 			
-			temp = validParameter.valid(parameters, "precision");			if (temp == "not found") { temp = "100"; }
-			util.mothurConvert(temp, precision); 
+			temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "0.03"; } util.mothurConvert(temp, cutoff);
 			
-			temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "10.0"; }
-			util.mothurConvert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));
 		}
 	}
 	catch(exception& e) {
@@ -399,113 +385,82 @@ int GetOTURepCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		int error;
 		list = NULL;
-		
-        if (method=="distance") {
-            readDist();
-            if ((!weighted) && (namefile != "")) { readNamesFile(weighted); }
-        }else {
-            //map name -> abundance for use if findRepAbund
-            if (namefile != "") { nameToIndex = util.readNames(namefile); }
-        }
         
-        if (m->getControl_pressed()) { if (method=="distance") { if (large) {  inRow.close(); util.mothurRemove(distFile);  } }return 0; }
+        if (method == "distance") {
+            if ((namefile != "") && (groupfile != "")) { //create count file for simplicity
+                current->setMothurCalling(true);
+                m->mothurOut("/******************************************/\n");
+                string inputString = "name=" + namefile + ", group=" + groupfile;
+                
+                m->mothurOut("/nRunning command: count.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* countSeqsCommand = new CountSeqsCommand(inputString);
+                countSeqsCommand->execute();
+                
+                countfile = countSeqsCommand->getOutputFiles()["count"][0];
+                namefile = ""; groupfile = "";
+                
+                delete countSeqsCommand;
+                
+                current->setCountFile(countfile);
+                ct.readTable(countfile, true, false);
+                if (ct.hasGroupInfo()) { hasGroups = true; }
+                
+                ofstream out;
+                util.openOutputFile("temp.accnos", out); vector<string> uniqueNames = ct.getNamesOfSeqs();
+                for (int i = 0; i < uniqueNames.size(); i++) { out << uniqueNames[i] << endl; } out.close();
+                
+                inputString = "list=" + listfile + ", accnos=temp.accnos";
+                
+                m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* getSeqsCommand = new GetSeqsCommand(inputString);
+                getSeqsCommand->execute();
+                
+                string templistfile = getSeqsCommand->getOutputFiles()["list"][0];
+                string newName = util.getRootName(listfile) + "unique.list";
+                util.renameFile(templistfile, newName);  listfile = newName;
+                namefile = ""; groupfile = ""; util.mothurRemove("temp.accnos");
+                
+                delete getSeqsCommand;
+                current->setMothurCalling(false);
+                
+                m->mothurOut("/******************************************/\n");
+            }
+            readDist();
+        }
+       
+        if (namefile != "") { nameMap = util.readNames(namefile); }
+        
+        if (m->getControl_pressed()) { return 0; }
         
         if (groupfile != "") {
             //read in group map info.
             groupMap = new GroupMap(groupfile);
             int error = groupMap->readMap();
-            if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile."); m->mothurOutEndLine(); groupfile = "";  }
+            if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile.\n");  groupfile = "";  }
         }
-        
-        //done with listvector from matrix
-        if (list != NULL) { delete list; }
         
         InputData input(listfile, "list", Groups);
         list = input.getListVector();
         string lastLabel = list->getLabel();
         
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-        
-        if (m->getControl_pressed()) { if (method=="distance") {  if (large) {  inRow.close(); util.mothurRemove(distFile);  } }  delete list; return 0; }
-        
-        while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            
-            if (allLines == 1 || labels.count(list->getLabel()) == 1){
-                m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
-                error = process(list);
-                if (error == 1) { return 0; } //there is an error in hte input files, abort command
-                
-                if (m->getControl_pressed()) {
-                    if (method=="distance") { if (large) {  inRow.close(); util.mothurRemove(distFile);  } }
-                    for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear();
-                    delete list; return 0;
-                }
-                
-                processedLabels.insert(list->getLabel());
-                userLabels.erase(list->getLabel());
-            }
-            
-            if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = list->getLabel();
-                
-                delete list;
-                list = input.getListVector(lastLabel);
-                m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
-                error = process(list);
-                if (error == 1) { return 0; } //there is an error in hte input files, abort command
-                
-                if (m->getControl_pressed()) {
-                    if (method=="distance") { if (large) {  inRow.close(); util.mothurRemove(distFile);  } }
-                    for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear();
-                    delete list; return 0;
-                }
-                
-                processedLabels.insert(list->getLabel());
-                userLabels.erase(list->getLabel());
-                
-                //restore real lastlabel to save below
-                list->setLabel(saveLabel);
-            }
-            
+        if (label == "") { m->mothurOut("You did not provide a label, using " + lastLabel + ".\n");  }
+        else if ( lastLabel == label) {} //do nothing, this is the list we want
+        else {
+            delete list;
+            list = input.getListVector(label);
             lastLabel = list->getLabel();
-            
+        }
+        if (list == NULL) { m->mothurOut("[ERROR]: Unable to read list file, aborting.\n");  m->setControl_pressed(true); }
+        else {
+            m->mothurOut(lastLabel + "\t" + toString(list->getNumBins()) + "\n");
+            process(list);
             delete list;
-            list = input.getListVector();
         }
         
-        //output error messages about any remaining user labels
-        bool needToRun = false;
-        for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + (*it));
-            if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                needToRun = true;
-            }else {
-                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-            }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            if (list != NULL) {	delete list;	}
-            list = input.getListVector(lastLabel);
-            m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
-            error = process(list);
-            delete list;
-            if (error == 1) { return 0; } //there is an error in hte input files, abort command
-            
-            if (m->getControl_pressed()) {
-                if (method=="distance") { if (large) {  inRow.close(); util.mothurRemove(distFile);  } }
-                for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } outputTypes.clear();
-                delete list; return 0;
-            }
-        }
-        
-        //close and remove formatted matrix file
-        if (method=="distance") { if (large) { inRow.close(); util.mothurRemove(distFile); } if (!weighted) { nameFileMap.clear(); } }
-         
         if (fastafile != "") {
             //read fastafile
             FastaMap* fasta = new FastaMap();
@@ -563,109 +518,18 @@ int GetOTURepCommand::execute(){
 //**********************************************************************************************************************
 int GetOTURepCommand::readDist() {
 	try {
+        string nameOrCount = "";
+        string thisNamefile = "";
+        map<string, int> counts;
+        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+        else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
         
-        if (!large) {
-			//read distance files
-			if (format == "column") { readMatrix = new ReadColumnMatrix(distFile); }	
-			else if (format == "phylip") { readMatrix = new ReadPhylipMatrix(distFile); }
-			else { m->mothurOut("File format error."); m->mothurOutEndLine(); return 0;  }
-			
-			readMatrix->setCutoff(cutoff);
-            
-			NameAssignment* nameMap = NULL;
-            if(namefile != ""){	
-                nameMap = new NameAssignment(namefile);
-                nameMap->readMap();
-                readMatrix->read(nameMap);
-            }else if (countfile != "") {
-                readMatrix->read(&ct);
-            }else {
-               readMatrix->read(nameMap); 
-            }
-			
-			if (m->getControl_pressed()) { delete readMatrix; return 0; }
-            
-			list = readMatrix->getListVector();
-			SparseDistanceMatrix* matrix = readMatrix->getDMatrix();
-			
-			// Create a data structure to quickly access the distance information.
-			// It consists of a vector of distance maps, where each map contains
-			// all distances of a certain sequence. Vector and maps are accessed
-			// via the index of a sequence in the distance matrix
-			seqVec = vector<SeqMap>(list->size()); 
-            for (int i = 0; i < matrix->seqVec.size(); i++) {
-                for (int j = 0; j < matrix->seqVec[i].size(); j++) {
-                    if (m->getControl_pressed()) { delete readMatrix; return 0; }
-                    //already added everyone else in row
-                    if (i < matrix->seqVec[i][j].index) {  seqVec[i][matrix->seqVec[i][j].index] = matrix->seqVec[i][j].dist;  }
-                }
-			}
-			//add dummy map for unweighted calc
-			SeqMap dummy;
-			seqVec.push_back(dummy);
-			
-			delete matrix;
-			delete readMatrix;
-			delete nameMap;
-			
-			if (m->getControl_pressed()) { return 0; }
-		}else {
-			//process file and set up indexes
-			if (format == "column") { formatMatrix = new FormatColumnMatrix(distFile); }	
-			else if (format == "phylip") { formatMatrix = new FormatPhylipMatrix(distFile); }
-			else { m->mothurOut("File format error."); m->mothurOutEndLine(); return 0;  }
-			
-			formatMatrix->setCutoff(cutoff);
-            
-			NameAssignment* nameMap = NULL;
-            if(namefile != ""){	
-                nameMap = new NameAssignment(namefile);
-                nameMap->readMap();
-                formatMatrix->read(nameMap);
-            }else if (countfile != "") {
-                formatMatrix->read(&ct);
-            }else {
-                formatMatrix->read(nameMap); 
-            }
-			
-			if (m->getControl_pressed()) { delete formatMatrix;  return 0; }
-            
-			list = formatMatrix->getListVector();
-			distFile = formatMatrix->getFormattedFileName();
-			
-			//positions in file where the distances for each sequence begin
-			//rowPositions[1] = position in file where distance related to sequence 1 start.
-			rowPositions = formatMatrix->getRowPositions();
-			rowPositions.push_back(-1); //dummy row for unweighted calc
-			
-			delete formatMatrix;
-			delete nameMap;
-			
-			//openfile for getMap to use
-			util.openInputFile(distFile, inRow);
-			
-			if (m->getControl_pressed()) { inRow.close(); util.mothurRemove(distFile); return 0; }
-		}
-		
-		
-		//list bin 0 = first name read in distance matrix, list bin 1 = second name read in distance matrix
-		if (list != NULL) {
-			vector<string> names;
-			string binnames;
-			//map names to rows in sparsematrix
-			for (int i = 0; i < list->size(); i++) {
-				names.clear();
-				binnames = list->get(i);
-				
-				util.splitAtComma(binnames, names);
-				
-				for (int j = 0; j < names.size(); j++) {
-					nameToIndex[names[j]] = i;
-				}
-			}
-		} else { m->mothurOut("error, no listvector."); m->mothurOutEndLine(); }
-
-        if (m->getControl_pressed()) { if (large) {  inRow.close(); util.mothurRemove(distFile);  }return 0; }
+        string distfile = columnfile;
+        if (format == "phylip") { distfile = phylipfile; }
+        
+        matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
+        
+        if (m->getControl_pressed()) { return 0; }
         
         return 0;
     }
@@ -709,39 +573,6 @@ void GetOTURepCommand::readNamesFile(FastaMap*& fasta) {
 	}
 }
 //**********************************************************************************************************************
-//read names file to find the weighted rep for each bin
-void GetOTURepCommand::readNamesFile(bool w) {
-	try {
-		ifstream in;
-		vector<string> dupNames;
-		util.openInputFile(namefile, in);
-		
-		string name, names, sequence;
-		
-		while(!in.eof()){
-			in >> name;	util.gobble(in);		//read from first column  A
-			in >> names;							//read from second column  A,B,C,D
-			
-			dupNames.clear();
-			
-			//parse names into vector
-			util.splitAtComma(names, dupNames);
-			
-			for (int i = 0; i < dupNames.size(); i++) {
-				nameFileMap[dupNames[i]] = name;
-			}
-			
-			util.gobble(in);
-		}
-		in.close();
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "readNamesFile");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
 	try{
         vector<string> reps;
@@ -771,8 +602,8 @@ string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
                         reps.push_back(names[i]);
                     }
                 }else { //name file used, we assume list file contains all sequences
-                    map<string, int>::iterator itNameMap = nameToIndex.find(names[i]);
-                    if (itNameMap == nameToIndex.end()) {} //assume that this sequence is not a unique
+                    map<string, int>::iterator itNameMap = nameMap.find(names[i]);
+                    if (itNameMap == nameMap.end()) {} //assume that this sequence is not a unique
                     else {
                         if (itNameMap->second > maxAbund) {
                             reps.clear();
@@ -813,102 +644,81 @@ string GetOTURepCommand::findRep(vector<string> names, string group) {
             if ((names.size() == 1)) {
                 return names[0];
             }else{
-                vector<int> seqIndex; //(names.size());
-                map<string, string>::iterator itNameFile;
-                map<string, int>::iterator itNameIndex;
+                //unique sequence with greatest number of "close" seqs in the OTU
+                map<string, long long> matrixNameIndexes = matrix->getNameIndexMap(); //maps unique names to index in matrix
+                vector<long long> binTranslated;
                 
                 //fill seqIndex and initialize sums
                 for (size_t i = 0; i < names.size(); i++) {
-                    if (weighted) {
-                        seqIndex.push_back(nameToIndex[names[i]]);
-                        if (countfile != "") {  //if countfile is not blank then we can assume the list file contains only uniques, otherwise we assume list file contains everyone.
+                    
+                    map<string, long long>::iterator itNameIndex = matrixNameIndexes.find(names[i]);
+                    
+                    if (itNameIndex == matrixNameIndexes.end()) { } //no distances in matrix, or not unique
+                    else { //you have a distance in the matrix, do we need to inflate the otu for weighted option?
+                        long long matrixIndex = itNameIndex->second;
+                        if (weighted) {
+                            binTranslated.push_back(matrixIndex);
                             int numRep = 0;
-                            if (group != "") {  numRep = ct.getGroupCount(names[i], group);  }
-                            else { numRep = ct.getNumSeqs(names[i]);  }
-                            for (int j = 1; j < numRep; j++) { //don't add yourself again
-                                seqIndex.push_back(nameToIndex[names[i]]);
-                            }
-                        }
-                    }else {
-                        if (namefile == "") {
-                            itNameIndex = nameToIndex.find(names[i]);
-                            
-                            if (itNameIndex == nameToIndex.end()) { // you are not in the distance file and no namesfile, then assume you are not unique
-                                if (large) {  seqIndex.push_back((rowPositions.size()-1)); }
-                                else {  seqIndex.push_back((seqVec.size()-1)); }
-                            }else {
-                                seqIndex.push_back(itNameIndex->second);
-                            }
-                            
-                        }else {
-                            itNameFile = nameFileMap.find(names[i]);
-                            
-                            if (itNameFile == nameFileMap.end()) {
-                                m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
-                            }else{
-                                string name1 = itNameFile->first;
-                                string name2 = itNameFile->second;
+                            if (countfile != "") {  //if countfile is not blank then we can assume the list file contains only uniques, otherwise we assume list file contains everyone.
+                                if (group != "") {  numRep = ct.getGroupCount(names[i], group);  }
+                                else { numRep = ct.getNumSeqs(names[i]);  }
+                            }else if (namefile != "") {
+                                map<string, int>::iterator itNameFile = nameMap.find(names[i]);
                                 
-                                if (name1 == name2) { //then you are unique so add your real dists
-                                    seqIndex.push_back(nameToIndex[names[i]]);
-                                }else { //add dummy
-                                    if (large) {  seqIndex.push_back((rowPositions.size()-1)); }
-                                    else {  seqIndex.push_back((seqVec.size()-1)); }
-                                }
+                                if (itNameFile == nameMap.end()) { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct.\n");  m->setControl_pressed(true); }
+                                else{ numRep = itNameFile->second; }
+                            }
+                            for (int j = 1; j < numRep; j++) { binTranslated.push_back(matrixIndex); } //inflate redundants
+                        }else {
+                            if (namefile == "") { binTranslated.push_back(matrixIndex);  } //will be unique and in matrix, possible rep
+                            else {//name file, no group because if group file was present we could be usingthe count file
+                                map<string, int>::iterator itNameFile = nameMap.find(names[i]);
+                                
+                                if (itNameFile == nameMap.end()) { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct.\n");  m->setControl_pressed(true); }
+                                else{ binTranslated.push_back(matrixIndex); }
                             }
                         }
                     }
                 }
                 
-                vector<float> max_dist(seqIndex.size(), 0.0);
-                vector<float> total_dist(seqIndex.size(), 0.0);
+                //True Negative - far, cluster apart
+                //True Positive - close, cluster together
+                //False Negative - close, cluster apart
+                //False Positve - far, cluster together
+                vector<int> numCloseInBin; numCloseInBin.resize(binTranslated.size(), 0);
                 
-                // loop through all entries in seqIndex
-                SeqMap::iterator it;
-                SeqMap currMap;
-                for (size_t i=0; i < seqIndex.size(); i++) {
+                for (size_t i=0; i < binTranslated.size(); i++) {
                     if (m->getControl_pressed()) {  return  "control"; }
                     
-                    if (!large) {	currMap = seqVec[seqIndex[i]];  }
-                    else		{	currMap = getMap(seqIndex[i]);	}
-                    
-                    for (size_t j=0; j < seqIndex.size(); j++) {
-                        it = currMap.find(seqIndex[j]);
-                        if (it != currMap.end()) {
-                            max_dist[i] = max(max_dist[i], it->second);
-                            max_dist[j] = max(max_dist[j], it->second);
-                            total_dist[i] += it->second;
-                            total_dist[j] += it->second;
-                        }else{ //if you can't find the distance make it the cutoff
-                            max_dist[i] = max(max_dist[i], cutoff);
-                            max_dist[j] = max(max_dist[j], cutoff);
-                            total_dist[i] += cutoff;
-                            total_dist[j] += cutoff;
+                    for (size_t j = 0; j < i; j++) {
+                        if (matrix->isClose(binTranslated[i], binTranslated[j])) {
+                            numCloseInBin[i]++; numCloseInBin[j]++;
+                        }else if (binTranslated[i] == binTranslated[j]) { //you have inflated the otu and need to count this as a close match
+                            numCloseInBin[i]++; numCloseInBin[j]++;
                         }
                     }
                 }
                 
-                // sequence with the smallest maximum distance is the representative
-                //if tie occurs pick sequence with smallest average distance
-                float min = 10000;
-                int minIndex;
-                for (size_t i=0; i < max_dist.size(); i++) {
+                long long minIndex = binTranslated[0]; int min = numCloseInBin[0];
+                vector<long long> ties; ties.push_back(binTranslated[0]);
+                for (size_t i=1; i < numCloseInBin.size(); i++) {
                     if (m->getControl_pressed()) {  return  "control"; }
-                    if (max_dist[i] < min) {
-                        min = max_dist[i];
-                        minIndex = i;
-                    }else if (max_dist[i] == min) {
-                        float currentAverage = total_dist[minIndex] / (float) total_dist.size();
-                        float newAverage = total_dist[i] / (float) total_dist.size();
-                        
-                        if (newAverage < currentAverage) {
-                            min = max_dist[i];
-                            minIndex = i;
-                        }
-                    }
+                    if (numCloseInBin[i] > min) {
+                        ties.clear();
+                        min = numCloseInBin[i];
+                        minIndex = binTranslated[i];
+                        ties.push_back(binTranslated[i]);
+                    }else if (numCloseInBin[i] == min) { ties.push_back(binTranslated[i]); }
                 }
                 
-                return(names[minIndex]);
+                string repName = "";
+                if (ties.size() > 0) {
+                    long long numTies = ties.size()-1;
+                    long long randomIndex = util.getRandomIndex(numTies);
+                    repName = matrix->getName(ties[randomIndex]);
+                }else { repName = matrix->getName(minIndex); }
+                
+                return repName;
             }
         }
 	}
@@ -1165,7 +975,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 					reps.push_back(newRep);
 				}
 			}else { 
-				m->mothurOut(rep + " is missing from your fasta or name file, ignoring. Please correct."); m->mothurOutEndLine(); 
+				m->mothurOut(rep + " is missing from your fasta or name file, ignoring. Please correct.\n");
 			}
 		}
 		
@@ -1264,35 +1074,6 @@ int GetOTURepCommand::processNames(string filename, string label) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetOTURepCommand", "processNames");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-SeqMap GetOTURepCommand::getMap(int row) {
-	try {
-		SeqMap rowMap;
-		
-		//make sure this row exists in the file, it may not if the seq did not have any distances below the cutoff
-		if (rowPositions[row] != -1){
-			//go to row in file
-			inRow.seekg(rowPositions[row]);
-			
-			int rowNum, numDists, colNum;
-			float dist;
-			
-			inRow >> rowNum >> numDists;
-			
-			for(int i = 0; i < numDists; i++) {
-				inRow >> colNum >> dist;
-				rowMap[colNum] = dist;
-				
-			}
-		}
-		
-		return rowMap;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "getMap");
 		exit(1);
 	}
 }

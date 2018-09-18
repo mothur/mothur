@@ -47,8 +47,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "closed-open", "closed", "", "", "","",false,false,true); parameters.push_back(pmethod);
-        CommandParameter pinitialize("initialize", "Multiple", "oneotu-singleton", "singleton", "", "", "","",false,false,true); parameters.push_back(pinitialize);
-        CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
+         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.0001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
         CommandParameter pdenovoiters("denovoiters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pdenovoiters);
@@ -83,9 +82,8 @@ string ClusterFitCommand::getHelpString(){
         helpString += "The refcount parameter allows you to enter your reference count file.\nA refcount or refname file is required if your reference distance file is in column format.\n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
         helpString += "The denovoiters parameter allow you to set the number of randomizations to perform. \n";
-        helpString += "The fitpercent parameter allow you to set percentage of reads to be fitted. Default=10. Max=100, min=0.01.\n";
+        helpString += "The fitpercent parameter allow you to set percentage of reads to be fitted. Default=50. Max=100, min=0.01.\n";
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
-        helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its own OTU, or oneotu meaning all sequences are assigned to one otu. Default=singleton.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method (delta=0.0001). \n";
         helpString += "The method parameter allows you to enter your clustering method. Options are closed and open. Default=closed.\n";
         helpString += "The cluster.fit command should be in the following format: \n";
@@ -375,10 +373,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             if ((metricName == "mcc") || (metricName == "sens") || (metricName == "spec") || (metricName == "tptn") || (metricName == "tp") || (metricName == "tn") || (metricName == "fp") || (metricName == "fn") || (metricName == "f1score") || (metricName == "accuracy") || (metricName == "ppv") || (metricName == "npv") || (metricName == "fdr") || (metricName == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
             
-            initialize = validParameter.valid(parameters, "initialize");		if (initialize == "not found") { initialize = "singleton"; }
-            
-            if (initialize == "singleton"){ }
-            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initialization is singleton.\n");  abort = true; }
+            initialize = "singleton";
             
             temp = validParameter.valid(parameters, "iters");		if (temp == "not found")  { temp = "100"; }
             util.mothurConvert(temp, maxIters);
@@ -793,7 +788,7 @@ string ClusterFitCommand::runSensSpec(string listFileName, string distFName, str
                 string accnosFileName = filenames["accnos"][0];
                 
                 inputString = "column=" + thisDistFile + ", accnos=" + accnosFileName;
-                m->mothurOut("/n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
+                m->mothurOut("\n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
                 m->mothurOut("Running command: get.dists(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 

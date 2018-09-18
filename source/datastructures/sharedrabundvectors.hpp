@@ -25,10 +25,9 @@ inline bool compareRAbunds(SharedRAbundVector* left, SharedRAbundVector* right){
 class SharedRAbundVectors : public DataVector {
     
 public:
-    SharedRAbundVectors() : DataVector() {  label = ""; numBins = 0; otuTag = "Otu"; printSharedHeaders = true; }
+    SharedRAbundVectors() : DataVector() {  label = ""; numBins = 0; otuTag = "Otu";  }
     SharedRAbundVectors(ifstream&, vector<string>& userGroups, string&, string&);
     SharedRAbundVectors(SharedRAbundVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
-        printSharedHeaders = true;
         vector<SharedRAbundVector*> data = bv.getSharedRAbundVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         setLabels(bv.getLabel());
@@ -61,7 +60,7 @@ public:
     int size() { return (int)lookup.size(); }
     void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundVectors.\n"); m->setControl_pressed(true); }
     void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; }
-    void print(ostream&);
+    void print(ostream&, bool&);
     
     RAbundVector getRAbundVector();
     RAbundVector getRAbundVector(string); //group you want the rabund for
@@ -72,13 +71,12 @@ public:
     vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
     
 private:
-    void printHeaders(ostream&);
+    void printHeaders(ostream&, bool&);
     vector<SharedRAbundVector*> lookup;
     vector<string> currentLabels;
     map<string, int> groupNames;
     int numBins;
     string otuTag;
-    bool printSharedHeaders;
     
 };
 

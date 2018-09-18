@@ -473,8 +473,8 @@ int RemoveOtuLabelsCommand::readShared(){
         variables["[distance]"] = lookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);
         outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        ofstream out; util.openOutputFile(outputFileName, out);
-        lookup->print(out);
+        ofstream out; util.openOutputFile(outputFileName, out);  bool printHeaders = true;
+        lookup->print(out, printHeaders);
         out.close();
         
         delete lookup;

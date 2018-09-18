@@ -376,6 +376,10 @@ int RenameSeqsCommand::execute() {
                 
                 Sequence seq(in); util.gobble(in);
                 
+                if (seq.getName() == "1_Sample_128") {
+                    cout << "here\n";
+                }
+                
                 vector<string> dups;
                 if (nameFile != "") {
                     map<string, vector<string> >::iterator it = nameMap.find(seq.getName());
@@ -390,10 +394,10 @@ int RenameSeqsCommand::execute() {
                         group = groupMap->getGroup(dups[i]);
                     }else if (countfile != "") {
                         if (hasGroups) {
-                            vector<string> groups = countTable->getGroups(seq.getName());
-                            if (group.size() == 0)      {   group = "not found";    }
-                            else if (group.size() == 1) {   group = groups[0];      }
-                            else                        {   group = "Multi";        }
+                            vector<string> thisReadsGroups = countTable->getGroups(seq.getName());
+                            if (thisReadsGroups.size() == 0)        {   group = "not found";            }
+                            else if (thisReadsGroups.size() == 1)   {   group = thisReadsGroups[0];     }
+                            else                                    {   group = "Multi";                }
                         }
                     }
                     
@@ -411,13 +415,13 @@ int RenameSeqsCommand::execute() {
                             else if (group != "") { newName = group + delim + newName; }
                         }
                         
+                        if (countfile != "") { countTable->renameSeq(seq.getName(), newName); }
+                        if (groupfile != "") { outGroup << newName << '\t' << group << endl;  }
+                        
                         if (i == 0) {
                             seq.setName(newName);
                             seq.printSequence(outFasta);
                         }
-                        
-                        if (countfile != "") { countTable->renameSeq(seq.getName(), newName); }
-                        if (groupfile != "") { outGroup << newName << '\t' << group << endl;  }
                         
                         if ((nameFile != "") && (i == 0))  { outName << newName << '\t' << newName;  }
                         else { outName << "," << newName;  }

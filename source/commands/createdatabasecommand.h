@@ -12,6 +12,7 @@
 #include "command.hpp"
 #include "listvector.hpp"
 #include "sequence.hpp"
+#include "sharedrabundfloatvectors.hpp"
 
 class CreateDatabaseCommand : public Command {
 public:
@@ -35,7 +36,7 @@ public:
 private:
 	
 	bool abort;
-	string sharedfile, listfile, groupfile, repfastafile, repnamesfile, contaxonomyfile, label, outputDir, countfile;
+	string relabundfile, sharedfile, listfile, groupfile, repfastafile, repnamesfile, contaxonomyfile, label, outputDir, countfile;
 	
 	vector<string> outputNames;
 		
@@ -43,6 +44,7 @@ private:
     vector<int> readTax(vector<string>&, vector<string>&);
 	ListVector* getList();
     SharedRAbundVectors* getShared();
+    SharedRAbundFloatVectors* getRelabund();
     int findIndex(vector<string>&, string);
 	
 };

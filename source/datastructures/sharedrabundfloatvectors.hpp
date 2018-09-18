@@ -24,13 +24,12 @@ inline bool compareRAbundFloats(SharedRAbundFloatVector* left, SharedRAbundFloat
 class SharedRAbundFloatVectors : public DataVector {
     
 public:
-    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu"; printSharedHeaders = true; }
+    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu";  }
     SharedRAbundFloatVectors(ifstream&, vector<string>&, string&, string&);
     SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
         vector<SharedRAbundFloatVector*> data = bv.getSharedRAbundFloatVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         setLabels(bv.getLabel());
-        printSharedHeaders = true;
         setOTUNames(bv.getOTUNames());
         eliminateZeroOTUS();
     }
@@ -57,7 +56,7 @@ public:
     int getNumBins() { return numBins; }
     float getNumSeqs(string); //group
     float getNumSeqsSmallestGroup();
-    void print(ostream&);
+    void print(ostream&, bool&);
     
     vector<SharedRAbundVector*> getSharedRAbundVectors();
     vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
@@ -69,13 +68,13 @@ public:
     void eliminateZeroOTUS(); //run after push_backs if groups are chosen
     
 private:
-    void printHeaders(ostream&);
+    void printHeaders(ostream&, bool&);
     vector<SharedRAbundFloatVector*> lookup;
     vector<string> currentLabels;
     map<string, int> groupNames;
     int numBins;
     string otuTag;
-    bool printSharedHeaders;
+    
 
 };
 

@@ -122,8 +122,8 @@ bool CountTable::testGroups(string file, vector<string>& groups) {
 bool CountTable::setNamesOfGroups(vector<string> mygroups) {
     try {
         //remove groups from table not in new groups we are setting
-        for (int i = 0; i < groups.size(); i++) {
-            if (util.inUsersGroups(groups[i], mygroups)) {}
+        for (int i = 0; i < groups.size();) {
+            if (util.inUsersGroups(groups[i], mygroups)) { ++i; }
             else { removeGroup(groups[i]);  }
         }
 
@@ -491,6 +491,45 @@ int CountTable::printSeq(ofstream& out, string seqName) {
 		m->errorOut(e, "CountTable", "printSeq");
 		exit(1);
 	}
+}
+/************************************************************/
+SharedRAbundVectors* CountTable::getShared(vector<string> selected) {
+    try {
+        
+        if (selected.size() == 0) {}
+        else { setNamesOfGroups(selected); }
+        
+        return getShared();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "getShared");
+        exit(1);
+    }
+}
+/************************************************************/
+SharedRAbundVectors* CountTable::getShared() {
+    try {
+        SharedRAbundVectors* lookup = new SharedRAbundVectors();
+        
+        if (hasGroups) {
+            for (int i = 0; i < groups.size(); i++) { //create blank rabunds for each group
+                SharedRAbundVector* thisGroupsRabund = new SharedRAbundVector();
+                thisGroupsRabund->setGroup(groups[i]);
+                lookup->push_back(thisGroupsRabund);
+            }
+            
+            //add each "otu"
+            for (int i = 0; i < counts.size(); i++) { lookup->push_back(counts[i]); }
+            
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
+        
+
+        return lookup;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "getShared");
+        exit(1);
+    }
 }
 /************************************************************/
 //group counts for a seq

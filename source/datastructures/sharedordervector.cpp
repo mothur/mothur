@@ -32,7 +32,6 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups, st
         int numUserGroups = userGroups.size();
 				
 		groupmap = new GroupMap();
-        if (!util.isSubset(groupmap->getNamesOfGroups(), userGroups)) { m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); m->setControl_pressed(true); }
 		
 		int num, inputData, count;
 		count = 0;  numSeqs = 0;

@@ -602,6 +602,7 @@ int RemoveGroupsCommand::readShared(){
 		lookup = input2.getSharedRAbundVectors();
 
 		bool wroteSomething = false;
+        bool printHeaders = true;
 		
 		while(lookup != NULL) {
 			
@@ -614,7 +615,7 @@ int RemoveGroupsCommand::readShared(){
             if (m->getControl_pressed()) { out.close();  util.mothurRemove(outputFileName);  delete lookup; return 0; }
 			
             if (lookup->size() != 0) { wroteSomething = true; }
-            lookup->print(out);
+            lookup->print(out, printHeaders);
 			
 			//get next line to process
 			//prevent memory leak

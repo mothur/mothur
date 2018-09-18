@@ -326,7 +326,7 @@ int MergeGroupsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out){
+int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out, bool& printHeaders){
 	try {
         vector<string> setNames = designMap->getCategory();
         
@@ -382,7 +382,7 @@ int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out)
         merged->eliminateZeroOTUS(); // remove any zero OTUs created by median option.
         
         //print new file
-        merged->print(out);
+        merged->print(out, printHeaders);
         delete merged;
         
 		return 0;
@@ -417,6 +417,7 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
+        bool printHeaders = true;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -426,7 +427,7 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				
 				m->mothurOut(lookup->getLabel()+"\n"); 
-				process(lookup, out);
+				process(lookup, out, printHeaders);
 				
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
@@ -438,7 +439,7 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()+"\n"); 
 				
-				process(lookup, out);
+				process(lookup, out, printHeaders);
 				
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
@@ -472,7 +473,7 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup->getLabel()+"\n"); 
-			process(lookup, out);
+			process(lookup, out, printHeaders);
 			
 			delete lookup;
 		}

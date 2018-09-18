@@ -800,7 +800,6 @@ void ClusterCommand::printData(string label, map<string, int>& counts, bool& ph)
         }
         
 		oldList.setLabel(label);
-        oldList.setPrintedLabels(ph); ph = false;
         if(countfile != "") {
             oldList.print(listFile, counts);
         }else {
