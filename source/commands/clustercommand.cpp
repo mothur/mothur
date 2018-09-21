@@ -342,6 +342,13 @@ ClusterCommand::ClusterCommand(string option)  {
             temp = validParameter.valid(parameters, "cutoff");
             if (temp == "not found") { if ((method == "opti") || (method == "agc") || (method == "dgc")) { temp = "0.03"; }else { temp = "0.15"; } }
             else { cutOffSet = true; }
+            int pos = temp.find('-');
+            if (pos != string::npos) { //multiple cutoffs given
+                if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) {
+                    m->mothurOut("[WARNING]: Multiple cutoffs can only be specified when using the opti, agc and dgc methods. Using 0.15. \n.");
+                    cutOffSet = false; temp = "0.15";
+                }else { util.splitAtDash(temp, cutoffs);  temp = *cutoffs.begin(); }
+            }else {     cutoffs.insert(temp);  }
             util.mothurConvert(temp, cutoff);
             
 			showabund = validParameter.valid(parameters, "showabund");
@@ -367,7 +374,7 @@ int ClusterCommand::execute(){
 		
 		//phylip file given and cutoff not given - use cluster.classic because it uses less memory and is faster
 		if ((format == "phylip") && (!cutOffSet) && (method != "opti")) {
-			m->mothurOutEndLine(); m->mothurOut("You are using a phylip file and no cutoff.  I will run cluster.classic to save memory and time."); m->mothurOutEndLine();
+			m->mothurOut("\nYou are using a phylip file and no cutoff.  I will run cluster.classic to save memory and time.\n");
 			
 			//run unique.seqs for deconvolute results
 			string inputString = "phylip=" + distfile;
@@ -480,36 +487,49 @@ int ClusterCommand::runVsearchCluster(){
         
         if (cutoff > 1.0) {  m->mothurOut("You did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
         
-        //Run vsearch
-        string ucVsearchFile = util.getSimpleName(vsearchFastafile) + ".clustered.uc";
-        string logfile = util.getSimpleName(vsearchFastafile) + ".clustered.log";
-        vsearchDriver(vsearchFastafile, ucVsearchFile, logfile);
-        
-        if (m->getControl_pressed()) { util.mothurRemove(ucVsearchFile); util.mothurRemove(logfile);  util.mothurRemove(vsearchFastafile); return 0; }
-        
-        if (outputDir == "") { outputDir += util.hasPath(distfile); }
-        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
-        tag = method;
-        
+        map<string, int> counts;
         map<string, string> variables;
+        if (outputDir == "") { outputDir += util.hasPath(distfile); }
+        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile)); tag = method;
+
         variables["[filename]"] = fileroot;
         variables["[clustertag]"] = tag;
-        string sabundFileName = getOutputFileName("sabund", variables);
-        string rabundFileName = getOutputFileName("rabund", variables);
-        //if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         string listFileName = getOutputFileName("list", variables);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
-        if (countfile == "") {
-            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
-            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+        
+        ofstream out;
+        util.openOutputFile(listFileName,	out);
+        bool printHeaders = true;
+        
+        for (set<string>::iterator it = cutoffs.begin(); it != cutoffs.end(); it++) {
+            
+            m->mothurOut("\n" + *it + "\n");
+            util.mothurConvert(*it, cutoff);
+            
+            //Run vsearch
+            string ucVsearchFile = util.getSimpleName(vsearchFastafile) + ".clustered.uc";
+            string logfile = util.getSimpleName(vsearchFastafile) + ".clustered.log";
+            vsearchDriver(vsearchFastafile, ucVsearchFile, logfile);
+            
+            if (m->getControl_pressed()) { break; }
+            
+            //Convert outputted *.uc file into a list file
+            ListVector list = vParse->createListFile(ucVsearchFile, vParse->getNumBins(logfile), toString(1.0-cutoff), counts);
+            
+            if (printHeaders) {
+                list.DataVector::printHeaders(out);
+                printHeaders = false;
+            }else {  list.setPrintedLabels(printHeaders);  }
+            
+            if (countfile != "") { list.print(out, counts); }
+            else { list.print(out); }
+           
+            //remove temp files
+            util.mothurRemove(ucVsearchFile); util.mothurRemove(logfile);
+            
         }
-        
-        //Convert outputted *.uc file into a list file
-        vParse->createListFile(ucVsearchFile, listFileName, sabundFileName, rabundFileName, vParse->getNumBins(logfile), toString(1.0-cutoff));  delete vParse;
-        
-        //remove temp files
-        util.mothurRemove(ucVsearchFile); util.mothurRemove(logfile);  util.mothurRemove(vsearchFastafile);
-        
+        out.close();
+        util.mothurRemove(vsearchFastafile); delete vParse;
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
         return 0;

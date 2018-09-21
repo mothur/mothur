@@ -1269,8 +1269,17 @@ string runVsearchCluster(string thisDistFile, string thisNamefile, double& small
         string listFileName = thisOutputDir + params->util.getRootName(params->util.getSimpleName(thisDistFile)) + params->tag + ".list";
         
         //Convert outputted *.uc file into a list file
-        vParse->createListFile(ucVsearchFile, listFileName, "", "", vParse->getNumBins(logfile), toString(params->cutoff));  delete vParse;
+        map<string, int> counts;
+        ListVector list = vParse->createListFile(ucVsearchFile, vParse->getNumBins(logfile), toString(params->cutoff), counts);
         
+        ofstream out;
+        params->util.openOutputFile(listFileName,	out);
+
+        list.DataVector::printHeaders(out);
+        
+        if (params->useCount) { list.print(out, counts); }
+        else { list.print(out); } delete vParse;
+
         //remove temp files
         params->util.mothurRemove(ucVsearchFile); params->util.mothurRemove(logfile);  params->util.mothurRemove(vsearchFastafile);
         

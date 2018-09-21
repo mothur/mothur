@@ -65,6 +65,7 @@ private:
 	string showabund, timing, metricName;
 	int precision, length, maxIters, processors;
 	ofstream sabundFile, rabundFile, listFile;
+    set<string> cutoffs;
 
 	bool print_start;
 	time_t start;

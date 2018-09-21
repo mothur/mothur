@@ -153,7 +153,7 @@ string VsearchFileParser::getNamesFile(string& inputFile){
 }
 /*************************************************************************/
 //S	1	275	*	*	*	*	*	GQY1XT001C44N8/ab=3677/	*
-int VsearchFileParser::createListFile(string inputFile, string listFile, string sabundFile, string rabundFile, int numBins, string label){
+ListVector VsearchFileParser::createListFile(string inputFile, int numBins, string label, map<string, int>& ct){
     try {
         Utils util;
         map<string, string>::iterator itName;
@@ -191,27 +191,10 @@ int VsearchFileParser::createListFile(string inputFile, string listFile, string 
             
         }
         in.close();
+        ct = counts;
         
-        ofstream out;
-        util.openOutputFile(listFile,	out);
+        return list;
         
-        if (countfile != "") { list.print(out, counts); }
-        else {
-            list.print(out);
-            
-            if ((sabundFile != "") && (rabundFile != "")){
-                //print sabund and rabund
-                ofstream sabund, rabund;
-                util.openOutputFile(sabundFile, sabund);
-                util.openOutputFile(rabundFile, rabund);
-            
-                list.getRAbundVector().print(rabund);  rabund.close();
-                list.getSAbundVector().print(sabund);  sabund.close();
-            }
-        }
-        out.close();
-
-        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "VsearchFileParser", "createListFile");

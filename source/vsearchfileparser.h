@@ -31,7 +31,7 @@ class VsearchFileParser {
     
         string getVsearchFile(); //creates vsearch formatted file. degapped, abundance appended, and sorted.
         string getCountFile(); //returns count filename. If no names or count file is given, then a count file is generated. 
-        int createListFile(string uc, string listfile, string sabund, string rabund, int numbins, string label); //takes vsearch output and creates list file
+        ListVector createListFile(string uc, int numbins, string label, map<string, int>& counts); //takes vsearch output and creates listvector
         int getNumBins(string logfile);
         void setFastaFile(string f) { fastafile = f; }
     
