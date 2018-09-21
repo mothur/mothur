@@ -14,15 +14,15 @@
 //count table files look like:
 
 /*
- Representative_Sequence	total	F003D000	F003D002	F003D004	F003D006	F003D008	F003D142	F003D144	F003D146	F003D148	F003D150	MOCK.GQY1XT001	
- GQY1XT001C296C	6051	409	985	923	937	342	707	458	439	387	464	0	
- GQY1XT001A3TJI	4801	396	170	413	442	306	769	581	576	497	651	0	
- GQY1XT001CS2B8	3018	263	226	328	460	361	336	248	290	187	319	0	
- GQY1XT001CD9IB	2736	239	177	256	405	306	286	263	248	164	392	0	
- 
+ Representative_Sequence	total	F003D000	F003D002	F003D004	F003D006	F003D008	F003D142	F003D144	F003D146	F003D148	F003D150	MOCK.GQY1XT001
+ GQY1XT001C296C	6051	409	985	923	937	342	707	458	439	387	464	0
+ GQY1XT001A3TJI	4801	396	170	413	442	306	769	581	576	497	651	0
+ GQY1XT001CS2B8	3018	263	226	328	460	361	336	248	290	187	319	0
+ GQY1XT001CD9IB	2736	239	177	256	405	306	286	263	248	164	392	0
+
  or if no group info was used to create it
- 
- Representative_Sequence	total	
+
+ Representative_Sequence	total
  GQY1XT001C296C	6051
  GQY1XT001A3TJI	4801
  GQY1XT001CS2B8	3018
@@ -31,8 +31,8 @@
  GQY1XT001CNF2P	2796
  GQY1XT001CJMDA	1667
  GQY1XT001CBVJB	3758
- 
- 
+
+
  */
 
 
@@ -43,18 +43,19 @@
 #include "sharedrabundvectors.hpp"
 
 class CountTable {
-    
+
     public:
-    
+
         CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; }
         ~CountTable() {}
-    
-        //reads and creates smart enough to eliminate groups with zero counts 
-        int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames 
+
+        //reads and creates smart enough to eliminate groups with zero counts
+        int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames
         int createTable(string, string, bool); //namefile, groupfile, createGroup
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
-    
+        int clearTable(); //turn all counts to zeros
+
         int printTable(string);
         int printHeaders(ofstream&);
         vector<string> getHardCodedHeaders(); //Representative_Sequence, total
@@ -62,23 +63,23 @@ class CountTable {
         bool testGroups(string file); //used to check if file has group data without reading it
         bool testGroups(string file, vector<string>&); //used to check if file has group data without reading it, return groups if found.
         int copy(CountTable*); //copy countable
-    
+
         bool hasGroupInfo() { return hasGroups; }
         int getNumGroups() { return (int)groups.size(); }
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
         bool setNamesOfGroups(vector<string>);
         int addGroup(string);
         int removeGroup(string);
-        
+
         int renameSeq(string, string); //used to change name of sequence for use with trees
         int setAbund(string, string, int); //set abundance number of seqs for that group for that seq
-        int push_back(string); //add a sequence 
-        int push_back(string, int); //add a sequence 
+        int push_back(string); //add a sequence
+        int push_back(string, int); //add a sequence
         int push_back(string, vector<int>); //add a sequence with group info
         int remove(string); //remove seq
         int get(string); //returns unique sequence index for reading distance matrices like NameAssignment
         int size() { return (int)indexNameMap.size(); }
-    
+
         vector<string> getGroups(string); //returns vector of groups represented by this sequences
         vector<int> getGroupCounts(string);  //returns group counts for a seq passed in, if no group info is in file vector is blank. Order is the same as the groups returned by getGroups function.
         int getGroupCount(string, string); //returns number of seqs for that group for that seq
@@ -88,7 +89,7 @@ class CountTable {
         int getNumSeqs() { return total; } //return total number of seqs
         int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
         int getGroupIndex(string); //returns index in getGroupCounts vector of specific group
-    
+
         vector<string> getNamesOfSeqs(); //return names of all seqeunce in table
         vector<string> getNamesOfSeqs(string); //returns names of seqs in specific group in table
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
@@ -96,7 +97,7 @@ class CountTable {
         SharedRAbundVectors* getShared();
         SharedRAbundVectors* getShared(vector<string>); //set of groups selected
         map<string, int> getNameMap();  //sequenceName -> total number of sequences it represents
-    
+
     private:
         string filename;
         MothurOut* m;
@@ -109,7 +110,7 @@ class CountTable {
         vector<int> totalGroups;
         map<string, int> indexNameMap; //maps seqName -> vector index in counts. seq1 -> 1 would mean seq1's counts are stored in counts[1].
         map<string, int> indexGroupMap;
-    
+
 };
 
 #endif
