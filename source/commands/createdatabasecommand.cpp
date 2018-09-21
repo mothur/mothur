@@ -508,11 +508,6 @@ int CreateDatabaseCommand::execute(){
                     out  << '\t' << abund;
                 }
                 
-                //sanity check
-                if (totalAbund != classifyOtuSizes[index]) {
-                    m->mothurOut("[WARNING]: OTU " + currentLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); //m->setControl_pressed(true);   break;
-                }
-                
                 //output repSeq
                 if (repfastafile != "") { out << '\t' << seqs[index].getName() << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl; }
                 else { out << '\t' << taxonomies[index] << endl; }
