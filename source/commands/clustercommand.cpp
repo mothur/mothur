@@ -345,7 +345,7 @@ ClusterCommand::ClusterCommand(string option)  {
             int pos = temp.find('-');
             if (pos != string::npos) { //multiple cutoffs given
                 if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) {
-                    m->mothurOut("[WARNING]: Multiple cutoffs can only be specified when using the opti, agc and dgc methods. Using 0.15. \n.");
+                    m->mothurOut("[WARNING]: Multiple cutoffs can only be specified when using the agc, dgc or opti method. Using 0.15. \n.");
                     cutOffSet = false; temp = "0.15";
                 }else { util.splitAtDash(temp, cutoffs);  temp = *cutoffs.begin(); }
             }else {     cutoffs.insert(temp);  }
@@ -921,7 +921,7 @@ int ClusterCommand::runOptiCluster(){
             m->mothurOut("\n" + *it + "\n");
             util.mothurConvert(*it, cutoff);
             
-            OptiData* matrix; matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
+            OptiData* matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
             
             OptiCluster cluster(matrix, metric, 0);
             
