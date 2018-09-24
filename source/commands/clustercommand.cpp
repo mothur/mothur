@@ -517,7 +517,6 @@ int ClusterCommand::runVsearchCluster(){
             ListVector list = vParse->createListFile(ucVsearchFile, vParse->getNumBins(logfile), toString(1.0-cutoff), counts);
             
             if (printHeaders) {
-                list.DataVector::printHeaders(out);
                 printHeaders = false;
             }else {  list.setPrintedLabels(printHeaders);  }
             
@@ -862,18 +861,8 @@ int ClusterCommand::runOptiCluster(){
     try {
         if (!cutOffSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03;  }
         
-        string nameOrCount = "";
-        string thisNamefile = "";
-        map<string, int> counts;
-        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
-        else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
+        m->mothurOut("\nClustering " + distfile); m->mothurOutEndLine();
         
-        string distfile = columnfile;
-        if (format == "phylip") { distfile = phylipfile; }
-        
-        
-        OptiData* matrix; matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
-    
         ClusterMetric* metric = NULL;
         if (metricName == "mcc")             { metric = new MCC();              }
         else if (metricName == "sens")       { metric = new Sensitivity();      }
@@ -889,15 +878,19 @@ int ClusterCommand::runOptiCluster(){
         else if (metricName == "npv")        { metric = new NPV();              }
         else if (metricName == "fdr")        { metric = new FDR();              }
         else if (metricName == "fpfn")       { metric = new FPFN();             }
+
+        string nameOrCount = "";
+        string thisNamefile = "";
+        map<string, int> counts;
+        if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap(); }
+        else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
         
-        
-        OptiCluster cluster(matrix, metric, 0);
-        tag = cluster.getTag();
-        
-        m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
+        string distfile = columnfile;
+        if (format == "phylip") { distfile = phylipfile; }
         
         if (outputDir == "") { outputDir += util.hasPath(distfile); }
         fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
+        tag = "opti_" + metric->getName();
         
         string listFileName = fileroot+ tag + ".list";
         
@@ -913,91 +906,87 @@ int ClusterCommand::runOptiCluster(){
         ofstream outStep;
         util.openOutputFile(outputName, outStep);
         
-        int iters = 0;
-        double listVectorMetric = 0; //worst state
-        double delta = 1;
-        
-        cluster.initialize(listVectorMetric, true, initialize);
-        
-        long long numBins = cluster.getNumBins();
-        m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
-        outStep << "iter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
-        long long tp, tn, fp, fn;
-        vector<double> results = cluster.getStats(tp, tn, fp, fn);
-        m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-        outStep << "0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
-        for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
-        m->mothurOutEndLine();
-        outStep << endl;
-        
-        while ((delta > stableMetric) && (iters < maxIters)) {
-            
-            long start = time(NULL);
-            
-            if (m->getControl_pressed()) { break; }
-            double oldMetric = listVectorMetric;
-            
-            cluster.update(listVectorMetric);
-
-            delta = abs(oldMetric - listVectorMetric);
-            iters++;
-            
-            results = cluster.getStats(tp, tn, fp, fn);
-            numBins = cluster.getNumBins();
-            
-            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-            outStep << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
-            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
-            m->mothurOutEndLine();
-            outStep << endl;
-        }
-        m->mothurOutEndLine(); m->mothurOutEndLine();
-        
-        if (m->getControl_pressed()) { delete matrix; delete metric; metric = NULL; return 0; }
-        
-        ListVector* list = cluster.getList();
-        list->setLabel(toString(cutoff));
-        if(countfile != "") { list->print(listFile, counts); }
-        else { list->print(listFile); }
-        listFile.close();
-        
-        variables["[filename]"] = fileroot;
-        variables["[clustertag]"] = tag;
-        string sabundFileName = getOutputFileName("sabund", variables);
-        string rabundFileName = getOutputFileName("rabund", variables);
-        
-        if (countfile == "") {
-            util.openOutputFile(sabundFileName,	sabundFile);
-            util.openOutputFile(rabundFileName,	rabundFile);
-            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
-            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
-            
-            SAbundVector sabund = list->getSAbundVector();
-            sabund.print(sabundFile);
-            sabundFile.close();
-            
-            RAbundVector rabund = list->getRAbundVector();
-            rabund.print(rabundFile);
-            rabundFile.close();
-        }
-        delete list;
-        
         string sensspecFilename = fileroot+ tag + ".sensspec";
         ofstream sensFile;
         util.openOutputFile(sensspecFilename,	sensFile);
         outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
         
-        
         sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        outStep << "iter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+
+        bool printHeaders = true;
+        for (set<string>::iterator it = cutoffs.begin(); it != cutoffs.end(); it++) {
+            
+            m->mothurOut("\n" + *it + "\n");
+            util.mothurConvert(*it, cutoff);
+            
+            OptiData* matrix; matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
+            
+            OptiCluster cluster(matrix, metric, 0);
+            
+            int iters = 0;
+            double listVectorMetric = 0; //worst state
+            double delta = 1;
+            
+            cluster.initialize(listVectorMetric, true, initialize);
+            
+            long long numBins = cluster.getNumBins();
+                        long long tp, tn, fp, fn;
+            vector<double> results = cluster.getStats(tp, tn, fp, fn);
+            m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            outStep << "0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+            for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
+            m->mothurOutEndLine();
+            outStep << endl;
+            
+            while ((delta > stableMetric) && (iters < maxIters)) {
+                
+                long start = time(NULL);
+                
+                if (m->getControl_pressed()) { break; }
+                double oldMetric = listVectorMetric;
+                
+                cluster.update(listVectorMetric);
+                
+                delta = abs(oldMetric - listVectorMetric);
+                iters++;
+                
+                results = cluster.getStats(tp, tn, fp, fn);
+                numBins = cluster.getNumBins();
+                
+                m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+                outStep << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+                for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
+                m->mothurOutEndLine(); outStep << endl;
+            }
+            m->mothurOutEndLine(); m->mothurOutEndLine();
+            
+            if (m->getControl_pressed()) { delete matrix; delete metric; metric = NULL; return 0; }
+            
+            ListVector* list = cluster.getList();
+            list->setLabel(toString(cutoff));
+            
+            if (printHeaders) { //only print headers the first time
+                printHeaders = false;
+            }else {  list->setPrintedLabels(printHeaders);  }
+            
+            if(countfile != "") { list->print(listFile, counts); }
+            else { list->print(listFile); }
+            delete list;
+            
+            results = cluster.getStats(tp, tn, fp, fn);
+            
+            sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+            for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; } sensFile << '\n';
+            
+            
+            delete matrix;
+        }
         
-        results = cluster.getStats(tp, tn, fp, fn);
-        
-        sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
-        for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; }
-        sensFile << '\n';
+        listFile.close();
         sensFile.close();
-        
-        delete matrix;
+        outStep.close();
         
         return 0;
         
