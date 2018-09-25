@@ -34,7 +34,7 @@ class OptiFitCluster : public Cluster {
     
 public:
     
-    OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns);
+    OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns, string crit);
     ~OptiFitCluster() {}
     
     int initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string>, string, bool);
@@ -55,6 +55,7 @@ protected:
     Utils util;
     ClusterMetric* metric;
     OptiData* matrix;
+    string criteria;
     
     map<long long, long long> seqBin; //sequence# -> bin#
     vector<long long> randomizeSeqs;
