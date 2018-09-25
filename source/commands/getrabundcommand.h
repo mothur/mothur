@@ -38,9 +38,9 @@ public:
 	
 private:
 	
-	string filename, listfile, sabundfile, inputfile, format, outputDir, countfile;
+	string filename, listfile, sabundfile, inputfile, format, outputDir, countfile, sharedfile;
 	ofstream out;
-	vector<string> outputNames;
+	vector<string> outputNames, Groups;
 
 	bool abort, allLines, sorted;
 	set<string> labels; //holds labels to be used

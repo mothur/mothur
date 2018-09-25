@@ -532,12 +532,11 @@ vector<SharedRAbundFloatVector*> SharedRAbundVectors::getSharedRAbundFloatVector
 /***********************************************************************/
 RAbundVector SharedRAbundVectors::getRAbundVector(){
     try {
-        RAbundVector rav;
+        RAbundVector rav; rav.setLabel(label);
         for (int i = 0; i < numBins; i++) {
             int abund = getOTUTotal(i);
             rav.push_back(abund);
         }
-        
         return rav;
     }
     catch(exception& e) {
