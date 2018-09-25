@@ -10,7 +10,8 @@
 
 //**********************************************************************************************************************
 vector<string> FilterSharedCommand::setParameters(){	
-	try {		
+	try {
+        CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","shared",false,true,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
@@ -42,6 +43,7 @@ string FilterSharedCommand::getHelpString(){
 		helpString += "The filter.shared command is used to remove OTUs based on various critieria.\n";
 		helpString += "The filter.shared command parameters are shared, minpercent, minabund, mintotal, minnumsamples, minpercentsamples, rarepercent, makerare, keepties, groups and label.  You must provide a shared file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n";
+        helpString += "You may provide an accnos containing the list of groups to get instead of setting the groups parameter to the groups you wish to select.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
         
 		helpString += "The minabund parameter allows you indicate the minimum abundance required for each sample in a given OTU.  If any samples abundance falls below the minimum, the OTU is removed. Default=0\n";
@@ -133,6 +135,14 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("accnos");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
+                }
             }
 					
 			sharedfile = validParameter.validFile(parameters, "shared");
@@ -163,7 +173,12 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 				util.splitAtDash(groups, Groups);
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
-			
+            
+            accnosfile = validParameter.validFile(parameters, "accnos");
+            if (accnosfile == "not open") { abort = true; }
+            else if (accnosfile == "not found") {  accnosfile = ""; }
+            else { current->setAccnosFile(accnosfile); util.readAccnos(accnosfile, Groups);  } //load groups in accnos file into Groups parameter
+
             bool setSomething = false;
 			string temp = validParameter.valid(parameters, "minabund");
             if (temp == "not found"){	temp = "-1";		}
@@ -323,9 +338,6 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         
         if (m->getControl_pressed()) {  return 0; }
         
-        map<string, int> labelsForRare;
-        vector<string> filteredLabels;
-        
         vector<SharedRAbundVector*> data = sharedLookup->getSharedRAbundVectors();
         vector<int> rareCounts; rareCounts.resize(Groups.size(), 0);
         
@@ -427,8 +439,6 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             
             //did this OTU pass the filter criteria
             if (okay) {
-                //filteredLabels.push_back(saveBinLabels[i]);
-                //labelsForRare[util.getSimpleLabel(saveBinLabels[i])] = i;
                 ++i;
             }else { //if not, do we want to save the counts
                 filteredSomething = true;
@@ -442,37 +452,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         }
         
         //if we are saving the counts add a "rare" OTU if anything was filtered
-        if (makeRare) {
-            if (filteredSomething) {
-                //create label for rare OTUs
-                map<string, int>::iterator it;
-                int otuNum = 0; bool notDone = true;
-                
-                //find label prefix
-                string prefix = "Otu";
-                if (filteredLabels[filteredLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
-                
-                string tempLabel = filteredLabels[filteredLabels.size()-1];
-                string simpleLastLabel = util.getSimpleLabel(tempLabel);
-                util.mothurConvert(simpleLastLabel, otuNum); otuNum++;
-                while (notDone) {
-                    if (m->getControl_pressed()) { notDone = false; break; }
-                    
-                    string potentialLabel = toString(otuNum);
-                    it = labelsForRare.find(potentialLabel);
-                    if (it == labelsForRare.end()) {
-                        potentialLabel = prefix + toString(otuNum);
-                        it = labelsForRare.find(potentialLabel);
-                        if (it == labelsForRare.end()) {
-                            notDone = false; break;
-                        }
-                    }
-                    otuNum++;
-                }
-                sharedLookup->push_back(rareCounts, "rareOTUs" + toString(otuNum));
-                //filteredLabels.push_back("rareOTUs" + toString(otuNum));
-            }
-        }
+        if (makeRare) { if (filteredSomething) { sharedLookup->push_back(rareCounts, "OTURare1"); } }
         
         ofstream out;
 		util.openOutputFile(outputFileName, out);
