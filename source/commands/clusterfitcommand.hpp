@@ -44,8 +44,8 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, sim, print_start, selfReference;
-    string refcolumnfile, refphylipfile, refdistfile, reffastafile, refnamefile, refcountfile, reflistfile, refNameOrCount;
+    bool abort, sim, print_start, selfReference, printref;
+    string refdistfile, reffastafile, refnamefile, refcountfile, reflistfile, refNameOrCount;
     string namefile, refformat, distfile, countfile, fastafile, columnfile, nameOrCount;
     string comboDistFile;
     
@@ -61,7 +61,7 @@ private:
     ListVector* clusterRefs(OptiData*& refsMatrix, ClusterMetric*&);
     void createReferenceNameCount();
     string calcDists();
-    string runSensSpec(string listFileName, string distFileName, string dupsFile, string dupsFormat, ClusterMetric*&, string);
+    string runSensSpec(string distFileName, string dupsFile, string dupsFormat, ClusterMetric*&, string);
     void outputSteps(string outputName, bool& printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int, bool, int);
 };
 

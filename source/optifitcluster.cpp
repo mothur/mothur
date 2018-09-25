@@ -410,7 +410,7 @@ ListVector* OptiFitCluster::getList() {
     }
 }
 /***********************************************************************/
-ListVector* OptiFitCluster::getFittedList(string label) {
+ListVector* OptiFitCluster::getFittedList(string label, bool includerefs) {
     try {
         ListVector* list = new ListVector();
         
@@ -476,6 +476,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
                 
                 if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
                     for (int i = 0; i < singleton->getNumBins(); i++) {
+                        if (m->getControl_pressed()) { break; }
                         if (singleton->get(i) != "") {
                             list->push_back(singleton->get(i));
                         }
@@ -489,6 +490,7 @@ ListVector* OptiFitCluster::getFittedList(string label) {
                 
                 if (unFitsingleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
                     for (int i = 0; i < unFitsingleton->getNumBins(); i++) {
+                        if (m->getControl_pressed()) { break; }
                         if (unFitsingleton->get(i) != "") {
                             list->push_back(unFitsingleton->get(i));
                         }
@@ -505,10 +507,11 @@ ListVector* OptiFitCluster::getFittedList(string label) {
             }
         }
         
-        if (denovo) { //add in refs
+        if (denovo || includerefs) { //add in refs
             vector<long long> refs = matrix->getRefSeqs();
             
             for (long long i = 0; i < refs.size(); i++) {
+                if (m->getControl_pressed()) { break; }
                 map<long long, long long>::iterator it = seqBin.find(refs[i]);
                 
                 long long seqNumber = it->first;
@@ -619,7 +622,7 @@ long long OptiFitCluster::getNumBins() {
 /***********************************************************************/
 long long OptiFitCluster::getNumFitBins() {
     try {
-        ListVector* list = getFittedList("");
+        ListVector* list = getFittedList("", false);
         
         int numBins = 0;
         if (list != NULL) {

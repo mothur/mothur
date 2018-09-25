@@ -48,7 +48,7 @@ public:
     vector<double>  getFitStats( long long&,  long long&,  long long&,  long long&); //fitted seqs stats
     
     ListVector* getList();
-    ListVector* getFittedList(string);
+    ListVector* getFittedList(string, bool);
     
 protected:
     MothurOut* m;

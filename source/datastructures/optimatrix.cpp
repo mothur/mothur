@@ -209,7 +209,7 @@ int OptiMatrix::readColumn(){
             map<string, int> temp = ct.getNameMap();
             for (map<string, int>::iterator it = temp.begin(); it!= temp.end(); it++) {  nameAssignment[it->first] = it->second; }
         }
-        int count = 0;
+        long long count = 0;
         for (map<string, long long>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
             it->second = count; count++;
             nameMap.push_back(it->first);

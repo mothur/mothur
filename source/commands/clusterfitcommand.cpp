@@ -36,24 +36,23 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter plist("reflist", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(plist);
         CommandParameter pfasta("fasta", "InputTypes", "", "", "", "", "","list",false,true,true); parameters.push_back(pfasta);
         CommandParameter prepfasta("reffasta", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(prepfasta);
-        //CommandParameter pfastamap("fastamap", "InputTypes", "", "", "", "", "","",false,true,true); parameters.push_back(pfastamap);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none","","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "","",false,false,true); parameters.push_back(pcount);
         CommandParameter prefname("refname", "InputTypes", "", "", "RefNameCount", "none","","",false,false,true); parameters.push_back(prefname);
         CommandParameter prefcount("refcount", "InputTypes", "", "", "RefNameCount", "none", "","",false,false,true); parameters.push_back(prefcount);
         CommandParameter prefcolumn("refcolumn", "InputTypes", "", "", "PhylipColumnRef", "", "ColumnName","",false,false,true); parameters.push_back(prefcolumn);
-        CommandParameter prefphylip("refphylip", "InputTypes", "", "", "PhylipColumnRef", "", "","",false,false,true); parameters.push_back(prefphylip);
         CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "", "ColumnName","",false,false,true); parameters.push_back(pcolumn);
         CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "closed-open", "closed", "", "", "","",false,false,true); parameters.push_back(pmethod);
-         CommandParameter pcrit("criteria", "Multiple", "fit-combo-both", "both", "", "", "","",false,false,true); parameters.push_back(pcrit);
-         CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
+        CommandParameter pcrit("criteria", "Multiple", "fit-combo-both", "both", "", "", "","",false,false,true); parameters.push_back(pcrit);
+        CommandParameter pmetric("metric", "Multiple", "mcc-sens-spec-tptn-fpfn-tp-tn-fp-fn-f1score-accuracy-ppv-npv-fdr", "mcc", "", "", "","",false,false,true); parameters.push_back(pmetric);
         CommandParameter pmetriccutoff("delta", "Number", "", "0.0001", "", "", "","",false,false,true); parameters.push_back(pmetriccutoff);
         CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
         CommandParameter pdenovoiters("denovoiters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pdenovoiters);
         CommandParameter pfitpercent("fitpercent", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pfitpercent);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter prefprint("printref", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prefprint);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
@@ -70,9 +69,8 @@ vector<string> ClusterFitCommand::setParameters(){
 string ClusterFitCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refphylip, refname, refcount, fasta, name, count, column, method, cutoff, precent, metric, iters, initialize, denovoiters.\n";
+        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refname, refcount, fasta, name, count, column, method, cutoff, precent, metric, iters, initialize, denovoiters.\n";
         helpString += "The refcolumn parameter allow you to enter your reference data distance file, to reduce processing time. \n";
-        helpString += "The refphylip parameter allow you to enter your reference data distance file, to reduce processing time. \n";
         helpString += "The column parameter allow you to enter your data distance file, to reduce processing time. \n";
         helpString += "The fasta parameter allows you to enter your fasta file. \n";
         helpString += "The reffasta parameter allows you to enter your fasta file for your reference dataset. \n";
@@ -86,6 +84,7 @@ string ClusterFitCommand::getHelpString(){
         helpString += "The fitpercent parameter allow you to set percentage of reads to be fitted. Default=50. Max=100, min=0.01.\n";
         helpString += "The criteria parameter allows you to indicate which metric will influence the fitting. Options are fit, combo and both. Default=both. Using fit means a sequence will be fitted to an OTU if the fit makes the metric for the fitted sequences better (only considers metric value generated by fit seqs). Using combo means a sequence will be fitted to an OTU if the fit makes the metric for the fitted and the reference sequences better (considers metric value generated by all reference and fit sequences). Using both means a sequence will be fitted to an OTU if it makes the metric for the fitted sequences better (fit) or the metric for the combo better (combo). \n";
         helpString += "The metric parameter allows to select the metric in the opticluster method. Options are Matthews correlation coefficient (mcc), sensitivity (sens), specificity (spec), true positives + true negatives (tptn), false positives + false negatives (fpfn), true positives (tp), true negative (tn), false positive (fp), false negative (fn), f1score (f1score), accuracy (accuracy), positive predictive value (ppv), negative predictive value (npv), false discovery rate (fdr). Default=mcc.\n";
+        helpString += "The printref parameter allows to indicate whether you want the reference seqs printed with the fit seqs. For example, if you are trying to see how a new patient's data changes the clustering, you want to set printref=t so the old patient and new patient OTUs are printed together. If you want to see how your data would fit with a reference like silva, setting printref=f would output only your sequences to the list file. By default printref=t for denovo clustering and printref=f when using a reference.\n";
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method (delta=0.0001). \n";
         helpString += "The method parameter allows you to enter your clustering method. Options are closed and open. Default=closed.\n";
         helpString += "The cluster.fit command should be in the following format: \n";
@@ -177,14 +176,6 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
                     if (path == "") {	parameters["refcolumn"] = inputDir + it->second;		}
                 }
                 
-                it = parameters.find("refphylip");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["refphylip"] = inputDir + it->second;		}
-                }
-                
                 it = parameters.find("column");
                 //user has given a template file
                 if(it != parameters.end()){
@@ -260,15 +251,10 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             else if (reffastafile == "not found") { reffastafile = "";  }
             else {  selfReference = false; }
             
-            refcolumnfile = validParameter.validFile(parameters, "refcolumn");
-            if (refcolumnfile == "not open") { refcolumnfile = ""; abort = true; }
-            else if (refcolumnfile == "not found") { refcolumnfile = ""; }
-            else {  refdistfile = refcolumnfile; refformat = "column"; current->setColumnFile(refcolumnfile);	selfReference = false; }
-            
-            refphylipfile = validParameter.validFile(parameters, "refphylip");
-            if (refphylipfile == "not open") { refphylipfile = ""; abort = true; }
-            else if (refphylipfile == "not found") { refphylipfile = ""; }
-            else {  refdistfile = refphylipfile; refformat = "phylip"; current->setPhylipFile(refphylipfile);	selfReference = false; }
+            refdistfile = validParameter.validFile(parameters, "refcolumn");
+            if (refdistfile == "not open") { refdistfile = ""; abort = true; }
+            else if (refdistfile == "not found") { refdistfile = ""; }
+            else {  refformat = "column"; selfReference = false; }
             
             reflistfile = validParameter.validFile(parameters, "reflist");
             if (reflistfile == "not open") { abort = true; }
@@ -287,7 +273,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             
             
             if (!selfReference) { //if you are providing reference files, lets make sure we have all of them
-                if ((refdistfile == "") || (reffastafile == "") || (reflistfile == "")) { m->mothurOut("[ERROR]: When providing a reference file, you must provide a reffasta, refcolumn or refphylip, reflist and refcount or refname, aborting.\n");  abort = true; }
+                if ((refdistfile == "") || (reffastafile == "") || (reflistfile == "")) { m->mothurOut("[ERROR]: When providing a reference file, you must provide a reffasta, refcolumn, reflist and refcount or refname, aborting.\n");  abort = true; }
             }
             
             fastafile = validParameter.validFile(parameters, "fasta");
@@ -402,6 +388,9 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             if (temp == "not found") { temp = "0.03"; }
             util.mothurConvert(temp, cutoff);
             
+            temp = validParameter.valid(parameters, "printref");			if (temp == "not found") { if (selfReference) { temp = "t"; }else { temp = "f"; } }
+            printref = util.isTrue(temp);
+            
         }
     }
     catch(exception& e) {
@@ -448,6 +437,7 @@ int ClusterFitCommand::execute(){
         variables["[clustertag]"] = "optifit_" + metric->getName();
         string outputName = getOutputFileName("steps", variables);
         string listFile = "";
+        string bestListFileName = "";
         
         if (selfReference) {
         
@@ -456,6 +446,8 @@ int ClusterFitCommand::execute(){
             
             listFile = runDenovoOptiCluster(matrix, metric, counts, outputName);
             
+            //evaluate results
+            bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
         }else {
             
             createReferenceNameCount(); //creates reference name or count file if needed
@@ -478,16 +470,34 @@ int ClusterFitCommand::execute(){
         
             listFile = runRefOptiCluster(matrix, metric, list, counts, outputName);
             listFiles.push_back(listFile);
+            
+            if (!printref) {
+                bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
+            }else {
+                //create combined files needed for sensspec
+                string newDistFile, newDupsFile;
+                newDistFile = distfile + ".temp";
+                newDupsFile = dupsFile + ".temp";
+                util.appendFiles(distfile, newDistFile);
+                util.appendFiles(refdistfile, newDistFile);
+                util.appendFiles(comboDistFile, newDistFile);
+                ofstream out; util.openOutputFile(newDupsFile, out);
+                out << "Representative_Sequence\ttotal\n";
+                for (map<string, int>::iterator it = counts.begin(); it != counts.end(); it++) { out << it->first << '\t' << it->second << endl;  }
+                out.close();
+                
+                bestListFileName = runSensSpec(newDistFile, newDupsFile, "count", metric, listFile);
+                util.mothurRemove(newDistFile); util.mothurRemove(newDupsFile);
+            }
         }
-    
+        delete metric;
+        
         if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
         
-        //evaluate results
-        string bestListFileName = runSensSpec(listFile, columnfile, dupsFile, nameOrCount, metric, listFile);
-        
-        delete metric;
         outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
         outputNames.push_back(bestListFileName); outputTypes["list"].push_back(bestListFileName);
+        
+        if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
 
         m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to fit sequences to reference OTUs.\n");
         
@@ -591,7 +601,7 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
             string listFileName = fileroot+ tag + ".list";
             util.openOutputFile(listFileName,	listFile);
             
-            ListVector* list = cluster.getFittedList(toString(cutoff));
+            ListVector* list = cluster.getFittedList(toString(cutoff), printref);
             list->setLabel(toString(cutoff));
             list->setLabels(nullVector);
             
@@ -688,7 +698,7 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         int iters = 0;
         double listVectorMetric = 0; //worst state
         double delta = 1;
-        
+
         vector<vector<string> > otus;
         for (int i = 0; i < refList->getNumBins(); i++) {
             vector<string> binNames;
@@ -696,6 +706,18 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
             if (bin != "") {
                 util.splitAtComma(bin, binNames);
                 otus.push_back(binNames);
+            }
+        }
+        
+        map<string, int> refCounts;
+        if (printref) { // need to include reference in counts
+            
+            if (refcountfile != "") {
+                CountTable refct; refct.readTable(refcountfile, false, false);
+                refCounts = refct.getNameMap();
+            }else if (refnamefile != "") { refCounts = util.readNames(refnamefile); }
+            else { //assume unique
+                for (int i = 0; i < otus.size(); i++) { for (int j = 0; j < otus[i].size(); j++) { refCounts[otus[i][j]] = 1; } }
             }
         }
         
@@ -733,7 +755,7 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         
         if (m->getControl_pressed()) {  return 0; }
         
-        ListVector* list = cluster.getFittedList(toString(cutoff));
+        ListVector* list = cluster.getFittedList(toString(cutoff), printref);
         list->setLabel(toString(cutoff));
         
         ofstream listFile;
@@ -741,6 +763,10 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         util.openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 
+        if (printref) { // need to include reference in counts
+            counts.insert(refCounts.begin(), refCounts.end());
+        }
+        
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
         listFile.close();
@@ -756,7 +782,7 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
     
 }
 //**********************************************************************************************************************
-string ClusterFitCommand::runSensSpec(string listFileName, string distFName, string dupsfile, string dupsFormat, ClusterMetric*& userMetric, string listFile) {
+string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string dupsFormat, ClusterMetric*& userMetric, string listFile) {
     try {
         
         ofstream sensSpecFile;
