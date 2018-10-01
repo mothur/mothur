@@ -704,99 +704,69 @@ int process(string group, string newMapFile, preClusterData* params){
 	  	if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + 	toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
 
 		} else if(params->pc_method == "tree") {
-			params->diffs = 1;
 
 			params->m->mothurOutJustToScreen("Determining which sequences can be merged...");
 			cout.flush();
 
-			vector<vector<bool> > mergable(numSeqs);
-			vector<vector<int> > mismatches(numSeqs);
-
-			mergable[0].resize(numSeqs, false);
-			mismatches[0].resize(numSeqs, 1000);
+			vector<int> mergable_row;//{ 1,2,3,4,5,7,7,8,9,10,11 };
+			vector<int> mergable_col;//{ 0,1,2,1,4,4,6,6,8,9,10 };
 
 	    for (int i = 1; i < numSeqs; i++) {
-				mergable[i].resize(numSeqs, false);
-				mismatches[i].resize(numSeqs, 1000);
 
         for (int j = 0; j < i; j++) {
 
           if (params->m->getControl_pressed()) { out.close(); return 0; }
 
-          int mismatch = params->length;
+          int mismatches = params->length;
 
 					if(originalCount[j] > originalCount[i] * params->delta){
 	          if (params->align_method == "unaligned") {
-							mismatches[i][j] = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
+							mismatches = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
 																					params->alignSeqs[j]->seq.getAligned(), params);
 						} else {
-							mismatches[i][j] = calcMisMatches(params->alignSeqs[i]->filteredSeq,
+							mismatches = calcMisMatches(params->alignSeqs[i]->filteredSeq,
 																				params->alignSeqs[j]->filteredSeq, params);
 						}
 
-						mergable[i][j] = (mismatches[i][j] == 1);
+						if(mismatches == 1){
+							mergable_row.push_back(i);
+							mergable_col.push_back(j);
+						}
 					}
         }
       }
 			params->m->mothurOutJustToScreen(" done\n");
 
-			vector<int> cluster(numSeqs, -1);
-
 			params->m->mothurOutJustToScreen("Clusterng sequences...");
 			cout.flush();
 
+			for(int i=0;i<mergable_row.size()-1;i++){
 
-			for(int i=0;i<numSeqs;i++){
+				int seed_row = mergable_row[i];
+				int seed_col = mergable_col[i];
 
-        if (params->m->getControl_pressed()) { out.close(); return 0; }
+				for(int j=i+1;j<mergable_row.size();j++){
 
-				vector<int> indices_to_merge;
-
-				for(int j=0;j<numSeqs;j++){
-					if(mergable[j][i] == true){	indices_to_merge.push_back(j); }
-				}
-
-				while(indices_to_merge.size() != 0){
-					for(int j=0;j<numSeqs;j++){
-						bool to_merge = mergable[j][i];
-
-						if(!to_merge){
-							for(int k=0;k<indices_to_merge.size();k++){
-
-								if(mergable[j][indices_to_merge[k]]){
-									to_merge = true;
-									break;
-								}
-
-							}
-						}
-						mergable[i][j] = to_merge;
-						mergable[j][i] = mergable[i][j];
-
-						if (params->m->getControl_pressed()) { out.close(); return 0; }
-					}
-
-					cluster[i] = i;
-
-					for(int k=0;k<indices_to_merge.size();k++){
-						cluster[indices_to_merge[k]] = i;
-
-						for(int l=0;l<numSeqs;l++){
-							mergable[indices_to_merge[k]][l] = false;
-							mergable[l][indices_to_merge[k]] = false;
-						}
-
-		        if (params->m->getControl_pressed()) { out.close(); return 0; }
-					}
-					mergable[i][i] = false;
-
-					indices_to_merge.clear();
-
-					for(int j=0;j<numSeqs;j++){
-						if(mergable[j][i] == true){	indices_to_merge.push_back(j); }
+					if(mergable_col[j] == seed_row){
+						mergable_col[j] = seed_col;
+					} else if(mergable_row[j] == seed_row){
+							mergable_row[j] = -1;
+							mergable_col[j] = -1;
 					}
 
 					if (params->m->getControl_pressed()) { out.close(); return 0; }
+				}
+				if (params->m->getControl_pressed()) { out.close(); return 0; }
+			}
+
+			vector<int> cluster(numSeqs, -1);
+			for(int i=0;i<cluster.size();i++){
+				cluster[i] = i;
+			}
+
+			for(int i=0;i<mergable_row.size();i++){
+				if(mergable_row[i] != -1){
+					cluster[mergable_row[i]] = mergable_col[i];
 				}
 			}
 
@@ -815,7 +785,18 @@ int process(string group, string newMapFile, preClusterData* params){
 	        params->alignSeqs[cluster[i]]->names += ',' + params->alignSeqs[i]->names;
 	        params->alignSeqs[cluster[i]]->numIdentical += params->alignSeqs[i]->numIdentical;
 
-        	chunk[cluster[i]] += params->alignSeqs[cluster[i]]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(mismatches[i][cluster[i]]) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+					int mismatches;
+					params->diffs = params->length;
+
+          if (params->align_method == "unaligned") {
+						mismatches = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
+																				params->alignSeqs[cluster[i]]->seq.getAligned(), params);
+					} else {
+						mismatches = calcMisMatches(params->alignSeqs[i]->filteredSeq,
+																			params->alignSeqs[cluster[i]]->filteredSeq, params);
+					}
+
+        	chunk[cluster[i]] += params->alignSeqs[cluster[i]]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(mismatches) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
 
         	params->alignSeqs[i]->active = 0;
         	params->alignSeqs[i]->numIdentical = 0;
