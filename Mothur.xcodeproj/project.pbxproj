@@ -403,6 +403,10 @@
 		489AF694210619410028155E /* optirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */; };
 		489AF6952106194A0028155E /* optifitcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */; };
 		489AF6962106195E0028155E /* optidata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C720A48EF700FF9F6E /* optidata.cpp */; };
+		489ECDB1215EC5160036D42C /* libhdf5_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA7215EB4980036D42C /* libhdf5_cpp.a */; };
+		489ECDB2215EC5160036D42C /* libhdf5_hl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA9215EB4BB0036D42C /* libhdf5_hl.a */; };
+		489ECDB3215EC5160036D42C /* libhdf5.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA5215EB4750036D42C /* libhdf5.a */; };
+		489ECDB5215EC5160036D42C /* libhdf5_hl_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDB4215EC5160036D42C /* libhdf5_hl_cpp.a */; };
 		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48B01D2920163594006BE140 /* clusterfitcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B01D2720163594006BE140 /* clusterfitcommand.cpp */; };
@@ -939,6 +943,14 @@
 		489387F8210F633E00284329 /* testOligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testOligos.hpp; path = TestMothur/testcontainers/testOligos.hpp; sourceTree = SOURCE_ROOT; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = SOURCE_ROOT; };
+		489ECDA3215EB30A0036D42C /* libhdf5_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_cpp.a; path = ../libhdf5_cpp.a; sourceTree = "<group>"; };
+		489ECDA5215EB4750036D42C /* libhdf5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5.a; path = ../../../../usr/local/lib/libhdf5.a; sourceTree = "<group>"; };
+		489ECDA7215EB4980036D42C /* libhdf5_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_cpp.a; path = ../../../../usr/local/lib/libhdf5_cpp.a; sourceTree = "<group>"; };
+		489ECDA9215EB4BB0036D42C /* libhdf5_hl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl.a; path = ../../../../usr/local/lib/libhdf5_hl.a; sourceTree = "<group>"; };
+		489ECDAB215EB5690036D42C /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../../../../usr/local/hdf5/lib; sourceTree = "<group>"; };
+		489ECDAD215EB7660036D42C /* libhdf5_hl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl.a; path = ../../../../usr/local/hdf5/lib/libhdf5_hl.a; sourceTree = "<group>"; };
+		489ECDAE215EB7660036D42C /* libhdf5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5.a; path = ../../../../usr/local/hdf5/lib/libhdf5.a; sourceTree = "<group>"; };
+		489ECDB4215EC5160036D42C /* libhdf5_hl_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl_cpp.a; path = ../../../../usr/local/lib/libhdf5_hl_cpp.a; sourceTree = "<group>"; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = TestMothur/testcommands/testrenamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenamefilecommand.h; path = TestMothur/testcommands/testrenamefilecommand.h; sourceTree = SOURCE_ROOT; };
 		48B01D2720163594006BE140 /* clusterfitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = clusterfitcommand.cpp; path = source/commands/clusterfitcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1723,6 +1735,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				489ECDB5215EC5160036D42C /* libhdf5_hl_cpp.a in Frameworks */,
+				489ECDB1215EC5160036D42C /* libhdf5_cpp.a in Frameworks */,
+				489ECDB2215EC5160036D42C /* libhdf5_hl.a in Frameworks */,
+				489ECDB3215EC5160036D42C /* libhdf5.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1735,6 +1751,7 @@
 				08FB7795FE84155DC02AAC07 /* Source */,
 				481FB51A1AC0A63E0076CFF3 /* TestMothur */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				489ECDA2215EB30A0036D42C /* Frameworks */,
 			);
 			name = mothur;
 			sourceTree = "<group>";
@@ -1989,6 +2006,21 @@
 				48789AF22061776100A7D848 /* unchecked.h */,
 			);
 			name = utf8;
+			sourceTree = "<group>";
+		};
+		489ECDA2215EB30A0036D42C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				489ECDB4215EC5160036D42C /* libhdf5_hl_cpp.a */,
+				489ECDAD215EB7660036D42C /* libhdf5_hl.a */,
+				489ECDAE215EB7660036D42C /* libhdf5.a */,
+				489ECDAB215EB5690036D42C /* lib */,
+				489ECDA9215EB4BB0036D42C /* libhdf5_hl.a */,
+				489ECDA7215EB4980036D42C /* libhdf5_cpp.a */,
+				489ECDA5215EB4750036D42C /* libhdf5.a */,
+				489ECDA3215EB30A0036D42C /* libhdf5_cpp.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		48E5443E1E9C28CC00FF6AB8 /* clustercalcs */ = {
@@ -3726,7 +3758,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
-				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = /usr/local/hdf5/lib;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
 				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "";
@@ -3758,7 +3790,10 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_VALUE = YES;
-				LIBRARY_SEARCH_PATHS = /usr/local/lib/;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/,
+					/usr/local/hdf5/lib,
+				);
 				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
 				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "";

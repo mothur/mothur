@@ -12,6 +12,7 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "phylosummary.h"
+#include "H5Cpp.h"
 
 class BiomInfoCommand : public Command {
     
@@ -39,6 +40,7 @@ public:
 protected:
     void printSharedData(SharedRAbundVectors*, ofstream&);
     int createFilesFromBiom();
+    int extractFilesFromHDF5();
     string getTag(string&);
     string getName(string);
     string getTaxonomy(string, string);
@@ -48,7 +50,7 @@ protected:
     vector<string> getNamesAndTaxonomies(string);
     
     vector<string> outputNames;
-    string fileroot, outputDir, biomfile, label, basis, output;
+    string fileroot, outputDir, biomfile, label, basis, output, format;
     bool firsttime, abort, relabund;
     int maxLevel, printlevel;
     

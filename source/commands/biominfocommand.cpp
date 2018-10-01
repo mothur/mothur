@@ -17,6 +17,7 @@ vector<string> BiomInfoCommand::setParameters(){
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
         CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
+        CommandParameter pformat("format", "Multiple", "hdf5-simple", "hdf5", "", "", "","",false,false, true); parameters.push_back(pformat);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
         CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
@@ -43,6 +44,7 @@ string BiomInfoCommand::getHelpString(){
         helpString += "The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n";
         helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
         helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
+        helpString += "The format parameter allows you indicate type of biom file you have. Options hdf5 or simple. Default is hdf5.\n";
         helpString += "For example consider the following basis=sequence could give Clostridiales	3	105, where 105 is the total number of sequences whose otu classified to Clostridiales.\n";
         helpString += "Now for basis=otu could give Clostridiales	3	7, where 7 is the number of otus that classified to Clostridiales.\n";
         helpString += "The biom.info command should be in the following format: biom.info(biom=test.biom, label=0.03).\n";
@@ -156,7 +158,12 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             basis = validParameter.valid(parameters, "basis");
             if (basis == "not found") { basis = "otu"; }
             
-            if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu."); m->mothurOutEndLine(); }
+            if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu.\n"); }
+            
+            format = validParameter.valid(parameters, "format");
+            if (format == "not found") { format = "simple"; }
+            
+            if ((format != "hdf5") && (format != "simple")) { m->mothurOut("Invalid option for format. format options are hdf5 and simple, using hdf5.\n"); }
         }
         
     }
@@ -174,7 +181,8 @@ int BiomInfoCommand::execute(){
         
         long start = time(NULL);
         
-        createFilesFromBiom();
+        if (format == "hdf5")   { extractFilesFromHDF5();   }
+        else                    { createFilesFromBiom();    }
         
         m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " create mothur files from your biom file.\n");	m->mothurOutEndLine();
         
@@ -207,6 +215,135 @@ int BiomInfoCommand::execute(){
     }
     catch(exception& e) {
         m->errorOut(e, "BiomInfoCommand", "execute");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int BiomInfoCommand::extractFilesFromHDF5() {
+    try {
+        //getting output filename
+        string filename = biomfile; filename = "/Users/sarahwestcott/Desktop/Release/hdf5.biom";
+        if (outputDir == "") { outputDir += util.hasPath(filename); }
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+        variables["[tag]"] = label;
+        string sharedFilename = getOutputFileName("shared",variables);
+        outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
+        
+        
+        hid_t did; // dataset id
+        hid_t tid; //type id
+        herr_t err = 0;
+        herr_t retErr = 0;
+        hsize_t size;
+        hid_t loc_id;
+        string data = "";
+        H5std_string datasetName;
+        const int    NX_SUB = 3;    // hyperslab dimensions
+        const int    NY_SUB = 4;
+        const int    NX = 7;        // output buffer dimensions
+        const int    NY = 7;
+        const int    NZ = 3;
+        const int    RANK_OUT = 3;
+        
+        H5::H5File file( filename.c_str(), H5F_ACC_RDONLY );
+        H5::DataSet dataset = file.openDataSet(datasetName);
+        
+        /*
+         * Get the class of the datatype that is used by the dataset.
+         */
+        H5T_class_t type_class = dataset.getTypeClass();
+        /*
+         * Get class of datatype and print message if it's an integer.
+         */
+        if( type_class == H5T_INTEGER )
+        {
+            cout << "Data set has INTEGER type" << endl;
+            /*
+             * Get the integer datatype
+             */
+            H5::IntType intype = dataset.getIntType();
+            /*
+             * Get order of datatype and print message if it's a little endian.
+             */
+            H5std_string order_string;
+            H5T_order_t order = intype.getOrder( order_string );
+            cout << order_string << endl;
+            /*
+             * Get size of the data element stored in file and print it.
+             */
+            size_t size = intype.getSize();
+            cout << "Data size is " << size << endl;
+        }
+        /*
+         * Get dataspace of the dataset.
+         */
+        H5::DataSpace dataspace = dataset.getSpace();
+        /*
+         * Get the number of dimensions in the dataspace.
+         */
+        int rank = dataspace.getSimpleExtentNdims();
+        /*
+         * Get the dimension size of each dimension in the dataspace and
+         * display them.
+         */
+        hsize_t dims_out[2];
+        int ndims = dataspace.getSimpleExtentDims( dims_out, NULL);
+        cout << "rank " << rank << ", dimensions " <<
+        (unsigned long)(dims_out[0]) << " x " <<
+        (unsigned long)(dims_out[1]) << endl;
+        /*
+         * Define hyperslab in the dataset; implicitly giving strike and
+         * block NULL.
+         */
+        hsize_t      offset[2];   // hyperslab offset in the file
+        hsize_t      count[2];    // size of the hyperslab in the file
+        offset[0] = 1;
+        offset[1] = 2;
+        count[0]  = NX_SUB;
+        count[1]  = NY_SUB;
+        dataspace.selectHyperslab( H5S_SELECT_SET, count, offset );
+        /*
+         * Define the memory dataspace.
+         */
+        hsize_t     dimsm[3];              /* memory space dimensions */
+        dimsm[0] = NX;
+        dimsm[1] = NY;
+        dimsm[2] = NZ ;
+        H5::DataSpace memspace( RANK_OUT, dimsm );
+        /*
+         * Define memory hyperslab.
+         */
+        hsize_t      offset_out[3];   // hyperslab offset in memory
+        hsize_t      count_out[3];    // size of the hyperslab in memory
+        offset_out[0] = 3;
+        offset_out[1] = 0;
+        offset_out[2] = 0;
+        count_out[0]  = NX_SUB;
+        count_out[1]  = NY_SUB;
+        count_out[2]  = 1;
+        memspace.selectHyperslab( H5S_SELECT_SET, count_out, offset_out );
+        /*
+         * Read data from hyperslab in the file into the hyperslab in
+         * memory and display the data.
+         */
+        int         data_out[NX][NY][NZ ];
+        dataset.read( data_out, H5::PredType::NATIVE_INT, memspace, dataspace );
+        for (int j = 0; j < NX; j++)
+        {
+            for (int i = 0; i < NY; i++)
+                cout << data_out[j][i][0] << " ";
+            cout << endl;
+        }
+        ofstream out; util.openOutputFile(sharedFilename, out);
+        out << data << endl;
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomInfoCommand", "extractFilesFromHDF5");
         exit(1);
     }
 }
@@ -441,7 +578,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             string thisLine = it->second;
             SharedRAbundVectors* lookup = readData(matrixFormat, thisLine, matrixElementType, groupNames, otuNames.size());
             lookup->setOTUNames(otuNames);
-            m->mothurOutEndLine(); m->mothurOut(lookup->getLabel()+"\n"); 
+            m->mothurOut("\n"+lookup->getLabel()+"\n");
             lookup->print(out, printHeaders);
             
             if (conTaxonomy.size() != 0) {
@@ -457,24 +594,25 @@ int BiomInfoCommand::createFilesFromBiom() {
                     util.openOutputFile(taxFilename, outTax);
                     outTax << "OTU\tSize\tTaxonomy\n";
                     
-                    CountTable* ct = NULL;
-                    if (basis == "otu") {
-                        ct = new CountTable();
-                        vector<string> groupNames = lookup->getNamesGroups();
-                        for (int j = 0; j < groupNames.size(); j++) {  ct->addGroup(groupNames[j]); }
+                    CountTable ct;
+                    vector<string> groupNames = lookup->getNamesGroups();
+                    for (int j = 0; j < groupNames.size(); j++) {  ct.addGroup(groupNames[j]); }
                         
-                        int numBins = lookup->getNumBins();
-                        for (int i = 0; i < numBins; i++) {
-                            vector<int> abunds;
-                            for (int j = 0; j < lookup->size(); j++) {
-                                if (m->getControl_pressed()) { break; }
-                                abunds.push_back(lookup->get(i, groupNames[j]));
-                            }
-                            ct->push_back(otuNames[i], abunds);
+                    int numBins = lookup->getNumBins();
+                    
+                    for (int i = 0; i < numBins; i++) {
+                        vector<int> abunds;
+                        for (int j = 0; j < lookup->size(); j++) {
+                            if (m->getControl_pressed()) { break; }
+                            int abund = lookup->get(i, groupNames[j]);
+                            if (basis == "otu") { if (abund > 0) { abund = 1;  } } //count presence in otu
+                            //abunds.push_back(lookup->get(i, groupNames[j]));
+                            abunds.push_back(abund);
                         }
+                        ct.push_back(otuNames[i], abunds);
                     }
                     
-                    PhyloSummary taxaSum(ct, relabund, printlevel);
+                    PhyloSummary taxaSum(&ct, relabund, printlevel);
                     
                     for (int i = 0; i < lookup->getNumBins(); i++) {
                         if (m->getControl_pressed()) { break; }
@@ -491,7 +629,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                         outTax << otuNames[i] << '\t' << total << '\t' << newTax << endl;
                         
                         if (basis == "sequence") {
-                            for (int k = 0; k < total; k++) { taxaSum.addSeqToTree(otuNames[i], newTax); } //one for each sequence in the otu
+                            taxaSum.addSeqToTree(otuNames[i], newTax);
                         }else {
                             taxaSum.addSeqToTree(newTax, containsGroup); //add otu
                         }
@@ -508,9 +646,6 @@ int BiomInfoCommand::createFilesFromBiom() {
                     util.openOutputFile(taxSumFilename, outTaxSum);
                     taxaSum.print(outTaxSum, output);
                     outTaxSum.close();
-                    
-                    if (ct != NULL) { delete ct; }
-                   
                 }
             }
             
