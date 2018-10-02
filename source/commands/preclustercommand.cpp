@@ -705,21 +705,22 @@ int process(string group, string newMapFile, preClusterData* params){
 
 		} else if(params->pc_method == "tree") {
 
-			params->m->mothurOutJustToScreen("Determining which sequences can be merged...");
-			cout.flush();
+			vector<int> cluster(numSeqs, -1);
+			for(int i=0;i<cluster.size();i++){
+				cluster[i] = i;
+			}
 
-			vector<int> mergable_row;//{ 1,2,3,4,5,7,7,8,9,10,11 };
-			vector<int> mergable_col;//{ 0,1,2,1,4,4,6,6,8,9,10 };
+	    for (int i=0;i<numSeqs-1;i++) {
 
-	    for (int i = 1; i < numSeqs; i++) {
+        if (params->m->getControl_pressed()) { out.close(); return 0; }
 
-        for (int j = 0; j < i; j++) {
+        for (int j=i+1;j<numSeqs;j++) {
 
           if (params->m->getControl_pressed()) { out.close(); return 0; }
 
           int mismatches = params->length;
 
-					if(originalCount[j] > originalCount[i] * params->delta){
+					if(originalCount[i] > originalCount[j] * params->delta){
 	          if (params->align_method == "unaligned") {
 							mismatches = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
 																					params->alignSeqs[j]->seq.getAligned(), params);
@@ -729,49 +730,19 @@ int process(string group, string newMapFile, preClusterData* params){
 						}
 
 						if(mismatches == 1){
-							mergable_row.push_back(i);
-							mergable_col.push_back(j);
+							cluster[j] = cluster[i];
 						}
 					}
         }
+
+				if(cluster[i] == i) count++;
+
+	      if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
       }
-			params->m->mothurOutJustToScreen(" done\n");
+	     params->m->mothurOutJustToScreen(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");
 
-			params->m->mothurOutJustToScreen("Clusterng sequences...");
-			cout.flush();
 
-			for(int i=0;i<mergable_row.size()-1;i++){
-
-				int seed_row = mergable_row[i];
-				int seed_col = mergable_col[i];
-
-				for(int j=i+1;j<mergable_row.size();j++){
-
-					if(mergable_col[j] == seed_row){
-						mergable_col[j] = seed_col;
-					} else if(mergable_row[j] == seed_row){
-							mergable_row[j] = -1;
-							mergable_col[j] = -1;
-					}
-
-					if (params->m->getControl_pressed()) { out.close(); return 0; }
-				}
-				if (params->m->getControl_pressed()) { out.close(); return 0; }
-			}
-
-			vector<int> cluster(numSeqs, -1);
-			for(int i=0;i<cluster.size();i++){
-				cluster[i] = i;
-			}
-
-			for(int i=0;i<mergable_row.size();i++){
-				if(mergable_row[i] != -1){
-					cluster[mergable_row[i]] = mergable_col[i];
-				}
-			}
-
-			params->m->mothurOutJustToScreen("done.\n");
-
+			count = 0;
 			vector<string> chunk(numSeqs, "");
 
 			for(int i=0;i<numSeqs;i++){
