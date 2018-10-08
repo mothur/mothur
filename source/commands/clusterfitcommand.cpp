@@ -761,7 +761,6 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         ofstream listFile;
         string listFileName = fileroot+ tag + ".list";
         util.openOutputFile(listFileName,	listFile);
-        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 
         if (printref) { // need to include reference in counts
             counts.insert(refCounts.begin(), refCounts.end());

@@ -12,7 +12,12 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "phylosummary.h"
-#include "H5Cpp.h"
+
+#ifdef USE_BIOM
+    #include "H5Cpp.h"
+#endif
+
+#define MAX_NAME 1024
 
 class BiomInfoCommand : public Command {
     
@@ -53,6 +58,20 @@ protected:
     string fileroot, outputDir, biomfile, label, basis, output, format;
     bool firsttime, abort, relabund;
     int maxLevel, printlevel;
+
+    #ifdef USE_BIOM
+    void readType(hid_t);
+    void readDataSet(hid_t);
+    void do_link(hid_t, char *);
+    void extractHDF5Group(hid_t);
+    void processAttributes(H5::Group&, set<string>&);
+    void readPropList(hid_t);
+    #endif
+    
+    set<string> requiredTopLevelAttrib;
+    set<string> requiredGroups;
+    set<string> requiredDatasets;
+    
     
 };
 

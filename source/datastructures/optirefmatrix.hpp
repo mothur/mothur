@@ -63,10 +63,8 @@ protected:
     int readFiles(string, string, string, string, string, string, string, string, string, string, string, string);
     int readFiles(string, string, string, string);
     
-    map<long long, long long> readColumnSingletons(vector<bool>& singleton, string namefile, string countfile, string distFile, long long&, map<string, long long>&);
-    void readColumnSingletons(vector<bool>& singleton, string distFile, map<string, long long>& nameAssignment);
+    map<long long, long long> readColumnSingletons(vector<bool>& singleton, string distFile, map<string, long long>&);
     map<long long, long long> readPhylipSingletons(vector<bool>& singleton, string distFile, long long&,  map<string, long long>& nameAssignment);
-    //void assignReferences(vector<string>);
     
     vector<bool> isRef; //same size as closeness, this tells us whether a seq with distances in the matrix is a reference
     vector<bool> isSingleRef; ////same size as singletons, this tells us whether a seq WITHOUT distances in the matrix (singleton) is a reference

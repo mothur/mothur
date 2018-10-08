@@ -146,7 +146,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
-        helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
+        helpString += "The checkorient parameter will look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
         helpString += "The deltaq parameter allows you to specify the delta allowed between quality scores of a mismatched base.  For example in the overlap, if deltaq=5 and in the alignment seqA, pos 200 has a quality score of 30 and the same position in seqB has a quality score of 20, you take the base from seqA (30-20 >= 5).  If the quality score in seqB is 28 then the base in the consensus will be an N (30-28<5). The default is 6.\n";
 				helpString += "The maxee parameter allows you to specify the maximum number of errors to allow in a sequence. Makes sense to use with deltaq=0. This numbrer is a decimal number. The expected numbrer of errors is based on Edgar's approach used in USEARCH/VSEARCH.";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";

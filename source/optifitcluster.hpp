@@ -61,7 +61,6 @@ protected:
     vector<long long> randomizeSeqs;
     vector< vector<long long> > bins; //bin[0] -> seqs in bin[0]
     map<long long, string> binLabels; //for fitting - maps binNumber to existing reference label
-    set<long long> fitSeqs; //matrix indexes for movable sequences
     long long maxRefBinNumber;
     bool closed, denovo;
     
