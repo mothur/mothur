@@ -13,7 +13,7 @@
 #include "inputdata.h"
 #include "phylosummary.h"
 
-#ifdef USE_BIOM
+#ifdef USE_HDF5
     #include "H5Cpp.h"
 #endif
 
@@ -59,19 +59,15 @@ protected:
     bool firsttime, abort, relabund;
     int maxLevel, printlevel;
 
-    #ifdef USE_BIOM
-    void readType(hid_t);
+    #ifdef USE_HDF5
     void readDataSet(hid_t);
-    void do_link(hid_t, char *);
     void extractHDF5Group(hid_t);
     void processAttributes(H5::Group&, set<string>&);
-    void readPropList(hid_t);
+    void checkGroups(H5::H5File&, map<string, string>&);
+    void checkDatasets(H5::H5File&, set<string>&);
     #endif
     
-    set<string> requiredTopLevelAttrib;
-    set<string> requiredGroups;
-    set<string> requiredDatasets;
-    
+        
     
 };
 
