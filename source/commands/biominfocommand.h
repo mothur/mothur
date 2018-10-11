@@ -54,21 +54,16 @@ protected:
     SharedRAbundVectors* readData(string, string, string, vector<string>&, int);
     vector<string> getNamesAndTaxonomies(string);
     
-    vector<string> outputNames;
+    vector<string> outputNames, otuNames, sampleNames, taxonomy;
+    vector<int> indices, indptr, otudata;
     string fileroot, outputDir, biomfile, label, basis, output, format;
     bool firsttime, abort, relabund;
     int maxLevel, printlevel;
 
     #ifdef USE_HDF5
-    void readDataSet(hid_t);
-    void extractHDF5Group(hid_t);
     void processAttributes(H5::Group&, set<string>&);
     void checkGroups(H5::H5File&, map<string, string>&);
-    void checkDatasets(H5::H5File&, set<string>&);
     #endif
-    
-        
-    
 };
 
 
