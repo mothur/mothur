@@ -117,17 +117,24 @@ int main(int argc, char *argv[]){
 				m->appendLogBuffer("Windows version\n\n");
 			#endif		
 			
+            string packagesUsed = "";
 			#ifdef USE_READLINE
-				m->appendLogBuffer("Using ReadLine\n");
+                packagesUsed += "ReadLine,";
 			#endif
             
             #ifdef USE_BOOST
-                m->appendLogBuffer("Using Boost\n");
+                packagesUsed += "Boost,";
             #endif
             
             #ifdef USE_HDF5
-                m->appendLogBuffer("Using HDF5\n");
+                packagesUsed += "HDF5,";
             #endif
+            
+            if (packagesUsed != "") {
+                //remove last comma
+                packagesUsed = packagesUsed.substr(0,packagesUsed.length()-1);
+                m->appendLogBuffer("Using " + packagesUsed + "\n");
+            }
 			
 			#ifdef MOTHUR_FILES
 				m->appendLogBuffer("\nUsing default file location " + temp + "\n\n");
