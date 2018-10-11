@@ -7,7 +7,6 @@
 #
 # Macros
 #
-# 64BIT_VERSION - set to no if you are using a 32bit arch.
 # OPTIMIZE - yes will increase speed of executable.
 # USEREADLINE - link with readline libraries.  Must have readline installed. Windows set to no.
 # USEBOOST - link with boost libraries. Must install boost. Allows the make.contigs command to read .gz files.
@@ -20,7 +19,6 @@
 
 PREFIX := ${CURDIR} 
 
-64BIT_VERSION ?= yes
 OPTIMIZE ?= yes
 USEREADLINE ?= yes
 USEBOOST ?= yes
@@ -33,9 +31,6 @@ HDF5_INCLUDE_DIR="\"Enter_your_HDF5_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 VERSION = "\"1.41.0\""
 
-ifeq  ($(strip $(64BIT_VERSION)),yes)
-    CXXFLAGS += -DBIT_VERSION
-endif
 
 # Set a static logfile name
 ifeq  ($(strip $(LOGFILE_NAME)),yes)

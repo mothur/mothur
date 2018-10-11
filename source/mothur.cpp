@@ -118,21 +118,19 @@ int main(int argc, char *argv[]){
 			#endif		
 			
 			#ifdef USE_READLINE
-				m->appendLogBuffer("Using ReadLine\n\n");
+				m->appendLogBuffer("Using ReadLine\n");
 			#endif
             
             #ifdef USE_BOOST
-                m->appendLogBuffer("Using Boost\n\n");
+                m->appendLogBuffer("Using Boost\n");
+            #endif
+            
+            #ifdef USE_HDF5
+                m->appendLogBuffer("Using HDF5\n");
             #endif
 			
 			#ifdef MOTHUR_FILES
-				m->appendLogBuffer("Using default file location " + temp + "\n\n");
-			#endif
-			
-			#ifdef BIT_VERSION
-				m->appendLogBuffer("Running 64Bit Version\n\n");
-			#else
-				m->appendLogBuffer("Running 32Bit Version\n\n");
+				m->appendLogBuffer("\nUsing default file location " + temp + "\n\n");
 			#endif
 			
 			//header
@@ -175,12 +173,6 @@ int main(int argc, char *argv[]){
                 
                 #else
                 OS = "Windows ";
-                #endif
-                
-                #ifdef BIT_VERSION
-                OS += "64Bit Version";
-                #else
-                OS += "32Bit Version";
                 #endif
                 
 				cout << (OS + "\nMothur version=" + mothurVersion + "\nRelease Date=" + releaseDate + "\n\n");
