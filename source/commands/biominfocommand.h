@@ -58,11 +58,11 @@ protected:
     vector<int> indices, indptr, otudata;
     string fileroot, outputDir, biomfile, label, basis, output, format;
     bool firsttime, abort, relabund;
-    int maxLevel, printlevel;
+    int maxLevel, printlevel, nnz;
 
     #ifdef USE_HDF5
     void processAttributes(H5::Group&, set<string>&);
-    void checkGroups(H5::H5File&, map<string, string>&);
+    void checkGroups(H5::H5File&, map<string, vector<string> >&);
     #endif
 };
 

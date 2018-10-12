@@ -257,12 +257,14 @@ void BiomInfoCommand::processAttributes(H5::Group& groupID, set<string>& require
                         hsize_t data = 0;
                         attribute.read(attributeType, &data);
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: " + attributeName + " = " + toString(data) + "\n");  }
+                        if (attributeName == "nnz") { nnz = data; }
                     }else if (rank == 1) {
                         hsize_t data[dims[0]];
                         attribute.read(attributeType, data);
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: " + attributeName + " = "); }
                         for (int i = 0; i < dims[0]; i++) {
                             if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                            if (attributeName == "nnz") { nnz = data[i]; }
                         }  if (m->getDebug()) { m->mothurOutEndLine(); }
                     }
                 }
@@ -294,89 +296,114 @@ void BiomInfoCommand::processAttributes(H5::Group& groupID, set<string>& require
 }
 //**********************************************************************************************************************
 //check to make sure required groups are present
-void BiomInfoCommand::checkGroups( H5::H5File& file, map<string, string>& requiredGroups) {
+void BiomInfoCommand::checkGroups( H5::H5File& file, map<string, vector<string> >& requiredGroups) {
     try {
        
-        for (map<string, string>::iterator it = requiredGroups.begin(); it != requiredGroups.end(); it++) {
+        for (map<string, vector<string> >::iterator it = requiredGroups.begin(); it != requiredGroups.end(); it++) {
             
             H5std_string groupName = it->first;
-            H5std_string datasetName = it->second;
+            vector<string> datasetNames = it->second;
             H5::Group group(file.openGroup(groupName));
             
-            int numObjects = group.getNumObjs();
-
-            if (numObjects != 0) {
-                H5::DataSet dataset = group.openDataSet(datasetName);
-                H5::DataType  dataType(dataset.getDataType());
-                H5::DataSpace dataSpace = dataset.getSpace();
+            for (int h = 0; h < datasetNames.size(); h++) {
+                string datasetName = datasetNames[h];
+                int numObjects = group.getNumObjs();
+                cout << numObjects << '\t' << groupName << '\t' << datasetName << endl;
                 
-                int rank = dataSpace.getSimpleExtentNdims(); //number of dimensions
-                hsize_t dims[rank]; dataSpace.getSimpleExtentDims(dims); //size of each dimension
-                
-                if (dataset.getTypeClass() == H5T_STRING) {
-
-                    char **data = new char*[dims[0]];
-                    H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
-                    dataset.read((void*)data, str_type);
-
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
+                if (numObjects != 0) {
+                    H5::DataSet dataset = group.openDataSet(datasetName);
+                    H5::DataType  dataType(dataset.getDataType());
+                    H5::DataSpace dataSpace = dataset.getSpace();
                     
-                    for (int i = 0; i < dims[0]; i++) {
-                        if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
-                        
-                        if (groupName == "observation/") {
-                            otuNames.push_back(data[i]);
-                        }else if (groupName == "sample/") {
-                            sampleNames.push_back(data[i]);
-                        }else if (groupName == "observation/metadata") {
-                            if (datasetName == "taxonomy") { taxonomy.push_back(data[i]); }
+                    int rank = dataSpace.getSimpleExtentNdims(); //number of dimensions
+                    hsize_t dims[rank]; dataSpace.getSimpleExtentDims(dims); //size of each dimension
+                    cout << "rank = "<< rank << '\t' << groupName << '\t' << datasetName << endl;;
+                    
+                    if (dataset.getTypeClass() == H5T_STRING) {
+                        if (rank == 1) {
+                            char **data = new char*[dims[0]];
+                            H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
+                            dataset.read((void*)data, str_type);
+                            
+                            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
+                            
+                            for (int i = 0; i < dims[0]; i++) {
+                                if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                                
+                                if (groupName == "observation/") {
+                                    otuNames.push_back(data[i]);
+                                }else if (groupName == "sample/") {
+                                    sampleNames.push_back(data[i]);
+                                }else if (groupName == "observation/metadata") {
+                                    if (datasetName == "taxonomy") { taxonomy.push_back(data[i]); }
+                                }
+                                delete[] data[i];
+                            }  if (m->getDebug()) { m->mothurOutEndLine(); }
+                            delete[] data;
+                        }else if (rank == 2) {
+                            
+                            char **data = new char*[dims[0]*dims[1]];
+
+                            H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
+                            dataset.read((void*)data, str_type);
+                            
+                            string otuTaxonomy = ""; int count = 0;
+                            for (int i = 0; i < dims[0]*dims[1]; i++) {
+                                
+                                if (groupName == "observation/metadata") {
+                                    if (datasetName == "taxonomy") {  otuTaxonomy += data[i];  otuTaxonomy += ";";  count++; }
+                                }
+                                
+                                if (count == dims[1]) {
+                                    if (m->getDebug()) { m->mothurOut(toString(otuTaxonomy) + "\n"); }
+                                    taxonomy.push_back(otuTaxonomy);
+                                    count = 0; otuTaxonomy = "";
+                                }
+                            }
                         }
-                        delete[] data[i];
-                    }  if (m->getDebug()) { m->mothurOutEndLine(); }
-                    delete[] data;
-                    
-                }else if (dataset.getTypeClass() == H5T_INTEGER) {
-                    
-                    if (rank == 1) {
-                        int* data = new int[dims[0]];
-                        H5::DataSpace data_mspace(rank, dims);
-                        dataset.read(data, H5::PredType::NATIVE_INT, data_mspace, dataSpace);
+                    }else if (dataset.getTypeClass() == H5T_INTEGER) {
                         
-                        if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
-                        for (int i = 0; i < dims[0]; i++) {
-                            if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                        if (rank == 1) {
+                            int* data = new int[dims[0]];
+                            H5::DataSpace data_mspace(rank, dims);
+                            dataset.read(data, H5::PredType::NATIVE_INT, data_mspace, dataSpace);
                             
-                            if (groupName == "observation/matrix/") {
-                                if (datasetName == "data") { otudata.push_back(data[i]); }
-                                else if (datasetName == "indices") { indices.push_back(data[i]); }
-                                else if (datasetName == "indptr") { indptr.push_back(data[i]); }
-                            }
-                      } if (m->getDebug()) { m->mothurOutEndLine(); }
-                        delete[] data;
-                    }
-                    
-                }else if (dataset.getTypeClass() == H5T_FLOAT) {
-                    
-                    if (rank == 1) {
-                        float* data = new float[dims[0]];
-                        H5::DataSpace data_mspace(rank, dims);
-                        dataset.read(data, H5::PredType::NATIVE_FLOAT, data_mspace, dataSpace);
+                            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
+                            for (int i = 0; i < dims[0]; i++) {
+                                if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                                
+                                if (groupName == "observation/matrix/") {
+                                    if (datasetName == "data") { otudata.push_back(data[i]); }
+                                    else if (datasetName == "indices") { indices.push_back(data[i]); }
+                                    else if (datasetName == "indptr") { indptr.push_back(data[i]); }
+                                }
+                            } if (m->getDebug()) { m->mothurOutEndLine(); }
+                            delete[] data;
+                        }
                         
-                        if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
-                        for (int i = 0; i < dims[0]; i++) {
-                            if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                    }else if (dataset.getTypeClass() == H5T_FLOAT) {
+                        
+                        if (rank == 1) {
+                            float* data = new float[dims[0]];
+                            H5::DataSpace data_mspace(rank, dims);
+                            dataset.read(data, H5::PredType::NATIVE_FLOAT, data_mspace, dataSpace);
                             
-                            if (groupName == "observation/matrix/") {
-                                if (datasetName == "data") { otudata.push_back((int)data[i]); }
-                                else if (datasetName == "indices") { indices.push_back((int)data[i]); }
-                                else if (datasetName == "indptr") { indptr.push_back((int)data[i]); }
-                            }
-                        }  if (m->getDebug()) { m->mothurOutEndLine(); }
-                        delete[] data;
-                    }
-                }else { m->mothurOut("[ERROR]: Unexpected datatype class, quitting.\n"); m->setControl_pressed(true);  }
-
-                dataset.close();
+                            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
+                            for (int i = 0; i < dims[0]; i++) {
+                                if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                                
+                                if (groupName == "observation/matrix/") {
+                                    if (datasetName == "data") { otudata.push_back((int)data[i]); }
+                                    else if (datasetName == "indices") { indices.push_back((int)data[i]); }
+                                    else if (datasetName == "indptr") { indptr.push_back((int)data[i]); }
+                                }
+                            }  if (m->getDebug()) { m->mothurOutEndLine(); }
+                            delete[] data;
+                        }
+                    }else { m->mothurOut("[ERROR]: Unexpected datatype class, quitting.\n"); m->setControl_pressed(true);  }
+                    
+                    dataset.close();
+                }
             }
             group.close();
         }
@@ -391,19 +418,19 @@ void BiomInfoCommand::checkGroups( H5::H5File& file, map<string, string>& requir
 int BiomInfoCommand::extractFilesFromHDF5() {
     try {
         //getting output filename
-        string filename = biomfile; filename = "/Users/sarahwestcott/Desktop/Release/hdf5.biom";
+        string filename = biomfile;
         if (outputDir == "") { outputDir += util.hasPath(filename); }
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
         variables["[tag]"] = label;
         string sharedFilename = getOutputFileName("shared",variables);
-        //outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
         
+        nnz = 0;
         set<string> requiredTopLevelAttrib;
-        map<string, string> requiredOTUDatasets;
-        map<string, string> requiredSampleDatasets;
-        map<string, string> optionalDatasets;
+        map<string, vector<string> > requiredOTUDatasets;
+        map<string, vector<string> > requiredSampleDatasets;
+        map<string, vector<string> > optionalDatasets;
 
         //set required fields
         requiredTopLevelAttrib.insert("id"); requiredTopLevelAttrib.insert("type"); requiredTopLevelAttrib.insert("format-url");
@@ -411,21 +438,24 @@ int BiomInfoCommand::extractFilesFromHDF5() {
         requiredTopLevelAttrib.insert("shape"); requiredTopLevelAttrib.insert("nnz");
         
         //set required datasets - groupname -> datasetname
-        requiredOTUDatasets["observation/"] = "ids"; //otuLabels - "GG_OTU_1", "GG_OTU_2", "GG_OTU_3", "GG_OTU_4", "GG_OTU_5"
-        requiredOTUDatasets["observation/matrix/"] = "data"; //otu abundances for each non zero abundnace entry - 1, 5, 1, 2, 3, 1, 1, 4, 2, 2, 1, 1, 1, 1, 1
-        requiredOTUDatasets["observation/matrix/"] = "indices"; //index of group - maps into samples/ids  2, 0, 1, 3, 4, 5, 2, 3, 5, 0, 1, 2, 5, 1, 2
-        requiredOTUDatasets["observation/matrix/"] = "indptr";  //maps non zero abundance to OTU - 0, 1, 6, 9, 13, 15 - 0 start of OTU1s indexes, 1 start of OTU2s indexes, ... 15 start of OTU5s indexes
+        vector<string> datasets; datasets.push_back("ids");
+        requiredOTUDatasets["observation/"] = datasets; //otuLabels - "GG_OTU_1", "GG_OTU_2", "GG_OTU_3", "GG_OTU_4", "GG_OTU_5"
+        datasets.clear();
+        datasets.push_back("data"); //otu abundances for each non zero abundnace entry - 1, 5, 1, 2, 3, 1, 1, 4, 2, 2, 1, 1, 1, 1, 1
+        datasets.push_back("indices"); //index of group - maps into samples/ids  2, 0, 1, 3, 4, 5, 2, 3, 5, 0, 1, 2, 5, 1, 2
+        datasets.push_back("indptr"); //maps non zero abundance to OTU - 0, 1, 6, 9, 13, 15 - 0 start of OTU1s indexes, 1 start of OTU2s indexes, ... 15 start of OTU5s indexes
+        requiredOTUDatasets["observation/matrix/"] = datasets;
         
-        requiredSampleDatasets["sample/"] = "ids"; //group names - "Sample1", "Sample2", "Sample3", "Sample4", "Sample5", "Sample6"
-        
-        //optional datasets to look for - taxonomy info
-        optionalDatasets["observation/metadata"] = "taxonomy"; //otu classifications
+        datasets.clear(); datasets.push_back("ids"); //group names - "Sample1", "Sample2", "Sample3", "Sample4", "Sample5", "Sample6"
+        requiredSampleDatasets["sample/"] = datasets;
+        datasets.clear(); datasets.push_back("taxonomy"); //optional datasets to look for - taxonomy info - otu classifications
+        optionalDatasets["observation/metadata"] = datasets;
 
         /*
          label group numOtus GG_OTU_1  GG_OTU_2  GG_OTU_3  GG_OTU_4  GG_OTU_5
          userLabel  Sample1     0           5       0           2       0
-         userLabel  Sample2     0           0       0           2       1
-         userLabel  Sample3     1           1       1           1       1
+         userLabel  Sample2     0           1       0           2       1
+         userLabel  Sample3     1           0       1           1       1
          userLabel  Sample4     0           2       4           0       0
          userLabel  Sample5     0           3       0           0       0
          userLabel  Sample6     0           1       2           1       0
@@ -435,46 +465,80 @@ int BiomInfoCommand::extractFilesFromHDF5() {
         H5::H5File file( filename.c_str(), H5F_ACC_RDONLY );
         H5::Group     what(file.openGroup( "/" ));
       
-        processAttributes(what, requiredTopLevelAttrib);
+        processAttributes(what, requiredTopLevelAttrib); if (m->getControl_pressed()) { return 0; }
 
         try {
             
-            checkGroups(file, requiredOTUDatasets);
+            checkGroups(file, requiredOTUDatasets); if (m->getControl_pressed()) { return 0; }
             
         }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
             m->mothurOut("[ERROR]: Missing required groups or datasets, aborting. Required datasets include: \n");
-            for (map<string, string>::iterator it = requiredOTUDatasets.begin(); it != requiredOTUDatasets.end(); it++) { m->mothurOut(it->first + '\t' + it->second + '\n'); }
+            for (map<string, vector< string> >::iterator it = requiredOTUDatasets.begin(); it != requiredOTUDatasets.end(); it++) {
+                for (int i = 0; i < (it->second).size(); i++) { m->mothurOut(it->first + '\t' + it->second[i] + '\n'); }
+            }
             m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
         try {
             
-            checkGroups(file, requiredSampleDatasets);
+            checkGroups(file, requiredSampleDatasets); if (m->getControl_pressed()) { return 0; }
             
         }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
             m->mothurOut("[ERROR]: Missing required groups or datasets, aborting. Required datasets include: \n");
-            for (map<string, string>::iterator it = requiredSampleDatasets.begin(); it != requiredSampleDatasets.end(); it++) { m->mothurOut(it->first + '\t' + it->second + '\n'); }
+            for (map<string, vector< string> >::iterator it = requiredOTUDatasets.begin(); it != requiredOTUDatasets.end(); it++) {
+                for (int i = 0; i < (it->second).size(); i++) { m->mothurOut(it->first + '\t' + it->second[i] + '\n'); }
+            }
             m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
+        bool error = false;
+        if (nnz != otudata.size()) { error = true; }
+        
+        //create shared file
+        sort(sampleNames.begin(), sampleNames.end());
+        
+        //create empty sharedrabundvectors so we can add otus below
+        SharedRAbundVectors lookup;
+        for (int i = 0; i < sampleNames.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector();
+            temp->setGroup(sampleNames[i]);
+            lookup.push_back(temp);
+        }
+        
+        lookup.setLabels(label);
+        
+        //for each otu
+        int count = 0;
+        for (int h = 0; h < indptr.size()-1; h++) {
+            int otuStart = indptr[h];
+            int otuEnd = indptr[h+1];
+            
+            vector<int> otuAbunds; otuAbunds.resize(sampleNames.size(), 0); //initialze otus sample abundances to 0 - only non zero abunds are recorded
+            
+            for (int i = otuStart; i < otuEnd; i++) {
+                otuAbunds[indices[i]] = otudata[count]; count++;
+            }
+            
+            lookup.push_back(otuAbunds, otuNames[h]);
+        }
+        
+        ofstream out; util.openOutputFile(sharedFilename, out);
+        m->mothurOut("\n"+lookup.getLabel()+"\n"); bool printHeaders = true;
+        lookup.print(out, printHeaders);
+        out.close();
+        
+        outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
+
+        
         try {
             
-            checkGroups(file, optionalDatasets);
+            checkGroups(file, optionalDatasets); if (m->getControl_pressed()) { return 0; }
             
         }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
             m->mothurOut("\nIgnore HDF5 errors, mothur was checking for OTU taxonomies and your file does not contain them. They are not required, continuing.\n");
         }
         
         #endif
-        
-        
-        
-        
-        return 0;
-        
-        //ofstream out; util.openOutputFile(sharedFilename, out);
-        //out << data << endl;
-        //out.close();
         
         return 0;
     }
