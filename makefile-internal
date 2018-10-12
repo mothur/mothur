@@ -1,4 +1,4 @@
-64BIT_VERSION ?= yes
+
 USEREADLINE ?= no
 USEBOOST ?= no
 LOGFILE_NAME ?= yes
@@ -12,20 +12,18 @@ ifeq  ($(strip $(LOGFILE_NAME)),yes)
     LOGFILE_NAME="\"mothur.logfile\""
 endif
 
-ifeq  ($(strip $(64BIT_VERSION)),yes)
-    #if you are a mac user use the following line
-    #TARGET_ARCH += -arch x86_64
 
-    #if you using cygwin to build Windows the following line
-    CXX = x86_64-w64-mingw32-g++
-    CC = x86_64-w64-mingw32-g++
-    TARGET_ARCH += -m64 -static
+#if you are a mac user use the following line
+#TARGET_ARCH += -arch x86_64
 
-    #if you are a linux user use the following line - specific processor builds in future??
-    #CXXFLAGS += -mtune=generic
+#if you using cygwin to build Windows the following line
+#CXX = x86_64-w64-mingw32-g++
+#CC = x86_64-w64-mingw32-g++
+#TARGET_ARCH += -m64 -static
 
-    CXXFLAGS += -DBIT_VERSION
-endif
+#if you are a linux user use the following line
+#CXXFLAGS += -mtune=generic
+
 
 
 #CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}

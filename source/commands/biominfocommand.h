@@ -13,7 +13,7 @@
 #include "inputdata.h"
 #include "phylosummary.h"
 
-#ifdef USE_BIOM
+#ifdef USE_HDF5
     #include "H5Cpp.h"
 #endif
 
@@ -54,25 +54,16 @@ protected:
     SharedRAbundVectors* readData(string, string, string, vector<string>&, int);
     vector<string> getNamesAndTaxonomies(string);
     
-    vector<string> outputNames;
+    vector<string> outputNames, otuNames, sampleNames, taxonomy;
+    vector<int> indices, indptr, otudata;
     string fileroot, outputDir, biomfile, label, basis, output, format;
     bool firsttime, abort, relabund;
-    int maxLevel, printlevel;
+    int maxLevel, printlevel, nnz;
 
-    #ifdef USE_BIOM
-    void readType(hid_t);
-    void readDataSet(hid_t);
-    void do_link(hid_t, char *);
-    void extractHDF5Group(hid_t);
+    #ifdef USE_HDF5
     void processAttributes(H5::Group&, set<string>&);
-    void readPropList(hid_t);
+    void checkGroups(H5::H5File&, map<string, vector<string> >&);
     #endif
-    
-    set<string> requiredTopLevelAttrib;
-    set<string> requiredGroups;
-    set<string> requiredDatasets;
-    
-    
 };
 
 

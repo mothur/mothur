@@ -44,7 +44,7 @@ string BiomInfoCommand::getHelpString(){
         helpString += "The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n";
         helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
         helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
-        helpString += "The format parameter allows you indicate type of biom file you have. Options hdf5 or simple. Default is hdf5.\n";
+        helpString += "The format parameter allows you indicate type of biom file you have. Options hdf5 or classic. Default is hdf5.\n";
         helpString += "For example consider the following basis=sequence could give Clostridiales	3	105, where 105 is the total number of sequences whose otu classified to Clostridiales.\n";
         helpString += "Now for basis=otu could give Clostridiales	3	7, where 7 is the number of otus that classified to Clostridiales.\n";
         helpString += "The biom.info command should be in the following format: biom.info(biom=test.biom, label=0.03).\n";
@@ -161,9 +161,17 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu.\n"); }
             
             format = validParameter.valid(parameters, "format");
-            if (format == "not found") { format = "simple"; }
+            if (format == "not found") { format = "classic"; }
             
-            if ((format != "hdf5") && (format != "simple")) { m->mothurOut("Invalid option for format. format options are hdf5 and simple, using hdf5.\n"); }
+            if ((format != "hdf5") && (format != "classic")) { m->mothurOut("Invalid option for format. format options are hdf5 and classic, using hdf5.\n"); }
+            
+            if (format == "hdf5") {
+                #ifdef USE_HDF5
+                //do nothing we have the api
+                #else
+                    m->mothurOut("[ERROR]: To read HDF5 biom files, you must have the API installed, quitting.\n"); abort=true;
+                #endif
+            }
         }
         
     }
@@ -218,287 +226,68 @@ int BiomInfoCommand::execute(){
         exit(1);
     }
 }
-#ifdef USE_BIOM
-//**********************************************************************************************************************
-
-/*
- *  Retrieve information about a dataset.
- *
- *  Many other possible actions.
- *
- *  This example does not read the data of the dataset.
- */
-void BiomInfoCommand::readDataSet(hid_t dataSetID) {
-    try {
-    
-        char datasetName[MAX_NAME];
-        H5Iget_name(dataSetID, datasetName, MAX_NAME  );
-        
-        if (m->getDebug()) { string name = datasetName; m->mothurOut("[DEBUG]: Dataset Name : " + name + "\n"); }
-        
-        //extractAttributes(dataSetID);
-        
-        hid_t spaceID = H5Dget_space(dataSetID);
-        hid_t typeID = H5Dget_type(dataSetID);
-        
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: DATA TYPE:\n"); }
-        
-        readType(typeID);
-        
-        hid_t propertyID = H5Dget_create_plist(dataSetID); /* get creation property list */
-        readPropList(propertyID);
-        hid_t size = H5Dget_storage_size(dataSetID);
-        
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: Total space currently written in file: " + toString(size) + "\n"); }
-        
-        
-        /*
-         * The datatype and dataspace can be used to read all or
-         * part of the data.  (Not shown in this example.)
-         */
-        
-        /* ... read data with H5Dread, write with H5Dwrite, etc. */
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        H5Pclose(propertyID);
-        H5Tclose(typeID);
-        H5Sclose(spaceID);
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "readDataSet");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-void BiomInfoCommand::readType(hid_t typeID) {
-    try {
-    
-        H5T_class_t t_class;
-        t_class = H5Tget_class(typeID);
-        
-        if(t_class < 0){ m->mothurOut("[ERROR]: Invalid datatype, quitting.\n");  m->setControl_pressed(true); }
-        else {
-            /*
-             * Each class has specific properties that can be
-             * retrieved, e.g., size, byte order, exponent, etc.
-             */
-            if(t_class == H5T_INTEGER) {
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'H5T_INTEGER'.\n"); }
-                /* display size, signed, endianess, etc. */
-            } else if(t_class == H5T_FLOAT) {
-
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'H5T_FLOAT'.\n"); }
-                /* display size, endianess, exponennt, etc. */
-            } else if(t_class == H5T_STRING) {
-
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'H5T_STRING'.\n"); }
-                /* display size, padding, termination, etc. */
-            } else if(t_class == H5T_BITFIELD) {
-
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'H5T_BITFIELD'.\n"); }
-                /* display size, label, etc. */
-            } else if(t_class == H5T_OPAQUE) {
-
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'H5T_OPAQUE'.\n"); }
-                /* display size, etc. */
-            } else if(t_class == H5T_COMPOUND) {
-
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'H5T_COMPOUND'.\n"); }
-                /* recursively display each member: field name, type  */
-            } else if(t_class == H5T_ARRAY) {
-
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'H5T_COMPOUND'.\n"); }
-                /* display  dimensions, base type  */
-            } else if(t_class == H5T_ENUM) {
-
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'H5T_ENUM'.\n"); }
-                /* display elements: name, value   */
-            } else  {
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Datatype is 'Other'.\n"); }
-                /* eg. Object Reference, ...and so on ... */
-            }
-        }
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "readType");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-/*
- *   Example of information that can be read from a Dataset Creation
- *   Property List.
- *
- *   There are many other possibilities, and there are other property
- *   lists.
- */
-void BiomInfoCommand::readPropList(hid_t propertyID) {
-    try {
-        hsize_t chunk_dims_out[2];
-        int  rank_chunk;
-        int nfilters;
-        H5Z_filter_t  filtn;
-        int i;
-        unsigned int   filt_flags, filt_conf;
-        size_t cd_nelmts;
-        unsigned int cd_values[32] ;
-        char f_name[MAX_NAME];
-        H5D_fill_time_t ft;
-        H5D_alloc_time_t at;
-        H5D_fill_value_t fvstatus;
-        unsigned int szip_options_mask;
-        unsigned int szip_pixels_per_block;
-        
-        /* zillions of things might be on the plist */
-        /*  here are a few... */
-        
-        /*
-         * get chunking information: rank and dimensions.
-         *
-         *  For other layouts, would get the relevant information.
-         */
-        if(H5D_CHUNKED == H5Pget_layout(propertyID)){
-            rank_chunk = H5Pget_chunk(propertyID, 2, chunk_dims_out);
-            
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: chunk rank " + toString(rank_chunk) + " dimensions " + toString(chunk_dims_out[0]) + " x " + toString(chunk_dims_out[1]) + ".\n"); }
-        } /* else if contiguous, etc. */
-        
-        /*
-         *  Get optional filters, if any.
-         *
-         *  This include optional checksum and compression methods.
-         */
-        
-        nfilters = H5Pget_nfilters(propertyID);
-        for (i = 0; i < nfilters; i++)
-        {
-            /* For each filter, get
-             *   filter ID
-             *   filter specific parameters
-             */
-            cd_nelmts = 32;
-            filtn = H5Pget_filter(propertyID, (unsigned)i,
-                                  &filt_flags, &cd_nelmts, cd_values,
-                                  (size_t)MAX_NAME, f_name, &filt_conf);
-            /*
-             *  These are the predefined filters
-             */
-            switch (filtn) {
-                case H5Z_FILTER_DEFLATE:  /* AKA GZIP compression */
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: DEFLATE level = " + toString(cd_values[0]) + ".\n"); }
-                    break;
-                case H5Z_FILTER_SHUFFLE:
-                     if (m->getDebug()) { m->mothurOut("[DEBUG]: SHUFFLE\n"); }
-                    break;
-                case H5Z_FILTER_FLETCHER32:
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: FLETCHER32\n"); }
-                    break;
-                case H5Z_FILTER_SZIP:
-                    szip_options_mask=cd_values[0];;
-                    szip_pixels_per_block=cd_values[1];
-                    
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: SZIP COMPRESSION: PIXELS_PER_BLOCK  " + toString(szip_pixels_per_block) + ".\n"); }
-                    /* print SZIP options mask, etc. */
-                    break;
-                default:
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: UNKNOWN_FILTER\n"); }
-                    break;
-            }
-        }
-        
-        /*
-         *  Get the fill value information:
-         *    - when to allocate space on disk
-         *    - when to fill on disk
-         *    - value to fill, if any
-         */
-        
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: ALLOC_TIME "); }
-        H5Pget_alloc_time(propertyID, &at);
-        
-        switch (at)
-        {
-            case H5D_ALLOC_TIME_EARLY:
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: EARLY\n"); }
-                break;
-            case H5D_ALLOC_TIME_INCR:
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: INCR\n"); }
-                break;
-            case H5D_ALLOC_TIME_LATE:
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: LATE\n"); }
-                break;
-            default:
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: unknown allocation policy\n"); }
-                break;
-        }
-        
-        /* ... and so on for other dataset properties ... */
-}
-catch(exception& e) {
-    m->errorOut(e, "BiomInfoCommand", "readPropList");
-    exit(1);
-}
-}
+#ifdef USE_HDF5
 //**********************************************************************************************************************
 //Process attribute of group or dataset
 void BiomInfoCommand::processAttributes(H5::Group& groupID, set<string>& requiredAttributes) {
     try {
         
-        
         for (set<string>::iterator it = requiredAttributes.begin(); it != requiredAttributes.end(); it++) {
+            
             
             H5::Attribute attribute(groupID.openAttribute(*it));
             H5std_string attributeName; attribute.getName(attributeName);
             H5::DataType  attributeType(attribute.getDataType());
             H5::DataSpace attDataSpace = attribute.getSpace();
             
-            hsize_t dims; attDataSpace.getSimpleExtentDims(&dims);
+            int rank = attDataSpace.getSimpleExtentNdims(); //number of dimensions
+            hsize_t dims[rank]; attDataSpace.getSimpleExtentDims(dims); //size of each dimension
             
             // Read the Attribute Data. Depends on the kind of data
-            switch(attributeType.getClass())
-            {
-                case H5T_STRING:
-                {
+            if (attributeType.getClass() == H5T_STRING) {
+                if (rank == 0) {
                     H5std_string biomTableId;
                     attribute.read(attributeType, biomTableId);
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: " + attributeName + " = " + biomTableId + "\n");  }
-                    cout << attributeName << " = " << biomTableId << endl;
                 }
-                case H5T_INTEGER:
-                {
-                    break;
-                }
+            }else if (attributeType.getClass() == H5T_INTEGER) {
+                if (attDataSpace.isSimple()) {
                     
-                case H5T_FLOAT:
-                {
-                    break;
+                    if (rank == 0) {
+                        hsize_t data = 0;
+                        attribute.read(attributeType, &data);
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: " + attributeName + " = " + toString(data) + "\n");  }
+                        if (attributeName == "nnz") { nnz = data; }
+                    }else if (rank == 1) {
+                        hsize_t data[dims[0]];
+                        attribute.read(attributeType, data);
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: " + attributeName + " = "); }
+                        for (int i = 0; i < dims[0]; i++) {
+                            if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                            if (attributeName == "nnz") { nnz = data[i]; }
+                        }  if (m->getDebug()) { m->mothurOutEndLine(); }
+                    }
                 }
-                    
-                default: { m->mothurOut("[ERROR]: Unexpected datatype class, quitting.\n"); m->setControl_pressed(true); }
-            }
+                
+            }else if (attributeType.getClass() == H5T_FLOAT) {
+                m->mothurOut("[WARNING]: the shared file only uses integers, any float values will be rounded down to the nearest integer.\n");
+                if (rank == 0) {
+                    hsize_t data = 0;
+                    attribute.read(attributeType, &data);
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + attributeName + " = " + toString(data) + "\n");  }
+                }else if (rank == 1) {
+                    hsize_t data[dims[0]];
+                    attribute.read(attributeType, data);
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + attributeName + " = "); }
+                    for (int i = 0; i < dims[0]; i++) {
+                        if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                    } if (m->getDebug()) { m->mothurOutEndLine(); }
+                }
+   
+            }else { m->mothurOut("[ERROR]: Unexpected datatype class, quitting.\n"); m->setControl_pressed(true);  }
+            
+            attribute.close();
         }
-        
-        
-        
-        /*
-         * The datatype and dataspace can be used to read all or
-         * part of the data.  (Not shown in this example.)
-         */
-        
-        /* ... read data with H5Aread, write with H5Awrite, etc. */
-        
-        
-        
     }
     catch(exception& e) {
         m->errorOut(e, "BiomInfoCommand", "processAttributes");
@@ -506,60 +295,119 @@ void BiomInfoCommand::processAttributes(H5::Group& groupID, set<string>& require
     }
 }
 //**********************************************************************************************************************
-
-void BiomInfoCommand::extractHDF5Group(hid_t gid) {
+//check to make sure required groups are present
+void BiomInfoCommand::checkGroups( H5::H5File& file, map<string, vector<string> >& requiredGroups) {
     try {
-        char group_name[MAX_NAME];
-        char name[MAX_NAME];
-        
-        ssize_t len = H5Iget_name (gid, group_name, MAX_NAME);
-        
-        if (m->getDebug()) { string group = group_name; m->mothurOut("[DEBUG]: Group Name: " + group + "\n");  }
-        
-        //attributes like creation_date, id, type, shape, ect...
-        //extractAttributes(gid);
-        
-        //expand each group
-        int otype;
-        hid_t grpid, dataType, dsid;
-        hsize_t numObjects;
-        herr_t err = H5Gget_num_objs(gid, &numObjects);
-        for (size_t i = 0; i < numObjects; i++) {
+       
+        for (map<string, vector<string> >::iterator it = requiredGroups.begin(); it != requiredGroups.end(); it++) {
             
-            if (m->getControl_pressed()) { break; }
+            H5std_string groupName = it->first;
+            vector<string> datasetNames = it->second;
+            H5::Group group(file.openGroup(groupName));
             
-            //get name and type
-            len = H5Gget_objname_by_idx(gid, i, name, MAX_NAME);
-            otype =  H5Gget_objtype_by_idx(gid, i);
-            
-           //process each object according to its type
-            switch(otype) {
-                case H5G_GROUP:
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: GROUP:\n");  }
-                    grpid = H5Gopen(gid,name, H5P_DEFAULT);
-                    extractHDF5Group(grpid);
-                    H5Gclose(grpid);
-                    break;
-                case H5G_DATASET:
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: DATASET:\n");  }
-                    dsid = H5Dopen(gid,name, H5P_DEFAULT);
-                    readDataSet(dsid);
-                    H5Dclose(dsid);
-                    break;
-                case H5G_TYPE:
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: DATA TYPE:\n");  }
-                    dataType = H5Topen(gid,name, H5P_DEFAULT);
-                    readType(dataType);
-                    H5Tclose(dataType);
-                    break;
-                default:
-                    m->mothurOut("[ERROR]: unrecognizes member type, quitting.\n");  m->setControl_pressed(true);
-                    break;
+            for (int h = 0; h < datasetNames.size(); h++) {
+                string datasetName = datasetNames[h];
+                int numObjects = group.getNumObjs();
+                
+                if (numObjects != 0) {
+                    H5::DataSet dataset = group.openDataSet(datasetName);
+                    H5::DataType  dataType(dataset.getDataType());
+                    H5::DataSpace dataSpace = dataset.getSpace();
+                    
+                    int rank = dataSpace.getSimpleExtentNdims(); //number of dimensions
+                    hsize_t dims[rank]; dataSpace.getSimpleExtentDims(dims); //size of each dimension
+                    
+                    if (dataset.getTypeClass() == H5T_STRING) {
+                        if (rank == 1) {
+                            char **data = new char*[dims[0]];
+                            H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
+                            dataset.read((void*)data, str_type);
+                            
+                            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
+                            
+                            for (int i = 0; i < dims[0]; i++) {
+                                if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                                
+                                if (groupName == "observation/") {
+                                    otuNames.push_back(data[i]);
+                                }else if (groupName == "sample/") {
+                                    sampleNames.push_back(data[i]);
+                                }else if (groupName == "observation/metadata") {
+                                    if (datasetName == "taxonomy") { taxonomy.push_back(data[i]); }
+                                }
+                                delete[] data[i];
+                            }  if (m->getDebug()) { m->mothurOutEndLine(); }
+                            delete[] data;
+                        }else if (rank == 2) {
+                            
+                            char **data = new char*[dims[0]*dims[1]];
+
+                            H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
+                            dataset.read((void*)data, str_type);
+                            
+                            string otuTaxonomy = ""; int count = 0;
+                            for (int i = 0; i < dims[0]*dims[1]; i++) {
+                                
+                                if (groupName == "observation/metadata") {
+                                    if (datasetName == "taxonomy") {  otuTaxonomy += data[i];  otuTaxonomy += ";";  count++; }
+                                }
+                                
+                                if (count == dims[1]) {
+                                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(otuTaxonomy) + "\n"); }
+                                    taxonomy.push_back(otuTaxonomy);
+                                    count = 0; otuTaxonomy = "";
+                                }
+                            }
+                        }
+                    }else if (dataset.getTypeClass() == H5T_INTEGER) {
+                        
+                        if (rank == 1) {
+                            int* data = new int[dims[0]];
+                            H5::DataSpace data_mspace(rank, dims);
+                            dataset.read(data, H5::PredType::NATIVE_INT, data_mspace, dataSpace);
+                            
+                            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
+                            for (int i = 0; i < dims[0]; i++) {
+                                if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                                
+                                if (groupName == "observation/matrix/") {
+                                    if (datasetName == "data") { otudata.push_back(data[i]); }
+                                    else if (datasetName == "indices") { indices.push_back(data[i]); }
+                                    else if (datasetName == "indptr") { indptr.push_back(data[i]); }
+                                }
+                            } if (m->getDebug()) { m->mothurOutEndLine(); }
+                            delete[] data;
+                        }
+                        
+                    }else if (dataset.getTypeClass() == H5T_FLOAT) {
+                        
+                        if (rank == 1) {
+                            float* data = new float[dims[0]];
+                            H5::DataSpace data_mspace(rank, dims);
+                            dataset.read(data, H5::PredType::NATIVE_FLOAT, data_mspace, dataSpace);
+                            
+                            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
+                            for (int i = 0; i < dims[0]; i++) {
+                                if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
+                                
+                                if (groupName == "observation/matrix/") {
+                                    if (datasetName == "data") { otudata.push_back((int)data[i]); }
+                                    else if (datasetName == "indices") { indices.push_back((int)data[i]); }
+                                    else if (datasetName == "indptr") { indptr.push_back((int)data[i]); }
+                                }
+                            }  if (m->getDebug()) { m->mothurOutEndLine(); }
+                            delete[] data;
+                        }
+                    }else { m->mothurOut("[ERROR]: Unexpected datatype class, quitting.\n"); m->setControl_pressed(true);  }
+                    
+                    dataset.close();
+                }
             }
+            group.close();
         }
     }
     catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "extractHDF5Group");
+        m->errorOut(e, "BiomInfoCommand", "checkGroups");
         exit(1);
     }
 }
@@ -568,43 +416,188 @@ void BiomInfoCommand::extractHDF5Group(hid_t gid) {
 int BiomInfoCommand::extractFilesFromHDF5() {
     try {
         //getting output filename
-        string filename = biomfile; filename = "/Users/sarahwestcott/Desktop/Release/hdf5.biom";
+        string filename = biomfile;
         if (outputDir == "") { outputDir += util.hasPath(filename); }
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
         variables["[tag]"] = label;
         string sharedFilename = getOutputFileName("shared",variables);
-        //outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
+        string taxFilename = getOutputFileName("constaxonomy",variables);
+        variables["[tag2]"] = "cons";
+        string taxSumFilename = getOutputFileName("taxsummary",variables);
         
+        nnz = 0;
+        set<string> requiredTopLevelAttrib;
+        map<string, vector<string> > requiredOTUDatasets;
+        map<string, vector<string> > requiredSampleDatasets;
+        map<string, vector<string> > optionalDatasets;
+
         //set required fields
         requiredTopLevelAttrib.insert("id"); requiredTopLevelAttrib.insert("type"); requiredTopLevelAttrib.insert("format-url");
         requiredTopLevelAttrib.insert("format-version"); requiredTopLevelAttrib.insert("generated-by"); requiredTopLevelAttrib.insert("creation-date");
         requiredTopLevelAttrib.insert("shape"); requiredTopLevelAttrib.insert("nnz");
         
-        //set required groups
-        requiredGroups.insert("observation/"); requiredGroups.insert("observation/matrix"); requiredGroups.insert("observation/metadata");
-        requiredGroups.insert("observation/group-metadata"); requiredGroups.insert("sample/"); requiredGroups.insert("sample/matrix");
-        requiredGroups.insert("sample/metadata"); requiredGroups.insert("sample/group-metadata");
+        //set required datasets - groupname -> datasetname
+        vector<string> datasets; datasets.push_back("ids");
+        requiredOTUDatasets["observation/"] = datasets; //otuLabels - "GG_OTU_1", "GG_OTU_2", "GG_OTU_3", "GG_OTU_4", "GG_OTU_5"
+        datasets.clear();
+        datasets.push_back("data"); //otu abundances for each non zero abundnace entry - 1, 5, 1, 2, 3, 1, 1, 4, 2, 2, 1, 1, 1, 1, 1
+        datasets.push_back("indices"); //index of group - maps into samples/ids  2, 0, 1, 3, 4, 5, 2, 3, 5, 0, 1, 2, 5, 1, 2
+        datasets.push_back("indptr"); //maps non zero abundance to OTU - 0, 1, 6, 9, 13, 15 - 0 start of OTU1s indexes, 1 start of OTU2s indexes, ... 15 start of OTU5s indexes
+        requiredOTUDatasets["observation/matrix/"] = datasets;
         
-        //set required datasets
-        requiredDatasets.insert("observation/ids"); requiredDatasets.insert("observation/matrix/data"); requiredDatasets.insert("observation/matrix/indices");
-        requiredDatasets.insert("observation/matrix/indptr"); requiredDatasets.insert("sample/ids"); requiredDatasets.insert("sample/matrix/data");
-        requiredDatasets.insert("sample/matrix/indices"); requiredDatasets.insert("sample/matrix/indptr");
+        datasets.clear(); datasets.push_back("ids"); //group names - "Sample1", "Sample2", "Sample3", "Sample4", "Sample5", "Sample6"
+        requiredSampleDatasets["sample/"] = datasets;
+        datasets.clear(); datasets.push_back("taxonomy"); //optional datasets to look for - taxonomy info - otu classifications
+        optionalDatasets["observation/metadata"] = datasets;
+
+        /*
+         label group numOtus GG_OTU_1  GG_OTU_2  GG_OTU_3  GG_OTU_4  GG_OTU_5
+         userLabel  Sample1     0           5       0           2       0
+         userLabel  Sample2     0           1       0           2       1
+         userLabel  Sample3     1           0       1           1       1
+         userLabel  Sample4     0           2       4           0       0
+         userLabel  Sample5     0           3       0           0       0
+         userLabel  Sample6     0           1       2           1       0
+         */
         
-        string endian = util.findEdianness();
+        #ifdef USE_HDF5
+        H5::H5File file( filename.c_str(), H5F_ACC_RDONLY );
+        H5::Group     what(file.openGroup( "/" ));
+      
+        processAttributes(what, requiredTopLevelAttrib); if (m->getControl_pressed()) { return 0; }
+
+        try {
+            
+            checkGroups(file, requiredOTUDatasets); if (m->getControl_pressed()) { return 0; }
+            
+        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+            m->mothurOut("[ERROR]: Missing required groups or datasets, aborting. Required datasets include: \n");
+            for (map<string, vector< string> >::iterator it = requiredOTUDatasets.begin(); it != requiredOTUDatasets.end(); it++) {
+                for (int i = 0; i < (it->second).size(); i++) { m->mothurOut(it->first + '\t' + it->second[i] + '\n'); }
+            }
+            m->mothurOutEndLine(); m->setControl_pressed(true);
+        }
         
-        //H5::H5File file( filename.c_str(), H5F_ACC_RDONLY );
-        //H5::Group     what(file.openGroup( "/" ));
-        //cout << endl;
-        //processAttributes(what, requiredTopLevelAttrib);
+        try {
+            
+            checkGroups(file, requiredSampleDatasets); if (m->getControl_pressed()) { return 0; }
+            
+        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+            m->mothurOut("[ERROR]: Missing required groups or datasets, aborting. Required datasets include: \n");
+            for (map<string, vector< string> >::iterator it = requiredOTUDatasets.begin(); it != requiredOTUDatasets.end(); it++) {
+                for (int i = 0; i < (it->second).size(); i++) { m->mothurOut(it->first + '\t' + it->second[i] + '\n'); }
+            }
+            m->mothurOutEndLine(); m->setControl_pressed(true);
+        }
         
+        bool hasTaxonomy = false;
+        try {
+            
+            checkGroups(file, optionalDatasets); if (m->getControl_pressed()) { return 0; }
+            
+            if (taxonomy.size() == otuNames.size()) { hasTaxonomy = true; }
+            
+        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+            m->mothurOut("\nIgnore HDF5 errors, mothur was checking for OTU taxonomies and your file does not contain them. They are not required, continuing.\n");
+            hasTaxonomy = false;
+        }
+
         
-        return 0;
+        bool error = false;
+        if (nnz != otudata.size()) { error = true; }
         
-        //ofstream out; util.openOutputFile(sharedFilename, out);
-        //out << data << endl;
-        //out.close();
+        //create shared file
+        sort(sampleNames.begin(), sampleNames.end());
+        
+        //create empty sharedrabundvectors so we can add otus below
+        SharedRAbundVectors lookup;
+        for (int i = 0; i < sampleNames.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector();
+            temp->setGroup(sampleNames[i]);
+            lookup.push_back(temp);
+        }
+        
+        lookup.setLabels(label);
+        
+        ofstream outTax;
+        if (hasTaxonomy) {
+            outputNames.push_back(taxFilename); outputTypes["constaxonomy"].push_back(taxFilename);
+            util.openOutputFile(taxFilename, outTax);
+            outTax << "OTU\tSize\tTaxonomy\n";
+        }
+        
+        //for each otu
+        int count = 0;
+        for (int h = 0; h < indptr.size()-1; h++) {
+            int otuStart = indptr[h];
+            int otuEnd = indptr[h+1];
+            
+            vector<int> otuAbunds; otuAbunds.resize(sampleNames.size(), 0); //initialze otus sample abundances to 0 - only non zero abunds are recorded
+            
+            for (int i = otuStart; i < otuEnd; i++) {
+                otuAbunds[indices[i]] = otudata[count]; count++;
+            }
+            
+            lookup.push_back(otuAbunds, otuNames[h]);
+        }
+        
+        ofstream out; util.openOutputFile(sharedFilename, out);
+        m->mothurOut("\n"+lookup.getLabel()+"\n"); bool printHeaders = true;
+        lookup.print(out, printHeaders);
+        out.close();
+        outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
+        
+        if (hasTaxonomy) {
+            
+            CountTable ct; for (int j = 0; j < sampleNames.size(); j++) {  ct.addGroup(sampleNames[j]); }
+            int numBins = lookup.getNumBins();
+            
+            for (int i = 0; i < numBins; i++) {
+                vector<int> abunds;
+                for (int j = 0; j < lookup.size(); j++) {
+                    if (m->getControl_pressed()) { break; }
+                    int abund = lookup.get(i, sampleNames[j]);
+                    if (basis == "otu") { if (abund > 0) { abund = 1;  } } //count presence in otu
+                    abunds.push_back(abund);
+                }
+                ct.push_back(otuNames[i], abunds);
+            }
+            
+            PhyloSummary taxaSum(&ct, relabund, printlevel);
+            
+            for (int i = 0; i < lookup.getNumBins(); i++) {
+                if (m->getControl_pressed()) { break; }
+                
+                int total = 0;
+                map<string, bool> containsGroup;
+                for (int j = 0; j < lookup.size(); j++) {
+                    int abund = lookup.get(i, sampleNames[j]);
+                    total += abund;
+                    containsGroup[sampleNames[j]] = abund;
+                }
+                
+                string newTax = util.addUnclassifieds(taxonomy[i], maxLevel, false);
+                outTax << otuNames[i] << '\t' << total << '\t' << newTax << endl;
+                
+                if (basis == "sequence") {
+                    taxaSum.addSeqToTree(otuNames[i], newTax);
+                }else {
+                    taxaSum.addSeqToTree(newTax, containsGroup); //add otu
+                }
+            }
+            outTax.close();
+            
+            //write taxonomy summary file
+            outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
+            ofstream outTaxSum;
+            util.openOutputFile(taxSumFilename, outTaxSum);
+            taxaSum.print(outTaxSum, output);
+            outTaxSum.close();
+        }
+
+        #endif
         
         return 0;
     }
@@ -872,7 +865,6 @@ int BiomInfoCommand::createFilesFromBiom() {
                             if (m->getControl_pressed()) { break; }
                             int abund = lookup->get(i, groupNames[j]);
                             if (basis == "otu") { if (abund > 0) { abund = 1;  } } //count presence in otu
-                            //abunds.push_back(lookup->get(i, groupNames[j]));
                             abunds.push_back(abund);
                         }
                         ct.push_back(otuNames[i], abunds);
