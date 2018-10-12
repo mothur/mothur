@@ -24,10 +24,10 @@ USEREADLINE ?= yes
 USEBOOST ?= yes
 USEHDF5 ?= no
 LOGFILE_NAME ?= yes
-BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
-BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
-HDF5_LIBRARY_DIR="\"Enter_your_HDF5_library_path_here\""
-HDF5_INCLUDE_DIR="\"Enter_your_HDF5_include_path_here\""
+BOOST_LIBRARY_DIR ?= "\"Enter_your_boost_library_path_here\""
+BOOST_INCLUDE_DIR ?= "\"Enter_your_boost_include_path_here\""
+HDF5_LIBRARY_DIR ?= "\"Enter_your_HDF5_library_path_here\""
+HDF5_INCLUDE_DIR ?= "\"Enter_your_HDF5_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 VERSION = "\"1.41.0\""
 
