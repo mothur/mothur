@@ -308,7 +308,6 @@ void BiomInfoCommand::checkGroups( H5::H5File& file, map<string, vector<string> 
             for (int h = 0; h < datasetNames.size(); h++) {
                 string datasetName = datasetNames[h];
                 int numObjects = group.getNumObjs();
-                cout << numObjects << '\t' << groupName << '\t' << datasetName << endl;
                 
                 if (numObjects != 0) {
                     H5::DataSet dataset = group.openDataSet(datasetName);
@@ -317,7 +316,6 @@ void BiomInfoCommand::checkGroups( H5::H5File& file, map<string, vector<string> 
                     
                     int rank = dataSpace.getSimpleExtentNdims(); //number of dimensions
                     hsize_t dims[rank]; dataSpace.getSimpleExtentDims(dims); //size of each dimension
-                    cout << "rank = "<< rank << '\t' << groupName << '\t' << datasetName << endl;;
                     
                     if (dataset.getTypeClass() == H5T_STRING) {
                         if (rank == 1) {
@@ -355,7 +353,7 @@ void BiomInfoCommand::checkGroups( H5::H5File& file, map<string, vector<string> 
                                 }
                                 
                                 if (count == dims[1]) {
-                                    if (m->getDebug()) { m->mothurOut(toString(otuTaxonomy) + "\n"); }
+                                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(otuTaxonomy) + "\n"); }
                                     taxonomy.push_back(otuTaxonomy);
                                     count = 0; otuTaxonomy = "";
                                 }
@@ -425,6 +423,9 @@ int BiomInfoCommand::extractFilesFromHDF5() {
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
         variables["[tag]"] = label;
         string sharedFilename = getOutputFileName("shared",variables);
+        string taxFilename = getOutputFileName("constaxonomy",variables);
+        variables["[tag2]"] = "cons";
+        string taxSumFilename = getOutputFileName("taxsummary",variables);
         
         nnz = 0;
         set<string> requiredTopLevelAttrib;
@@ -491,6 +492,19 @@ int BiomInfoCommand::extractFilesFromHDF5() {
             m->mothurOutEndLine(); m->setControl_pressed(true);
         }
         
+        bool hasTaxonomy = false;
+        try {
+            
+            checkGroups(file, optionalDatasets); if (m->getControl_pressed()) { return 0; }
+            
+            if (taxonomy.size() == otuNames.size()) { hasTaxonomy = true; }
+            
+        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+            m->mothurOut("\nIgnore HDF5 errors, mothur was checking for OTU taxonomies and your file does not contain them. They are not required, continuing.\n");
+            hasTaxonomy = false;
+        }
+
+        
         bool error = false;
         if (nnz != otudata.size()) { error = true; }
         
@@ -506,6 +520,13 @@ int BiomInfoCommand::extractFilesFromHDF5() {
         }
         
         lookup.setLabels(label);
+        
+        ofstream outTax;
+        if (hasTaxonomy) {
+            outputNames.push_back(taxFilename); outputTypes["constaxonomy"].push_back(taxFilename);
+            util.openOutputFile(taxFilename, outTax);
+            outTax << "OTU\tSize\tTaxonomy\n";
+        }
         
         //for each otu
         int count = 0;
@@ -526,18 +547,56 @@ int BiomInfoCommand::extractFilesFromHDF5() {
         m->mothurOut("\n"+lookup.getLabel()+"\n"); bool printHeaders = true;
         lookup.print(out, printHeaders);
         out.close();
-        
         outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
-
         
-        try {
+        if (hasTaxonomy) {
             
-            checkGroups(file, optionalDatasets); if (m->getControl_pressed()) { return 0; }
+            CountTable ct; for (int j = 0; j < sampleNames.size(); j++) {  ct.addGroup(sampleNames[j]); }
+            int numBins = lookup.getNumBins();
             
-        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
-            m->mothurOut("\nIgnore HDF5 errors, mothur was checking for OTU taxonomies and your file does not contain them. They are not required, continuing.\n");
+            for (int i = 0; i < numBins; i++) {
+                vector<int> abunds;
+                for (int j = 0; j < lookup.size(); j++) {
+                    if (m->getControl_pressed()) { break; }
+                    int abund = lookup.get(i, sampleNames[j]);
+                    if (basis == "otu") { if (abund > 0) { abund = 1;  } } //count presence in otu
+                    abunds.push_back(abund);
+                }
+                ct.push_back(otuNames[i], abunds);
+            }
+            
+            PhyloSummary taxaSum(&ct, relabund, printlevel);
+            
+            for (int i = 0; i < lookup.getNumBins(); i++) {
+                if (m->getControl_pressed()) { break; }
+                
+                int total = 0;
+                map<string, bool> containsGroup;
+                for (int j = 0; j < lookup.size(); j++) {
+                    int abund = lookup.get(i, sampleNames[j]);
+                    total += abund;
+                    containsGroup[sampleNames[j]] = abund;
+                }
+                
+                string newTax = util.addUnclassifieds(taxonomy[i], maxLevel, false);
+                outTax << otuNames[i] << '\t' << total << '\t' << newTax << endl;
+                
+                if (basis == "sequence") {
+                    taxaSum.addSeqToTree(otuNames[i], newTax);
+                }else {
+                    taxaSum.addSeqToTree(newTax, containsGroup); //add otu
+                }
+            }
+            outTax.close();
+            
+            //write taxonomy summary file
+            outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
+            ofstream outTaxSum;
+            util.openOutputFile(taxSumFilename, outTaxSum);
+            taxaSum.print(outTaxSum, output);
+            outTaxSum.close();
         }
-        
+
         #endif
         
         return 0;
@@ -806,7 +865,6 @@ int BiomInfoCommand::createFilesFromBiom() {
                             if (m->getControl_pressed()) { break; }
                             int abund = lookup->get(i, groupNames[j]);
                             if (basis == "otu") { if (abund > 0) { abund = 1;  } } //count presence in otu
-                            //abunds.push_back(lookup->get(i, groupNames[j]));
                             abunds.push_back(abund);
                         }
                         ct.push_back(otuNames[i], abunds);
