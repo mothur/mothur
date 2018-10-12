@@ -23,3 +23,5 @@ uchime
 
 *.stderr
 *.pat
+
+flux_compile.sh
