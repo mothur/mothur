@@ -162,7 +162,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						filenames[i] = current->getSFFFile(); 
 						if (filenames[i] != "") {  m->mothurOut("Using " + filenames[i] + " as input file for the sff parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
-							m->mothurOut("You have no current sfffile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							m->mothurOut("You have no current sfffile, ignoring current.\n"); ignore=true; 
 							//erase from file list
 							filenames.erase(filenames.begin()+i);
 							i--;

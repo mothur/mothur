@@ -20,6 +20,8 @@
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
 		480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
+		4810D5B3217A1D2F00C668E8 /* libhdf5.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA5215EB4750036D42C /* libhdf5.a */; };
+		4810D5B4217A1D3800C668E8 /* libhdf5_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA7215EB4980036D42C /* libhdf5_cpp.a */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -1726,6 +1728,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4810D5B3217A1D2F00C668E8 /* libhdf5.a in Frameworks */,
+				4810D5B4217A1D3800C668E8 /* libhdf5_cpp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3754,7 +3758,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
-				LIBRARY_SEARCH_PATHS = /usr/local/hdf5/lib;
+				LIBRARY_SEARCH_PATHS = /usr/local/hdf5/lib/;
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
 				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "";
@@ -3788,7 +3792,7 @@
 				GCC_WARN_UNUSED_VALUE = YES;
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib/,
-					/usr/local/hdf5/lib,
+					/usr/local/hdf5/lib/,
 				);
 				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
 				ONLY_ACTIVE_ARCH = YES;
@@ -3847,7 +3851,10 @@
 				);
 				INSTALL_PATH = TARGET_BUILD_DIR;
 				LIBRARY_SEARCH_PATHS = "";
-				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					/usr/local/lib/,
+					/usr/local/hdf5/lib/,
+				);
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
@@ -3919,7 +3926,10 @@
 				);
 				INSTALL_PATH = TARGET_BUILD_DIR;
 				LIBRARY_SEARCH_PATHS = "";
-				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					/usr/local/lib/,
+					/usr/local/hdf5/lib/,
+				);
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -3963,7 +3973,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -3973,6 +3983,10 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					/usr/local/lib/,
+					/usr/local/hdf5/lib/,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -4012,7 +4026,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.40.5\\\"\"",
 					"RELEASE_DATE=\"\\\"06/20/2018\\\"\"",
@@ -4021,6 +4035,14 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/hdf5/lib,
+					/usr/local/lib,
+				);
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					/usr/local/lib/,
+					/usr/local/hdf5/lib/,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;

@@ -710,16 +710,14 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         }
         
         map<string, int> refCounts;
-        if (printref) { // need to include reference in counts
-            
-            if (refcountfile != "") {
-                CountTable refct; refct.readTable(refcountfile, false, false);
-                refCounts = refct.getNameMap();
-            }else if (refnamefile != "") { refCounts = util.readNames(refnamefile); }
-            else { //assume unique
-                for (int i = 0; i < otus.size(); i++) { for (int j = 0; j < otus[i].size(); j++) { refCounts[otus[i][j]] = 1; } }
-            }
+        if (refcountfile != "") {
+            CountTable refct; refct.readTable(refcountfile, false, false);
+            refCounts = refct.getNameMap();
+        }else if (refnamefile != "") { refCounts = util.readNames(refnamefile); }
+        else { //assume unique
+            for (int i = 0; i < otus.size(); i++) { for (int j = 0; j < otus[i].size(); j++) { refCounts[otus[i][j]] = 1; } }
         }
+        counts.insert(refCounts.begin(), refCounts.end());
         
         cluster.initialize(listVectorMetric, true, otus, refList->getLabels(), method, false);
         
@@ -761,10 +759,6 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         ofstream listFile;
         string listFileName = fileroot+ tag + ".list";
         util.openOutputFile(listFileName,	listFile);
-
-        if (printref) { // need to include reference in counts
-            counts.insert(refCounts.begin(), refCounts.end());
-        }
         
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }

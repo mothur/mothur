@@ -335,9 +335,10 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
             if (hasCount && (templatefile != "self")) { m->mothurOut("You have provided a countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
             if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
-            
+
             //look for uchime exe
-            path = current->getProgramPath();         
+            path = current->getProgramPath();
+
             string vsearchCommand;
 #if defined NON_WINDOWS
             vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
@@ -1025,9 +1026,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         
         vector<char*> cPara;
         string vsearchCommand = "";
-#ifdef UNIT_TEST
-        //vsearchCommand = "./";
-#endif
+
         vsearchCommand += vsearchLocation;
         vsearchCommand = "\"" + vsearchCommand + "\" ";
         

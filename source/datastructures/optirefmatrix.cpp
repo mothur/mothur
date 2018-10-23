@@ -509,6 +509,8 @@ void OptiRefMatrix::randomizeRefs() {
         //counted twice
         numRefDists /= 2;
         numFitDists /= 2;
+        numBetweenDists /= 2;
+
     }
     catch(exception& e) {
         m->errorOut(e, "OptiRefMatrix", "randomizeRefs");
@@ -635,6 +637,7 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         //counted twice
         numRefDists /= 2;
         numFitDists /= 2;
+        numBetweenDists /= 2;
 
         return 0;
     }
@@ -671,7 +674,7 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
         //read fit file to find singletons
         map<long long, long long> fitSingletonIndexSwap;
         map<string, long long> fitnameAssignment;
-        if (fitnamefile != "") { util.readNames(refnamefile, fitnameAssignment); }
+        if (fitnamefile != "") { util.readNames(fitnamefile, fitnameAssignment); }
         else  {
             CountTable ct; ct.readTable(fitcountfile, false, true);
             map<string, int> temp = ct.getNameMap();
@@ -800,6 +803,8 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
         //counted twice
         numRefDists /= 2;
         numFitDists /= 2;
+        numBetweenDists /= 2;
+
         return 0;
     }
     catch(exception& e) {

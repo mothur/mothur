@@ -81,12 +81,12 @@ Test454SOP::Test454SOP() {  //setup
 }
 /**************************************************************************************************/
 Test454SOP::~Test454SOP() {}
-/**************************************************************************************************/
+/**************************************************************************************************
 
 TEST(Test_Integration_454SOP, SFF) {
     Test454SOP test;
     
-    test.m->mothurOut("/******************************************/\n");
+   
     test.current->setMothurCalling(true);
     
     string inputs = "seed=123456";
@@ -121,13 +121,13 @@ TEST(Test_Integration_454SOP, SFF) {
     delete summarySeqsCommand;
     
     test.current->setMothurCalling(false);
-    test.m->mothurOut("/******************************************/\n");
+    
 }
 
 TEST(Test_Integration_454SOP, ReducingSequencingErrors) {
     Test454SOP test;
     
-    test.m->mothurOut("/******************************************/\n");
+    
     test.current->setMothurCalling(true);
     
     string inputs = "seed=123456";
@@ -202,13 +202,13 @@ TEST(Test_Integration_454SOP, ReducingSequencingErrors) {
     delete summarySeqsCommand2;
     
     test.current->setMothurCalling(false);
-    test.m->mothurOut("/******************************************/\n");
+    
 }
 
 TEST(Test_Integration_454SOP, ProcessingImprovedSequences) {
     Test454SOP test;
     
-    test.m->mothurOut("/******************************************/\n");
+   
     test.current->setMothurCalling(true);
     
     string inputs = "seed=123456";
@@ -283,13 +283,13 @@ TEST(Test_Integration_454SOP, ProcessingImprovedSequences) {
     delete summarySeqsCommand;
     
     test.current->setMothurCalling(false);
-    test.m->mothurOut("/******************************************/\n");
+   
 }
 
 TEST(Test_Integration_454SOP, RemoveChimerasContaminants) {
     Test454SOP test;
     
-    test.m->mothurOut("/******************************************/\n");
+   
     test.current->setMothurCalling(true);
     
     string inputs = "seed=123456";
@@ -348,13 +348,12 @@ TEST(Test_Integration_454SOP, RemoveChimerasContaminants) {
     delete summarySeqsCommand;
     
     test.current->setMothurCalling(false);
-    test.m->mothurOut("/******************************************/\n");
 }
 
 TEST(Test_Integration_454SOP, AssessingErrorRates) {
     Test454SOP test;
     
-    test.m->mothurOut("/******************************************/\n");
+    
     test.current->setMothurCalling(true);
     
     string inputs = "seed=123456";
@@ -472,13 +471,13 @@ TEST(Test_Integration_454SOP, AssessingErrorRates) {
     //0.03	ave	26.227000
     
     test.current->setMothurCalling(false);
-    test.m->mothurOut("/******************************************/\n");
+    
 }
 
 TEST(Test_Integration_454SOP, PreparingForAnalysis) {
     Test454SOP test;
     
-    test.m->mothurOut("/******************************************/\n");
+    
     test.current->setMothurCalling(true);
     
     string inputs = "seed=123456";
@@ -601,13 +600,13 @@ TEST(Test_Integration_454SOP, PreparingForAnalysis) {
     delete clearcutCommand;
     
     test.current->setMothurCalling(false);
-    test.m->mothurOut("/******************************************/\n");
+    
 }
 
 TEST(Test_Integration_454SOP, OTUBasedAnalysis) {
     Test454SOP test;
     
-    test.m->mothurOut("/******************************************/\n");
+    
     test.current->setMothurCalling(true);
     
     string inputs = "seed=123456";
@@ -778,13 +777,13 @@ TEST(Test_Integration_454SOP, OTUBasedAnalysis) {
     delete corrAxesCommand2;
     
     test.current->setMothurCalling(false);
-    test.m->mothurOut("/******************************************/\n");
+   
 }
 
 TEST(Test_Integration_454SOP, PhylogenyBasedAnalysis) {
     Test454SOP test;
     
-    test.m->mothurOut("/******************************************/\n");
+    
     test.current->setMothurCalling(true);
     
     string inputs = "seed=123456";
@@ -835,8 +834,8 @@ TEST(Test_Integration_454SOP, PhylogenyBasedAnalysis) {
     delete unifracWeightedCommand;
     
     test.current->setMothurCalling(false);
-    test.m->mothurOut("/******************************************/\n");
-}
+    
+}*/
 
 /**************************************************************************************************/
 

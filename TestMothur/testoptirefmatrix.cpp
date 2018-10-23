@@ -31,9 +31,9 @@ TEST(Test_Container_OptiRefMatrix, readColumnDenovo) {
     OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
     
     //EXPECT_EQ(160,(matrix.print(cout)));
-    EXPECT_EQ(160,(matrix.getNumDists()));
-    EXPECT_EQ(34,(matrix.getNumFitDists()));
-    EXPECT_EQ(54,(matrix.getNumRefDists()));
+    EXPECT_EQ(80,(matrix.getNumDists()));
+    EXPECT_EQ(17,(matrix.getNumFitDists()));
+    EXPECT_EQ(27,(matrix.getNumRefDists()));
     
     vector<long long> refSeqs = matrix.getRefSeqs();
     string Expected_ReturnResults = "1357111516181920222527283132333435373840414445474851535556";
@@ -43,7 +43,7 @@ TEST(Test_Container_OptiRefMatrix, readColumnDenovo) {
     EXPECT_EQ(Expected_ReturnResults, ReturnResults);
     
     long long sanityCheck = matrix.getNumDists() - (matrix.getNumFitDists() + matrix.getNumRefDists());
-    EXPECT_EQ(72,sanityCheck); //number of inbetween dists
+    EXPECT_EQ(36,sanityCheck); //number of inbetween dists
 }
 
 //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
@@ -55,9 +55,9 @@ TEST(Test_Container_OptiRefMatrix, readPhylipDenovo) {
     OptiRefMatrix matrix(testOMatrix.phylipFile, "phylip", testOMatrix.filenames[1], "name", 0.03, 50);
     
     //EXPECT_EQ(160,(matrix.print(cout)));
-    EXPECT_EQ(160,(matrix.getNumDists()));
-    EXPECT_EQ(34,(matrix.getNumFitDists()));
-    EXPECT_EQ(44,(matrix.getNumRefDists()));
+    EXPECT_EQ(80,(matrix.getNumDists()));
+    EXPECT_EQ(17,(matrix.getNumFitDists()));
+    EXPECT_EQ(22,(matrix.getNumRefDists()));
     
     vector<long long> refSeqs = matrix.getRefSeqs();
     string Expected_ReturnResults = "136791014161819212224282930323335363839414344455152535556";
@@ -67,13 +67,12 @@ TEST(Test_Container_OptiRefMatrix, readPhylipDenovo) {
     EXPECT_EQ(Expected_ReturnResults, ReturnResults);
     
     long long sanityCheck = matrix.getNumDists() - (matrix.getNumFitDists() + matrix.getNumRefDists());
-    EXPECT_EQ(82,sanityCheck); //number of inbetween dists
+    EXPECT_EQ(41,sanityCheck); //number of inbetween dists
 }
 
 //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
 TEST(Test_Container_OptiRefMatrix, readColumnReference) {
     TestOptiRefMatrix testOMatrix;
-    
     OptiRefMatrix matrix(testOMatrix.reffilenames[2], testOMatrix.reffilenames[1], "count", "column", 0.03, testOMatrix.columnFile, testOMatrix.filenames[1], "name", "column", testOMatrix.reffilenames[5], "column");
     
     //EXPECT_EQ(113772,(matrix.print(cout)));

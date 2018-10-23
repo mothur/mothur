@@ -164,7 +164,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
             }
 
             
-			fastaFileName = validParameter.valid(parameters, "fasta");
+			fastaFileName = validParameter.validFile(parameters, "fasta");
 			if (fastaFileName == "not found") {
 				fastaFileName = current->getFastaFile();
 				if (fastaFileName != "") {  m->mothurOut("Using " + fastaFileName + " as input file for the fasta parameter.\n");  }

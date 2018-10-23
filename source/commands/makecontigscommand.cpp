@@ -1698,11 +1698,6 @@ void driverContigs(contigsData* params){
                 int primerIndex = 0;
                 Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
                 Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
-
-                if (fSeq.getName() == "M02973_138_000000000-C366M_1_1101_11335_1892") {
-                    cout << "found it\n";
-                    
-                }
                 
                 if(numBarcodes != 0){
                     vector<int> results;
