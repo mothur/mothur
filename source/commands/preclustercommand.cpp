@@ -1344,7 +1344,7 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
 	    string group, unique_sequence;
 			int count;
 
-			ct.clearTable();
+			ct.zeroOutTable();
 
 	    while (!inNames.eof()) {
 

@@ -54,7 +54,8 @@ class CountTable {
         int createTable(string, string, bool); //namefile, groupfile, createGroup
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
-        int clearTable(); //turn all counts to zeros
+        int zeroOutTable(); //turn all counts to zeros
+        int clearTable();
 
         int printTable(string);
         int printHeaders(ofstream&);

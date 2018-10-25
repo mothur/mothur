@@ -68,6 +68,11 @@ vector<string> TestDataSet::getSubsetFNGFiles() {
 }
 /***********************************************************************/
 
+string TestDataSet::getCountTableFile() {
+    return testDir+"test.count_table";
+}
+/***********************************************************************/
+
 string TestDataSet::getSharedFile() {
     return testDir+"test.opti_mcc.shared";
 }

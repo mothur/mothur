@@ -34,6 +34,7 @@ public:
     vector<string> getOligosFiles(); //single, paired, indexes, comboNamesTest
     string getSharedFile(); //shared
     string getRelabundFile(); //relabund
+    string getCountTableFile(); //count
     
 private:
     MothurOut* m;

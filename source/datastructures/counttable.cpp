@@ -184,7 +184,6 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
         ifstream in;
         util.openInputFile(namefile, in);
 
-        int total = 0;
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
 
@@ -331,7 +330,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
         counts.clear();
         map<int, string> originalGroupIndexes;
         if ((columnHeaders.size() > 2) && readGroups) { hasGroups = true; numGroups = columnHeaders.size() - 2;  }
-        for (int i = 2; i < columnHeaders.size(); i++) {  groups.push_back(columnHeaders[i]);  originalGroupIndexes[i-2] = columnHeaders[i]; totalGroups.push_back(0); }
+        if (readGroups) {  for (int i = 2; i < columnHeaders.size(); i++) {  groups.push_back(columnHeaders[i]);  originalGroupIndexes[i-2] = columnHeaders[i]; totalGroups.push_back(0); } }
         //sort groups to keep consistent with how we store the groups in groupmap
         sort(groups.begin(), groups.end());
         for (int i = 0; i < groups.size(); i++) {  indexGroupMap[groups[i]] = i; }
@@ -363,7 +362,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
 
             map<string, int>::iterator it = indexNameMap.find(name);
             if (it == indexNameMap.end()) {
-                if (hasGroups) {  counts.push_back(groupCounts);  }
+                if (hasGroups && readGroups) {  counts.push_back(groupCounts);  }
                 indexNameMap[name] = uniques;
                 totals.push_back(thisTotal);
                 total += thisTotal;
@@ -377,7 +376,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
 
         if (error) { m->setControl_pressed(true); }
         else { //check for zero groups
-            if (hasGroups) {
+            if (hasGroups && readGroups) {
                 for (int i = 0; i < totalGroups.size(); i++) {
                     if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
                 }
@@ -394,7 +393,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
 
 /************************************************************/
 
-int CountTable::clearTable() {
+int CountTable::zeroOutTable() {
   try {
 
 		for(int i=0;i<counts.size();i++){
@@ -408,11 +407,30 @@ int CountTable::clearTable() {
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CountTable", "readTable");
+		m->errorOut(e, "CountTable", "zeroOutTable");
 		exit(1);
 	}
 }
+/************************************************************/
 
+int CountTable::clearTable() {
+    try {
+        hasGroups = false;
+        total = 0;
+        uniques = 0;
+        groups.clear();
+        counts.clear();
+        totals.clear();
+        totalGroups.clear();
+        indexNameMap.clear();
+        indexGroupMap.clear();
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "clearTable");
+        exit(1);
+    }
+}
 /************************************************************/
 int CountTable::printTable(string file) {
     try {
@@ -888,10 +906,17 @@ int CountTable::remove(string seqName) {
             uniques--;
             if (hasGroups){ //remove this sequences counts from group totals
                 for (int i = 0; i < totalGroups.size(); i++) {  totalGroups[i] -= counts[it->second][i];  counts[it->second][i] = 0; }
+                counts[it->second].clear();
+                counts.erase(counts.begin()+it->second);
             }
-            int thisTotal = totals[it->second]; totals[it->second] = 0;
+            int thisTotal = totals[it->second];
+            totals.erase(totals.begin()+it->second);
             total -= thisTotal;
-            indexNameMap.erase(it);
+            
+            int thisIndex = 0;
+            map<string, int> newIndexNameMap;
+            for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) { if (it->first != seqName) { newIndexNameMap[it->first] = thisIndex; thisIndex++; } }
+            indexNameMap = newIndexNameMap;
         }else {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
