@@ -136,6 +136,8 @@ TEST(Test_Container_CountTable, push_backs) {
     ct.push_back("seq3", 10);
     EXPECT_EQ(ct.get("seq2"), 0);
     EXPECT_EQ(ct.get("seq3"), 1);
+    ct.setNumSeqs("seq3", 100);
+    EXPECT_EQ(ct.getNumSeqs("seq3"), 100);
 }
 /**************************************************************************************************/
 //Testing testGroups functions
@@ -150,22 +152,42 @@ TEST(Test_Container_CountTable, push_backGroups) {
     ct.push_back("mySeq", abunds);
     EXPECT_EQ(ct.getGroupCount("mySeq", "F003D000"), 100);
     
+    
+}
+/**************************************************************************************************/
+TEST(Test_Container_CountTable, getSets) {
+    TestCountTable testData;
+    CountTable ct;
+    ct.createTable(testData.namefile, testData.groupfile, false);
+    
+    vector<string> thisSeqsGroups = ct.getGroups("GQY1XT001B1CEF");
+    EXPECT_EQ(thisSeqsGroups[0], "F003D148");
+    
+    vector<int> thisSeqsAbunds = ct.getGroupCounts("GQY1XT001B1CEF");
+    EXPECT_EQ(thisSeqsAbunds[0], 0);
+    EXPECT_EQ(thisSeqsAbunds[8], 1);
+    EXPECT_EQ(ct.getGroupCount("GQY1XT001B1CEF", "F003D148"), 1);
+    EXPECT_EQ(ct.getGroupCount("F003D148"), 21);
+    //EXPECT_EQ(ct.getNumSeqs("fakeSeq"), 0);
+    EXPECT_EQ(ct.getNumSeqs("GQY1XT001CO8VD"), 16);
+    EXPECT_EQ(ct.getNumUniqueSeqs(), 93);
 }
 /**************************************************************************************************/
 
-//vector<string> getGroups(string); //returns vector of groups represented by this sequences
-//vector<int> getGroupCounts(string);  //returns group counts for a seq passed in, if no group info is in file vector is blank. Order is the same as the groups returned by getGroups function.
-//int getGroupCount(string, string); //returns number of seqs for that group for that seq
-//int getGroupCount(string); // returns total seqs for that group
-//int getNumSeqs(string); //returns total seqs for that seq, 0 if not found
-//int setNumSeqs(string, int); //set total seqs for that seq, return -1 if not found
-//int getNumSeqs() { return total; } //return total number of seqs
-//int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
-//int getGroupIndex(string); //returns index in getGroupCounts vector of specific group
+TEST(Test_Container_CountTable, dataStructures) {
+    TestCountTable testData;
+    CountTable ct;
+    ct.createTable(testData.namefile, testData.groupfile, false);
+    
+    EXPECT_EQ(ct.getNamesOfSeqs().size(), 93);
+    EXPECT_EQ(ct.getNamesOfSeqs("F003D148").size(), 19);
+    EXPECT_EQ(ct.getNamesOfSeqs("F003D004").size(), 11);
+    ct.mergeCounts("GQY1XT001B1CEF", "GQY1XT001CO8VD");
+    EXPECT_EQ(ct.getNumSeqs("GQY1XT001B1CEF"), 17);
+    
+}
+/**************************************************************************************************/
 
-//vector<string> getNamesOfSeqs(); //return names of all seqeunce in table
-//vector<string> getNamesOfSeqs(string); //returns names of seqs in specific group in table
-//int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
 //ListVector getListVector();
 //SharedRAbundVectors* getShared();
 //SharedRAbundVectors* getShared(vector<string>); //set of groups selected

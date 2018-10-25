@@ -89,7 +89,6 @@ class CountTable {
         int setNumSeqs(string, int); //set total seqs for that seq, return -1 if not found
         int getNumSeqs() { return total; } //return total number of seqs
         int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
-        int getGroupIndex(string); //returns index in getGroupCounts vector of specific group
 
         vector<string> getNamesOfSeqs(); //return names of all seqeunce in table
         vector<string> getNamesOfSeqs(string); //returns names of seqs in specific group in table
