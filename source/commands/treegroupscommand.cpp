@@ -758,8 +758,8 @@ int process(treeSharedData* params) {
                         int column = calcDists[i][j].seq2;
                         double dist = calcDists[i][j].dist;
                         
-                        matrix[row][column] = dist;
-                        matrix[column][row] = dist;
+                        matrix[row][column] = -(dist-1.0);
+                        matrix[column][row] = -(dist-1.0);
                     }
                     params->matrices.push_back(matrix);
                 }
