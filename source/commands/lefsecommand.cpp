@@ -218,10 +218,6 @@ LefseCommand::LefseCommand(string option)  {
 			if (temp == "not found") { temp = "T"; }
 			normMillion = util.isTrue(temp);
             
-            //temp = validParameter.validFile(parameters, "subject", false);
-			//if (temp == "not found") { temp = "F"; }
-			//subject = util.isTrue(temp);
-
             temp = validParameter.valid(parameters, "lda");
 			if (temp == "not found") { temp = "2.0"; }
 			util.mothurConvert(temp, ldaThreshold);
@@ -233,10 +229,6 @@ LefseCommand::LefseCommand(string option)  {
             temp = validParameter.valid(parameters, "fboots");
 			if (temp == "not found") { temp = "0.67"; }
 			util.mothurConvert(temp, fBoots);
-            
-            //temp = validParameter.validFile(parameters, "wilcsamename", false);
-			//if (temp == "not found") { temp = "F"; }
-			//wilcsamename = util.isTrue(temp);
             
             temp = validParameter.valid(parameters, "curv");
 			if (temp == "not found") { temp = "F"; }
@@ -571,7 +563,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
         map<string, set<string> >::iterator itB;
         for(map<string, set<string> >::iterator it=class2SubClasses.begin();it!=class2SubClasses.end();it++){
             itB = it;itB++;
-            for(itB;itB!=class2SubClasses.end();itB++){
+            for(;itB!=class2SubClasses.end();itB++){
                 if (m->getControl_pressed()) { return false; }
                 bool first = true;
                 int dirCmp = 0; // not set?? dir_cmp = "not_set" # 0=notset or none, 1=true, 2=false.
@@ -805,12 +797,6 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: after 1000. \n."); }
             
-            //print data in R input format for testing
-            if (false) {
-                //vector<string> groups; for (int h = 0; h < rand_s.size(); h++) {  groups.push_back(lookup[rand_s[h]]->getGroup()); }
-                //for (int h = 0; h < groups.size(); h++) { cout << groups[h]<< endl; }
-                //printToCoutForRTesting(adjustedLookup, rand_s, class2GroupIndex, bins, subClass2GroupIndex, groups);
-            }
             if (save < 1000) { m->mothurOut("[WARNING]: Skipping iter " + toString(j+1) + " in LDA test. This can be caused by too few groups per class or not enough contrast within the classes. \n"); }
             else {
                 //for each pair of classes
@@ -1077,16 +1063,7 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
             cout << (adjustedLookup[count][rand_s[rand_s.size()-1]]) << ")\n";
             count++;
         }
-        /*
-        string tempOutput = "";
-        for (int h = 0; h < rand_s.size(); h++) {
-            //find class this index is in
-            for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it!= class2GroupIndex.end(); it++) {
-                if (util.inUsersGroups(rand_s[h], (it->second)) ) {   cout << (h+1) << " <- c(\"" +it->first + "\")\n" ; }
-            }
-        }*/
         
-       
         string tempOutput = "treatments <- c(";
         for (int h = 0; h < rand_s.size(); h++) {
             //find class this index is in
@@ -1098,31 +1075,6 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         tempOutput += ")\n";
         cout << tempOutput;
         
-         /*
-        if (subclass != "") {
-            string tempOutput = "sub <- c(";
-            for (int h = 0; h < rand_s.size(); h++) {
-                //find class this index is in
-                for (map<string, vector<int> >::iterator it = subClass2GroupIndex.begin(); it!= subClass2GroupIndex.end(); it++) {
-                    if (util.inUsersGroups(rand_s[h], (it->second)) ) {   tempOutput += "\"" +it->first + "\"" + ','; }
-                }
-            }
-            tempOutput = tempOutput.substr(0, tempOutput.length()-1);
-            tempOutput += ")\n";
-            cout << tempOutput;
-        }
-        
-        if (subject) {
-            string tempOutput = "group <- c(";
-            for (int h = 0; h < groups.size(); h++) {
-                tempOutput += "\"" +groups[h] + "\"" + ','; 
-            }
-            tempOutput = tempOutput.substr(0, tempOutput.length()-1);
-            tempOutput += ")\n";
-            cout << tempOutput;
-        }*/
-
-        
         //print data frame
         tempOutput = "dat <- data.frame(";
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
@@ -1130,10 +1082,8 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
             
             tempOutput += "\"" + currentLabels[it->first] + "\"=" + currentLabels[it->first] + ",";
         }
-        //tempOutput = tempOutput.substr(0, tempOutput.length()-1);
+        
         tempOutput += " class=treatments";
-        //if (subclass != "") { tempOutput += ", subclass=sub"; }
-        //if (subject) { tempOutput += ", subject=group"; }
         tempOutput += ")\n";
         cout << tempOutput;
                 
@@ -1149,8 +1099,6 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         cout << "w <- z$scaling[,1]\n"; //robjects.r('w <- z$scaling[,1]')
         cout << "w.unit <- w/sqrt(sum(w^2))\n"; //robjects.r('w.unit <- w/sqrt(sum(w^2))')
         cout << "ss <- dat[,-match(\"class\",colnames(dat))]\n"; //robjects.r('ss <- sub_d[,-match("class",colnames(sub_d))]')
-        //if (subclass != "") { cout << "ss <- ss[,-match(\"subclass\",colnames(ss))]\n";  }//robjects.r('ss <- ss[,-match("subclass",colnames(ss))]')
-        //if (subject) { cout << "ss <- ss[,-match(\"subject\",colnames(ss))]\n";  }//robjects.r('ss <- ss[,-match("subject",colnames(ss))]')
         cout << "xy.matrix <- as.matrix(ss)\n"; //robjects.r('xy.matrix <- as.matrix(ss)')
         cout << "LD <- xy.matrix%*%w.unit\n"; //robjects.r('LD <- xy.matrix%*%w.unit')
         cout << "effect.size <- abs(mean(LD[dat[,\"class\"]==\"'+p[0]+'\"]) - mean(LD[dat[,\"class\"]==\"'+p[1]+'\"]))\n"; //robjects.r('effect.size <- abs(mean(LD[sub_d[,"class"]=="'+p[0]+'"]) - mean(LD[sub_d[,"class"]=="'+p[1]+'"]))')

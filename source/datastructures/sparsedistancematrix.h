@@ -34,7 +34,7 @@ public:
 	void addCell(ull, PDistCell);
     int addCellSorted(ull, PDistCell);
     vector<vector<PDistCell> > seqVec;
-    
+    void print();
     
 private:
 	PDistCell smallCell;				//The cell with the smallest distance

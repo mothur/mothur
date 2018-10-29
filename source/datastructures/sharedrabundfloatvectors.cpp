@@ -16,7 +16,6 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
         int num;
         string holdLabel, nextLabel, groupN;
         int numUserGroups = userGroups.size();
-        printSharedHeaders = true;
         
         for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();
         
@@ -133,9 +132,9 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
     }
 }
 /***********************************************************************/
-void SharedRAbundFloatVectors::print(ostream& output){
+void SharedRAbundFloatVectors::print(ostream& output, bool& printOTUHeaders){
     try {
-        printHeaders(output);
+        printHeaders(output, printOTUHeaders);
         sort(lookup.begin(), lookup.end(), compareRAbundFloats);
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -150,7 +149,7 @@ void SharedRAbundFloatVectors::print(ostream& output){
 /***********************************************************************/
 string SharedRAbundFloatVectors::getOTUName(int bin){
     try {
-        if (currentLabels.size() < bin) {  }
+        if (currentLabels.size() > bin) {  }
         else { getOTUNames(); }
         return currentLabels[bin];
     }
@@ -162,10 +161,10 @@ string SharedRAbundFloatVectors::getOTUName(int bin){
 /***********************************************************************/
 void SharedRAbundFloatVectors::setOTUName(int bin, string otuName){
     try {
-        if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+        if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
         else {
             getOTUNames(); //fills currentLabels if needed
-            if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+            if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
             else {
                 m->setControl_pressed(true);
                 m->mothurOut("[ERROR]: " + toString(bin) + " bin does not exist\n");
@@ -311,7 +310,7 @@ vector<string> SharedRAbundFloatVectors::getOTUNames(){
     }
 }
 /***********************************************************************/
-void SharedRAbundFloatVectors::printHeaders(ostream& output){
+void SharedRAbundFloatVectors::printHeaders(ostream& output, bool& printSharedHeaders){
     try {
         if (printSharedHeaders) {
             getOTUNames();

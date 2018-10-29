@@ -57,7 +57,7 @@ public:
 	
 	int getMaxLevel()		{	return maxLevel;	}
 	int getNumSeqs()		{	return numSeqs;		}
-	int getNumNodes()		{	return tree.size();	}
+	int getNumNodes()		{	return (int)tree.size();	}
 	
 	bool ErrorCheck(vector<string>);
 	

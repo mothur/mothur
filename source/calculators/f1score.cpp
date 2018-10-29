@@ -11,8 +11,8 @@
 /***********************************************************************/
 double F1Score::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
     try {
-        long long p = tp + fn;
-        long long pPrime = tp + fp;
+        long long p = 2.0 * tp;
+        long long pPrime = fn + fp;
         double f1Score = 2.0 * tp / (double) (p + pPrime);
         
         if(p + pPrime == 0)	{	f1Score = 0;	}

@@ -16,9 +16,13 @@
 #include "inputdata.h"
 #include "fastamap.h"
 #include "groupmap.h"
-#include "readmatrix.hpp"
-#include "formatmatrix.h"
 #include "counttable.h"
+#include "optimatrix.h"
+#include "nameassignment.hpp"
+#include "countseqscommand.h"
+#include "getseqscommand.h"
+#include "calculator.h"
+#include "mcc.hpp"
 
 typedef map<int, float> SeqMap;
 
@@ -58,29 +62,25 @@ public:
 private:
 	ListVector* list;
 	GroupMap* groupMap;
-	ReadMatrix* readMatrix;
-	FormatMatrix* formatMatrix;
-	NameAssignment* nameMap;
+    map<string, int> nameMap;
+    OptiData* matrix;
     CountTable ct;
 	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, countfile, columnfile, distFile, format, outputDir, groups, method;
 	ofstream out;
 	ifstream in, inNames, inRow;
-	bool abort, allLines, groupError, large, weighted, hasGroups;
+	bool abort, allLines, groupError, weighted, hasGroups;
 	set<string> labels; //holds labels to be used
-	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
-	map<string, string> nameFileMap;
+	//map<string, string> nameFileMap;
 	vector<string> outputNames, Groups;
 	map<string, string> outputNameFiles;
 	float cutoff;
 	int precision;
-	vector<SeqMap> seqVec;			// contains maps with sequence index and distance
-									// for all distances related to a certain sequence
-	vector<int> rowPositions;
+    
+	
 
 	void readNamesFile(FastaMap*&);
-	void readNamesFile(bool);
+	//void readNamesFile(bool);
 	int process(ListVector*);
-	SeqMap getMap(int);
 	string findRep(vector<string>, string); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
     string findRepAbund(vector<string>, string);
 	int processNames(string, string);

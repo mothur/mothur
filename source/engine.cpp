@@ -92,6 +92,7 @@ bool InteractEngine::getInput(){
             
             if (commandName != "") {
                 mout->setExecuting(true);
+                mout->resetCommandErrors();
                 
                 //executes valid command
                 mout->setChangedSeqNames(true);
@@ -229,6 +230,7 @@ bool BatchEngine::getInput(){
 										
 				if (commandName != "") {
 					mout->setExecuting(true);
+                    mout->resetCommandErrors();
 					
 					//executes valid command
                     mout->setChangedSeqNames(true);
@@ -344,6 +346,7 @@ bool ScriptEngine::getInput(){
 										
 			if (commandName != "") {
                 mout->setExecuting(true);
+                mout->resetCommandErrors();
                 
                 //executes valid command
                 mout->setChangedSeqNames(true);

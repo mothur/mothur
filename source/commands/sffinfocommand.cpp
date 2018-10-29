@@ -162,7 +162,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						filenames[i] = current->getSFFFile(); 
 						if (filenames[i] != "") {  m->mothurOut("Using " + filenames[i] + " as input file for the sff parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
-							m->mothurOut("You have no current sfffile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							m->mothurOut("You have no current sfffile, ignoring current.\n"); ignore=true; 
 							//erase from file list
 							filenames.erase(filenames.begin()+i);
 							i--;
@@ -467,10 +467,6 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		if (sfftxt) {	printCommonHeader(outSfftxt, header);		}
 		if (flow)	{	outFlow << header.numFlowsPerRead << endl;	}
         
-        //ofstream outtemp;
-        //util.openOutputFileBinary("./temp", outtemp);
-        //printCommonHeaderForDebug(header, outtemp, 20000);
-        //outtemp.close();
 		//read through the sff file
 		while (!in.eof()) {
 			
@@ -482,7 +478,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             
             bool okay = sanityCheck(readheader, read);
             if (!okay) { break; }
-            //cout << readheader.name << endl;
+            
 			//if you have provided an accosfile and this seq is not in it, then dont print
 			if (seqNames.size() != 0) {   if (seqNames.count(readheader.name) == 0) { print = false; }  }
 			
@@ -519,16 +515,16 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             
             if (hasGroup) { delete groupMap; }
             
-            //cout << "here" << endl;
+            
 			map<string, string>::iterator it;
 			set<string> namesToRemove;
 			for(int i=0;i<filehandles.size();i++){
 				for(int j=0;j<filehandles[0].size();j++){
-                    //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << endl;
+                    
 					if (filehandles[i][j] != "") {
 						if (namesToRemove.count(filehandles[i][j]) == 0) {
 							if(util.isBlank(filehandles[i][j])){
-                                //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " is blank removing" << endl;
+                               
 								util.mothurRemove(filehandles[i][j]);
                                 util.mothurRemove(filehandlesHeaders[i][j]);
 								namesToRemove.insert(filehandles[i][j]);
@@ -537,7 +533,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 					}
 				}
 			}
-            //cout << "here2" << endl;
+            
             //append new header to reads
             for (int i = 0; i < filehandles.size(); i++) {
                 for (int j = 0; j < filehandles[i].size(); j++) {
@@ -545,21 +541,21 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
                         util.appendSFFFiles(filehandles[i][j], filehandlesHeaders[i][j]);
                         util.renameFile(filehandlesHeaders[i][j], filehandles[i][j]);
                         util.mothurRemove(filehandlesHeaders[i][j]);
-                        //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " done appending headers and removing " << filehandlesHeaders[i][j] << endl;
+                        
                         if (numSplitReads[i][j] == 0) { util.mothurRemove(filehandles[i][j]); }
                     }
                 }
             }
-			//cout << "here3" << endl;
+			
 			//remove names for outputFileNames, just cleans up the output
 			for(int i = 0; i < outputNames.size(); i++) { 
                 if (namesToRemove.count(outputNames[i]) != 0) {
-                    //cout << "erasing " << i << '\t' << outputNames[i] << endl;
+                    
                     outputNames.erase(outputNames.begin()+i);
                     i--;
                 }else { outputTypes["sff"].push_back(outputNames[i]); }
             }
-            //cout << "here4" << endl;
+            
             if(util.isBlank(noMatchFile)){  util.mothurRemove(noMatchFile); }
             else { outputNames.push_back(noMatchFile); outputTypes["sff"].push_back(noMatchFile); }
         }
@@ -680,7 +676,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(mybuffer, lengthRead);
                 out.close();
             }
@@ -696,7 +692,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(mybuffer, lengthRead);
                 out.close();
             }
@@ -722,7 +718,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << thisbuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(thisbuffer, 8);
                 out.close();
             }
@@ -746,7 +742,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << thisbuffer2 << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(thisbuffer2, 4);
                 out.close();
             }
@@ -762,7 +758,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         delete[] mybuffer;
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                //cout << filehandlesHeaders[i][j] << '\t' << numSplitReads[i][j] << endl;
+                
                 char* thisbuffer = new char[4];
                 thisbuffer[0] = (numSplitReads[i][j] >> 24) & 0xFF;
                 thisbuffer[1] = (numSplitReads[i][j] >> 16) & 0xFF;
@@ -770,9 +766,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
                 thisbuffer[3] = numSplitReads[i][j] & 0xFF;
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << thisbuffer << '\t' << filehandlesHeaders[i][j] << endl;
-                //unsigned int numTReads = (be_int4(*(unsigned int *)(thisbuffer)));
-                //cout << "numReads = " << numTReads << endl;
+                
                 out.write(thisbuffer, 4);
                 out.close();
                 delete[] thisbuffer;
@@ -795,7 +789,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(mybuffer, lengthRead);
                 out.close();
             }
@@ -811,7 +805,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(mybuffer, lengthRead);
                 out.close();
             }
@@ -827,7 +821,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(mybuffer, lengthRead);
                 out.close();
             }
@@ -843,7 +837,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(mybuffer, lengthRead);
                 out.close();
             }
@@ -859,7 +853,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(mybuffer, lengthRead);
                 out.close();
             }
@@ -875,7 +869,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
                 util.openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
-                //cout << able << '\t' << mybuffer << '\t' << filehandlesHeaders[i][j] << endl;
+                
                 out.write(mybuffer, lengthRead);
                 out.close();
             }
@@ -1315,7 +1309,7 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
             
             int thisBarcodeIndex = 0;
             int thisPrimerIndex = 0;
-            //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
+            
             if(numBarcodes != 0){
                 vector<int> results = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
                 if (pairedOligos)   {  thisSuccess = results[0] + results[2];   }
@@ -1323,7 +1317,7 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
                 if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
                 else{ thisCurrentSeqsDiffs += thisSuccess;  }
             }
-            //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
+            
             if(numFPrimers != 0){
                 vector<int> results = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, true);
                 if (pairedOligos)   {  thisSuccess = results[0] + results[2];   }

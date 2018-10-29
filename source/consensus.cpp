@@ -258,9 +258,7 @@ vector<string> Consensus::getSmallest(map< vector<string>, int> nodes) {
 //**********************************************************************************************************************
 vector<string> Consensus::getNextAvailableSet(vector<string> bigset, vector<string>& rest) {
 	try {
-//cout << "new call " << endl << endl << endl;
-		vector<string> largest; largest.clear();
-		rest.clear();
+		vector<string> largest; largest.clear(); rest.clear();
 		
 		//if you are just 2 groups
 		if (bigset.size() == 2)  {   

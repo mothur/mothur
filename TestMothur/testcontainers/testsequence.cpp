@@ -8,53 +8,107 @@
 
 
 #include "testsequence.h"
-/*
-TEST_CASE("Testing Sequence Class") {
-    Sequence seq;
-    TestSequence seq2;
+#include "dataset.h"
+
+/**************************************************************************************************/
+TestSequence::TestSequence() {  //setup
+    m = MothurOut::getInstance();
     
-    SECTION("test constructor - string, string") {
-        INFO("Using TestSeq, atgcatgc") // Only appears on a FAIL
-        Sequence seq2("TestSeq", "atgcatgc");
-        CAPTURE(seq2.getInlineSeq()); // Displays this variable on a FAIL
-        
-        CHECK(seq2.getInlineSeq() == "TestSeq\tatgcatgc");
-    }
+    TestDataSet data;
+    vector<string> filenames = data.getSubsetFNGFiles();
+    fastafile = filenames[0];
     
-    SECTION("setting / getting name") {
-        INFO("Using TestSeq") // Only appears on a FAIL
-        seq.setName("TestSeq");
-        CAPTURE(seq.getName()); // Displays this variable on a FAIL
-        
-        CHECK(seq.getName() == "TestSeq");
-    }
+}
+/**************************************************************************************************/
+TestSequence::~TestSequence() {}//teardown
+/**************************************************************************************************/
+TEST(Test_Container_Sequence, SequenceConstructors) {
     
-    SECTION("test setAligned / get Aligned") {
-        INFO("Using ..atgc--atgc..") // Only appears on a FAIL
-        seq.setAligned("..atgc--atgc..");
-        CAPTURE(seq.getAligned()); // Displays this variable on a FAIL
-        
-        CHECK(seq.getAligned() == "..atgc--atgc..");
-    }
+    Sequence seq("testSeq", "ATGCGTCATC");
+    EXPECT_EQ(seq.getAligned(), "ATGCGTCATC");
+    EXPECT_EQ(seq.getName(), "testSeq");
+    EXPECT_EQ(seq.getUnaligned(), "ATGCGTCATC");
     
-    SECTION("test setUnaligned / getUnaligned") {
-        INFO("Using ..atgc--atgc..") // Only appears on a FAIL
-        seq.setUnaligned("..atgc--atgc..");
-        CAPTURE(seq.getUnaligned()); // Displays this variable on a FAIL
-        
-        CHECK(seq.getUnaligned() == "atgcatgc");
-    }
-    
-    SECTION("test initialize") {
-        INFO("No data") // Only appears on a FAIL
-        seq2.initialize();
-        CAPTURE(seq.getUnaligned()); // Displays this variable on a FAIL
-        
-        CHECK(seq.getUnaligned() == "");
-    }
-    
-    
-   //more tests need to be added - just a start to set up testing project and model
+    Sequence seq1;
+    EXPECT_EQ(seq1.getAligned(), "");
+    EXPECT_EQ(seq1.getName(), "");
+    EXPECT_EQ(seq1.getUnaligned(), "");
 }
 
-*/
+TEST(Test_Container_Sequence, setGets) {
+    
+    Sequence seq; seq.setName("mothurSeq");
+    EXPECT_EQ("mothurSeq", seq.getName());
+    
+    seq.setAligned("A--TGC-G-TCA--TC");
+    EXPECT_EQ("A--TGC-G-TCA--TC", seq.getAligned());
+    
+    seq.setUnaligned("A--TGC-G-TCA--TC");
+    EXPECT_EQ("ATGCGTCATC", seq.getUnaligned());
+    
+    seq.reverseComplement();
+    EXPECT_EQ("GATGACGCAT", seq.getUnaligned());
+    
+    seq.setComment("This is my sequence comment. It can contain anything I want including numbers and symbols & % -- 234");
+    EXPECT_EQ("This is my sequence comment. It can contain anything I want including numbers and symbols & % -- 234", seq.getComment());
+    
+    Sequence seq2("testSeq", "ATNNGTCATC");
+    EXPECT_EQ("testSeq\tATNNGTCATC", seq2.getInlineSeq());
+    
+    EXPECT_EQ(2, seq2.getNumNs());
+    EXPECT_EQ(0, seq.getNumNs());
+    
+    Sequence seq3("testSeq", "ATGCGTCATC");
+    EXPECT_EQ(10, seq3.getNumBases());
+    EXPECT_EQ(1, seq3.getStartPos());
+    EXPECT_EQ(10, seq3.getEndPos());
+    
+    Sequence seq4("testSeq", "..A--TGC-G-TCA--TC..");
+    EXPECT_EQ(3, seq4.getStartPos());
+    EXPECT_EQ(18, seq4.getEndPos());
+    
+    seq3.trim(5);
+    EXPECT_EQ("ATGCG", seq3.getAligned());
+    
+    seq4.trim(5);
+    EXPECT_EQ("ATGCG", seq4.getAligned());
+    
+    seq4.padToPos(3);
+    EXPECT_EQ("..GCG", seq4.getAligned());
+    
+    seq4.padFromPos(3);
+    EXPECT_EQ("..G..", seq4.getAligned());
+    
+    seq.setAligned("ATGCG");
+    seq.filterToPos(2);
+    EXPECT_EQ("..GCG", seq.getAligned());
+    
+    seq.setAligned("ATGCG");
+    seq.filterFromPos(2);
+    EXPECT_EQ("AT...", seq.getAligned());
+    
+    seq.setAligned("..GCG");
+    seq.filterFromPos(2);
+    EXPECT_EQ(".....", seq.getAligned());
+    
+    seq.setAligned("..A--TGC-G-TCA--TC..");
+    EXPECT_EQ(20, seq.getAlignLength());
+    EXPECT_EQ(0, seq.getAmbigBases());
+    
+    seq.setAligned("..A--MGC-G-TCA--TC..");
+    EXPECT_EQ(1, seq.getAmbigBases());
+    
+    seq.removeAmbigBases();
+    EXPECT_EQ(0, seq.getAmbigBases());
+    EXPECT_EQ("..A---GC-G-TCA--TC..", seq.getAligned());
+    
+    EXPECT_EQ(1, seq.getLongHomoPolymer());
+    seq.setAligned("..A--AAA-G-TCA--TC..");
+    EXPECT_EQ(4, seq.getLongHomoPolymer());
+    
+    EXPECT_EQ("0000231031", seq.convert2ints());
+}
+
+/**************************************************************************************************/
+
+

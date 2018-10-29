@@ -55,6 +55,25 @@ int GroupMap::readMap() {
         char buffer[4096];
         bool pairDone = false;
         bool columnOne = true;
+        
+        string header = util.getline(fileHandle);
+        vector<string> pieces = util.splitWhiteSpace(header);
+        seqName = pieces[0];
+        seqGroup = pieces[1];
+        if (seqName != "group") { //first group, not header
+            util.checkGroupName(seqGroup);
+            setNamesOfGroups(seqGroup);
+            
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+            util.checkName(seqName);
+            it = groupmap.find(seqName);
+            
+            if (it != groupmap.end()) { error = 1; m->mothurOut("Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+            else {
+                groupmap[seqName] = seqGroup;	//store data in map
+                seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
+            }
+        }
     
         while (!fileHandle.eof()) {
             if (m->getControl_pressed()) { fileHandle.close();  return 1; }

@@ -40,12 +40,13 @@ class MothurOut {
     
         //logger
         void appendLogBuffer(string); //used to store log before we establish the logfilename
-        bool getDebug()                                 { return debug;                     }
-        void setDebug(bool t)                           { debug = t;                        }
-        bool getQuietMode()                             { return quietMode;                 }
-        void setQuietMode(bool t)                       { quietMode = t;                    }
-        int getNumErrors()                              { return numErrors;                 }
-        string getLogFileName()                         { return logFileName;               }
+        bool getDebug()                                 { return debug;                                 }
+        void setDebug(bool t)                           { debug = t;                                    }
+        bool getQuietMode()                             { return quietMode;                             }
+        void setQuietMode(bool t)                       { quietMode = t;                                }
+        int getNumErrors()                              { return numErrors;                             }
+        void resetCommandErrors()                        { numCommandErrors = 0; numCommandWarnings = 0;}
+        string getLogFileName()                         { return logFileName;                           }
 		void setLogFileName(string f, bool append);
     
 		void mothurOut(string); //writes to cout and the logfile
@@ -79,8 +80,9 @@ class MothurOut {
             quietMode = false;
             changedSeqNames = true;
             silenceLog = false;
-            numErrors = 0;
-            numWarnings = 0;
+            numErrors = 0; numWarnings = 0;
+            numCommandErrors = 0; numCommandWarnings = 0;
+            maxCommandErrors = 10; maxCommandWarnings = 10;
             logFileName = "";
             buffer = "";
             seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -89,7 +91,7 @@ class MothurOut {
 		
 		ofstream out;
         unsigned seed;
-        int numErrors, numWarnings;
+        int numErrors, numWarnings, numCommandErrors, numCommandWarnings, maxCommandErrors, maxCommandWarnings;
         string logFileName, buffer;
         bool changedSeqNames, silenceLog, control_pressed, executing, debug, quietMode;
 };

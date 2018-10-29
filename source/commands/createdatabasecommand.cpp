@@ -19,6 +19,7 @@ vector<string> CreateDatabaseCommand::setParameters(){
 		CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pconstaxonomy);
 		CommandParameter plist("list", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(plist);
         CommandParameter pshared("shared", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(pshared);
+        CommandParameter prelabund("relabund", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(prelabund);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -37,7 +38,7 @@ vector<string> CreateDatabaseCommand::setParameters(){
 string CreateDatabaseCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The create.database command reads a list file or a shared file, *.cons.taxonomy, and optional *.rep.fasta, *.rep.names, groupfile, or count file and creates a database file.\n";
+		helpString += "The create.database command reads a list, shared or relabund file, *.cons.taxonomy, and optional *.rep.fasta, *.rep.names, groupfile, or count file and creates a database file.\n";
 		helpString += "The create.database command parameters are repfasta, list, shared, repname, constaxonomy, group, count and label. List or shared and constaxonomy are required.\n";
         helpString += "The repfasta file is fasta file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
         helpString += "The repname file is the name file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
@@ -172,6 +173,14 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("relabund");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
+                }
 			}
             
 			
@@ -189,24 +198,33 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			else if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else { current->setSharedFile(sharedfile); }
             
-            if ((sharedfile == "") && (listfile == "")) { 
+            relabundfile = validParameter.validFile(parameters, "relabund");
+            if (relabundfile == "not found") {	relabundfile = "";			}
+            else if (relabundfile == "not open") { relabundfile = ""; abort = true; }
+            else { current->setRelAbundFile(relabundfile); }
+            
+            if ((sharedfile == "") && (listfile == "") && (relabundfile == "")) {
 				//is there are current file available for either of these?
-				//give priority to list, then shared
+				//give priority to list, then shared, then relabund
 				listfile = current->getListFile(); 
 				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 
 					sharedfile = current->getSharedFile(); 
 					if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("[ERROR]: No valid current files. You must provide a shared or list file before you can use the create.database command."); m->mothurOutEndLine();
-						abort = true;
+                        relabundfile = current->getRelAbundFile();
+                        if (relabundfile != "") {  m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+                        else {
+                            m->mothurOut("[ERROR]: No valid current files. You must provide a shared, list or relabund file before you can use the create.database command.\n");  abort = true;
+                        }
 					}
 				}
 			}
-			else if ((sharedfile != "") && (listfile != "")) { m->mothurOut("When executing a create.database command you must enter ONLY ONE of the following: shared or list."); m->mothurOutEndLine(); abort = true; }
+			else if ((sharedfile != "") && (listfile != "")) { m->mothurOut("When executing a create.database command you must enter ONLY ONE of the following: relabund, shared or list.\n"); abort = true; }
             
             if (sharedfile != "") { if (outputDir == "") { outputDir = util.hasPath(sharedfile); } }
-            else { if (outputDir == "") { outputDir = util.hasPath(listfile); } }
+            else if (listfile != ""){ if (outputDir == "") { outputDir = util.hasPath(listfile); } }
+            else { if (outputDir == "") { outputDir = util.hasPath(relabundfile); } }
 			
 			contaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
 			if (contaxonomyfile == "not found") {  //if there is a current list file, use it
@@ -237,7 +255,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
             label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your listfile.\n");}
+			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your file.\n");}
         }
 	}
 	catch(exception& e) {
@@ -319,7 +337,8 @@ int CreateDatabaseCommand::execute(){
         
         map<string, string> variables; 
         if (listfile != "") {  variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile)); }
-        else { variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile)); }
+        else if (sharedfile != "") { variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile)); }
+        else {  variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(relabundfile)); }
         string outputFileName = getOutputFileName("database", variables); 
         outputNames.push_back(outputFileName); outputTypes["database"].push_back(outputFileName);
         
@@ -460,7 +479,7 @@ int CreateDatabaseCommand::execute(){
             delete list;
             if (groupfile != "") { delete groupmap; }
            
-        }else {
+        }else if (sharedfile != "") {
             SharedRAbundVectors* lookup = getShared();
             vector<string> namesOfGroups = lookup->getNamesGroups();
             
@@ -489,15 +508,44 @@ int CreateDatabaseCommand::execute(){
                     out  << '\t' << abund;
                 }
                 
-                //sanity check
-                if (totalAbund != classifyOtuSizes[index]) {
-                    m->mothurOut("[WARNING]: OTU " + currentLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); //m->setControl_pressed(true);   break;
+                //output repSeq
+                if (repfastafile != "") { out << '\t' << seqs[index].getName() << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl; }
+                else { out << '\t' << taxonomies[index] << endl; }
+            }
+        }else { //relabund
+            SharedRAbundFloatVectors* lookup = getRelabund();
+            vector<string> namesOfGroups = lookup->getNamesGroups();
+            
+            header = "OTUNumber";
+            for (int i = 0; i < namesOfGroups.size(); i++) { header += '\t' + namesOfGroups[i]; }
+            if (repfastafile != "") {  header += "\trepSeqName\trepSeq";  }
+            header += "\tOTUConTaxonomy";
+            out << header << endl;
+            
+            vector<string> currentLabels = lookup->getOTUNames();
+            for (int h = 0; h < lookup->getNumBins(); h++) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                int index = findIndex(otuLabels, currentLabels[h]);
+                if (index == -1) {  m->mothurOut("[ERROR]: " + currentLabels[h] + " is not in your constaxonomy file, aborting.\n"); m->setControl_pressed(true); }
+                
+                if (m->getControl_pressed()) { break; }
+                
+                out << otuLabels[index];
+                
+                float totalAbund = 0;
+                for (int i = 0; i < lookup->size(); i++) {
+                    float abund = lookup->get(h, namesOfGroups[i]);
+                    totalAbund += abund;
+                    out  << '\t' << abund;
                 }
                 
                 //output repSeq
                 if (repfastafile != "") { out << '\t' << seqs[index].getName() << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl; }
                 else { out << '\t' << taxonomies[index] << endl; }
             }
+
         }
         out.close();
         if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return 0; }
@@ -749,6 +797,78 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+SharedRAbundFloatVectors* CreateDatabaseCommand::getRelabund(){
+    try {
+        InputData input(relabundfile, "relabund", nullVector);
+        SharedRAbundFloatVectors* lookupFloat = input.getSharedRAbundFloatVectors();
+        string lastLabel = lookupFloat->getLabel();
+        
+        if (label == "") { label = lastLabel;  return lookupFloat; }
+        
+        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        set<string> labels; labels.insert(label);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((lookupFloat != NULL) && (userLabels.size() != 0)) {
+            
+            if (m->getControl_pressed()) {  return 0;  }
+            
+            if(labels.count(lookupFloat->getLabel()) == 1){
+                processedLabels.insert(lookupFloat->getLabel());
+                userLabels.erase(lookupFloat->getLabel());
+                break;
+            }
+            
+            if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = lookupFloat->getLabel();
+                
+                delete lookupFloat;
+                lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
+                
+                processedLabels.insert(lookupFloat->getLabel());
+                userLabels.erase(lookupFloat->getLabel());
+                
+                //restore real lastlabel to save below
+                lookupFloat->setLabels(saveLabel);
+                break;
+            }
+            
+            lastLabel = lookupFloat->getLabel();
+            
+            //get next line to process
+            //prevent memory leak
+            delete lookupFloat;
+            lookupFloat = input.getSharedRAbundFloatVectors();
+        }
+        
+        
+        if (m->getControl_pressed()) { return 0;  }
+        
+        //output error messages about any remaining user labels
+        bool needToRun = false;
+        for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+            else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete lookupFloat;
+            lookupFloat = input.getSharedRAbundFloatVectors();
+        }	
+        
+        return lookupFloat;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CreateDatabaseCommand", "getRelabund");
+        exit(1);
+    }
+}
+
 
 //**********************************************************************************************************************
 

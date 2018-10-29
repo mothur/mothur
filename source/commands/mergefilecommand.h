@@ -12,6 +12,8 @@
 
 #include "mothur.h"
 #include "command.hpp"
+#include "sequence.hpp"
+#include "counttable.h"
 
 class MergeFileCommand : public Command {
 public:
@@ -23,7 +25,7 @@ public:
 	string getCommandName()			{ return "merge.files";	}
 	string getCommandCategory()		{ return "General";		}
 	string getHelpString();	
-    string getOutputPattern(string){ return "";  }	
+    string getOutputPattern(string);
 	string getCitation() { return "http://www.mothur.org/wiki/Merge.files"; }
 	string getDescription()		{ return "appends files creating one file"; }
 
@@ -33,9 +35,12 @@ public:
 	
 private:
 	vector<string> fileNames, outputNames;
-	string outputFileName;
+	string outputFileName, fastafile, namefile, countfile, taxfile, outputDir;
 	int numInputFiles;
 	bool abort;
+    bool appendMode;
+    
+    string mergeFileData();
 };
 
 #endif

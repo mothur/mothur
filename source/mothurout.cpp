@@ -12,9 +12,6 @@
 #include "sharedordervector.h"
 #include "counttable.h"
 
-//needed for testing project
-//MothurOut* MothurOut::_uniqueInstance;
-
 /******************************************************/
 MothurOut* MothurOut::getInstance() {
 	if( _uniqueInstance == 0) {
@@ -56,7 +53,7 @@ void MothurOut::setLogFileName(string filename, bool append)  {
 /*********************************************************************************************/
 void MothurOut::closeLog()  {
 	try {
-        if (buffer != "") { mothurOut(buffer); buffer = "";  }
+        if (buffer != "") { string output = buffer; buffer = ""; mothurOut(output);   }
         if (numErrors != 0) {
             if (!silenceLog) {
                 out << "\n\n************************************************************\n";
@@ -117,8 +114,19 @@ MothurOut::~MothurOut() {
 void MothurOut::mothurOut(string output) {
 	try {
         if (buffer != "") { output = buffer + output; buffer = ""; }
-        if (output.find("[ERROR]") != string::npos) { numErrors++; }
-        if (output.find("[WARNING]") != string::npos) { numWarnings++; }
+        if (output.find("[ERROR]") != string::npos) {
+            numErrors++;
+            numCommandErrors++;
+            if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
+        }
+        bool savedSilenceLog = silenceLog;
+        if (output.find("[WARNING]") != string::npos) {
+            numWarnings++;
+            numCommandWarnings++;
+            if (numCommandWarnings > maxCommandWarnings) {
+                silenceLog = true; // write to cout, don't add to logfile
+            }
+        }
         
         if (!quietMode) {
             if (!silenceLog) { out << output; }
@@ -130,7 +138,7 @@ void MothurOut::mothurOut(string output) {
                 logger() << output;
             }
         }
-        
+        silenceLog = savedSilenceLog;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -141,9 +149,16 @@ void MothurOut::mothurOut(string output) {
 void MothurOut::mothurOutJustToScreen(string output) {
 	try {
         if (buffer != "") { output = buffer + output; buffer = ""; }
-		if (output.find("[ERROR]") != string::npos) { numErrors++; }
+		if (output.find("[ERROR]") != string::npos) {
+            numErrors++;
+            numCommandErrors++;
+            if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
+        }
         
-        if (output.find("[WARNING]") != string::npos) { numWarnings++; }
+        if (output.find("[WARNING]") != string::npos) {
+            numWarnings++;
+            numCommandWarnings++;
+        }
         
         if (!quietMode) {
             logger() << output;
@@ -177,8 +192,19 @@ void MothurOut::mothurOutEndLine() {
 void MothurOut::mothurOut(string output, ofstream& outputFile) {
 	try {
         if (buffer != "") { output = buffer + output; buffer = ""; }
-        if (output.find("[ERROR]") != string::npos) { numErrors++; }
-        if (output.find("[WARNING]") != string::npos) { numWarnings++; }
+        if (output.find("[ERROR]") != string::npos) {
+            numErrors++;
+            numCommandErrors++;
+            if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
+        }
+        bool savedSilenceLog = silenceLog;
+        if (output.find("[WARNING]") != string::npos) {
+            numWarnings++;
+            numCommandWarnings++;
+            if (numCommandWarnings > maxCommandWarnings) {
+                silenceLog = true; // write to cout, don't add to logfile
+            }
+        }
         
         if (!quietMode) {
             if (!silenceLog) { out << output; }
@@ -193,6 +219,7 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
             }
             
         }
+        silenceLog = savedSilenceLog;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -207,6 +234,7 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
             logger() << buffer << endl;
             outputFile << buffer << endl;
         }
+        buffer = "";
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutEndLine");
@@ -217,8 +245,19 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
         if (buffer != "") { output = buffer + output; buffer = ""; }
-        if (output.find("[ERROR]") != string::npos) { numErrors++; }
-        if (output.find("[WARNING]") != string::npos) { numWarnings++; }
+        if (output.find("[ERROR]") != string::npos) {
+            numErrors++;
+            numCommandErrors++;
+            if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
+        }
+        bool savedSilenceLog = silenceLog;
+        if (output.find("[WARNING]") != string::npos) {
+            numWarnings++;
+            numCommandWarnings++;
+            if (numCommandWarnings > maxCommandWarnings) {
+                silenceLog = true; // write to cout, don't add to logfile
+            }
+        }
         
         if (!quietMode) {
             if (!silenceLog) { out << output; }
@@ -228,7 +267,7 @@ void MothurOut::mothurOutJustToLog(string output) {
                 if (!silenceLog) { out << output; }
             }
         }
-
+        silenceLog = savedSilenceLog;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutJustToLog");

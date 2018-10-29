@@ -13,7 +13,6 @@
 //reads a shared file
 SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups, string& nextLabel, string& labelTag) : DataVector(){
     try {
-        printSharedHeaders = true;
         int num, count;
         count = 0;
         string holdLabel, nextLabel, groupN;
@@ -139,9 +138,9 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups
     }
 }
 /***********************************************************************/
-void SharedRAbundVectors::print(ostream& output){
+void SharedRAbundVectors::print(ostream& output, bool& printOTUHeaders){
     try {
-        printHeaders(output);
+        printHeaders(output, printOTUHeaders);
         sort(lookup.begin(), lookup.end(), compareRAbunds);
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -168,7 +167,7 @@ void SharedRAbundVectors::setOTUNames(vector<string> names){
 /***********************************************************************/
 string SharedRAbundVectors::getOTUName(int bin){
     try {
-        if (currentLabels.size() < bin) {  }
+        if (currentLabels.size() > bin) {  }
         else { getOTUNames(); }
         return currentLabels[bin];
     }
@@ -180,10 +179,10 @@ string SharedRAbundVectors::getOTUName(int bin){
 /***********************************************************************/
 void SharedRAbundVectors::setOTUName(int bin, string otuName){
     try {
-        if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+        if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
         else {
             getOTUNames(); //fills currentLabels if needed
-            if (currentLabels.size() < bin) {  currentLabels[bin] = otuName; }
+            if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
             else {
                 m->setControl_pressed(true);
                 m->mothurOut("[ERROR]: " + toString(bin) + " bin does not exist\n");
@@ -210,7 +209,7 @@ vector<string> SharedRAbundVectors::getOTUNames(){
     }
 }
 /***********************************************************************/
-void SharedRAbundVectors::printHeaders(ostream& output){
+void SharedRAbundVectors::printHeaders(ostream& output, bool& printSharedHeaders){
     try {
         if (printSharedHeaders) {
             getOTUNames();
@@ -231,14 +230,15 @@ int SharedRAbundVectors::push_back(SharedRAbundVector* thisLookup){
     try {
         
         if (numBins == 0) {  numBins = thisLookup->getNumBins();  }
+        else if (numBins != thisLookup->getNumBins()) { m->mothurOut("[ERROR]: Number of bins does not match. Expected " + toString(numBins) + " found " + toString(thisLookup->getNumBins()) + ".\n"); m->setControl_pressed(true); return 0; }
+        
         lookup.push_back(thisLookup);
         sort(lookup.begin(), lookup.end(), compareRAbunds);
         if (label == "") { label = thisLookup->getLabel(); }
         groupNames.clear();
         for (int i = 0; i < lookup.size(); i ++) { groupNames[lookup[i]->getGroup()] = i; }
         
-        return lookup.size();
-        
+        return ((int)lookup.size());
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundVectors", "push_back");
@@ -257,11 +257,14 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
             
             //find label prefix
             string prefix = "Otu";
-            if (currentLabels[currentLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
+            if (currentLabels.size() != 0) {
+                if (currentLabels[currentLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
             
-            string tempLabel = currentLabels[currentLabels.size()-1];
-            string simpleLastLabel = util.getSimpleLabel(tempLabel);
-            util.mothurConvert(simpleLastLabel, otuNum); otuNum++;
+                string tempLabel = currentLabels[currentLabels.size()-1];
+                string simpleLastLabel = util.getSimpleLabel(tempLabel);
+                util.mothurConvert(simpleLastLabel, otuNum); otuNum++;
+            }
+            
             string potentialLabel = toString(otuNum);
             
             while (notDone) {
@@ -282,6 +285,7 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
             binLabel = potentialLabel;
         }
         currentLabels.push_back(binLabel);
+        numBins++;
         
         return lookup.size();
     }
@@ -528,12 +532,11 @@ vector<SharedRAbundFloatVector*> SharedRAbundVectors::getSharedRAbundFloatVector
 /***********************************************************************/
 RAbundVector SharedRAbundVectors::getRAbundVector(){
     try {
-        RAbundVector rav;
+        RAbundVector rav; rav.setLabel(label);
         for (int i = 0; i < numBins; i++) {
             int abund = getOTUTotal(i);
             rav.push_back(abund);
         }
-        
         return rav;
     }
     catch(exception& e) {

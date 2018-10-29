@@ -12,12 +12,14 @@
 //**********************************************************************************************************************
 vector<string> GetRAbundCommand::setParameters(){	
 	try {
+        CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","rabund",false,false, true); parameters.push_back(pshared);
 		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none","rabund",false,false, true); parameters.push_back(plist);
         CommandParameter pcount("count", "InputTypes", "", "", "none", "none", "none","",false,false, false); parameters.push_back(pcount);
 		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none","rabund",false,false, true); parameters.push_back(psabund);		
 		CommandParameter psorted("sorted", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(psorted);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -34,7 +36,7 @@ vector<string> GetRAbundCommand::setParameters(){
 string GetRAbundCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.rabund command parameters are list, sabund, count, label and sorted.  list or sabund parameters are required, unless you have valid current files.\n";
+		helpString += "The get.rabund command parameters are list, shared, sabund, count, label, groups and sorted.  shared, list or sabund parameters are required, unless you have valid current files.\n";
         helpString += "The count parameter allows you to provide a count file associated with your list file. If you clustered with a countfile the list file only contains the unique sequences and you will want to add the redundant counts into the rabund file, providing the count file allows you to do so.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like included in your .rabund file, and are separated by dashes.\n";
 		helpString += "The sorted parameters allows you to print the rabund results sorted by abundance or not.  The default is sorted.\n";
@@ -118,6 +120,14 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("shared");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+                }
 				
 				it = parameters.find("sabund");
 				//user has given a template file
@@ -143,6 +153,11 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 			else if (listfile == "not found") { listfile = ""; }
 			else {  format = "list"; inputfile = listfile; current->setListFile(listfile); }
 			
+            sharedfile = validParameter.validFile(parameters, "shared");
+            if (sharedfile == "not open") { sharedfile = ""; abort = true; }
+            else if (sharedfile == "not found") { sharedfile = ""; }
+            else { format = "sharedfile"; inputfile = sharedfile; current->setSharedFile(sharedfile); }
+            
 			sabundfile = validParameter.validFile(parameters, "sabund");
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
@@ -153,7 +168,10 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else {  current->setCountFile(countfile); }
 			
-			
+            string groups = validParameter.valid(parameters, "groups");
+            if (groups == "not found") { groups = ""; }
+            else {  util.splitAtDash(groups, Groups);  }
+
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
@@ -167,19 +185,20 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			if ((listfile == "") && (sabundfile == "")) { 
+			if ((listfile == "") && (sabundfile == "") && (sharedfile == "")) {
 				//is there are current file available for any of these?
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				listfile = current->getListFile(); 
 				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 
-					sabundfile = current->getSabundFile(); 
-					if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
-					else { 
-						m->mothurOut("No valid current files. You must provide a list or sabund file."); m->mothurOutEndLine(); 
-						abort = true;
-					}
+				else {
+                    sharedfile = current->getSharedFile();
+                    if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n"); }
+                    else {
+                        sabundfile = current->getSabundFile();
+                        if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter.\n"); }
+                        else { m->mothurOut("No valid current files. You must provide a shared, list or sabund file.\n"); abort = true; }
+                    }
 				}
 			}
 			
@@ -187,7 +206,6 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
             
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile); 	}			
-			
 		}
 			
 
@@ -203,16 +221,16 @@ int GetRAbundCommand::execute(){
 	try {
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
+        
         map<string, string> variables; 
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
 		filename = getOutputFileName("rabund", variables);
 		util.openOutputFile(filename, out);
-		
+        
         if (countfile != "") {
             processList(out);
         }else {
-            InputData input(inputfile, format, nullVector);
+            InputData input(inputfile, format, Groups);
             RAbundVector* rabund = input.getRAbundVector();
             string lastLabel = rabund->getLabel();
             

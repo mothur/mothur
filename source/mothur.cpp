@@ -117,22 +117,27 @@ int main(int argc, char *argv[]){
 				m->appendLogBuffer("Windows version\n\n");
 			#endif		
 			
+            string packagesUsed = "";
 			#ifdef USE_READLINE
-				m->appendLogBuffer("Using ReadLine\n\n");
+                packagesUsed += "ReadLine,";
 			#endif
             
             #ifdef USE_BOOST
-                m->appendLogBuffer("Using Boost\n\n");
+                packagesUsed += "Boost,";
             #endif
+            
+            #ifdef USE_HDF5
+                packagesUsed += "HDF5,";
+            #endif
+            
+            if (packagesUsed != "") {
+                //remove last comma
+                packagesUsed = packagesUsed.substr(0,packagesUsed.length()-1);
+                m->appendLogBuffer("Using " + packagesUsed + "\n");
+            }
 			
 			#ifdef MOTHUR_FILES
-				m->appendLogBuffer("Using default file location " + temp + "\n\n");
-			#endif
-			
-			#ifdef BIT_VERSION
-				m->appendLogBuffer("Running 64Bit Version\n\n");
-			#else
-				m->appendLogBuffer("Running 32Bit Version\n\n");
+				m->appendLogBuffer("\nUsing default file location " + temp + "\n\n");
 			#endif
 			
 			//header
@@ -175,12 +180,6 @@ int main(int argc, char *argv[]){
                 
                 #else
                 OS = "Windows ";
-                #endif
-                
-                #ifdef BIT_VERSION
-                OS += "64Bit Version";
-                #else
-                OS += "32Bit Version";
                 #endif
                 
 				cout << (OS + "\nMothur version=" + mothurVersion + "\nRelease Date=" + releaseDate + "\n\n");

@@ -146,7 +146,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
-        helpString += "The checkorient parameter will check look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
+        helpString += "The checkorient parameter will look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
         helpString += "The deltaq parameter allows you to specify the delta allowed between quality scores of a mismatched base.  For example in the overlap, if deltaq=5 and in the alignment seqA, pos 200 has a quality score of 30 and the same position in seqB has a quality score of 20, you take the base from seqA (30-20 >= 5).  If the quality score in seqB is 28 then the base in the consensus will be an N (30-28<5). The default is 6.\n";
 				helpString += "The maxee parameter allows you to specify the maximum number of errors to allow in a sequence. Makes sense to use with deltaq=0. This numbrer is a decimal number. The expected numbrer of errors is based on Edgar's approach used in USEARCH/VSEARCH.";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
@@ -395,18 +395,18 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "match");		if (temp == "not found"){	temp = "1.0";			}
+			temp = validParameter.valid(parameters, "match");		if (temp == "not found"){	temp = "1.0";			}
 			util.mothurConvert(temp, match);
 
-			temp = validParameter.validFile(parameters, "mismatch");		if (temp == "not found"){	temp = "-1.0";			}
+			temp = validParameter.valid(parameters, "mismatch");		if (temp == "not found"){	temp = "-1.0";			}
 			util.mothurConvert(temp, misMatch);
             if (misMatch > 0) { m->mothurOut("[ERROR]: mismatch must be negative.\n"); abort=true; }
 
-			temp = validParameter.validFile(parameters, "gapopen");		if (temp == "not found"){	temp = "-2.0";			}
+			temp = validParameter.valid(parameters, "gapopen");		if (temp == "not found"){	temp = "-2.0";			}
 			util.mothurConvert(temp, gapOpen);
             if (gapOpen > 0) { m->mothurOut("[ERROR]: gapopen must be negative.\n"); abort=true; }
 
-			temp = validParameter.validFile(parameters, "gapextend");	if (temp == "not found"){	temp = "-1.0";			}
+			temp = validParameter.valid(parameters, "gapextend");	if (temp == "not found"){	temp = "-1.0";			}
 			util.mothurConvert(temp, gapExtend);
             if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
 
@@ -445,7 +445,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             temp = validParameter.valid(parameters, "trimoverlap");		if (temp == "not found") { temp = "F"; }
 			trimOverlap = util.isTrue(temp);
 
-			align = validParameter.validFile(parameters, "align");		if (align == "not found"){	align = "needleman";	}
+			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh") && (align != "kmer")) { m->mothurOut(align + " is not a valid alignment method. Options are kmer, needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
 
             format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
@@ -828,8 +828,6 @@ struct groupContigsData {
     int start, end;
     vector< vector<string> > fileInputs;
     set<string> badNames;
-    map<string, int> groupCounts;
-    map<string, string> groupMap;
     map<int, string> file2Groups;
     contigsData* bundle;
     long long count;
@@ -945,6 +943,7 @@ int setNameType(string forwardFile, string reverseFile, char delim, int& offByOn
                 FastqRead rread(inReverse, error, format);
                 reverse = rread.getName();
             }
+            inForward.close(); inReverse.close();
         }else { //compressed files
 #ifdef USE_BOOST
             util.openInputFileBinary(forwardFile, inForward, inFF);
@@ -961,6 +960,7 @@ int setNameType(string forwardFile, string reverseFile, char delim, int& offByOn
                 FastqRead rread(inRF, error, format);
                 reverse = rread.getName();
             }
+            inFF.pop(); inRF.pop();
 #endif
         }
 
@@ -1412,7 +1412,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
         bool ignore = false;
         Utils util;
         if (delim == '@') { //fastq files
-            bool tignore;
+            bool tignore = false;
             FastqRead fread(inFF, tignore, format);  util.gobble(inFF);
             FastqRead rread(inRF, ignore, format); util.gobble(inRF);
             if (!checkName(fread, rread, nameType, offByOneTrimLength)) {
@@ -1482,8 +1482,8 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             }
             if (tfSeq.getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
         }
+        
         return ignore;
-
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "read");
@@ -1698,7 +1698,7 @@ void driverContigs(contigsData* params){
                 int primerIndex = 0;
                 Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
                 Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
-
+                
                 if(numBarcodes != 0){
                     vector<int> results;
                     if (hasQuality) {
@@ -2099,11 +2099,11 @@ void driverContigsGroups(groupContigsData* gparams) {
 
             gparams->count += dataBundle->count;
             gparams->badNames.insert(dataBundle->badNames.begin(), dataBundle->badNames.end());
-            gparams->groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
+            gparams->bundle->groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
             for (map<string, int>::iterator it = dataBundle->groupCounts.begin(); it != dataBundle->groupCounts.end(); it++) {
-                map<string, int>::iterator itMine = gparams->groupCounts.find(it->first);
-                if (itMine != gparams->groupCounts.end()) { itMine->second += it->second; }
-                else { gparams->groupCounts[it->first] = it->second; }
+                map<string, int>::iterator itMine = gparams->bundle->groupCounts.find(it->first);
+                if (itMine != gparams->bundle->groupCounts.end()) { itMine->second += it->second; }
+                else { gparams->bundle->groupCounts[it->first] = it->second; }
             }
             gparams->bundle->m->mothurOut("Done.\n\nIt took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(dataBundle->count) + " reads.\n\n");
             delete dataBundle;
@@ -2187,9 +2187,9 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             delete threadQTrimWriter;
             delete threadQScrapWriter;
         }
-        long long num = dataBundle->count;
+        long long num = groupDataBundle->count;
         badNames.insert(dataBundle->badNames.begin(), dataBundle->badNames.end());
-        groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
+        groupMap.insert(groupDataBundle->bundle->groupMap.begin(), groupDataBundle->bundle->groupMap.end());
         for (map<string, int>::iterator it = dataBundle->groupCounts.begin(); it != dataBundle->groupCounts.end(); it++) {
             map<string, int>::iterator itMine = groupCounts.find(it->first);
             if (itMine != groupCounts.end()) { itMine->second += it->second; }
@@ -2209,9 +2209,9 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
                 delete data[i]->bundle->scrapQFileName;
             }
             badNames.insert(data[i]->badNames.begin(), data[i]->badNames.end());
-            groupMap.insert(data[i]->groupMap.begin(), data[i]->groupMap.end());
+            groupMap.insert(data[i]->bundle->groupMap.begin(), data[i]->bundle->groupMap.end());
             //merge counts
-            for (map<string, int>::iterator it = data[i]->groupCounts.begin(); it != data[i]->groupCounts.end(); it++) {
+            for (map<string, int>::iterator it = data[i]->bundle->groupCounts.begin(); it != data[i]->bundle->groupCounts.end(); it++) {
                 map<string, int>::iterator itMine = groupCounts.find(it->first);
                 if (itMine != groupCounts.end()) { itMine->second += it->second; }
                 else { groupCounts[it->first] = it->second; }
@@ -2482,12 +2482,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
 #else
 
-        if (processors == 1) { //save time
-            //fastaFilePos.push_back(0); qfileFilePos.push_back(0);
-            //fastaFilePos.push_back(1000); qfileFilePos.push_back(1000);
-            lines.push_back(linePair(0, 1000)); lines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
-            qLines.push_back(linePair(0, 1000)); qLines.push_back(linePair(0, 1000));  //qual[0], qual[1] - forward and reverse
-        }else{
+        
             long long numFastaSeqs = 0;
             fastaFilePos = util.setFilePosFasta(fasta[0], numFastaSeqs, delim); //forward
             if (numFastaSeqs < processors) { processors = numFastaSeqs; }
@@ -2550,8 +2545,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 }
 
             }else { qLines = lines;	} //files with duds
-        }
+    
         if(qual.size() == 0)	{	qLines = lines;	} //files with duds
+        
         return 1;
 
 #endif
@@ -2902,7 +2898,7 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
         if (oligos.hasPairedBarcodes() || oligos.hasPairedPrimers()) {
             pairedPrimers = oligos.getPairedPrimers();
             rpairedPrimers = oligos.getReorientedPairedPrimers();
-            primerNames = oligos.getBarcodeNames();
+            primerNames = oligos.getPrimerNames();
             pairedBarcodes = oligos.getPairedBarcodes();
             rpairedBarcodes = oligos.getReorientedPairedBarcodes();
             barcodeNames = oligos.getBarcodeNames();

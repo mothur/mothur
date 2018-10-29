@@ -187,9 +187,7 @@ SharedListVector* InputData::getSharedListVector(){
 			util.gobble(fileHandle);
 			return SharedList;
 		}
-		else{
-			return NULL;
-		}
+		else{ return NULL; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "getSharedListVector");
@@ -231,9 +229,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 			in.close();
 			return SharedList;
 			
-		}else{
-			return NULL;
-		}
+		}else{ return NULL; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "getSharedListVector");
@@ -824,13 +820,30 @@ RAbundVector* InputData::getRAbundVector(){
 			}
 			else if(format == "sabund"){
 				input = new SAbundVector(fileHandle);
-			}
-			
-			util.gobble(fileHandle);
+            }else if (format == "sharedfile")  {
+                SharedRAbundVectors* shared = new SharedRAbundVectors(fileHandle, groups, nextDistanceLabel, otuTag);
+                if (shared != NULL) {
+                    //pass labels to others distances in file
+                    if (currentLabels.size() == 0) { currentLabels = shared->getOTUNames(); }
+                    else { shared->setOTUNames(currentLabels);  }
+                    if (shared->getNumBins() == 0) { delete shared; shared = NULL;  return NULL; } //no valid groups
+                }
+                
+                util.gobble(fileHandle);
+                
+                rabund = new RAbundVector();
+                *rabund = (shared->getRAbundVector());
+                
+                delete shared;
+                return rabund;
+            }
 
+			util.gobble(fileHandle);
+            
 			rabund = new RAbundVector();
 			*rabund = (input->getRAbundVector());
-
+            
+            delete input;
 			return rabund;
 		}
 		else{
@@ -928,7 +941,36 @@ RAbundVector* InputData::getRAbundVector(string label){
 					
 				}
 
-			}			
+            }else if (format == "sharedfile")  {
+                while (!in.eof()) {
+                    
+                    SharedRAbundVectors* shared = new SharedRAbundVectors(in, groups, nextDistanceLabel, otuTag);
+                    if (shared != NULL) {
+                        thisLabel = shared->getLabel();
+                        
+                        if (shared->getNumBins() == 0) { delete shared; shared = NULL; in.close(); return NULL; } //no valid groups
+                        
+                        //pass labels to others distances in file
+                        if (currentLabels.size() == 0) { currentLabels = shared->getOTUNames(); }
+                        else { shared->setOTUNames(currentLabels);  }
+                        
+                        
+                        //if you are at the last label
+                        if (thisLabel == label) {
+                            in.close();
+                            
+                            rabund = new RAbundVector();
+                            *rabund = (shared->getRAbundVector());
+                            
+                            delete shared;
+                            return rabund;
+                        }
+                        else { delete shared;  }
+                    }else{ in.close(); return NULL;  }
+                    util.gobble(in);
+                }
+                
+            }
 			
 			
 			in.close();		

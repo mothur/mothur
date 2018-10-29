@@ -24,17 +24,16 @@ inline bool compareRAbundFloats(SharedRAbundFloatVector* left, SharedRAbundFloat
 class SharedRAbundFloatVectors : public DataVector {
     
 public:
-    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu"; printSharedHeaders = true; }
+    SharedRAbundFloatVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu";  }
     SharedRAbundFloatVectors(ifstream&, vector<string>&, string&, string&);
     SharedRAbundFloatVectors(SharedRAbundFloatVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
         vector<SharedRAbundFloatVector*> data = bv.getSharedRAbundFloatVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         setLabels(bv.getLabel());
-        printSharedHeaders = true;
         setOTUNames(bv.getOTUNames());
         eliminateZeroOTUS();
     }
-    ~SharedRAbundFloatVectors() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); }
+    ~SharedRAbundFloatVectors() { clear(); }
     
     void setLabels(string l);
     float getOTUTotal(int bin);
@@ -47,18 +46,17 @@ public:
     string getOTUName(int);
     void setOTUName(int, string);
 
-    
     int push_back(SharedRAbundFloatVector*);
     void removeGroups(vector<string> g);
     int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize
     void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedRAbundFloatVectors.\n"); }
     void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; currentLabels.clear(); }
-    int size() { return lookup.size();  }
-    int getNumGroups() { return lookup.size(); }
+    int size() { return (int)lookup.size();  }
+    int getNumGroups() { return (int)lookup.size(); }
     int getNumBins() { return numBins; }
     float getNumSeqs(string); //group
     float getNumSeqsSmallestGroup();
-    void print(ostream&);
+    void print(ostream&, bool&);
     
     vector<SharedRAbundVector*> getSharedRAbundVectors();
     vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors();
@@ -70,13 +68,13 @@ public:
     void eliminateZeroOTUS(); //run after push_backs if groups are chosen
     
 private:
-    void printHeaders(ostream&);
+    void printHeaders(ostream&, bool&);
     vector<SharedRAbundFloatVector*> lookup;
     vector<string> currentLabels;
     map<string, int> groupNames;
     int numBins;
     string otuTag;
-    bool printSharedHeaders;
+    
 
 };
 

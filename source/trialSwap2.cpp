@@ -50,8 +50,7 @@ double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix, vector<int> ro
             }
         }
         
-        //cscore = cscore/(double)(nrows*(nrows-1)/2);  //not normalized
-        //cout << "normalized c score: " << normcscore/nonzeros << endl;
+        
         cscore = normcscore/(double)nonzeros;
 
         return cscore;
@@ -79,20 +78,14 @@ int TrialSwap2::calc_checker (vector<vector<int> > &co_matrix, vector<int> rowto
                 //s[i][j]=0;
                 for(int k=0;k<ncols;k++)
                 {
-                    //cout << s[i][j] << endl;
+                    
                     //iterates through the row and counts co-occurrences. The total number of co-occurrences for each row pair is kept in matrix s at location s[i][j].
                     if((co_matrix[i][k]==1)&&(co_matrix[j][k]==1)) //if both are 1s ie co-occurrence
                         s[i][j]++; //s counts co-occurrences
                     
                 }
-                //cout << "rowtotal: " << rowtotal[i] << endl;
-                //cout << "co-occurrences: " << s[i][j] << endl;
-                //cunits+=(rowtotal[i]-s[i][j])*(rowtotal[j]-s[i][j]);
-                if (s[i][j] == 0)
-                {
-                    cunits+=1;
-                }
-                //cunits+=s[i][j];
+               
+                if (s[i][j] == 0) {  cunits+=1; }
             }
         }
         
@@ -272,7 +265,7 @@ double TrialSwap2::t_test (double initialscore, int runs, double nullMean, vecto
         {
             if (m->getControl_pressed()) { return 0; }
             sum += pow((scorevec[i] - nullMean),2);
-            //cout << "scorevec[" << i << "]" << scorevec[i] << endl;
+           
         }
         
         m->mothurOut("nullMean: " + toString(nullMean)); m->mothurOutEndLine();

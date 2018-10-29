@@ -93,9 +93,6 @@ void RareDisplay::close(){
 			data[0] = meanResults;
 			data[1] = (it->second)[(int)(0.025*(nIters-1))];
 			data[2] = (it->second)[(int)(0.975*(nIters-1))];
-            //cout << nIters << '\t' << (int)(0.025*(nIters-1)) << '\t' << (int)(0.975*(nIters-1)) << endl;
-            
-            //cout << it->first << '\t' << data[1] << '\t' << data[2] << endl;
 		
 			output->output(it->first, data);
 		}

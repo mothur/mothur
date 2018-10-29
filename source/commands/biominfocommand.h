@@ -13,6 +13,12 @@
 #include "inputdata.h"
 #include "phylosummary.h"
 
+#ifdef USE_HDF5
+    #include "H5Cpp.h"
+#endif
+
+#define MAX_NAME 1024
+
 class BiomInfoCommand : public Command {
     
 #ifdef UNIT_TEST
@@ -36,9 +42,10 @@ public:
     int execute();
     void help() { m->mothurOut(getHelpString()); }
     
-private:
+protected:
     void printSharedData(SharedRAbundVectors*, ofstream&);
     int createFilesFromBiom();
+    int extractFilesFromHDF5();
     string getTag(string&);
     string getName(string);
     string getTaxonomy(string, string);
@@ -47,11 +54,16 @@ private:
     SharedRAbundVectors* readData(string, string, string, vector<string>&, int);
     vector<string> getNamesAndTaxonomies(string);
     
-    vector<string> outputNames;
-    string fileroot, outputDir, biomfile, label, basis, output;
+    vector<string> outputNames, otuNames, sampleNames, taxonomy;
+    vector<int> indices, indptr, otudata;
+    string fileroot, outputDir, biomfile, label, basis, output, format;
     bool firsttime, abort, relabund;
-    int maxLevel, printlevel;
-    
+    int maxLevel, printlevel, nnz;
+
+    #ifdef USE_HDF5
+    void processAttributes(H5::Group&, set<string>&);
+    void checkGroups(H5::H5File&, map<string, vector<string> >&);
+    #endif
 };
 
 

@@ -237,8 +237,7 @@ int MantelCommand::execute(){
 		
 		out.close();
 	
-		cout << "\nmantel = " << mantel << "\tpValue = " << pValue << endl;
-		m->mothurOutJustToLog("\nmantel = " + toString(mantel) + "\tpValue = " + toString(pValue) + "\n"); 
+		m->mothurOut("\nmantel = " + toString(mantel) + "\tpValue = " + toString(pValue) + "\n");
 		
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();		

@@ -88,7 +88,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
 				
 				//if there is a valid overlap, add it
-				if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+				if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                     seqDist overlapValue(itA->second, itB->second, thisoverlap);
                     overlap.push_back(overlapValue);
 				}
@@ -103,7 +103,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 			
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-			//cout << firstName << '\t' << secondName << '\t' << percentId << '\t' << numBases << '\t' << mismatch << '\t' << gap << '\t' << startQuery << '\t' << endQuery << '\t' << startRef << '\t' << endRef << '\t' << eScore << '\t' << score << endl;	
+			
 			util.gobble(fileHandle);
 			
 			string temp = firstName + secondName; //to check if this file has repeat lines, ie. is this a blast instead of a blscreen file
@@ -113,7 +113,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				repeatName = temp; 
 				
 				if (currentRow == firstName) {
-					//cout << "first = " << firstName << " second = " << secondName << endl;	
+						
 					if (firstName == secondName) { 
 						refScore = score;  
 						reading->update((count + nseqs));  
@@ -132,9 +132,8 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
 						
 						//if there is a valid overlap, add it
-						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                             seqDist overlapValue(itA->second, itB->second, thisoverlap);
-                            //cout << "overlap = " << itA->second << '\t' << itB->second << '\t' << thisoverlap << endl;
                             overlap.push_back(overlapValue);
 						}
 					} //end else
@@ -158,7 +157,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 							else{	distance = min(itDist->second, distance);  }
 
 							//is this distance below cutoff
-							if (distance < cutoff) {
+							if (distance <= cutoff) {
                                 if (itA->second < it->first) {
                                     PDistCell value(it->first, distance);
                                     matrix->addCell(itA->second, value);
@@ -195,7 +194,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						thisoverlap = 1.0 - (percentId * (lengthThisSeq - startQuery) / endRef / 100.0 - penalty);
 						
 						//if there is a valid overlap, add it
-						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
+						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
                             seqDist overlapValue(itA->second, itB->second, thisoverlap);
                             overlap.push_back(overlapValue);
 						}
@@ -222,7 +221,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				else{	distance = min(itDist->second, distance);  }
 				
 				//is this distance below cutoff
-				if (distance < cutoff) {
+				if (distance <= cutoff) {
                     if (itA->second < it->first) {
                         PDistCell value(it->first, distance);
                         matrix->addCell(itA->second, value);

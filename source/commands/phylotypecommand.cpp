@@ -256,7 +256,7 @@ int PhylotypeCommand::execute(){
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 
         
-		int count = 1;		
+        int count = 1;		bool printHeaders = true;
 		//start at leaves of tree and work towards root, processing the labels the user wants
 		while((!done) && ((allLines == 1) || (labels.size() != 0))) {
 		
@@ -309,6 +309,10 @@ int PhylotypeCommand::execute(){
 					if (name != "") { list.push_back(name); } //caused by unknown
 				}	
 				
+                if (printHeaders) { //only print headers the first time
+                    printHeaders = false;
+                }else {  list.setPrintedLabels(printHeaders);  }
+                
 				//print listvector
                 if (countfile == "") { list.print(outList);  }
                 else { list.print(outList, counts);  }

@@ -344,7 +344,6 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 // make a list of strings that are keys in the kernel parameter range map
                 // but are not in the kernel list
                 for (KernelParameterRangeMap::iterator i = kernelParameterRangeMap.begin(); i != kernelParameterRangeMap.end(); i++) {
-                    //cout << "looking for kernel " << *i << " in kernel option" << endl;
                     //should be kernelList here
                     string kernelKey = i->first;
                     if ( kernelSet.find(kernelKey) == kernelSet.end() ) {
@@ -564,18 +563,18 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
         Observation* observation = new Observation(lookup[j]->getNumBins(), 0.0);
         string sharedGroupName = lookup[j]->getGroup();
         string treatmentName = designMap.get(sharedGroupName);
-        //cout << "shared group name: " << sharedGroupName << " treatment name: " << treatmentName << endl;
+        
         //labeledObservationVector.push_back(make_pair(treatmentName, observation));
         labeledObservationVector.push_back(LabeledObservation(j, treatmentName, observation));
-        //cout << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
+        
         for (int k = 0; k < lookup[j]->size(); k++) {
-            //cout << " abundance " << data[k].abundance;
+            
             observation->at(k) = double(lookup[j]->get(k));
             if ( j == 0) {
                 featureVector.push_back(Feature(k, currentLabels[k]));
             }
         }
-        //cout << endl;
+        
         // let this happen later?
         //delete lookup[j];
     }

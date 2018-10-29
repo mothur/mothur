@@ -7,29 +7,30 @@
 #
 # Macros
 #
-# 64BIT_VERSION - set to no if you are using a 32bit arch.
 # OPTIMIZE - yes will increase speed of executable.
 # USEREADLINE - link with readline libraries.  Must have readline installed. Windows set to no.
 # USEBOOST - link with boost libraries. Must install boost. Allows the make.contigs command to read .gz files.
+# USEHDF5 - link with HDF5cpp libraries. Must install HDF5. Allows the biom.info command to read Biom format 2.0.
+# HDF5_LIBRARY_DIR - location of HDF5 libraries
+# HDF5_INCLUDE_DIR - location of HDF5 include files
 # BOOST_LIBRARY_DIR - location of boost libraries
 # BOOST_INCLUDE_DIR - location of boost include files
-# MOTHUR_FILES - default location for mothur to look for input files at runtime. Most often used for reference files.
+# MOTHUR_FILES - The MOTHUR_FILES parameter is optional, but allows you to set a default location for mothur to look for input files it can't find. This is often used for reference files you want to store in one location separate from your data.
 
 PREFIX := ${CURDIR} 
 
-64BIT_VERSION ?= yes
 OPTIMIZE ?= yes
 USEREADLINE ?= yes
 USEBOOST ?= yes
+USEHDF5 ?= no
 LOGFILE_NAME ?= yes
-BOOST_LIBRARY_DIR="\"Enter_your_boost_library_path_here\""
-BOOST_INCLUDE_DIR="\"Enter_your_boost_include_path_here\""
+BOOST_LIBRARY_DIR ?= "\"Enter_your_boost_library_path_here\""
+BOOST_INCLUDE_DIR ?= "\"Enter_your_boost_include_path_here\""
+HDF5_LIBRARY_DIR ?= "\"Enter_your_HDF5_library_path_here\""
+HDF5_INCLUDE_DIR ?= "\"Enter_your_HDF5_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-VERSION = "\"1.40.4\""
+VERSION = "\"1.41.0\""
 
-ifeq  ($(strip $(64BIT_VERSION)),yes)
-    CXXFLAGS += -DBIT_VERSION
-endif
 
 # Set a static logfile name
 ifeq  ($(strip $(LOGFILE_NAME)),yes)
@@ -40,7 +41,7 @@ ifeq  ($(strip $(OPTIMIZE)),yes)
     CXXFLAGS += -O3
 endif
 
-CXXFLAGS += -std=c++11 -DVERSION=${VERSION}
+CXXFLAGS += -std=c++11 -pthread -DVERSION=${VERSION}
 LDFLAGS += -std=c++11 -pthread
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
@@ -66,6 +67,14 @@ ifeq  ($(strip $(USEBOOST)),yes)
 
     LIBS += -lboost_iostreams -lz
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
+endif
+
+#User specified HDF5 library
+ifeq  ($(strip $(USEHDF5)),yes)
+
+LDFLAGS += -L ${HDF5_LIBRARY_DIR}
+CXXFLAGS += -DUSE_HDF5 -I ${HDF5_INCLUDE_DIR}
+
 endif
 
 #

@@ -532,7 +532,7 @@ int ScreenSeqsCommand::execute(){
                     variables["[extension]"] = util.getExtension(qualfile);
                     string outQual = getOutputFileName("qfile", variables);
                     util.renameFile(filenames["qfile"][0], outQual);
-                    outputNames.push_back(outQual); outputTypes["name"].push_back(outQual);
+                    outputNames.push_back(outQual); outputTypes["qfile"].push_back(outQual);
                 }
                 
                 if (taxonomy != "") {
@@ -542,7 +542,7 @@ int ScreenSeqsCommand::execute(){
                     variables["[extension]"] = util.getExtension(taxonomy);
                     string outTax = getOutputFileName("taxonomy", variables);
                     util.renameFile(filenames["taxonomy"][0], outTax);
-                    outputNames.push_back(outTax); outputTypes["count"].push_back(outTax);
+                    outputNames.push_back(outTax); outputTypes["taxonomy"].push_back(outTax);
                 }
             }
         }
@@ -685,13 +685,13 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; util.gobble(in);
             
-            bool goodSeq = 1;		//	innocent until proven guilty
+            bool goodSeq = true;		//	innocent until proven guilty
             string trashCode = "";
-            if(maxInsert != -1 && maxInsert < LongestInsert)    {	goodSeq = 0; trashCode += "insert|";	}
-            if(minScore != -1 && minScore > SearchScore)		{	goodSeq = 0; trashCode += "score|";     }
-            if(minSim != -1 && minSim > SimBtwnQueryTemplate)	{	goodSeq = 0; trashCode += "sim|";       }
+            if(maxInsert != -1 && maxInsert < LongestInsert)    {	goodSeq = false; trashCode += "insert|";	}
+            if(minScore != -1 && minScore > SearchScore)		{	goodSeq = false; trashCode += "score|";     }
+            if(minSim != -1 && minSim > SimBtwnQueryTemplate)	{	goodSeq = false; trashCode += "sim|";       }
             
-            if(goodSeq == 1){
+            if(goodSeq){
                 out << name << '\t' << length << '\t' << TemplateName  << '\t' << TemplateLength  << '\t' << SearchMethod  << '\t' << SearchScore  << '\t' << AlignmentMethod  << '\t' << QueryStart  << '\t' << QueryEnd  << '\t' << TemplateStart  << '\t' << TemplateEnd  << '\t' << PairwiseAlignmentLength  << '\t' << GapsInQuery  << '\t' << GapsInTemplate  << '\t' << LongestInsert  << '\t' << SimBtwnQueryTemplate << endl;
             }
             else{ badSeqNames[name] = trashCode;  }
@@ -756,6 +756,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         string name;
         //Name	Length	Overlap_Length	Overlap_Start	Overlap_End	MisMatches	Num_Ns
         int length, OLength, thisOStart, thisOEnd, numMisMatches, numNs;
+        double expectedErrors;
         
         ofstream out;
         util.openOutputFile(outSummary, out);
@@ -772,18 +773,18 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; util.gobble(in);
+            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs >> expectedErrors; util.gobble(in);
             
-            bool goodSeq = 1;		//	innocent until proven guilty
+            bool goodSeq = true;		//	innocent until proven guilty
             string trashCode = "";
-            if(oStart != -1 && oStart < thisOStart)             {	goodSeq = 0;	trashCode += "ostart|";     }
-            if(oEnd != -1 && oEnd > thisOEnd)                   {	goodSeq = 0;	trashCode += "oend|";       }
-            if(maxN != -1 && maxN <	numNs)                      {	goodSeq = 0;	trashCode += "n|";          }
-            if(minOverlap != -1 && minOverlap > OLength)		{	goodSeq = 0;	trashCode += "olength|";    }
-            if(mismatches != -1 && mismatches < numMisMatches)	{	goodSeq = 0;	trashCode += "mismatches|"; }
+            if(oStart != -1 && oStart < thisOStart)             {	goodSeq = false;	trashCode += "ostart|";     }
+            if(oEnd != -1 && oEnd > thisOEnd)                   {	goodSeq = false;	trashCode += "oend|";       }
+            if(maxN != -1 && maxN <	numNs)                      {	goodSeq = false;	trashCode += "n|";          }
+            if(minOverlap != -1 && minOverlap > OLength)		{	goodSeq = false;	trashCode += "olength|";    }
+            if(mismatches != -1 && mismatches < numMisMatches)	{	goodSeq = false;	trashCode += "mismatches|"; }
             
-            if(goodSeq == 1){
-                out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;
+            if(goodSeq){
+                out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << '\t' << expectedErrors << endl;
             }
             else{ badSeqNames[name] = trashCode; }
             count++;
@@ -811,10 +812,10 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs; util.gobble(in2);
+                in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs >> expectedErrors;; util.gobble(in2);
                 
                 if (badSeqNames.count(name) == 0) { //are you good?
-                    out2 << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << endl;
+                    out2 << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << '\t' << expectedErrors << endl;
                 }
             }
             in2.close();
@@ -861,16 +862,16 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
             in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; util.gobble(in);
             
-            bool goodSeq = 1;		//	innocent until proven guilty
+            bool goodSeq = true;		//	innocent until proven guilty
             string trashCode = "";
-            if(startPos != -1 && startPos < start)			{	goodSeq = 0;	trashCode += "start|"; }
-            if(endPos != -1 && endPos > end)				{	goodSeq = 0;	trashCode += "end|"; }
-            if(maxAmbig != -1 && maxAmbig <	ambigs)         {	goodSeq = 0;	trashCode += "ambig|"; }
-            if(maxHomoP != -1 && maxHomoP < polymer)        {	goodSeq = 0;	trashCode += "homop|"; }
-            if(minLength > length)                          {	goodSeq = 0;	trashCode += "<length|"; }
-            if(maxLength != -1 && maxLength < length)		{	goodSeq = 0;	trashCode += ">length|"; }
+            if(startPos != -1 && startPos < start)			{	goodSeq = false;	trashCode += "start|"; }
+            if(endPos != -1 && endPos > end)				{	goodSeq = false;	trashCode += "end|"; }
+            if(maxAmbig != -1 && maxAmbig <	ambigs)         {	goodSeq = false;	trashCode += "ambig|"; }
+            if(maxHomoP != -1 && maxHomoP < polymer)        {	goodSeq = false;	trashCode += "homop|"; }
+            if(minLength > length)                          {	goodSeq = false;	trashCode += "<length|"; }
+            if(maxLength != -1 && maxLength < length)		{	goodSeq = false;	trashCode += ">length|"; }
             
-            if(goodSeq == 1){
+            if(goodSeq){
                 out << name << '\t' << start  << '\t' << end  << '\t' << length  << '\t' << ambigs  << '\t' << polymer  << '\t' << numReps << endl;	
             }
             else{ badSeqNames[name] = trashCode; }
@@ -1057,28 +1058,28 @@ void driverScreen(sumScreenData* params){
 			
 			Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
 			if (currSeq.getName() != "") {
-				bool goodSeq = 1;		//	innocent until proven guilty
+				bool goodSeq = true;		//	innocent until proven guilty
                 string trashCode = "";
                 //have the report files found you bad
                 map<string, string>::iterator it = params->badSeqNames.find(currSeq.getName());
                 if (it != params->badSeqNames.end()) { goodSeq = 0;  trashCode = it->second; }
                 
                 if (params->summaryfile == "") { //summaryfile includes these so no need to check again
-                    if(params->startPos != -1 && params->startPos < currSeq.getStartPos())			{	goodSeq = 0;	trashCode += "start|";  }
-                    if(params->endPos != -1 && params->endPos > currSeq.getEndPos())				{	goodSeq = 0;	trashCode += "end|";    }
-                    if(params->maxAmbig != -1 && params->maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	trashCode += "ambig|";  }
-                    if(params->maxHomoP != -1 && params->maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|";  }
-                    if(params->minLength > currSeq.getNumBases())                                   {	goodSeq = 0;	trashCode += "<length|";}
-                    if(params->maxLength != -1 && params->maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|";}
+                    if(params->startPos != -1 && params->startPos < currSeq.getStartPos())			{	goodSeq = false;	trashCode += "start|";  }
+                    if(params->endPos != -1 && params->endPos > currSeq.getEndPos())				{	goodSeq = false;	trashCode += "end|";    }
+                    if(params->maxAmbig != -1 && params->maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = false;	trashCode += "ambig|";  }
+                    if(params->maxHomoP != -1 && params->maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = false;	trashCode += "homop|";  }
+                    if(params->minLength > currSeq.getNumBases())                                   {	goodSeq = false;	trashCode += "<length|";}
+                    if(params->maxLength != -1 && params->maxLength < currSeq.getNumBases())		{	goodSeq = false;	trashCode += ">length|";}
                     
                     if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + currSeq.getName() + "\t" + toString(currSeq.getStartPos()) + "\t" + toString(currSeq.getEndPos()) + "\t" + toString(currSeq.getNumBases()) + "\n"); }
                 }
                 
                 if (params->contigsreport == "") { //contigs report includes this so no need to check again
-                    if(params->maxN != -1 && params->maxN < currSeq.getNumNs())                     {	goodSeq = 0;	trashCode += "n|"; }
+                    if(params->maxN != -1 && params->maxN < currSeq.getNumNs())                     {	goodSeq = false;	trashCode += "n|"; }
                 }
 				
-				if(goodSeq == 1){
+				if(goodSeq){
 					currSeq.printSequence(params->outputWriter);
 				}else{
 					string badAccnos = currSeq.getName() + '\t' + trashCode.substr(0, trashCode.length()-1) + '\n';

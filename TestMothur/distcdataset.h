@@ -10,6 +10,8 @@
 #define __Mothur__distcdataset__
 
 #include "mothurout.h"
+#include "utils.hpp"
+#include "currentfile.h"
 
 class DistCDataSet  {
     
@@ -23,7 +25,9 @@ public:
     
 private:
     MothurOut* m;
+    Utils util;
     string columnFile, countFile;
+    CurrentFile* current;
     
 };
 

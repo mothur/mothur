@@ -40,12 +40,13 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	void printSharedData(SharedRAbundVectors*&, ofstream&);
+	void printSharedData(SharedRAbundVectors*&, ofstream&, bool&);
 	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
 	int ListGroupSameSeqs(vector<string>&, SharedListVector*);
     int createSharedFromListGroup();
     int createSharedFromBiom();
+    int createSharedFromCount();
     string getTag(string&);
     vector<string> readRows(string, int&);
     int getDims(string, int&, int&);

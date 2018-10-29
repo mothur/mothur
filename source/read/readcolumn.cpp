@@ -65,7 +65,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			if (distance == -1) { distance = 1000000; }
 			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 			
-			if(distance < cutoff && itA != itB){
+			if(distance <= cutoff && itA != itB){
 				if(itA->second > itB->second){
                     PDistCell value(itA->second, distance);
                     
@@ -125,7 +125,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				if (distance == -1) { distance = 1000000; }
 				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 				
-				if(distance < cutoff && itA->second > itB->second){
+				if(distance <= cutoff && itA->second > itB->second){
                     PDistCell value(itA->second, distance);
 					DMatrix->addCell(itB->second, value);
 					reading->update(itA->second * nseqs);
@@ -187,7 +187,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
 			if (distance == -1) { distance = 1000000; }
 			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 			
-			if(distance < cutoff && itA != itB){
+			if(distance <= cutoff && itA != itB){
 				if(itA > itB){
                     PDistCell value(itA, distance);
                     
@@ -247,7 +247,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
 				if (distance == -1) { distance = 1000000; }
 				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 				
-				if(distance < cutoff && itA > itB){
+				if(distance <= cutoff && itA > itB){
                     PDistCell value(itA, distance);
 					DMatrix->addCell(itB, value);
 					reading->update(itA * nseqs);

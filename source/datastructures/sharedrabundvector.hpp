@@ -12,6 +12,7 @@
 #include "datavector.hpp"
 #include "ordervector.hpp"
 #include "rabundvector.hpp"
+#include "rabundfloatvector.hpp"
 #include "sabundvector.hpp"
 
 
@@ -41,6 +42,11 @@ class OrderVector;
 
 class SharedRAbundVector : public DataVector {
     
+#ifdef UNIT_TEST
+    friend class TestSharedRabundVector;
+#endif
+
+    
 public:
     SharedRAbundVector();
     SharedRAbundVector(int);
@@ -55,15 +61,18 @@ public:
     int getNumSeqs();
     int getMaxRank();
     
-    int remove(int);
     void set(int, int);
     int get(int);
     vector<int> get() { return data; }
+    string getGroup() { return group; } //group = "" for rabunds without groupInfo
+    void setGroup(string g) { group = g;  }
+    
     int increment(int); //add 1 to bin
     void push_back(int);
     void resize(int);
     int size();
     void clear();
+    int remove(int);
     
     void print(ostream&); //nonsorted
     
@@ -72,10 +81,8 @@ public:
     SAbundVector getSAbundVector();
     OrderVector getOrderVector(map<string,int>*); 
     
-    string getGroup() { return group; } //group = "" for rabunds without groupInfo
-    void setGroup(string g) { group = g;  }
+    protected:
     
-private:
     vector<int> data;
     int maxRank;
     int numBins;

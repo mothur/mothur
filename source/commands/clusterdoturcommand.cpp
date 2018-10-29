@@ -262,12 +262,11 @@ int ClusterDoturCommand::execute(){
 		float rndPreviousDist = 0.00000;
 		oldRAbund = *rabund;
 		oldList = *list;
-
-		bool printHeaders = true;
+        bool printHeaders = true;
 		
-		int estart = time(NULL);
+        int estart = time(NULL); int loop = 0;
 	
-		while ((cluster->getSmallDist() < cutoff) && (cluster->getNSeqs() > 1)){
+		while ((cluster->getSmallDist() <= cutoff) && (cluster->getNSeqs() > 1)){
 			if (m->getControl_pressed()) { delete cluster; delete list; delete rabund; if(countfile == "") {rabundFile.close(); sabundFile.close();  util.mothurRemove((fileroot+ tag + ".rabund")); util.mothurRemove((fileroot+ tag + ".sabund")); }
                 listFile.close(); util.mothurRemove((fileroot+ tag + ".list")); outputTypes.clear();  return 0;  }
 		
@@ -275,13 +274,11 @@ int ClusterDoturCommand::execute(){
 	
 			float dist = cluster->getSmallDist();
 			float rndDist = util.ceilDist(dist, precision);
+            
+            //cout << loop << '\t' << dist << '\t' << oldList.getNumBins() << endl; loop++;
 
-			if(previousDist <= 0.0000 && dist != previousDist){
-				printData("unique", counts, printHeaders);
-			}
-			else if(rndDist != rndPreviousDist){
-				printData(toString(rndPreviousDist,  length-1), counts, printHeaders);
-			}
+			if(previousDist <= 0.0000 && dist != previousDist)  { printData("unique", counts, printHeaders);                                }
+			else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
 		
 			previousDist = dist;
 			rndPreviousDist = rndDist;
@@ -289,12 +286,8 @@ int ClusterDoturCommand::execute(){
 			oldList = *list;
 		}
 	
-		if(previousDist <= 0.0000){
-			printData("unique", counts, printHeaders);
-		}
-		else if(rndPreviousDist<cutoff){
-			printData(toString(rndPreviousDist, length-1), counts, printHeaders);
-		}
+		if(previousDist <= 0.0000)          { printData("unique", counts, printHeaders);                            }
+		else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist, length-1), counts, printHeaders); }
 		
         if (countfile == "") {
             sabundFile.close();
@@ -345,13 +338,12 @@ void ClusterDoturCommand::printData(string label, map<string, int>& counts, bool
 		oldRAbund.getSAbundVector().print(cout);
 		
 		oldList.setLabel(label);
-        
         if(countfile != "") {
             oldList.print(listFile, counts);
         }else {
             oldList.print(listFile, true);
         }
-
+        ph = false;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterDoturCommand", "printData");

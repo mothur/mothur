@@ -837,6 +837,7 @@ int SubSampleCommand::getSubSampleShared() {
 		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine();  return 0; }
 		
 		m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();
+        bool printHeaders = true;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -846,7 +847,7 @@ int SubSampleCommand::getSubSampleShared() {
 				
 				m->mothurOut(lookup->getLabel()+"\n"); 
 				
-				processShared(lookup);
+				processShared(lookup, printHeaders);
 				
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
@@ -859,7 +860,7 @@ int SubSampleCommand::getSubSampleShared() {
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()+"\n"); 
 				
-				processShared(lookup);
+				processShared(lookup, printHeaders);
 				
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
@@ -893,7 +894,7 @@ int SubSampleCommand::getSubSampleShared() {
 			
 			m->mothurOut(lookup->getLabel()+"\n"); 
 			
-			processShared(lookup);
+			processShared(lookup, printHeaders);
 			
 			if (lookup != NULL) { delete lookup; lookup = NULL; }
 		}
@@ -907,7 +908,7 @@ int SubSampleCommand::getSubSampleShared() {
 	}
 }
 //**********************************************************************************************************************
-int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
+int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup, bool& printHeaders) {
 	try {
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
@@ -925,7 +926,7 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
         ofstream out;
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		thislookup->print(out);
+		thislookup->print(out, printHeaders);
         out.close();
 		
 		return 0;
