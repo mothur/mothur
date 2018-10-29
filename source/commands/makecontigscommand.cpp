@@ -2898,7 +2898,7 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
         if (oligos.hasPairedBarcodes() || oligos.hasPairedPrimers()) {
             pairedPrimers = oligos.getPairedPrimers();
             rpairedPrimers = oligos.getReorientedPairedPrimers();
-            primerNames = oligos.getBarcodeNames();
+            primerNames = oligos.getPrimerNames();
             pairedBarcodes = oligos.getPairedBarcodes();
             rpairedBarcodes = oligos.getReorientedPairedBarcodes();
             barcodeNames = oligos.getBarcodeNames();
