@@ -182,6 +182,8 @@ TEST(Test_Container_CountTable, dataStructures) {
     EXPECT_EQ(ct.getNamesOfSeqs().size(), 93);
     EXPECT_EQ(ct.getNamesOfSeqs("F003D148").size(), 19);
     EXPECT_EQ(ct.getNamesOfSeqs("F003D004").size(), 11);
+    EXPECT_EQ(ct.getNumSeqs("GQY1XT001B1CEF"), 1);
+    EXPECT_EQ(ct.getNumSeqs("GQY1XT001CO8VD"), 16);
     ct.mergeCounts("GQY1XT001B1CEF", "GQY1XT001CO8VD");
     EXPECT_EQ(ct.getNumSeqs("GQY1XT001B1CEF"), 17);
     
