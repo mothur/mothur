@@ -1185,26 +1185,26 @@ vector<seqPNode*> loadSeqs(map<string, string>& thisName, vector<Sequence>& this
 void printData(string group, preClusterData* params){
     try {
         if ((params->hasCount) && (group == ""))  {
-					params->newNName->write("Representative_Sequence\ttotal\n");
-				}
-
+            params->newNName->write("Representative_Sequence\ttotal\n");
+        }
+        
         if (params->hasCount) {
             if (group != "") {
-
+                
                 for (int i = 0; i < params->alignSeqs.size(); i++) {
                     if (params->alignSeqs[i]->numIdentical != 0) {
                         params->alignSeqs[i]->seq.printSequence(params->newFName);
-
-												if(params->pc_method == "deblur"){
-                        	params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + toString(params->alignSeqs[i]->numIdentical) + '\n');
-												} else {
-                        	params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
-												}
+                        
+                        if(params->pc_method == "deblur"){
+                            params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + toString(params->alignSeqs[i]->numIdentical) + '\n');
+                        } else {
+                            params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
+                        }
                     }
                 }
             }
             else {
-
+                
                 for (int i = 0; i < params->alignSeqs.size(); i++) {
                     if (params->alignSeqs[i]->numIdentical != 0) {
                         params->alignSeqs[i]->seq.printSequence(params->newFName);
@@ -1220,7 +1220,7 @@ void printData(string group, preClusterData* params){
                 }
             }
         }
-
+        
     }
     catch(exception& e) {
         params->m->errorOut(e, "PreClusterCommand", "printData");
@@ -1230,80 +1230,80 @@ void printData(string group, preClusterData* params){
 /**************************************************************************************************/
 
 long long driverGroups(preClusterData* params){
-	try {
-    vector<string> subsetGroups;
-    for (int i = params->start; i < params->end; i++) {  subsetGroups.push_back(params->groups[i]);  }
-
-    //parse fasta and name file by group
-    SequenceCountParser* cparser = NULL;
-    SequenceParser* parser = NULL;
-    if (params->hasCount) {
-        cparser = new SequenceCountParser(params->countfile, params->fastafile, subsetGroups);
-    }else {
-        if (params->hasName) { parser = new SequenceParser(params->groupfile, params->fastafile, params->namefile, subsetGroups);	}
-        else				{ parser = new SequenceParser(params->groupfile, params->fastafile, subsetGroups);                      }
+    try {
+        vector<string> subsetGroups;
+        for (int i = params->start; i < params->end; i++) {  subsetGroups.push_back(params->groups[i]);  }
+        
+        //parse fasta and name file by group
+        SequenceCountParser* cparser = NULL;
+        SequenceParser* parser = NULL;
+        if (params->hasCount) {
+            cparser = new SequenceCountParser(params->countfile, params->fastafile, subsetGroups);
+        }else {
+            if (params->hasName) { parser = new SequenceParser(params->groupfile, params->fastafile, params->namefile, subsetGroups);	}
+            else				{ parser = new SequenceParser(params->groupfile, params->fastafile, subsetGroups);                      }
+        }
+        
+        long long numSeqs = 0;
+        
+        //precluster each group
+        for (int i = params->start; i < params->end; i++) {
+            if (params->m->getControl_pressed()) { if (params->hasCount) { delete cparser; }else { delete parser; } return numSeqs; }
+            
+            params->m->mothurOut("\nProcessing group " + params->groups[i] + ":\n");
+            
+            time_t start = time(NULL);
+            map<string, string> thisNameMap;
+            vector<Sequence> thisSeqs;
+            
+            if (params->groupfile != "")        {  thisSeqs = parser->getSeqs(params->groups[i]);       }
+            else if (params->hasCount)          { thisSeqs = cparser->getSeqs(params->groups[i]);       }
+            
+            if (params->hasName)                {  thisNameMap = parser->getNameMap(params->groups[i]); }
+            
+            map<string, int> thisCount;
+            if (params->hasCount) { thisCount = cparser->getCountTable(params->groups[i]);  }
+            
+            long long num = 0;
+            params->alignSeqs = loadSeqs(thisNameMap, thisSeqs, thisCount, params->groups[i], num, params->hasName, params->hasCount, params->length, params->align_method);
+            numSeqs += num;
+            
+            if (params->m->getControl_pressed()) {   return 0; }
+            
+            if (params->align_method == "aligned") {
+                if (params->diffs > params->length) {
+                    params->m->mothurOut("[ERROR]: diffs is greater than your sequence length.\n");
+                    params->m->setControl_pressed(true);
+                    return 0;
+                }
+            }
+            
+            string extension = params->groups[i]+".map";
+            long long count = process(params->groups[i]+"\t", params->newMName+extension, params);
+            
+            if(params->pc_method != "deblur"){
+                params->outputNames.push_back(params->newMName+extension);
+                params->outputTypes["map"].push_back(params->newMName+extension);
+            }
+            
+            if (params->m->getControl_pressed()) {  return 0; }
+            
+            params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(params->alignSeqs.size()) + ".\n");
+            params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
+            printData(params->groups[i], params);
+            for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
+            
+            params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(num) + " sequences.\n");
+        }
+        
+        if (params->hasCount) { delete cparser; }else { delete parser; }
+        
+        return numSeqs;
     }
-
-		long long numSeqs = 0;
-
-		//precluster each group
-		for (int i = params->start; i < params->end; i++) {
-			if (params->m->getControl_pressed()) { if (params->hasCount) { delete cparser; }else { delete parser; } return numSeqs; }
-
-      params->m->mothurOut("\nProcessing group " + params->groups[i] + ":\n");
-
-			time_t start = time(NULL);
-			map<string, string> thisNameMap;
-      vector<Sequence> thisSeqs;
-
-			if (params->groupfile != "")        {  thisSeqs = parser->getSeqs(params->groups[i]);       }
-      else if (params->hasCount)          { thisSeqs = cparser->getSeqs(params->groups[i]);       }
-
-      if (params->hasName)                {  thisNameMap = parser->getNameMap(params->groups[i]); }
-
-      map<string, int> thisCount;
-      if (params->hasCount) { thisCount = cparser->getCountTable(params->groups[i]);  }
-
-      long long num = 0;
-			params->alignSeqs = loadSeqs(thisNameMap, thisSeqs, thisCount, params->groups[i], num, params->hasName, params->hasCount, params->length, params->align_method);
-      numSeqs += num;
-
-			if (params->m->getControl_pressed()) {   return 0; }
-
-      if (params->align_method == "aligned") {
-				if (params->diffs > params->length) {
-					params->m->mothurOut("[ERROR]: diffs is greater than your sequence length.\n");
-					params->m->setControl_pressed(true);
-					return 0;
-				}
-			}
-
-      string extension = params->groups[i]+".map";
-			long long count = process(params->groups[i]+"\t", params->newMName+extension, params);
-
-			if(params->pc_method != "deblur"){
-				params->outputNames.push_back(params->newMName+extension);
-				params->outputTypes["map"].push_back(params->newMName+extension);
-			}
-
-			if (params->m->getControl_pressed()) {  return 0; }
-
-			params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(params->alignSeqs.size()) + ".\n");
-			params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
-			printData(params->groups[i], params);
-      for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
-
-			params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(num) + " sequences.\n");
-		}
-
-    if (params->hasCount) { delete cparser; }else { delete parser; }
-
-		return numSeqs;
-	}
-	catch(exception& e) {
-		params->m->errorOut(e, "PreClusterCommand", "driverGroups");
-		exit(1);
-	}
+    catch(exception& e) {
+        params->m->errorOut(e, "PreClusterCommand", "driverGroups");
+        exit(1);
+    }
 }
 
 /**************************************************************************************************/
@@ -1367,7 +1367,7 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
     }
 
     ct.printTable(newcount);
-    // util.mothurRemove(newname);
+    util.mothurRemove(newname);
 
     if (bygroup) { //if by group, must remove the duplicate seqs that are named the same
       ifstream in;
