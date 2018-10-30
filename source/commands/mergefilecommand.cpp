@@ -35,7 +35,7 @@ vector<string> MergeFileCommand::setParameters(){
 string MergeFileCommand::getHelpString(){	
 	try {
 		string helpString = "";
-        helpString += "The merge.file command takes a list of files separated by dashes and appends them into one file. Altternatively, the merge file command can combine the data or several files. For example, you can combine a fasta, taxonomy and name or count field to achieve outputs like: GQY1XT001C44N8 3677 Bacteria;Bacteroidetes;Bacteroidia;Bacteroidales;Porphyromonadaceae;Porphyromonadaceae_unclassified; C-G--T-T--GA-A-A-C-T-G-G--CG-T-T-C--T-T-G-A-G-T-G-G-GC-GA-G-A-A-G-T-A--TG-C-GG-A-ATG-C-G-T-G-GT-GT-A-G-CGGT-G-AAA--...";
+        helpString += "The merge.file command takes a list of files separated by dashes and appends them into one file. Altternatively, the merge file command can combine the data of several files. For example, you can combine a fasta, taxonomy and name or count field to achieve outputs like: GQY1XT001C44N8 3677 Bacteria;Bacteroidetes;Bacteroidia;Bacteroidales;Porphyromonadaceae;Porphyromonadaceae_unclassified; C-G--T-T--GA-A-A-C-T-G-G--CG-T-T-C--T-T-G-A-G-T-G-G-GC-GA-G-A-A-G-T-A--TG-C-GG-A-ATG-C-G-T-G-GT-GT-A-G-CGGT-G-AAA--...";
 		helpString += "The merge.file command parameters are input and output or fasta, taxonomy, name and count.";
 		helpString += "Example merge.file(input=small.fasta-large.fasta, output=all.fasta).";
         helpString += "Example merge.file(fasta=final.fasta, name=final.names, taxonomy=final.taxonomy).";
