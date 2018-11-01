@@ -73,8 +73,6 @@ FullMatrix::FullMatrix(ifstream& filehandle, GroupMap* g, bool s) : groupmap(g),
 int FullMatrix::readSquareMatrix(ifstream& filehandle) {
 	try {
 	
-		Progress* reading;
-		reading = new Progress("Reading matrix:     ", numSeqs * numSeqs);
 		
 		int count = 0;
 		
@@ -90,20 +88,19 @@ int FullMatrix::readSquareMatrix(ifstream& filehandle) {
 			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine(); exit(1); }
 				
 			for(int j=0;j<numSeqs;j++){
-				if (m->getControl_pressed()) { delete reading;  return 0; }
+				if (m->getControl_pressed()) {   return 0; }
 				
 				filehandle >> matrix[i][j];
 				if (sim) {  matrix[i][j] = 1.0 - matrix[i][j];  }
 				
 				count++;
-				reading->update(count);
 			}
 		}
 		
-		if (m->getControl_pressed()) { delete reading;  return 0; }
+		if (m->getControl_pressed()) {   return 0; }
 		
-		reading->finish();
-		delete reading;
+		
+		
 		
 		return 0;
 	}
@@ -115,10 +112,6 @@ int FullMatrix::readSquareMatrix(ifstream& filehandle) {
 /**************************************************************************/
 int FullMatrix::readLTMatrix(ifstream& filehandle) {
 	try {
-		
-		Progress* reading;
-		reading = new Progress("Reading matrix:     ", numSeqs * (numSeqs - 1) / 2);
-		
 		int count = 0;
 		float distance;
 
@@ -134,7 +127,7 @@ int FullMatrix::readLTMatrix(ifstream& filehandle) {
 			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 				
 			for(int j=0;j<i;j++){
-				if (m->getControl_pressed()) { delete reading;  return 0; }
+				if (m->getControl_pressed()) {   return 0; }
 				
 				filehandle >> distance;
 				if (sim) {  distance = 1.0 - distance;  }
@@ -142,14 +135,13 @@ int FullMatrix::readLTMatrix(ifstream& filehandle) {
 				matrix[i][j] = distance;  matrix[j][i] = distance;
 				
 				count++;
-				reading->update(count);
 			}
 		}
 		
-		if (m->getControl_pressed()) { delete reading;  return 0; }
+		if (m->getControl_pressed()) {   return 0; }
 		
-		reading->finish();
-		delete reading;
+		
+		
 		
 		return 0;
 	}

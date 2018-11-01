@@ -7,7 +7,7 @@
 //
 
 #include "optimatrix.h"
-#include "progress.hpp"
+
 #include "counttable.h"
 
 
@@ -117,7 +117,7 @@ int OptiMatrix::readPhylip(){
             }
         }
         
-        Progress* reading;
+        
         ifstream in;
         
         util.openInputFile(distFile, in);
@@ -129,12 +129,11 @@ int OptiMatrix::readPhylip(){
         string line = "";
         if(square == 0){
             
-            reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
             int index = 0;
             
             for(long long i=1;i<nseqs;i++){
                 
-                if (m->getControl_pressed()) {  in.close();  delete reading; return 0; }
+                if (m->getControl_pressed()) {  in.close();   return 0; }
                 
                 in >> name; util.gobble(in);
                 
@@ -153,17 +152,16 @@ int OptiMatrix::readPhylip(){
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
                     }
-                    index++; reading->update(index);
+                    index++; 
                 }
             }
         }else{
-            reading = new Progress("Reading matrix:     ", nseqs * nseqs);
             long long index = nseqs;
             
             for(long long i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
             
             for(long long i=1;i<nseqs;i++){
-                if (m->getControl_pressed()) {  in.close();  delete reading; return 0; }
+                if (m->getControl_pressed()) {  in.close();   return 0; }
                 
                 in >> name; util.gobble(in);
                 
@@ -181,13 +179,13 @@ int OptiMatrix::readPhylip(){
                         closeness[newA].insert(newB);
                         closeness[newB].insert(newA);
                     }
-                    index++; reading->update(index);
+                    index++; 
                 }
             }
         }
         in.close();
-        reading->finish();
-        delete reading;
+        
+        
 
         return 0;
         

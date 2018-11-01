@@ -8,7 +8,7 @@
  */
 
 #include "formatcolumn.h"
-#include "progress.hpp"
+
 
 /***********************************************************************/
 FormatColumnMatrix::FormatColumnMatrix(string df) : filename(df){
@@ -25,7 +25,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 
 		list = new ListVector(nameMap->getListVector());
 	
-		Progress* reading = new Progress("Formatting matrix:     ", nseqs * nseqs);
+		
 
 		int lt = 1;
 		int refRow = 0;	//we'll keep track of one cell - Cell(refRow,refCol) - and see if it's transpose
@@ -39,7 +39,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 	
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
 		
-			if (m->getControl_pressed()) { out.close();  util.mothurRemove(tempOutFile); fileHandle.close();  delete reading; return 0; }
+			if (m->getControl_pressed()) { out.close();  util.mothurRemove(tempOutFile); fileHandle.close();   return 0; }
 		
 			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
 	
@@ -66,7 +66,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 					out << itB->second << '\t' << itA->second << '\t' << distance << endl;
 				}
 				
-				reading->update(itA->second * nseqs / 2);
+				
 			}
 			util.gobble(fileHandle);
 		}
@@ -90,7 +90,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 			system(command.c_str());
 		#endif
 		
-		if (m->getControl_pressed()) { util.mothurRemove(tempOutFile); util.mothurRemove(outfile); delete reading; return 0; }
+		if (m->getControl_pressed()) { util.mothurRemove(tempOutFile); util.mothurRemove(outfile);  return 0; }
 
 		//output to new file distance for each row and save positions in file where new row begins
 		ifstream in;
@@ -115,7 +115,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 		
 		while(!in.eof()) {
 			
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(distFile); util.mothurRemove(tempOutFile); util.mothurRemove(outfile); delete reading; return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(distFile); util.mothurRemove(tempOutFile); util.mothurRemove(outfile); return 0; }
 			
 			in >> first >> second >> dist; util.gobble(in);
 			
@@ -159,14 +159,11 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 		in.close();
 		out.close();
 		
-		if (m->getControl_pressed()) {  util.mothurRemove(distFile); util.mothurRemove(tempOutFile); util.mothurRemove(outfile);  delete reading; return 0; }
+		if (m->getControl_pressed()) {  util.mothurRemove(distFile); util.mothurRemove(tempOutFile); util.mothurRemove(outfile);  return 0; }
 		
 		util.mothurRemove(tempOutFile);
 		util.mothurRemove(outfile);
 		
-		reading->finish();
-		
-		delete reading;
 		list->setLabel("0");
 		
 		if (m->getControl_pressed()) {  util.mothurRemove(distFile);  return 0; }
@@ -190,8 +187,6 @@ int FormatColumnMatrix::read(CountTable* nameMap){
         
 		list = new ListVector(nameMap->getListVector());
         
-		Progress* reading = new Progress("Formatting matrix:     ", nseqs * nseqs);
-        
 		int lt = 1;
 		int refRow = 0;	//we'll keep track of one cell - Cell(refRow,refCol) - and see if it's transpose
 		int refCol = 0; //shows up later - Cell(refCol,refRow).  If it does, then its a square matrix
@@ -204,7 +199,7 @@ int FormatColumnMatrix::read(CountTable* nameMap){
         
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
             
-			if (m->getControl_pressed()) { out.close();  util.mothurRemove(tempOutFile); fileHandle.close();  delete reading; return 0; }
+			if (m->getControl_pressed()) { out.close();  util.mothurRemove(tempOutFile); fileHandle.close();   return 0; }
             
 			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
             
@@ -228,8 +223,6 @@ int FormatColumnMatrix::read(CountTable* nameMap){
 					out << itA << '\t' << itB << '\t' << distance << endl;
 					out << itB << '\t' << itA << '\t' << distance << endl;
 				}
-				
-				reading->update(itA * nseqs / 2);
 			}
 			util.gobble(fileHandle);
 		}
@@ -253,7 +246,7 @@ int FormatColumnMatrix::read(CountTable* nameMap){
         system(command.c_str());
 #endif
 		
-		if (m->getControl_pressed()) { util.mothurRemove(tempOutFile); util.mothurRemove(outfile); delete reading; return 0; }
+		if (m->getControl_pressed()) { util.mothurRemove(tempOutFile); util.mothurRemove(outfile);  return 0; }
         
 		//output to new file distance for each row and save positions in file where new row begins
 		ifstream in;
@@ -278,7 +271,7 @@ int FormatColumnMatrix::read(CountTable* nameMap){
 		
 		while(!in.eof()) {
 			
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(distFile); util.mothurRemove(tempOutFile); util.mothurRemove(outfile); delete reading; return 0; }
+			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(distFile); util.mothurRemove(tempOutFile); util.mothurRemove(outfile); return 0; }
 			
 			in >> first >> second >> dist; util.gobble(in);
 			
@@ -322,14 +315,11 @@ int FormatColumnMatrix::read(CountTable* nameMap){
 		in.close();
 		out.close();
 		
-		if (m->getControl_pressed()) {  util.mothurRemove(distFile); util.mothurRemove(tempOutFile); util.mothurRemove(outfile);  delete reading; return 0; }
+		if (m->getControl_pressed()) {  util.mothurRemove(distFile); util.mothurRemove(tempOutFile); util.mothurRemove(outfile); return 0; }
 		
 		util.mothurRemove(tempOutFile);
 		util.mothurRemove(outfile);
 		
-		reading->finish();
-		
-		delete reading;
 		list->setLabel("0");
 		
 		if (m->getControl_pressed()) {  util.mothurRemove(distFile);  return 0; }

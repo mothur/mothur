@@ -11,7 +11,7 @@
 
 #include "mothur.h"
 #include "groupmap.h"
-#include "progress.hpp"
+
 
 
 struct Names {

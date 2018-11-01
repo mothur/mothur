@@ -10,10 +10,9 @@
  */
 
 #include "command.hpp"
+#include "treereader.h"
 #include "parsimony.h"
 #include "counttable.h"
-#include "progress.hpp"
-
 #include "fileoutput.h"
 #include "readtree.h"
 

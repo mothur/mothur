@@ -292,49 +292,37 @@ int LibShuffCommand::execute(){
 		}
 	
 		if (m->getControl_pressed()) {  outputTypes.clear(); delete form;  delete matrix; delete groupMap; return 0; }
-				
-		Progress* reading = new Progress();
 		
 		for(int i=0;i<numGroups-1;i++) {
 			for(int j=i+1;j<numGroups;j++) {
 				
-				if (m->getControl_pressed()) {  outputTypes.clear();  delete form;  delete matrix; delete groupMap; delete reading; return 0; }
+				if (m->getControl_pressed()) {  outputTypes.clear();  delete form;  delete matrix; delete groupMap;  return 0; }
 
-				reading->newLine(Groups[i]+'-'+Groups[j], iters);
 				int spoti = groupMap->groupIndex[Groups[i]]; //neccessary in case user selects groups so you know where they are in the matrix
 				int spotj = groupMap->groupIndex[Groups[j]];
 	
 				for(int p=0;p<iters;p++) {	
 					
-					if (m->getControl_pressed()) {  outputTypes.clear(); delete form;  delete matrix; delete groupMap; delete reading; return 0; }
+					if (m->getControl_pressed()) {  outputTypes.clear(); delete form;  delete matrix; delete groupMap;  return 0; }
 					
 					form->randomizeGroups(spoti,spotj); 
 					if(form->evaluatePair(spoti,spotj) >= savedDXYValues[spoti][spotj])	{	pValueCounts[i][j]++;	}
 					if(form->evaluatePair(spotj,spoti) >= savedDXYValues[spotj][spoti])	{	pValueCounts[j][i]++;	}
 					
-					if (m->getControl_pressed()) {  outputTypes.clear(); delete form;  delete matrix; delete groupMap; delete reading; return 0; }
-					
-					reading->update(p);			
+					if (m->getControl_pressed()) {  outputTypes.clear(); delete form;  delete matrix; delete groupMap;  return 0; }
 				}
 				form->resetGroup(spoti);
 				form->resetGroup(spotj);
 			}
 		}
 		
-		if (m->getControl_pressed()) { outputTypes.clear();  delete form;  delete matrix; delete groupMap; delete reading; return 0; }
-	
-		reading->finish();
-		delete reading;
+		if (m->getControl_pressed()) { outputTypes.clear();  delete form;  delete matrix; delete groupMap;  return 0; }
 
 		m->mothurOutEndLine();
 		printSummaryFile();
 		printCoverageFile();
-				
-		//clear out users groups
-		
-		delete form;
-		
-		delete matrix; delete groupMap;
+						
+		delete form; delete matrix; delete groupMap;
 		
 		if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 

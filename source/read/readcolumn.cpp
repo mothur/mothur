@@ -8,7 +8,7 @@
  */
 
 #include "readcolumn.h"
-#include "progress.hpp"
+
 
 /***********************************************************************/
 
@@ -37,9 +37,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
         DMatrix->resize(nseqs);
 		list = new ListVector(nameMap->getListVector());
 	
-		Progress* reading = new Progress("Reading matrix:     ", nseqs * nseqs);
-
-		int lt = 1;
+        int lt = 1;
 		int refRow = 0;	//we'll keep track of one cell - Cell(refRow,refCol) - and see if it's transpose
 		int refCol = 0; //shows up later - Cell(refCol,refRow).  If it does, then its a square matrix
 
@@ -54,13 +52,13 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
             
             if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
 			
-			if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+			if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 	
-			map<string,int>::iterator itA = nameMap->find(firstName);
-			map<string,int>::iterator itB = nameMap->find(secondName);
-
-			if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
-			if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
+            map<string,int>::iterator itA = nameMap->find(firstName);
+            map<string,int>::iterator itB = nameMap->find(secondName);
+            
+            if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
+            if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 
 			if (distance == -1) { distance = 1000000; }
 			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -97,7 +95,6 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 						DMatrix->addCell(itA->second, value);
 					}
 				}
-				reading->update(itA->second * nseqs);
 			}
 			util.gobble(fileHandle);
 		}
@@ -114,7 +111,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
                 fileHandle >> secondName; util.gobble(fileHandle);
                 fileHandle >> distance;	// get the row and column names and distance
 				
-				if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+				if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 		
 				map<string,int>::iterator itA = nameMap->find(firstName);
 				map<string,int>::iterator itB = nameMap->find(secondName);
@@ -128,16 +125,15 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				if(distance <= cutoff && itA->second > itB->second){
                     PDistCell value(itA->second, distance);
 					DMatrix->addCell(itB->second, value);
-					reading->update(itA->second * nseqs);
 				}
 		
 				util.gobble(fileHandle);
 			}
 		}
 		
-		if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 		
-		reading->finish();
+		
 		fileHandle.close();
 
 		list->setLabel("0");
@@ -162,8 +158,6 @@ int ReadColumnMatrix::read(CountTable* countTable){
         DMatrix->resize(nseqs);
 		list = new ListVector(countTable->getListVector());
         
-		Progress* reading = new Progress("Reading matrix:     ", nseqs * nseqs);
-        
 		int lt = 1;
 		int refRow = 0;	//we'll keep track of one cell - Cell(refRow,refCol) - and see if it's transpose
 		int refCol = 0; //shows up later - Cell(refCol,refRow).  If it does, then its a square matrix
@@ -177,7 +171,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
             fileHandle >> secondName; util.gobble(fileHandle);
             fileHandle >> distance;	// get the row and column names and distance
             
-			if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+			if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
             
 			int itA = countTable->get(firstName);
 			int itB = countTable->get(secondName);
@@ -219,7 +213,6 @@ int ReadColumnMatrix::read(CountTable* countTable){
 						DMatrix->addCell(itA, value);
 					}
 				}
-				reading->update(itA * nseqs);
 			}
 			util.gobble(fileHandle);
 		}
@@ -236,7 +229,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
                 fileHandle >> secondName; util.gobble(fileHandle);
                 fileHandle >> distance;	// get the row and column names and distance
 				
-				if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+				if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                 
 				int itA = countTable->get(firstName);
                 int itB = countTable->get(secondName);
@@ -250,16 +243,15 @@ int ReadColumnMatrix::read(CountTable* countTable){
 				if(distance <= cutoff && itA > itB){
                     PDistCell value(itA, distance);
 					DMatrix->addCell(itB, value);
-					reading->update(itA * nseqs);
 				}
                 
 				util.gobble(fileHandle);
 			}
 		}
 		
-		if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 		
-		reading->finish();
+		
 		fileHandle.close();
         
 		list->setLabel("0");

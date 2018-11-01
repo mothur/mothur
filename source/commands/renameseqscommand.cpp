@@ -376,10 +376,6 @@ int RenameSeqsCommand::execute() {
                 
                 Sequence seq(in); util.gobble(in);
                 
-                if (seq.getName() == "1_Sample_128") {
-                    cout << "here\n";
-                }
-                
                 vector<string> dups;
                 if (nameFile != "") {
                     map<string, vector<string> >::iterator it = nameMap.find(seq.getName());

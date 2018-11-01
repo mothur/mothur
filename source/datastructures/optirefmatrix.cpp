@@ -7,7 +7,7 @@
 //
 
 #include "optirefmatrix.hpp"
-#include "progress.hpp"
+
 #include "counttable.h"
 
 /***********************************************************************/

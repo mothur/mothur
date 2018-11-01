@@ -82,12 +82,6 @@ int OptiBlastMatrix::readBlast(){
             
             if (firstName == secondName) {   refScore = score;  }
             else{
-                //convert name to number
-                map<string,long long>::iterator itA = nameAssignment.find(firstName);
-                map<string,long long>::iterator itB = nameAssignment.find(secondName);
-                if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
-                if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
-                
                 thisRowsBlastScores[secondName] = score;
                 
                 //calc overlap score
@@ -95,6 +89,12 @@ int OptiBlastMatrix::readBlast(){
                 
                 //if there is a valid overlap, add it
                 if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
+                    //convert name to number
+                    map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                    map<string,long long>::iterator itB = nameAssignment.find(secondName);
+                    if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
+                    if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
+
                     int indexA = (itA->second);
                     int indexB = (itB->second);
                     overlapSingleton[indexA] = false;
@@ -123,12 +123,6 @@ int OptiBlastMatrix::readBlast(){
                 if (currentRow == firstName) {
                     if (firstName == secondName) {  refScore = score; }
                     else{
-                        //convert name to number
-                        map<string,long long>::iterator itA = nameAssignment.find(firstName);
-                        map<string,long long>::iterator itB = nameAssignment.find(secondName);
-                        if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
-                        if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
-                        
                         //save score
                         thisRowsBlastScores[secondName] = score;
                         
@@ -137,6 +131,11 @@ int OptiBlastMatrix::readBlast(){
                         
                         //if there is a valid overlap, add it
                         if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
+                            //convert name to number
+                            map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                            map<string,long long>::iterator itB = nameAssignment.find(secondName);
+                            if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
+                            if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
                             int indexA = (itA->second);
                             int indexB = (itB->second);
                             overlapSingleton[indexA] = false;
@@ -188,13 +187,6 @@ int OptiBlastMatrix::readBlast(){
                     //add this row to thisRowsBlastScores
                     if (firstName == secondName) {   refScore = score;  }
                     else{ //add this row to thisRowsBlastScores
-                        
-                        //convert name to number
-                        map<string,long long>::iterator itA = nameAssignment.find(firstName);
-                        map<string,long long>::iterator itB = nameAssignment.find(secondName);
-                        if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
-                        if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
-                        
                         thisRowsBlastScores[secondName] = score;
                         
                         //calc overlap score
@@ -202,6 +194,11 @@ int OptiBlastMatrix::readBlast(){
                         
                         //if there is a valid overlap, add it
                         if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap <= cutoff)) {
+                            //convert name to number
+                            map<string,long long>::iterator itA = nameAssignment.find(firstName);
+                            map<string,long long>::iterator itB = nameAssignment.find(secondName);
+                            if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
+                            if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
                             int indexA = (itA->second);
                             int indexB = (itB->second);
                             overlapSingleton[indexA] = false;

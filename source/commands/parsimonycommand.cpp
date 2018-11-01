@@ -8,7 +8,7 @@
  */
 
 #include "parsimonycommand.h"
-#include "treereader.h"
+
 
 //**********************************************************************************************************************
 vector<string> ParsimonyCommand::setParameters(){	
@@ -284,10 +284,10 @@ int ParsimonyCommand::execute() {
 		Parsimony pars(Groups);
 		counter = 0;
 	
-		Progress* reading; reading = new Progress("Comparing to random:", iters);
+		
 		
 		if (m->getControl_pressed()) { 
-			delete reading; delete output;
+			 delete output;
 			delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 			if (randomtree == "") {  outSum.close();  }
 			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
@@ -306,7 +306,7 @@ int ParsimonyCommand::execute() {
 				userData = pars.getValues(T[i], processors, outputDir);  //data = AB, AC, BC, ABC.
 				
 				if (m->getControl_pressed()) { 
-					delete reading; delete output;
+					 delete output;
 					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
@@ -344,7 +344,7 @@ int ParsimonyCommand::execute() {
 				randomData = pars.getValues(randT, processors, outputDir);
 				
 				if (m->getControl_pressed()) { 
-                    delete reading;  delete output; delete randT; delete stableRandom;
+                      delete output; delete randT; delete stableRandom;
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
 					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
@@ -364,9 +364,7 @@ int ParsimonyCommand::execute() {
 					validScores[randomData[r]] = randomData[r];
 				}
 				
-				//update progress bar
-				reading->update(j);
-				
+								
 				delete randT;
 			}
             delete stableRandom;
@@ -382,7 +380,7 @@ int ParsimonyCommand::execute() {
 				randT->assembleRandomTree(stableRandom);
 				
 				if (m->getControl_pressed()) { 
-					delete reading; delete output; delete randT; delete ct;  delete stableRandom;
+					 delete output; delete randT; delete ct;  delete stableRandom;
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
 
@@ -390,7 +388,7 @@ int ParsimonyCommand::execute() {
 				randomData = pars.getValues(randT, processors, outputDir);
 				
 				if (m->getControl_pressed()) { 
-					delete reading; delete output; delete randT; delete ct; 
+					 delete output; delete randT; delete ct;
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
 			
@@ -407,8 +405,6 @@ int ParsimonyCommand::execute() {
 					validScores[randomData[r]] = randomData[r];
 				}
 				
-				//update progress bar
-				reading->update(j);
 				
 				delete randT;
 			}
@@ -444,16 +440,13 @@ int ParsimonyCommand::execute() {
 		}
 		
 		if (m->getControl_pressed()) { 
-				delete reading; delete output;
+				delete output;
 				delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 				if (randomtree == "") {  outSum.close();  }
 				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
 		}
-		
-		//finish progress bar
-		reading->finish(); delete reading;
-		
+				
 		printParsimonyFile();
 		if (randomtree == "") { printUSummaryFile(); }
 				

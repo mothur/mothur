@@ -8,7 +8,7 @@
  */
 
 #include "clusterclassic.h"
-#include "progress.hpp"
+
 #include "utils.hpp"
 
 /***********************************************************************/
@@ -80,16 +80,15 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 				}
 		}
 
-		Progress* reading;
+		
 
 		if(square == 0){
 
-				reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
 
 				int        index = 0;
 
 				for(int i=1;i<nseqs;i++){
-						if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+						if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 						
 						fileHandle >> name;
 						matrixNames.push_back(name);
@@ -101,7 +100,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 						
 								for(int j=0;j<i;j++){
 								
-										if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+										if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
 										
 										fileHandle >> distance;
 							
@@ -113,7 +112,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
                                         if (distance < smallDist) { smallDist = distance; }
 											
 										index++;
-										reading->update(index);
+										
 								}
 				
 						}
@@ -123,7 +122,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 								for(int j=0;j<i;j++){
 										fileHandle >> distance;
 										
-										if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+										if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
 				
 										if (distance == -1) { distance = 1000000; }
 										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -138,14 +137,14 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
                                         else { dMatrix[row][col] = distance; }
 											
 										index++;
-										reading->update(index);
+										
 								}
 						}
 				}
 		}
 		else{
 
-				reading = new Progress("Reading matrix:     ", nseqs * nseqs);
+				
 		
 				int index = nseqs;
 
@@ -158,7 +157,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 								for(int j=0;j<nseqs;j++){
 										fileHandle >> distance;
 										
-										if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+										if (m->getControl_pressed()) {  fileHandle.close();  return 0; }
 										
 										if (distance == -1) { distance = 1000000; }
 										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -169,7 +168,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 											dMatrix[i][j] = distance;
 										}
 										index++;
-										reading->update(index);
+										
 								}
 						
 						}
@@ -179,7 +178,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 								for(int j=0;j<nseqs;j++){
 										fileHandle >> distance;
 										
-										if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+										if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 										
 									   if (distance == -1) { distance = 1000000; }
 										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
@@ -194,16 +193,15 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 											else { dMatrix[row][col] = distance; }
 										}
 										index++;
-										reading->update(index);
+										
 								}
 						}
 				}
 		}
 		
-		if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close();  return 0; }
 		
-		reading->finish();
-		delete reading;
+		
 
 		list->setLabel("0");
 		rabund = new RAbundVector(list->getRAbundVector());
@@ -270,16 +268,15 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
             }
 		}
         
-		Progress* reading;
+		
         
 		if(square == 0){
             
-            reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
             
             int        index = 0;
             
             for(int i=1;i<nseqs;i++){
-                if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+                if (m->getControl_pressed()) {  fileHandle.close(); return 0; }
                 
                 fileHandle >> name;
                 matrixNames.push_back(name);
@@ -291,7 +288,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                     
                     for(int j=0;j<i;j++){
                         
-                        if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+                        if (m->getControl_pressed()) { fileHandle.close(); return 0;  }
                         
                         fileHandle >> distance;
                         
@@ -302,7 +299,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                         dMatrix[i][j] = distance;
                         if (distance < smallDist) { smallDist = distance; }
                                                 index++;
-                        reading->update(index);
+                        
                     }
                     
                 }
@@ -310,7 +307,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                     for(int j=0;j<i;j++){
                         fileHandle >> distance;
                         
-                        if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+                        if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -324,14 +321,13 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                         else { dMatrix[row][col] = distance; }
                         
                         index++;
-                        reading->update(index);
+                        
                     }
                 }
             }
 		}
 		else{
             
-            reading = new Progress("Reading matrix:     ", nseqs * nseqs);
             
             int index = nseqs;
             
@@ -344,7 +340,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;
                         
-                        if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+                        if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -355,7 +351,6 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                             dMatrix[i][j] = distance;
                         }
                         index++;
-                        reading->update(index);
                     }
                     
                 }
@@ -364,7 +359,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;
                         
-                        if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+                        if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
@@ -379,16 +374,14 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                             else { dMatrix[row][col] = distance; }
                         }
                         index++;
-                        reading->update(index);
                     }
                 }
             }
 		}
 		
-		if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 		
-		reading->finish();
-		delete reading;
+		
         
 		list->setLabel("0");
 		rabund = new RAbundVector();

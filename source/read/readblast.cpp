@@ -8,7 +8,7 @@
  */
 
 #include "readblast.h"
-#include "progress.hpp"
+
 
 //********************************************************************************************************************
 //sorts lowest to highest
@@ -59,8 +59,6 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		
 		if (m->getControl_pressed()) { fileHandle.close(); delete matrix; return 0; }
 		
-		Progress* reading = new Progress("Reading blast:     ", nseqs * nseqs);
-		
 		//this is used to quickly find if we already have a distance for this combo
 		vector< map<int,float> > dists;  dists.resize(nseqs);  //dists[0][1] = distance from seq0 to seq1
 		map<int, float> thisRowsBlastScores;
@@ -99,7 +97,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		//read file
 		while(!fileHandle.eof()){  
 		
-			if (m->getControl_pressed()) { fileHandle.close(); delete matrix; delete reading; return 0; }
+			if (m->getControl_pressed()) { fileHandle.close(); delete matrix;  return 0; }
 			
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
@@ -116,7 +114,6 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						
 					if (firstName == secondName) { 
 						refScore = score;  
-						reading->update((count + nseqs));  
 						count++; 
 					}else{
 						//convert name to number
@@ -240,14 +237,14 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		thisRowsBlastScores.clear();
 		dists.clear();
 		
-		if (m->getControl_pressed()) {  fileHandle.close(); delete matrix; delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close(); delete matrix;  return 0; }
 		
         sort(overlap.begin(), overlap.end(), compareOverlap);
  
-		if (m->getControl_pressed()) {  fileHandle.close(); delete matrix; delete reading; return 0; }
+		if (m->getControl_pressed()) {  fileHandle.close(); delete matrix;  return 0; }
 		
-		reading->finish();
-		delete reading;
+		
+		
 		fileHandle.close();
 		
 		return 0;

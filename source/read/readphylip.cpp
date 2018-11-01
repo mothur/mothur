@@ -8,7 +8,7 @@
  */
 
 #include "readphylip.h"
-#include "progress.hpp"
+
 
 /***********************************************************************/
 
@@ -71,17 +71,17 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 }
                         }
         
-                        Progress* reading;
+            
                         DMatrix->resize(nseqs);
         
                         if(square == 0){
 
-                                reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
+                            
                 
                                 int        index = 0;
                
                                 for(int i=1;i<nseqs;i++){
-										if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+										if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 										
                                         fileHandle >> name;
                                         matrixNames.push_back(name);
@@ -93,7 +93,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                         
                                                 for(int j=0;j<i;j++){
 												
-														if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+														if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
 														
                                                         fileHandle >> distance;
                                                 
@@ -105,7 +105,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                             DMatrix->addCell(j, value);
                                                         }
                                                         index++;
-                                                        reading->update(index);
+                                                        
                                                 }
                                 
                                         }
@@ -115,7 +115,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                 for(int j=0;j<i;j++){
                                                         fileHandle >> distance;
 														
-														if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+														if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
                                 
                                                         if (distance == -1) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -125,15 +125,12 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                             DMatrix->addCell(nameMap->get(matrixNames[j]), value);
                                                         }
                                                         index++;
-                                                        reading->update(index);
+                                                        
                                                 }
                                         }
                                 }
                         }
                         else{
-
-                                reading = new Progress("Reading matrix:     ", nseqs * nseqs);
-                        
                                 int index = nseqs;
                 
                                 for(int i=1;i<nseqs;i++){
@@ -147,7 +144,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                 for(int j=0;j<nseqs;j++){
                                                         fileHandle >> distance;
 														
-														if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+														if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 														
                                                         if (distance == -1) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -157,7 +154,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                             DMatrix->addCell(j, value);
                                                         }
                                                         index++;
-                                                        reading->update(index);
+                                                        
                                                 }
                                         
                                         }
@@ -167,7 +164,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                 for(int j=0;j<nseqs;j++){
                                                         fileHandle >> distance;
 														
-														if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+														if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 														
                                                        if (distance == -1) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
@@ -177,16 +174,16 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                                                             DMatrix->addCell(nameMap->get(matrixNames[j]), value);
                                                         }
                                                         index++;
-                                                        reading->update(index);
+                                                        
                                                 }
                                         }
                                 }
                         }
 						
-						if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+						if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 						
-                        reading->finish();
-                        delete reading;
+                        
+                        
             
                         list->setLabel("0");
                         fileHandle.close();
@@ -243,17 +240,15 @@ int ReadPhylipMatrix::read(CountTable* countTable){
             }
         }
         
-        Progress* reading;
+        
         DMatrix->resize(nseqs);
         
         if(square == 0){
             
-            reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
-            
             int        index = 0;
             
             for(int i=1;i<nseqs;i++){
-                if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+                if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                 
                 fileHandle >> name;
                 matrixNames.push_back(name);
@@ -265,7 +260,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                     
                     for(int j=0;j<i;j++){
                         
-                        if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+                        if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
                         
                         fileHandle >> distance;
                         
@@ -277,7 +272,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                             DMatrix->addCell(j, value);
                         }
                         index++;
-                        reading->update(index);
+                        
                     }
                     
                 }
@@ -285,7 +280,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                     for(int j=0;j<i;j++){
                         fileHandle >> distance;
                         
-                        if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+                        if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -294,7 +289,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                             int iIndex = countTable->get(matrixNames[i]);
                             int jIndex = countTable->get(matrixNames[j]);
                             
-                            if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+                            if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
                             if (iIndex < jIndex) { 
                                 PDistCell value(jIndex, distance);
                                 DMatrix->addCell(iIndex, value);
@@ -305,15 +300,13 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                             }
                         }
                         index++;
-                        reading->update(index);
+                        
                     }
                 }
             }
         }
         else{
-            
-            reading = new Progress("Reading matrix:     ", nseqs * nseqs);
-            
+                        
             int index = nseqs;
             
             for(int i=1;i<nseqs;i++){
@@ -325,7 +318,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;
                         
-                        if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+                        if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -335,7 +328,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                             DMatrix->addCell(j, value);
                         }
                         index++;
-                        reading->update(index);
+                        
                     }
                     
                 }
@@ -343,7 +336,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;
                         
-                        if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+                        if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                         
                         if (distance == -1) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
@@ -352,7 +345,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                             int iIndex = countTable->get(matrixNames[i]);
                             int jIndex = countTable->get(matrixNames[j]);
                             
-                            if (m->getControl_pressed()) { delete reading; fileHandle.close(); return 0;  }
+                            if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
                             if (iIndex < jIndex) { 
                                 PDistCell value(jIndex, distance);
                                 DMatrix->addCell(iIndex, value);
@@ -363,16 +356,16 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                             }
                         }
                         index++;
-                        reading->update(index);
+                        
                     }
                 }
             }
         }
         
-        if (m->getControl_pressed()) {  fileHandle.close();  delete reading; return 0; }
+        if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
         
-        reading->finish();
-        delete reading;
+        
+        
         
         list->setLabel("0");
         fileHandle.close();
