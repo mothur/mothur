@@ -72,7 +72,7 @@ endif
 #User specified HDF5 library
 ifeq  ($(strip $(USEHDF5)),yes)
 
-LDFLAGS += -L ${HDF5_LIBRARY_DIR}
+LDFLAGS += -L ${HDF5_LIBRARY_DIR} -lhdf5 -lhdf5_cpp
 CXXFLAGS += -DUSE_HDF5 -I ${HDF5_INCLUDE_DIR}
 
 endif

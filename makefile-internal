@@ -1,6 +1,7 @@
 
-USEREADLINE ?= no
-USEBOOST ?= no
+USEREADLINE ?= yes
+USEBOOST ?= yes
+USEHDF% ?= yes
 LOGFILE_NAME ?= yes
 VERSION = "\"1.41.0\""
 
@@ -25,8 +26,7 @@ endif
 #CXXFLAGS += -mtune=generic
 
 
-
-#CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
+CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
 
 # if you do not want to use the readline library, set this to no.
 # make sure you have the library installed
@@ -53,6 +53,22 @@ ifeq  ($(strip $(USEBOOST)),yes)
     #if linux or windows
     #LIBS += ${BOOST_LIBRARY_DIR}/libz.a
 endif
+
+#User specified HDF5 library
+ifeq  ($(strip $(USEHDF5)),yes)
+
+    HDF5_INCLUDE_DIR="/usr/local/include"
+    HDF5_LIBRARY_DIR="/usr/local/lib"
+
+    LDFLAGS +=  -L ${HDF5_LIBRARY_DIR} -lz -ldl -lm -Wl,-rpath -Wl,${HDF5_LIBRARY_DIR}
+    LIBS += ${HDF5_LIBRARY_DIR}/libhdf5_hl_cpp.a
+    LIBS += ${HDF5_LIBRARY_DIR}/libhdf5_cpp.a
+    LIBS += ${HDF5_LIBRARY_DIR}/libhdf5_hl.a
+    LIBS += ${HDF5_LIBRARY_DIR}/libhdf5.a
+
+    CXXFLAGS += -DUSE_HDF5 #-I ${HDF5_INCLUDE_DIR}
+endif
+
 
 #
 # INCLUDE directories for mothur
