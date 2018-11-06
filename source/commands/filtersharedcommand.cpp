@@ -338,8 +338,8 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         
         if (m->getControl_pressed()) {  return 0; }
         
-        vector<SharedRAbundVector*> data = sharedLookup->getSharedRAbundVectors();
         vector<int> rareCounts; rareCounts.resize(Groups.size(), 0);
+        int numGroups = Groups.size();
         
         //you want to remove a percentage of OTUs
         set<string> removeLabels;
@@ -348,9 +348,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             //rank otus by abundance
             for (int i = 0; i < sharedLookup->getNumBins(); i++) {
                 float otuTotal = 0.0;
-                for (int j = 0; j < data.size(); j++) {
-                    otuTotal += data[j]->get(i);
-                }
+                for (int j = 0; j < numGroups; j++) { otuTotal += sharedLookup->get(i, Groups[j]); }
                 spearmanRank temp(sharedLookup->getOTUName(i), otuTotal);
                 otus.push_back(temp);
             }
@@ -359,7 +357,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             sort(otus.begin(), otus.end(), compareSpearman);
             
             //find index of cutoff
-            int indexFirstNotRare = ceil(rarePercent * (float)data[0]->getNumBins());
+            int indexFirstNotRare = ceil(rarePercent * (float)sharedLookup->getNumBins());
             
             //handle ties
             if (keepties) { //adjust indexFirstNotRare if needed
@@ -384,19 +382,21 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         int numRemoved = 0;
         for (int i = 0; i < sharedLookup->getNumBins();) {
             
-            if (m->getControl_pressed()) { for (int j = 0; j < data.size(); j++) { delete data[j]; } return 0; }
+            if (m->getControl_pressed()) { return 0; }
+            
+            vector<int> abunds = sharedLookup->getOTU(i);
             
             bool okay = true; //innocent until proven guilty
             if (minAbund != -1) {
-                for (int j = 0; j < data.size(); j++) {
-                    if (data[j]->get(i) < minAbund) { okay = false; break; }
+                for (int j = 0; j < numGroups; j++) {
+                    if (abunds[j] < minAbund) { okay = false; break; }
                 }
             }
             
             if (okay && (minTotal != -1)) {
                 int otuTotal = 0;
-                for (int j = 0; j < data.size(); j++) {
-                    otuTotal += data[j]->get(i);
+                for (int j = 0; j < numGroups; j++) {
+                    otuTotal += abunds[j];
                 }
                 if (otuTotal < minTotal) { okay = false; }
             }
@@ -404,9 +404,9 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             if (okay && (minPercent != -0.01)) {
                 double otuTotal = 0;
                 double total = 0;
-                for (int j = 0; j < data.size(); j++) {
-                    otuTotal += data[j]->get(i);
-                    total += data[j]->getNumSeqs();
+                for (int j = 0; j < numGroups; j++) {
+                    otuTotal += abunds[j];
+                    total += sharedLookup->getNumSeqs(Groups[j]);
                 }
                 double percent = otuTotal / total; 
                 if (percent < minPercent) { okay = false; }
@@ -415,17 +415,17 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             
             if (okay && (minSamples != -1)) {
                 int samples = 0;
-                for (int j = 0; j < data.size(); j++) {
-                    if (data[j]->get(i) != 0) { samples++; }
+                for (int j = 0; j < numGroups; j++) {
+                    if (abunds[j] != 0) { samples++; }
                 }
                 if (samples < minSamples) { okay = false; }
             }
             
             if (okay && (minPercentSamples != -0.01)) {
                 double samples = 0;
-                double total = data.size();
-                for (int j = 0; j < data.size(); j++) {
-                    if (data[j]->get(i) != 0) { samples++; }
+                double total = numGroups;
+                for (int j = 0; j < numGroups; j++) {
+                    if (abunds[j] != 0) { samples++; }
                 }
                 double percent = samples / total; 
                 if (percent < minPercentSamples) { okay = false; }
@@ -443,7 +443,9 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             }else { //if not, do we want to save the counts
                 filteredSomething = true;
                 if (makeRare) {
-                    for (int j = 0; j < rareCounts.size(); j++) {  rareCounts[j] += data[j]->get(i); }
+                    for (int j = 0; j < numGroups; j++) {
+                        rareCounts[j] += abunds[j];
+                    }
                 }
                 sharedLookup->removeOTU(i);
                 numRemoved++;
