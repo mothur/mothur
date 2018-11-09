@@ -22,6 +22,10 @@
     #include <boost/iostreams/filter/gzip.hpp>
 #endif
 
+#ifdef USE_HDF5
+    #include "H5Cpp.h"
+#endif
+
 //io libraries
 #include <iostream>
 #include <iomanip>

@@ -13,10 +13,6 @@
 #include "inputdata.h"
 #include "phylosummary.h"
 
-#ifdef USE_HDF5
-    #include "H5Cpp.h"
-#endif
-
 #define MAX_NAME 1024
 
 class BiomInfoCommand : public Command {
