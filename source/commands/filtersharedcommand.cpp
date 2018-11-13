@@ -200,7 +200,8 @@ FilterSharedCommand::FilterSharedCommand(string option) {
             else { setSomething = true; }
             
 			util.mothurConvert(temp, minPercent);
-            if (minPercent < 1) {} //already in percent form
+            if (minPercent == -1) { minPercent = -0.01; }
+            else if (minPercent < 1) {} //already in percent form
             else {  minPercent = minPercent / 100.0; } //user gave us a whole number version so convert to %
             
             temp = validParameter.valid(parameters, "rarepercent");
@@ -208,7 +209,8 @@ FilterSharedCommand::FilterSharedCommand(string option) {
             else { setSomething = true; }
             
 			util.mothurConvert(temp, rarePercent);
-            if (rarePercent < 1) {} //already in percent form
+            if (rarePercent == -1) { rarePercent = -0.01; }
+            else if (rarePercent < 1) {} //already in percent form
             else {  rarePercent = rarePercent / 100.0; } //user gave us a whole number version so convert to %
             
             temp = validParameter.valid(parameters, "minpercentsamples");
@@ -216,7 +218,8 @@ FilterSharedCommand::FilterSharedCommand(string option) {
             else { setSomething = true; }
             
 			util.mothurConvert(temp, minPercentSamples);
-            if (minPercentSamples < 1) {} //already in percent form
+            if (minPercentSamples == -1) { minPercentSamples = -0.01; }
+            else if (minPercentSamples < 1) {} //already in percent form
             else {  minPercentSamples = minPercentSamples / 100.0; } //user gave us a whole number version so convert to %
 			
 			temp = validParameter.valid(parameters, "makerare");		if (temp == "not found"){	temp = "T";		}
@@ -340,10 +343,11 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         
         vector<int> rareCounts; rareCounts.resize(Groups.size(), 0);
         int numGroups = Groups.size();
+        float defaultSetting = -0.01;
         
         //you want to remove a percentage of OTUs
         set<string> removeLabels;
-        if (rarePercent != -0.01) {
+        if (!util.isEqual(rarePercent, defaultSetting)) {
             vector<spearmanRank> otus;
             //rank otus by abundance
             for (int i = 0; i < sharedLookup->getNumBins(); i++) {
@@ -401,7 +405,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                 if (otuTotal < minTotal) { okay = false; }
             }
             
-            if (okay && (minPercent != -0.01)) {
+            if (okay && (!util.isEqual(minPercent, defaultSetting))) {
                 double otuTotal = 0;
                 double total = 0;
                 for (int j = 0; j < numGroups; j++) {
@@ -421,7 +425,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                 if (samples < minSamples) { okay = false; }
             }
             
-            if (okay && (minPercentSamples != -0.01)) {
+            if (okay && (!util.isEqual(minPercentSamples, defaultSetting))) {
                 double samples = 0;
                 double total = numGroups;
                 for (int j = 0; j < numGroups; j++) {
@@ -431,7 +435,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                 if (percent < minPercentSamples) { okay = false; }
             }
             
-            if (okay && (rarePercent != -0.01)) {
+            if (okay && (!util.isEqual(rarePercent, defaultSetting))) {
                 if (removeLabels.count(sharedLookup->getOTUName(i)) != 0) { //are we on the 'bad' list
                     okay = false;
                 }
@@ -447,6 +451,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                         rareCounts[j] += abunds[j];
                     }
                 }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: removing OTU " + sharedLookup->getOTUName(i) + "\n"); }
                 sharedLookup->removeOTU(i);
                 numRemoved++;
             }

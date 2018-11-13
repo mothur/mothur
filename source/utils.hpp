@@ -171,6 +171,9 @@ public:
     double max(vector<double> v) {  double max = 0; vector<double>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     long long max(vector<long long> v) {  long long max = 0; vector<long long>::iterator it = max_element(v.begin(), v.end()); max = *it;  return max; }
     bool isPositiveNumeric(string);
+    bool isEqual(float, float); //handles approximate equal
+    bool isEqual(double, double); //handles approximate equal
+    
     
     //type conversion
     bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
