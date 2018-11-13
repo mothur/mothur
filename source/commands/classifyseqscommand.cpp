@@ -641,7 +641,7 @@ void driverClassifier(classifyData* params){
                 
                 if (params->m->getControl_pressed()) { delete candidateSeq; break; }
                 
-                if (taxonomy == "unknown;") { params->m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); params->m->mothurOutEndLine(); }
+                if (taxonomy == "unknown;") { params->m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences.\n");  }
                 
                 //output confidence scores or not
                 if (params->probs)  { taxBuffer += candidateSeq->getName() + '\t' + taxonomy + '\n';    }
