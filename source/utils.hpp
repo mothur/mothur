@@ -47,6 +47,7 @@ public:
     void mothurRandomShuffle(SharedOrderVector&);
     void mothurRandomShuffle(vector<SharedRAbundVector*>&);
     void mothurRandomShuffle(Tree* t, vector<string> g);
+    void mothurRandomShuffle(vector<weightedSeq>&);
     
     //checks
     bool isTrue(string);

@@ -408,7 +408,7 @@ int PcrSeqsCommand::execute(){
                     util.renameFile(filenames["taxonomy"][0], outputFileName);
                     outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
                 }
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n"); 
             }
         }
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }

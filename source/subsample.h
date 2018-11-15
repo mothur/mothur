@@ -32,7 +32,8 @@ class SubSample {
         Tree* getSample(Tree*, CountTable*, CountTable*, int, vector<string>&); //creates new subsampled tree. Uses first counttable to fill new counttable with sabsampled seqs. Sets groups of seqs not in subsample to "doNotIncludeMe".
         int getSample(SAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
         CountTable getSample(CountTable&, int, vector<string>); //subsample a countTable bygroup(same number sampled from each group, returns subsampled countTable 
-        CountTable getSample(CountTable&, int, vector<string>, bool); //subsample a countTable. If you want to only sample from specific groups, pass in groups in the vector and set bool=true, otherwise set bool=false.   
+        CountTable getSample(CountTable&, int, vector<string>, bool); //subsample a countTable. If you want to only sample from specific groups, pass in groups in the vector and set bool=true, otherwise set bool=false.
+        set<long long> getWeightedSample(map<long long, long long>&, long long); //map of sequence names -> weight (could be abundance or some other measure), num to sample
     
     private:
     

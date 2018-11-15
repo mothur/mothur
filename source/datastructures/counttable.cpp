@@ -347,7 +347,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
             in >> name; util.gobble(in); in >> thisTotal; util.gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
 
-            if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct."); m->mothurOutEndLine();
+            if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct.\n"); 
             }
 
             //if group info, then read it

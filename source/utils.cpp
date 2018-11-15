@@ -115,6 +115,17 @@ void Utils::mothurRandomShuffle(vector<int>& randomize){
 
 }
 /***********************************************************************/
+void Utils::mothurRandomShuffle(vector<weightedSeq>& randomize){
+    try {
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurRandomShuffle");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 void Utils::mothurRandomShuffle(vector<long long>& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);

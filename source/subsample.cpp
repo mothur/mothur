@@ -107,6 +107,45 @@ map<string, string> SubSample::deconvolute(map<string, string> whole, vector<str
 	}
 }
 //**********************************************************************************************************************
+
+set<long long> SubSample::getWeightedSample(map<long long, long long> & nameMap, long long num) {
+    try {
+        set<long long> sampleNames;
+    
+        long long totalSeqs = nameMap.size();
+        if (totalSeqs < num) { m->mothurOut("[ERROR]: Requesting sample size larger than number of seqeunces, quitting.\n"); m->setControl_pressed(true); return sampleNames; }
+        
+        long long numSampled = 0;
+        vector<weightedSeq> weights;
+        long long total = 0;
+        for (map<long long, long long>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
+            total += it->second;
+            weightedSeq temp(it->first, it->second);
+            weights.push_back(temp);
+        }
+        util.mothurRandomShuffle(weights);
+        
+        while(numSampled != num) {
+            long long index = util.getRandomIndex(total); //random index including weights
+            
+            long long runningIndex = 0;
+            for (long long i = 0; i != weights.size(); i++) {
+                runningIndex += weights[i].weight;
+                if (runningIndex > index) { //we found the read to sample
+                    sampleNames.insert(weights[i].name); break;
+                }
+            }
+            numSampled = sampleNames.size();
+        }
+    
+        return sampleNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSample", "getWeightedSample");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int size, vector<string> currentLabels) {
     try {
         

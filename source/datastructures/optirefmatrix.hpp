@@ -11,6 +11,7 @@
 
 #include "optidata.hpp"
 #include "optimatrix.h"
+#include "subsample.h"
 
 /* Looking to easily access ref, fit and combined information to compare OTU assignments for the references, the sequences to fit, and the merged reference fit OTUs */
 
@@ -22,7 +23,7 @@ public:
     OptiRefMatrix() : OptiData(0.03) { };
 #endif
     
-    OptiRefMatrix(string, string, string, string, double, float); //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
+    OptiRefMatrix(string, string, string, string, double, float, string); //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs, refWeightMethod (options: abundance, none, connectivity)
     OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
     ~OptiRefMatrix(){ }
     
@@ -52,7 +53,9 @@ public:
 
 protected:
     
-    string method;
+    SubSample subsample; 
+    map<long long, long long> weights; //seqeunce index in matrix to weight in chosing as reference
+    string method, refWeightMethod;
     bool square;
     //a refSingleton or Fitsingleton may not be a true singleton (no valid dists in matrix), but may be a refSeq with no distances to other refs but distances to fitseqs. a fitsingleton may have dists to refs but no dists to other fitseqs.
     long long numFitDists, numRefDists, numRefSingletons, numFitSingletons, numBetweenDists, numSingletons, numFitSeqs;
@@ -68,6 +71,8 @@ protected:
     
     vector<bool> isRef; //same size as closeness, this tells us whether a seq with distances in the matrix is a reference
     vector<bool> isSingleRef; ////same size as singletons, this tells us whether a seq WITHOUT distances in the matrix (singleton) is a reference
+    
+    void calcCounts();
     
 };
 

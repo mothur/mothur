@@ -48,7 +48,7 @@ bool Summary::isCountFile(string inputfile){
             CountTable ct;
             vector<string> defaultHeaders = ct.getHardCodedHeaders();
             if (defaultHeaders.size() >= 2) {
-                if (pieces[0] != defaultHeaders[0]) { isCount = false; }
+                if ((pieces[0] != defaultHeaders[0]) && (pieces[0] != "OTU_Label")) { isCount = false; }
                 if (pieces[1] != defaultHeaders[1]) { isCount = false; }
             }else { isCount = false; }
         }else { isCount = false; }

@@ -563,7 +563,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 				subset.clear();
 			}
 				
-			if (groupsAlreadyAdded.size() != data.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+			if (groupsAlreadyAdded.size() != data.size()) {  m->mothurOut("[ERROR]: could not make proper groupings.\n"); }
 				
 			indicatorValues = getValues(groupings, groupingNames, indicatorGroups, randomGroupingsMap, m);
 			

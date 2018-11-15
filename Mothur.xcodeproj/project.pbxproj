@@ -16,6 +16,7 @@
 		4803D5B3211DDA5A001C63B5 /* testsharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B1211DDA5A001C63B5 /* testsharedrabundvectors.cpp */; };
 		4803D5B621231D9D001C63B5 /* testsharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */; };
 		4803D5B921271B47001C63B5 /* 454sop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B721271B47001C63B5 /* 454sop.cpp */; };
+		48098ED6219DE7A500031FA4 /* testsubsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48098ED4219DE7A500031FA4 /* testsubsample.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -874,6 +875,8 @@
 		4803D5B521231D9D001C63B5 /* testsharedrabundfloatvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundfloatvectors.hpp; path = TestMothur/testcontainers/testsharedrabundfloatvectors.hpp; sourceTree = SOURCE_ROOT; };
 		4803D5B721271B47001C63B5 /* 454sop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 454sop.cpp; path = TestMothur/IntegrationTests/454sop.cpp; sourceTree = SOURCE_ROOT; };
 		4803D5B821271B47001C63B5 /* 454sop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = 454sop.hpp; path = TestMothur/IntegrationTests/454sop.hpp; sourceTree = SOURCE_ROOT; };
+		48098ED4219DE7A500031FA4 /* testsubsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testsubsample.cpp; sourceTree = "<group>"; };
+		48098ED5219DE7A500031FA4 /* testsubsample.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testsubsample.hpp; sourceTree = "<group>"; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -1938,6 +1941,8 @@
 				480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */,
 				48910D4E1D58E26C00F60EDB /* testopticluster.h */,
 				48910D4D1D58E26C00F60EDB /* testopticluster.cpp */,
+				48098ED4219DE7A500031FA4 /* testsubsample.cpp */,
+				48098ED5219DE7A500031FA4 /* testsubsample.hpp */,
 				4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */,
 				4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */,
 				48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */,
@@ -3230,6 +3235,7 @@
 				481FB6311AC1B7EA0076CFF3 /* fullmatrix.cpp in Sources */,
 				481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */,
 				481FB58F1AC1B71B0076CFF3 /* newcommandtemplate.cpp in Sources */,
+				48098ED6219DE7A500031FA4 /* testsubsample.cpp in Sources */,
 				481FB6741AC1B88F0076CFF3 /* formatcolumn.cpp in Sources */,
 				481FB5571AC1B6550076CFF3 /* shannoneven.cpp in Sources */,
 				481FB5D11AC1B75C0076CFF3 /* lefsecommand.cpp in Sources */,
@@ -3849,7 +3855,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.41.0\\\"\"",
@@ -3919,7 +3925,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.41.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
