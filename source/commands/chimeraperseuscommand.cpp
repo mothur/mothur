@@ -529,12 +529,15 @@ int ChimeraPerseusCommand::execute(){
                     }else {
                         set<string> doNotRemove;
                         CountTable c; c.readTable(newCountFile, true, true);
+                        c.eliminateZeroSeqs();
                         vector<string> namesInTable = c.getNamesOfSeqs();
-                        for (int i = 0; i < namesInTable.size(); i++) {
-                            int temp = c.getNumSeqs(namesInTable[i]);
-                            if (temp == 0) {  c.remove(namesInTable[i]);  }
-                            else { doNotRemove.insert((namesInTable[i])); }
-                        }
+                        for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
+                        /*vector<string> namesInTable = c.getNamesOfSeqs();
+                         for (int i = 0; i < namesInTable.size(); i++) {
+                         int temp = c.getNumSeqs(namesInTable[i]);
+                         if (temp == 0) {  c.remove(namesInTable[i]);  }
+                         else { doNotRemove.insert((namesInTable[i])); }
+                         }*/
                         //remove names we want to keep from accnos file.
                         set<string> accnosNames = util.readAccnos(accnosFileName);
                         ofstream out2;

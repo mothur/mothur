@@ -485,7 +485,7 @@ int RemoveRareCommand::processList(){
 					newList.push_back(saveBinNames);
                     newLabels.push_back(binLabels[i]);
 					if (groupfile != "") {  for(int k = 0; k < newGroupFile.size(); k++) { outGroup << newGroupFile[k] << endl; }  }
-                    else if (countfile != "") { for(int k = 0; k < newGroupFile.size(); k++) {  ct.remove(newGroupFile[k]); } }  
+                    else if (countfile != "") { for(int k = 0; k < newGroupFile.size(); k++) {  ct.remove(newGroupFile[k]); } }
 				}else {  if (countfile != "") {  for(int k = 0; k < names.size(); k++) {  ct.remove(names[k]); } }  }
 			}
 			
