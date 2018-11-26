@@ -1305,89 +1305,94 @@ long long driverGroups(preClusterData* params){
 /**************************************************************************************************/
 
 int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string newfasta){
-    try {
-        ifstream inNames;
-        util.openInputFile(newname, inNames);
-        
-        if(pc_method != "deblur"){
-            string group, first, second;
-            
-            while (!inNames.eof()) {
-                
-                if (m->getControl_pressed()) { break; }
-                inNames >> group; util.gobble(inNames);
-                inNames >> first; util.gobble(inNames);
-                inNames >> second; util.gobble(inNames);
-                
-                vector<string> names;
-                util.splitAtComma(second, names);
-                
-                int total = ct.getGroupCount(first, group);
-                for (int i = 1; i < names.size(); i++) {
-                    total += ct.getGroupCount(names[i], group);
-                    ct.setAbund(names[i], group, 0);
-                }
-                ct.setAbund(first, group, total);
-            }
-            inNames.close();
-            
-        } else { //for deblur
-            
-            string group, unique_sequence;
-            int count;
-            
-            ct.zeroOutTable();
-            
-            while (!inNames.eof()) {
-                
-                if (m->getControl_pressed()) { break; }
-                
-                inNames >> group; util.gobble(inNames);
-                inNames >> unique_sequence; util.gobble(inNames);
-                inNames >> count; util.gobble(inNames);
-                
-                ct.setAbund(unique_sequence, group, count);
-            }
+	try {
+		ifstream inNames;
+    util.openInputFile(newname, inNames);
+
+		if(pc_method != "deblur"){
+	    string group, first, second;
+	    set<string> uniqueNames;
+
+	    while (!inNames.eof()) {
+
+	      if (m->getControl_pressed()) { break; }
+
+	      inNames >> group; util.gobble(inNames);
+	      inNames >> first; util.gobble(inNames);
+	      inNames >> second; util.gobble(inNames);
+
+	      vector<string> names;
+	      util.splitAtComma(second, names);
+
+	      uniqueNames.insert(first);
+
+	      int total = ct.getGroupCount(first, group);
+	      for (int i = 1; i < names.size(); i++) {
+	          total += ct.getGroupCount(names[i], group);
+	          ct.setAbund(names[i], group, 0);
+	      }
+	      ct.setAbund(first, group, total);
+	    }
+	    inNames.close();
+
+		} else { //for deblur
+
+	    string group, unique_sequence;
+			int count;
+
+			ct.zeroOutTable();
+
+	    while (!inNames.eof()) {
+
+	      if (m->getControl_pressed()) { break; }
+
+	      inNames >> group; util.gobble(inNames);
+	      inNames >> unique_sequence; util.gobble(inNames);
+	      inNames >> count; util.gobble(inNames);
+
+				ct.setAbund(unique_sequence, group, count);
+
+			}
+		}
+
+    ct.eliminateZeroSeqs();
+    ct.printTable(newcount);
+    util.mothurRemove(newname);
+
+    if (bygroup) { //if by group, must remove the duplicate seqs that are named the same
+      ifstream in;
+      util.openInputFile(newfasta, in);
+
+      ofstream out;
+      util.openOutputFile(newfasta+"temp", out);
+
+      int count = 0;
+      set<string> already;
+      while(!in.eof()) {
+        if (m->getControl_pressed()) { break; }
+
+        Sequence seq(in); util.gobble(in);
+
+        if (seq.getName() != "") {
+          count++;
+          if (already.count(seq.getName()) == 0) {
+            seq.printSequence(out);
+            already.insert(seq.getName());
+          }
         }
-        
-        ct.eliminateZeroSeqs();
-        ct.printTable(newcount);
-        util.mothurRemove(newname);
-        
-        if (bygroup) { //if by group, must remove the duplicate seqs that are named the same
-            ifstream in;
-            util.openInputFile(newfasta, in);
-            
-            ofstream out;
-            util.openOutputFile(newfasta+"temp", out);
-            
-            int count = 0;
-            set<string> already; 
-            while(!in.eof()) {
-                if (m->getControl_pressed()) { break; }
-                
-                Sequence seq(in); util.gobble(in);
-                
-                if (seq.getName() != "") {
-                    count++;
-                    if (already.count(seq.getName()) == 0) {
-                        seq.printSequence(out);
-                        already.insert(seq.getName());
-                    }
-                }
-            }
-            in.close();
-            out.close();
-            util.mothurRemove(newfasta);
-            util.renameFile(newfasta+"temp", newfasta);
-        }
-        
-        return 0;
+      }
+      in.close();
+      out.close();
+      util.mothurRemove(newfasta);
+      util.renameFile(newfasta+"temp", newfasta);
     }
-    catch(exception& e) {
-        m->errorOut(e, "PreClusterCommand", "mergeGroupCounts");
-        exit(1);
-    }
+
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PreClusterCommand", "mergeGroupCounts");
+		exit(1);
+	}
 }
 
 /**************************************************************************************************/
