@@ -347,7 +347,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
             in >> name; util.gobble(in); in >> thisTotal; util.gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
 
-            if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct."); m->mothurOutEndLine();
+            if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct.\n"); 
             }
 
             //if group info, then read it
@@ -436,9 +436,7 @@ int CountTable::printTable(string file) {
     try {
         ofstream out;
         util.openOutputFile(file, out);
-		out << "Representative_Sequence\ttotal";
-        if (hasGroups) {  for (int i = 0; i < groups.size(); i++) { out << '\t' << groups[i]; }  }
-        out << endl;
+        printHeaders(out);
 
         map<int, string> reverse; //use this to preserve order
         for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
@@ -446,7 +444,7 @@ int CountTable::printTable(string file) {
         for (int i = 0; i < totals.size(); i++) {
             map<int, string>::iterator itR = reverse.find(i);
 
-            if (itR != reverse.end()) { //will equal end if seqs were removed because remove just removes from indexNameMap
+            if (itR != reverse.end()) {
                 out << itR->second << '\t' << totals[i];
                 if (hasGroups) {
                     for (int j = 0; j < groups.size(); j++) {
@@ -478,8 +476,8 @@ vector<string> CountTable::getHardCodedHeaders() {
 /************************************************************/
 int CountTable::printHeaders(ofstream& out) {
     try {
-		out << "Representative_Sequence\ttotal";
-        for (int i = 0; i < groups.size(); i++) { out << '\t' << groups[i]; }
+        out << "Representative_Sequence\ttotal";
+        if (hasGroups) {  for (int i = 0; i < groups.size(); i++) { out << '\t' << groups[i]; }  }
         out << endl;
         return 0;
     }
@@ -903,36 +901,74 @@ int CountTable::remove(string seqName) {
     try {
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it != indexNameMap.end()) {
+            int seqIndexIntoCounts = it->second;
             uniques--;
             if (hasGroups){ //remove this sequences counts from group totals
-                for (int i = 0; i < totalGroups.size(); i++) {  totalGroups[i] -= counts[it->second][i];  counts[it->second][i] = 0; }
-                counts[it->second].clear();
-                counts.erase(counts.begin()+it->second);
+                for (int i = 0; i < totalGroups.size(); i++) {  totalGroups[i] -= counts[seqIndexIntoCounts][i];   }
             }
-            int thisTotal = totals[it->second];
-            totals.erase(totals.begin()+it->second);
+            
+            //save for later in case removing a group means we need to remove a seq.
+            map<int, string> reverse;
+            for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 !=indexNameMap.end(); it2++) { reverse[it2->second] = it2->first;  }
+            
+            int thisIndex = 0; int newIndex = 0;
+            map<string, int> newIndexNameMap;
+            for (int i = 0; i < counts.size(); i++) {
+                if (i == seqIndexIntoCounts) { }//you are the seq we are trying to remove
+                else {   newIndexNameMap[reverse[i]] = newIndex; newIndex++;  }
+            }
+            indexNameMap = newIndexNameMap;
+
+            counts.erase(counts.begin()+seqIndexIntoCounts);
+            int thisTotal = totals[seqIndexIntoCounts];
+            totals.erase(totals.begin()+seqIndexIntoCounts);
             total -= thisTotal;
             
-            int thisIndex = 0;
-            map<string, int> newIndexNameMap;
-            for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) { if (it->first != seqName) { newIndexNameMap[it->first] = thisIndex; thisIndex++; } }
-            indexNameMap = newIndexNameMap;
         }else {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
                 if (util.inUsersGroups(seqName, groups)) {
-                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n"); 
                 }
             }
-            m->mothurOut("[ERROR]: Your count table contains does not include " + seqName + ", cannot remove."); m->mothurOutEndLine(); m->setControl_pressed(true);
+            m->mothurOut("[ERROR]: Your count table contains does not include " + seqName + ", cannot remove.\n");  m->setControl_pressed(true);
         }
 
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "CountTable", "push_back");
+		m->errorOut(e, "CountTable", "remove");
 		exit(1);
 	}
+}
+/************************************************************/
+//remove sequences with zeroed out counts
+void CountTable::eliminateZeroSeqs() {
+    try {
+        //save for later in case removing a group means we need to remove a seq.
+        map<int, string> reverse;
+        for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 !=indexNameMap.end(); it2++) { reverse[it2->second] = it2->first;  }
+        
+        int thisIndex = 0;
+        map<string, int> newIndexNameMap;
+        for (int i = 0; i < totals.size(); i++) {
+            if (totals[i] == 0) { //remove
+                counts.erase(counts.begin()+i);
+                totals.erase(totals.begin()+i);
+                --i;
+                uniques--;
+            }else {
+                string seqName = reverse[thisIndex];
+                newIndexNameMap[seqName] = i;
+            }
+            thisIndex++;
+        }
+        indexNameMap = newIndexNameMap;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "eliminateZeroSeqs");
+        exit(1);
+    }
 }
 /************************************************************/
 //add seqeunce without group info

@@ -1359,13 +1359,7 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
 			}
 		}
 
-    vector<string> namesOfSeqs = ct.getNamesOfSeqs();
-    for (int i = 0; i < namesOfSeqs.size(); i++) {
-        if (ct.getNumSeqs(namesOfSeqs[i]) == 0) {
-            ct.remove(namesOfSeqs[i]);
-        }
-    }
-
+    ct.eliminateZeroSeqs();
     ct.printTable(newcount);
     util.mothurRemove(newname);
 
