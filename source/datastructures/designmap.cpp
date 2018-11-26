@@ -65,7 +65,7 @@ int DesignMap::read(string file) {
         int count = 0;
         
         //file without headers, fix it
-        if (temp != "group") {
+        if ((temp != "group") && (temp != "Group")){
             group = temp;
             util.checkGroupName(group);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
