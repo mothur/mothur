@@ -463,6 +463,34 @@ int CountTable::printTable(string file) {
 	}
 }
 /************************************************************/
+int CountTable::printSortedTable(string file) {
+    try {
+        ofstream out;
+        util.openOutputFile(file, out);
+        printHeaders(out);
+        
+        for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) {
+            string seqName = it->first;
+            int index = it->second;
+            out << seqName << '\t' << totals[index];
+            if (hasGroups) {
+                for (int j = 0; j < groups.size(); j++) {
+                    out << '\t' << counts[index][j];
+                }
+            }
+            out << endl;
+        }
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "printSortedTable");
+        exit(1);
+    }
+}
+
+/************************************************************/
 vector<string> CountTable::getHardCodedHeaders() {
     try {
         vector<string> headers; headers.push_back("Representative_Sequence"); headers.push_back("total");

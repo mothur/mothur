@@ -28,13 +28,14 @@ typedef map<int, float> SeqMap;
 
 struct repStruct {
 		string name;
+        string sequence;
 		string bin;
         int simpleBin;
 		int size;
 		string group;
 		
 		repStruct(){}
-		repStruct(string n, string b, int sb, int s, string g) : name(n), bin(b), size(s), group(g), simpleBin(sb) { }
+		repStruct(string n, string seq, string b, int sb, int s, string g) : name(n), bin(b), size(s), group(g), simpleBin(sb), sequence(seq) { }
 		~repStruct() {}
 };
 
@@ -68,7 +69,7 @@ private:
 	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, countfile, columnfile, distFile, format, outputDir, groups, method;
 	ofstream out;
 	ifstream in, inNames, inRow;
-	bool abort, allLines, groupError, weighted, hasGroups;
+	bool abort, allLines, groupError, weighted, hasGroups, rename;
 	set<string> labels; //holds labels to be used
 	//map<string, string> nameFileMap;
 	vector<string> outputNames, Groups;
@@ -76,12 +77,10 @@ private:
 	float cutoff;
 	int precision;
     
-	
-
 	void readNamesFile(FastaMap*&);
 	//void readNamesFile(bool);
 	int process(ListVector*);
-	string findRep(vector<string>, string); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
+	string findRep(vector<string>, map<string, long long>&, string); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
     string findRepAbund(vector<string>, string);
 	int processNames(string, string);
 	int processFastaNames(string, string, FastaMap*&);

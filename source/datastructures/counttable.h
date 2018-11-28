@@ -57,7 +57,8 @@ class CountTable {
         int zeroOutTable(); //turn all counts to zeros
         int clearTable();
 
-        int printTable(string);
+        int printTable(string); //preserves order in original
+        int printSortedTable(string); //sorted by seqName
         int printHeaders(ofstream&);
         vector<string> getHardCodedHeaders(); //Representative_Sequence, total
         int printSeq(ofstream&, string);
