@@ -797,13 +797,60 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
         
         double bestStat = 0; int bestResult = 0;
         
-        for (int i = 0; i < listFiles.size(); i++) {
+        if (method == "open") {
             
-            string thislistFileName = listFiles[i];
             string thisDistFile = distFName;
             string thisDupsFile = dupsfile;
+            OptiMatrix matrix(thisDistFile, thisDupsFile, dupsFormat, "column", cutoff, false);
             
-            if (method != "open") {
+            for (int i = 0; i < listFiles.size(); i++) {
+                string thislistFileName = listFiles[i];
+                
+                InputData input(thislistFileName, "list", nullVector);
+                ListVector* list = input.getListVector();
+                
+                string label = list->getLabel();
+                int numBins = list->getNumBins();
+                
+                SensSpecCalc senscalc(matrix, list);
+                long long truePositives, trueNegatives, falsePositives, falseNegatives;
+                senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
+                
+                long long tp =  truePositives;
+                long long fp =  falsePositives;
+                long long tn =  trueNegatives;
+                long long fn =  falseNegatives;
+                
+                Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
+                Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
+                PPV ppv;            double positivePredictiveValue = ppv.getValue(tp, tn, fp, fn);
+                NPV npv;            double negativePredictiveValue = npv.getValue(tp, tn, fp, fn);
+                FDR fdr;            double falseDiscoveryRate = fdr.getValue(tp, tn, fp, fn);
+                Accuracy acc;       double accuracy = acc.getValue(tp, tn, fp, fn);
+                MCC mcc;            double matthewsCorrCoef = mcc.getValue(tp, tn, fp, fn);
+                F1Score f1;         double f1Score = f1.getValue(tp, tn, fp, fn);
+                
+                sensSpecFile << i+1 << '\t' << label << '\t' << cutoff << '\t' << numBins << '\t';
+                sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
+                sensSpecFile << setprecision(4);
+                sensSpecFile << sensitivity << '\t' << specificity << '\t' << positivePredictiveValue << '\t' << negativePredictiveValue << '\t';
+                sensSpecFile << falseDiscoveryRate << '\t' << accuracy << '\t' << matthewsCorrCoef << '\t' << f1Score << endl;
+                
+                m->mothurOut(toString(i+1) + "\t" + label + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
+                m->mothurOut(toString(sensitivity) + "\t" + toString(specificity) + "\t" + toString(positivePredictiveValue) + "\t" + toString(negativePredictiveValue) + "\t");
+                m->mothurOut(toString(falseDiscoveryRate) + "\t" + toString(accuracy) + "\t" + toString(matthewsCorrCoef) + "\t" + toString(f1Score) + "\n\n");
+                
+                double userStat = userMetric->getValue(tp, tn, fp, fn);
+                if (userStat > bestStat) { bestStat = userStat; bestResult = i; }
+
+            }
+        }else {
+            for (int i = 0; i < listFiles.size(); i++) {
+                
+                string thislistFileName = listFiles[i];
+                string thisDistFile = distFName;
+                string thisDupsFile = dupsfile;
+                
                 //extract only distances related to the list file
                 string inputString = "list=" + thislistFileName;
                 m->mothurOut("/******************************************/\n");
@@ -853,45 +900,45 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
                 
                 delete getSeqsCommand;
                 current->setMothurCalling(false);
+                
+                InputData input(thislistFileName, "list", nullVector);
+                ListVector* list = input.getListVector();
+                
+                string label = list->getLabel();
+                int numBins = list->getNumBins();
+                
+                OptiMatrix matrix(thisDistFile, thisDupsFile, dupsFormat, "column", cutoff, false);
+                SensSpecCalc senscalc(matrix, list);
+                long long truePositives, trueNegatives, falsePositives, falseNegatives;
+                senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
+                
+                long long tp =  truePositives;
+                long long fp =  falsePositives;
+                long long tn =  trueNegatives;
+                long long fn =  falseNegatives;
+                
+                Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
+                Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
+                PPV ppv;            double positivePredictiveValue = ppv.getValue(tp, tn, fp, fn);
+                NPV npv;            double negativePredictiveValue = npv.getValue(tp, tn, fp, fn);
+                FDR fdr;            double falseDiscoveryRate = fdr.getValue(tp, tn, fp, fn);
+                Accuracy acc;       double accuracy = acc.getValue(tp, tn, fp, fn);
+                MCC mcc;            double matthewsCorrCoef = mcc.getValue(tp, tn, fp, fn);
+                F1Score f1;         double f1Score = f1.getValue(tp, tn, fp, fn);
+                
+                sensSpecFile << i+1 << '\t' << label << '\t' << cutoff << '\t' << numBins << '\t';
+                sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
+                sensSpecFile << setprecision(4);
+                sensSpecFile << sensitivity << '\t' << specificity << '\t' << positivePredictiveValue << '\t' << negativePredictiveValue << '\t';
+                sensSpecFile << falseDiscoveryRate << '\t' << accuracy << '\t' << matthewsCorrCoef << '\t' << f1Score << endl;
+                
+                m->mothurOut(toString(i+1) + "\t" + label + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
+                m->mothurOut(toString(sensitivity) + "\t" + toString(specificity) + "\t" + toString(positivePredictiveValue) + "\t" + toString(negativePredictiveValue) + "\t");
+                m->mothurOut(toString(falseDiscoveryRate) + "\t" + toString(accuracy) + "\t" + toString(matthewsCorrCoef) + "\t" + toString(f1Score) + "\n\n");
+                
+                double userStat = userMetric->getValue(tp, tn, fp, fn);
+                if (userStat > bestStat) { bestStat = userStat; bestResult = i; }
             }
-            
-            InputData input(thislistFileName, "list", nullVector);
-            ListVector* list = input.getListVector();
-
-            string label = list->getLabel();
-            int numBins = list->getNumBins();
-        
-            OptiMatrix matrix(thisDistFile, thisDupsFile, dupsFormat, "column", cutoff, false);
-            SensSpecCalc senscalc(matrix, list);
-            long long truePositives, trueNegatives, falsePositives, falseNegatives;
-            senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
-            
-            long long tp =  truePositives;
-            long long fp =  falsePositives;
-            long long tn =  trueNegatives;
-            long long fn =  falseNegatives;
-            
-            Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
-            Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
-            PPV ppv;            double positivePredictiveValue = ppv.getValue(tp, tn, fp, fn);
-            NPV npv;            double negativePredictiveValue = npv.getValue(tp, tn, fp, fn);
-            FDR fdr;            double falseDiscoveryRate = fdr.getValue(tp, tn, fp, fn);
-            Accuracy acc;       double accuracy = acc.getValue(tp, tn, fp, fn);
-            MCC mcc;            double matthewsCorrCoef = mcc.getValue(tp, tn, fp, fn);
-            F1Score f1;         double f1Score = f1.getValue(tp, tn, fp, fn);
-            
-            sensSpecFile << i+1 << '\t' << label << '\t' << cutoff << '\t' << numBins << '\t';
-            sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
-            sensSpecFile << setprecision(4);
-            sensSpecFile << sensitivity << '\t' << specificity << '\t' << positivePredictiveValue << '\t' << negativePredictiveValue << '\t';
-            sensSpecFile << falseDiscoveryRate << '\t' << accuracy << '\t' << matthewsCorrCoef << '\t' << f1Score << endl;
-            
-            m->mothurOut(toString(i+1) + "\t" + label + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
-            m->mothurOut(toString(sensitivity) + "\t" + toString(specificity) + "\t" + toString(positivePredictiveValue) + "\t" + toString(negativePredictiveValue) + "\t");
-            m->mothurOut(toString(falseDiscoveryRate) + "\t" + toString(accuracy) + "\t" + toString(matthewsCorrCoef) + "\t" + toString(f1Score) + "\n\n");
-            
-            double userStat = userMetric->getValue(tp, tn, fp, fn);
-            if (userStat > bestStat) { bestStat = userStat; bestResult = i; }
         }
         
         sensSpecFile.close();
