@@ -1,5 +1,7 @@
 #For Unix / Linux / Centos
 
+Compiling with Boost:
+
 1. Boost requires some things to installed on your machine already.  Most come standard on many flavors on Unix, but you may need to install the devel packages. Install libz, bzip2 and python, if its not on your machine, including zlib-devel, bzip2-devel. 
 	This can be easily done with yum or apt get.
 
@@ -12,4 +14,8 @@
 
 4. Run make. If you get a linking errors, it is likely because the zlib files were not found correctly. You may need to add gzip.cpp and zlib.cpp to the source folder of mothur.  They are located in the boost_versionNumber/libs/iostreams/src/gzip.cpp.
 
+
+Compiling with HDF5:
+
+1. Download HDF5, https://www.hdfgroup.org/downloads/hdf5/
 

@@ -28,7 +28,7 @@ TEST(Test_Container_OptiRefMatrix, readColumnDenovo) {
     m->setRandomSeed(123456); //stabilize radomization
     
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50, "none");
     
     //EXPECT_EQ(160,(matrix.print(cout)));
     EXPECT_EQ(80,(matrix.getNumDists()));
@@ -52,7 +52,7 @@ TEST(Test_Container_OptiRefMatrix, readPhylipDenovo) {
     m->setRandomSeed(123456); //stabilize radomization
     
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.phylipFile, "phylip", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.phylipFile, "phylip", testOMatrix.filenames[1], "name", 0.03, 50, "none");
     
     //EXPECT_EQ(160,(matrix.print(cout)));
     EXPECT_EQ(80,(matrix.getNumDists()));
@@ -104,7 +104,7 @@ TEST(Test_Container_OptiRefMatrix, getNumCLose) {
     m->setRandomSeed(123456); //stabilize radomization
     
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50, "none");
     
     EXPECT_EQ(1,(matrix.getNumClose(0)));
     EXPECT_EQ(2,(matrix.getNumClose(5)));
@@ -130,7 +130,7 @@ TEST(Test_Container_OptiRefMatrix, isCloseFit) {
     m->setRandomSeed(123456); //stabilize radomization
     
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50, "none");
     
     bool isFit;
     vector<long long> fitSeqs = matrix.getFitSeqs();
@@ -173,7 +173,7 @@ TEST(Test_Container_OptiRefMatrix, getCloseFitSeqs) {
     m->setRandomSeed(123456); //stabilize radomization
  
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50, "none");
  
     //"024689101213141721232426293036394243464950525457";
  
@@ -223,7 +223,7 @@ TEST(Test_Container_OptiRefMatrix, extractRefMatrix) {
     m->setRandomSeed(123456); //stabilize radomization
  
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50, "none");
     OptiData* refMatrix = matrix.extractRefMatrix();
     
     //EXPECT_EQ(54,(refMatrix->print(cout)));
@@ -235,7 +235,7 @@ TEST(Test_Container_OptiRefMatrix, extractMatrixSubset) {
     m->setRandomSeed(123456); //stabilize radomization
     
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50, "none");
     vector<long long> temp = matrix.getFitSeqs();
     set<long long> fitSeqs;
     for (long long i = 0; i < temp.size(); i++) { fitSeqs.insert(temp[i]); }
@@ -251,7 +251,7 @@ TEST(Test_Container_OptiRefMatrix, getFitListSingle) {
     m->setRandomSeed(123456); //stabilize radomization
     
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50, "none");
     
     //maps names to index in closeness matrix
     ListVector* fitListSingle = matrix.getFitListSingle();
@@ -278,7 +278,7 @@ TEST(Test_Container_OptiRefMatrix, randomizeRefs) {
     m->setRandomSeed(123456); //stabilize radomization
     
     TestOptiRefMatrix testOMatrix;
-    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50);
+    OptiRefMatrix matrix(testOMatrix.columnFile, "column", testOMatrix.filenames[1], "name", 0.03, 50, "none");
 
     matrix.randomizeRefs();
     

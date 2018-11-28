@@ -114,27 +114,48 @@ set<long long> SubSample::getWeightedSample(map<long long, long long> & nameMap,
     
         long long totalSeqs = nameMap.size();
         if (totalSeqs < num) { m->mothurOut("[ERROR]: Requesting sample size larger than number of seqeunces, quitting.\n"); m->setControl_pressed(true); return sampleNames; }
+        else if (totalSeqs == num) {
+            for (map<long long, long long>::iterator it = nameMap.begin(); it != nameMap.end(); it++) { sampleNames.insert(it->first);     }
+            return sampleNames;
+        }
         
         long long numSampled = 0;
-        vector<weightedSeq> weights;
+        map<long long, set<long long> > weights;//weight -> names of seqs with that weight
+        map<long long, set<long long> >::iterator itWeight;
         long long total = 0;
         for (map<long long, long long>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
             total += it->second;
-            weightedSeq temp(it->first, it->second);
-            weights.push_back(temp);
+            itWeight = weights.find(it->second);
+            if (itWeight == weights.end()) { //this is a weight we haven't seen before
+                set<long long> temp;
+                temp.insert(it->first);
+                weights[it->second] = temp;
+            }else {
+                weights[it->second].insert(it->first); //dup weight, combine to save memory
+            }
         }
-        util.mothurRandomShuffle(weights);
+        
+        //find running total
+        long long runningTotal = 0;
+        map<long long, set<long long> > cumulative;//weight + sum so far -> names of seqs with that weight
+        for (itWeight = weights.begin(); itWeight != weights.end(); itWeight++) {
+            int count = itWeight->second.size(); //number of seqs with this weight
+            runningTotal += itWeight->first * count;
+            cumulative[runningTotal] = itWeight->second;
+        }
+        weights.clear();
         
         while(numSampled != num) {
             long long index = util.getRandomIndex(total); //random index including weights
             
-            long long runningIndex = 0;
-            for (long long i = 0; i != weights.size(); i++) {
-                runningIndex += weights[i].weight;
-                if (runningIndex > index) { //we found the read to sample
-                    sampleNames.insert(weights[i].name); break;
-                }
-            }
+            map<long long, set<long long> >::iterator itWeight = cumulative.lower_bound(index);
+            
+            sampleNames.insert(*itWeight->second.begin()); //save name in sample names
+            
+            itWeight->second.erase(itWeight->second.begin()); //remove seq since we sampled it
+            
+            if (itWeight->second.size() == 0) { cumulative.erase(itWeight); total = cumulative.rbegin()->first;  } //remove this weight if all seqs are sampled. Reset bound if needed.
+            
             numSampled = sampleNames.size();
         }
     

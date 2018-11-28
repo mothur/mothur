@@ -18,25 +18,27 @@ TestSubSample::~TestSubSample() { }
 TEST(Test_SubSample, getWeightedSample) {
     TestSubSample test;
     
-    map<string, long long> weights;
-    weights["seq1"] = 1;
-    weights["seq2"] = 5;
-    weights["seq3"] = 10;
-    weights["seq4"] = 15;
-    weights["seq5"] = 20;
-    weights["seq6"] = 25;
-    weights["seq7"] = 30;
-    weights["seq8"] = 35;
-    weights["seq9"] = 40;
-    weights["seq10"] = 45; //226 total reads represented
+    map<long long, long long> weights;
+    weights[1] = 1;
+    weights[2] = 5;
+    weights[3] = 10;
+    weights[4] = 15;
+    weights[5] = 20;
+    weights[6] = 25;
+    weights[7] = 30;
+    weights[8] = 35;
+    weights[9] = 40;
+    weights[10] = 45; //226 total reads represented
     
-    set<string> names = test.getWeightedSample(weights, 10); //select all the reads
+    set<long long> names = test.getWeightedSample(weights, 10); //select all the reads
     
-    EXPECT_EQ("seq1",*names.begin());
+    EXPECT_EQ(1,*names.begin());
     
-    names = test.getWeightedSample(weights, 1); //select 1 the read
+    names = test.getWeightedSample(weights, 5); //select 1 the read
     
-    //EXPECT_EQ("seq10",*names.begin());
+    set<long long>::iterator it = names.find(10);
+    
+    EXPECT_EQ((it != names.end()),true);
 }
 
 /**************************************************************************************************/
