@@ -482,8 +482,9 @@ int ClusterFitCommand::execute(){
             }else {
                 //create combined files needed for sensspec
                 string newDistFile, newDupsFile;
-                newDistFile = distfile + ".temp";
-                newDupsFile = dupsFile + ".temp";
+                int randNum = util.getRandomNumber();
+                newDistFile = distfile + "." + toString(randNum) + ".temp";
+                newDupsFile = dupsFile + "." + toString(randNum) + ".temp";
                 util.appendFiles(distfile, newDistFile);
                 util.appendFiles(refdistfile, newDistFile);
                 util.appendFiles(comboDistFile, newDistFile);
