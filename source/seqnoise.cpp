@@ -820,7 +820,7 @@ int seqNoise::writeOutput(string fastaFileName, string namesFileName, string uMa
 			
 			if(finalTau[i] > 0){
 				
-				if(maxSequenceIndex[i] != centroids[i] && distances[maxSequenceIndex[i]*numSeqs + centroids[i]] == 0){
+				if((maxSequenceIndex[i] != centroids[i]) && util.isEqual(distances[maxSequenceIndex[i]*numSeqs + centroids[i]], 0)){
 					centroids[i] = maxSequenceIndex[i];
 				}
 				

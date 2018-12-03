@@ -366,7 +366,7 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             //handle ties
             if (keepties) { //adjust indexFirstNotRare if needed
                 if (indexFirstNotRare != 0) { //not out of bounds
-                    if (otus[indexFirstNotRare].score == otus[indexFirstNotRare-1].score) { //you have a tie
+                    if (util.isEqual(otus[indexFirstNotRare].score, otus[indexFirstNotRare-1].score)) { //you have a tie
                         bool tie = true;
                         for (int i = indexFirstNotRare-1; i >=0; i--) {
                             if (otus[indexFirstNotRare].score != otus[i].score) { //found value below tie

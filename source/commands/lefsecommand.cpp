@@ -611,7 +611,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                         double pValue = 0.0;
                         double H = 0.0;
                         bool tres = true; //don't think this is set in the python source.  Not sure how that is handled, but setting it here.
-                        if ((x[0] == y[0]) && (x.size() == 1) && (y.size() == 1)) { tres = false; first = false; }
+                        if (util.isEqual(x[0],y[0]) && (x.size() == 1) && (y.size() == 1)) { tres = false; first = false; }
                         else if (!medComp) {
                             H = linear.calcWilcoxon(x, y, pValue);
                             if (pValue < (alphaMtc*2.0)) { tres = true; }
@@ -646,7 +646,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                             first = false;
                             if ((!curv) && (medComp || tres)) {
                                 dirCmp = 2; if (sx<sy) { dirCmp = 1; } //dir_cmp = sx < sy
-                                if (sx == sy) { br = true; }
+                                if (util.isEqual(sx,sy)) { br = true; }
                             }else if (curv) {
                                 dirCmp = 0;
                                 if (medComp || tres) {
@@ -655,7 +655,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                                 }
                             }else { br = true; }
                         }else if (!curv && medComp) {
-                            if (sxSy != dirCmp || sx == sy) { br = true; }
+                            if (sxSy != dirCmp || util.isEqual(sx,sy)) { br = true; }
                         }else if (curv) {
                             if (tres && dirCmp == 0) { curv_sign++; }
                             dirCmp = 2; if (sx<sy) { dirCmp = 1; } //dir_cmp = sx < sy
@@ -663,7 +663,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                                 br = true;
                                 curv_sign = -1;
                             }
-                        }else if (!tres || sxSy != dirCmp || sx == sy) { br = true; } //elif not tres or (sx < sy) != dir_cmp or sx == sy: br = True
+                        }else if (!tres || sxSy != dirCmp || util.isEqual(sx,sy)) { br = true; } //elif not tres or (sx < sy) != dir_cmp or sx == sy: br = True
                         if (br) { break; }
                         ok++;
                     }//for class2 subclasses

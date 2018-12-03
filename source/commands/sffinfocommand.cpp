@@ -1483,9 +1483,7 @@ bool SffInfoCommand::sanityCheck(Header& header, seqRead& read) {
             okay = false; message += "Clip Qual Right = " + toString(header.clipQualRight) + ", but we only read " + toString(read.qualScores.size()) + " quality scores.\n";
         }
         
-        if (okay == false) {
-            m->mothurOut(message); m->mothurOutEndLine();
-        }
+        if (!okay) { m->mothurOut(message); m->mothurOutEndLine(); }
         
 		return okay;
 	}

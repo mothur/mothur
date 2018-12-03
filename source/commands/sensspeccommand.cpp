@@ -294,7 +294,7 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
 	try {
         string label = list->getLabel();
         
-        if(getCutoff == 1){
+        if(getCutoff){
             if(label != "unique"){
                 origCutoff = label;
                 convert(label, cutoff);
@@ -331,7 +331,7 @@ int SensSpecCommand::processListFile(){
         
         bool getCutoff = 0;
         string origCutoff = "";
-        if(cutoff == -1.00)	{	getCutoff = 1;                                              }
+        if(util.isEqual(cutoff, -1))	{	getCutoff = 1;                                              }
         else 				{	origCutoff = toString(util.ceilDist(cutoff, precision));	}
         
 		InputData input(listFile, "list", nullVector);

@@ -113,8 +113,8 @@ void RAbundFloatVector::set(int binNumber, float newBinSize){
         float oldBinSize = data[binNumber];
         data[binNumber] = newBinSize;
         
-        if(oldBinSize == 0)			{	numBins++;				}
-        if(newBinSize == 0)			{	numBins--;				}
+        if(util.isEqual(oldBinSize, 0))			{	numBins++;				}
+        if(util.isEqual(newBinSize, 0))			{	numBins--;				}
         if(newBinSize > maxRank)	{	maxRank = newBinSize;	}
         
         numSeqs += (newBinSize - oldBinSize);
@@ -206,7 +206,7 @@ float RAbundFloatVector::remove(int bin){
         data.erase(data.begin()+bin);
         numBins--;
         
-        if(abund == maxRank){ maxRank = util.max(data); }
+        if(util.isEqual(abund, maxRank)){ maxRank = util.max(data); }
         
         numSeqs -= abund;
         

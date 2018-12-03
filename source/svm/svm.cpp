@@ -360,14 +360,15 @@ void SvmPerformanceSummary::init(const SVM& svm, const LabeledObservationVector&
             }
         }
     }
-    if ( tp == 0 && fp == 0 ) {
+    Utils util;
+    if (util.isEqual(tp, 0) && util.isEqual(fp, 0) ) {
         precision = 0;
     }
     else {
         precision = tp / (tp + fp);
     }
     recall = tp / (tp + fn);
-    if ( precision == 0 && recall == 0 ) {
+    if ( util.isEqual(precision, 0) && util.isEqual(recall, 0) ) {
         f = 0;
     }
     else {
@@ -475,8 +476,9 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
     if (outputFilter.trace()) m->mothurOut( "assign A and B" ); m->mothurOutEndLine();
     vector<double> A(observationCount);
     vector<double> B(observationCount);
+    Utils util;
     for ( int n = 0; n < observationCount; n++ ) {
-        if ( y[n] == +1.0) {
+        if ( util.isEqual(y[n], +1.0)) {
             A[n] = 0.0;
             B[n] = C;
         }
@@ -611,7 +613,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
     vector<double> nonzero_a;
     LabeledObservationVector supportVectors;
     for (int i = 0; i < a.size(); i++) {
-        if ( a.at(i) == 0.0 ) {
+        if ( util.isEqual(a.at(i), 0.0) ) {
             // this dual coefficient does not correspond to a support vector
         }
         else {
@@ -621,7 +623,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
         }
     }
     //return new SVM(y, a, twoClassLabeledObservationVector, b, discriminantToLabel);
-    if (outputFilter.info()) m->mothurOut( "found " + toString(supportVectors.size()) + " support vectors" ); m->mothurOutEndLine();
+    if (outputFilter.info()) m->mothurOut( "found " + toString(supportVectors.size()) + " support vectors\n" );
     return new SVM(support_y, nonzero_a, supportVectors, b, discriminantToLabel);
 }
 
@@ -842,8 +844,8 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                     }
                 }
             }
-
-            if ( bestMeanScoreOnKFolds == 0.0 ) {
+            Utils util;
+            if ( util.isEqual(bestMeanScoreOnKFolds, 0.0) ) {
                 m->mothurOut( "failed to train SVM on labels " + toString(label0) + " and " + toString(label1) ); m->mothurOutEndLine();
                 throw exception();
             }
@@ -969,9 +971,8 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
         m->mothurOut( "done with cross validation on C = " + toString(smoTrainer.getC()) ); m->mothurOutEndLine();
         m->mothurOut( "    mean score over " + toString(kFoldLabeledObservationsDivider.getFoldNumber()) + " folds is " + toString(meanScoreOverKFolds) ); m->mothurOutEndLine();
     }
-    if ( meanScoreOverKFolds == 0.0 ) {
-        m->mothurOut( "failed to train SVM with C = " + toString(smoTrainer.getC()) ); m->mothurOutEndLine();
-    }
+    Utils util;
+    if ( util.isEqual(meanScoreOverKFolds, 0.0) ) { m->mothurOut( "failed to train SVM with C = " + toString(smoTrainer.getC()) + "\n");  }
     return meanScoreOverKFolds;
 }
 

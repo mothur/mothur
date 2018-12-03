@@ -147,32 +147,32 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			
 			if(c != 1) {
 				if(a != piSentinel && b == piSentinel) {
-					if(d == 0)
+					if(util.isEqual(d, 0))
 						valid = a0;
 					else
 						valid = a1;
 				}
-				else if(a == piSentinel && b != piSentinel) {
+				else if(util.isEqual(a, piSentinel) && !util.isEqual(b, piSentinel)) {
 					if(e == 0)
 						valid = b0;
 					else
 						valid = b1;
 				}
 				else {
-					if(d == 0 && e == 0)
+					if(util.isEqual(d, 0) && util.isEqual(e, 0))
 						valid = (a0 && b0);
-					else if(d == 0 && e == 1)
+					else if(util.isEqual(d, 0) && util.isEqual(e, 1))
 						valid = (a0 && b1);
-					else if(d == 1 && e == 0)
+					else if(util.isEqual(d, 1) && util.isEqual(e, 0))
 						valid = (a1 && b0);
 					else
 						valid = (a1 && b1);
 				}
 			}
 			else {
-				if(a != piSentinel && b == piSentinel)
+				if(!util.isEqual(a, piSentinel) && util.isEqual(b, piSentinel))
 					valid = (pVal == a);
-				else if(a == piSentinel && b != piSentinel)
+				else if(util.isEqual(a, piSentinel) && !util.isEqual(b, piSentinel))
 					valid = (pVal == b);
 				else
 					valid = (pVal == a || pVal == b);
@@ -181,22 +181,22 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			
 			if(!valid) {
 				m->mothurOut("The '" + parameter + "' parameter needs to be ");
-				if(c == 1)
+				if(util.isEqual(c, 1))
 					m->mothurOut("either '" + toString(a) + "' or '" + toString(b) + "'.\n");
 				else {
-					if(a != piSentinel) {
+					if(!util.isEqual(a, piSentinel)) {
 						m->mothurOut(">");
 						if(d != 0)
 							m->mothurOut("=");
 						m->mothurOut(" '" + toString(a) + "'");
 					}
-					if(b == piSentinel)
+					if(util.isEqual(b, piSentinel))
 						m->mothurOut( "'.\n");
 					else if(a != piSentinel)
 						m->mothurOut(" and ");
-					if(b != piSentinel) {
+					if(!util.isEqual(b, piSentinel)) {
 						m->mothurOut("<");
-						if(e != 0)
+						if(!util.isEqual(e, 0))
 							m->mothurOut("=");
 						m->mothurOut(" '" + toString(b) + "'.\n");
 					}

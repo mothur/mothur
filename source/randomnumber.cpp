@@ -23,9 +23,9 @@ RandomNumberGenerator::RandomNumberGenerator(){
 
 float RandomNumberGenerator::randomUniform(){
 	
-	float randUnif = 0.0000;
+	float randUnif = 0;
 	
-	while(randUnif == 0.0000){
+	while(util.isEqual(randUnif, 0)){
 		
 		randUnif = rand() / (float)RAND_MAX;
 		
@@ -42,9 +42,9 @@ float RandomNumberGenerator::randomUniform(){
 
 float RandomNumberGenerator::randomExp(){
 	
-	float randExp = 0.0000;
+	float randExp = 0;
 	
-	while(randExp == 0.0000){
+	while(util.isEqual(randExp, 0)){
 		
 		randExp = -log(randomUniform());
 		
@@ -68,7 +68,7 @@ float RandomNumberGenerator::randomNorm(){
 		y = 2.0 * randomUniform() - 1.0;
 	
 		rsquare = x * x + y * y;
-	} while(rsquare >= 1.0 || rsquare == 0.0);
+	} while(rsquare >= 1.0 || util.isEqual(rsquare, 0));
 	
 	float fac = sqrt(-2.0 * log(rsquare)/rsquare);
 

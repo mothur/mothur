@@ -41,6 +41,7 @@ public:
 	void citation() { m->mothurOut(getCitation()); m->mothurOutEndLine(); }
     
 protected:
+    Utils util;
 	MothurOut* m;
 	EstOutput data;
 	string name;
@@ -71,6 +72,7 @@ public:
     
 protected:
     MothurOut* m;
+    Utils util;
     string name;
     
     
@@ -90,6 +92,7 @@ public:
 protected:
     double dist;
     MothurOut* m;
+    Utils util;
 };
 
 /**************************************************************************************************/

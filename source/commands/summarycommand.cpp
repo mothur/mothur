@@ -276,7 +276,7 @@ SummaryCommand::SummaryCommand(string option)  {
             
             if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2."); m->mothurOutEndLine(); abort=true; }
             
-            if (subsample == false) { iters = 0; }
+            if (!subsample) { iters = 0; }
             else {
                 //if you did not set a samplesize and are not using a sharedfile
                 if ((subsampleSize == -1) && (format != "sharedfile"))  { m->mothurOut("[ERROR]: If you want to subsample with a list, rabund or sabund file, you must provide the sample size.  You can do this by setting subsample=yourSampleSize.\n");  abort=true; }

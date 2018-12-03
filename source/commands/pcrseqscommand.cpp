@@ -376,6 +376,7 @@ int PcrSeqsCommand::execute(){
                     thisOutputDir = outputDir;
                     if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
+                    variables["[extension]"] = util.getExtension(groupfile);
                     string outGroup = getOutputFileName("group", variables);
                     util.renameFile(filenames["group"][0], outGroup);
                     outputNames.push_back(outGroup); outputTypes["group"].push_back(outGroup);
@@ -385,6 +386,7 @@ int PcrSeqsCommand::execute(){
                     thisOutputDir = outputDir;
                     if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+                    variables["[extension]"] = util.getExtension(namefile);
                     string outName = getOutputFileName("name", variables);
                     util.renameFile(filenames["name"][0], outName);
                     outputNames.push_back(outName); outputTypes["name"].push_back(outName);
@@ -394,6 +396,7 @@ int PcrSeqsCommand::execute(){
                     thisOutputDir = outputDir;
                     if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+                    variables["[extension]"] = util.getExtension(countfile);
                     string outCount = getOutputFileName("count", variables);
                     util.renameFile(filenames["count"][0], outCount);
                     outputNames.push_back(outCount); outputTypes["count"].push_back(outCount);

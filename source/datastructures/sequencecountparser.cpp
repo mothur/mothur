@@ -224,13 +224,13 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
 				
 				map<string, int> countForThisGroup = getCountTable(g);
 				map<string, int>::iterator itCount;
-				int error = 0;
+				bool error = false;
 				
 				for (int i = 0; i < seqForThisGroup.size(); i++) {
 					itCount = countForThisGroup.find(seqForThisGroup[i].getName());
 					
 					if (itCount == countForThisGroup.end()){
-						error = 1;
+						error = true;
 						m->mothurOut("[ERROR]: " + seqForThisGroup[i].getName() + " is in your fastafile, but is not in your count file, please correct."); m->mothurOutEndLine();
 					}else {
                         seqPriorityNode temp(itCount->second, seqForThisGroup[i].getUnaligned(), seqForThisGroup[i].getName());
@@ -238,7 +238,7 @@ int SequenceCountParser::getSeqs(string g, string filename, string tag, string t
 					}
 				}
 				
-				if (error == 1) { out.close(); util.mothurRemove(filename); return 1; }
+				if (error) { out.close(); util.mothurRemove(filename); return 1; }
 				
 				//sort by num represented
 				sort(nameVector.begin(), nameVector.end(), compareSeqPriorityNodes);

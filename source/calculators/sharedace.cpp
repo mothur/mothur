@@ -39,11 +39,11 @@ EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 			if ((tempA != 0) && (tempB != 0)) {//they are shared
 				S12++;
 				//do both A and B have one
-				if ((tempA == 1) && (tempB == 1))		{	f11++;	 }
+				if (util.isEqual(tempA, 1) && util.isEqual(tempB,1))		{	f11++;	 }
 				//is A one and B rare
-				if ((tempA == 1) && (tempB <= abund))	{  fARare++; }
+				if (util.isEqual(tempA, 1) && (tempB <= abund))	{  fARare++; }
 				//is B one and A rare
-				if ((tempB == 1) && (tempA <= abund))	{  fBRare++; }
+				if (util.isEqual(tempB, 1) && (tempA <= abund))	{  fBRare++; }
 			
 				if ((tempA <= abund) && (tempB <= abund)) { //shared and both rare
 					S12Rare++;
@@ -52,11 +52,11 @@ EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 					
 					//calculate top of C12
 					// YiI(Xi = 1)
-					if (tempA == 1) { C12Numerator += tempB; }
+					if (util.isEqual(tempA, 1)) { C12Numerator += tempB; }
 					//XiI(Yi = 1)
-					if (tempB == 1)	{ C12Numerator += tempA; }
+					if (util.isEqual(tempB, 1))	{ C12Numerator += tempA; }
 					//-I(Xi=Yi=1)
-					if ((tempA == 1) && (tempB == 1)) { C12Numerator--; }
+					if (util.isEqual(tempA, 1) && util.isEqual(tempB, 1)) { C12Numerator--; }
 					
 					//calculate t11 - Sum of XiYi
 					t11 += tempA * tempB;

@@ -148,7 +148,7 @@ PCell* SparseMatrix::getSmallestCell(){
 					smallDist = dist;
 					mins.push_back(&*currentCell);  //this is the address of the data in the list being pointed to by the MatData iterator
 				}
-				else if(dist == smallDist){  //if a subsequent distance is the same as mins distance add the new iterator to the mins vector
+				else if(util.isEqual(dist, smallDist)){  //if a subsequent distance is the same as mins distance add the new iterator to the mins vector
 					mins.push_back(&*currentCell); //this is the address of the data in the list being pointed to by the MatData iterator
 				}
 

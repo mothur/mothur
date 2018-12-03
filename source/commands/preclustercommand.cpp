@@ -333,7 +333,7 @@ PreClusterCommand::PreClusterCommand(string option) {
                     
                 } else if(pc_method == "deblur"){
                     
-                    if(error_dist[0] == -100){ //construct the binomial distribution
+                    if(util.isEqual(error_dist[0], -100)){ //construct the binomial distribution
                         
                         error_dist.clear();
                         

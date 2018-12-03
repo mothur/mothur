@@ -14,6 +14,7 @@
 /**************************************************************************************************/
 
 #include "mothur.h"
+#include "utils.hpp"
 
 /**************************************************************************************************/
 
@@ -26,6 +27,9 @@ public:
 	float randomNorm();
 	float randomGamma(float);
 	vector<float> randomDirichlet(vector<float> alphas);
+    
+private:
+    Utils util;
 	
 };
 

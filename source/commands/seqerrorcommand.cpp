@@ -846,7 +846,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> >& errorForward, ma
 			float del = (float)errorForward['d'][i];
 			float amb = (float)errorForward['a'][i];
 			float total = match + subst + insert + del + amb;
-			if(total == 0){	break;	}
+			if(util.isEqual(total, 0)){	break;	}
 			errorForwardFile << i+1 << '\t' << total << '\t' << match/total  << '\t' << subst/total  << '\t' << insert/total  << '\t' << del/total  << '\t' << amb/total << endl;
 		}
 		errorForwardFile.close();
@@ -864,7 +864,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> >& errorForward, ma
 			float del = (float)errorReverse['d'][i];
 			float amb = (float)errorReverse['a'][i];
 			float total = match + subst + insert + del + amb;
-			if(total == 0){	break;	}
+			if(util.isEqual(total, 0)){	break;	}
 			errorReverseFile << i+1 << '\t' << total << '\t' << match/total  << '\t' << subst/total  << '\t' << insert/total  << '\t' << del/total  << '\t' << amb/total << endl;
 		}
 		errorReverseFile.close();

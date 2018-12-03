@@ -336,7 +336,7 @@ int MakeLookupCommand::execute(){
             if (m->getControl_pressed()) { return 0; }
             
             for(int j=0;j<N;j++){
-                if(lookupTable[i][j] == 0){
+                if(util.isEqual(lookupTable[i][j], 0)){
                     lookupTable[i][j] = 1;  //bring back
                 }
                 lookupTable[i][j] = -log(lookupTable[i][j]/double(counts[j]));  //bring back

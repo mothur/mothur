@@ -271,15 +271,6 @@ RAbundVector SharedListVector::getRAbundVector(){
 			rav.push_back(binSize);
 		}
 	
-	//  This was here before to output data in a nice format, but it screws up the name mapping steps
-	//	sort(rav.rbegin(), rav.rend());
-	//	
-	//	for(int i=data.size()-1;i>=0;i--){
-	//		if(rav.get(i) == 0){	rav.pop_back();	}
-	//		else{
-	//			break;
-	//		}
-	//	}
 		rav.setLabel(label);
 	
 		return rav;

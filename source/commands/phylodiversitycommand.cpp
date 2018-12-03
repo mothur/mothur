@@ -499,7 +499,7 @@ map<string, int> getRootForGroups(Tree* t, MothurOut* m){
             
             for (int j = 0; j < groups.size(); j++) {
                 
-                if (done[groups[j]] == false) { //we haven't found the root for this group yet, initialize it
+                if (!done[groups[j]]) { //we haven't found the root for this group yet, initialize it
                     done[groups[j]] = true;
                     roots[groups[j]] = i; //set root to self to start
                 }

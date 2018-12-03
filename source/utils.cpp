@@ -3326,7 +3326,7 @@ bool Utils::isSubset(vector<string> bigset, vector<string> subset) {
             }
 
             //you have a guy in subset that had no match in bigset
-            if (match == false) { return false; }
+            if (!match) { return false; }
         }
 
         return true;
@@ -4336,12 +4336,12 @@ bool Utils::anyLabelsToProcess(string label, set<string>& userLabels, string err
         /*************************************************/
         //is this label bigger than any of the users labels
         /*************************************************/
-
+        
         //loop through order until you find a label greater than label
         for (int i = 0; i < orderFloat.size(); i++) {
             if (orderFloat[i] < labelFloat) {
                 smaller = true;
-                if (orderFloat[i] == -1) {
+                if (isEqual(orderFloat[i], -1)) {
                     if (errorOff == "") { cout << ("Your file does not include the label unique.\n"); }
                     userLabels.erase("unique");
                 }
@@ -4349,7 +4349,7 @@ bool Utils::anyLabelsToProcess(string label, set<string>& userLabels, string err
                     if (errorOff == "") { cout << ("Your file does not include the label. \n");  }
                     string s = "";
                     for (it2 = userMap.begin(); it2!= userMap.end(); it2++) {
-                        if (it2->second == orderFloat[i]) {
+                        if (isEqual(it2->second, orderFloat[i])) {
                             s = it2->first;
                             //remove small labels
                             userLabels.erase(s);

@@ -159,7 +159,7 @@ vector<long long> Summary::getValues(map<float, long long>& positions) {
         int lastValue = 0;
 
         //minimum
-        if ((positions.begin())->first == -1) { results[0] = 0; }
+        if (util.isEqual((positions.begin())->first, -1)) { results[0] = 0; }
         else {results[0] = (positions.begin())->first; }
         results[1] = results[0]; results[2] = results[0]; results[3] = results[0]; results[4] = results[0]; results[5] = results[0];
 
@@ -196,7 +196,7 @@ long long Summary::getValue(map<float, long long>& positions, double value) {
         long long lastValue = 0;
 
         //minimum
-        if ((positions.begin())->first == -1) { result = 0; }
+        if (util.isEqual((positions.begin())->first, -1)) { result = 0; }
         else { result = (positions.begin())->first; }
 
         for (map<float, long long>::iterator it = positions.begin(); it != positions.end(); it++) {

@@ -15,8 +15,7 @@
 //This solves for the value of 'v' using a binary search.
 double Boneh::getV(double f1, double n, double rs) {
 
-	if(rs == 0)
-		return 0;
+    if(util.isEqual(rs, 0.0)) { return 0; }
 	
 	double accuracy = .0001;
 	double v = 100000.0;
@@ -40,11 +39,10 @@ EstOutput Boneh::getValues(SAbundVector* sabund){
 	try {
 		data.resize(1,0);
 		
-
 		bool valid = false;
 		double sum = 0;
 		double n = (double)sabund->getNumSeqs();
-		if(f==0){	f=n;	}
+		if(util.isEqual(f,0.0)){	f=n;	}
 		
 		double f1 = (double)sabund->get(1);
 		

@@ -234,7 +234,7 @@ Sequence Pintail::print(ostream& out, ostream& outAcc) {
 		//is your DE value higher than the 95%
 		string chimera;
 		if (index != 0) {  //if index is 0 then its an exact match to a template seq
-			if (quantiles[index][4] == 0.0) {
+			if (util.isEqual(quantiles[index][4], 0)) {
 				chimera = "Your template does not include sequences that provide quantile values at distance " + toString(index);
 			}else {
 				if (DE > quantiles[index][4])		{	chimera = "Yes";	}

@@ -182,12 +182,12 @@ void check_extremum (double c0, double c1, double c2, double c3, double z,
 int gsl_poly_solve_quadratic (double a, double b, double c,
                               double *x0, double *x1)
 {
-    
+    Utils util;
     double disc = b * b - 4 * a * c;
     
-    if (a == 0) /* Handle linear case */
+    if (util.isEqual(a, 0))/* Handle linear case */
     {
-        if (b == 0)
+        if (util.isEqual(b, 0))
         {
             return 0;
         }
@@ -200,7 +200,7 @@ int gsl_poly_solve_quadratic (double a, double b, double c,
     
     if (disc > 0)
     {
-        if (b == 0)
+        if (util.isEqual(b, 0))
         {
             double r = fabs (0.5 * sqrt (disc) / a);
             *x0 = -r;
@@ -226,7 +226,7 @@ int gsl_poly_solve_quadratic (double a, double b, double c,
         }
         return 2;
     }
-    else if (disc == 0)
+    else if (util.isEqual(disc, 0))
     {
         *x0 = -0.5 * b / a ;
         *x1 = -0.5 * b / a ;
@@ -474,7 +474,7 @@ int qFinderDMM::bfgs2_Solver(vector<double>& x){
             
             double alphaOld, alphaNew;
 
-            if(pNorm == 0 || g0norm == 0 || df0 == 0){
+            if(util.isEqual(pNorm, 0) || util.isEqual(g0norm, 0) || util.isEqual(df0, 0)){
                 dx.assign(numOTUs, 0.0000);
                 break;
             }

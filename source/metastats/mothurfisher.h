@@ -12,6 +12,7 @@
 
 
 #include "mothurout.h"
+#include "utils.hpp"
 
 class MothurFisher {
 	
@@ -23,6 +24,7 @@ public:
 	
 private:
 	MothurOut* m;
+    Utils util;
 	double sleft, sright, sless, slarg;
 	double sn11,sn1_,sn_1,sn,sprob;
 	double lngamm(double);

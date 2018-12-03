@@ -197,7 +197,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
                 else { subsample = false; }
             }
             
-            if (subsample == false) { iters = 0; }
+            if (!subsample) { iters = 0; }
             
             temp = validParameter.valid(parameters, "distance");					if (temp == "not found") { temp = "false"; }
 			createPhylip = util.isTrue(temp);

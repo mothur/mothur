@@ -10,6 +10,7 @@
 #define Mothur_wilcox_h
 
 #include "mothurout.h"
+#include "utils.hpp"
 
 class PWilcox {
     public:

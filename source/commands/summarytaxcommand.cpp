@@ -346,11 +346,10 @@ string SummaryTaxCommand::processTaxMap(string tax) {
                     newtaxon = taxon;
                     confidence = "-1";
                 }
-                float con = 0;
                 
-                util.mothurConvert(confidence, con);
+                float con = 0; util.mothurConvert(confidence, con);
                 
-                if (con == -1) { i += taxLength; } //not a confidence score, no confidence scores on this taxonomy
+                if (util.isEqual(con, -1)) { i += taxLength; } //not a confidence score, no confidence scores on this taxonomy
                 else if ( con < threshold)  { spot = i; break; } //below threshold, set all to unclassified
                 else {} //acceptable, move on
                 taxons.push_back(taxon);

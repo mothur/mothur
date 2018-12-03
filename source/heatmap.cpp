@@ -144,17 +144,17 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 				
 				if (lookup[i]->get(j) != 0) { //don't want log value of 0.
 					if (scaler == "log10") {
-                        if (maxRelAbund[i] == 1) { maxRelAbund[i] -= 0.001; }
-                        if (relAbund == 1) { relAbund -= 0.001; }
+                        if (util.isEqual(maxRelAbund[i], 1)) { maxRelAbund[i] -= 0.001; }
+                        if (util.isEqual(relAbund, 1)) { relAbund -= 0.001; }
 						scaleRelAbund[i][j] = toHex(int(255 * log10(relAbund) / log10(maxRelAbund[i]))) + "0000";
 					}else if (scaler == "log2") {
-                        if (maxRelAbund[i] == 1) { maxRelAbund[i] -= 0.001; }
-                        if (relAbund == 1) { relAbund -= 0.001; }
+                        if (util.isEqual(maxRelAbund[i], 1)) { maxRelAbund[i] -= 0.001; }
+                        if (util.isEqual(relAbund, 1)) { relAbund -= 0.001; }
 						scaleRelAbund[i][j] = toHex(int(255 * log2(relAbund) / log2(maxRelAbund[i]))) + "0000";  
 					}else if (scaler == "linear") {
 						scaleRelAbund[i][j] = toHex(int(255 * relAbund / maxRelAbund[i])) + "0000";
 					}else {  //if user enters invalid scaler option.
-                        if (maxRelAbund[i] == 1) { maxRelAbund[i] += 0.001; }
+                        if (util.isEqual(maxRelAbund[i], 1)) { maxRelAbund[i] += 0.001; }
 						scaleRelAbund[i][j] = toHex(int(255 * log10(relAbund / log10(maxRelAbund[i]))))  + "0000"; 
 					} 
 				}else { scaleRelAbund[i][j] = "FFFFFF";  }
@@ -447,12 +447,12 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 				
 				if (lookup[i]->get(j) != 0) { //don't want log value of 0.
 					if (scaler == "log10") {
-                        if (maxRelAbund[i] == 1) { maxRelAbund[i] -= 0.001; }
-                        if (relAbund == 1) { relAbund -= 0.001; }
+                        if (util.isEqual(maxRelAbund[i], 1)) { maxRelAbund[i] -= 0.001; }
+                        if (util.isEqual(relAbund, 1)) { relAbund -= 0.001; }
 						scaleRelAbund[i][j] = toHex(int(255 * log10(relAbund) / log10(maxRelAbund[i]))) + "0000";  
 					}else if (scaler == "log2") {
-                        if (maxRelAbund[i] == 1) { maxRelAbund[i] -= 0.001; }
-                        if (relAbund == 1) { relAbund -= 0.001; }
+                        if (util.isEqual(maxRelAbund[i], 1)) { maxRelAbund[i] -= 0.001; }
+                        if (util.isEqual(relAbund, 1)) { relAbund -= 0.001; }
 						scaleRelAbund[i][j] = toHex(int(255 * log2(relAbund) / log2(maxRelAbund[i]))) + "0000";  
 					}else if (scaler == "linear") {
 						scaleRelAbund[i][j] = toHex(int(255 * relAbund / maxRelAbund[i])) + "0000";

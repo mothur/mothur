@@ -672,12 +672,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
             if ((*it != "unique") && (convertTestFloat(*it, temp) ))	{	util.mothurConvert(*it, temp);	}
             else if (*it == "unique")										{	temp = -1.0;		}
             
-            //double ttemp = temp * 1000; ttemp = ceil(temp);
-            
-            if (temp < cutoff) {
-                orderFloat.push_back(temp);
-                labelBin[temp] = numSingleBins; //initialize numbins
-            }else if (fabs(cutoff - temp) < 0.0001) {
+            if ((temp < cutoff) || util.isEqual(cutoff, temp)) {
                 orderFloat.push_back(temp);
                 labelBin[temp] = numSingleBins; //initialize numbins
             }
@@ -710,7 +705,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 			for(int l = 0; l < orderFloat.size(); l++){
                 
 				string thisLabel;
-				if (orderFloat[l] == -1) { thisLabel = "unique"; }
+				if (util.isEqual(orderFloat[l],-1)) { thisLabel = "unique"; }
 				else { thisLabel = toString(orderFloat[l],  length-1);  } 
                 
 				//this file has reached the end
@@ -797,7 +792,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
 		for(map<double, int>::iterator itLabel = userLabels.begin(); itLabel != userLabels.end(); itLabel++) {
 			
 			string thisLabel;
-			if (itLabel->first == -1) { thisLabel = "unique"; }
+			if (util.isEqual(itLabel->first,-1)) { thisLabel = "unique"; }
 			else { thisLabel = toString(itLabel->first,  length-1);  } 
 			
 			//outList << thisLabel << '\t' << itLabel->second << '\t';

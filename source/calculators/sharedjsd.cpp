@@ -26,13 +26,13 @@ EstOutput JSD::getValues(vector<SharedRAbundVector*> shared) {
             double tempA = shared[0]->get(i) / totalA;
             double tempB = shared[1]->get(i) / totalB;
             
-            if (tempA == 0) { tempA = 0.000001; }
-            if (tempB == 0) { tempB = 0.000001; }
+            if (util.isEqual(tempA, 0)) { tempA = 0.000001; }
+            if (util.isEqual(tempB, 0)) { tempB = 0.000001; }
 
             double denom = (tempA+tempB)/(double)2.0;
 
-            if (tempA != 0) {  KLD1 += tempA * log(tempA/denom); } //KLD(x,m)
-            if (tempB != 0) {  KLD2 += tempB * log(tempB/denom); } //KLD(y,m)
+            if (!util.isEqual(tempA, 0)) {  KLD1 += tempA * log(tempA/denom); } //KLD(x,m)
+            if (!util.isEqual(tempB, 0)) {  KLD2 += tempB * log(tempB/denom); } //KLD(y,m)
         }
 
             

@@ -36,7 +36,7 @@ EstOutput Chao1::getValues(SAbundVector* rank){
 					+ singles*pow(2*singles-1, 2)/(4*pow(doubles+1,2))
 					+ pow(singles, 2)*doubles*pow(singles-1, 2)/(4*pow(doubles+1,4));
 		}
-		else if(singles > 0 && doubles == 0){
+		else if(singles > 0 && util.isEqual(doubles,0)){
 			chaovar = singles*(singles-1)/2 + singles*pow(2*singles-1, 2)/4 - pow(singles, 4)/(4*chao); 
 		}
 		else if(singles == 0){

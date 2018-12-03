@@ -69,7 +69,7 @@ int OptiMatrix::readPhylip(){
                     
                     fileHandle >> distance;
                     
-                    if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                    if (util.isEqual(distance,-1)) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance <= cutoff){
                         singleton[i] = false;
@@ -86,7 +86,7 @@ int OptiMatrix::readPhylip(){
                 for(long long j=0;j<nseqs;j++){
                     fileHandle >> distance;
                     
-                    if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                    if (util.isEqual(distance,-1)) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance <= cutoff && j < i){
                         singleton[i] = false;
@@ -144,7 +144,7 @@ int OptiMatrix::readPhylip(){
                     
                     in >> distance; util.gobble(in);
                     
-                    if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                    if (util.isEqual(distance,-1)) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance <= cutoff){
                         long long newB = singletonIndexSwap[j];
@@ -171,7 +171,7 @@ int OptiMatrix::readPhylip(){
                 for(long long j=0;j<nseqs;j++){
                     in >> distance; util.gobble(in);
 
-                    if (distance == -1) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                    if (util.isEqual(distance,-1)) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
                     if(distance <= cutoff && j < i){
                         long long newB = singletonIndexSwap[j];
@@ -231,7 +231,7 @@ int OptiMatrix::readColumn(){
             
             if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
             
-            if (distance == -1) { distance = 1000000; }
+            if (util.isEqual(distance,-1)) { distance = 1000000; }
             else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
             
             if(distance <= cutoff){
@@ -284,7 +284,7 @@ int OptiMatrix::readColumn(){
             
             if (m->getControl_pressed()) {  in.close();   return 0; }
             
-            if (distance == -1) { distance = 1000000; }
+            if (util.isEqual(distance,-1)) { distance = 1000000; }
             else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
             
             if(distance <= cutoff){

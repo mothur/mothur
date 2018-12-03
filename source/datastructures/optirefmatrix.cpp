@@ -734,7 +734,7 @@ map<long long, long long> OptiRefMatrix::readColumnSingletons(vector<bool>& sing
             
             if (m->getControl_pressed()) {  break; }
             
-            if (distance == -1) { distance = 1000000; }
+            if (util.isEqual(distance,-1)) { distance = 1000000; }
             
             if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);
@@ -800,7 +800,7 @@ map<long long, long long> OptiRefMatrix::readPhylipSingletons(vector<bool>& sing
                     
                     fileHandle >> distance;
                     
-                    if (distance == -1) { distance = 1000000; }
+                    if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
                     if(distance <= cutoff){
                         singleton[i] = false;
@@ -817,7 +817,7 @@ map<long long, long long> OptiRefMatrix::readPhylipSingletons(vector<bool>& sing
                 for(long long j=0;j<nseqs;j++){
                     fileHandle >> distance;
                     
-                    if (distance == -1) { distance = 1000000; }
+                    if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
                     if(distance <= cutoff && j < i){
                         singleton[i] = false;
@@ -879,7 +879,7 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                     
                     in >> distance; util.gobble(in);
                     
-                    if (distance == -1) { distance = 1000000; } 
+                    if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
                     if(distance <= cutoff){
                         if (refWeightMethod == "connectivity") { //count dists
@@ -906,7 +906,7 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                 for(long long j=0;j<nseqs;j++){
                     in >> distance; util.gobble(in);
                     
-                    if (distance == -1) { distance = 1000000; }
+                    if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
                     if(distance <= cutoff && j < i){
                         if (refWeightMethod == "connectivity") { //count dists
@@ -948,7 +948,7 @@ int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>
             
             if (m->getControl_pressed()) {  in.close();   return 0; }
             
-            if (distance == -1) { distance = 1000000; }
+            if (util.isEqual(distance,-1)) { distance = 1000000; }
             
             if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);

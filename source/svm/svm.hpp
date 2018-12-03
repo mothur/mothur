@@ -21,7 +21,7 @@
 #include <string>
 #include <sstream>
 #include "mothurout.h"
-
+#include "utils.hpp"
 
 // For the purpose of training a support vector machine
 // we need to calculate a dot product between two feature

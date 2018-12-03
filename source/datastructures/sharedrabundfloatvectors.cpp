@@ -474,7 +474,7 @@ void SharedRAbundFloatVectors::eliminateZeroOTUS() {
                 float total = getOTUTotal(i);
                 
                 //if they are not all zero add this bin
-                if (total == 0) { removeOTU(i); }
+                if (util.isEqual(total, 0)) { removeOTU(i); }
                 else { ++i;  }
             }
         }

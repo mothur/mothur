@@ -132,8 +132,8 @@ double PWilcox::cwilcox(int k, int m, int n, double*** w) {
          if there were just k y's.
          */
         if (j > 0 && k < j) return cwilcox(k, i, k, w);
-        
-        if (w[i][j] == 0) {
+        Utils util;
+        if (util.isEqual(*w[i][j], 0)) {
             w[i][j] = (double *) calloc((size_t) c + 1, sizeof(double));
 
             for (l = 0; l <= c; l++)

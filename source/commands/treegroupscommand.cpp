@@ -277,7 +277,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
                 else { subsample = false; }
             }
             
-            if (subsample == false) { iters = 1; }
+            if (!subsample) { iters = 1; }
             
             if (subsample && (format != "sharedfile")) { m->mothurOut("[ERROR]: the subsample parameter can only be used with a shared file.\n"); abort=true; }
             

@@ -124,7 +124,7 @@ int Pam::swapPhase() {
                             double dz = 0.0; //Tih sum of distances between objects and closest medoid caused by swapping i and h. Basically the change in cost. If this < 0 its a "good" swap. When all Tih are > 0, then we stop the algo, because we have the optimal medoids.
                             for (int j = 0; j < numSamples; j++) {
                                 if (m->getControl_pressed()) { break; }
-                                if (dists[i][j] == Dp[j][0]) {
+                                if (util.isEqual(dists[i][j], Dp[j][0])) {
                                     double smallValue; smallValue = 0.0;
                                     if (Dp[j][1] > dists[h][j]) {   smallValue = dists[h][j];    }
                                     else                        {   smallValue = Dp[j][1];       }
