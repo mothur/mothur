@@ -15,7 +15,7 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups
     try {
         int num, count;
         count = 0;
-        string holdLabel, nextLabel, groupN;
+        string holdLabel, groupN;
         int numUserGroups = userGroups.size();
         
         for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();

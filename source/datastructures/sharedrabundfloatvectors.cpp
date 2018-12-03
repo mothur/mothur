@@ -14,7 +14,7 @@
 SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& userGroups, string& nextLabel, string& labelTag) : DataVector() {
     try {
         int num;
-        string holdLabel, nextLabel, groupN;
+        string holdLabel, groupN;
         int numUserGroups = userGroups.size();
         
         for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();
