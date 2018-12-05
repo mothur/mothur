@@ -351,7 +351,7 @@ PreClusterCommand::PreClusterCommand(string option) {
                             double a = pow(error_rate, i);
                             double b = pow(1 - error_rate, median_length - i);
                             
-                            if(a != 0 && b != 0){
+                            if(!util.isEqual(a, 0) && !util.isEqual(b, 0)){
                                 error_dist.push_back(choose * a * b);
                                 if(error_dist[i] < 0.1 / max_abund){ break;	}
                             } else {

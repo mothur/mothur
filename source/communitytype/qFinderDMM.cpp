@@ -518,7 +518,7 @@ int qFinderDMM::bfgs2_Solver(vector<double>& x){
             
             double A, B;
             
-            if(dxdg != 0){
+            if(!util.isEqual(dxdg, 0)){
                 B = dxg / dxdg;
                 A = -(1.0 + dgnorm*dgnorm /dxdg) * B + dgg / dxdg;            
             }

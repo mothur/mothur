@@ -36,7 +36,7 @@ EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 			//store in temps to avoid multiple repetitive function calls
 			tempA = shared[0]->get(i);
 			tempB = shared[1]->get(i);
-			if ((tempA != 0) && (tempB != 0)) {//they are shared
+			if (!util.isEqual(tempA, 0) && !util.isEqual(tempB, 0)) {//they are shared
 				S12++;
 				//do both A and B have one
 				if (util.isEqual(tempA, 1) && util.isEqual(tempB,1))		{	f11++;	 }

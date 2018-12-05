@@ -386,7 +386,7 @@ int LinearAlgebra::tred2(vector<vector<double> >& a, vector<double>& d, vector<d
 		
 		for(int i=0;i<n;i++){
 			int l = i;
-			if(d[i] != 0.0){
+			if(!util.isEqual(d[i], 0)){
 				for(int j=0;j<l;j++){
 					g = 0.0000;
 					for(int k=0;k<l;k++){
@@ -752,7 +752,7 @@ double LinearAlgebra::calcSpearman(vector< vector<double> >& euclidDists, vector
 			ties.push_back(scores[j]);
 			
 			if (j != (scores.size()-1)) { // you are not the last so you can look ahead
-				if (scores[j].score != scores[j+1].score) { // you are done with ties, rank them and continue
+				if (!util.isEqual(scores[j].score, scores[j+1].score)) { // you are done with ties, rank them and continue
 					
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
@@ -831,7 +831,7 @@ double LinearAlgebra::calcKendall(vector< vector<double> >& euclidDists, vector<
 			ties.push_back(scores[j]);
 			
 			if (j != (scores.size()-1)) { // you are not the last so you can look ahead
-				if (scores[j].score != scores[j+1].score) { // you are done with ties, rank them and continue
+				if (!util.isEqual(scores[j].score, scores[j+1].score)) { // you are done with ties, rank them and continue
 					
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
@@ -869,7 +869,7 @@ double LinearAlgebra::calcKendall(vector< vector<double> >& euclidDists, vector<
 			ties.push_back(scoresUser[j]);
 			
 			if (j != (scoresUser.size()-1)) { // you are not the last so you can look ahead
-				if (scoresUser[j].score != scoresUser[j+1].score) { // you are done with ties, rank them and continue
+				if (!util.isEqual(scoresUser[j].score, scoresUser[j+1].score)) { // you are done with ties, rank them and continue
 					
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
@@ -950,7 +950,7 @@ double LinearAlgebra::calcKendall(vector<double>& x, vector<double>& y, double& 
 			ties.push_back(&(xscores[j]));
 				
 			if (j != xscores.size()-1) { // you are not the last so you can look ahead
-				if (xscores[j].score != xscores[j+1].score) { // you are done with ties, rank them and continue
+				if (!util.isEqual(xscores[j].score, xscores[j+1].score)) { // you are done with ties, rank them and continue
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
 						(*ties[k]).score = thisrank;
@@ -986,7 +986,7 @@ double LinearAlgebra::calcKendall(vector<double>& x, vector<double>& y, double& 
 			yties.push_back(yscores[j]);
 				
 			if (j != yscores.size()-1) { // you are not the last so you can look ahead
-				if (yscores[j].score != yscores[j+1].score) { // you are done with ties, rank them and continue
+				if (!util.isEqual(yscores[j].score, yscores[j+1].score)) { // you are done with ties, rank them and continue
 					for (int k = 0; k < yties.size(); k++) {
 						float thisrank = rankTotal / (float) yties.size();
 						rank[yties[k].name] = thisrank;
@@ -1243,7 +1243,7 @@ double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pV
             ties.push_back(&(values[j]));
             
             if (j != values.size()-1) { // you are not the last so you can look ahead
-                if (values[j].score != values[j+1].score) { // you are done with ties, rank them and continue
+                if (!util.isEqual(values[j].score, values[j+1].score)) { // you are done with ties, rank them and continue
                     if (ties.size() > 1) { TIES.push_back(ties.size()); }
                     for (int k = 0; k < ties.size(); k++) {
                         double thisrank = rankTotal / (double) ties.size();
@@ -1379,7 +1379,7 @@ double LinearAlgebra::calcWilcoxon(vector<double>& x, vector<double>& y, double&
 			ties.push_back(&(ranks[j]));
             
 			if (j != ranks.size()-1) { // you are not the last so you can look ahead
-				if (ranks[j].score != ranks[j+1].score) { // you are done with ties, rank them and continue
+				if (!util.isEqual(ranks[j].score, ranks[j+1].score)) { // you are done with ties, rank them and continue
                     if (ties.size() > 1) { TIES.push_back(ties.size()); }
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
@@ -1525,7 +1525,7 @@ double LinearAlgebra::calcSpearman(vector<double>& x, vector<double>& y, double&
 			xties.push_back(xscores[j]);
 			
 			if (j != xscores.size()-1) { // you are not the last so you can look ahead
-				if (xscores[j].score != xscores[j+1].score) { // you are done with ties, rank them and continue
+				if (!util.isEqual(xscores[j].score, xscores[j+1].score)) { // you are done with ties, rank them and continue
 					for (int k = 0; k < xties.size(); k++) {
 						float thisrank = rankTotal / (float) xties.size();
 						rankx[xties[k].name] = thisrank;
@@ -1577,7 +1577,7 @@ double LinearAlgebra::calcSpearman(vector<double>& x, vector<double>& y, double&
 			yties.push_back(yscores[j]);
 			
 			if (j != yscores.size()-1) { // you are not the last so you can look ahead
-				if (yscores[j].score != yscores[j+1].score) { // you are done with ties, rank them and continue
+				if (!util.isEqual(yscores[j].score, yscores[j+1].score)) { // you are done with ties, rank them and continue
 					for (int k = 0; k < yties.size(); k++) {
 						float thisrank = rankTotal / (float) yties.size();
 						rank[yties[k].name] = thisrank;
@@ -1888,7 +1888,7 @@ void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vecto
                     total -= A[i][j] * b[j];
                 }
             }
-            else if(total != 0){  ii = i+1;   }
+            else if(!util.isEqual(total, 0)){  ii = i+1;   }
             b[i] = total;
         }
         for(int i=n-1;i>=0;i--){
@@ -1996,7 +1996,7 @@ void LinearAlgebra::lubksb(vector<vector<float> >& A, vector<int>& index, vector
                     total -= A[i][j] * b[j];
                 }
             }
-            else if(total != 0){  ii = i+1;   }
+            else if(!util.isEqual(total, 0)){  ii = i+1;   }
             b[i] = total;
         }
         for(int i=n-1;i>=0;i--){
@@ -2456,7 +2456,7 @@ int LinearAlgebra::svd(vector< vector<double> >& a, vector<double>& w, vector< v
                     for (i = l; i <= k; i++)
                     {
                         f = s * rv1[i];
-                        if (fabs(f) + anorm != anorm)
+                        if (!util.isEqual((fabs(f) + anorm), anorm))
                         {
                             g = (double)w[i];
                             h = pythag(f, g);

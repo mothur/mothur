@@ -95,7 +95,7 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -407,23 +407,15 @@ unsigned long long CountSeqsCommand::driver(ofstream& out, GroupMap*& groupMap) 
 						map<string, int>::iterator it = groupCounts.find(group);
 						
 						//if not found, then this sequence is not from a group we care about
-						if (it != groupCounts.end()) {
-							it->second++;
-							total++;
-						}
+						if (it != groupCounts.end()) { it->second++; total++; }
 					}
 				}
 				
 				if (total != 0) {
 					out << firstCol << '\t' << total;
-					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-						out << '\t' << it->second;
-					}
-					out << endl;
+					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { out << '\t' << it->second; } out << endl;
 				}
-			}else {
-				out << firstCol << '\t' << names.size() << endl;
-			}
+			}else { out << firstCol << '\t' << names.size() << endl; }
 			
 			total += names.size();
         }

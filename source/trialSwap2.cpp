@@ -42,7 +42,7 @@ double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix, vector<int> ro
                     maxD = rowtotal[i] * rowtotal[j];
                 }
                 
-                if(maxD != 0)
+                if(!util.isEqual(maxD, 0))
                 {
                     normcscore += D/maxD;
                     nonzeros++;

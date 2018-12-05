@@ -101,7 +101,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 			map<string,string>::iterator it;
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			
@@ -180,7 +180,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
             string temp = validParameter.valid(parameters, "abundance");	if (temp == "not found"){	temp = "-1";	}
 			util.mothurConvert(temp, abund);
             
-            if (abund != -1) { 
+            if (!util.isEqual(abund, -1)) {
                 if ((abund < 0) || (abund > 100)) { m->mothurOut(toString(abund) + " is not a valid number for abund. Must be between 0 and 100.\n"); }
                 if (abund < 1) { //convert
                     string temp = toString(abund); string factorString = "1";
@@ -429,7 +429,7 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
         
         if (m->getControl_pressed()) { return 0; }
         
-        if ((samples != -1) || (abund != -1))  {
+        if ((samples != -1) || (!util.isEqual(abund, -1)))  {
             string outputFileName2 = outputDir + util.getRootName(util.getSimpleName(inputFileName)) + lookup->getLabel() + ".core.microbiomelist";
             outputNames.push_back(outputFileName2);  outputTypes["coremicrobiome"].push_back(outputFileName2);
             ofstream out2;

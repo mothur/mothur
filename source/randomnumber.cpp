@@ -185,7 +185,7 @@ float RandomNumberGenerator::randomGamma(float a)
     /* --- a >= 1 : GD algorithm --- */
 	
     /* Step 1: Recalculations of s2, s, d if a has changed */
-    if (a != aa) {
+    if (!util.isEqual(a, aa)) {
         aa = a;
         s2 = a - 0.5;
         s = sqrt(s2);
@@ -208,7 +208,7 @@ float RandomNumberGenerator::randomGamma(float a)
 	
     /* Step 4: recalculations of q0, b, si, c if necessary */
 	
-    if (a != aaa) {
+    if (!util.isEqual(a, aaa)) {
         aaa = a;
         r = 1.0 / a;
         q0 = ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r

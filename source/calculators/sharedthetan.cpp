@@ -33,9 +33,9 @@ EstOutput ThetaN::getValues(vector<SharedRAbundVector*> shared) {
 			tempB = shared[1]->get(j);
 			
 			//they are shared
-			if ((tempA != 0) && (tempB != 0)) {
-				if (Atotal != 0)	{ sumSharedA = (tempA / (float)Atotal); }
-				if (Btotal != 0)	{ sumSharedB = (tempB / (float)Btotal); }
+			if (!util.isEqual(tempA, 0) && !util.isEqual(tempB, 0)) {
+				if (!util.isEqual(Atotal, 0))	{ sumSharedA = (tempA / (float)Atotal); }
+				if (!util.isEqual(Btotal, 0))	{ sumSharedB = (tempB / (float)Btotal); }
 			
 				a += sumSharedA;
 				b += sumSharedB;

@@ -25,7 +25,7 @@ EstOutput Simpson::getValues(SAbundVector* rank){
 		double firstTerm = 0;
 		double secondTerm = 0;
 	
-		if(sobs != 0){
+		if(!util.isEqual(sobs, 0)){
 			double simnum=0.0000;
 		
 			for(unsigned long long i=1;i<=maxRank;i++){

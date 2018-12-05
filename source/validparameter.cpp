@@ -91,7 +91,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			if(parameter.compare("precision") == 0) {
 				double logNum = log10((double)pVal);
 				double diff = (double)((int)logNum - logNum);
-				if(diff != 0) {
+				if(!util.isEqual(diff, 0)) {
 					m->mothurOut("The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n");
 					return false;
 				}
@@ -146,7 +146,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			bool b1 = pVal <= b;
 			
 			if(c != 1) {
-				if(a != piSentinel && b == piSentinel) {
+				if(!util.isEqual(a, piSentinel) && util.isEqual(b, piSentinel)) {
 					if(util.isEqual(d, 0))
 						valid = a0;
 					else
@@ -186,13 +186,13 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 				else {
 					if(!util.isEqual(a, piSentinel)) {
 						m->mothurOut(">");
-						if(d != 0)
+						if(!util.isEqual(d, 0))
 							m->mothurOut("=");
 						m->mothurOut(" '" + toString(a) + "'");
 					}
 					if(util.isEqual(b, piSentinel))
 						m->mothurOut( "'.\n");
-					else if(a != piSentinel)
+					else if(!util.isEqual(a, piSentinel))
 						m->mothurOut(" and ");
 					if(!util.isEqual(b, piSentinel)) {
 						m->mothurOut("<");

@@ -27,11 +27,11 @@ EstOutput Jclass::getValues(vector<SharedRAbundVector*> shared) {
 			tempB = shared[1]->get(i);
 			
 			//find number of bins in shared1 and shared2
-			if (tempA != 0) { S1++; }
-			if (tempB != 0) { S2++; } 
+			if (!util.isEqual(tempA, 0)) { S1++; }
+			if (!util.isEqual(tempB, 0)) { S2++; }
 			
 			//they are shared
-			if ((tempA != 0) && (tempB != 0)) {	S12++; }
+			if (!util.isEqual(tempA, 0) && !util.isEqual(tempB, 0)) {	S12++; }
 		}
 		
 		data[0] = 1.0 - S12 / (float)(S1 + S2 - S12);

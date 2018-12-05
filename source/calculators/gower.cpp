@@ -38,7 +38,7 @@ EstOutput Gower::getValues(vector<SharedRAbundVector*> shared) {
 			double numerator = abs(A - B);
 			double denominator = maxOtus[i] - minOtus[i];
 				
-			if (denominator != 0) { sum += (numerator / denominator); }
+			if (!util.isEqual(denominator, 0)) { sum += (numerator / denominator); }
 		}
 		
 		data[0] = sum;

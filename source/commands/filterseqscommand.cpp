@@ -108,7 +108,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -461,18 +461,18 @@ string FilterSeqsCommand::createFilter() {
 		string filterString = "";			
 		Filters F;
 		
-		if (soft != 0)			{  F.setSoft(soft);		}
+		if (!util.isEqual(soft, 0))			{  F.setSoft(soft);		}
 		if (trump != '*')		{  F.setTrump(trump);	}
 		
 		F.setLength(alignmentLength);
 		
-		if(trump != '*' || util.isTrue(vertical) || soft != 0){ F.initialize(); }
+		if(trump != '*' || util.isTrue(vertical) || !util.isEqual(soft, 0)){ F.initialize(); }
 		
 		if(hard.compare("") != 0)	{	F.doHard(hard);		}
 		else						{	F.setFilter(string(alignmentLength, '1'));	}
 		
 		numSeqs = 0;
-		if(trump != '*' || util.isTrue(vertical) || soft != 0){
+		if(trump != '*' || util.isTrue(vertical) || !util.isEqual(soft, 0)){
 			for (int s = 0; s < fastafileNames.size(); s++) {
 			
                 numSeqs += createProcessesCreateFilter(F, fastafileNames[s]);
@@ -483,7 +483,7 @@ string FilterSeqsCommand::createFilter() {
 
 		F.setNumSeqs(numSeqs);
 		if(util.isTrue(vertical) == 1)	{	F.doVertical();	}
-		if(soft != 0)                   {	F.doSoft();		}
+		if(!util.isEqual(soft, 0))                   {	F.doSoft();		}
 		filterString = F.getFilter();
         
 		return filterString;
@@ -496,12 +496,12 @@ string FilterSeqsCommand::createFilter() {
 /**************************************************************************************/
 void driverCreateFilter(filterData* params) {
 	try {
-        if (params->soft != 0)			{  params->F.setSoft(params->soft);		}
+        if (!params->util.isEqual(params->soft, 0))			{  params->F.setSoft(params->soft);		}
         if (params->trump != '*')		{  params->F.setTrump(params->trump);	}
         
         params->F.setLength(params->alignmentLength);
         
-        if(params->trump != '*' || params->vertical || params->soft != 0){ params->F.initialize(); }
+        if(params->trump != '*' || params->vertical || !params->util.isEqual(params->soft, 0)){ params->F.initialize(); }
         
         if(params->hard.compare("") != 0)	{	params->F.doHard(params->hard);                             }
         else                                {	params->F.setFilter(string(params->alignmentLength, '1'));	}
@@ -528,7 +528,7 @@ void driverCreateFilter(filterData* params) {
                 if (seq.getAligned().length() != params->alignmentLength) { params->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct.\n"); error = true; if (!params->m->getDebug()) { params->m->setControl_pressed(true); }else{ params->m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); } }
 					
 					if(params->trump != '*')                    {	params->F.doTrump(seq);		}
-					if(params->vertical || params->soft != 0)	{	params->F.getFreqs(seq);	}
+					if(params->vertical || !params->util.isEqual(params->soft, 0))	{	params->F.getFreqs(seq);	}
 					cout.flush();
 					params->count++;
             }

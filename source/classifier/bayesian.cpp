@@ -52,7 +52,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
             maxLevel = phyloTree->getMaxLevel();
 			
-			m->mothurOut("DONE."); m->mothurOutEndLine();
+			m->mothurOut("DONE.\n"); 
 			
 			genusNodes = phyloTree->getGenusNodes(); 
 			genusTotals = phyloTree->getGenusTotals();

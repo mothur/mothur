@@ -782,7 +782,7 @@ vector<double> CommunityTypeFinder::calcSilhouettes(vector<vector<double> > dist
             }
             
             silhouettes[i] = 0.0;
-            if (computeSi && bi != ai) {
+            if (computeSi && !util.isEqual(bi, ai)) {
                 silhouettes[i] = (bi-ai) / (max(ai, bi));
             }
         }

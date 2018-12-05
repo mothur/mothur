@@ -26,11 +26,11 @@ EstOutput Lennon::getValues(vector<SharedRAbundVector*> shared) {
 			tempA = shared[0]->get(i);
 			tempB = shared[1]->get(i);
 			
-			if (tempA != 0) { S1++; }
-			if (tempB != 0) { S2++; } 
+			if (!util.isEqual(tempA, 0)) { S1++; }
+			if (!util.isEqual(tempB, 0)) { S2++; }
 
 			//they are shared
-			if ((tempA != 0) && (tempB != 0)) {	S12++; }
+			if (!util.isEqual(tempA, 0) && !util.isEqual(tempB, 0)) {	S12++; }
 		}
 		
 		

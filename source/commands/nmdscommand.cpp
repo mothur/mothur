@@ -108,7 +108,7 @@ NMDSCommand::NMDSCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.valid(parameters, "inputdir");		
@@ -336,7 +336,7 @@ vector< vector<double> > NMDSCommand::nmdsCalc(vector< vector<double> >& matrix,
 			for (int i = 0; i < euclid.size(); i++) {
 				for (int j = 0; j < euclid[i].size(); j++) {
 					//eliminate divide by zero error
-					if (euclid[i][j] != 0) { 
+					if (!util.isEqual(euclid[i][j], 0)) {
 						b[i][j] = matrix[i][j] / euclid[i][j];
 						columnSums[j] += b[i][j];
 						b[i][j] *= -1.0;
@@ -477,7 +477,7 @@ double NMDSCommand::calculateStress(vector< vector<double> >& matrix, vector< ve
 		}
 		
 		//normalize stress
-		if ((rawStress != 0.0) && (denom != 0.0)) {
+		if (!util.isEqual(rawStress, 0.0) && !util.isEqual(denom, 0.0)) {
 			normStress = sqrt((rawStress / denom));
 		}
 

@@ -49,23 +49,12 @@ private:
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
 	vector<string> outputNames;
 	set<string> filesToRemove;
-    //map<int, oligosPair> pairedBarcodes;
-    //map<int, oligosPair> pairedPrimers;
-	//map<string, int> barcodes;
 	vector<string> groupVector;
-	//map<string, int> primers;
-    //vector<string>  linker;
-    //vector<string>  spacer;
-	//map<string, int> combos;
-	//map<string, int> groupToIndex;
-	//vector<string> primerNameVector;	//needed here?
-	//vector<string> barcodeNameVector;	//needed here?
 	map<string, int> groupCounts;  
 	map<string, string> nameMap;
     map<string, int> nameCount; //for countfile name -> repCount
     map<string, string> groupMap; //for countfile name -> group
 
-	//vector<int> processIDS;   //processid
 	vector<linePair> lines;
 	vector<linePair> qLines;
 	

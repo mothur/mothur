@@ -144,7 +144,7 @@ ClusterCommand::ClusterCommand(string option)  {
 		
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {
 					abort = true;
 				}
 			}
@@ -752,8 +752,8 @@ int ClusterCommand::runMothurCluster(){
             float rndDist = util.ceilDist(dist, precision);
             //cout << loops << '\t' << dist << '\t' << oldList.getNumBins() << '\t' << matrix->getNNodes() << endl; loops++;
             
-            if(previousDist <= 0.0000 && dist != previousDist)  {  printData("unique", counts, printHeaders);                               }
-            else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
+            if(previousDist <= 0.0000 && !util.isEqual(dist, previousDist))  {  printData("unique", counts, printHeaders);                               }
+            else if(!util.isEqual(rndDist, rndPreviousDist))                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
             
             previousDist = dist;
             rndPreviousDist = rndDist;
@@ -781,7 +781,7 @@ int ClusterCommand::runMothurCluster(){
         }
         listFile.close();
         
-        if (saveCutoff != cutoff) {
+        if (!util.isEqual(saveCutoff, cutoff)) {
             saveCutoff = util.ceilDist(saveCutoff, precision);
             m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
         }

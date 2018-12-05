@@ -183,7 +183,7 @@ CollectCommand::CollectCommand(string option)  {
 		
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 
 			//initialize outputTypes
@@ -331,7 +331,7 @@ CollectCommand::CollectCommand(string option)  {
             temp = validParameter.valid(parameters, "alpha");		if (temp == "not found") { temp = "1"; }
 			util.mothurConvert(temp, alpha);
             
-            if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2."); m->mothurOutEndLine(); abort=true; }
+            if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2.\n"); abort=true; }
 			
 			temp = validParameter.valid(parameters, "abund");		if (temp == "not found") { temp = "10"; }
 			util.mothurConvert(temp, abund); 

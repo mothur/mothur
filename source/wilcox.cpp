@@ -209,12 +209,12 @@ double PWilcox::pwilcox(double q, double m, double n, bool lower_tail){
             }
             lower_tail = !lower_tail; /* p = 1 - p; */
         }
-        
+        Utils util;
         //free w
         /********************************************/
         for (int i = allocated_m; i >= 0; i--) {
             for (int j = allocated_n; j >= 0; j--) {
-                if (w[i][j] != 0)
+                if (!util.isEqual(*w[i][j], 0))
                     free((void *) w[i][j]);
             }
             free((void *) w[i]);

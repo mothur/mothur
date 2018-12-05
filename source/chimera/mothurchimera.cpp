@@ -54,7 +54,7 @@ string MothurChimera::createFilter(vector<Sequence*> seqs, float t) {
 			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	numColRemoved++;  }
 		}
 
-		if (threshold != 0.0) {  m->mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  m->mothurOutEndLine();  }
+		if (threshold != 0) {  m->mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  m->mothurOutEndLine();  }
 		
 		return filterString;
 	}

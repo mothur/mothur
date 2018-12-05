@@ -248,7 +248,7 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
         for (int i = 0; i < numPartitions; i++) {
             for (int j = 0; j < numSamples; j++) {
                 if (m->getControl_pressed()) { return 0.0; }
-                if (zMatrix[i][j] != 0) { clusterMap[j] = i; }
+                if (!util.isEqual(zMatrix[i][j], 0)) { clusterMap[j] = i; }
             }
         }
         

@@ -135,7 +135,7 @@ LefseCommand::LefseCommand(string option)  {
 			map<string,string>::iterator it;
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			vector<string> tempOutNames;
@@ -236,7 +236,7 @@ LefseCommand::LefseCommand(string option)  {
             
             temp = validParameter.valid(parameters, "strict");
             if (temp == "not found"){	temp = "0";		}
-			if ((temp != "0") && (temp != "1") && (temp != "2")) { m->mothurOut("Invalid strict option: choices are 0, 1 or 2."); m->mothurOutEndLine(); abort=true; }
+			if ((temp != "0") && (temp != "1") && (temp != "2")) { m->mothurOut("[ERROR]: Invalid strict option: choices are 0, 1 or 2.\n");  abort=true; }
             else {  util.mothurConvert(temp, strict); }
             
             temp = validParameter.valid(parameters, "minc");

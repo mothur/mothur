@@ -42,6 +42,7 @@ protected:
 	ull nRowCells;
 	ull nColCells;
 	MothurOut* m;
+    Utils util;
 };
 
 /***********************************************************************/

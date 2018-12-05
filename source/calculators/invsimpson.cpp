@@ -20,7 +20,7 @@ EstOutput InvSimpson::getValues(SAbundVector* rank){
 		Simpson* simp = new Simpson();
 		simpData = simp->getValues(rank);
 		
-		if(simpData[0] != 0){
+		if(!util.isEqual(simpData[0], 0)){
 			data[0] = 1/simpData[0];
 			data[1] = 1/simpData[2];
 			data[2] = 1/simpData[1];

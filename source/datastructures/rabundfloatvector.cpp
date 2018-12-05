@@ -34,7 +34,7 @@ RAbundFloatVector::RAbundFloatVector(string id, vector<float> rav) : DataVector(
         numSeqs = 0;
         
         for(int i=0;i<data.size();i++){
-            if(data[i] != 0)		{	numBins = i+1;		}
+            if(!util.isEqual(data[i], 0))		{	numBins = i+1;		}
             if(data[i] > maxRank)	{	maxRank = data[i];	}
             numSeqs += data[i];
         }
@@ -222,7 +222,7 @@ float RAbundFloatVector::remove(int bin){
 
 int RAbundFloatVector::numNZ(){
     int numNZ = 0;
-    for(int i = 0; i < data.size(); i++) { if(data[i] != 0) { numNZ++; } }
+    for(int i = 0; i < data.size(); i++) { if(!util.isEqual(data[i], 0)) { numNZ++; } }
     return numNZ;
 }
 

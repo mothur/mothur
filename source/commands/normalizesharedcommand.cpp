@@ -104,7 +104,7 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -477,7 +477,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp, bool& pr
 					
 				for (int i = 0; i < lookupGroups.size(); i++) {
 					int finalNorm = 0;
-					if (standardDev != 0) { // stop divide by zero
+					if (!util.isEqual(standardDev, 0)) { // stop divide by zero
 						float newNorm = ((float)thisLookUp->get(j, lookupGroups[i]) - mean) / standardDev;
 						//round to nearest int
 						finalNorm = (int) floor((newNorm + 0.5));
@@ -553,7 +553,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp, boo
 				
 				for (int i = 0; i < lookupGroups.size(); i++) {
 					float newNorm = 0.0;
-                    if (standardDev != 0) { // stop divide by zero
+                    if (!util.isEqual(standardDev, 0)) { // stop divide by zero
                         newNorm = ((float)thisLookUp->get(j, lookupGroups[i]) - mean) / standardDev;
                     }
                     thisLookUp->set(j, newNorm, lookupGroups[i]);

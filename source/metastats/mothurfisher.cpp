@@ -105,7 +105,7 @@ double MothurFisher::myhyper(double n11){
 /***********************************************************/
 double MothurFisher::hyper0(double n11i, double n1_i, double n_1i, double ni) {
 	try {
-		if (!((n1_i != 0)&&(n_1i != 0)&&(ni != 0))) {
+		if (!( !util.isEqual(n1_i, 0) && !util.isEqual(n_1i,0) && !util.isEqual(ni, 0) )) {
 			if(!(((int)n11i % 10) == 0)){
 				if(util.isEqual(n11i,sn11+1))
 				{

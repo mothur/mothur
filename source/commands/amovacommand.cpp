@@ -102,7 +102,7 @@ AmovaCommand::AmovaCommand(string option) {
 			//check to make sure all parameters are valid for command
 			map<string,string>::iterator it;
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -139,8 +139,8 @@ AmovaCommand::AmovaCommand(string option) {
 			else if (phylipFileName == "not found") { 
 				//if there is a current phylip file, use it
 				phylipFileName = current->getPhylipFile(); 
-				if (phylipFileName != "") { m->mothurOut("Using " + phylipFileName + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (phylipFileName != "") { m->mothurOut("Using " + phylipFileName + " as input file for the phylip parameter.\n");  }
+				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required.\n");  abort = true; }
 			}else { current->setPhylipFile(phylipFileName); }
 			
 			//check for required parameters
