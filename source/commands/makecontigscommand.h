@@ -22,6 +22,7 @@
 #include "fastqread.h"
 #include "kmeralign.h"
 #include "splitgroupscommand.h"
+#include "filefile.hpp"
 
 
 #        define PROBABILITY(score) (pow(10.0, (-(double)(score)) / 10.0))

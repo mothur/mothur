@@ -17,6 +17,8 @@
 		4803D5B621231D9D001C63B5 /* testsharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */; };
 		4803D5B921271B47001C63B5 /* 454sop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B721271B47001C63B5 /* 454sop.cpp */; };
 		48098ED6219DE7A500031FA4 /* testsubsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48098ED4219DE7A500031FA4 /* testsubsample.cpp */; };
+		48098ED921B8601300031FA4 /* filefile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48098ED721B8601300031FA4 /* filefile.cpp */; };
+		48098EDA21B8601300031FA4 /* filefile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48098ED721B8601300031FA4 /* filefile.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -877,6 +879,8 @@
 		4803D5B821271B47001C63B5 /* 454sop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = 454sop.hpp; path = TestMothur/IntegrationTests/454sop.hpp; sourceTree = SOURCE_ROOT; };
 		48098ED4219DE7A500031FA4 /* testsubsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testsubsample.cpp; sourceTree = "<group>"; };
 		48098ED5219DE7A500031FA4 /* testsubsample.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testsubsample.hpp; sourceTree = "<group>"; };
+		48098ED721B8601300031FA4 /* filefile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filefile.cpp; sourceTree = "<group>"; };
+		48098ED821B8601300031FA4 /* filefile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = filefile.hpp; sourceTree = "<group>"; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -2650,6 +2654,8 @@
 				A7E9B6DF12D37EC400DA6239 /* fastamap.h */,
 				48C51DEE1A76B870004ECDF1 /* fastqread.h */,
 				48C51DEF1A76B888004ECDF1 /* fastqread.cpp */,
+				48098ED721B8601300031FA4 /* filefile.cpp */,
+				48098ED821B8601300031FA4 /* filefile.hpp */,
 				A7E9B6E812D37EC400DA6239 /* flowdata.h */,
 				A7E9B6E712D37EC400DA6239 /* flowdata.cpp */,
 				A7E9B6EE12D37EC400DA6239 /* fullmatrix.cpp */,
@@ -3139,6 +3145,7 @@
 				481FB6381AC1B7EA0076CFF3 /* oligos.cpp in Sources */,
 				481FB59E1AC1B71B0076CFF3 /* classifyseqscommand.cpp in Sources */,
 				4810D5B7218208CC00C668E8 /* testcounttable.cpp in Sources */,
+				48098EDA21B8601300031FA4 /* filefile.cpp in Sources */,
 				481FB5CF1AC1B75C0076CFF3 /* indicatorcommand.cpp in Sources */,
 				481FB64F1AC1B8100076CFF3 /* consensus.cpp in Sources */,
 				481FB5441AC1B6140076CFF3 /* goodscoverage.cpp in Sources */,
@@ -3579,6 +3586,7 @@
 				A7E9B95612D37EC400DA6239 /* sharedordervector.cpp in Sources */,
 				A7E9B95A12D37EC400DA6239 /* sharedsobs.cpp in Sources */,
 				48B44EEE1FB5006500789C45 /* currentfile.cpp in Sources */,
+				48098ED921B8601300031FA4 /* filefile.cpp in Sources */,
 				A7E9B95B12D37EC400DA6239 /* sharedsobscollectsummary.cpp in Sources */,
 				A7E9B95C12D37EC400DA6239 /* sharedsorabund.cpp in Sources */,
 				A7E9B95D12D37EC400DA6239 /* sharedsorclass.cpp in Sources */,
