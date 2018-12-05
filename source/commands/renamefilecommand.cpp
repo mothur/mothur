@@ -644,7 +644,7 @@ string RenameFileCommand::getNewName(string inputFileName, string type){
             
             if (prefix == "") {
                 int pos = inputFileName.find_first_of(".");
-                if (pos != string::npos) { basicName = inputFileName.substr(0, pos); }
+                if (pos != string::npos) { basicName = util.getSimpleName(inputFileName.substr(0, pos)); }
             }else { basicName = prefix; }
             
             if ((type == "shared") || (type == "list") || (type == "relabund") || (type == "rabund") || (type == "sabund")) {
