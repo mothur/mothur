@@ -468,11 +468,11 @@ void alignDriver(alignStruct* params) {
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+			if((count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
 			
 		}
 		//report progress
-		if((count) % 100 != 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+		if((count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
         
         params->numSeqs += count;
         params->flippedResults[0] += numFlipped_0;
