@@ -2572,7 +2572,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename, map<
         vector< vector<string> > files = dataFile.getFiles();
         gz = dataFile.isGZ();
         file2Group = dataFile.getFile2Group();
-        createFileGroup = dataFile.getCreateGroup();
+        createFileGroup = dataFile.is3ColumnWithGroupNames();
         if (dataFile.containsIndexFiles() && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->setControl_pressed(true);  }
         
         if (files.size() == 0) { m->setControl_pressed(true); }

@@ -45,6 +45,7 @@ public:
     vector<string> getPrimerNames()                         { return primerNameVector;  }
     vector<string> getBarcodeNames()                        { return barcodeNameVector; }
     vector<string> getGroupNames()                          { return Groups;            }
+    vector<string> getSRAGroupNames();                     
         
     
     //for printing and other formatting uses
