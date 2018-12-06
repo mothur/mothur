@@ -145,39 +145,11 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 							if (path == "") {	filenames[i] = inputDir + filenames[i];		}
 						}
                         
-						ifstream in;
-						bool ableToOpen = util.openInputFile(filenames[i], in, "noerror");
+                        bool ableToOpen = util.checkLocations(filenames[i], current->getLocations());
                         
-						//if you can't open it, try default location
 						if (!ableToOpen) {
-							if (current->getDefaultPath() != "") { //default path is set
-								string tryPath = current->getDefaultPath() + util.getSimpleName(filenames[i]);
-								m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								filenames[i] = tryPath;
-							}
-						}
-						
-						//if you can't open it, try default location
-						if (!ableToOpen) {
-							if (current->getOutputDir() != "") { //default path is set
-								string tryPath = current->getOutputDir() + util.getSimpleName(filenames[i]);
-								m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-								ifstream in2;
-								ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-								in2.close();
-								filenames[i] = tryPath;
-							}
-						}
-						
-						in.close();
-						
-						if (!ableToOpen) {
-							m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-							//erase from file list
-							filenames.erase(filenames.begin()+i);
+							m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded.\n");
+							filenames.erase(filenames.begin()+i); //erase from file list
 							i--;
 						}else { current->setSFFFile(filenames[i]); }
 					}
@@ -771,35 +743,9 @@ int MergeSfffilesCommand::readFile(){
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + ".\n"); }
             
-            //check to make sure both are able to be opened
-            ifstream in2;
-            bool openForward = util.openInputFile(filename, in2, "noerror");
+            bool ableToOpen = util.checkLocations(filename, current->getLocations());
             
-            //if you can't open it, try default location
-            if (!openForward) {
-                if (current->getDefaultPath() != "") { //default path is set
-                    string tryPath = current->getDefaultPath() + util.getSimpleName(filename);
-                    m->mothurOut("Unable to open " + filename + ". Trying default " + tryPath); m->mothurOutEndLine();
-                    ifstream in3;
-                    openForward = util.openInputFile(tryPath, in3, "noerror");
-                    in3.close();
-                    filename = tryPath;
-                }
-            }
-            
-            //if you can't open it, try output location
-            if (!openForward) {
-                if (current->getOutputDir() != "") { //default path is set
-                    string tryPath = current->getOutputDir() + util.getSimpleName(filename);
-                    m->mothurOut("Unable to open " + filename + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                    ifstream in4;
-                    openForward = util.openInputFile(tryPath, in4, "noerror");
-                    filename = tryPath;
-                    in4.close();
-                }
-            }
-            
-            if (!openForward) { //can't find it
+            if (!ableToOpen) { //can't find it
                 m->mothurOut("[WARNING]: can't find " + filename + ", ignoring.\n");
             }else{  filenames.push_back(filename); }
             

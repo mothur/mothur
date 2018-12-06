@@ -56,7 +56,7 @@ private:
     vector<string> spacers;
     map<string, string> Group2Organism;
     map<string, map<string, string> > mimarks;  //group -> <field -> valueForGroup> ex.  F003D001 -> <lat_lon -> 42.282026 -83.733850>
-    set<string> uniqueNames;
+    
 
     bool checkCasesInstrumentModels(string&);
     bool checkCasesPlatforms(string&);
@@ -69,7 +69,7 @@ private:
     int readFile(map<string, vector<string> >&);
     int readContactFile();
     int readMIMarksFile();
-    int readOligos();
+    bool readOligos();
     int parseSffFile(map<string, vector<string> >&);
     int parseFastqFile(map<string, vector<string> >&);
     int checkGroups(map<string, vector<string> >&);
