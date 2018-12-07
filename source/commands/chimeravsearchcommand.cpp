@@ -423,7 +423,7 @@ int ChimeraVsearchCommand::execute(){
             //setup fasta file if denovo and no groups
             if ((templatefile == "self") && (!hasGroup)) { //you want to run uchime with a template=self and no groups
                 
-                if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
+                if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing.\n"); processors = 1; }
                 if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
                     nameFile = nameFileNames[s];
                 }else { nameFile = getNamesFile(fastaFileNames[s]); }

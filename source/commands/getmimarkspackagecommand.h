@@ -11,6 +11,7 @@
 
 #include "command.hpp"
 #include "oligos.h"
+#include "filefile.hpp"
 
 /**************************************************************************************************/
 
@@ -35,15 +36,11 @@ public:
 private:
     bool abort, requiredonly, setOligosParameter;
     string oligosfile, groupfile, package, inputfile, file, inputDir;
-    int fileOption;
     string outputDir;
     vector<string> outputNames;
-    set<string> createGroupNames(Oligos& oligos);
     set<string> Groups;
-    map<string, string> Group2Barcode;
-    map<string, string> Group2Primer;
-    int findFileOption();
     
+    void createGroupNames(Oligos& oligos);
     int readFile();
 };
 

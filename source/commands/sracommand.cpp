@@ -310,8 +310,6 @@ int SRACommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        uniqueNames.insert("scrap");
-        
         readContactFile();
         if (m->getDebug()) { m->mothurOut("[DEBUG]: read contact file.\n"); }
         readMIMarksFile();
@@ -986,204 +984,26 @@ int SRACommand::readFile(map<string, vector<string> >& files){
         bool using3NONE = false;
         inputfile = file;
         files.clear();
-        
-        ifstream in;
-        util.openInputFile(file, in);
-        
         fileOption = 0;
-        
-        while(!in.eof()) {
-            
-            if (m->getControl_pressed()) { return 0; }
-            
-            string line = util.getline(in);  util.gobble(in);
-            vector<string> pieces = util.splitWhiteSpace(line);
-            
-            string group = "";
-            string thisFileName1, thisFileName2, findex, rindex; thisFileName1 = ""; thisFileName2 = ""; findex = ""; rindex = "";
-            if (pieces.size() == 2) {
-                thisFileName1 = pieces[0];
-                thisFileName2 = pieces[1];
-            }else if (pieces.size() == 3) {
-                thisFileName1 = pieces[1];
-                thisFileName2 = pieces[2];
-                group = pieces[0];
-                util.checkGroupName(group);
-                if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
-                if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->setControl_pressed(true); } }
-                else {  thisFileName2 = ""; libLayout = "single"; using3NONE = true; }
-            }else if (pieces.size() == 4) {
-                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true); }
-                thisFileName1 = pieces[0];
-                thisFileName2 = pieces[1];
-                findex = pieces[2];
-                rindex = pieces[3];
-                if ((findex == "none") || (findex == "NONE")){ findex = ""; }
-                if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
-            }else {
-                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->setControl_pressed(true);
-            }
-            
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
-            
-            if (inputDir != "") {
-                string path = util.hasPath(thisFileName1);
-                if (path == "") {  thisFileName1 = inputDir + thisFileName1;  }
-                
-                if (thisFileName2 != "") {
-                    path = util.hasPath(thisFileName2);
-                    if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
-                }
-                
-                if (findex != "") {
-                    path = util.hasPath(findex);
-                    if (path == "") {  findex = inputDir + findex;  }
-                }
-                
-                if (rindex != "") {
-                    path = util.hasPath(rindex);
-                    if (path == "") {  rindex = inputDir + rindex;  }
-                }
-            }
-            
-            //check to make sure both are able to be opened
-            ifstream in2;
-            bool openForward = util.openInputFile(thisFileName1, in2, "noerror");
-            
-            //if you can't open it, try default location
-            if (!openForward) {
-                
-                if (current->getDefaultPath() != "") { //default path is set
-                    string tryPath = current->getDefaultPath() + util.getSimpleName(thisFileName1);
-                    m->mothurOut("Unable to open " + thisFileName1 + ". Trying default " + tryPath); m->mothurOutEndLine();
-                    ifstream in3;
-                    openForward = util.openInputFile(tryPath, in3, "noerror");
-                    in3.close();
-                    thisFileName1 = tryPath;
-                }
-            }
-            
-            //if you can't open it, try output location
-            if (!openForward) {
-                if (current->getOutputDir() != "") { //default path is set
-                    string tryPath = current->getOutputDir() + util.getSimpleName(thisFileName1);
-                    m->mothurOut("Unable to open " + thisFileName1 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                    ifstream in4;
-                    openForward = util.openInputFile(tryPath, in4, "noerror");
-                    thisFileName1 = tryPath;
-                    in4.close();
-                }
-            }
-            
-            if (!openForward) { //can't find it
-                m->mothurOut("[WARNING]: can't find " + thisFileName1 + ", ignoring.\n");
-            }else{  in2.close();  }
-            
-            bool openReverse = true;
-            
-            if (thisFileName2 != "") {
-                ifstream in3;
-                openReverse = util.openInputFile(thisFileName2, in3, "noerror");
-                
-                //if you can't open it, try default location
-                if (!openReverse) {
-                    if (current->getDefaultPath() != "") { //default path is set
-                        string tryPath = current->getDefaultPath() + util.getSimpleName(thisFileName2);
-                        m->mothurOut("Unable to open " + thisFileName2 + ". Trying default " + tryPath); m->mothurOutEndLine();
-                        ifstream in3;
-                        openReverse = util.openInputFile(tryPath, in3, "noerror");
-                        in3.close();
-                        thisFileName2 = tryPath;
-                    }
-                }
-                
-                //if you can't open it, try output location
-                if (!openReverse) {
-                    if (current->getOutputDir() != "") { //default path is set
-                        string tryPath = current->getOutputDir() + util.getSimpleName(thisFileName2);
-                        m->mothurOut("Unable to open " + thisFileName2 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                        ifstream in4;
-                        openReverse = util.openInputFile(tryPath, in4, "noerror");
-                        thisFileName2 = tryPath;
-                        in4.close();
-                    }
-                }
-                
-                if (!openReverse) { //can't find it
-                    m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n");
-                }else{  in3.close();  }
-            }
-            
-            bool openFindex = true;
-            if (findex != "") {
-                ifstream in4;
-                openFindex = util.openInputFile(findex, in4, "noerror"); in4.close();
-                
-                //if you can't open it, try default location
-                if (!openFindex) {
-                    if (current->getDefaultPath() != "") { //default path is set
-                        string tryPath = current->getDefaultPath() + util.getSimpleName(findex);
-                        m->mothurOut("Unable to open " + findex + ". Trying default " + tryPath); m->mothurOutEndLine();
-                        ifstream in5;
-                        openFindex = util.openInputFile(tryPath, in5, "noerror");
-                        in5.close();
-                        findex = tryPath;
-                    }
-                }
-                
-                //if you can't open it, try output location
-                if (!openFindex) {
-                    if (current->getOutputDir() != "") { //default path is set
-                        string tryPath = current->getOutputDir() + util.getSimpleName(findex);
-                        m->mothurOut("Unable to open " + findex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                        ifstream in6;
-                        openFindex = util.openInputFile(tryPath, in6, "noerror");
-                        findex = tryPath;
-                        in6.close();
-                    }
-                }
-                
-                if (!openFindex) { //can't find it
-                    m->mothurOut("[WARNING]: can't find " + findex + ", ignoring pair.\n");
-                }
-            }
-            
-            bool openRindex = true;
-            if (rindex != "") {
-                ifstream in7;
-                openRindex = util.openInputFile(rindex, in7, "noerror"); in7.close();
-                
-                //if you can't open it, try default location
-                if (!openRindex) {
-                    if (current->getDefaultPath() != "") { //default path is set
-                        string tryPath = current->getDefaultPath() + util.getSimpleName(rindex);
-                        m->mothurOut("Unable to open " + rindex + ". Trying default " + tryPath); m->mothurOutEndLine();
-                        ifstream in8;
-                        openRindex = util.openInputFile(tryPath, in8, "noerror");
-                        in8.close();
-                        rindex = tryPath;
-                    }
-                }
-                
-                //if you can't open it, try output location
-                if (!openRindex) {
-                    if (current->getOutputDir() != "") { //default path is set
-                        string tryPath = current->getOutputDir() + util.getSimpleName(rindex);
-                        m->mothurOut("Unable to open " + rindex + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                        ifstream in9;
-                        openRindex = util.openInputFile(tryPath, in9, "noerror");
-                        rindex = tryPath;
-                        in9.close();
-                    }
-                }
-                
-                if (!openRindex) { //can't find it
-                    m->mothurOut("[WARNING]: can't find " + rindex + ", ignoring pair.\n");
-                }
-            }
 
+        FileFile dataFile(inputfile, "sra");
+        vector< vector<string> > dataFiles = dataFile.getFiles();
+        int dataFileFormat = dataFile.getFileFormat();
+        map<int, string> file2Group = dataFile.getFile2Group();
+        
+        if (dataFile.containsIndexFiles() && (!setOligosParameter)) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true);  }
+        
+        if (dataFileFormat == 2) { //3 column file
+            if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
+        }
+        
+        
+        for (int i = 0; i < dataFiles.size(); i++) {
+            string group = "";
+            string thisFileName1, thisFileName2, findex, rindex;
+            thisFileName1 = dataFiles[i][0]; thisFileName2 = dataFiles[i][1]; findex = dataFiles[i][2]; rindex = dataFiles[i][3];
             
-            if ((pieces.size() == 2) && (openForward) && (openReverse)) { //good pair and sff or fastq and oligos
+            if (dataFileFormat == 1) { //2 column
                 libLayout = "single";
                 if (!setOligosParameter) {
                     //process pair
@@ -1208,7 +1028,10 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: done parsing " + fastqfile + "\n"); }
                     }
                 }else {  runParseFastqFile = true;  libLayout = "paired"; fileOption = 3; }
-            }else if((pieces.size() == 3) && (openForward) && (openReverse)) { //good pair and paired read
+            }else if (dataFileFormat == 2) { //3 column
+                if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->setControl_pressed(true); } }
+                else {  thisFileName2 = ""; libLayout = "single"; using3NONE = true; }
+                
                 string thisname = thisFileName1 + " " + thisFileName2;
                 if (using3NONE) { thisname = thisFileName1;  }
                 map<string, vector<string> >::iterator it = files.find(group);
@@ -1219,12 +1042,14 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     files[group].push_back(thisname);
                 }
                 fileOption = 4;
-            }else if ((pieces.size() == 4) && (openForward) && (openReverse) && (openFindex) && (openRindex)) {
+
+            }else if (dataFileFormat == 3) { //4 column
+                if ((findex == "none") || (findex == "NONE")){ findex = ""; }
+                if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
                 libLayout = "paired"; runParseFastqFile = true; fileOption = 5;
             }
         }
-        in.close();
-        
+
         if (runParseFastqFile) {
             
             vector<string> theseFiles;
@@ -1239,9 +1064,8 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             if (tdiffs != 0) { commandString += ", tdiffs=" + toString(tdiffs); }
             if (util.isTrue(checkorient)) { commandString += ", checkorient=" + checkorient; }
             
-            m->mothurOutEndLine();
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
+            m->mothurOut("\n/******************************************/\n");
+            m->mothurOut("Running command: fastq.info(" + commandString + ")\n");
             current->setMothurCalling(true);
             
             Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
@@ -1254,7 +1078,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             
             delete fastqinfoCommand;
             current->setMothurCalling(false);
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("/******************************************/\n");
             
             for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
             
@@ -1262,7 +1086,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             fixMap(files);
         }
         
-        inputfile = file;
+        if (files.size() == 0) { m->setControl_pressed(true); }
         
         return 0;
     }
@@ -1339,9 +1163,8 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         if (tdiffs != 0) { commandString += ", tdiffs=" + toString(tdiffs); }
         if (util.isTrue(checkorient)) { commandString += ", checkorient=" + checkorient; }
        
-        m->mothurOutEndLine();
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-        m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
+        m->mothurOut("\n/******************************************/\n");
+        m->mothurOut("Running command: fastq.info(" + commandString + ")\n");
         current->setMothurCalling(true);
         
         Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
@@ -1354,7 +1177,7 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         
         delete fastqinfoCommand;
         current->setMothurCalling(false);
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("/******************************************/\n");
         
         for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
         
@@ -1475,8 +1298,10 @@ int SRACommand::checkGroups(map<string, vector<string> >& files){
 	}
 }
 //***************************************************************************************************************
-int SRACommand::readOligos(){
+bool SRACommand::readOligos(){
 	try {
+        set<string> uniqueNames; uniqueNames.insert("scrap");
+        
         Oligos oligos;
         if ((fileOption == 3) || (fileOption == 5)) { oligos.read(oligosfile, false);  } //like make.contigs
         else {  oligos.read(oligosfile);  }
@@ -1494,164 +1319,9 @@ int SRACommand::readOligos(){
         for (int i = 0; i < thisFilesSpacers.size(); i++) { spacers.push_back(thisFilesSpacers[i]); break; }
         if (thisFilesSpacers.size() > 1) { m->mothurOut("[WARNING]: the make.sra command only allows for the use of one spacer at a time, disregarding all but first one.\n");  }
         
-        if (pairedOligos) {
-            map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
-            map<int, oligosPair> primers = oligos.getPairedPrimers();
-            for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                    
-                    string primerName = oligos.getPrimerName(itPrimer->first);
-                    string barcodeName = oligos.getBarcodeName(itBar->first);
-                    
-                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
-                    else {
-                        string comboGroupName = "";
-                        string comboName = "";
-                        
-                        if(primerName == ""){
-                            comboGroupName = barcodeName;
-                        }else{
-                            if(barcodeName == ""){
-                                comboGroupName = primerName;
-                            }
-                            else{
-                                comboGroupName = barcodeName + "." + primerName;
-                            }
-                        }
-                        
-                        if(((itPrimer->second).forward+(itPrimer->second).reverse) == ""){
-                            if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
-                            if ((itBar->second).reverse != "NONE") {
-                                if (comboName == "") {  comboName += (itBar->second).reverse; }
-                                else {  comboName += ("."+(itBar->second).reverse);  }
-                            }
-                        }else{
-                            if(((itBar->second).forward+(itBar->second).reverse) == ""){
-                                if ((itPrimer->second).forward != "NONE") { comboName += (itPrimer->second).forward; }
-                                if ((itPrimer->second).reverse != "NONE") {
-                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
-                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
-                                }
-                            }
-                            else{
-                                if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
-                                if ((itBar->second).reverse != "NONE") {
-                                    if (comboName == "") {  comboName += (itBar->second).reverse; }
-                                    else {  comboName += ("."+(itBar->second).reverse);  }
-                                }
-                                if ((itPrimer->second).forward != "NONE") {
-                                    if (comboName == "") {  comboName += (itPrimer->second).forward; }
-                                    else {  comboName += ("."+(itPrimer->second).forward);  }
-                                }
-                                if ((itPrimer->second).reverse != "NONE") {
-                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
-                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
-                                }
-                            }
-                        }
-                        
-                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
-                        uniqueNames.insert(comboGroupName);
-                        
-                        map<string, string>::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
-                        if (itGroup2Barcode == Group2Barcode.end()) {
-                            string temp = (itBar->second).forward+"."+(itBar->second).reverse;
-                            Group2Barcode[comboGroupName] = temp;
-                        }else {
-                            string temp = (itBar->second).forward+"."+(itBar->second).reverse;
-                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
-                                m->mothurOut("[ERROR]: group and barcodes/primers not unique. Should never get here.\n");
-                            }
-                        }
-                        
-                        itGroup2Barcode = Group2Primer.find(comboGroupName);
-                        if (itGroup2Barcode == Group2Primer.end()) {
-                            string temp = ((itPrimer->second).forward+"."+(itPrimer->second).reverse);
-                            Group2Primer[comboGroupName] = temp;
-                        }else {
-                            string temp = ((itPrimer->second).forward+"."+(itPrimer->second).reverse);
-                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
-                                m->mothurOut("[ERROR]: group and barcodes/primers not unique. Should never get here.\n");
-                            }
-                        }
-                    }
-                }
-            }
-        }else {
-            map<string, int> barcodes = oligos.getBarcodes() ;
-            map<string, int> primers = oligos.getPrimers();
-            for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                    
-                    string primerName = oligos.getPrimerName(itPrimer->second);
-                    string barcodeName = oligos.getBarcodeName(itBar->second);
-                    
-                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
-                    else {
-                        string comboGroupName = "";
-                        string comboName = "";
-                        
-                        if(primerName == ""){
-                            comboGroupName = barcodeName;
-                        }else{
-                            if(barcodeName == ""){
-                                comboGroupName = primerName;
-                            }
-                            else{
-                                comboGroupName = barcodeName + "." + primerName;
-                            }
-                        }
-                        
-                        if(itPrimer->first == ""){
-                            comboName = itBar->first;
-                        }else{
-                            if(itBar->first == ""){
-                                comboName = itPrimer->first;
-                            }
-                            else{
-                                comboName = itBar->first + "." + itPrimer->first;
-                            }
-                        }
-                       
-                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
-                        uniqueNames.insert(comboGroupName);
-                        
-                        map<string, string >::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
-                        if (itGroup2Barcode == Group2Barcode.end()) {
-                            string temp = (itBar->first);
-                            Group2Barcode[comboGroupName] = temp;
-                        }else {
-                            string temp = (itBar->first);
-                           if ((temp != ".") && (temp != itGroup2Barcode->second)) {
-                                m->mothurOut("[ERROR]: group and barcodes/primers not unique. Should never get here.\n");
-                            }
-                        }
-                        
-                        itGroup2Barcode = Group2Primer.find(comboGroupName);
-                        if (itGroup2Barcode == Group2Primer.end()) {
-                            string temp = (itPrimer->first);
-                            Group2Primer[comboGroupName] = temp;
-                        }else {
-                            string temp = (itPrimer->first);
-                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
-                                m->mothurOut("[ERROR]: group and barcodes/primers not unique. Should never get here.\n");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (m->getDebug()) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
-        
-        Groups.clear();
-        for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  Groups.push_back(*it);  }
-        
+        Groups = oligos.getSRAGroupNames();
         
 		return true;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SRACommand", "readOligos");

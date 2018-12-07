@@ -84,7 +84,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(){
 GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 	try {
         
-        abort = false; calledHelp = false; fileOption = 0;
+        abort = false; calledHelp = false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -152,7 +152,7 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
             file = validParameter.validFile(parameters, "file");
 			if (file == "not open") {  file = "";  abort = true; }
 			else if (file == "not found") { file = ""; }
-            else {  inputfile = file;  fileOption = findFileOption();  }
+            else {  inputfile = file;    }
             
             
             if ((groupfile == "") && (oligosfile == "") && (file == "")) {
@@ -436,134 +436,39 @@ int GetMIMarksPackageCommand::execute(){
  
  My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
  ...
+ 
+ 
+ 
+ ***** We are just looking for the group names, so we only care about option 4 and 1 or 2. *****
  */
 
 int GetMIMarksPackageCommand::readFile(){
 	try {
-        
         inputfile = file;
-        int format = 2;
         
-        ifstream in;
-        util.openInputFile(file, in);
+        FileFile dataFile(file, "mimarks");
+        vector< vector<string> > files = dataFile.getFiles();
+        int fileOption = dataFile.getFileFormat();
         
-        while(!in.eof()) {
+        if (m->getControl_pressed()) { return 0; }
+        
+        if (fileOption == 2) { // 3 column file with group names
             
-            Oligos oligos;
+            map<int, string> fileIndex2GroupName = dataFile.getFile2Group();
+            for (map<int, string>::iterator it = fileIndex2GroupName.begin(); it != fileIndex2GroupName.end(); it++)  { Groups.insert(it->second); }
             
-            if (m->getControl_pressed()) { return 0; }
+        }else if (fileOption == 1) { //2 column format, extract names from oligos file
             
-            string line = util.getline(in);  util.gobble(in);
-            vector<string> pieces = util.splitWhiteSpace(line);
-            
-            string group = "";
-            string thisFileName1, thisFileName2; thisFileName1 = ""; thisFileName2 = "";
-            if (pieces.size() == 2) {
-                thisFileName1 = pieces[0];
-                thisFileName2 = pieces[1];
-            }else if (pieces.size() == 3) {
-                thisFileName1 = pieces[1];
-                thisFileName2 = pieces[2];
-                group = pieces[0];
-                util.checkGroupName(group);
-            }else if (pieces.size() == 4) {
-                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true); }
-                thisFileName1 = pieces[0];
-                thisFileName2 = pieces[1];
-            }else {
-                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->setControl_pressed(true);
+            for (int i = 0; i < files.size(); i++) {
+                oligosfile = files[i][1]; //second column file
+                Oligos oligos; oligos.read(oligosfile);
+                createGroupNames(oligos); // adding in groupNames from this file
             }
             
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
+        }else if (fileOption == 3) { //4 column format, make sure oligos parameter was set
             
-            if (inputDir != "") {
-                string path = util.hasPath(thisFileName2);
-                if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
-                
-                path = util.hasPath(thisFileName1);
-                if (path == "") {  thisFileName1 = inputDir + thisFileName1;  }
-            }
-            
-            //check to make sure both are able to be opened
-            ifstream in2;
-            bool openForward = util.openInputFile(thisFileName1, in2, "noerror");
-            
-            //if you can't open it, try default location
-            if (!openForward) {
-                if (current->getDefaultPath() != "") { //default path is set
-                    string tryPath = current->getDefaultPath() + util.getSimpleName(thisFileName1);
-                    m->mothurOut("Unable to open " + thisFileName1 + ". Trying default " + tryPath); m->mothurOutEndLine();
-                    ifstream in3;
-                    openForward = util.openInputFile(tryPath, in3, "noerror");
-                    in3.close();
-                    thisFileName1 = tryPath;
-                }
-            }
-            
-            //if you can't open it, try output location
-            if (!openForward) {
-                if (current->getOutputDir() != "") { //default path is set
-                    string tryPath = current->getOutputDir() + util.getSimpleName(thisFileName1);
-                    m->mothurOut("Unable to open " + thisFileName1 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                    ifstream in4;
-                    openForward = util.openInputFile(tryPath, in4, "noerror");
-                    thisFileName1 = tryPath;
-                    in4.close();
-                }
-            }
-            
-            if (!openForward) { //can't find it
-                m->mothurOut("[WARNING]: can't find " + thisFileName1 + ", ignoring.\n");
-            }else{  in2.close();  }
-            
-            bool openReverse = true;
-            
-            ifstream in3;
-            openReverse = util.openInputFile(thisFileName2, in3, "noerror");
-            
-            //if you can't open it, try default location
-            if (!openReverse) {
-                if (current->getDefaultPath() != "") { //default path is set
-                    string tryPath = current->getDefaultPath() + util.getSimpleName(thisFileName2);
-                    m->mothurOut("Unable to open " + thisFileName2 + ". Trying default " + tryPath); m->mothurOutEndLine();
-                    ifstream in3;
-                    openReverse = util.openInputFile(tryPath, in3, "noerror");
-                    in3.close();
-                    thisFileName2 = tryPath;
-                }
-            }
-            
-            //if you can't open it, try output location
-            if (!openReverse) {
-                if (current->getOutputDir() != "") { //default path is set
-                    string tryPath = current->getOutputDir() + util.getSimpleName(thisFileName2);
-                    m->mothurOut("Unable to open " + thisFileName2 + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                    ifstream in4;
-                    openReverse = util.openInputFile(tryPath, in4, "noerror");
-                    thisFileName2 = tryPath;
-                    in4.close();
-                }
-            }
-            
-            if (!openReverse) { //can't find it
-                m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n");
-            }else{  in3.close();  }
-            
-            
-            if ((pieces.size() == 2) && (openForward) && (openReverse)) { //good pair and sff or fastq and oligos
-                    oligosfile = thisFileName2;
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: about to read oligos\n"); }
-                    oligos.read(oligosfile);
-                    createGroupNames(oligos); // adding in groupNames from this file
-                format = 2;
-            }else if((pieces.size() == 3) && (openForward) && (openReverse)) { //good pair and paired read
-                Groups.insert(group);
-                format = 3;
-            }
+            if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true); }
         }
-        in.close();
-        
-        inputfile = file;
         
         return 0;
     }
@@ -574,251 +479,19 @@ int GetMIMarksPackageCommand::readFile(){
 }
 //**********************************************************************************************************************
 
-set<string> GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
+void GetMIMarksPackageCommand::createGroupNames(Oligos& oligos) {
     try {
-        bool pairedOligos = false;
-        
-        if (oligos.hasPairedPrimers() || oligos.hasPairedBarcodes()) {      pairedOligos = true;        }
-        
-        vector<string> groupNames = oligos.getGroupNames();
-        if (groupNames.size() == 0) { return Groups;  }
-        
-        if (pairedOligos) {
-            //overwrite global oligos - assume fastq data like make.contigs
-            Oligos oligos;
-            if ((fileOption == 3) || (fileOption == 5)) { oligos.read(oligosfile, false);  } //like make.contigs
-            else {  oligos.read(oligosfile, false);  }
-            
-            map<int, oligosPair> barcodes = oligos.getPairedBarcodes();
-            map<int, oligosPair> primers = oligos.getPairedPrimers();
-            for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                    
-                    string primerName = oligos.getPrimerName(itPrimer->first);
-                    string barcodeName = oligos.getBarcodeName(itBar->first);
-                    
-                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
-                    else {
-                        string comboGroupName = "";
-                        string comboName = "";
-                        
-                        if(primerName == ""){
-                            comboGroupName = barcodeName;
-                        }else{
-                            if(barcodeName == ""){
-                                comboGroupName = primerName;
-                            }
-                            else{
-                                comboGroupName = barcodeName + "." + primerName;
-                            }
-                        }
-                        
-                        if(((itPrimer->second).forward+(itPrimer->second).reverse) == ""){
-                            if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
-                            if ((itBar->second).reverse != "NONE") {
-                                if (comboName == "") {  comboName += (itBar->second).reverse; }
-                                else {  comboName += ("."+(itBar->second).reverse);  }
-                            }
-                        }else{
-                            if(((itBar->second).forward+(itBar->second).reverse) == ""){
-                                if ((itPrimer->second).forward != "NONE") { comboName += (itPrimer->second).forward; }
-                                if ((itPrimer->second).reverse != "NONE") {
-                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
-                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
-                                }
-                            }
-                            else{
-                                if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
-                                if ((itBar->second).reverse != "NONE") {
-                                    if (comboName == "") {  comboName += (itBar->second).reverse; }
-                                    else {  comboName += ("."+(itBar->second).reverse);  }
-                                }
-                                if ((itPrimer->second).forward != "NONE") {
-                                    if (comboName == "") {  comboName += (itPrimer->second).forward; }
-                                    else {  comboName += ("."+(itPrimer->second).forward);  }
-                                }
-                                if ((itPrimer->second).reverse != "NONE") {
-                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
-                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
-                                }
-                            }
-                        }
-                        
-                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
-                        Groups.insert(comboGroupName);
-                        
-                        map<string, string>::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
-                        if (itGroup2Barcode == Group2Barcode.end()) {
-                            string temp = (itBar->second).forward+"."+(itBar->second).reverse;
-                            Group2Barcode[comboGroupName] = temp;
-                        }else {
-                            string temp = (itBar->second).forward+"."+(itBar->second).reverse;
-                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
-                                m->mothurOut("[ERROR]: groupName = " + comboGroupName + "\t" + temp + "\t" + itGroup2Barcode->second + " group and barcodes/primers not unique. Should never get here.\n");
-                            }
-                        }
-                        
-                        itGroup2Barcode = Group2Primer.find(comboGroupName);
-                        if (itGroup2Barcode == Group2Primer.end()) {
-                            string temp = ((itPrimer->second).forward+"."+(itPrimer->second).reverse);
-                            Group2Primer[comboGroupName] = temp;
-                        }else {
-                            string temp = ((itPrimer->second).forward+"."+(itPrimer->second).reverse);
-                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
-                                m->mothurOut("[ERROR]: groupName = " + comboGroupName + "\t" + temp + "\t" + itGroup2Barcode->second + " group and barcodes/primers not unique. Should never get here.\n");
-                            }
-                        }
-
-                    }
-                }
-            }
-        }else {
-            map<string, int> barcodes = oligos.getBarcodes() ;
-            map<string, int> primers = oligos.getPrimers();
-            for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
-                for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
-                    
-                    string primerName = oligos.getPrimerName(itPrimer->second);
-                    string barcodeName = oligos.getBarcodeName(itBar->second);
-                    
-                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
-                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
-                    else {
-                        string comboGroupName = "";
-                        string comboName = "";
-                        
-                        if(primerName == ""){
-                            comboGroupName = barcodeName;
-                        }else{
-                            if(barcodeName == ""){
-                                comboGroupName = primerName;
-                            }
-                            else{
-                                comboGroupName = barcodeName + "." + primerName;
-                            }
-                        }
-                        
-                        if(itPrimer->first == ""){
-                            comboName = itBar->first;
-                        }else{
-                            if(itBar->first == ""){
-                                comboName = itPrimer->first;
-                            }
-                            else{
-                                comboName = itBar->first + "." + itPrimer->first;
-                            }
-                        }
-                        
-                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
-                        Groups.insert(comboGroupName);
-                        
-                        map<string, string >::iterator itGroup2Barcode = Group2Barcode.find(comboGroupName);
-                        if (itGroup2Barcode == Group2Barcode.end()) {
-                            string temp = (itBar->first);
-                            Group2Barcode[comboGroupName] = temp;
-                        }else {
-                            string temp = (itBar->first);
-                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
-                                m->mothurOut("[ERROR]: groupName = " + comboGroupName + "\t" + temp + "\t" + itGroup2Barcode->second + " group and barcodes/primers not unique. Should never get here.\n");
-                            }
-                        }
-                        
-                        itGroup2Barcode = Group2Primer.find(comboGroupName);
-                        if (itGroup2Barcode == Group2Primer.end()) {
-                            string temp = (itPrimer->first);
-                            Group2Primer[comboGroupName] = temp;
-                        }else {
-                            string temp = (itPrimer->first);
-                            if ((temp != ".") && (temp != itGroup2Barcode->second)) {
-                               m->mothurOut("[ERROR]: groupName = " + comboGroupName + "\t" + temp + "\t" + itGroup2Barcode->second + " group and barcodes/primers not unique. Should never get here.\n");
-                            }
-                        }
-
-                    }
-                }
-            }
+        vector<string> groupNames = oligos.getSRAGroupNames();
+        if (groupNames.size() == 0) {   m->mothurOut("[ERROR]: your oligos file does not contain any group names.\n");  m->setControl_pressed(true);  }
+        else {
+            for (int i = 0; i < groupNames.size(); i++) { Groups.insert(groupNames[i]); }
         }
-        
-        if (Groups.size() == 0) {
-            m->mothurOut("[ERROR]: your oligos file does not contain any group names."); m->mothurOutEndLine(); m->setControl_pressed(true);
-        }
-        
-        return Groups;
     }
     catch(exception& e) {
         m->errorOut(e, "GetMIMarksPackageCommand", "createGroupNames");
         exit(1);
     }
 }
-//**********************************************************************************************************************
-/*
- file option 1
- 
- sfffile1   oligosfile1
- sfffile2   oligosfile2
- ...
- 
- file option 2
- 
- fastqfile1 oligosfile1
- fastqfile2 oligosfile2
- ...
- 
- file option 3
- 
- ffastqfile1 rfastqfile1
- ffastqfile2 rfastqfile2
- ...
- 
- file option 4
- 
- group fastqfile  fastqfile
- group fastqfile  fastqfile
- group fastqfile  fastqfile
- ...
- 
- file option 5
- 
- My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
- ...
- */
-
-int GetMIMarksPackageCommand::findFileOption(){
-    try {
-        ifstream in;
-        util.openInputFile(file, in);
-        
-        fileOption = 0;
-        
-        while(!in.eof()) {
-            
-            if (m->getControl_pressed()) { return 0; }
-            
-            string line = util.getline(in);  util.gobble(in);
-            vector<string> pieces = util.splitWhiteSpace(line);
-            
-            if (pieces.size() == 2) { //good pair and sff or fastq and oligos
-                if (!setOligosParameter) {
-                    fileOption = 12; //1 or 2
-                }else {  fileOption = 3; }
-            }else if(pieces.size() == 3) { //good pair and paired read
-                fileOption = 4;
-            }else if (pieces.size() == 4) {
-                fileOption = 5;
-            }
-            break;
-        }
-        in.close();
-        
-        return fileOption;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "GetMIMarksPackageCommand", "findFileOption");
-        exit(1);
-    }
-}
-
 //**********************************************************************************************************************
 
 
