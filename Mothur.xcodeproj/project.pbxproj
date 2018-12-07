@@ -879,8 +879,8 @@
 		4803D5B821271B47001C63B5 /* 454sop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = 454sop.hpp; path = TestMothur/IntegrationTests/454sop.hpp; sourceTree = SOURCE_ROOT; };
 		48098ED4219DE7A500031FA4 /* testsubsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testsubsample.cpp; sourceTree = "<group>"; };
 		48098ED5219DE7A500031FA4 /* testsubsample.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testsubsample.hpp; sourceTree = "<group>"; };
-		48098ED721B8601300031FA4 /* filefile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filefile.cpp; sourceTree = "<group>"; };
-		48098ED821B8601300031FA4 /* filefile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = filefile.hpp; sourceTree = "<group>"; };
+		48098ED721B8601300031FA4 /* filefile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filefile.cpp; sourceTree = SOURCE_ROOT; };
+		48098ED821B8601300031FA4 /* filefile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = filefile.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -2378,7 +2378,6 @@
 				A7C3DC0A14FE457500FE1924 /* cooccurrencecommand.h */,
 				A7C3DC0914FE457500FE1924 /* cooccurrencecommand.cpp */,
 				A7E9B6BA12D37EC400DA6239 /* corraxescommand.h */,
-				A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */,
 				A795840B13F13CD900F201D5 /* countgroupscommand.h */,
 				A795840C13F13CD900F201D5 /* countgroupscommand.cpp */,
 				A7730EFD13967241007433A3 /* countseqscommand.h */,
@@ -2425,6 +2424,7 @@
 				A7E9B6FE12D37EC400DA6239 /* getoturepcommand.cpp */,
 				A70056E8156A93E300924A2D /* getotulabelscommand.h */,
 				A70056E5156A93D000924A2D /* getotulabelscommand.cpp */,
+				A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */,
 				A7E9B70312D37EC400DA6239 /* getrabundcommand.h */,
 				A7E9B70212D37EC400DA6239 /* getrabundcommand.cpp */,
 				A7E9B70512D37EC400DA6239 /* getrelabundcommand.h */,
