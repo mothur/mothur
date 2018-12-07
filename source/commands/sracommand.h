@@ -12,6 +12,7 @@
 #include "command.hpp"
 #include "trimoligos.h"
 #include "oligos.h"
+#include "filefile.hpp"
 
 /**************************************************************************************************/
 

@@ -984,95 +984,26 @@ int SRACommand::readFile(map<string, vector<string> >& files){
         bool using3NONE = false;
         inputfile = file;
         files.clear();
-        
-        ifstream in;
-        util.openInputFile(file, in);
-        
         fileOption = 0;
-        
-        while(!in.eof()) {
-            
-            if (m->getControl_pressed()) { return 0; }
-            
-            string line = util.getline(in);  util.gobble(in);
-            vector<string> pieces = util.splitWhiteSpace(line);
-            
-            string group = "";
-            string thisFileName1, thisFileName2, findex, rindex; thisFileName1 = ""; thisFileName2 = ""; findex = ""; rindex = "";
-            if (pieces.size() == 2) {
-                thisFileName1 = pieces[0];
-                thisFileName2 = pieces[1];
-            }else if (pieces.size() == 3) {
-                thisFileName1 = pieces[1];
-                thisFileName2 = pieces[2];
-                group = pieces[0];
-                util.checkGroupName(group);
-                if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
-                if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->setControl_pressed(true); } }
-                else {  thisFileName2 = ""; libLayout = "single"; using3NONE = true; }
-            }else if (pieces.size() == 4) {
-                if (!setOligosParameter) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true); }
-                thisFileName1 = pieces[0];
-                thisFileName2 = pieces[1];
-                findex = pieces[2];
-                rindex = pieces[3];
-                if ((findex == "none") || (findex == "NONE")){ findex = ""; }
-                if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
-            }else {
-                m->mothurOut("[ERROR]: file lines can be 2, 3 or 4 columns. The 2 column files are sff file then oligos or fastqfile then oligos or ffastq and rfastq. You may have multiple lines in the file.  The 3 column files are for paired read libraries. The format is groupName, forwardFastqFile reverseFastqFile. Four column files are for inputting file pairs with index files. Example: My.forward.fastq My.reverse.fastq NONE My.rindex.fastq. The keyword NONE can be used when there is not a index file for either the forward or reverse file.\n"); m->setControl_pressed(true);
-            }
-            
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", thisFileName1 = " + thisFileName1 + ", thisFileName2 = " + thisFileName2  + ".\n"); }
-            
-            if (inputDir != "") {
-                string path = util.hasPath(thisFileName1);
-                if (path == "") {  thisFileName1 = inputDir + thisFileName1;  }
-                
-                if (thisFileName2 != "") {
-                    path = util.hasPath(thisFileName2);
-                    if (path == "") {  thisFileName2 = inputDir + thisFileName2;  }
-                }
-                
-                if (findex != "") {
-                    path = util.hasPath(findex);
-                    if (path == "") {  findex = inputDir + findex;  }
-                }
-                
-                if (rindex != "") {
-                    path = util.hasPath(rindex);
-                    if (path == "") {  rindex = inputDir + rindex;  }
-                }
-            }
-            
-            //check to make sure both are able to be opened
-            bool openForward = util.checkLocations(thisFileName1, current->getLocations());
-            if (openForward) {
-                if (util.isBlank(thisFileName1)) { m->mothurOut("[WARNING]: " + thisFileName1 + " is blank, skipping.\n"); openForward=false; }
-            }else { m->mothurOut("[WARNING]: can't find " + thisFileName1 + ", ignoring pair.\n"); }
-            
-            bool openReverse = util.checkLocations(thisFileName2, current->getLocations());
-            if (openReverse) {
-                if (util.isBlank(thisFileName2)) { m->mothurOut("[WARNING]: " + thisFileName2 + " is blank, skipping.\n"); openReverse=false; }
-            }else { m->mothurOut("[WARNING]: can't find " + thisFileName2 + ", ignoring pair.\n"); }
-            
-            
-            bool openFindex = true;
-            if ((findex != "") && (findex != "NONE")){
-                openFindex = util.checkLocations(findex, current->getLocations());
-                if (openFindex) {
-                    if (util.isBlank(findex)) { m->mothurOut("[WARNING]: " + findex + " is blank, skipping.\n"); openFindex=false; }
-                }else { m->mothurOut("[WARNING]: can't find " + findex + ", ignoring pair.\n"); }
-            }
-            
-            bool openRindex = true;
-            if ((rindex != "") && (rindex != "NONE")) {
-                openRindex = util.checkLocations(rindex, current->getLocations());
-                if (openRindex) {
-                    if (util.isBlank(rindex)) { m->mothurOut("[WARNING]: " + rindex + " is blank, skipping.\n"); openRindex=false; }
-                }else { m->mothurOut("[WARNING]: can't find " + rindex + ", ignoring pair.\n"); }
-            }
 
-            if ((pieces.size() == 2) && (openForward) && (openReverse)) { //good pair and sff or fastq and oligos
+        FileFile dataFile(inputfile, "sra");
+        vector< vector<string> > dataFiles = dataFile.getFiles();
+        int dataFileFormat = dataFile.getFileFormat();
+        map<int, string> file2Group = dataFile.getFile2Group();
+        
+        if (dataFile.containsIndexFiles() && (!setOligosParameter)) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true);  }
+        
+        if (dataFileFormat == 2) { //3 column file
+            if (setOligosParameter) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
+        }
+        
+        
+        for (int i = 0; i < dataFiles.size(); i++) {
+            string group = "";
+            string thisFileName1, thisFileName2, findex, rindex;
+            thisFileName1 = dataFiles[i][0]; thisFileName2 = dataFiles[i][1]; findex = dataFiles[i][2]; rindex = dataFiles[i][3];
+            
+            if (dataFileFormat == 1) { //2 column
                 libLayout = "single";
                 if (!setOligosParameter) {
                     //process pair
@@ -1097,7 +1028,10 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: done parsing " + fastqfile + "\n"); }
                     }
                 }else {  runParseFastqFile = true;  libLayout = "paired"; fileOption = 3; }
-            }else if((pieces.size() == 3) && (openForward) && (openReverse)) { //good pair and paired read
+            }else if (dataFileFormat == 2) { //3 column
+                if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->setControl_pressed(true); } }
+                else {  thisFileName2 = ""; libLayout = "single"; using3NONE = true; }
+                
                 string thisname = thisFileName1 + " " + thisFileName2;
                 if (using3NONE) { thisname = thisFileName1;  }
                 map<string, vector<string> >::iterator it = files.find(group);
@@ -1108,12 +1042,14 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                     files[group].push_back(thisname);
                 }
                 fileOption = 4;
-            }else if ((pieces.size() == 4) && (openForward) && (openReverse) && (openFindex) && (openRindex)) {
+
+            }else if (dataFileFormat == 3) { //4 column
+                if ((findex == "none") || (findex == "NONE")){ findex = ""; }
+                if ((rindex == "none") || (rindex == "NONE")){ rindex = ""; }
                 libLayout = "paired"; runParseFastqFile = true; fileOption = 5;
             }
         }
-        in.close();
-        
+
         if (runParseFastqFile) {
             
             vector<string> theseFiles;
@@ -1128,9 +1064,8 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             if (tdiffs != 0) { commandString += ", tdiffs=" + toString(tdiffs); }
             if (util.isTrue(checkorient)) { commandString += ", checkorient=" + checkorient; }
             
-            m->mothurOutEndLine();
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
+            m->mothurOut("\n/******************************************/\n");
+            m->mothurOut("Running command: fastq.info(" + commandString + ")\n");
             current->setMothurCalling(true);
             
             Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
@@ -1143,7 +1078,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             
             delete fastqinfoCommand;
             current->setMothurCalling(false);
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("/******************************************/\n");
             
             for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
             
@@ -1151,7 +1086,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
             fixMap(files);
         }
         
-        inputfile = file;
+        if (files.size() == 0) { m->setControl_pressed(true); }
         
         return 0;
     }
@@ -1228,9 +1163,8 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         if (tdiffs != 0) { commandString += ", tdiffs=" + toString(tdiffs); }
         if (util.isTrue(checkorient)) { commandString += ", checkorient=" + checkorient; }
        
-        m->mothurOutEndLine();
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-        m->mothurOut("Running command: fastq.info(" + commandString + ")"); m->mothurOutEndLine();
+        m->mothurOut("\n/******************************************/\n");
+        m->mothurOut("Running command: fastq.info(" + commandString + ")\n");
         current->setMothurCalling(true);
         
         Command* fastqinfoCommand = new ParseFastaQCommand(commandString);
@@ -1243,7 +1177,7 @@ int SRACommand::parseFastqFile(map<string, vector<string> >& files){
         
         delete fastqinfoCommand;
         current->setMothurCalling(false);
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("/******************************************/\n");
         
         for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
         
