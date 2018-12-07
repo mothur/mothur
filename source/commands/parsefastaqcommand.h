@@ -17,6 +17,7 @@
 #include "fastqread.h"
 #include "groupmap.h"
 #include "oligos.h"
+#include "filefile.hpp"
 
 
 class ParseFastaQCommand : public Command {
