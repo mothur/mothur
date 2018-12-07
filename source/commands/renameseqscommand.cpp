@@ -458,8 +458,7 @@ int RenameSeqsCommand::execute() {
         
         if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]);  } return 0; }
 
-        m->mothurOutEndLine();
-        m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names:\n ");
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
         m->mothurOutEndLine();
         
@@ -752,34 +751,33 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
 vector<map<string, string> > RenameSeqsCommand::readFiles(){
     try {
         
+        FileFile dataFile(fileFile, "renameSeqs");
+        vector< vector<string> > dataFiles = dataFile.getFiles();
+        int dataFileFormat = dataFile.getFileFormat();
+        map<int, string> file2Group = dataFile.getFile2Group();
+        
+        if (dataFileFormat == 3) { //4 column
+            m->mothurOut("[ERROR]: Your file contains " + toString(4) + " columns. The rename.seqs file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->setControl_pressed(true);
+        }
+
         vector<map<string, string> > files;
-        
-        ifstream in;
-        util.openInputFile(fileFile, in);
-        
-        while (!in.eof()) {
-            if (m->getControl_pressed()) { break; }
-            
-            string line = util.getline(in);  util.gobble(in);
-            vector<string> pieces = util.splitWhiteSpace(line);
-            
+        for (int i = 0; i < dataFiles.size(); i++) {
             string group = "";
             string thisFileName; thisFileName = "";
-            if (pieces.size() == 2) {
-                thisFileName = pieces[0]+"-"+pieces[1];
-            }else if (pieces.size() == 3) {
-                thisFileName = pieces[0]+"-"+pieces[1];
-                group = pieces[2];
-                util.checkGroupName(group);
-            }else {
-                m->mothurOut("[ERROR]: Your file contains " + toString(pieces.size()) + " columns. TThe file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->setControl_pressed(true);
+            string thisFileName1, thisFileName2;
+            thisFileName1 = dataFiles[i][0]; thisFileName2 = dataFiles[i][1];
+            
+            if (dataFileFormat == 1) { //2 column
+                thisFileName = thisFileName1+"-"+thisFileName2;
+            }else if (dataFileFormat == 2) { //3 column
+                thisFileName = thisFileName1+"-"+thisFileName2;
+                group = file2Group[i];
             }
             
             map<string, string> temp; temp[thisFileName] = group;
             files.push_back(temp);
         }
-        in.close();
-        
+
         return files;
     }
     catch(exception& e) {
