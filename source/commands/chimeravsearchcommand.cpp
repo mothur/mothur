@@ -160,7 +160,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                         fastaFileNames[i] = current->getFastaFile();
                         if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
                         else {
-                            m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true;
+                            m->mothurOut("You have no current fastafile, ignoring current.\n"); ignore=true;
                             //erase from file list
                             fastaFileNames.erase(fastaFileNames.begin()+i);
                             i--;

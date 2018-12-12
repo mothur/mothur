@@ -161,7 +161,7 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
             
             if (m->getDebug()) { m->mothurOut(taxon +'\n'); }
 			
-			if (taxon == "") {  m->mothurOut(taxCopy + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); break;  }
+			if (taxon == "") {  m->mothurOut(taxCopy + " has an error in the taxonomy.  This may be due to a ;;\n"); break;  }
 			
 			childPointer = tree[currentNode].children.find(taxon);
 			
@@ -169,7 +169,7 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
 				currentNode = childPointer->second;
 			}
 			else{											//otherwise, error this taxonomy is not in tree
-				m->mothurOut("[ERROR]: " + taxCopy + " is not in taxonomy tree, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); return names;
+				m->mothurOut("[ERROR]: " + taxCopy + " is not in taxonomy tree, please correct.\n"); m->setControl_pressed(true); return names;
 			}
             
 			if (seqTaxonomy == "") {   names = tree[currentNode].accessions;	}
@@ -288,6 +288,30 @@ vector<int> PhyloTree::getGenusTotals()	{
 		m->errorOut(e, "PhyloTree", "getGenusNodes");
 		exit(1);
 	}
+}
+/**************************************************************************************************/
+vector<TaxNode> PhyloTree::getNodes(int level)	{
+    try {
+        vector<TaxNode> thisLevelsNodes;
+        
+        //check level is not above max
+        if (level > maxLevel) {
+            m->mothurOut("[ERROR]: Tax level not present in file. Cannot continue.\n");
+            m->setControl_pressed(true); return thisLevelsNodes;
+        }
+        
+        for (size_t i = 0; i < tree.size(); i++) {
+            if (tree[i].level == level) {
+                thisLevelsNodes.push_back(tree[i]);
+            }
+        }
+        
+        return thisLevelsNodes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloTree", "getNodes");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 

@@ -434,6 +434,8 @@
 		48C728751B6AB4CD00D40830 /* testgetgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728731B6AB4CD00D40830 /* testgetgroupscommand.cpp */; };
 		48C728791B728D6B00D40830 /* biominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728771B728D6B00D40830 /* biominfocommand.cpp */; };
 		48C7287A1B728D6B00D40830 /* biominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728771B728D6B00D40830 /* biominfocommand.cpp */; };
+		48CF76F021BEBDD300B2FB5C /* mergeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */; };
+		48CF76F121BEBDE000B2FB5C /* mergeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */; };
 		48D6E9681CA42389008DF76B /* testvsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */; };
 		48D6E96B1CA4262A008DF76B /* dataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6E9691CA4262A008DF76B /* dataset.cpp */; };
 		48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
@@ -991,6 +993,8 @@
 		48C728771B728D6B00D40830 /* biominfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = biominfocommand.cpp; path = source/commands/biominfocommand.cpp; sourceTree = SOURCE_ROOT; };
 		48C728781B728D6B00D40830 /* biominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = biominfocommand.h; path = source/commands/biominfocommand.h; sourceTree = SOURCE_ROOT; };
 		48CC010E1EB79E49009D61E6 /* fakeoligos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fakeoligos.h; path = fakes/fakeoligos.h; sourceTree = "<group>"; };
+		48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergeotuscommand.cpp; path = source/commands/mergeotuscommand.cpp; sourceTree = SOURCE_ROOT; };
+		48CF76EF21BEBDD300B2FB5C /* mergeotuscommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergeotuscommand.hpp; path = source/commands/mergeotuscommand.hpp; sourceTree = "<group>"; };
 		48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testvsearchfileparser.cpp; path = TestMothur/testvsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		48D6E9671CA42389008DF76B /* testvsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testvsearchfileparser.h; path = TestMothur/testvsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48D6E9691CA4262A008DF76B /* dataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dataset.cpp; path = TestMothur/dataset.cpp; sourceTree = SOURCE_ROOT; };
@@ -2479,6 +2483,8 @@
 				A7E9B75312D37EC400DA6239 /* mergefilecommand.cpp */,
 				A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */,
 				A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */,
+				48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */,
+				48CF76EF21BEBDD300B2FB5C /* mergeotuscommand.hpp */,
 				48705AC019BE32C50075E977 /* mergesfffilecommand.h */,
 				48705ABF19BE32C50075E977 /* mergesfffilecommand.cpp */,
 				A799314816CBD0BC0017E888 /* mergetaxsummarycommand.h */,
@@ -3064,6 +3070,7 @@
 				481FB59A1AC1B71B0076CFF3 /* chimeraslayercommand.cpp in Sources */,
 				489AF691210619140028155E /* sharedrabundvector.cpp in Sources */,
 				48E543EB1E8F15A500FF6AB8 /* summary.cpp in Sources */,
+				48CF76F121BEBDE000B2FB5C /* mergeotuscommand.cpp in Sources */,
 				481FB5901AC1B71B0076CFF3 /* aligncommand.cpp in Sources */,
 				481FB6081AC1B7970076CFF3 /* setdircommand.cpp in Sources */,
 				481FB62C1AC1B7EA0076CFF3 /* designmap.cpp in Sources */,
@@ -3715,6 +3722,7 @@
 				A721AB6A161C570F009860A1 /* alignnode.cpp in Sources */,
 				A721AB6B161C570F009860A1 /* aligntree.cpp in Sources */,
 				A721AB71161C572A009860A1 /* kmernode.cpp in Sources */,
+				48CF76F021BEBDD300B2FB5C /* mergeotuscommand.cpp in Sources */,
 				A721AB72161C572A009860A1 /* kmertree.cpp in Sources */,
 				A721AB77161C573B009860A1 /* taxonomynode.cpp in Sources */,
 				83F25B0C163B031200ABE73D /* forest.cpp in Sources */,

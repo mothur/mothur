@@ -30,11 +30,13 @@ public:
     void set(int, string);
     string get(int);
     vector<string> getLabels();
+    string getOTUName(int bin);
     void setLabels(vector<string>);
     bool getPrintedLabels();
     void setPrintedLabels(bool pl) { printListHeaders = pl; }
     
     void push_back(string);
+    int push_back(string, int, string binLabel="");
     void resize(int);
     void clear();
     int size();
