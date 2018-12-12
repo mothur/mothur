@@ -3474,7 +3474,30 @@ string Utils::addUnclassifieds(string tax, int maxlevel, bool probs) {
         exit(1);
     }
 }
-
+/**************************************************************************************************/
+string Utils::trimTax(string tax, int trimLevel) {
+    try{
+        string newTax = "";
+        string savedTax = tax;
+        vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
+    
+        if (taxons.size() == trimLevel) { return savedTax; }
+        else {
+            int level = 0;
+            for (int i = 0; i < taxons.size(); i++) {
+                newTax += taxons[i] +";";
+                level++;
+                if (level == trimLevel) { break; }
+            }
+        }
+        
+        return newTax;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "trimTax");
+        exit(1);
+    }
+}
 /***********************************************************************/
 bool Utils::isNumeric1(string stringToCheck){
     try {

@@ -50,6 +50,7 @@ public:
 		
 	TaxNode get(int i);				
 	TaxNode get(string seqName);
+    vector<TaxNode> getNodes(int); //returns vector of nodes at given level
 	string getName(int i);			
 	int getGenusIndex(string seqName);	
 	string getFullTaxonomy(string);	 //pass a sequence name return taxonomy

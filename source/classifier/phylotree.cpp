@@ -290,6 +290,30 @@ vector<int> PhyloTree::getGenusTotals()	{
 	}
 }
 /**************************************************************************************************/
+vector<TaxNode> PhyloTree::getNodes(int level)	{
+    try {
+        vector<TaxNode> thisLevelsNodes;
+        
+        //check level is not above max
+        if (level > maxLevel) {
+            m->mothurOut("[ERROR]: Tax level not present in file. Cannot continue.\n");
+            m->setControl_pressed(true); return thisLevelsNodes;
+        }
+        
+        for (size_t i = 0; i < tree.size(); i++) {
+            if (tree[i].level == level) {
+                thisLevelsNodes.push_back(tree[i]);
+            }
+        }
+        
+        return thisLevelsNodes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloTree", "getNodes");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
 
 void PhyloTree::assignHeirarchyIDs(int index){
 	try {
