@@ -10,465 +10,149 @@
 #include "fileoutput.h"
 
 /***********************************************************************/
-
-ThreeColumnFile::~ThreeColumnFile(){
-	
-	inFile.close();
-	outFile.close();
-	util.mothurRemove(outName);
-}
-
-/***********************************************************************/
-
-void ThreeColumnFile::initFile(string label){
+void ThreeColumnFile::setLabelName(string label){
 	try {
-		if(counter != 0){
-			util.openOutputFile(outName, outFile);
-			util.openInputFile(inName, inFile);
-
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-		
-			outFile	<<  inputBuffer << '\t' << label << "\tlci\thci" << endl;
-		}
-		else{
-			util.openOutputFile(outName, outFile);
-			outFile << "numsampled\t" << label << "\tlci\thci" << endl;
-		}
-
-		outFile.setf(ios::fixed, ios::floatfield);
-		outFile.setf(ios::showpoint);
-	}
+		if(!firstLabel)     { fileHeader += "\t" + label + "\tlci\thci";             }
+        else                { fileHeader = "numsampled\t" + label + "\tlci\thci";    }
+    }
 	catch(exception& e) {
-		m->errorOut(e, "ThreeColumnFile", "initFile");
+		m->errorOut(e, "ThreeColumnFile", "setLabelName");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-
-void ThreeColumnFile::output(int nSeqs, vector<double> data){
+void ThreeColumnFile::updateOutput(int nSeqs, vector<double> data){
 	try {
-		if(counter != 0){		
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-		
-			outFile	<<  inputBuffer << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+
+		if(firstLabel){ //this is a new label for an existing row
+            results.push_back(nSeqs);
 		}
-		else{
-			outFile	<< nSeqs << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
-		}
+        results.push_back(data[0]);
+        results.push_back(data[1]);
+        results.push_back(data[2]);
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ThreeColumnFile", "output");
+		m->errorOut(e, "ThreeColumnFile", "updateOutput");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-
-void ThreeColumnFile::resetFile(){
+void ColumnFile::setLabelName(string label, vector<string> tags){
 	try {
-		if(counter != 0){
-			outFile.close();
-			inFile.close();
-		}
-		else{
-			outFile.close();
-		}
-		counter = 1;
-		
-		util.mothurRemove(inName);
-		renameOk = rename(outName.c_str(), inName.c_str());
-		
-		//renameFile(outName, inName);
-		
-		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { 
-			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
-			perror(" : ");
-		}	
+		if(firstLabel){ fileHeader = ""; }
+        
+        for(int i = 0; i < tags.size(); i++) { fileHeader += label + tags[i] + '\t'; }
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ThreeColumnFile", "resetFile");
+		m->errorOut(e, "ColumnFile", "setLabelName");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-/***********************************************************************/
-
-ColumnFile::~ColumnFile(){
-	
-	inFile.close();
-	outFile.close();
-	util.mothurRemove(outName);
-}
-
-/***********************************************************************/
-
-void ColumnFile::initFile(string label, vector<string> tags){
+void ColumnFile::updateOutput(vector<double> data){
 	try {
-		if(counter != 0){
-			util.openOutputFile(outName, outFile);
-			util.openInputFile(inName, inFile);
-
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-		
-			outFile	<<  inputBuffer << '\t'; 
-			for(int i = 0; i < tags.size(); i++) {
-				outFile << label + tags[i] << '\t';
-			}
-			outFile << endl;
-		}
-		else{
-			util.openOutputFile(outName, outFile);
-			for(int i = 0; i < tags.size(); i++) {
-				outFile << label + tags[i] << '\t';
-			}
-			outFile << endl;
-		}
-
-		outFile.setf(ios::fixed, ios::floatfield);
-		outFile.setf(ios::showpoint);
+        for (size_t i = 0; i < data.size(); i++) { results.push_back(data[i]);  }
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ColumnFile", "initFile");
+		m->errorOut(e, "ColumnFile", "updateOutput");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-
-void ColumnFile::output(vector<double> data){
+void FileOutput::printFile(){
 	try {
-	
-		if(counter != 0){		
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-
-			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(iters.length());
-			for (int i = 1; i< data.size(); i++) {
-				outFile << '\t' << data[i]; 
-			}
-			outFile << endl;
-		}
-		else{
-			outFile << setprecision(6) << data[0] << setprecision(iters.length());
-			for (int i = 1; i< data.size(); i++) {
-				outFile << '\t' << data[i]; 
-			}
-			outFile << endl;
-		}
-
-	}
+        ofstream outFile;
+        util.openOutputFile(filename, outFile);
+        
+        outFile.setf(ios::fixed, ios::floatfield);
+        outFile.setf(ios::showpoint);
+        
+        outFile << fileHeader << endl;
+        for (size_t i = 0; i < results.size(); i++) { outFile << setprecision(6) << results[i] << '\t';   }
+        outFile << endl;
+        
+        outFile.close();
+    }
 	catch(exception& e) {
-		m->errorOut(e, "ColumnFile", "output");
+		m->errorOut(e, "FileOutput", "printFile");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-
-void ColumnFile::resetFile(){
+void SharedThreeColumnFile::setLabelName(string label){
 	try {
-		if(counter != 0){
-			outFile.close();
-			inFile.close();
-		}
-		else{
-			outFile.close();
-		}
-		counter = 1;
-		
-		util.mothurRemove(inName);
-		renameOk = rename(outName.c_str(), inName.c_str());
-		
-		//renameFile(outName, inName);
-		
-		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { 
-			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
-			perror(" : ");
-		}	
+        if(!firstLabel)     { fileHeader += "\t" + label + "\tlci\thci";                                }
+        else                { fileHeader = "numsampled\t" + groupLabel + "\t" + label + "\tlci\thci";   }
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ColumnFile", "resetFile");
+		m->errorOut(e, "SharedThreeColumnFile", "setLabelName");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-/***********************************************************************/
-
-SharedThreeColumnFile::~SharedThreeColumnFile(){
-	
-	inFile.close();
-	outFile.close();
-	util.mothurRemove(outName);
-}
-
-/***********************************************************************/
-
-void SharedThreeColumnFile::initFile(string label){
+void SharedThreeColumnFile::updateOutput(int nSeqs, vector<double> data){
 	try {
-		if(counter != 0){
-			util.openOutputFile(outName, outFile);
-			util.openInputFile(inName, inFile);
-
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-		
-			outFile	<<  inputBuffer << '\t' << label << "\tlci\thci" << endl;
-		}
-		else{
-			util.openOutputFile(outName, outFile);
-			outFile << "numsampled\t" << groupLabel << '\t' << label << "\tlci\thci" << endl;
-		}
-
-		outFile.setf(ios::fixed, ios::floatfield);
-		outFile.setf(ios::showpoint);
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedThreeColumnFile", "initFile");
-		exit(1);
-	}
-}
-
-/***********************************************************************/
-
-void SharedThreeColumnFile::output(int nSeqs, vector<double> data){
-	try {
-		if(counter != 0){		
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-		
-			outFile	<<  inputBuffer << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
-		}
-		else{
-			outFile	<< numGroup << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
-			numGroup++;
-		}
-	}
+        if(firstLabel){ //this is a new label for an existing row
+            results.push_back(numGroup); numGroup++;
+        }
+        results.push_back(data[0]);
+        results.push_back(data[1]);
+        results.push_back(data[2]);
+    }
 	catch(exception& e) {
 		m->errorOut(e, "SharedThreeColumnFile", "output");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-
-void SharedThreeColumnFile::resetFile(){
+void OneColumnFile::setLabelName(string label){
 	try {
-		if(counter != 0){
-			outFile.close();
-			inFile.close();
-		}
-		else{
-			outFile.close();
-		}
-		counter = 1;
-		
-		util.mothurRemove(inName);
-		renameOk = rename(outName.c_str(), inName.c_str());
-		
-		//renameFile(outName, inName);
-		
-		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { 
-			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
-			perror(" : ");
-		}	
-	}
+        if(!firstLabel)     { fileHeader += "\t" + label;            }
+        else                { fileHeader = "numsampled\t" + label;   }
+    }
 	catch(exception& e) {
-		m->errorOut(e, "SharedThreeColumnFile", "resetFile");
+		m->errorOut(e, "OneColumnFile", "setLabelName");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-
-/***********************************************************************/
-
-OneColumnFile::~OneColumnFile(){
-	
-	inFile.close();
-	outFile.close();
-	util.mothurRemove(outName);	
-}
-
-/***********************************************************************/
-
-void OneColumnFile::initFile(string label){
-	try {
-		if(counter != 0){
-			util.openOutputFile(outName, outFile);
-			util.openInputFile(inName, inFile);
-		
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-		
-			outFile	<<  inputBuffer << '\t' << label << endl;
-		}
-		else{
-			util.openOutputFile(outName, outFile);
-			outFile << "numsampled\t" << label << endl;
-		}
-	
-		outFile.setf(ios::fixed, ios::floatfield);
-		outFile.setf(ios::showpoint);
-	}
-	catch(exception& e) {
-		m->errorOut(e, "OneColumnFile", "initFile");
-		exit(1);
-	}
-}
-
-/***********************************************************************/
-
-void OneColumnFile::output(int nSeqs, vector<double> data){
+void OneColumnFile::updateOutput(int nSeqs, vector<double> data){
 	try {	
-		if(counter != 0){		
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-		
-			outFile	<<  inputBuffer << setprecision(4) << '\t'  << data[0] << endl;
-		}
-		else{	
-			outFile	<< nSeqs << setprecision(4) << '\t' << data[0] << endl;
-		}
+        if(firstLabel){ //this is a new label for an existing row
+            results.push_back(nSeqs);
+        }
+        results.push_back(data[0]);
 	}
 	catch(exception& e) {
-		m->errorOut(e, "OneColumnFile", "output");
+		m->errorOut(e, "OneColumnFile", "updateOutput");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
 
-void OneColumnFile::resetFile(){
+void SharedOneColumnFile::setLabelName(string label){
 	try {
-		if(counter != 0){
-			outFile.close();
-			inFile.close();
-		}else{
-			outFile.close();
-		}	
-		counter = 1;
-		
-		util.mothurRemove(inName);
-		renameOk = rename(outName.c_str(), inName.c_str());
-		
-		//renameFile(outName, inName);
-		
-		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { 
-			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
-			perror(" : ");
-		}	
-
-	}
+        if(!firstLabel)     { fileHeader += "\t" + label;            }
+        else                { fileHeader = "sampled\t" + label;   }
+    }
 	catch(exception& e) {
-		m->errorOut(e, "OneColumnFile", "resetFile");
+		m->errorOut(e, "SharedOneColumnFile", "setLabelName");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-/***********************************************************************/
-
-SharedOneColumnFile::~SharedOneColumnFile(){
-	
-	inFile.close();
-	outFile.close();
-	util.mothurRemove(outName);	
-}
-
-/***********************************************************************/
-
-void SharedOneColumnFile::initFile(string label){
+void SharedOneColumnFile::updateOutput(int nSeqs, vector<double> data){
 	try {
-		if(counter != 0){
-			util.openOutputFile(outName, outFile);
-			util.openInputFile(inName, inFile);
-		
-			string inputBuffer;
-			inputBuffer = util.getline(inFile);
-		
-			outFile	<<  inputBuffer << '\t' << label  << endl;
-
-		}
-		else{
-			util.openOutputFile(outName, outFile);
-			outFile << "sampled\t" << label << endl;
-		
-		}
-	
-		outFile.setf(ios::fixed, ios::floatfield);
-		outFile.setf(ios::showpoint);
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedOneColumnFile", "initFile");
-		exit(1);
-	}
-}
-
-/***********************************************************************/
-
-void SharedOneColumnFile::output(int nSeqs, vector<double> data){
-	try {	
-			string dataOutput;
-			float sam;
-			sam = data[0];
-			dataOutput = "";
-			for (int i = 0; i < data.size(); i++) {
-				dataOutput = dataOutput + "\t" + toString(data[i]);
-			}
-			if(counter != 0){		
-				string inputBuffer;
-				inputBuffer = util.getline(inFile);
-
-				outFile	<<  inputBuffer << setprecision(2) << '\t' << dataOutput << endl;
-			}
-			else{	
-				outFile	<< nSeqs << setprecision(2) << '\t' << dataOutput << endl;
-			}
-	}
+        if(firstLabel){ //this is a new label for an existing row
+            results.push_back(nSeqs);
+        }
+        for (int i = 0; i < data.size(); i++) {  results.push_back(data[i]);  }
+    }
 	catch(exception& e) {
 		m->errorOut(e, "SharedOneColumnFile", "output");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
 
-void SharedOneColumnFile::resetFile(){
-	try {
-		if(counter != 0){
-			outFile.close();
-			inFile.close();
-		}
-		else{
-			outFile.close();
-		}	
-		counter = 1;
 
-		util.mothurRemove(inName);
-		renameOk = rename(outName.c_str(), inName.c_str());
-		
-		//renameFile(outName, inName);
-		
-		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { 
-			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
-			perror(" : ");
-		}	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedOneColumnFile", "resetFile");
-		exit(1);
-	}
-}
-
-/***********************************************************************/

@@ -12,7 +12,7 @@ class RareDisplay : public Display {
 	
 public:
 	RareDisplay(Calculator* calc, FileOutput* file) : estimate(calc), output(file), nIters(1) {};
-	~RareDisplay()					{	delete estimate; delete output;		};
+	~RareDisplay()					{	delete estimate; delete output;		}
 	void init(string);
 	void reset();
 	void update(SAbundVector*);
@@ -20,8 +20,8 @@ public:
 	void close();
 	bool isCalcMultiple() { return estimate->getMultiple(); }
 	
-	void outputTempFiles(string);
-	void inputTempFiles(string);
+	//void outputTempFiles(string);
+	//void inputTempFiles(string);
 	
 private:
 	Calculator* estimate;

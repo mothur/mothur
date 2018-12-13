@@ -475,7 +475,7 @@ void ParsimonyCommand::printParsimonyFile() {
 		else { tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul"); }
 
 		for(int a = 0; a < numComp; a++) {
-			output->initFile(groupComb[a], tags);
+			output->setLabelName(groupComb[a], tags);
 			//print each line
 			for (map<int,double>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
 				if (randomtree == "") {
@@ -483,7 +483,7 @@ void ParsimonyCommand::printParsimonyFile() {
 				}else{
 					data.push_back(it->first);  data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
 				}
-				output->output(data);
+				output->updateOutput(data);
 				data.clear();
 			} 
 			output->resetFile();

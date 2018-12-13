@@ -18,7 +18,7 @@ public:
 	void update(SAbundVector* rank){
 		nSeqs=rank->getNumSeqs();
 		data = estimate->getValues(rank);
-		output->output(nSeqs, data);	
+		output->updateOutput(nSeqs, data);
 	};
 	
     void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroups, vector<string> mGroups){
@@ -70,15 +70,15 @@ public:
 		
 		//when you get all your groups info then output
 		if ((timesCalled % numGroupComb) == 0) {
-			output->output(numSeqs, groupData);	
+			output->updateOutput(numSeqs, groupData);
 		}
 	};
 									
-	void init(string s)		{	output->initFile(s);	};
-	void reset()			{	output->resetFile();	};
-	void close()			{	output->resetFile();	};
-	void setAll(bool a)		{	all = a;				}
-	bool getAll()			{	return all;				}
+	void init(string s)		{	output->setLabelName(s);	}
+	void reset()			{	output->resetFile();        }
+	void close()			{	output->resetFile();        }
+	void setAll(bool a)		{	all = a;                    }
+	bool getAll()			{	return all;                 }
 	
 	
 	bool isCalcMultiple()	{ return estimate->getMultiple(); }

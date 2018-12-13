@@ -80,7 +80,7 @@ void RareDisplay::reset(){
 
 void RareDisplay::close(){
 	try {
-		output->initFile(label);
+		output->setLabelName(label);
 	
 		for (map<int, vector<double> >::iterator it = results.begin(); it != results.end(); it++) {
 		
@@ -94,7 +94,7 @@ void RareDisplay::close(){
 			data[1] = (it->second)[(int)(0.025*(nIters-1))];
 			data[2] = (it->second)[(int)(0.975*(nIters-1))];
 		
-			output->output(it->first, data);
+			output->updateOutput(it->first, data);
 		}
 		
 		nIters = 1;
@@ -108,70 +108,3 @@ void RareDisplay::close(){
 	}
 }
 /***********************************************************************/
-
-void RareDisplay::inputTempFiles(string filename){
-	try {
-		ifstream in;
-		util.openInputFile(filename, in);
-		
-		int thisIters, size;
-		in >> thisIters >> size; util.gobble(in);
-        nIters += thisIters;
-		
-		for (int i = 0; i < size; i++) {
-			int tempCount;
-            in >> tempCount; util.gobble(in);
-            map<int, vector<double> >::iterator it = results.find(tempCount);
-            if (it != results.end()) {
-                for (int j = 0; j < thisIters; j++) {
-                    double value;
-                    in >> value; util.gobble(in);
-                    (it->second).push_back(value);
-                }
-            }else {
-                vector<double> tempValues;
-                for (int j = 0; j < thisIters; j++) {
-                    double value;
-                    in >> value; util.gobble(in);
-                    tempValues.push_back(value);
-                }
-                results[tempCount] = tempValues;
-            }
-		}
-		
-		in.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RareDisplay", "inputTempFiles");
-		exit(1);
-	}
-}
-
-/***********************************************************************/
-
-void RareDisplay::outputTempFiles(string filename){
-	try {
-		ofstream out;
-		util.openOutputFile(filename, out);
-		
-		out << nIters-1 << '\t' << results.size() << endl;
-		
-		for (map<int, vector<double> >::iterator it = results.begin(); it != results.end(); it++) {
-            out << it->first;
-            for(int i = 0; i < (it->second).size(); i++) {
-                out << '\t' << (it->second)[i];
-            }
-            out << endl;
-		}
-		
-		out.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RareDisplay", "outputTempFiles");
-		exit(1);
-	}
-}
-
-
-/***********************************************************************/
-
