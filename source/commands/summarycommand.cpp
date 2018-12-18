@@ -75,7 +75,7 @@ string SummaryCommand::getHelpString(){
 		helpString += "Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n";
 		helpString += validCalculator.printCalc("summary");
         helpString += "The subsample parameter allows you to enter the size of the sample or you can set subsample=T and mothur will use the size of your smallest group in the case of a shared file. With a list, sabund or rabund file you must provide a subsample size.\n";
-        helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
+        helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample. Default=1000.\n";
 		helpString += "The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n";
 		helpString += "If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=true).\n";
         helpString += "The alpha parameter is used to set the alpha value for the shannonrange calculator.\n";

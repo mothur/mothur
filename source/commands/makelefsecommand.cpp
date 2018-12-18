@@ -294,6 +294,7 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
                 map<int, consTax2>::iterator it = consTax.find(simpleLabel);
                 if (it != consTax.end()) {
                     nameOfOtu = it->second.taxonomy;
+                    
                     //add sanity check abundances here??
                     string fixedName = "";
                     //remove confidences and change ; to |
@@ -396,6 +397,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 		}
         
         vector<SharedRAbundVector*> data = templookup->getSharedRAbundVectors();
+        vector<string> otuNames = templookup->getOTUNames();
         delete templookup;
         SharedRAbundFloatVectors* lookup = new SharedRAbundFloatVectors();
         
@@ -437,6 +439,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             
         }
         for (int k = 0; k < data.size(); k++) {  delete data[k];  } data.clear();
+        lookup->setOTUNames(otuNames);
         lookup->eliminateZeroOTUS();
         
 		return lookup;
