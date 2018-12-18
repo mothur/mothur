@@ -24,7 +24,7 @@ protected:
     Utils util;
     string filename, fileHeader;
     bool firstLabel;
-    vector<double> results;
+    vector< vector<double> > results;
     
     void printFile();
 };	
@@ -34,14 +34,14 @@ protected:
 class ThreeColumnFile : public FileOutput {
 	
 public:
-    ThreeColumnFile(string n) : FileOutput(n) {}
+    ThreeColumnFile(string n) : FileOutput(n) { }
     ~ThreeColumnFile() {}
     
 	void setLabelName(string);
 	void updateOutput(int, vector<double>);
 
 private:
-
+    
 	
 };
 
@@ -50,7 +50,7 @@ class OneColumnFile : public FileOutput {
 	
 	
 public:
-	OneColumnFile(string n) : FileOutput(n) {}
+	OneColumnFile(string n) : FileOutput(n) { }
 	~OneColumnFile() {}
     
     void setLabelName(string);
@@ -80,7 +80,7 @@ private:
 class SharedThreeColumnFile : public FileOutput {
 	
 public:
-	SharedThreeColumnFile(string n, string groups) : FileOutput(n), groupLabel(groups), numGroup(1) {}
+    SharedThreeColumnFile(string n, string groups) : FileOutput(n), groupLabel(groups), numGroup(1) { }
     ~SharedThreeColumnFile() {}
     
     void setLabelName(string);
