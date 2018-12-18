@@ -46,7 +46,7 @@ public:
 private:
     bool abort, sim, print_start, selfReference, printref;
     string refdistfile, reffastafile, refnamefile, refcountfile, reflistfile, refNameOrCount;
-    string namefile, refformat, distfile, countfile, fastafile, columnfile, nameOrCount;
+    string namefile, refformat, distfile, countfile, fastafile, columnfile, nameOrCount, accnosfile;
     string comboDistFile;
     
     string method, fileroot, tag, outputDir, inputDir, metric, initialize, metricName, criteria, refWeight;
@@ -56,11 +56,13 @@ private:
     vector<string> outputNames, listFiles;
     unsigned long loops;
     
+    ListVector* runUserRefOptiCluster(OptiData*&, ClusterMetric*&, map<string, int>&, string);
     string runRefOptiCluster(OptiData*&, ClusterMetric*&, ListVector*&, map<string, int>&, string);
     string runDenovoOptiCluster(OptiData*&, ClusterMetric*&, map<string, int>&, string);
     ListVector* clusterRefs(OptiData*& refsMatrix, ClusterMetric*&);
     void createReferenceNameCount();
     string calcDists();
+    string runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts);
     string runSensSpec(string distFileName, string dupsFile, string dupsFormat, ClusterMetric*&, string);
     void outputSteps(string outputName, bool& printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int, bool, int);
 };

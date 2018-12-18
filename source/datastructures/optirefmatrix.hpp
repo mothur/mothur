@@ -24,6 +24,7 @@ public:
 #endif
     
     OptiRefMatrix(string, string, string, string, double, float, string); //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs, refWeightMethod (options: abundance, none, connectivity)
+    OptiRefMatrix(string, string, string, string, double, string); //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnosfile containing refNames
     OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
     ~OptiRefMatrix(){ }
     
@@ -64,7 +65,7 @@ protected:
     int readPhylip(string distFile, bool hasName, map<string, string>& names, map<string, long long>& nameAssignment, map<long long, long long>& singletonIndexSwap);
     int readColumn(string distFile, bool hasName, map<string, string>& names, map<string, long long>& nameAssignment, map<long long, long long>& singletonIndexSwap);
     int readFiles(string, string, string, string, string, string, string, string, string, string, string, string);
-    int readFiles(string, string, string, string);
+    int readFiles(string, string, string, string, set<string>&);
     
     map<long long, long long> readColumnSingletons(vector<bool>& singleton, string distFile, map<string, long long>&);
     map<long long, long long> readPhylipSingletons(vector<bool>& singleton, string distFile, long long&,  map<string, long long>& nameAssignment);

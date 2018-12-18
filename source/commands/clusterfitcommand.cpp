@@ -42,6 +42,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter prefcount("refcount", "InputTypes", "", "", "RefNameCount", "none", "","",false,false,true); parameters.push_back(prefcount);
         CommandParameter prefcolumn("refcolumn", "InputTypes", "", "", "PhylipColumnRef", "", "ColumnName","",false,false,true); parameters.push_back(prefcolumn);
         CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "", "ColumnName","",false,false,true); parameters.push_back(pcolumn);
+        CommandParameter paccnos("accnos", "InputTypes", "", "", "", "", "","",false,false,true); parameters.push_back(paccnos);
         CommandParameter pcutoff("cutoff", "Number", "", "0.03", "", "", "","",false,false,true); parameters.push_back(pcutoff);
         CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
         CommandParameter pmethod("method", "Multiple", "closed-open", "closed", "", "", "","",false,false,true); parameters.push_back(pmethod);
@@ -70,7 +71,7 @@ vector<string> ClusterFitCommand::setParameters(){
 string ClusterFitCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refname, refcount, fasta, name, count, column, method, cutoff, precent, metric, iters, initialize, denovoiters.\n";
+        helpString += "The cluster.fit command parameter options are reflist, refcolumn, refname, refcount, fasta, name, count, column, accnos, method, cutoff, precent, metric, iters, initialize, denovoiters.\n";
         helpString += "The refcolumn parameter allow you to enter your reference data distance file, to reduce processing time. \n";
         helpString += "The column parameter allow you to enter your data distance file, to reduce processing time. \n";
         helpString += "The fasta parameter allows you to enter your fasta file. \n";
@@ -80,6 +81,7 @@ string ClusterFitCommand::getHelpString(){
         helpString += "The count parameter allows you to enter your count file.\nA count or name file is required if your distance file is in column format.\n";
         helpString += "The refname parameter allows you to enter your reference name file. \n";
         helpString += "The refcount parameter allows you to enter your reference count file.\nA refcount or refname file is required if your reference distance file is in column format.\n";
+        helpString += "The accnos parameter allows you to assign reference seqeunces by name. This can save time by allowing you to provide a distance matrix containing all the sequence distances rather than a sample matrix and reference matrix and mothur calculating the distances between the sample and reference.\n";
         helpString += "The iters parameter allow you to set the maxiters for the opticluster method. \n";
         helpString += "The denovoiters parameter allow you to set the number of randomizations to perform. \n";
         helpString += "The fitpercent parameter allow you to set percentage of reads to be fitted. Default=50. Max=100, min=0.01.\n";
@@ -242,6 +244,14 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["reffasta"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("accnos");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
+                }
             }
             
             selfReference = true;
@@ -303,6 +313,11 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             if (columnfile == "not open") { columnfile = ""; abort = true; }
             else if (columnfile == "not found") { columnfile = ""; }
             else {  distfile = columnfile;  current->setColumnFile(columnfile);	}
+            
+            accnosfile = validParameter.validFile(parameters, "accnos");
+            if (accnosfile == "not open") { accnosfile = ""; abort = true; }
+            else if (accnosfile == "not found") { accnosfile = ""; }
+            else {   current->setAccnosFile(accnosfile);	}
             
             method = validParameter.valid(parameters, "method");
             if (method == "not found") {  method = "open";}
@@ -445,7 +460,7 @@ int ClusterFitCommand::execute(){
         string listFile = "";
         string bestListFileName = "";
         
-        if (selfReference) {
+        if ((selfReference) && (accnosfile == "")) { //denovo with mothur randomly assigning references
         
             //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
             OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, fitPercent, refWeight);
@@ -454,7 +469,32 @@ int ClusterFitCommand::execute(){
             
             //evaluate results
             bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
-        }else {
+            
+            delete matrix;
+        }else if ((selfReference) && (accnosfile != "")) { //reference with accnos file assigning references
+            
+            //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnos containing refseq name
+            OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, accnosfile);
+            
+            ListVector* list = runUserRefOptiCluster(matrix, metric, counts, outputName);
+            
+            if (method == "open") { bestListFileName = runSensSpec(matrix, metric, list, counts); }
+            else {
+                ofstream listFile;
+                string listFileName = fileroot+ tag + ".list";
+                util.openOutputFile(listFileName,	listFile);
+                
+                if(countfile != "") { list->print(listFile, counts); }
+                else { list->print(listFile); }
+                listFile.close();
+                
+                listFiles.push_back(listFileName);
+                
+                bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFileName);
+            }
+            delete list; delete matrix;
+            
+        }else if (!selfReference) { //reference with files containing reference seqs
             
             createReferenceNameCount(); //creates reference name or count file if needed
             
@@ -496,6 +536,7 @@ int ClusterFitCommand::execute(){
                 bestListFileName = runSensSpec(newDistFile, newDupsFile, "count", metric, listFile);
                 util.mothurRemove(newDistFile); util.mothurRemove(newDupsFile);
             }
+            delete matrix;
         }
         delete metric;
         
@@ -630,6 +671,87 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
     }
     catch(exception& e) {
         m->errorOut(e, "ClusterFitCommand", "runDenovoOptiCluster");
+        exit(1);
+    }
+    
+}
+//**********************************************************************************************************************
+ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterMetric*& metric, map<string, int>& counts, string outStepFile){
+    try {
+        m->mothurOut("\nClustering " + distfile + "\n");
+        bool printStepsHeader = true;
+
+        OptiFitCluster cluster(matrix, metric, 0, criteria);
+        tag = cluster.getTag();
+        
+        int iters = 0;
+        double listVectorMetric = 0; //worst state
+        double delta = 1;
+        
+        //get "ref" seqs for initialize inputs
+        OptiData* refMatrix = matrix->extractRefMatrix();
+        ListVector* refList = clusterRefs(refMatrix, metric); delete refMatrix;
+        
+        vector<vector<string> > otus;
+        for (int i = 0; i < refList->getNumBins(); i++) {
+            vector<string> binNames;
+            string bin = refList->get(i);
+            if (bin != "") {
+                util.splitAtComma(bin, binNames);
+                otus.push_back(binNames);
+            }
+        }
+        
+        //add tag to OTULabels to indicate the reference
+        vector<string> refListLabels = refList->getLabels();
+        for (int i = 0; i < refListLabels.size(); i++) { refListLabels[i] = "Ref_" + refListLabels[i];  }
+        refList->setLabels(refListLabels);
+        
+        cluster.initialize(listVectorMetric, true, otus, refList->getLabels(), method, true);
+        delete refList;
+        
+        long long numBins = cluster.getNumBins();
+        long long tp, tn, fp, fn;
+        vector<double> results = cluster.getStats(tp, tn, fp, fn);
+        
+        long long fittp, fittn, fitfp, fitfn;
+        long long numFitBins = cluster.getNumFitBins();
+        vector<double> fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
+        
+        m->mothurOut("\nFitting " + toString(matrix->getNumFitSeqs()+matrix->getNumFitSingletons()+matrix->getNumFitTrueSingletons()) + " sequences to reference otus.\n");
+        
+        m->mothurOut("\n\nlist\tstate\titer\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        
+        outputSteps(outStepFile, printStepsHeader, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, 0, false, 0);
+        
+        while ((delta > stableMetric) && (iters < maxIters)) { //
+            
+            if (m->getControl_pressed()) { break; }
+            double oldMetric = listVectorMetric;
+            
+            cluster.update(listVectorMetric);
+            
+            delta = abs(oldMetric - listVectorMetric);
+            iters++;
+            
+            results = cluster.getStats(tp, tn, fp, fn);
+            numBins = cluster.getNumBins();
+            numFitBins = cluster.getNumFitBins();
+            fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
+            
+            outputSteps(outStepFile, printStepsHeader, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, iters, false, 0);
+        }
+        m->mothurOutEndLine(); m->mothurOutEndLine();
+        
+        if (m->getControl_pressed()) {  return 0; }
+        
+        ListVector* list = cluster.getFittedList(toString(cutoff), printref);
+        list->setLabel(toString(cutoff));
+        
+        return list;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterFitCommand", "runUserRefOptiCluster");
         exit(1);
     }
     
@@ -951,7 +1073,74 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
         exit(1);
     }
 }
+//**********************************************************************************************************************
+string ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts) {
+    try {
 
+        ofstream listFile;
+        string listFileName = fileroot+ tag + ".list";
+
+        ofstream sensSpecFile;
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listFileName));
+        string sensSpecFileName = getOutputFileName("sensspec",variables);
+        util.openOutputFile(sensSpecFileName, sensSpecFile);
+        outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
+        
+        sensSpecFile << "iter\tlabel\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        m->mothurOut("iter\tlabel\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+        
+        if (method == "open") {
+
+                string label = list->getLabel();
+                int numBins = list->getNumBins();
+                
+                SensSpecCalc senscalc(*matrix, list);
+                long long truePositives, trueNegatives, falsePositives, falseNegatives;
+                senscalc.getResults(*matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
+                
+                long long tp =  truePositives;
+                long long fp =  falsePositives;
+                long long tn =  trueNegatives;
+                long long fn =  falseNegatives;
+                
+                Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
+                Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
+                PPV ppv;            double positivePredictiveValue = ppv.getValue(tp, tn, fp, fn);
+                NPV npv;            double negativePredictiveValue = npv.getValue(tp, tn, fp, fn);
+                FDR fdr;            double falseDiscoveryRate = fdr.getValue(tp, tn, fp, fn);
+                Accuracy acc;       double accuracy = acc.getValue(tp, tn, fp, fn);
+                MCC mcc;            double matthewsCorrCoef = mcc.getValue(tp, tn, fp, fn);
+                F1Score f1;         double f1Score = f1.getValue(tp, tn, fp, fn);
+                
+                sensSpecFile << "1" << '\t' << label << '\t' << cutoff << '\t' << numBins << '\t';
+                sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
+                sensSpecFile << setprecision(4);
+                sensSpecFile << sensitivity << '\t' << specificity << '\t' << positivePredictiveValue << '\t' << negativePredictiveValue << '\t';
+                sensSpecFile << falseDiscoveryRate << '\t' << accuracy << '\t' << matthewsCorrCoef << '\t' << f1Score << endl;
+                
+                m->mothurOut(toString(1) + "\t" + label + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
+                m->mothurOut(toString(sensitivity) + "\t" + toString(specificity) + "\t" + toString(positivePredictiveValue) + "\t" + toString(negativePredictiveValue) + "\t");
+                m->mothurOut(toString(falseDiscoveryRate) + "\t" + toString(accuracy) + "\t" + toString(matthewsCorrCoef) + "\t" + toString(f1Score) + "\n\n");
+        }else {
+            m->mothurOut("[ERROR]: should never get here... \n");
+        }
+        
+        sensSpecFile.close();
+        
+        util.openOutputFile(listFileName, listFile);
+        
+        if(countfile != "") { list->print(listFile, counts); }
+        else { list->print(listFile); }
+        listFile.close();
+        
+        return listFileName;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterFitCommand", "runSensSpec");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 void ClusterFitCommand::outputSteps(string outputName, bool& printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int iter, bool printToFile, int denovoIter) {
     try {

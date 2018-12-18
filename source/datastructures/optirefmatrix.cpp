@@ -28,7 +28,26 @@ OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile
     
     square = false;
     
-    readFiles(distFile, distFormat, dupsFile, dupsFormat);
+    set<string> noRefNamesSet;
+    readFiles(distFile, distFormat, dupsFile, dupsFormat, noRefNamesSet);
+}
+/***********************************************************************/
+OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, string accnosfile) : OptiData(c) {
+    
+    numFitSingletons = 0;
+    numRefSingletons = 0;
+    numSingletons = 0;
+    numBetweenDists = 0;
+    numFitDists = 0;
+    numRefDists = 0;
+    numFitSeqs = 0;
+    refWeightMethod = "accnos";
+    
+    set<string> accnosRefFileNames = util.readAccnos(accnosfile);
+    
+    square = false;
+    
+    readFiles(distFile, distFormat, dupsFile, dupsFormat, accnosRefFileNames);
 }
 
 /***********************************************************************/
@@ -486,7 +505,7 @@ void OptiRefMatrix::randomizeRefs() {
 }
 /***********************************************************************/
 //for denovo method
-int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile, string dupsFormat) {
+int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile, string dupsFormat, set<string>& optionalRefNames) {
     try {
         string namefile, countfile;
         if (dupsFormat == "name") { namefile = dupsFile; countfile = ""; }
@@ -501,10 +520,17 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
             for (map<string, int>::iterator it = temp.begin(); it!= temp.end(); it++) {  nameAssignment[it->first] = it->second; }
         }
         
+        //select sequences to be reference
+        set<long long> fitSeqsIndexes;
         long long count = 0;
         for (map<string, long long>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
             if (refWeightMethod == "abundance")          { weights[count] = it->second; }
             else if (refWeightMethod == "connectivity")  { weights[count] = 1;          } //initialize
+            else if (refWeightMethod == "accnos") { //fill fit indexes
+                if (optionalRefNames.count(it->first) == 0) { //you are not a reference sequence
+                    fitSeqsIndexes.insert(count); //add as fit seq
+                }
+            }
             it->second = count; count++;
             nameMap.push_back(it->first);
             nameAssignment[it->first] = it->second;
@@ -516,10 +542,6 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         
         if (distFormat == "column")        {  singletonIndexSwap = readColumnSingletons(singleton, distFile, nameAssignment);           }
         else if (distFormat == "phylip")   {  singletonIndexSwap = readPhylipSingletons(singleton, distFile, count, nameAssignment);    }
-        
-        //randomly select the "fit" seqs
-        long long numToSelect = nameAssignment.size() * fitPercent;
-        
         
         int nonSingletonCount = 0;
         for (int i = 0; i < singleton.size(); i++) {
@@ -546,16 +568,20 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         if (distFormat == "column")        {  readColumn(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
         else if (distFormat == "phylip")   {  readPhylip(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
         
-        //select sequences to be reference
-        set<long long> fitSeqsIndexes;
+        
+        //randomly select the "fit" seqs
+        long long numToSelect = nameAssignment.size() * fitPercent;
         if (weights.size() != 0) {  fitSeqsIndexes = subsample.getWeightedSample(weights, numToSelect);  } //you have weighted selection
         else {
-            long long numSelected = 0;
-            long long totalSeqs = nameAssignment.size();
-            while (numSelected < numToSelect) {
-                if (m->getControl_pressed()) { break; }
-                fitSeqsIndexes.insert(util.getRandomIndex(totalSeqs-1)); //no repeats
-                numSelected = fitSeqsIndexes.size();
+            if (refWeightMethod == "accnos") { } //fitIndexes are filled above
+            else { //randomly select references
+                long long numSelected = 0;
+                long long totalSeqs = nameAssignment.size();
+                while (numSelected < numToSelect) {
+                    if (m->getControl_pressed()) { break; }
+                    fitSeqsIndexes.insert(util.getRandomIndex(totalSeqs-1)); //no repeats
+                    numSelected = fitSeqsIndexes.size();
+                }
             }
         }
         
