@@ -15,7 +15,7 @@ public:
 	CollectorsCurveData() : rank(0) {};
 	
 	void registerDisplay(Display* o)		{	displays.insert(o);				};
-	void removeDisplay(Display* o)			{	displays.erase(o);	delete o;	};
+	//void removeDisplay(Display* o)			{	displays.erase(o);	delete o;	};
 	SAbundVector* getRankData()				{	return rank;					};
 	void rankDataChanged()					{	notifyDisplays();				};
 	void updateRankData(SAbundVector* rv)	{	rank = rv; rankDataChanged();	};
@@ -41,7 +41,7 @@ public:
 	SharedCollectorsCurveData() { }; //: shared1(0), shared2(0)
 	
 	void registerDisplay(Display* o)		{	displays.insert(o);			};
-	void removeDisplay(Display* o)			{	displays.erase(o);	delete o;	};
+	//void removeDisplay(Display* o)			{	displays.erase(o);	delete o;	};
 	void SharedDataChanged()				{	notifyDisplays();				};
     void updateSharedData(vector<SharedRAbundVector*> s, int numSeqs, int numGroupComb, bool p, vector<string> g)	{	pairs = p; shared = s; NumSeqs = numSeqs; NumGroupComb = numGroupComb; groups = g; SharedDataChanged();	};
 	

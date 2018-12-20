@@ -7,15 +7,14 @@
 #include "observable.h"
 
 /***********************************************************************/
-
+//Has a display for each calculator
 class RarefactionCurveData : public Observable {
 	
 public:
 	RarefactionCurveData() : rank(0) {};
 	
 	void registerDisplay(Display* o)	{	displays.insert(o);				};
-	void removeDisplay(Display* o)		{	displays.erase(o);	delete o;	};
-	SAbundVector* getRankData()			{	return rank;					};
+    SAbundVector* getRankData()			{	return rank;					};
 	void rankDataChanged()				{	notifyDisplays();				};
 	void updateRankData(SAbundVector* rv)	{	rank = rv; rankDataChanged();	};
 
@@ -39,7 +38,7 @@ public:
 	SharedRarefactionCurveData() {}; //: shared1(0), shared2(0) 
 	
 	void registerDisplay(Display* o)	{	displays.insert(o);				};
-	void removeDisplay(Display* o)		{	displays.erase(o);	delete o;	};
+	//void removeDisplay(Display* o)		{	displays.erase(o);	delete o;	};
 	void SharedDataChanged()			{	notifyDisplays();				};
 	void updateSharedData(vector<SharedRAbundVector*> r, int numSeqs, int numGroupComb)	{
         shared = r; NumSeqs = numSeqs; NumGroupComb = numGroupComb;

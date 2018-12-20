@@ -7,6 +7,7 @@
 #include "display.h"
 
 /***********************************************************************/
+//Each display is responsible for one calculator. The FileOutput class handles creating the outputfile for the calc.
 
 class RareDisplay : public Display {
 	
@@ -19,9 +20,6 @@ public:
 	void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb, vector<string>);
 	void close();
 	bool isCalcMultiple() { return estimate->getMultiple(); }
-	
-	//void outputTempFiles(string);
-	//void inputTempFiles(string);
 	
 private:
 	Calculator* estimate;
