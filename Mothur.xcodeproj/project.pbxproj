@@ -329,7 +329,6 @@
 		481FB6641AC1B8450076CFF3 /* optionparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77512D37EC400DA6239 /* optionparser.cpp */; };
 		481FB6651AC1B8450076CFF3 /* overlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77B12D37EC400DA6239 /* overlap.cpp */; };
 		481FB6671AC1B8450076CFF3 /* randomnumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77B7186173D4041002163C2 /* randomnumber.cpp */; };
-		481FB6681AC1B8450076CFF3 /* rarecalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A512D37EC400DA6239 /* rarecalc.cpp */; };
 		481FB6691AC1B8520076CFF3 /* abstractdecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C241619E52200651424 /* abstractdecisiontree.cpp */; };
 		481FB66B1AC1B8520076CFF3 /* decisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C28161A110700651424 /* decisiontree.cpp */; };
 		481FB66C1AC1B8520076CFF3 /* randomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77E1937161B201E00DB1A2A /* randomforest.cpp */; };
@@ -703,7 +702,6 @@
 		A7E9B92112D37EC400DA6239 /* qualityscores.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79F12D37EC400DA6239 /* qualityscores.cpp */; };
 		A7E9B92212D37EC400DA6239 /* quitcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A112D37EC400DA6239 /* quitcommand.cpp */; };
 		A7E9B92312D37EC400DA6239 /* rabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A312D37EC400DA6239 /* rabundvector.cpp */; };
-		A7E9B92412D37EC400DA6239 /* rarecalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A512D37EC400DA6239 /* rarecalc.cpp */; };
 		A7E9B92512D37EC400DA6239 /* raredisplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A712D37EC400DA6239 /* raredisplay.cpp */; };
 		A7E9B92612D37EC400DA6239 /* rarefact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A912D37EC400DA6239 /* rarefact.cpp */; };
 		A7E9B92712D37EC400DA6239 /* rarefactcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7AB12D37EC400DA6239 /* rarefactcommand.cpp */; };
@@ -1514,8 +1512,6 @@
 		A7E9B7A212D37EC400DA6239 /* quitcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = quitcommand.h; path = source/commands/quitcommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B7A312D37EC400DA6239 /* rabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rabundvector.cpp; path = source/datastructures/rabundvector.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B7A412D37EC400DA6239 /* rabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rabundvector.hpp; path = source/datastructures/rabundvector.hpp; sourceTree = SOURCE_ROOT; };
-		A7E9B7A512D37EC400DA6239 /* rarecalc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rarecalc.cpp; path = source/rarecalc.cpp; sourceTree = "<group>"; };
-		A7E9B7A612D37EC400DA6239 /* rarecalc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rarecalc.h; path = source/rarecalc.h; sourceTree = "<group>"; };
 		A7E9B7A712D37EC400DA6239 /* raredisplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = raredisplay.cpp; path = source/raredisplay.cpp; sourceTree = "<group>"; };
 		A7E9B7A812D37EC400DA6239 /* raredisplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = raredisplay.h; path = source/raredisplay.h; sourceTree = "<group>"; };
 		A7E9B7A912D37EC400DA6239 /* rarefact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rarefact.cpp; path = source/rarefact.cpp; sourceTree = "<group>"; };
@@ -1849,9 +1845,7 @@
 				A7E9B77C12D37EC400DA6239 /* overlap.hpp */,
 				A77B7187173D4041002163C2 /* randomnumber.h */,
 				A77B7186173D4041002163C2 /* randomnumber.cpp */,
-				A7E9B7A512D37EC400DA6239 /* rarecalc.cpp */,
 				A7386C191619C9FB00651424 /* randomforest */,
-				A7E9B7A612D37EC400DA6239 /* rarecalc.h */,
 				A7E9B7A712D37EC400DA6239 /* raredisplay.cpp */,
 				A7E9B7A812D37EC400DA6239 /* raredisplay.h */,
 				A7E9B7A912D37EC400DA6239 /* rarefact.cpp */,
@@ -3268,7 +3262,6 @@
 				481FB6731AC1B8820076CFF3 /* seqnoise.cpp in Sources */,
 				481FB5DC1AC1B75C0076CFF3 /* makelookupcommand.cpp in Sources */,
 				481FB53D1AC1B5F80076CFF3 /* bstick.cpp in Sources */,
-				481FB6681AC1B8450076CFF3 /* rarecalc.cpp in Sources */,
 				481FB60B1AC1B7AC0076CFF3 /* sffmultiplecommand.cpp in Sources */,
 				481FB59F1AC1B71B0076CFF3 /* classifyrfsharedcommand.cpp in Sources */,
 				481FB5F51AC1B77E0076CFF3 /* primerdesigncommand.cpp in Sources */,
@@ -3536,7 +3529,6 @@
 				A7E9B92112D37EC400DA6239 /* qualityscores.cpp in Sources */,
 				A7E9B92212D37EC400DA6239 /* quitcommand.cpp in Sources */,
 				A7E9B92312D37EC400DA6239 /* rabundvector.cpp in Sources */,
-				A7E9B92412D37EC400DA6239 /* rarecalc.cpp in Sources */,
 				A7E9B92512D37EC400DA6239 /* raredisplay.cpp in Sources */,
 				A7E9B92612D37EC400DA6239 /* rarefact.cpp in Sources */,
 				48B44EF21FB9EF8200789C45 /* utils.cpp in Sources */,

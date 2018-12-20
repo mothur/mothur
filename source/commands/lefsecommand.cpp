@@ -389,8 +389,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, DesignMap& designMa
                 subclass2Class[thisSub] = treatment;
                 vector<int> temp; temp.push_back(j);
                 subClass2GroupIndex[thisSub] = temp;
-            }
-            else {
+            }else {
                 if (it->second != treatment) {
                     //m->mothurOut("[WARNING]: subclass " + thisSub + " has members in " + it->second + " and " + treatment + ". Subclass members must be from the same class for Wilcoxon. Changing " + thisSub + " to " + treatment + "_" + thisSub + ".\n");
                     thisSub = treatment + "_" + thisSub;
