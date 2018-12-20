@@ -478,7 +478,7 @@ int ClusterFitCommand::execute(){
             
             ListVector* list = runUserRefOptiCluster(matrix, metric, counts, outputName);
             
-            if (method == "open") { bestListFileName = runSensSpec(matrix, metric, list, counts); }
+            if ((method == "open") && (printref)) { bestListFileName = runSensSpec(matrix, metric, list, counts); }
             else {
                 ofstream listFile;
                 string listFileName = fileroot+ tag + ".list";
@@ -919,7 +919,7 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
         
         double bestStat = 0; int bestResult = 0;
         
-        if (method == "open") {
+        if ((method == "open") && (printref)) {
             
             string thisDistFile = distFName;
             string thisDupsFile = dupsfile;
