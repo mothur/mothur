@@ -15,7 +15,7 @@
 int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 	try {
 		RarefactionCurveData* rcd = new RarefactionCurveData();
-		for(int i=0;i<displays.size();i++){ rcd->registerDisplay(displays[i]); }
+        rcd->registerDisplays(displays);
 		
 		//convert freq percentage to number
 		int increment = 1;
@@ -80,14 +80,12 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 /***********************************************************************/
 int Rarefact::getSharedCurve(float percentFreq = 0.01, int nIters = 1000){
 try {
-		SharedRarefactionCurveData* rcd = new SharedRarefactionCurveData();
+		SharedRarefactionCurveData rcd;
 		
 		label = lookup[0]->getLabel();
 		
 		//register the displays
-		for(int i=0;i<displays.size();i++){
-			rcd->registerDisplay(displays[i]);
-		}
+		rcd.registerDisplays(displays);
 		
 		//if jumble is false all iters will be the same
 		if (!jumble)  {  nIters = 1;  }
@@ -99,9 +97,7 @@ try {
 		
 		for(int iter=0;iter<nIters;iter++){
 		
-			for(int i=0;i<displays.size();i++){
-				displays[i]->init(label);		  
-			}
+			for(int i=0;i<displays.size();i++){ displays[i]->init(label);	 }
 			
             //randomize the groups
 			if (jumble)  { util.mothurRandomShuffle(lookup); }
@@ -115,29 +111,24 @@ try {
 			vector<SharedRAbundVector*> subset;
 			//send each group one at a time
 			for (int k = 0; k < lookup.size(); k++) { 
-				if (m->getControl_pressed()) {  delete merge; delete rcd; return 0;  }
+				if (m->getControl_pressed()) {  delete merge;  return 0;  }
 				
 				subset.clear(); //clears out old pair of sharedrabunds
 				//add in new pair of sharedrabunds
 				subset.push_back(merge); subset.push_back(lookup[k]);
 				
-				rcd->updateSharedData(subset, k+1, numGroupComb);
+				rcd.updateSharedData(subset, k+1, numGroupComb);
 				mergeVectors(merge, lookup[k]);
 			}
 
 			//resets output files
-			for(int i=0;i<displays.size();i++){
-				displays[i]->reset();
-			}
+			for(int i=0;i<displays.size();i++){ displays[i]->reset(); }
 			
 			delete merge;
 		}
 		
-		for(int i=0;i<displays.size();i++){
-			displays[i]->close();
-		}
+		for(int i=0;i<displays.size();i++){ displays[i]->close(); }
 		
-		delete rcd;
 		return 0;
 	}
 	catch(exception& e) {
