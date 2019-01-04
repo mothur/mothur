@@ -37,7 +37,8 @@ public:
 	void updateSharedData(vector<SharedRAbundVector*> r, int numSeqs, int numGroupComb)	{
         shared = r; NumSeqs = numSeqs; NumGroupComb = numGroupComb;
         groups.clear(); for (int i = 0; i < r.size(); i++) { groups.push_back(r[i]->getGroup()); }
-        SharedDataChanged();
+        
+        for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){ (*pos)->update(shared, NumSeqs, NumGroupComb, groups); }
     }
 	
 private:
@@ -46,8 +47,6 @@ private:
 	int NumSeqs, NumGroupComb;
     vector<string> groups;
     
-    void SharedDataChanged()                    {	for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){ (*pos)->update(shared, NumSeqs, NumGroupComb, groups); }				}
-	
 };
 
 /***********************************************************************/

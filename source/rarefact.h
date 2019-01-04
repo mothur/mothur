@@ -32,7 +32,7 @@ private:
     bool jumble;
     Utils util;
 	
-	int driver(RarefactionCurveData*, int, int);
+	int driver(RarefactionCurveData, int, int);
 
 };
 

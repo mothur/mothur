@@ -8,6 +8,7 @@
 
 /***********************************************************************/
 //Each display is responsible for one calculator. The FileOutput class handles creating the outputfile for the calc.
+//This class uses mutex and lock_guard to prevent thread errors.
 
 class RareDisplay : public Display {
 	
@@ -29,6 +30,7 @@ private:
 	int nIters;
     vector<string> Groups;
     Utils util;
+    std::mutex mutex;
     
 };
 

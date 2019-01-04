@@ -13,6 +13,7 @@
 
 void RareDisplay::init(string label){
 	try {
+        lock_guard<std::mutex> guard(mutex);
 		this->label = label;
 	}
 	catch(exception& e) {
@@ -25,6 +26,8 @@ void RareDisplay::init(string label){
 
 void RareDisplay::update(SAbundVector* rank){
 	try {
+        lock_guard<std::mutex> guard(mutex);
+        
 		int newNSeqs = rank->getNumSeqs();
 		vector<double> data = estimate->getValues(rank);
 
@@ -46,6 +49,8 @@ void RareDisplay::update(SAbundVector* rank){
 /***********************************************************************/
 void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb, vector<string> g) {
 	try {
+        lock_guard<std::mutex> guard(mutex);
+        
 		vector<double> data = estimate->getValues(shared);
         Groups = g;
 		
@@ -68,6 +73,7 @@ void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int nu
 
 void RareDisplay::reset(){
 	try {
+        lock_guard<std::mutex> guard(mutex);
 		nIters++;
 	}
 	catch(exception& e) {
@@ -77,7 +83,7 @@ void RareDisplay::reset(){
 }
 
 /***********************************************************************/
-
+//assumes only one thread will run close
 void RareDisplay::close(){
 	try {
 		output->setLabelName(label);

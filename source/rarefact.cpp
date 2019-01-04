@@ -8,14 +8,13 @@
  */
 
 #include "rarefact.h"
-//#include "ordervector.hpp"
 
 /***********************************************************************/
 
 int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 	try {
-		RarefactionCurveData* rcd = new RarefactionCurveData();
-        rcd->registerDisplays(displays);
+		RarefactionCurveData rcd;
+        rcd.registerDisplays(displays);
 		
 		//convert freq percentage to number
 		int increment = 1;
@@ -26,7 +25,6 @@ int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 
 		for(int i=0;i<displays.size();i++){ displays[i]->close(); }
 		
-		delete rcd;
 		return 0;
 	}
 	catch(exception& e) {
@@ -35,7 +33,7 @@ int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 	}
 }
 /***********************************************************************/
-int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000){
+int Rarefact::driver(RarefactionCurveData rcd, int increment, int nIters = 1000){
 	try {
 			
 		for(int iter=0;iter<nIters;iter++){
@@ -48,7 +46,7 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 		
 			for(int i=0;i<numSeqs;i++){
 			
-				if (m->getControl_pressed()) { delete lookup; delete rank; delete rcd; return 0;  }
+				if (m->getControl_pressed()) { delete lookup; delete rank; return 0;  }
 			
 				int binNumber = order.get(i);
 				int abundance = lookup->get(binNumber);
@@ -59,10 +57,10 @@ int Rarefact::driver(RarefactionCurveData* rcd, int increment, int nIters = 1000
 				lookup->set(binNumber, abundance);
 				rank->set(abundance, rank->get(abundance)+1);
 
-				if((i == 0) || ((i+1) % increment == 0) || (ends.count(i+1) != 0)){ rcd->updateRankData(rank); }
+				if((i == 0) || ((i+1) % increment == 0) || (ends.count(i+1) != 0)){ rcd.updateRankData(rank); }
 			}
 	
-			if((numSeqs % increment != 0) || (ends.count(numSeqs) != 0)){ rcd->updateRankData(rank); }
+			if((numSeqs % increment != 0) || (ends.count(numSeqs) != 0)){ rcd.updateRankData(rank); }
 
 			for(int i=0;i<displays.size();i++){ displays[i]->reset(); }
 			
@@ -117,7 +115,7 @@ try {
 				//add in new pair of sharedrabunds
 				subset.push_back(merge); subset.push_back(lookup[k]);
 				
-				rcd.updateSharedData(subset, k+1, numGroupComb);
+				rcd.updateSharedData(subset, k+1, numGroupComb); //
 				mergeVectors(merge, lookup[k]);
 			}
 
