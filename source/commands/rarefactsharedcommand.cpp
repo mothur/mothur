@@ -30,6 +30,7 @@ vector<string> RareFactSharedCommand::setParameters(){
         CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
 		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pgroupmode);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -47,7 +48,7 @@ string RareFactSharedCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The rarefaction.shared command parameters are shared, design, label, iters, groups, sets, jumble, groupmode and calc.  shared is required if there is no current sharedfile. \n";
+		helpString += "The rarefaction.shared command parameters are shared, design, label, iters, groups, sets, jumble, groupmode, processors and calc.  shared is required if there is no current sharedfile. \n";
         helpString += "The design parameter allows you to assign your groups to sets. If provided mothur will run rarefaction.shared on a per set basis. \n";
         helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
 		helpString += "The rarefaction command should be in the following format: \n";
@@ -224,6 +225,9 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
             temp = validParameter.valid(parameters, "subsampleiters");			if (temp == "not found") { temp = "1000"; }
 			util.mothurConvert(temp, iters); 
             
+            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+            processors = current->setProcessors(temp);
+
             temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
 			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
             else {  
@@ -369,11 +373,10 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 			
 			if(allLines == 1 || labels.count(subset->getLabel()) == 1){
 				m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-                vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
-				rCurve = new Rarefact(rabunds, rDisplays, jumble);
+                
+				rCurve = new Rarefact(subset, rDisplays, jumble, processors);
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
-                for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
                 
                 if (subsample) { subsampleLookup(subset, fileNameRoot);  }
                     
@@ -395,11 +398,10 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
                 }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
                 
                 m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-                vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
-                rCurve = new Rarefact(rabunds, rDisplays, jumble);
+                
+                rCurve = new Rarefact(subset, rDisplays, jumble, processors);
                 rCurve->getSharedCurve(freq, nIters);
                 delete rCurve;
-                for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
                 
                 if (subsample) { subsampleLookup(subset, fileNameRoot);  }
                 
@@ -459,11 +461,10 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             }else {  subset = NULL; }
             
 			m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-            vector<SharedRAbundVector*> rabunds = subset->getSharedRAbundVectors();
-			rCurve = new Rarefact(rabunds, rDisplays, jumble);
+            
+			rCurve = new Rarefact(subset, rDisplays, jumble, processors);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
-            for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
             
             if (subsample) { subsampleLookup(subset, fileNameRoot);  }
                 
@@ -512,11 +513,9 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
                 }
             }
             
-            vector<SharedRAbundVector*> rabunds = thisItersLookup->getSharedRAbundVectors();
-            rCurve = new Rarefact(rabunds, rDisplays, jumble);
+            rCurve = new Rarefact(thisItersLookup, rDisplays, jumble, processors);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
-            for (int i = 0; i < rabunds.size(); i++) {	delete rabunds[i]; 	}
             
             //clean up memory
             for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
@@ -636,11 +635,9 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 			ifstream in;
 			util.openInputFile(outputNames[i], in);
 			
-			string labels = util.getline(in);
+            string labels = util.getline(in); util.gobble(in);
+            vector<string> theseLabels = util.splitWhiteSpace(labels);
             
-			istringstream iss (labels,istringstream::in);
-            string newLabel = ""; vector<string> theseLabels;
-            while(!iss.eof()) {  iss >> newLabel; util.gobble(iss); theseLabels.push_back(newLabel); }
             vector< vector<string> > allLabels;
             vector<string> thisSet; thisSet.push_back(theseLabels[0]); allLabels.push_back(thisSet); thisSet.clear(); //makes "numSampled" its own grouping
             for (int j = 1; j < theseLabels.size()-1; j++) {
@@ -687,27 +684,36 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
                 string thisfilename = itFileNameGroup->first;
                 string group = itFileNameGroup->second;
                 
-				ifstream temp;
-				util.openInputFile(thisfilename, temp);
-				
-				//read through first line - labels
-				util.getline(temp);	util.gobble(temp);
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + thisfilename + "\t" + group + "\n");  }
+                
+                ifstream temp;
+                util.openInputFile(thisfilename, temp);
+                
+                //read through first line - labels
+                string dummy = util.getline(temp);	util.gobble(temp);
+                
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + dummy + "\t" + toString(fileLabels[combineFileName].size()) + "\n");  }
 				
 				map<int, vector< vector<string> > > thisFilesLines;
 				while (!temp.eof()){
-                    int numSampled = 0;
-                    temp >> numSampled; util.gobble(temp);
+                    float numSampled = 0;
+                    string thisLineInfo = util.getline(temp); util.gobble(temp);
+                    vector<string> parsedLine = util.splitWhiteSpace(thisLineInfo);
+                    util.mothurConvert(parsedLine[0], numSampled);
                     
                     vector< vector<string> > theseReads;
                     vector<string> thisSet; thisSet.push_back(toString(numSampled)); theseReads.push_back(thisSet); thisSet.clear();
+                    int columnIndex = 1; //0 -> numSampled, 1 -> 0.03, 2 -> 0.03lci, 3 -> 0.03hci, 4 -> 0.05, 5 -> 0.05lci, 6 -> 0.05hci
                     for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
                         vector<string> reads;
                         string next = "";
-                        for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
-                            temp >> next; util.gobble(temp);
-                            reads.push_back(next);
+                        int numColumnsPerLabel = fileLabels[combineFileName][k].size();  // 0.03 lci hci  ... 0.05 lci hci -> 3 columns
+                        for (int l = 0; l < numColumnsPerLabel; l++) {
+                            reads.push_back(parsedLine[columnIndex]); columnIndex++;
                         }
                         theseReads.push_back(reads);
+                        
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: " + util.getStringFromVector(reads, " ") + "\n");  }
                     }
                     thisFilesLines[numSampled] = theseReads;
                     util.gobble(temp);

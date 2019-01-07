@@ -609,7 +609,6 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 				map<int, vector< vector<string> > > thisFilesLines; //numSampled ->
 				while (!temp.eof()){
                     float numSampled = 0;
-                    //temp >> numSampled; util.gobble(temp);
                     string thisLineInfo = util.getline(temp); util.gobble(temp);
                     vector<string> parsedLine = util.splitWhiteSpace(thisLineInfo);
                     util.mothurConvert(parsedLine[0], numSampled);
