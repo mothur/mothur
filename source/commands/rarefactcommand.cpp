@@ -42,6 +42,7 @@ vector<string> RareFactCommand::setParameters(){
         CommandParameter palpha("alpha", "Multiple", "0-1-2", "1", "", "", "","",false,false,true); parameters.push_back(palpha);
 		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pgroupmode);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -59,7 +60,7 @@ string RareFactCommand::getHelpString(){
 	try {
 		ValidCalculators validCalculator;
 		string helpString = "";
-		helpString += "The rarefaction.single command parameters are list, sabund, rabund, shared, label, iters, freq, calc, groupmode, groups and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
+		helpString += "The rarefaction.single command parameters are list, sabund, rabund, shared, label, iters, freq, calc, groupmode, groups, processors and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
 		helpString += "The rarefaction.single command should be in the following format: \n";
 		helpString += "rarefaction.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n";
@@ -301,6 +302,9 @@ RareFactCommand::RareFactCommand(string option)  {
 			temp = validParameter.valid(parameters, "groupmode");		if (temp == "not found") { temp = "T"; }
 			groupMode = util.isTrue(temp);
             
+            temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
+            processors = current->setProcessors(temp);
+            
             string groups = validParameter.valid(parameters, "groups");
             if (groups == "not found") { groups = ""; }
             else {  util.splitAtDash(groups, Groups);
@@ -321,6 +325,8 @@ int RareFactCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
+        long start = time(NULL);
+        
         map<string, set<int> > labelToEnds;
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
 		else {  inputFileNames = parseSharedFile(sharedfile, labelToEnds);  format = "rabund"; }
@@ -426,7 +432,7 @@ int RareFactCommand::execute(){
                     map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                     set<int> ends;
                     if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-					rCurve = new Rarefact(*order, rDisplays, ends);
+					rCurve = new Rarefact(*order, rDisplays, ends, processors);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -444,7 +450,7 @@ int RareFactCommand::execute(){
 					map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                     set<int> ends;
                     if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-					rCurve = new Rarefact(*order, rDisplays, ends);
+					rCurve = new Rarefact(*order, rDisplays, ends, processors);
 
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
@@ -488,14 +494,13 @@ int RareFactCommand::execute(){
 				map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                 set<int> ends;
                 if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-                rCurve = new Rarefact(*order, rDisplays, ends);
+                rCurve = new Rarefact(*order, rDisplays, ends, processors);
 
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 				
 				delete order;
 			}
-			
 			
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
 			rDisplays.clear();
@@ -508,6 +513,8 @@ int RareFactCommand::execute(){
 		if ((sharedfile != "") && (groupMode)) {   outputNames = createGroupFile(outputNames, file2Group);  }
 
 		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
+        
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to run rarefaction.single.\n");
 
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -522,7 +529,6 @@ int RareFactCommand::execute(){
 //**********************************************************************************************************************
 vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map<int, string> file2Group) {
 	try {
-		
 		vector<string> newFileNames;
 		
 		//find different types of files
@@ -538,11 +544,9 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 			ifstream in;
 			util.openInputFile(outputNames[i], in);
 			
-			string labels = util.getline(in);
+            string labels = util.getline(in); util.gobble(in);
+            vector<string> theseLabels = util.splitWhiteSpace(labels);
             
-			istringstream iss (labels,istringstream::in);
-            string newLabel = ""; vector<string> theseLabels;
-            while(!iss.eof()) {  iss >> newLabel; util.gobble(iss); theseLabels.push_back(newLabel); }
             vector< vector<string> > allLabels;
             vector<string> thisSet; thisSet.push_back(theseLabels[0]); allLabels.push_back(thisSet); thisSet.clear(); //makes "numSampled" its own grouping
             for (int j = 1; j < theseLabels.size()-1; j++) {
@@ -550,9 +554,11 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                     thisSet.push_back(theseLabels[j]); 
                     thisSet.push_back(theseLabels[j+1]); 
                     thisSet.push_back(theseLabels[j+2]);
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + util.getStringFromVector(thisSet, " ") + "\n");  }
                     j++; j++;
                 }else{ //no lci or hci for this calc.
-                    thisSet.push_back(theseLabels[j]); 
+                    thisSet.push_back(theseLabels[j]);
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + util.getStringFromVector(thisSet, " ") + "\n");  }
                 }
                 allLabels.push_back(thisSet); 
                 thisSet.clear();
@@ -568,16 +574,16 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                 typesFiles[extension] = temp;
             }
             if (!(util.inUsersGroups(file2Group[i], groupNames))) {  groupNames.push_back(file2Group[i]); }
-            
 		}
 		
 		//for each type create a combo file
-		
 		for (map<string, map<string, string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
 			
 			ofstream out;
 			string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + it->first;
 			util.openOutputFileAppend(combineFileName, out);
+            out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+            
 			newFileNames.push_back(combineFileName);
 			map<string, string> thisTypesFiles = it->second; //it->second maps filename to group
             set<int> numSampledSet;
@@ -590,27 +596,37 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                 string thisfilename = itFileNameGroup->first;
                 string group = itFileNameGroup->second;
                 
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + thisfilename + "\t" + group + "\n");  }
+                
 				ifstream temp;
 				util.openInputFile(thisfilename, temp);
 				
 				//read through first line - labels
-				util.getline(temp);	util.gobble(temp);
+				string dummy = util.getline(temp);	util.gobble(temp);
+                
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + dummy + "\t" + toString(fileLabels[combineFileName].size()) + "\n");  } //
 				
-				map<int, vector< vector<string> > > thisFilesLines;
+				map<int, vector< vector<string> > > thisFilesLines; //numSampled ->
 				while (!temp.eof()){
-                    int numSampled = 0;
-                    temp >> numSampled; util.gobble(temp);
+                    float numSampled = 0;
+                    //temp >> numSampled; util.gobble(temp);
+                    string thisLineInfo = util.getline(temp); util.gobble(temp);
+                    vector<string> parsedLine = util.splitWhiteSpace(thisLineInfo);
+                    util.mothurConvert(parsedLine[0], numSampled);
                 
                     vector< vector<string> > theseReads;
                     vector<string> thisSet; thisSet.push_back(toString(numSampled)); theseReads.push_back(thisSet); thisSet.clear();
+                    int columnIndex = 1; //0 -> numSampled, 1 -> 0.03, 2 -> 0.03lci, 3 -> 0.03hci, 4 -> 0.05, 5 -> 0.05lci, 6 -> 0.05hci
                     for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
                         vector<string> reads;
                         string next = "";
-                        for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
-                            temp >> next; util.gobble(temp);
-                            reads.push_back(next);
+                        int numColumnsPerLabel = fileLabels[combineFileName][k].size();  // 0.03 lci hci  ... 0.05 lci hci -> 3 columns
+                        for (int l = 0; l < numColumnsPerLabel; l++) {
+                            reads.push_back(parsedLine[columnIndex]); columnIndex++;
                         }
                         theseReads.push_back(reads);
+                        
+                        if (m->getDebug()) { m->mothurOut("[DEBUG]: " + util.getStringFromVector(reads, " ") + "\n");  }
                     }
                     thisFilesLines[numSampled] = theseReads;
                     util.gobble(temp);

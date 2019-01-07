@@ -78,9 +78,9 @@ void FileOutput::printFile(){
         ofstream outFile;
         util.openOutputFile(filename, outFile);
         
-        outFile.setf(ios::fixed, ios::floatfield);
-        outFile.setf(ios::showpoint);
-        
+        outFile.setf(ios::fixed, ios::floatfield); outFile.setf(ios::showpoint);
+        cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
+    
         outFile << fileHeader << endl;
         for (size_t i = 0; i < results.size(); i++) {
             for (size_t j = 0; j < results[i].size(); j++) {
@@ -88,7 +88,7 @@ void FileOutput::printFile(){
             }
             outFile << endl;
         }
-        outFile << endl;
+        outFile << endl; 
         
         outFile.close();
     }
