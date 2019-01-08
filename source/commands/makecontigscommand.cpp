@@ -570,7 +570,7 @@ int MakeContigsCommand::createGroupFile(string outputGroupFile, string resultFas
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "processNamesCountFiles");
+        m->errorOut(e, "MakeContigsCommand", "createGroupFile");
         exit(1);
     }
 }

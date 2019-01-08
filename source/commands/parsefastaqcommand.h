@@ -18,6 +18,7 @@
 #include "groupmap.h"
 #include "oligos.h"
 #include "filefile.hpp"
+#include "splitgroupscommand.h"
 
 
 class ParseFastaQCommand : public Command {
@@ -50,15 +51,11 @@ private:
     
     map<int, string> file2Group;
     vector< vector<string> > readFile();
-    vector<vector<string> > fastqFileNames;
-    vector<vector<string> > rfastqFileNames;
-    vector<vector<string> > fastaFileNames;
-    vector<vector<string> > qualFileNames;
-    vector<vector<string> > rfastaFileNames;
-    vector<vector<string> > rqualFileNames;
     string ffqnoMatchFile, rfqnoMatchFile, ffnoMatchFile, rfnoMatchFile, fqnoMatchFile, rqnoMatchFile;
     vector<string> Groups;
-    map<string, int> GroupToFile;
+    //map<string, int> GroupToFile;
+    map<string, string> seqGroups;
+    map<string, long long> groupCounts;
 
 	
     int processFile(string inputfile, TrimOligos*&, TrimOligos*&);
@@ -67,10 +64,10 @@ private:
     vector<char> convertTable;
     bool readOligos(string oligosFile);
     bool readGroup(string oligosFile);
-    //fastqRead2 readFastq(ifstream&, bool&);
-    int findGroup(Sequence&, QualityScores&, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
-    int findGroup(Sequence, int&, int&, string);
-    int findGroup(Sequence&, QualityScores&, Sequence&, QualityScores&, int&, int&, TrimOligos*&, TrimOligos*&, int, int);
+    int findGroup(Sequence&, QualityScores&, string&, TrimOligos*&, TrimOligos*&, int, int);
+    int findGroup(Sequence, string&, string);
+    int findGroup(Sequence&, QualityScores&, Sequence&, QualityScores&, string&, TrimOligos*&, TrimOligos*&, int, int);
+    map<string, vector<string> > splitFastqFile(string outputGroupFile, string resultFastqfile); //uses split.groups command to parse the reads by sample
     
     
 };
