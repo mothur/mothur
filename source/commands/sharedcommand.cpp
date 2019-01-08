@@ -202,6 +202,7 @@ SharedCommand::SharedCommand(string option)  {
                      newCountTable.printTable(newCountfileName);
                      
                      current->setCountFile(newCountfileName);
+                     countfile = newCountfileName;
                      outputNames.push_back(newCountfileName);
                  }
              }
