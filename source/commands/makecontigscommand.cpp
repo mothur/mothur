@@ -2620,7 +2620,7 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
         if (groupNames.size() == 0) { allFiles = 0; allBlank = true;  }
 
         if (allBlank) {
-            m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
+            m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile.\n"); 
             allFiles = false;
             return false;
         }

@@ -225,7 +225,7 @@ SharedCommand::SharedCommand(string option)  {
 					}
 				}
 			}
-			else if ((biomfile != "") && (listfile != "")) { m->mothurOut("When executing a make.shared command you must enter ONLY ONE of the following: list or biom."); m->mothurOutEndLine(); abort = true; }
+			else if ((biomfile != "") && (listfile != "")) { m->mothurOut("When executing a make.shared command you must enter ONLY ONE of the following: list or biom.\n"); abort = true; }
 
 			if (listfile != "") {
 				if ((groupfile == "") && (countfile == "")) {

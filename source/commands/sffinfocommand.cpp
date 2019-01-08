@@ -1994,7 +1994,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
         }
         
 		if (allBlank) {
-			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a split the sff file."); m->mothurOutEndLine();
+			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a split the sff file.\n"); 
 			split = 1;
 			return false;
 		}
