@@ -430,10 +430,54 @@ map<string, vector<string> > ParseFastaQCommand::splitFastqFile(string outputGro
         current->setMothurCalling(false);
         m->mothurOut("/******************************************/\n");
         
+        if (fasta || qual) { //do we need to create a fasta and qual file for these split fastq files
+            
+            string fastaBool = "false"; string qualBool = "false";
+            if (fasta)  { fastaBool = "true"; }
+            if (qual)   { qualBool = "true";  }
+            
+            map<string, vector<string> >::iterator it = filenames.find("fastq");
+            if (it != filenames.end()) { //fastq files were produced
+                for (int k = 0; k < it->second.size(); k++) {
+                    
+                    string inputString = "fastq=" + it->second[k] + ", fasta=" + fastaBool + ", qfile=" + qualBool;
+                    m->mothurOut("/******************************************/\n");
+                    m->mothurOut("Generating parsed fasta and qual files... Running command: fastq.info(" + inputString + ")\n");
+                    current->setMothurCalling(true);
+                    
+                    Command* fastqCommand = new ParseFastaQCommand(inputString);
+                    fastqCommand->execute();
+                    
+                    map<string, vector<string> > fnames = fastqCommand->getOutputFiles();
+                    
+                    delete fastqCommand;
+                    current->setMothurCalling(false);
+                    m->mothurOut("/******************************************/\n");
+
+                    
+                    if (fasta) {
+                        map<string, vector<string> >::iterator itFastaName = fnames.find("fasta");
+                        if (itFastaName != fnames.end()) {
+                            string fName = itFastaName->second[0];
+                            outputNames.push_back(fName); outputTypes["fasta"].push_back(fName);
+                        }
+                    }
+                    
+                    if (qual) {
+                        map<string, vector<string> >::iterator itQualName = fnames.find("qfile");
+                        if (itQualName != fnames.end()) {
+                            string qName = itQualName->second[0];
+                            outputNames.push_back(qName); outputTypes["qfile"].push_back(qName);
+                        }
+                    }
+                }
+            }
+        }
+        
         return filenames;
     }
     catch(exception& e) {
-        m->errorOut(e, "splitFastqFile", "createGroupFile");
+        m->errorOut(e, "ParseFastaQCommand", "splitFastqFile");
         exit(1);
     }
 }
