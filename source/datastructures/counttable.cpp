@@ -1004,13 +1004,13 @@ int CountTable::push_back(string seqName, int thisTotal) {
     try {
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
-            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + "."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + ".\n"); m->setControl_pressed(true);  }
             indexNameMap[seqName] = uniques;
             totals.push_back(thisTotal);
             total+=thisTotal;
             uniques++;
         }else {
-            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");  m->setControl_pressed(true);
         }
 
         return thisTotal;
@@ -1022,12 +1022,41 @@ int CountTable::push_back(string seqName, int thisTotal) {
 }
 /************************************************************/
 //add sequence with group info
+int CountTable::push_back(string seqName, vector<int> groupCounts, bool ignoreDup=false) {
+    try {
+        int thisTotal = 0;
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it == indexNameMap.end()) {
+            if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct.\n");  m->setControl_pressed(true);  }
+            
+            for (int i = 0; i < getNumGroups(); i++) {   totalGroups[i] += groupCounts[i];  thisTotal += groupCounts[i]; }
+            if (hasGroups) {  counts.push_back(groupCounts);  }
+            indexNameMap[seqName] = uniques;
+            totals.push_back(thisTotal);
+            total+= thisTotal;
+            uniques++;
+        }else {
+            if (ignoreDup) {
+                m->mothurOut("[WARNING]: Your count table contains more than 1 sequence named " + seqName + ".  Mothur requires sequence names to be unique. I will only add it once.\n"); 
+            }else {  m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");  m->setControl_pressed(true);  }
+        }
+        
+        return thisTotal;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "push_back");
+        exit(1);
+    }
+}
+
+/************************************************************/
+//add sequence with group info
 int CountTable::push_back(string seqName, vector<int> groupCounts) {
     try {
         int thisTotal = 0;
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
-            if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+            if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct.\n");  m->setControl_pressed(true);  }
 
             for (int i = 0; i < getNumGroups(); i++) {   totalGroups[i] += groupCounts[i];  thisTotal += groupCounts[i]; }
             if (hasGroups) {  counts.push_back(groupCounts);  }
@@ -1036,7 +1065,7 @@ int CountTable::push_back(string seqName, vector<int> groupCounts) {
             total+= thisTotal;
             uniques++;
         }else {
-            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");  m->setControl_pressed(true);
         }
 
         return thisTotal;
@@ -1166,7 +1195,7 @@ int CountTable::copy(CountTable* ct) {
 
         for (int i = 0; i < names.size(); i++) {
             vector<int> thisCounts = ct->getGroupCounts(names[i]);
-            push_back(names[i], thisCounts);
+            push_back(names[i], thisCounts, false);
         }
 
         return 0;

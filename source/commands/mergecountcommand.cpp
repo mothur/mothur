@@ -194,7 +194,7 @@ int MergeCountCommand::execute(){
                             newAbunds[newIndex] = abunds[k];
                         }
                     }
-                    completeTable.push_back(seqs[j], newAbunds);
+                    completeTable.push_back(seqs[j], newAbunds, true);
                 }
             }
             else { util.appendFilesWithoutHeaders(fileNames[i], outputFileName); } //No group info so simple append

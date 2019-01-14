@@ -78,6 +78,7 @@ class CountTable {
         int push_back(string); //add a sequence
         int push_back(string, int); //add a sequence
         int push_back(string, vector<int>); //add a sequence with group info
+        int push_back(string, vector<int>, bool); //add a sequence with group info, no error - ignore dups
         int remove(string); //remove seq
         int get(string); //returns unique sequence index for reading distance matrices like NameAssignment
         int size() { return (int)indexNameMap.size(); }
@@ -94,6 +95,7 @@ class CountTable {
         vector<string> getNamesOfSeqs(); //return names of all seqeunce in table
         vector<string> getNamesOfSeqs(string); //returns names of seqs in specific group in table
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
+        bool inTable(string);  //accepts sequence name and returns true if sequence is in table, false if not present
         ListVector getListVector();
         SharedRAbundVectors* getShared();
         SharedRAbundVectors* getShared(vector<string>); //set of groups selected
