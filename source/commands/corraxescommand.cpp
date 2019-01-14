@@ -836,9 +836,8 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 				
 				if (it == axes.end()) {
 					axes[group] = thisGroupsAxes;
-				}else {
-					m->mothurOut(group + " is already in your axes file, using first definition."); m->mothurOutEndLine();
-				}
+                    
+				}else { m->mothurOut(group + " is already in your axes file, using first definition.\n");  }
 			}
 			
 			util.gobble(in);
