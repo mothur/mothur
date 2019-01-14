@@ -20,7 +20,6 @@ Download the mothur [source code](https://github.com/mothur/mothur).
 * bzip2
 * bzip2-devel
 * libz
-* python
 * zlib-devel
 
 You can use a package manager such as yum, apt-get, homebrew, or conda.
