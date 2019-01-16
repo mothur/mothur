@@ -753,6 +753,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedTaxTFile->close(); synchronizedTaxFile->close(); synchronizedAccnosFile->close();
         delete threadTaxWriter; delete threadTaxTWriter; delete threadAccnosWriter;
         delete dataBundle;
         time(&end);

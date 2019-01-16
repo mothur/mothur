@@ -1379,7 +1379,7 @@ string Utils::getStringFromVector(vector<int>& list, string delim){
 
         if (list.size() == 0) { return result; }
 
-        result = list[0];
+        result = toString(list[0]);
 
         for (int i = 1; i < list.size(); i++) {
             if (m->getControl_pressed()) { break;  }
@@ -1401,7 +1401,7 @@ string Utils::getStringFromVector(vector<double>& list, string delim){
 
         if (list.size() == 0) { return result; }
 
-        result = list[0];
+        result = toString(list[0]);
 
         for (int i = 1; i < list.size(); i++) {
             if (m->getControl_pressed()) { break;  }
@@ -1409,6 +1409,28 @@ string Utils::getStringFromVector(vector<double>& list, string delim){
             result += delim + temp;
         }
 
+        return result;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string Utils::getStringFromSet(set<int>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        vector<int> vlist;
+        for (set<int>::iterator it = list.begin(); it != list.end(); it++) {
+            if (m->getControl_pressed()) { break;  }
+            int value = *it;
+            vlist.push_back(value);
+        }
+        result = getStringFromVector(vlist, delim);
+        
         return result;
     }
     catch(exception& e) {

@@ -27,7 +27,7 @@ public:
     string getHelpString();
     string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/Merge.otus"; }
-    string getDescription()		{ return "combine otus based on inputs"; }
+    string getDescription()		{ return "combine otus based on consensus taxonomy"; }
     
     
     int execute();

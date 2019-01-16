@@ -443,6 +443,7 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedOutputFile->close();
         delete threadWriter;
         delete dataBundle;
         time(&end);

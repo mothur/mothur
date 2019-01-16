@@ -322,6 +322,7 @@ long long DegapSeqsCommand::createProcesses(string filename, string outputFileNa
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedFile->close();
         delete threadWriter;
         delete dataBundle;
         

@@ -566,6 +566,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedOutputAlignFile->close(); synchronizedOutputReportFile->close(); synchronizedOutputAccnosFile->close();
         delete threadAlignWriter; delete threadAccnosWriter; delete threadReportWriter;
         delete dataBundle;
         
