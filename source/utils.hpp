@@ -47,6 +47,7 @@ public:
     void mothurRandomShuffle(SharedOrderVector&);
     void mothurRandomShuffle(vector<SharedRAbundVector*>&);
     void mothurRandomShuffle(Tree* t, vector<string> g);
+    void mothurRandomShuffle(vector<weightedSeq>&);
     
     //checks
     bool isTrue(string);
@@ -187,6 +188,7 @@ public:
     
     //string manipulation
     string addUnclassifieds(string tax, int maxlevel, bool probs);
+    string trimTax(string tax, int trimLevel);
     bool checkGroupName(string name);
     int checkName(string&);
     void getCombos(vector<string>& groupComb, vector<string> userGroups, int& numComp);
@@ -196,6 +198,7 @@ public:
     string getStringFromVector(vector<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+    string getStringFromSet(set<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     bool inUsersGroups(vector<string>, vector<string>); //returns true if any of the strings in first vector are in second vector
     bool inUsersGroups(vector<int>, vector< vector<int> >);
     bool inUsersGroups(string, vector<string>);

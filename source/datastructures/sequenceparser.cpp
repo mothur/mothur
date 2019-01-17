@@ -15,11 +15,10 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 	try {
 		
 		m = MothurOut::getInstance();
-		int error;
 		
 		//read group file
 		GroupMap groupMap(groupFile);
-		error = groupMap.readMap();
+		int error = groupMap.readMap();
 		
 		if (error == 1) { m->setControl_pressed(true); }
 		

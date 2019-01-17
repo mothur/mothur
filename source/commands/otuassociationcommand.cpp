@@ -104,7 +104,7 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			vector<string> tempOutNames;
@@ -152,7 +152,7 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			else if (relabundfile == "not found") { relabundfile = ""; }
 			else { inputFileName = relabundfile; current->setRelAbundFile(relabundfile); }
 			
-            metadatafile = validParameter.valid(parameters, "metadata");
+            metadatafile = validParameter.validFile(parameters, "metadata");
 			if (metadatafile == "not open") { abort = true; metadatafile = ""; }
 			else if (metadatafile == "not found") { metadatafile = ""; }
             
@@ -556,18 +556,8 @@ int OTUAssociationCommand::readMetadata(){
 		util.openInputFile(metadatafile, in);
 		
 		string headerLine = util.getline(in); util.gobble(in);
-		istringstream iss (headerLine,istringstream::in);
-		
-		//read the first label, because it refers to the groups
-		string columnLabel;
-		iss >> columnLabel; util.gobble(iss); 
-		
-		//save names of columns you are reading
-		while (!iss.eof()) {
-			iss >> columnLabel; util.gobble(iss);
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata column Label = " + columnLabel + "\n"); }
-			metadataLabels.push_back(columnLabel);
-		}
+        metadataLabels = util.splitWhiteSpace(headerLine);
+        metadataLabels.erase(metadataLabels.begin());
         
 		int count = metadataLabels.size();
         SharedRAbundFloatVectors* metadataLookup = new SharedRAbundFloatVectors();
@@ -593,7 +583,8 @@ int OTUAssociationCommand::readMetadata(){
 				tempLookup->push_back(temp);
 			}
 			
-            if (util.inUsersGroups(group, Groups)) {  metadataLookup->push_back(tempLookup);  }
+            if (Groups.size() == 0) { metadataLookup->push_back(tempLookup);  }
+            else if (util.inUsersGroups(group, Groups)) {  metadataLookup->push_back(tempLookup);  }
 			
 			util.gobble(in);
 		}
@@ -607,7 +598,8 @@ int OTUAssociationCommand::readMetadata(){
         for (int i = 0; i < metadataLookup->getNumBins(); i++) {
             for (int j = 0; j < sampleNames.size(); j++) { metadata[i].push_back(metadataLookup->get(i, sampleNames[j])); }
         }
-		
+        delete metadataLookup;
+        
 		return 0;
 	}
 	catch(exception& e) {

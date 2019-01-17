@@ -158,6 +158,12 @@ struct item {
     ~item() {}
 };
 
+struct weightedSeq {
+    long long name;
+    long long weight;
+    weightedSeq(long long n, long long w)  { name = n; weight = w;     }
+};
+
 struct PCell{
     ull row;
     ull column;

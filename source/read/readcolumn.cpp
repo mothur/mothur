@@ -60,7 +60,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
             if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
             if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 
-			if (distance == -1) { distance = 1000000; }
+			if (util.isEqual(distance, -1)) { distance = 1000000; }
 			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 			
 			if(distance <= cutoff && itA != itB){
@@ -119,7 +119,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
 				if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 				
-				if (distance == -1) { distance = 1000000; }
+				if (util.isEqual(distance, -1)) { distance = 1000000; }
 				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 				
 				if(distance <= cutoff && itA->second > itB->second){
@@ -178,7 +178,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
             
             if (m->getControl_pressed()) { exit(1); }
             
-			if (distance == -1) { distance = 1000000; }
+			if (util.isEqual(distance, -1)) { distance = 1000000; }
 			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 			
 			if(distance <= cutoff && itA != itB){
@@ -237,7 +237,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
                 
                 if (m->getControl_pressed()) { exit(1); }
 				
-				if (distance == -1) { distance = 1000000; }
+				if (util.isEqual(distance, -1)) { distance = 1000000; }
 				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 				
 				if(distance <= cutoff && itA > itB){

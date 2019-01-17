@@ -116,7 +116,7 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 			//check to make sure all parameters are valid for command
 			map<string,string>::iterator it;
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -366,10 +366,10 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             //handle ties
             if (keepties) { //adjust indexFirstNotRare if needed
                 if (indexFirstNotRare != 0) { //not out of bounds
-                    if (otus[indexFirstNotRare].score == otus[indexFirstNotRare-1].score) { //you have a tie
+                    if (util.isEqual(otus[indexFirstNotRare].score, otus[indexFirstNotRare-1].score)) { //you have a tie
                         bool tie = true;
                         for (int i = indexFirstNotRare-1; i >=0; i--) {
-                            if (otus[indexFirstNotRare].score != otus[i].score) { //found value below tie
+                            if (!util.isEqual(otus[indexFirstNotRare].score, otus[i].score)) { //found value below tie
                                 indexFirstNotRare = i+1; tie = false; break;
                             }
                         }

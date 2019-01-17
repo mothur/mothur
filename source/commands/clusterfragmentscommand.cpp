@@ -120,7 +120,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 		
 			//check to make sure all parameters are valid for command
 			for (map<string, string>::iterator it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
-				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it2->first, myArray, it2->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes

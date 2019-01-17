@@ -104,7 +104,7 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			vector<string> tempOutNames;
@@ -164,16 +164,16 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 			if (treefile == "not open") { treefile = ""; abort = true; }
 			else if (treefile == "not found") { treefile = ""; 
                 treefile = current->getTreeFile(); 
-                if (treefile != "") {  m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
-                else { m->mothurOut("No valid current files. You must provide a tree file."); m->mothurOutEndLine(); abort = true; }
+                if (treefile != "") {  m->mothurOut("Using " + treefile + " as input file for the tree parameter.\n"); }
+                else { m->mothurOut("No valid current files. You must provide a tree file.\n");  abort = true; }
             }else { current->setTreeFile(treefile); }	
             
             taxonomyfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomyfile == "not open") { taxonomyfile = ""; abort = true; }
 			else if (taxonomyfile == "not found") { taxonomyfile = ""; 
                 taxonomyfile = current->getTaxonomyFile(); 
-                if (taxonomyfile != "") {  m->mothurOut("Using " + taxonomyfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
-                else { m->mothurOut("No valid current files. You must provide a taxonomy file."); m->mothurOutEndLine(); abort = true; }
+                if (taxonomyfile != "") {  m->mothurOut("Using " + taxonomyfile + " as input file for the taxonomy parameter.\n");  }
+                else { m->mothurOut("No valid current files. You must provide a taxonomy file.\n");  abort = true; }
             }else { current->setTaxonomyFile(taxonomyfile); }	
 			
 			namefile = validParameter.validFile(parameters, "name");
@@ -192,11 +192,11 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
             string temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "51"; }

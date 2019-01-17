@@ -154,6 +154,7 @@
 #include "chimeravsearchcommand.h"
 #include "mergecountcommand.hpp"
 #include "clusterfitcommand.hpp"
+#include "mergeotuscommand.hpp"
 
 
 /*******************************************************/
@@ -329,6 +330,7 @@ CommandFactory::CommandFactory(){
     commands["rename.file"]         = "rename.file";
     commands["merge.count"]         = "merge.count";
     commands["cluster.fit"]         = "cluster.fit";
+    commands["merge.otus"]         = "merge.otus";
 
 
 }
@@ -581,6 +583,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "biom.info")             {	command = new BiomInfoCommand(optionString);                }
         else if(commandName == "rename.file")           {	command = new RenameFileCommand(optionString);              }
         else if(commandName == "cluster.fit")           {	command = new ClusterFitCommand(optionString);              }
+        else if(commandName == "merge.otus")            {	command = new MergeOTUsCommand(optionString);               }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -757,7 +760,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "biom.info")             {	pipecommand = new BiomInfoCommand(optionString);                }
         else if(commandName == "rename.file")           {	pipecommand = new RenameFileCommand(optionString);              }
         else if(commandName == "cluster.fit")           {	pipecommand = new ClusterFitCommand(optionString);              }
+        else if(commandName == "merge.otus")            {	pipecommand = new MergeOTUsCommand(optionString);               }
 		else											{	pipecommand = new NoCommand(optionString);						}
+        
 
 		return pipecommand;
 	}
@@ -918,6 +923,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "biom.info")             {	shellcommand = new BiomInfoCommand();               }
         else if(commandName == "rename.file")           {	shellcommand = new RenameFileCommand();             }
         else if(commandName == "cluster.fit")           {	shellcommand = new ClusterFitCommand();             }
+        else if(commandName == "merge.otus")            {	shellcommand = new MergeOTUsCommand();              }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

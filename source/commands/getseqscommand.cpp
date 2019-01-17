@@ -129,7 +129,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -873,7 +873,7 @@ int GetSeqsCommand::readName(){
                 }
             }
 
-			if ((dups) && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
+			if (dups && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
 				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]); if (m->getDebug()) { sanity["dupname"].insert(parsedNames[i]); } }
 				out << firstCol << '\t' << hold << endl;
 				wroteSomething = true;

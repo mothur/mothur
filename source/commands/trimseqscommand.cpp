@@ -164,7 +164,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -830,10 +830,10 @@ int driverTrim(trimData* params) {
 				if(params->qFileName != ""){
 					int origLength = currSeq.getNumBases();
 					
-					if(params->qThreshold != 0)			{	success = currQual.stripQualThreshold(currSeq, params->qThreshold);			}
-					else if(params->qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, params->qAverage, params->logtransform);				}
-					else if(params->qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, params->qRollAverage, params->logtransform);	}
-					else if(params->qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, params->qWindowStep, params->qWindowSize, params->qWindowAverage, params->logtransform);	}
+					if(!params->util.isEqual(params->qThreshold,0))			{	success = currQual.stripQualThreshold(currSeq, params->qThreshold);			}
+					else if(!params->util.isEqual(params->qAverage, 0))		{	success = currQual.cullQualAverage(currSeq, params->qAverage, params->logtransform);				}
+					else if(!params->util.isEqual(params->qRollAverage, 0))	{	success = currQual.stripQualRollingAverage(currSeq, params->qRollAverage, params->logtransform);	}
+					else if(!params->util.isEqual(params->qWindowAverage, 0)){	success = currQual.stripQualWindowAverage(currSeq, params->qWindowStep, params->qWindowSize, params->qWindowAverage, params->logtransform);	}
 					else						{	success = 1;				}
 					
 					//you don't want to trim, if it fails above then scrap it
@@ -1025,12 +1025,12 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
             delete data[i];
             delete workerThreads[i];
         }
-        
+        synchronizedOutputFastaTrimFile->close(); synchronizedOutputQScrapFile->close();
         delete threadFastaTrimWriter;
         delete threadFastaScrapWriter;
         if (qFileName != "") {
-            delete threadQTrimWriter;
-            delete threadQScrapWriter;
+            synchronizedOutputQTrimFile->close(); synchronizedOutputFastaTrimFile->close();
+            delete threadQTrimWriter; delete threadQScrapWriter;
         }
         delete dataBundle;
         

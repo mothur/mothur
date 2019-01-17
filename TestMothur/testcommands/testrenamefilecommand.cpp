@@ -62,14 +62,14 @@ TEST_CASE("Testing RenameFileCommand Class") {
         
         CAPTURE(ableToOpen);
             
-        CHECK(ableToOpen == 0);
+        CHECK(ableToOpen == false);
         
         bool ableToOpen2 = testRename.util.openInputFile(testRename.filenames[0], in2);
         in2.close();
         
         CAPTURE(ableToOpen2);
         
-        CHECK(ableToOpen2 == 0);
+        CHECK(ableToOpen2 == false);
         
         testRename.util.mothurRemove("greatData.new.fasta");
     }
@@ -87,7 +87,7 @@ TEST_CASE("Testing RenameFileCommand Class") {
         
         CAPTURE(ableToOpen);
         
-        CHECK(ableToOpen == 0);
+        CHECK(ableToOpen == false);
         
         testRename.filenames[0] = testRename.getNewName(testRename.filenames[0], "fasta");  //for teardown
     }

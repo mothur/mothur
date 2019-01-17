@@ -142,7 +142,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -753,6 +753,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedTaxTFile->close(); synchronizedTaxFile->close(); synchronizedAccnosFile->close();
         delete threadTaxWriter; delete threadTaxTWriter; delete threadAccnosWriter;
         delete dataBundle;
         time(&end);

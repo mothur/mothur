@@ -105,15 +105,15 @@ double MothurFisher::myhyper(double n11){
 /***********************************************************/
 double MothurFisher::hyper0(double n11i, double n1_i, double n_1i, double ni) {
 	try {
-		if (!((n1_i != 0)&&(n_1i != 0)&&(ni != 0))) {
+		if (!( !util.isEqual(n1_i, 0) && !util.isEqual(n_1i,0) && !util.isEqual(ni, 0) )) {
 			if(!(((int)n11i % 10) == 0)){
-				if(n11i==sn11+1)  
+				if(util.isEqual(n11i,sn11+1))
 				{
 					sprob *= ((sn1_-sn11)/(n11i))*((sn_1-sn11)/(n11i+sn-sn1_-sn_1));
 					sn11 = n11i;
 					return sprob;
 				}
-				if(n11i==sn11-1)
+				if(util.isEqual(n11i,sn11-1))
 				{
 					sprob *= ((sn11)/(sn1_-n11i))*((sn11+sn-sn1_-sn_1)/(sn_1-n11i));
 					sn11 = n11i;
@@ -144,7 +144,7 @@ double MothurFisher::exact(double n11, double n1_, double n_1, double n){
 		if(n_1<max) max=n_1;
 		double min = n1_+n_1-n;
 		if(min<0) min=0;
-		if(min==max)
+		if(util.isEqual(min,max))
 		{
 			sless = 1;
 			sright= 1;

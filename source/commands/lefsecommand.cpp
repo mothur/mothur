@@ -135,7 +135,7 @@ LefseCommand::LefseCommand(string option)  {
 			map<string,string>::iterator it;
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			vector<string> tempOutNames;
@@ -236,7 +236,7 @@ LefseCommand::LefseCommand(string option)  {
             
             temp = validParameter.valid(parameters, "strict");
             if (temp == "not found"){	temp = "0";		}
-			if ((temp != "0") && (temp != "1") && (temp != "2")) { m->mothurOut("Invalid strict option: choices are 0, 1 or 2."); m->mothurOutEndLine(); abort=true; }
+			if ((temp != "0") && (temp != "1") && (temp != "2")) { m->mothurOut("[ERROR]: Invalid strict option: choices are 0, 1 or 2.\n");  abort=true; }
             else {  util.mothurConvert(temp, strict); }
             
             temp = validParameter.valid(parameters, "minc");
@@ -389,8 +389,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, DesignMap& designMa
                 subclass2Class[thisSub] = treatment;
                 vector<int> temp; temp.push_back(j);
                 subClass2GroupIndex[thisSub] = temp;
-            }
-            else {
+            }else {
                 if (it->second != treatment) {
                     //m->mothurOut("[WARNING]: subclass " + thisSub + " has members in " + it->second + " and " + treatment + ". Subclass members must be from the same class for Wilcoxon. Changing " + thisSub + " to " + treatment + "_" + thisSub + ".\n");
                     thisSub = treatment + "_" + thisSub;
@@ -611,7 +610,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                         double pValue = 0.0;
                         double H = 0.0;
                         bool tres = true; //don't think this is set in the python source.  Not sure how that is handled, but setting it here.
-                        if ((x[0] == y[0]) && (x.size() == 1) && (y.size() == 1)) { tres = false; first = false; }
+                        if (util.isEqual(x[0],y[0]) && (x.size() == 1) && (y.size() == 1)) { tres = false; first = false; }
                         else if (!medComp) {
                             H = linear.calcWilcoxon(x, y, pValue);
                             if (pValue < (alphaMtc*2.0)) { tres = true; }
@@ -646,7 +645,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                             first = false;
                             if ((!curv) && (medComp || tres)) {
                                 dirCmp = 2; if (sx<sy) { dirCmp = 1; } //dir_cmp = sx < sy
-                                if (sx == sy) { br = true; }
+                                if (util.isEqual(sx,sy)) { br = true; }
                             }else if (curv) {
                                 dirCmp = 0;
                                 if (medComp || tres) {
@@ -655,7 +654,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                                 }
                             }else { br = true; }
                         }else if (!curv && medComp) {
-                            if (sxSy != dirCmp || sx == sy) { br = true; }
+                            if (sxSy != dirCmp || util.isEqual(sx,sy)) { br = true; }
                         }else if (curv) {
                             if (tres && dirCmp == 0) { curv_sign++; }
                             dirCmp = 2; if (sx<sy) { dirCmp = 1; } //dir_cmp = sx < sy
@@ -663,7 +662,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
                                 br = true;
                                 curv_sign = -1;
                             }
-                        }else if (!tres || sxSy != dirCmp || sx == sy) { br = true; } //elif not tres or (sx < sy) != dir_cmp or sx == sy: br = True
+                        }else if (!tres || sxSy != dirCmp || util.isEqual(sx,sy)) { br = true; } //elif not tres or (sx < sy) != dir_cmp or sx == sy: br = True
                         if (br) { break; }
                         ok++;
                     }//for class2 subclasses

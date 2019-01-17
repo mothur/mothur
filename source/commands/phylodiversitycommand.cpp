@@ -118,7 +118,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 		
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -443,10 +443,10 @@ vector<float> calcBranchLength(Tree* t, int leaf, vector< map<string, bool> >& c
         
         vector<string> groups = t->tree[leaf].getGroup();
         sums.resize(groups.size(), 0.0);
-        
+        Utils util;
         
         //you are a leaf
-        if(t->tree[index].getBranchLength() != -1){
+        if(!util.isEqual(t->tree[index].getBranchLength(), -1)){
             for (int k = 0; k < groups.size(); k++) {
                 sums[k] += abs(t->tree[index].getBranchLength());
             }
@@ -465,7 +465,7 @@ vector<float> calcBranchLength(Tree* t, int leaf, vector< map<string, bool> >& c
                 if (index >= roots[groups[k]]) { counted[index][groups[k]] = true; } //if you are at this groups "root", then say we are done
                 
                 if (!counted[index][groups[k]]){ //if counted[index][groups[k] is true this groups has already added all br from here to root, so quit early
-                    if (t->tree[index].getBranchLength() != -1) {
+                    if (!util.isEqual(t->tree[index].getBranchLength(), -1)) {
                         sums[k] += abs(t->tree[index].getBranchLength());
                     }
                     counted[index][groups[k]] = true;
@@ -499,7 +499,7 @@ map<string, int> getRootForGroups(Tree* t, MothurOut* m){
             
             for (int j = 0; j < groups.size(); j++) {
                 
-                if (done[groups[j]] == false) { //we haven't found the root for this group yet, initialize it
+                if (!done[groups[j]]) { //we haven't found the root for this group yet, initialize it
                     done[groups[j]] = true;
                     roots[groups[j]] = i; //set root to self to start
                 }

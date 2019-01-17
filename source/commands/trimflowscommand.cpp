@@ -126,7 +126,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -290,7 +290,7 @@ int TrimFlowsCommand::execute(){
         outputTypes["file"].push_back(flowFilesFileName);
         outputNames.push_back(flowFilesFileName);
         
-		if(allFiles){
+		if((allFiles) && (groupMap.size() != 0)) {
             //print group file
             string groupFileName = getOutputFileName("group",variables);
             ofstream out; util.openOutputFile(groupFileName, out);
@@ -847,7 +847,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         if (fasta) { delete threadFastaWriter; }
         delete dataBundle;
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to trim " + toString(num) + " sequences."); if (m->getDebug()) {   m->mothurOut("Scrapped " + toString(badNames.size()) + ".");  } m->mothurOutEndLine();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to trim " + toString(num) + " sequences."); if (m->getDebug()) {   m->mothurOut("Scrapped " + toString(badNames.size()) + ".\n");  } 
         
 		return num;
 	}

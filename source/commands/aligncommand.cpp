@@ -125,7 +125,7 @@ AlignCommand::AlignCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -468,11 +468,11 @@ void alignDriver(alignStruct* params) {
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+			if((count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
 			
 		}
 		//report progress
-		if((count) % 100 != 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+		if((count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(count) + "\n"); 		}
         
         params->numSeqs += count;
         params->flippedResults[0] += numFlipped_0;
@@ -566,6 +566,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedOutputAlignFile->close(); synchronizedOutputReportFile->close(); synchronizedOutputAccnosFile->close();
         delete threadAlignWriter; delete threadAccnosWriter; delete threadReportWriter;
         delete dataBundle;
         

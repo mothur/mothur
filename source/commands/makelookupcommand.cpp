@@ -101,7 +101,7 @@ MakeLookupCommand::MakeLookupCommand(string option)  {
 			map<string,string>::iterator it;
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
             vector<string> tempOutNames;
@@ -336,7 +336,7 @@ int MakeLookupCommand::execute(){
             if (m->getControl_pressed()) { return 0; }
             
             for(int j=0;j<N;j++){
-                if(lookupTable[i][j] == 0){
+                if(util.isEqual(lookupTable[i][j], 0)){
                     lookupTable[i][j] = 1;  //bring back
                 }
                 lookupTable[i][j] = -log(lookupTable[i][j]/double(counts[j]));  //bring back

@@ -74,7 +74,7 @@ GetgroupCommand::GetgroupCommand(string option)  {
 			ValidParameters validParameter;
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -97,8 +97,8 @@ GetgroupCommand::GetgroupCommand(string option)  {
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n"); abort = true; }
 			}else { current->setSharedFile(sharedfile); }
 			
 			

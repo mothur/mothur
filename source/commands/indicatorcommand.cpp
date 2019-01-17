@@ -108,7 +108,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			vector<string> tempOutNames;
@@ -355,7 +355,7 @@ vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, v
             groupingsGroups.push_back(tempGrouping);
         }
         
-        
+        Utils util;
         //for each otu
         for (int i = 0; i < groupings[0][0]->getNumBins(); i++) {
             
@@ -376,10 +376,11 @@ vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, v
                     
                     if (it == groupingsMap.end()) { //this one didnt get moved, or initial calc
                         totalAbund += groupings[j][k]->get(i);
-                        if (groupings[j][k]->get(i) != 0.0) { numNotZero++; }
+                        if (!util.isEqual(groupings[j][k]->get(i), 0)) { numNotZero++; }
                     }else {
-                        totalAbund += groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i);
-                        if (groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i) != 0.0) { numNotZero++; }
+                        float thisAbund = groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i);
+                        totalAbund += thisAbund;
+                        if (!util.isEqual(thisAbund, 0)) { numNotZero++; }
                     }
                     
                 }
@@ -453,10 +454,10 @@ vector<float> getValues(vector< vector<SharedRAbundVector*> >& groupings, vector
                     
                     if (it == groupingsMap.end()) { //this one didnt get moved
                         totalAbund += groupings[j][k]->get(i);
-                        if (groupings[j][k]->get(i) != 0.0) { numNotZero++; }
+                        if (groupings[j][k]->get(i) != 0) { numNotZero++; }
                     }else {
                         totalAbund += groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i);
-                        if (groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i) != 0.0) { numNotZero++; }
+                        if (groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i) != 0) { numNotZero++; }
                     }
                 }
                 
@@ -563,7 +564,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 				subset.clear();
 			}
 				
-			if (groupsAlreadyAdded.size() != data.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+			if (groupsAlreadyAdded.size() != data.size()) {  m->mothurOut("[ERROR]: could not make proper groupings.\n"); }
 				
 			indicatorValues = getValues(groupings, groupingNames, indicatorGroups, randomGroupingsMap, m);
 			
@@ -1346,7 +1347,7 @@ map<int, float> IndicatorCommand::getDistToRoot(Tree*& T){
             int index = i;
             
             while(T->tree[index].getParent() != -1){
-                if (T->tree[index].getBranchLength() != -1) {
+                if (!util.isEqual(T->tree[index].getBranchLength(), -1)) {
                     sum += abs(T->tree[index].getBranchLength());
                 }
                 index = T->tree[index].getParent();

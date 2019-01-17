@@ -115,7 +115,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 		
 			//check to make sure all parameters are valid for command
 			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -197,7 +197,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
                 else { subsample = false; }
             }
             
-            if (subsample == false) { iters = 0; }
+            if (!subsample) { iters = 0; }
             
             temp = validParameter.valid(parameters, "distance");					if (temp == "not found") { temp = "false"; }
 			createPhylip = util.isTrue(temp);

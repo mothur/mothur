@@ -120,7 +120,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 		
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -644,11 +644,11 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vecto
         
         vector<string> tags; tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul");
         for(int a = 0; a < numComp; a++) {
-            output.initFile(groupComb[a], tags);
+            output.setLabelName(groupComb[a], tags);
             //print each line
             for (set<double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
                 vector<double> data; data.push_back(*it);  data.push_back(rScoreFreq[a][*it]); data.push_back(rCumul[a][*it]);
-                output.output(data);
+                output.updateOutput(data);
             } 
             output.resetFile();
         }

@@ -900,7 +900,7 @@ try {
 			out << ")";
 			
             //if there is a branch length then print it
-            if (tree[node].getBranchLength() != -1) {
+            if (!util.isEqual(tree[node].getBranchLength(), -1)) {
                 out << ":" << tree[node].getBranchLength();
             }
 			
@@ -915,7 +915,7 @@ try {
                 
                 if (dupNames.size() == 1) {
                     outputString += tree[node].getName();
-                    if (tree[node].getBranchLength() != -1) {
+                    if (!util.isEqual(tree[node].getBranchLength(), -1)) {
                         outputString += ":" + toString(tree[node].getBranchLength());
                     }
                 }else {
@@ -924,26 +924,26 @@ try {
                     for (int u = 0; u < dupNames.size()-1; u++) {
                         outputString += dupNames[u];
                         
-                        if (tree[node].getBranchLength() != -1) {
+                        if (!util.isEqual(tree[node].getBranchLength(), -1)) {
                             outputString += ":" + toString(0.0);
                         }
                         outputString += ",";
                     }
                     
                     outputString += dupNames[dupNames.size()-1];
-                    if (tree[node].getBranchLength() != -1) {
+                    if (!util.isEqual(tree[node].getBranchLength(), -1)) {
                         outputString += ":" + toString(0.0);
                     }
                     
                     outputString += ")";
-                    if (tree[node].getBranchLength() != -1) {
+                    if (!util.isEqual(tree[node].getBranchLength(), -1)) {
                         outputString += ":" + toString(tree[node].getBranchLength());
                     }
                 }
             }else { 
                 outputString = tree[node].getName();
                 //if there is a branch length then print it
-                if (tree[node].getBranchLength() != -1) {
+                if (!util.isEqual(tree[node].getBranchLength(), -1)) {
                     outputString += ":" + toString(tree[node].getBranchLength());
                 }
                 
@@ -972,7 +972,7 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 			out << ")";
 			if (mode == "branch") {
 				//if there is a branch length then print it
-				if (tree[node].getBranchLength() != -1) {
+				if (!util.isEqual(tree[node].getBranchLength(), -1)) {
 					out << ":" << tree[node].getBranchLength();
 				}
 			}else if (mode == "boot") {
@@ -985,7 +985,7 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 					out << tree[node].getLabel();
 				}
 				//if there is a branch length then print it
-				if (tree[node].getBranchLength() != -1) {
+				if (!util.isEqual(tree[node].getBranchLength(), -1)) {
 					out << ":" << tree[node].getBranchLength();
 				}
 			}
@@ -995,7 +995,7 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 			if (mode == "branch") {
 				out << leafGroup[0]; 
 				//if there is a branch length then print it
-				if (tree[node].getBranchLength() != -1) {
+				if (!util.isEqual(tree[node].getBranchLength(), -1)) {
 					out << ":" << tree[node].getBranchLength();
 				}
 			}else if (mode == "boot") {
@@ -1010,7 +1010,7 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 					out << tree[node].getLabel();
 				}
 				//if there is a branch length then print it
-				if (tree[node].getBranchLength() != -1) {
+				if (!util.isEqual(tree[node].getBranchLength(), -1)) {
 					out << ":" << tree[node].getBranchLength();
 				}
 			}
@@ -1035,7 +1035,7 @@ void Tree::printBranch(int node, ostream& out, string mode, vector<Node>& theseN
 			out << ")";
 			if (mode == "branch") {
 				//if there is a branch length then print it
-				if (theseNodes[node].getBranchLength() != -1) {
+				if (!util.isEqual(theseNodes[node].getBranchLength(), -1)) {
 					out << ":" << theseNodes[node].getBranchLength();
 				}
 			}else if (mode == "boot") {
@@ -1048,7 +1048,7 @@ void Tree::printBranch(int node, ostream& out, string mode, vector<Node>& theseN
 					out << theseNodes[node].getLabel();
 				}
 				//if there is a branch length then print it
-				if (theseNodes[node].getBranchLength() != -1) {
+				if (!util.isEqual(theseNodes[node].getBranchLength(), -1)) {
 					out << ":" << theseNodes[node].getBranchLength();
 				}
 			}
@@ -1058,7 +1058,7 @@ void Tree::printBranch(int node, ostream& out, string mode, vector<Node>& theseN
 			if (mode == "branch") {
 				out << leafGroup[0]; 
 				//if there is a branch length then print it
-				if (theseNodes[node].getBranchLength() != -1) {
+				if (!util.isEqual(theseNodes[node].getBranchLength(), -1)) {
 					out << ":" << theseNodes[node].getBranchLength();
 				}
 			}else if (mode == "boot") {
@@ -1073,7 +1073,7 @@ void Tree::printBranch(int node, ostream& out, string mode, vector<Node>& theseN
 					out << theseNodes[node].getLabel();
 				}
 				//if there is a branch length then print it
-				if (theseNodes[node].getBranchLength() != -1) {
+				if (!util.isEqual(theseNodes[node].getBranchLength(), -1)) {
 					out << ":" << theseNodes[node].getBranchLength();
 				}
 			}

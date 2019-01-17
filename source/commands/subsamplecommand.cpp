@@ -132,7 +132,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			//check to make sure all parameters are valid for command
 			map<string,string>::iterator it;
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -1233,8 +1233,8 @@ int SubSampleCommand::getSubSampleList() {
                 
                 //use unique.seqs to create new name and fastafile
                 string inputString = "dups=f, name=" + namefile + ", taxonomy=" + taxonomyfile + ", accnos=" + tempAccnos;
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-                m->mothurOut("Running command: get.seqs(" + inputString + ")"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: get.seqs(" + inputString + ")\n"); 
                 current->setMothurCalling(true);
                 
                 Command* getCommand = new GetSeqsCommand(inputString);
@@ -1251,9 +1251,7 @@ int SubSampleCommand::getSubSampleList() {
                 outputTypes["name"].push_back(outputNameFileName);  outputNames.push_back(outputNameFileName);
                 outputNames.push_back(outputTaxFileName); outputTypes["taxonomy"].push_back(outputTaxFileName);
                 
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-                
-                m->mothurOut("Done."); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\nDone.\n");
             }
         }
 						

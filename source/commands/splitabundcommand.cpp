@@ -117,7 +117,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 		
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -263,7 +263,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			temp = validParameter.valid(parameters, "cutoff");				if (temp == "not found") { temp = "0"; }
 			util.mothurConvert(temp, cutoff); 
 
-			if (cutoff == 0) {  m->mothurOut("You must provide a cutoff to qualify what is abundant for the split.abund command. "); m->mothurOutEndLine(); abort = true;  }
+			if (cutoff == 0) {  m->mothurOut("[ERROR]: You must provide a cutoff to qualify what is abundant for the split.abund command. \n");  abort = true;  }
 		}
 
 	}

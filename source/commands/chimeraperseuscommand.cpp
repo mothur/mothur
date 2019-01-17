@@ -119,7 +119,7 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			vector<string> tempOutNames;
@@ -532,6 +532,12 @@ int ChimeraPerseusCommand::execute(){
                         c.eliminateZeroSeqs();
                         vector<string> namesInTable = c.getNamesOfSeqs();
                         for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
+                        /*vector<string> namesInTable = c.getNamesOfSeqs();
+                         for (int i = 0; i < namesInTable.size(); i++) {
+                         int temp = c.getNumSeqs(namesInTable[i]);
+                         if (temp == 0) {  c.remove(namesInTable[i]);  }
+                         else { doNotRemove.insert((namesInTable[i])); }
+                         }*/
                         //remove names we want to keep from accnos file.
                         set<string> accnosNames = util.readAccnos(accnosFileName);
                         ofstream out2;

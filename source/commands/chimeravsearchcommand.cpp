@@ -129,7 +129,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             
             //check to make sure all parameters are valid for command
             for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
             }
             
             vector<string> tempOutNames;
@@ -160,7 +160,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                         fastaFileNames[i] = current->getFastaFile();
                         if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
                         else {
-                            m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true;
+                            m->mothurOut("You have no current fastafile, ignoring current.\n"); ignore=true;
                             //erase from file list
                             fastaFileNames.erase(fastaFileNames.begin()+i);
                             i--;
@@ -423,7 +423,7 @@ int ChimeraVsearchCommand::execute(){
             //setup fasta file if denovo and no groups
             if ((templatefile == "self") && (!hasGroup)) { //you want to run uchime with a template=self and no groups
                 
-                if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
+                if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing.\n"); processors = 1; }
                 if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
                     nameFile = nameFileNames[s];
                 }else { nameFile = getNamesFile(fastaFileNames[s]); }
@@ -512,6 +512,13 @@ int ChimeraVsearchCommand::execute(){
                         c.eliminateZeroSeqs();
                         vector<string> namesInTable = c.getNamesOfSeqs();
                         for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
+                        /*vector<string> namesInTable = c.getNamesOfSeqs();
+                         for (int i = 0; i < namesInTable.size(); i++) {
+                         int temp = c.getNumSeqs(namesInTable[i]);
+                         if (temp == 0) {  c.remove(namesInTable[i]);  }
+                         else { doNotRemove.insert((namesInTable[i])); }
+                         }*/
+
                         //remove names we want to keep from accnos file.
                         set<string> accnosNames = util.readAccnos(accnosFileName);
                         ofstream out2;

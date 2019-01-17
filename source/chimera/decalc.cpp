@@ -204,13 +204,7 @@ float DeCalculator::calcDE(vector<float> obs, vector<float> exp) {
 		//for each window
 		float sum = 0.0;  //sum = sum from 1 to i of (oi-ei)^2
 		int numZeros = 0;
-		for (int j = 0; j < obs.size(); j++) { 		
-			
-			//if (obs[j] != 0.0) {
-				sum += ((obs[j] - exp[j]) * (obs[j] - exp[j]));	
-			//}else {  numZeros++;   }
-			
-		}
+		for (int j = 0; j < obs.size(); j++) { 	sum += ((obs[j] - exp[j]) * (obs[j] - exp[j]));	}
 			
 		float de = sqrt((sum / (obs.size() - 1 - numZeros)));
 			

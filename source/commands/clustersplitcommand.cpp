@@ -169,7 +169,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			//check to make sure all parameters are valid for command
 			map<string,string>::iterator it;
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {
 					abort = true;
 				}
 			}
@@ -578,7 +578,7 @@ int ClusterSplitCommand::execute(){
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < listFileNames.size(); i++) { util.mothurRemove(listFileNames[i]); } return 0; }
 		
-		if (saveCutoff != cutoff) { m->mothurOut("\nCutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
+		if (!util.isEqual(saveCutoff, cutoff)) { m->mothurOut("\nCutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
 		
@@ -672,12 +672,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
             if ((*it != "unique") && (convertTestFloat(*it, temp) ))	{	util.mothurConvert(*it, temp);	}
             else if (*it == "unique")										{	temp = -1.0;		}
             
-            //double ttemp = temp * 1000; ttemp = ceil(temp);
-            
-            if (temp < cutoff) {
-                orderFloat.push_back(temp);
-                labelBin[temp] = numSingleBins; //initialize numbins
-            }else if (fabs(cutoff - temp) < 0.0001) {
+            if ((temp < cutoff) || util.isEqual(cutoff, temp)) {
                 orderFloat.push_back(temp);
                 labelBin[temp] = numSingleBins; //initialize numbins
             }
@@ -710,7 +705,7 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 			for(int l = 0; l < orderFloat.size(); l++){
                 
 				string thisLabel;
-				if (orderFloat[l] == -1) { thisLabel = "unique"; }
+				if (util.isEqual(orderFloat[l],-1)) { thisLabel = "unique"; }
 				else { thisLabel = toString(orderFloat[l],  length-1);  } 
                 
 				//this file has reached the end
@@ -797,7 +792,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
 		for(map<double, int>::iterator itLabel = userLabels.begin(); itLabel != userLabels.end(); itLabel++) {
 			
 			string thisLabel;
-			if (itLabel->first == -1) { thisLabel = "unique"; }
+			if (util.isEqual(itLabel->first,-1)) { thisLabel = "unique"; }
 			else { thisLabel = toString(itLabel->first,  length-1);  } 
 			
 			//outList << thisLabel << '\t' << itLabel->second << '\t';
@@ -995,13 +990,13 @@ string clusterClassicFile(string thisDistFile, string thisNamefile, double& smal
             float dist = cluster.getSmallDist();
             float rndDist = params->util.ceilDist(dist, params->precision);
             
-            if(previousDist <= 0.0000 && dist != previousDist){
+            if(previousDist <= 0.0000 && !params->util.isEqual(dist, previousDist)){
                 oldList.setLabel("unique");
                 oldList.setPrintedLabels(printHeaders);
                 oldList.print(listFile); printHeaders = false;
                 if (params->labels.count("unique") == 0) {  params->labels.insert("unique");  }
             }
-            else if(rndDist != rndPreviousDist){
+            else if(!params->util.isEqual(rndDist, rndPreviousDist)){
                 oldList.setLabel(toString(rndPreviousDist,  params->length-1));
                 oldList.setPrintedLabels(printHeaders);
                 oldList.print(listFile); printHeaders = false;
@@ -1381,13 +1376,13 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
                 float dist = matrix->getSmallDist();
                 float rndDist = params->util.ceilDist(dist, params->precision);
                 
-                if(previousDist <= 0.0000 && dist != previousDist){
+                if(previousDist <= 0.0000 && !params->util.isEqual(dist, previousDist)){
                     oldList.setLabel("unique");
                     oldList.setPrintedLabels(printHeaders);
                     oldList.print(listFile); printHeaders = false;
                     if (params->labels.count("unique") == 0) {  params->labels.insert("unique");  }
                 }
-                else if(rndDist != rndPreviousDist){
+                else if(!params->util.isEqual(rndDist, rndPreviousDist)){
                     oldList.setPrintedLabels(printHeaders);
                     oldList.setLabel(toString(rndPreviousDist,  params->length-1));
                     oldList.setPrintedLabels(printHeaders);
@@ -1428,7 +1423,7 @@ string clusterFile(string thisDistFile, string thisNamefile, double& smallestCut
                 params->util.mothurRemove(thisNamefile);
             }
             
-            if (saveCutoff != params->cutoff) {
+            if (!params->util.isEqual(saveCutoff, params->cutoff)) {
                 saveCutoff = params->util.ceilDist(saveCutoff, params->precision);
                 params->m->mothurOut("Cutoff was " + toString(params->cutoff) + " changed cutoff to " + toString(saveCutoff) + "\n");
             }

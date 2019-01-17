@@ -101,7 +101,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 			map<string,string>::iterator it;
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			
@@ -180,7 +180,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
             string temp = validParameter.valid(parameters, "abundance");	if (temp == "not found"){	temp = "-1";	}
 			util.mothurConvert(temp, abund);
             
-            if (abund != -1) { 
+            if (!util.isEqual(abund, -1)) {
                 if ((abund < 0) || (abund > 100)) { m->mothurOut(toString(abund) + " is not a valid number for abund. Must be between 0 and 100.\n"); }
                 if (abund < 1) { //convert
                     string temp = toString(abund); string factorString = "1";
@@ -356,17 +356,17 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
         for (int i = 0; i < table.size(); i++) { table[i].resize(numSamples, 0.0); }
         
         map<int, vector<string> > otuNames;
-        if ((abund != -1) && (samples == -1)) { //fill with all samples
+        if (!(util.isEqual(abund, -1)) && (samples == -1)) { //fill with all samples
             for (int i = 0; i < numSamples; i++) {
                 vector<string> temp;
                 otuNames[i+1] = temp;
             }
-        }else if ((abund == -1) && (samples != -1)) { //fill with all relabund
+        }else if ((util.isEqual(abund, -1)) && (samples != -1)) { //fill with all relabund
             for (int i = 0; i < factor+1; i++) {
                 vector<string> temp;
                 otuNames[i] = temp;
             }
-        }else if ((abund != -1) && (samples != -1)) { //only one line is wanted
+        }else if (!(util.isEqual(abund, -1)) && (samples != -1)) { //only one line is wanted
             vector<string> temp;
             int thisAbund = abund*factor;
             otuNames[thisAbund] = temp;
@@ -391,14 +391,14 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
             for (int j = 0; j < table.size(); j++) {
                 for (int k = 0; k < counts[j]; k++) { table[j][k]++; }
                 
-                if ((abund == -1) && (samples != -1)) { //we want all OTUs with this number of samples
+                if ((util.isEqual(abund, -1)) && (samples != -1)) { //we want all OTUs with this number of samples
                     if (counts[j] >= samples) { otuNames[j].push_back(currentLabels[i]); }
-                }else if ((abund != -1) && (samples == -1)) { //we want all OTUs with this relabund
-                    if (j == (abund*factor)) {
+                }else if (!(util.isEqual(abund, -1)) && (samples == -1)) { //we want all OTUs with this relabund
+                    if (j == (int)(abund*factor)) {
                         for (int k = 0; k < counts[j]; k++) {  otuNames[k+1].push_back(currentLabels[i]); }
                     }
-                }else if ((abund != -1) && (samples != -1)) { //we want only OTUs with this relabund for this number of samples
-                    if ((j == (abund*factor)) && (counts[j] >= samples)) {
+                }else if (!(util.isEqual(abund, -1)) && (samples != -1)) { //we want only OTUs with this relabund for this number of samples
+                    if ((j == (int)(abund*factor)) && (counts[j] >= samples)) {
                         otuNames[j].push_back(currentLabels[i]);
                     }
                 }
@@ -429,17 +429,17 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
         
         if (m->getControl_pressed()) { return 0; }
         
-        if ((samples != -1) || (abund != -1))  {
+        if ((samples != -1) || (!util.isEqual(abund, -1)))  {
             string outputFileName2 = outputDir + util.getRootName(util.getSimpleName(inputFileName)) + lookup->getLabel() + ".core.microbiomelist";
             outputNames.push_back(outputFileName2);  outputTypes["coremicrobiome"].push_back(outputFileName2);
             ofstream out2;
             util.openOutputFile(outputFileName2, out2);
             
-            if ((abund == -1) && (samples != -1)) { //we want all OTUs with this number of samples
+            if ((util.isEqual(abund, -1)) && (samples != -1)) { //we want all OTUs with this number of samples
                 out2 << "Relabund\tOTUList_for_samples=" << samples << "\n";
-            }else if ((abund != -1) && (samples == -1)) { //we want all OTUs with this relabund
+            }else if (!(util.isEqual(abund, -1)) && (samples == -1)) { //we want all OTUs with this relabund
                 out2 << "Samples\tOTUList_for_abund=" << abund*factor << "\n";
-            }else if ((abund != -1) && (samples != -1)) { //we want only OTUs with this relabund for this number of samples
+            }else if (!(util.isEqual(abund, -1)) && (samples != -1)) { //we want only OTUs with this relabund for this number of samples
                 out2 << "Relabund\tOTUList_for_samples=" << samples << "\n";
             }
 
@@ -449,7 +449,7 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
                 vector<string> temp = it->second;
                 string list = util.makeList(temp);
                 
-                if ((abund != -1) && (samples == -1)) { //fill with all samples
+                if (!(util.isEqual(abund, -1)) && (samples == -1)) { //fill with all samples
                     out2 << it->first << '\t' << list << endl;
                 }else  { //fill with relabund
                     out2 << fixed << showpoint << setprecision(precisionLength-1) << (it->first/(float)(factor)) << '\t' << list << endl;

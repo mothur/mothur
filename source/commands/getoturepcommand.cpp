@@ -53,6 +53,7 @@ vector<string> GetOTURepCommand::setParameters(){
 		CommandParameter pweighted("weighted", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pweighted);
 		CommandParameter psorted("sorted", "Multiple", "none-name-bin-size-group", "none", "", "", "","",false,false); parameters.push_back(psorted);
         CommandParameter pmethod("method", "Multiple", "distance-abundance", "distance", "", "", "","",false,false); parameters.push_back(pmethod);
+        CommandParameter prename("rename", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prename);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -70,8 +71,9 @@ vector<string> GetOTURepCommand::setParameters(){
 string GetOTURepCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, count, large, weighted, cutoff, precision, groups, sorted, method and label.  The list parameter is required, as well as phylip or column and name if you are using method=distance. If method=abundance a name or count file is required.\n";
-		helpString += "The label parameter allows you to select what distance you would like a output files created for. Example label=0.03. If no label is provided the first label is used.\n";
+		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, count, large, weighted, cutoff, precision, groups, sorted, method, label and rename.  The list parameter is required, as well as phylip or column and name if you are using method=distance. If method=abundance a name or count file is required.\n";
+        helpString += "The label parameter allows you to select what distance you would like a output files created for. Example label=0.03. If no label is provided the first label is used.\n";
+		helpString += "The rename parameter allows you to indicate you want the OTU label to replace the representative sequence name. Default=F. \n";
 		helpString += "The phylip or column parameter is required for method=distance, but only one may be used.  If you use a column file the name or count filename is required. \n";
         helpString += "The method parameter allows you to select the method of selecting the representative sequence. Choices are distance and abundance.  The distance method finds the sequence with the largest number of close sequences in the OTU. If tie occurs, a sequence is randomly selected from the ties.  The abundance method chooses the most abundant sequence in the OTU as the representative.\n";
 		helpString += "If you do not provide a cutoff value 0.03 is assumed. If you do not provide a precision value then 100 is assumed.\n";
@@ -148,7 +150,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 		
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -362,8 +364,14 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			}
 			
 			string temp = validParameter.valid(parameters, "weighted");		if (temp == "not found") {	 temp = "f"; 	} weighted = util.isTrue(temp);
+            
+            temp = validParameter.valid(parameters, "rename");		if (temp == "not found") {	 temp = "f"; 	} rename = util.isTrue(temp);
+            
+            if ((rename) && (namefile != "")) {
+                m->mothurOut("[WARNING]: You cannot use the rename option when you provide a namesfile due to downstream issues. Setting rename to false.\n"); rename = false;
+            }
 			
-			if ((weighted) && (namefile == "")) { m->mothurOut("You cannot set weighted to true unless you provide a namesfile.\n"); abort = true; }
+			if ((weighted) && (namefile == "")) { m->mothurOut("[ERROR]: You cannot set weighted to true unless you provide a namesfile.\n"); abort = true; }
 			
 			temp = validParameter.valid(parameters, "precision");			if (temp == "not found") { temp = "100"; } util.mothurConvert(temp, precision);
 			
@@ -633,7 +641,7 @@ string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
 	}
 }
 //**********************************************************************************************************************
-string GetOTURepCommand::findRep(vector<string> names, string group) {
+string GetOTURepCommand::findRep(vector<string> names, map<string, long long>& matrixNameIndexes, string group) {
 	try{
         //if using abundance 
         if (method == "abundance") { return (findRepAbund(names, group)); }
@@ -645,11 +653,12 @@ string GetOTURepCommand::findRep(vector<string> names, string group) {
                 return names[0];
             }else{
                 //unique sequence with greatest number of "close" seqs in the OTU
-                map<string, long long> matrixNameIndexes = matrix->getNameIndexMap(); //maps unique names to index in matrix
                 vector<long long> binTranslated;
                 
                 //fill seqIndex and initialize sums
                 for (size_t i = 0; i < names.size(); i++) {
+                    
+                    if (m->getControl_pressed()) { return names[0]; }
                     
                     map<string, long long>::iterator itNameIndex = matrixNameIndexes.find(names[i]);
                     
@@ -699,25 +708,33 @@ string GetOTURepCommand::findRep(vector<string> names, string group) {
                     }
                 }
                 
-                long long minIndex = binTranslated[0]; int min = numCloseInBin[0];
-                vector<long long> ties; ties.push_back(binTranslated[0]);
-                for (size_t i=1; i < numCloseInBin.size(); i++) {
-                    if (m->getControl_pressed()) {  return  "control"; }
-                    if (numCloseInBin[i] > min) {
-                        ties.clear();
-                        min = numCloseInBin[i];
-                        minIndex = binTranslated[i];
-                        ties.push_back(binTranslated[i]);
-                    }else if (numCloseInBin[i] == min) { ties.push_back(binTranslated[i]); }
-                }
-                
                 string repName = "";
-                if (ties.size() > 0) {
-                    long long numTies = ties.size()-1;
-                    long long randomIndex = util.getRandomIndex(numTies);
-                    repName = matrix->getName(ties[randomIndex]);
-                }else { repName = matrix->getName(minIndex); }
-                
+                if (binTranslated.size() == 0) { repName = names[0]; } //when names file is used singleton OTUs may contain multiple read names, but no dists in matrix
+                else {
+                    long long minIndex = binTranslated[0]; int min = numCloseInBin[0];
+                    vector<long long> ties; ties.push_back(binTranslated[0]);
+                    for (size_t i=1; i < numCloseInBin.size(); i++) {
+                        if (m->getControl_pressed()) {  return  "control"; }
+                        if (numCloseInBin[i] > min) {
+                            ties.clear();
+                            min = numCloseInBin[i];
+                            minIndex = binTranslated[i];
+                            ties.push_back(binTranslated[i]);
+                        }else if (numCloseInBin[i] == min) { ties.push_back(binTranslated[i]); }
+                    }
+                    
+                    if (ties.size() > 0) {
+                        long long numTies = ties.size()-1;
+                        long long randomIndex = util.getRandomIndex(numTies);
+                        repName = matrix->getName(ties[randomIndex]);
+                    }else { repName = matrix->getName(minIndex); }
+                    
+                    if (namefile != "") {
+                        vector<string> redundNames;
+                        util.splitAtComma(repName, redundNames);
+                        repName = redundNames[0];
+                    }
+                }
                 return repName;
             }
         }
@@ -776,6 +793,8 @@ int GetOTURepCommand::process(ListVector* processList) {
 			}
 		}
 		
+        map<string, long long> matrixNameIndexes = matrix->getNameIndexMap(); //maps unique names to index in matrix
+        
 		//for each bin in the list vector
         vector<string> binLabels = processList->getLabels();
 		for (int i = 0; i < processList->size(); i++) {
@@ -787,7 +806,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			util.splitAtComma(temp, namesInBin);
 			
 			if (Groups.size() == 0) {
-				nameRep = findRep(namesInBin, "");
+				nameRep = findRep(namesInBin, matrixNameIndexes, "");
 				newNamesOutput << binLabels[i] << '\t' << nameRep << '\t';
                 
                 //put rep at first position in names line
@@ -828,7 +847,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 				for (int j=0; j<Groups.size(); j++) {
 					if (NamesInGroup[Groups[j]].size() != 0) { //are there members from this group in this otu?
 						//get rep for each group
-						nameRep = findRep(NamesInGroup[Groups[j]], Groups[j]);
+						nameRep = findRep(NamesInGroup[Groups[j]], matrixNameIndexes, Groups[j]);
 						
 						//output group rep and other members of this group
                         ofstream outGroup;
@@ -898,22 +917,26 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 		while (!in.eof()) {
 			string rep, binnames, binLabel;
 			in >> binLabel >> rep >> binnames; util.gobble(in);
+            
+            string repName = rep;
+            if (rename) { repName = binLabel; }
 			
 			vector<string> names;
 			util.splitAtComma(binnames, names);
 			int binsize = names.size();
             
-            if (countfile == "") { out2 << rep << '\t' << binnames << endl; }
+            if (countfile == "") { out2 << repName << '\t' << binnames << endl; }
             else {
                 if (tempGroup == "noGroup") {
                     for (int j = 0; j < names.size(); j++) {
                         if (names[j] != rep) { thisCt.mergeCounts(rep, names[j]); }
                     }
                     binsize = thisCt.getNumSeqs(rep);
+                    if (rename) { thisCt.renameSeq(rep, repName); }
                 }else {
                     int total = 0; 
                     for (int j = 0; j < names.size(); j++) {  total += thisCt.getGroupCount(names[j], tempGroup);  }
-                    out2 << rep << '\t' << total << '\t' << total << endl;
+                    out2 << repName << '\t' << total << '\t' << total << endl;
                     binsize = total;
                 }
             }
@@ -927,7 +950,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 				for (int i = 0; i < names.size(); i++) {
 					string groupName = groupMap->getGroup(names[i]);
 					if (groupName == "not found") {  
-						m->mothurOut(names[i] + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
+						m->mothurOut(names[i] + " is missing from your group file. Please correct.\n");
 						groupError = true;
 					} else {
 						groups[groupName] = groupName;
@@ -961,17 +984,17 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 
 			if (sequence != "not found") {
 				if (sorted == "") { //print them out
-					rep = rep + "\t" + binLabel;
-					rep = rep + "|" + toString(binsize);
+					repName = repName + "\t" + binLabel;
+					repName = repName + "|" + toString(binsize);
 					if (group != "") {
-						rep = rep + "|" + group;
+						repName = repName + "|" + group;
 					}
-					out << ">" << rep << endl;
+					out << ">" << repName << endl;
 					out << sequence << endl;
 				}else { //save them
                     int simpleLabel;
                     util.mothurConvert(util.getSimpleLabel(binLabel), simpleLabel);
-					repStruct newRep(rep, binLabel, simpleLabel, binsize, group);
+					repStruct newRep(repName, sequence, binLabel, simpleLabel, binsize, group);
 					reps.push_back(newRep);
 				}
 			}else { 
@@ -988,14 +1011,13 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 			
 			//print them
 			for (int i = 0; i < reps.size(); i++) {
-				string sequence = fasta->getSequence(reps[i].name);
 				string outputName = reps[i].name + "\t" + reps[i].bin;
 				outputName = outputName + "|" + toString(reps[i].size);
 				if (reps[i].group != "") {
 					outputName = outputName + "|" + reps[i].group;
 				}
 				out << ">" << outputName << endl;
-				out << sequence << endl;
+				out << reps[i].sequence << endl;
 			}
 		}
 		
@@ -1004,9 +1026,13 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 		out2.close();
         	
 		util.mothurRemove(filename);
-		rename(tempNameFile.c_str(), filename.c_str());
+		util.renameFile(tempNameFile.c_str(), filename.c_str());
         
-        if ((countfile != "") && (tempGroup == "noGroup")) { thisCt.printTable(filename); } 
+        if ((countfile != "") && (tempGroup == "noGroup")) {
+            if (rename) { //want otu order not order from old count
+                thisCt.printSortedTable(filename);
+            }else { thisCt.printTable(filename); }
+        }
 		
 		return 0;
 
@@ -1046,7 +1072,10 @@ int GetOTURepCommand::processNames(string filename, string label) {
             string binLabel;
 			in >> binLabel >> rep >> binnames; util.gobble(in);
             
-			if (countfile == "") { out2 << rep << '\t' << binnames << endl; }
+            string repName = rep;
+            if (rename) { repName = binLabel; }
+            
+			if (countfile == "") { out2 << repName << '\t' << binnames << endl; }
             else {
                 vector<string> names;
                 util.splitAtComma(binnames, names);
@@ -1054,10 +1083,11 @@ int GetOTURepCommand::processNames(string filename, string label) {
                     for (int j = 0; j < names.size(); j++) {
                         if (names[j] != rep) { thisCt.mergeCounts(rep, names[j]); }
                     }
+                    if (rename) { thisCt.renameSeq(rep, repName); }
                 }else {
                     int total = 0; 
                     for (int j = 0; j < names.size(); j++) {  total += thisCt.getGroupCount(names[j], tempGroup);  }
-                    out2 << rep << '\t' << total << '\t' << total << endl;
+                    out2 << repName << '\t' << total << '\t' << total << endl;
                 }
             }
 
@@ -1066,9 +1096,13 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		out2.close();
 		
 		util.mothurRemove(filename);
-		rename(tempNameFile.c_str(), filename.c_str());
+		util.renameFile(tempNameFile.c_str(), filename.c_str());
 		
-        if ((countfile != "") && (tempGroup == "noGroup")) { thisCt.printTable(filename); } 
+        if ((countfile != "") && (tempGroup == "noGroup")) {
+            if (rename) { //want otu order not order from old count
+                thisCt.printSortedTable(filename);
+            }else { thisCt.printTable(filename); }
+        }
         
 		return 0;
 	}

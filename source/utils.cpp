@@ -115,6 +115,17 @@ void Utils::mothurRandomShuffle(vector<int>& randomize){
 
 }
 /***********************************************************************/
+void Utils::mothurRandomShuffle(vector<weightedSeq>& randomize){
+    try {
+        shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurRandomShuffle");
+        exit(1);
+    }
+    
+}
+/***********************************************************************/
 void Utils::mothurRandomShuffle(vector<long long>& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
@@ -1368,7 +1379,7 @@ string Utils::getStringFromVector(vector<int>& list, string delim){
 
         if (list.size() == 0) { return result; }
 
-        result = list[0];
+        result = toString(list[0]);
 
         for (int i = 1; i < list.size(); i++) {
             if (m->getControl_pressed()) { break;  }
@@ -1390,7 +1401,7 @@ string Utils::getStringFromVector(vector<double>& list, string delim){
 
         if (list.size() == 0) { return result; }
 
-        result = list[0];
+        result = toString(list[0]);
 
         for (int i = 1; i < list.size(); i++) {
             if (m->getControl_pressed()) { break;  }
@@ -1398,6 +1409,28 @@ string Utils::getStringFromVector(vector<double>& list, string delim){
             result += delim + temp;
         }
 
+        return result;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string Utils::getStringFromSet(set<int>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        vector<int> vlist;
+        for (set<int>::iterator it = list.begin(); it != list.end(); it++) {
+            if (m->getControl_pressed()) { break;  }
+            int value = *it;
+            vlist.push_back(value);
+        }
+        result = getStringFromVector(vlist, delim);
+        
         return result;
     }
     catch(exception& e) {
@@ -3315,7 +3348,7 @@ bool Utils::isSubset(vector<string> bigset, vector<string> subset) {
             }
 
             //you have a guy in subset that had no match in bigset
-            if (match == false) { return false; }
+            if (!match) { return false; }
         }
 
         return true;
@@ -3463,7 +3496,30 @@ string Utils::addUnclassifieds(string tax, int maxlevel, bool probs) {
         exit(1);
     }
 }
-
+/**************************************************************************************************/
+string Utils::trimTax(string tax, int trimLevel) {
+    try{
+        string newTax = "";
+        string savedTax = tax;
+        vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
+    
+        if (taxons.size() == trimLevel) { return savedTax; }
+        else {
+            int level = 0;
+            for (int i = 0; i < taxons.size(); i++) {
+                newTax += taxons[i] +";";
+                level++;
+                if (level == trimLevel) { break; }
+            }
+        }
+        
+        return newTax;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "trimTax");
+        exit(1);
+    }
+}
 /***********************************************************************/
 bool Utils::isNumeric1(string stringToCheck){
     try {
@@ -4325,12 +4381,12 @@ bool Utils::anyLabelsToProcess(string label, set<string>& userLabels, string err
         /*************************************************/
         //is this label bigger than any of the users labels
         /*************************************************/
-
+        
         //loop through order until you find a label greater than label
         for (int i = 0; i < orderFloat.size(); i++) {
             if (orderFloat[i] < labelFloat) {
                 smaller = true;
-                if (orderFloat[i] == -1) {
+                if (isEqual(orderFloat[i], -1)) {
                     if (errorOff == "") { cout << ("Your file does not include the label unique.\n"); }
                     userLabels.erase("unique");
                 }
@@ -4338,7 +4394,7 @@ bool Utils::anyLabelsToProcess(string label, set<string>& userLabels, string err
                     if (errorOff == "") { cout << ("Your file does not include the label. \n");  }
                     string s = "";
                     for (it2 = userMap.begin(); it2!= userMap.end(); it2++) {
-                        if (it2->second == orderFloat[i]) {
+                        if (isEqual(it2->second, orderFloat[i])) {
                             s = it2->first;
                             //remove small labels
                             userLabels.erase(s);

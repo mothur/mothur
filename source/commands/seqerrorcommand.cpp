@@ -139,7 +139,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -846,7 +846,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> >& errorForward, ma
 			float del = (float)errorForward['d'][i];
 			float amb = (float)errorForward['a'][i];
 			float total = match + subst + insert + del + amb;
-			if(total == 0){	break;	}
+			if(util.isEqual(total, 0)){	break;	}
 			errorForwardFile << i+1 << '\t' << total << '\t' << match/total  << '\t' << subst/total  << '\t' << insert/total  << '\t' << del/total  << '\t' << amb/total << endl;
 		}
 		errorForwardFile.close();
@@ -864,7 +864,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> >& errorForward, ma
 			float del = (float)errorReverse['d'][i];
 			float amb = (float)errorReverse['a'][i];
 			float total = match + subst + insert + del + amb;
-			if(total == 0){	break;	}
+			if(util.isEqual(total, 0)){	break;	}
 			errorReverseFile << i+1 << '\t' << total << '\t' << match/total  << '\t' << subst/total  << '\t' << insert/total  << '\t' << del/total  << '\t' << amb/total << endl;
 		}
 		errorReverseFile.close();

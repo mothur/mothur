@@ -34,7 +34,7 @@ RAbundFloatVector::RAbundFloatVector(string id, vector<float> rav) : DataVector(
         numSeqs = 0;
         
         for(int i=0;i<data.size();i++){
-            if(data[i] != 0)		{	numBins = i+1;		}
+            if(!util.isEqual(data[i], 0))		{	numBins = i+1;		}
             if(data[i] > maxRank)	{	maxRank = data[i];	}
             numSeqs += data[i];
         }
@@ -113,8 +113,8 @@ void RAbundFloatVector::set(int binNumber, float newBinSize){
         float oldBinSize = data[binNumber];
         data[binNumber] = newBinSize;
         
-        if(oldBinSize == 0)			{	numBins++;				}
-        if(newBinSize == 0)			{	numBins--;				}
+        if(util.isEqual(oldBinSize, 0))			{	numBins++;				}
+        if(util.isEqual(newBinSize, 0))			{	numBins--;				}
         if(newBinSize > maxRank)	{	maxRank = newBinSize;	}
         
         numSeqs += (newBinSize - oldBinSize);
@@ -206,7 +206,7 @@ float RAbundFloatVector::remove(int bin){
         data.erase(data.begin()+bin);
         numBins--;
         
-        if(abund == maxRank){ maxRank = util.max(data); }
+        if(util.isEqual(abund, maxRank)){ maxRank = util.max(data); }
         
         numSeqs -= abund;
         
@@ -222,7 +222,7 @@ float RAbundFloatVector::remove(int bin){
 
 int RAbundFloatVector::numNZ(){
     int numNZ = 0;
-    for(int i = 0; i < data.size(); i++) { if(data[i] != 0) { numNZ++; } }
+    for(int i = 0; i < data.size(); i++) { if(!util.isEqual(data[i], 0)) { numNZ++; } }
     return numNZ;
 }
 

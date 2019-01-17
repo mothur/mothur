@@ -133,7 +133,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			ValidParameters validParameter;
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -1483,9 +1483,7 @@ bool SffInfoCommand::sanityCheck(Header& header, seqRead& read) {
             okay = false; message += "Clip Qual Right = " + toString(header.clipQualRight) + ", but we only read " + toString(read.qualScores.size()) + " quality scores.\n";
         }
         
-        if (okay == false) {
-            m->mothurOut(message); m->mothurOutEndLine();
-        }
+        if (!okay) { m->mothurOut(message); m->mothurOutEndLine(); }
         
 		return okay;
 	}
@@ -1996,7 +1994,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
         }
         
 		if (allBlank) {
-			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a split the sff file."); m->mothurOutEndLine();
+			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a split the sff file.\n"); 
 			split = 1;
 			return false;
 		}

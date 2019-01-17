@@ -169,7 +169,7 @@ int SuffixTree::countSuffixes(string compareSequence){	//	here we count the numb
 
 void SuffixTree::canonize(){	//	if you have to ask how this works, you don't really want to know and this really
 								//	isn't the place to ask.
-	if ( isExplicit() == 0 ) {	//	if the node has no children...
+	if (!isExplicit()) {	//	if the node has no children...
 		
 		int tempNodeIndex = nodeVector[activeNode]->getChild(sequence[activeStartPosition]);
 		SuffixNode* tempNode = nodeVector[tempNodeIndex];
@@ -239,7 +239,7 @@ void SuffixTree::addPrefix(int prefixPosition){
 		
 		parentNode = activeNode;
 		
-		if(isExplicit() == 1){	//	if the node is explicit (has kids), try to follow it down the branch if its there...
+		if(isExplicit()){	//	if the node is explicit (has kids), try to follow it down the branch if its there...
 			if(nodeVector[activeNode]->getChild(sequence[prefixPosition]) != -1){	//	break out and get next prefix...
 				break;												
 			}

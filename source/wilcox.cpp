@@ -132,8 +132,8 @@ double PWilcox::cwilcox(int k, int m, int n, double*** w) {
          if there were just k y's.
          */
         if (j > 0 && k < j) return cwilcox(k, i, k, w);
-        
-        if (w[i][j] == 0) {
+        Utils util;
+        if (w[i][j] == NULL) {
             w[i][j] = (double *) calloc((size_t) c + 1, sizeof(double));
 
             for (l = 0; l <= c; l++)
@@ -161,7 +161,7 @@ double PWilcox::pwilcox(double q, double m, double n, bool lower_tail){
         int i;
         double c, p;
         bool log_p = false;
-        double*** w;
+        double*** w; w = NULL;
         
 
         if (isnan(m) || isnan(n))
@@ -209,12 +209,12 @@ double PWilcox::pwilcox(double q, double m, double n, bool lower_tail){
             }
             lower_tail = !lower_tail; /* p = 1 - p; */
         }
-        
+        Utils util;
         //free w
         /********************************************/
         for (int i = allocated_m; i >= 0; i--) {
             for (int j = allocated_n; j >= 0; j--) {
-                if (w[i][j] != 0)
+                if (w[i][j] != NULL)
                     free((void *) w[i][j]);
             }
             free((void *) w[i]);

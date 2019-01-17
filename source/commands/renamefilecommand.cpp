@@ -119,7 +119,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
             map<string,string>::iterator it;
             //check to make sure all parameters are valid for command
             for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
             }
             
             vector<string> tempOutNames;
@@ -644,7 +644,7 @@ string RenameFileCommand::getNewName(string inputFileName, string type){
             
             if (prefix == "") {
                 int pos = inputFileName.find_first_of(".");
-                if (pos != string::npos) { basicName = inputFileName.substr(0, pos); }
+                if (pos != string::npos) { basicName = util.getSimpleName(inputFileName.substr(0, pos)); }
             }else { basicName = prefix; }
             
             if ((type == "shared") || (type == "list") || (type == "relabund") || (type == "rabund") || (type == "sabund")) {

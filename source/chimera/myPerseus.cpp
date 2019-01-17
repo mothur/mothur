@@ -514,7 +514,7 @@ int Perseus::getChimera(vector<seqData> sequences,
 			
 			for(int i=0;i<numRefSeqs;i++){
 				
-				if(restricted[i] == 0){
+				if(!restricted[i]){
 					if(((leftDiffs[i][l] < singleLeft[l]) && sequences[i].frequency) || ((leftDiffs[i][l] == singleLeft[l]) && (sequences[i].frequency > sequences[bestLeft[l]].frequency))){
 						singleLeft[l] = leftDiffs[i][l];
 						bestLeft[l] = i;
@@ -532,7 +532,7 @@ int Perseus::getChimera(vector<seqData> sequences,
 			
 			for(int i=0;i<numRefSeqs;i++){
 				
-				if(restricted[i] == 0){
+				if(!restricted[i]){
 					if((rightDiffs[i][l] < singleRight[l] && sequences[i].frequency) || ((rightDiffs[i][l] == singleRight[l] && sequences[i].frequency > sequences[bestRight[l]].frequency))){
 						singleRight[l] = rightDiffs[i][l];
 						bestRight[l] = i;
@@ -646,7 +646,7 @@ int Perseus::getTrimera(vector<seqData>& sequences,
 					
 					if (m->getControl_pressed()) { return 0; }
 					
-					if(restricted[i] == 0){
+					if(!restricted[i]){
 						int delta = leftDiffs[i][y] - leftDiffs[i][x];
 
 						if(delta < minDelta[x][y] || (delta == minDelta[x][y] && sequences[i].frequency > sequences[minDeltaSeq[x][y]].frequency)){

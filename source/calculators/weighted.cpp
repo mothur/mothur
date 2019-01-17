@@ -75,9 +75,10 @@ double getLengthToRoot(Tree* t, bool includeRoot, int v, string groupA, string g
     try {
         double sum = 0.0;
         int index = v;
+        Utils util;
         
         //you are a leaf
-        if(t->tree[index].getBranchLength() != -1){	sum += abs(t->tree[index].getBranchLength());	}
+        if(!util.isEqual(t->tree[index].getBranchLength(), -1)){	sum += abs(t->tree[index].getBranchLength());	}
         double tempTotal = 0.0;
         index = t->tree[index].getParent();
         
@@ -93,7 +94,7 @@ double getLengthToRoot(Tree* t, bool includeRoot, int v, string groupA, string g
             int parent = t->tree[index].getParent();
             
             if (includeRoot) { //add everyone
-                if(t->tree[index].getBranchLength() != -1){	sum += abs(t->tree[index].getBranchLength());	}
+                if(!util.isEqual(t->tree[index].getBranchLength(), -1)){	sum += abs(t->tree[index].getBranchLength());	}
             }else {
                 
                 //am I the root for this grouping? if so I want to stop "early"
@@ -113,7 +114,7 @@ double getLengthToRoot(Tree* t, bool includeRoot, int v, string groupA, string g
                 
                 //if yes, I am not the root so add me
                 if (pcountSize != 0) {
-                    if (t->tree[index].getBranchLength() != -1) {
+                    if (!util.isEqual(t->tree[index].getBranchLength(), -1)) {
                         sum += abs(t->tree[index].getBranchLength()) + tempTotal;
                         tempTotal = 0.0;
                     }else {
@@ -123,7 +124,7 @@ double getLengthToRoot(Tree* t, bool includeRoot, int v, string groupA, string g
                     rootForGrouping[grouping].clear();
                     rootForGrouping[grouping].insert(parent);
                 }else { //if no, I may be the root so add my br to tempTotal until I am proven innocent
-                    if (t->tree[index].getBranchLength() != -1) {
+                    if (!util.isEqual(t->tree[index].getBranchLength(), -1)) {
                         tempTotal += abs(t->tree[index].getBranchLength());
                     }
                 }
@@ -219,16 +220,16 @@ void driverWeighted(weightedData* params) {
 				if (it != params->t->tree[i].pcount.end()) {
 					u -= (double) params->t->tree[i].pcount[groupB] / (double) params->ct->getGroupCount(groupB);
 				}
-				
+                Utils util;
 				if (params->includeRoot) {
-					if (params->t->tree[i].getBranchLength() != -1) {
+					if (!util.isEqual(params->t->tree[i].getBranchLength(), -1)) {
 						u = abs(u * params->t->tree[i].getBranchLength());
 						WScore[(groupA+groupB)] += u; 
 					}
 				}else {
 					//if this is not the root then add it
 					if (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0) {
-						if (params->t->tree[i].getBranchLength() != -1) {
+						if (!util.isEqual(params->t->tree[i].getBranchLength(), -1)) {
 							u = abs(u * params->t->tree[i].getBranchLength());
 							WScore[(groupA+groupB)] += u; 
 						}
@@ -316,14 +317,14 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 			}
 			
 			if (includeRoot) {
-				if (t->tree[i].getBranchLength() != -1) {
+				if (!util.isEqual(t->tree[i].getBranchLength(), -1)) {
 					u = abs(u * t->tree[i].getBranchLength());
 					WScore[(groupA+groupB)] += u;
 				}
 			}else{
 				//if this is not the root then add it
 				if (rootForGrouping[groups].count(i) == 0) {
-					if (t->tree[i].getBranchLength() != -1) {
+					if (!util.isEqual(t->tree[i].getBranchLength(), -1)) {
 						u = abs(u * t->tree[i].getBranchLength());
 						WScore[(groupA+groupB)] += u;
 					}

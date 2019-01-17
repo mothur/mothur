@@ -17,10 +17,12 @@ vector<string> SplitGroupCommand::setParameters(){
 	try {
         CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","fasta",false,false,true); parameters.push_back(pflow);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,false,true); parameters.push_back(pfasta);
+        CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none","fastq",false,false,true); parameters.push_back(pfastq);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "CountGroup", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "CountGroup", "none","group",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "sanger", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -39,9 +41,10 @@ string SplitGroupCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The split.groups command reads a group or count file, and parses your files by groups. \n";
-		helpString += "The split.groups command parameters are fasta, flow, name, group, count and groups.\n";
+		helpString += "The split.groups command parameters are fasta, fastq, flow, name, group, count and groups.\n";
 		helpString += "The group or count parameter is required.\n";
 		helpString += "The groups parameter allows you to select groups to create files for.  \n";
+        helpString += "The format parameter is used with the fastq parameter to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "For example if you set groups=A-B-C, you will get a .A.fasta, .A.names, .B.fasta, .B.names, .C.fasta, .C.names files.  \n";
 		helpString += "If you want .fasta and .names files for all groups, set groups=all.  \n";
 		helpString += "The split.groups command should be used in the following format: split.group(fasta=yourFasta, group=yourGroupFile).\n";
@@ -60,6 +63,7 @@ string SplitGroupCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta")        {  pattern = "[filename],[group],fasta";        }
+        else if (type == "fastq")    {  pattern = "[filename],[group],fastq";         }
         else if (type == "flow")    {  pattern = "[filename],[group],flow";         }
         else if (type == "name")    {  pattern = "[filename],[group],names";        }
         else if (type == "count")   {  pattern = "[filename],[group],count_table";  }
@@ -80,6 +84,8 @@ SplitGroupCommand::SplitGroupCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
+        outputTypes["flow"] = tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
 	}
@@ -108,13 +114,14 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 		
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
             outputTypes["flow"] = tempOutNames;
+            outputTypes["fastq"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
 		
@@ -162,6 +169,14 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["flow"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("fastq");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
+                }
 			}
 
 			
@@ -174,6 +189,10 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			if (fastafile == "not open") { abort = true; }
             else if (fastafile == "not found") {	fastafile = "";  }
             else { current->setFastaFile(fastafile); }
+            
+            fastqfile = validParameter.validFile(parameters, "fastq");
+            if (fastqfile == "not open") { abort = true; }
+            else if (fastqfile == "not found") {	fastqfile = "";  }
             
             flowfile = validParameter.validFile(parameters, "flow");
             if (flowfile == "not open") { abort = true; }
@@ -190,13 +209,13 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }	
 			else { current->setCountFile(countfile); }
             
-            if ((fastafile == "") && (flowfile == "")) {
+            if ((fastafile == "") && (flowfile == "") && (fastqfile == "")) {
                 fastafile = current->getFastaFile();
                 if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
                 else {
                     flowfile = current->getFlowFile();
                     if (flowfile != "") {  m->mothurOut("Using " + flowfile + " as input file for the flow parameter.\n");  }
-                    else { m->mothurOut("[ERROR]: You need to provide a fasta or flow file.\n");  abort = true; }
+                    else { m->mothurOut("[ERROR]: You need to provide a fasta, fastq or flow file.\n");  abort = true; }
                 }
             }
             
@@ -230,6 +249,13 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { util.splitAtDash(groups, Groups);
                     if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	}
+            
+            format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
+            
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
+                m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting.\n" ); 
+                abort=true;
+            }
 						
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
@@ -259,8 +285,9 @@ int SplitGroupCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        if (flowfile != "")     {  splitFlow();  }
-        if (fastafile != "")    {
+        if (flowfile != "")         {  splitFlow();     }
+        if (fastqfile != "")        {  splitFastq();    }
+        if (fastafile != "")        {
             if (countfile == "" )   {  runNameGroup();  }
             else                    {  runCount();      }
         }
@@ -424,7 +451,7 @@ int SplitGroupCommand::splitFlow(){
                     it->second.total++; it->second.output += name + ' ' + flows + '\n';
                     if (it->second.total % 100 == 0) { //buffer write
                         ofstream out; util.openOutputFileAppend(it->second.filename, out);
-                        out << it->second.output; it->second.output = "";
+                        out << it->second.output; it->second.output = ""; out.close();
                     }
                 } //else not in the groups we are looking to parse, so ignore
             }
@@ -453,6 +480,113 @@ int SplitGroupCommand::splitFlow(){
     }
     catch(exception& e) {
         m->errorOut(e, "SplitGroupCommand", "splitFlow");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+struct fastqOutput {
+    vector<FastqRead> output;
+    string filename;
+    int total;
+    
+    fastqOutput(string f) { filename = f;  total = 0;  }
+    fastqOutput() { filename = "";  total = 0;  }
+};
+//**********************************************************************************************************************
+int SplitGroupCommand::splitFastq(){
+    try {
+        GroupMap* groupMap = NULL;
+        CountTable* ct = NULL;
+        vector<string> namesGroups;
+        if (groupfile != "") {
+            groupMap = new GroupMap(groupfile);
+            groupMap->readMap();
+            namesGroups = groupMap->getNamesOfGroups();
+        }else if (countfile != ""){
+            ct = new CountTable();
+            ct->readTable(countfile, true, true);
+            namesGroups = ct->getNamesOfGroups();
+        }else { m->mothurOut("[ERROR]: you must provide a count or group file to split by group. quitting... \n"); m->setControl_pressed(true);  }
+        
+        if (Groups.size() == 0) { Groups = namesGroups; }
+        
+        if (m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        
+        string fastqfileRoot = outputDir + util.getRootName(util.getSimpleName(fastqfile));
+        
+        ifstream in; int numFlows = 0;
+        util.openInputFile(fastqfile, in);
+        
+        map<string, fastqOutput> parsedFastqData;
+        for (int i = 0; i < Groups.size(); i++) {
+            
+            map<string, string> variables;
+            variables["[filename]"] = fastqfileRoot;
+            variables["[group]"] = Groups[i];
+            string newFastq = getOutputFileName("fastq",variables);
+            
+            fastqOutput thisGroupsInfo(newFastq);
+            parsedFastqData[Groups[i]] = thisGroupsInfo;
+            
+            ofstream out; util.openOutputFile(newFastq, out);  out.close(); //clear file for append
+            
+            if (m->getControl_pressed()) { break; }
+        }
+        
+        int count = 0;
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+            
+            bool ignore = false;
+            FastqRead thisRead(in, ignore, format); util.gobble(in);
+            string name = thisRead.getName();
+            
+            vector<string> thisSeqsGroups;
+            if (groupMap != NULL) {
+                string thisGroup = groupMap->getGroup(name);
+                thisSeqsGroups.push_back(thisGroup);
+            }else if (ct != NULL) { thisSeqsGroups  = ct->getGroups(name); }
+            
+            for (int i = 0; i < thisSeqsGroups.size(); i++) {
+                
+                map<string, fastqOutput>::iterator it = parsedFastqData.find(thisSeqsGroups[i]);
+                
+                if (it != parsedFastqData.end()) {
+                    it->second.total++; it->second.output.push_back(thisRead);
+                    if (it->second.total % 500 == 0) { //buffer write
+                        ofstream out; util.openOutputFileAppend(it->second.filename, out);
+                        for (int j = 0; j < it->second.output.size(); j++) { it->second.output[j].printFastq(out); }
+                        it->second.output.clear(); out.close();
+                    }
+                } //else not in the groups we are looking to parse, so ignore
+            }
+            
+            count++;
+        }
+        
+        //output rest
+        for (map<string, fastqOutput>::iterator it = parsedFastqData.begin(); it != parsedFastqData.end(); it++) {
+            if (m->getControl_pressed()) { break; }
+            
+            if (it->second.output.size() != 0) { //more seqs to output
+                ofstream out; util.openOutputFileAppend(it->second.filename, out);
+                for (int j = 0; j < it->second.output.size(); j++) { it->second.output[j].printFastq(out); }
+                it->second.output.clear(); out.close();
+                outputNames.push_back(it->second.filename); outputTypes["fastq"].push_back(it->second.filename);
+            }else if (it->second.total == 0) { //no seqs for this group, remove file
+                util.mothurRemove(it->second.filename);
+            }else { //finished writing, just add to list of output files
+                outputNames.push_back(it->second.filename); outputTypes["fastq"].push_back(it->second.filename);
+            }
+        }
+        
+        if (m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        
+        return count;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitGroupCommand", "splitFastq");
         exit(1);
     }
 }

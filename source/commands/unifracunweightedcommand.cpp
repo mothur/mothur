@@ -121,7 +121,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 		
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -745,11 +745,11 @@ void UnifracUnweightedCommand::printUnweightedFile(int treeNum) {
         outputNames.push_back(unFileName); outputTypes["unweighted"].push_back(unFileName);
 			
 		for(int a = 0; a < numComp; a++) {
-			output->initFile(groupComb[a], tags);
+			output->setLabelName(groupComb[a], tags);
 			//print each line
 			for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
 				data.push_back(it->first);  data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]);						
-				output->output(data);
+				output->updateOutput(data);
 				data.clear();
 			} 
 			output->resetFile();

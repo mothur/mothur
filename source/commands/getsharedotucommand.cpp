@@ -116,7 +116,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -202,7 +202,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
             else {
                 current->setCountFile(countfile);
                 CountTable temp;
-                if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting."); m->mothurOutEndLine(); abort=true; }
+                if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting.\n");  abort=true; }
             }
             
             if ((sharedfile == "") && (listfile == "")) { //look for currents

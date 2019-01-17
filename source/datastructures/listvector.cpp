@@ -202,7 +202,18 @@ vector<string> ListVector::getLabels(){
 		exit(1);
 	}
 }
-
+/***********************************************************************/
+string ListVector::getOTUName(int bin){
+    try {
+        if (binLabels.size() > bin) {  }
+        else { getLabels(); }
+        return binLabels[bin];
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListVector", "getOTUName");
+        exit(1);
+    }
+}
 /***********************************************************************/
 
 void ListVector::push_back(string seqNames){
@@ -221,8 +232,57 @@ void ListVector::push_back(string seqNames){
 		m->errorOut(e, "ListVector", "push_back");
 		exit(1);
 	}
+}/***********************************************************************/
+int ListVector::push_back(string bin, int nNames, string binLabel){
+    try {
+        if (binLabel == "") { //create one
+            int otuNum = 1; bool notDone = true;
+            
+            //find label prefix
+            string prefix = "Otu";
+            if (binLabels.size() != 0) {
+                if (binLabels[binLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
+                
+                string tempLabel = binLabels[binLabels.size()-1];
+                string simpleLastLabel = util.getSimpleLabel(tempLabel);
+                util.mothurConvert(simpleLastLabel, otuNum); otuNum++;
+            }
+            
+            string potentialLabel = toString(otuNum);
+            
+            while (notDone) {
+                if (m->getControl_pressed()) { notDone = false; break; }
+                
+                potentialLabel = toString(otuNum);
+                vector<string>::iterator it = find(binLabels.begin(), binLabels.end(), potentialLabel);
+                if (it == binLabels.end()) {
+                    potentialLabel = prefix + toString(otuNum);
+                    it = find(binLabels.begin(), binLabels.end(), potentialLabel);
+                    if (it == binLabels.end()) {
+                        notDone = false; break;
+                    }
+                }
+                otuNum++;
+            }
+            
+            binLabel = potentialLabel;
+        }
+        binLabels.push_back(binLabel);
+        
+        data.push_back(bin);
+        numBins++;
+        
+        if(nNames > maxRank)	{	maxRank = nNames;	}
+        
+        numSeqs += nNames;
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListVector", "push_back");
+        exit(1);
+    }
 }
-
 /***********************************************************************/
 
 void ListVector::resize(int size){

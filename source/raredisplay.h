@@ -7,21 +7,20 @@
 #include "display.h"
 
 /***********************************************************************/
+//Each display is responsible for one calculator. The FileOutput class handles creating the outputfile for the calc.
+//This class uses mutex and lock_guard to prevent thread errors.
 
 class RareDisplay : public Display {
 	
 public:
 	RareDisplay(Calculator* calc, FileOutput* file) : estimate(calc), output(file), nIters(1) {};
-	~RareDisplay()					{	delete estimate; delete output;		};
+	~RareDisplay()					{	delete estimate; delete output;		}
 	void init(string);
 	void reset();
 	void update(SAbundVector*);
 	void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb, vector<string>);
 	void close();
 	bool isCalcMultiple() { return estimate->getMultiple(); }
-	
-	void outputTempFiles(string);
-	void inputTempFiles(string);
 	
 private:
 	Calculator* estimate;
@@ -31,6 +30,7 @@ private:
 	int nIters;
     vector<string> Groups;
     Utils util;
+    std::mutex mutex;
     
 };
 

@@ -97,7 +97,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														
                                                         fileHandle >> distance;
                                                 
-                                                        if (distance == -1) { distance = 1000000; }
+                                                        if (util.isEqual(distance, -1)) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                 
                                                         if(distance <= cutoff){
@@ -117,7 +117,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														
 														if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
                                 
-                                                        if (distance == -1) { distance = 1000000; }
+                                                        if (util.isEqual(distance, -1)) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                         
                                                         if(distance <= cutoff){
@@ -146,7 +146,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														
 														if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 														
-                                                        if (distance == -1) { distance = 1000000; }
+                                                        if (util.isEqual(distance, -1)) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                         
                                                         if(distance <= cutoff && j < i){
@@ -166,7 +166,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														
 														if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
 														
-                                                       if (distance == -1) { distance = 1000000; }
+                                                       if (util.isEqual(distance, -1)) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
                                                         
 														if(distance <= cutoff && j < i){
@@ -264,7 +264,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                         
                         fileHandle >> distance;
                         
-                        if (distance == -1) { distance = 1000000; }
+                        if (util.isEqual(distance, -1)) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                         
                         if(distance <= cutoff){
@@ -282,7 +282,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                         
                         if (m->getControl_pressed()) {  fileHandle.close(); return 0;  }
                         
-                        if (distance == -1) { distance = 1000000; }
+                        if (util.isEqual(distance, -1)) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                         
                         if(distance <= cutoff){
@@ -320,7 +320,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                         
                         if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                         
-                        if (distance == -1) { distance = 1000000; }
+                        if (util.isEqual(distance, -1)) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                         
                         if(distance <= cutoff && j < i){
@@ -338,7 +338,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                         
                         if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
                         
-                        if (distance == -1) { distance = 1000000; }
+                        if (util.isEqual(distance, -1)) { distance = 1000000; }
                         else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
                         
                         if(distance <= cutoff && j < i){

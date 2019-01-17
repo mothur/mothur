@@ -75,7 +75,7 @@ string SummaryCommand::getHelpString(){
 		helpString += "Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n";
 		helpString += validCalculator.printCalc("summary");
         helpString += "The subsample parameter allows you to enter the size of the sample or you can set subsample=T and mothur will use the size of your smallest group in the case of a shared file. With a list, sabund or rabund file you must provide a subsample size.\n";
-        helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
+        helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample. Default=1000.\n";
 		helpString += "The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n";
 		helpString += "If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=true).\n";
         helpString += "The alpha parameter is used to set the alpha value for the shannonrange calculator.\n";
@@ -137,7 +137,7 @@ SummaryCommand::SummaryCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -276,7 +276,7 @@ SummaryCommand::SummaryCommand(string option)  {
             
             if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2."); m->mothurOutEndLine(); abort=true; }
             
-            if (subsample == false) { iters = 0; }
+            if (!subsample) { iters = 0; }
             else {
                 //if you did not set a samplesize and are not using a sharedfile
                 if ((subsampleSize == -1) && (format != "sharedfile"))  { m->mothurOut("[ERROR]: If you want to subsample with a list, rabund or sabund file, you must provide the sample size.  You can do this by setting subsample=yourSampleSize.\n");  abort=true; }

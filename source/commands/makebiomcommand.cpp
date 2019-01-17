@@ -193,7 +193,7 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 
 			//initialize outputTypes
@@ -741,7 +741,7 @@ int MakeBiomCommand::getBiom(SharedRAbundFloatVectors*& lookup){
                     float abund = binAbund[j];
                     string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(abund) + "]";
                     //only print non zero values
-                    if (abund != 0) { dataRows.push_back(binInfo); }
+                    if (!util.isEqual(abund, 0)) { dataRows.push_back(binInfo); }
                 }
             }
         }else {

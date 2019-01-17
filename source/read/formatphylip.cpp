@@ -83,7 +83,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 											
 						fileHandle >> distance;
 						
-						if (distance == -1) { distance = 1000000; }
+						if (util.isEqual(distance, -1)) { distance = 1000000; }
 						
 						if(distance <= cutoff){
 							outTemp << i << '\t' << j << '\t' << distance << endl;
@@ -198,7 +198,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 						
 						fileHandle >> distance;
 					
-						if (distance == -1) { distance = 1000000; }
+						if (util.isEqual(distance, -1)) { distance = 1000000; }
 						
 						if((distance <= cutoff) && (j != i)){
 							rowMap[j] = distance;
@@ -310,7 +310,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
                     
                     fileHandle >> distance;
                     
-                    if (distance == -1) { distance = 1000000; }
+                    if (util.isEqual(distance, -1)) { distance = 1000000; }
                     
                     if(distance <= cutoff){
                         outTemp << i << '\t' << j << '\t' << distance << endl;
@@ -424,7 +424,7 @@ int FormatPhylipMatrix::read(CountTable* nameMap){
                     
                     fileHandle >> distance;
 					
-                    if (distance == -1) { distance = 1000000; }
+                    if (util.isEqual(distance, -1)) { distance = 1000000; }
                     
                     if((distance <= cutoff) && (j != i)){
                         rowMap[j] = distance;

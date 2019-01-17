@@ -175,21 +175,18 @@ void SAbundVector::print(ostream& output){
 
 /**********************************************************************/
 int SAbundVector::getNumBins(){
-//	if(needToUpdate == 1){	updateStats();	}
 	return numBins;
 }
 
 /***********************************************************************/
 
 int SAbundVector::getNumSeqs(){
-//	if(needToUpdate == 1){	updateStats();	}
 	return numSeqs;
 }
 
 /***********************************************************************/
 
 int SAbundVector::getMaxRank(){
-//	if(needToUpdate == 1){	updateStats();	}
 	return maxRank;
 }
 /***********************************************************************/

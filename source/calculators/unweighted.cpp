@@ -194,13 +194,13 @@ void driverUnweighted(unweightedData* params) {
                     
                     //unique calc
                     if (pcountSize == 0) { }
-                    else if ((params->t->tree[i].getBranchLength() != -1) && (pcountSize == 1) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root
+                    else if (!params->util.isEqual(params->t->tree[i].getBranchLength(), -1) && (pcountSize == 1) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root
                         UniqueBL += abs(params->t->tree[i].getBranchLength());
                     }
                     
                     //total calc
                     if (pcountSize == 0) { }
-                    else if ((params->t->tree[i].getBranchLength() != -1) && (pcountSize != 0) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root
+                    else if (!params->util.isEqual(params->t->tree[i].getBranchLength(), -1) && (pcountSize != 0) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root
                         totalBL += abs(params->t->tree[i].getBranchLength());
                     }
                 }
@@ -353,13 +353,13 @@ void driverRandomCalcs(unweightedData* params) {
                     
                     //unique calc
                     if (pcountSize == 0) { }
-                    else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root
+                    else if (!params->util.isEqual(copyTree->tree[i].getBranchLength(), -1) && (pcountSize == 1) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root
                         UniqueBL += abs(copyTree->tree[i].getBranchLength());
                     }
                     
                     //total calc
                     if (pcountSize == 0) { }
-                    else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize != 0) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root
+                    else if (!params->util.isEqual(copyTree->tree[i].getBranchLength(), -1) && (pcountSize != 0) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root
                         totalBL += abs(copyTree->tree[i].getBranchLength()); 
                     }
                     

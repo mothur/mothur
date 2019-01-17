@@ -46,7 +46,6 @@ private:
 	int processRelabund();
 	int process(SharedRAbundFloatVectors*&);
     int readMetadata();
-    //int getMetadata();
 	
 };
 

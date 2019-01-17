@@ -213,169 +213,169 @@ PreClusterCommand::PreClusterCommand(string option) {
 			else if (groupfile == "not open") { abort = true; groupfile =  ""; }
 			else {   current->setGroupFile(groupfile); bygroup = true;  }
 
-      countfile = validParameter.validFile(parameters, "count");
-			if (countfile == "not found") { countfile =  "";   }
-			else if (countfile == "not open") { abort = true; countfile =  ""; }
-			else {
-        current->setCountFile(countfile);
-        ct.readTable(countfile, true, false);
-        if (ct.hasGroupInfo()) { bygroup = true; }
-        else { bygroup = false;  }
-      }
-
-      if ((namefile != "") && (countfile != "")) {
-        m->mothurOut("[ERROR]: you may only use one of the following: name or count.");
- 				m->mothurOutEndLine();
-				abort = true;
-      }
-
-      if ((groupfile != "") && (countfile != "")) {
-        m->mothurOut("[ERROR]: you may only use one of the following: group or count.");
- 				m->mothurOutEndLine();
-				abort=true;
-      }
-
-
-			string temp	= validParameter.valid(parameters, "diffs"); if(temp == "not found"){	temp = "1"; }
-			util.mothurConvert(temp, diffs);
-
-			temp = validParameter.valid(parameters, "processors"); if (temp == "not found"){	temp = current->getProcessors();	}
-			processors = current->setProcessors(temp);
-
-      temp = validParameter.valid(parameters, "method"); if(temp == "not found"){  temp = "simple"; }
-			pc_method = temp;
-
-      temp = validParameter.valid(parameters, "match"); if(temp == "not found"){	temp = "1.0";			}
-      util.mothurConvert(temp, match);
-
-      temp = validParameter.valid(parameters, "mismatch"); if(temp == "not found"){	temp = "-1.0";			}
-      util.mothurConvert(temp, misMatch);
-      if (misMatch > 0) { m->mothurOut("[ERROR]: mismatch must be negative.\n"); abort=true; }
-
-      temp = validParameter.valid(parameters, "gapopen"); if(temp == "not found"){	temp = "-2.0";			}
-      util.mothurConvert(temp, gapOpen);
-      if (gapOpen > 0) { m->mothurOut("[ERROR]: gapopen must be negative.\n"); abort=true; }
-
-      temp = validParameter.valid(parameters, "gapextend");	if (temp == "not found"){	temp = "-1.0";			}
-      util.mothurConvert(temp, gapExtend);
-      if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
-
-      temp = validParameter.valid(parameters, "alpha");	if (temp == "not found"){	temp = "2.0";			}
-      util.mothurConvert(temp, alpha);
-      if (alpha < 0) { m->mothurOut("[ERROR]: alpha must be positive.\n"); abort=true; }
-
-      temp = validParameter.valid(parameters, "delta");	if (temp == "not found"){	temp = "2.0";			}
-      util.mothurConvert(temp, delta);
-      if (delta < 0) { m->mothurOut("[ERROR]: delta must be positive.\n"); abort=true; }
-
-      temp = validParameter.valid(parameters, "error_dist");
-			if (temp == "not found"){
-				error_dist = {1, 0.06, 0.02, 0.02, 0.01, 0.005, 0.005, 0.005, 0.001, 0.001, 0.001, 0.0005};
-			} else if(temp == "binomial"){
-				error_dist = {-100};
-			} else {
-				string probability;
-				istringstream probabilityStream(temp);
-				while (getline(probabilityStream, probability, '-')){
-					error_dist.push_back(stof(probability));
-				}
-			}
-
-				// vector<double>
-
-      temp = validParameter.valid(parameters, "error_rate");	if (temp == "not found"){	temp = "0.005";			}
-      util.mothurConvert(temp, error_rate);
-      if (error_rate < 0) { m->mothurOut("[ERROR]: error_rate must be positive.\n"); abort=true; }
-      else if (error_rate > 1) { m->mothurOut("[ERROR]: error_rate is a fraction and should be less than 1.\n"); abort=true; }
-
-      temp = validParameter.valid(parameters, "indel_prob");	if (temp == "not found"){	temp = "0.01";			}
-      util.mothurConvert(temp, indel_prob);
-      if (indel_prob < 0) { m->mothurOut("[ERROR]: indel_prob must be positive.\n"); abort=true; }
-      else if (indel_prob > 1) { m->mothurOut("[ERROR]: indel_prob is a fraction and should be less than 1.\n"); abort=true; }
-
-      temp = validParameter.valid(parameters, "max_indels");	if (temp == "not found"){	temp = "3";			}
-      util.mothurConvert(temp, max_indels);
-      if (indel_prob < 0) { m->mothurOut("[ERROR]: max_indels must be positive.\n"); abort=true; }
-
-
-
-      align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
-
-      align_method = "unaligned";
-
-      if (countfile == "") {
-          if (namefile == "") {
-              vector<string> files; files.push_back(fastafile);
-              if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-          }
-      }
-
-
-			if(pc_method == "tree"){
-
-				diffs = 1;
-
-			} else {
-
-				Summary summary_data(processors);
-				if(countfile != ""){
-					summary_data.summarizeFasta(fastafile, countfile, "");
-				} else if(namefile != ""){
-					summary_data.summarizeFasta(fastafile, namefile, "");
-				}
-				int median_length = summary_data.getLength()[3];
-				int max_abund = summary_data.getMaxAbundance();
-
-
-				if(pc_method == "unoise"){
-
-					diffs = int((log2(max_abund)-1) / alpha + 1);
-
-				} else if(pc_method == "deblur"){
-
-					if(error_dist[0] == -100){ //construct the binomial distribution
-
-						error_dist.clear();
-
-						for(int i=0;i<100;i++){
-
-							double choose = 1;
-							double k = 1;
-
-							for(int j=1;j<=i;j++){
-								choose *= (median_length - j + 1);
-								k *= j;
-							}
-							choose = choose/k;
-
-							double a = pow(error_rate, i);
-							double b = pow(1 - error_rate, median_length - i);
-
-							if(a != 0 && b != 0){
-								error_dist.push_back(choose * a * b);
-								if(error_dist[i] < 0.1 / max_abund){ break;	}
-							} else {
-								break;
-							}
-						}
-						error_dist[0] = 1;
-					}
-
-					double mod_factor = pow((1-error_rate), median_length);
-
-					for(int i=0;i<error_dist.size();i++){
-						error_dist[i] /= (double)mod_factor;
-					}
-					diffs = error_dist.size();
-				}
-			}
-		}
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PreClusterCommand", "PreClusterCommand");
-		exit(1);
-	}
+            countfile = validParameter.validFile(parameters, "count");
+            if (countfile == "not found") { countfile =  "";   }
+            else if (countfile == "not open") { abort = true; countfile =  ""; }
+            else {
+                current->setCountFile(countfile);
+                ct.readTable(countfile, true, false);
+                if (ct.hasGroupInfo()) { bygroup = true; }
+                else { bygroup = false;  }
+            }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.");
+                m->mothurOutEndLine();
+                abort = true;
+            }
+            
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.");
+                m->mothurOutEndLine();
+                abort=true;
+            }
+            
+            
+            string temp	= validParameter.valid(parameters, "diffs"); if(temp == "not found"){	temp = "1"; }
+            util.mothurConvert(temp, diffs);
+            
+            temp = validParameter.valid(parameters, "processors"); if (temp == "not found"){	temp = current->getProcessors();	}
+            processors = current->setProcessors(temp);
+            
+            temp = validParameter.valid(parameters, "method"); if(temp == "not found"){  temp = "simple"; }
+            pc_method = temp;
+            
+            temp = validParameter.valid(parameters, "match"); if(temp == "not found"){	temp = "1.0";			}
+            util.mothurConvert(temp, match);
+            
+            temp = validParameter.valid(parameters, "mismatch"); if(temp == "not found"){	temp = "-1.0";			}
+            util.mothurConvert(temp, misMatch);
+            if (misMatch > 0) { m->mothurOut("[ERROR]: mismatch must be negative.\n"); abort=true; }
+            
+            temp = validParameter.valid(parameters, "gapopen"); if(temp == "not found"){	temp = "-2.0";			}
+            util.mothurConvert(temp, gapOpen);
+            if (gapOpen > 0) { m->mothurOut("[ERROR]: gapopen must be negative.\n"); abort=true; }
+            
+            temp = validParameter.valid(parameters, "gapextend");	if (temp == "not found"){	temp = "-1.0";			}
+            util.mothurConvert(temp, gapExtend);
+            if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
+            
+            temp = validParameter.valid(parameters, "alpha");	if (temp == "not found"){	temp = "2.0";			}
+            util.mothurConvert(temp, alpha);
+            if (alpha < 0) { m->mothurOut("[ERROR]: alpha must be positive.\n"); abort=true; }
+            
+            temp = validParameter.valid(parameters, "delta");	if (temp == "not found"){	temp = "2.0";			}
+            util.mothurConvert(temp, delta);
+            if (delta < 0) { m->mothurOut("[ERROR]: delta must be positive.\n"); abort=true; }
+            
+            temp = validParameter.valid(parameters, "error_dist");
+            if (temp == "not found"){
+                error_dist = {1, 0.06, 0.02, 0.02, 0.01, 0.005, 0.005, 0.005, 0.001, 0.001, 0.001, 0.0005};
+            } else if(temp == "binomial"){
+                error_dist = {-100};
+            } else {
+                string probability;
+                istringstream probabilityStream(temp);
+                while (getline(probabilityStream, probability, '-')){
+                    error_dist.push_back(stof(probability));
+                }
+            }
+            
+            // vector<double>
+            
+            temp = validParameter.valid(parameters, "error_rate");	if (temp == "not found"){	temp = "0.005";			}
+            util.mothurConvert(temp, error_rate);
+            if (error_rate < 0) { m->mothurOut("[ERROR]: error_rate must be positive.\n"); abort=true; }
+            else if (error_rate > 1) { m->mothurOut("[ERROR]: error_rate is a fraction and should be less than 1.\n"); abort=true; }
+            
+            temp = validParameter.valid(parameters, "indel_prob");	if (temp == "not found"){	temp = "0.01";			}
+            util.mothurConvert(temp, indel_prob);
+            if (indel_prob < 0) { m->mothurOut("[ERROR]: indel_prob must be positive.\n"); abort=true; }
+            else if (indel_prob > 1) { m->mothurOut("[ERROR]: indel_prob is a fraction and should be less than 1.\n"); abort=true; }
+            
+            temp = validParameter.valid(parameters, "max_indels");	if (temp == "not found"){	temp = "3";			}
+            util.mothurConvert(temp, max_indels);
+            if (indel_prob < 0) { m->mothurOut("[ERROR]: max_indels must be positive.\n"); abort=true; }
+            
+            
+            
+            align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
+            
+            align_method = "unaligned";
+            
+            if (countfile == "") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(fastafile);
+                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
+                }
+            }
+            
+            
+            if(pc_method == "tree"){
+                
+                diffs = 1;
+                
+            } else {
+                
+                Summary summary_data(processors);
+                if(countfile != ""){
+                    summary_data.summarizeFasta(fastafile, countfile, "");
+                } else if(namefile != ""){
+                    summary_data.summarizeFasta(fastafile, namefile, "");
+                }
+                int median_length = summary_data.getLength()[3];
+                int max_abund = summary_data.getMaxAbundance();
+                
+                
+                if(pc_method == "unoise"){
+                    
+                    diffs = int((log2(max_abund)-1) / alpha + 1);
+                    
+                } else if(pc_method == "deblur"){
+                    
+                    if(util.isEqual(error_dist[0], -100)){ //construct the binomial distribution
+                        
+                        error_dist.clear();
+                        
+                        for(int i=0;i<100;i++){
+                            
+                            double choose = 1;
+                            double k = 1;
+                            
+                            for(int j=1;j<=i;j++){
+                                choose *= (median_length - j + 1);
+                                k *= j;
+                            }
+                            choose = choose/k;
+                            
+                            double a = pow(error_rate, i);
+                            double b = pow(1 - error_rate, median_length - i);
+                            
+                            if(!util.isEqual(a, 0) && !util.isEqual(b, 0)){
+                                error_dist.push_back(choose * a * b);
+                                if(error_dist[i] < 0.1 / max_abund){ break;	}
+                            } else {
+                                break;
+                            }
+                        }
+                        error_dist[0] = 1;
+                    }
+                    
+                    double mod_factor = pow((1-error_rate), median_length);
+                    
+                    for(int i=0;i<error_dist.size();i++){
+                        error_dist[i] /= (double)mod_factor;
+                    }
+                    diffs = error_dist.size();
+                }
+            }
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PreClusterCommand", "PreClusterCommand");
+        exit(1);
+    }
 }
 /************************************************************/
 struct seqPNode {
@@ -1012,108 +1012,104 @@ int PreClusterCommand::execute(){
 		string newFastaFile = getOutputFileName("fasta", variables);
 		outputNames.push_back(newFastaFile); outputTypes["fasta"].push_back(newFastaFile);
 
-		if (countfile == "") {
-			outputNames.push_back(newNamesFile); outputTypes["name"].push_back(newNamesFile);
-		}	else {
-			outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
-		}
+        if (countfile == "")    { outputNames.push_back(newNamesFile); outputTypes["name"].push_back(newNamesFile);     }
+		else                    { outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);    }
 
-		if (bygroup) {
-			//clear out old files
-			ofstream outFasta; util.openOutputFile(newFastaFile, outFasta); outFasta.close();
-			ofstream outNames; util.openOutputFile(newNamesFile, outNames);  outNames.close();
-			newMapFile = fileroot + "precluster.";
-
-			createProcessesGroups(newFastaFile, newNamesFile, newMapFile);
-
-			if (countfile != "") {
-				mergeGroupCounts(newCountFile, newNamesFile, newFastaFile);
-      } else {
-        //run unique.seqs for deconvolute results
-        string inputString = "fasta=" + newFastaFile;
-        if (namefile != "") { inputString += ", name=" + newNamesFile; }
-
-        m->mothurOut("\n/******************************************/\n");
-        m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
-        current->setMothurCalling(true);
-
-        Command* uniqueCommand = new DeconvoluteCommand(inputString);
-        uniqueCommand->execute();
-
-        map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
-
-        delete uniqueCommand;
-        current->setMothurCalling(false);
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-
-        util.renameFile(filenames["fasta"][0], newFastaFile);
-        util.renameFile(filenames["name"][0], newNamesFile);
-			}
-
-      if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}	 return 0; }
-
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster.\n");
-
-		}else {
-            if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
-
-            preClusterData* params = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, NULL, NULL, newMapFile, nullVector);
-            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
-
-            //reads fasta file and return number of seqs
-            long long numSeqs = 0; params->alignSeqs = readFASTA(ct, params, numSeqs); //fills alignSeqs and makes all seqs active
-            length = params->length;
-
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
-
-			if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct.\n");  return 0;  }
-			if (diffs > length) { m->mothurOut("Error: diffs is set to " + toString(diffs) + " which is greater than your sequence length of " + toString(length) + ".\n");   return 0;  }
-
-			int count = process("", newMapFile, params);
-			if(params->pc_method != "deblur"){
-				outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
-			}
-
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
-
-			m->mothurOut("Total number of sequences before precluster was " + toString(params->alignSeqs.size()) + ".\n");
-			m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
-			if (countfile != "") { newNamesFile = newCountFile; }
-            print(newFastaFile, newNamesFile, params);
-            for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
-		}
-
-		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
-
-		m->mothurOut("\nOutput File Names: \n");
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
-
-		//set fasta file as new current fastafile
-		string currentName = "";
-		itTypes = outputTypes.find("fasta");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
-		}
-
-		itTypes = outputTypes.find("name");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
-		}
-
-        itTypes = outputTypes.find("count");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
-		}
-
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PreClusterCommand", "execute");
-		exit(1);
-	}
+        if (bygroup) {
+            //clear out old files
+            ofstream outFasta; util.openOutputFile(newFastaFile, outFasta); outFasta.close();
+            ofstream outNames; util.openOutputFile(newNamesFile, outNames);  outNames.close();
+            newMapFile = fileroot + "precluster.";
+            
+            createProcessesGroups(newFastaFile, newNamesFile, newMapFile);
+            
+            if (countfile != "") { mergeGroupCounts(newCountFile, newNamesFile, newFastaFile);  }
+            else {
+                //run unique.seqs for deconvolute results
+                string inputString = "fasta=" + newFastaFile;
+                if (namefile != "") { inputString += ", name=" + newNamesFile; }
+                
+                m->mothurOut("\n/******************************************/\n");
+                m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* uniqueCommand = new DeconvoluteCommand(inputString);
+                uniqueCommand->execute();
+                
+                map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
+                
+                delete uniqueCommand;
+                current->setMothurCalling(false);
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                
+                util.renameFile(filenames["fasta"][0], newFastaFile);
+                util.renameFile(filenames["name"][0], newNamesFile);
+            }
+        
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}	 return 0; }
+        
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster.\n");
+        
+    }else {
+        if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
+        
+        preClusterData* params = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, NULL, NULL, newMapFile, nullVector);
+        params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
+        
+        //reads fasta file and return number of seqs
+        long long numSeqs = 0; params->alignSeqs = readFASTA(ct, params, numSeqs); //fills alignSeqs and makes all seqs active
+        length = params->length;
+        
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
+        
+        if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct.\n");  return 0;  }
+        if (diffs > length) { m->mothurOut("Error: diffs is set to " + toString(diffs) + " which is greater than your sequence length of " + toString(length) + ".\n");   return 0;  }
+        
+        int count = process("", newMapFile, params);
+        if(params->pc_method != "deblur"){
+            outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
+        }
+        
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
+        
+        m->mothurOut("Total number of sequences before precluster was " + toString(params->alignSeqs.size()) + ".\n");
+        m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
+        if (countfile != "") { newNamesFile = newCountFile; }
+        print(newFastaFile, newNamesFile, params);
+        for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
+    }
+    
+    if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
+    
+    m->mothurOut("\nOutput File Names: \n");
+    for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+    m->mothurOutEndLine();
+    
+    //set fasta file as new current fastafile
+    string currentName = "";
+    itTypes = outputTypes.find("fasta");
+    if (itTypes != outputTypes.end()) {
+        if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+    }
+    
+    itTypes = outputTypes.find("name");
+    if (itTypes != outputTypes.end()) {
+        if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
+    }
+    
+    itTypes = outputTypes.find("count");
+    if (itTypes != outputTypes.end()) {
+        if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
+    }
+    
+    return 0;
+    
+}
+catch(exception& e) {
+    m->errorOut(e, "PreClusterCommand", "execute");
+    exit(1);
+}
 }
 
 /**************************************************************************************************/

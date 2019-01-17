@@ -118,7 +118,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -485,7 +485,7 @@ int RemoveRareCommand::processList(){
 					newList.push_back(saveBinNames);
                     newLabels.push_back(binLabels[i]);
 					if (groupfile != "") {  for(int k = 0; k < newGroupFile.size(); k++) { outGroup << newGroupFile[k] << endl; }  }
-                    else if (countfile != "") { for(int k = 0; k < newGroupFile.size(); k++) {  ct.remove(newGroupFile[k]); } }  
+                    else if (countfile != "") { for(int k = 0; k < newGroupFile.size(); k++) {  ct.remove(newGroupFile[k]); } }
 				}else {  if (countfile != "") {  for(int k = 0; k < names.size(); k++) {  ct.remove(names[k]); } }  }
 			}
 			

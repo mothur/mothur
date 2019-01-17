@@ -85,6 +85,132 @@ int Oligos::read(string o, bool reverse){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+vector<string> Oligos::getSRAGroupNames(){
+    try {
+        vector<string> sraGroupNames;
+        set<string> uniqueNames;
+        
+        if (pairedOligos) {
+            for(map<int, oligosPair>::iterator itBar = pairedBarcodes.begin();itBar != pairedBarcodes.end();itBar++){
+                for(map<int, oligosPair>::iterator itPrimer = pairedPrimers.begin();itPrimer != pairedPrimers.end(); itPrimer++){
+                    
+                    if (m->getControl_pressed()) { return sraGroupNames; }
+                    
+                    string primerName = getPrimerName(itPrimer->first);
+                    string barcodeName = getBarcodeName(itBar->first);
+                    
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                    else {
+                        string comboGroupName = "";
+                        string comboName = "";
+                        
+                        if(primerName == ""){
+                            comboGroupName = barcodeName;
+                        }else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerName;
+                            }
+                            else{
+                                comboGroupName = barcodeName + "." + primerName;
+                            }
+                        }
+                        
+                        if(((itPrimer->second).forward+(itPrimer->second).reverse) == ""){
+                            if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
+                            if ((itBar->second).reverse != "NONE") {
+                                if (comboName == "") {  comboName += (itBar->second).reverse; }
+                                else {  comboName += ("."+(itBar->second).reverse);  }
+                            }
+                        }else{
+                            if(((itBar->second).forward+(itBar->second).reverse) == ""){
+                                if ((itPrimer->second).forward != "NONE") { comboName += (itPrimer->second).forward; }
+                                if ((itPrimer->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
+                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
+                                }
+                            }
+                            else{
+                                if ((itBar->second).forward != "NONE") { comboName += (itBar->second).forward; }
+                                if ((itBar->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itBar->second).reverse; }
+                                    else {  comboName += ("."+(itBar->second).reverse);  }
+                                }
+                                if ((itPrimer->second).forward != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).forward; }
+                                    else {  comboName += ("."+(itPrimer->second).forward);  }
+                                }
+                                if ((itPrimer->second).reverse != "NONE") {
+                                    if (comboName == "") {  comboName += (itPrimer->second).reverse; }
+                                    else {  comboName += ("."+(itPrimer->second).reverse);  }
+                                }
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
+                        uniqueNames.insert(comboGroupName);
+                    }
+                }
+            }
+        }else {
+            
+            for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+                for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+                    
+                    string primerName = getPrimerName(itPrimer->second);
+                    string barcodeName = getBarcodeName(itBar->second);
+                    
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing
+                    else if ((primerName == "") && (barcodeName == "")) { } //do nothing
+                    else {
+                        string comboGroupName = "";
+                        string comboName = "";
+                        
+                        if(primerName == ""){
+                            comboGroupName = barcodeName;
+                        }else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerName;
+                            }
+                            else{
+                                comboGroupName = barcodeName + "." + primerName;
+                            }
+                        }
+                        
+                        if(itPrimer->first == ""){
+                            comboName = itBar->first;
+                        }else{
+                            if(itBar->first == ""){
+                                comboName = itPrimer->first;
+                            }
+                            else{
+                                comboName = itBar->first + "." + itPrimer->first;
+                            }
+                        }
+                        
+                        if (comboName != "") {  comboGroupName +=  "_" + comboName;  }
+                        uniqueNames.insert(comboGroupName);
+                    }
+                }
+            }
+        }
+        
+        if (uniqueNames.size() == 0) {
+            m->mothurOut("[ERROR]: your oligos file does not contain any group names.\n");  m->setControl_pressed(true);
+        }else {
+            if (m->getDebug()) { int count = 0; for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { m->mothurOut("[DEBUG]: " + toString(count) + " groupName = " + *it + "\n"); count++; } }
+            for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {  sraGroupNames.push_back(*it); }
+        }
+
+    
+        return sraGroupNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Oligos", "getSRAGroupNames");
+        exit(1);
+    }
+}
 //***************************************************************************************************************
 
 int Oligos::readOligos(){
@@ -253,7 +379,7 @@ int Oligos::readOligos(){
         
         if (hasPBarcodes || hasPPrimers) {
             pairedOligos = true;
-            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
+            if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting.\n");  return 0; }
             
             //check for "NONE" to make sure if none is used then all primers in that position are NONE
             //ex. Can't have: PRIMER NONE reversePrimer and PRIMER fowardPrimer reversePrimer in same file

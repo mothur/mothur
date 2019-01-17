@@ -106,7 +106,7 @@ RemoveOtuLabelsCommand::RemoveOtuLabelsCommand(string option)  {
 			map<string,string>::iterator it;
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			
@@ -273,6 +273,9 @@ int RemoveOtuLabelsCommand::execute(){
         if (itTypes != outputTypes.end()) {
             if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setConsTaxonomyFile(currentName); }
         }
+        
+        m->mothurOut("\nOutput File Names:\n");
+        for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	} m->mothurOutEndLine();
         
         return 0;
     }

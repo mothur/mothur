@@ -125,7 +125,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 		
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -619,11 +619,11 @@ int MGClusterCommand::runMothurCluster(){
             float dist = distMatrix->getSmallDist();
             float rndDist = util.ceilDist(dist, precision);
             
-            if(previousDist <= 0.0000 && dist != previousDist){
+            if(previousDist <= 0.0000 && !util.isEqual(dist, previousDist)){
                 oldList.setLabel("unique");
                 printData(&oldList, counts, printHeaders);
             }
-            else if(rndDist != rndPreviousDist){
+            else if(!util.isEqual(rndDist, rndPreviousDist)){
                 if (merge) {
                     ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
                     
@@ -693,7 +693,7 @@ int MGClusterCommand::runMothurCluster(){
             return 0; 
         }
         
-        if (saveCutoff != cutoff) {
+        if (!util.isEqual(saveCutoff, cutoff)) {
             saveCutoff = util.ceilDist(saveCutoff, precision);
             m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();
         }

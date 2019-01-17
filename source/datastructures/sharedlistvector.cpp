@@ -271,15 +271,6 @@ RAbundVector SharedListVector::getRAbundVector(){
 			rav.push_back(binSize);
 		}
 	
-	//  This was here before to output data in a nice format, but it screws up the name mapping steps
-	//	sort(rav.rbegin(), rav.rend());
-	//	
-	//	for(int i=data.size()-1;i>=0;i--){
-	//		if(rav.get(i) == 0){	rav.pop_back();	}
-	//		else{
-	//			break;
-	//		}
-	//	}
 		rav.setLabel(label);
 	
 		return rav;
@@ -377,7 +368,7 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
             for (int j = 0; j < binNames.size(); j++) { 
                 if (groupMode == "group") {
                     string group = groupmap->getGroup(binNames[j]);
-                    if(group == "not found") {	m->mothurOut("Error: Sequence '" + binNames[j] + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
+                    if(group == "not found") {	m->mothurOut("Error: Sequence '" + binNames[j] + "' was not found in the group file, please correct.\n");   exit(1); }
                     it = finder.find(group);
                     if (it != finder.end()) { it->second->set(i, it->second->get(i) + 1); } //i represents what bin you are in
                 }else{

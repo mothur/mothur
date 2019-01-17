@@ -48,7 +48,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 			if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
 			if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 
-			if (distance == -1) { distance = 1000000; }
+			if (util.isEqual(distance, -1)) { distance = 1000000; }
 		
 			if((distance <= cutoff) && (itA != itB)){
 				if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
@@ -206,7 +206,7 @@ int FormatColumnMatrix::read(CountTable* nameMap){
 			int itA = nameMap->get(firstName);
 			int itB = nameMap->get(secondName);
             
-			if (distance == -1) { distance = 1000000; }
+			if (util.isEqual(distance, -1)) { distance = 1000000; }
             
 			if((distance <= cutoff) && (itA != itB)){
 				if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...

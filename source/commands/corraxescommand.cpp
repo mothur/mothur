@@ -104,7 +104,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			vector<string> tempOutNames;
@@ -836,9 +836,8 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 				
 				if (it == axes.end()) {
 					axes[group] = thisGroupsAxes;
-				}else {
-					m->mothurOut(group + " is already in your axes file, using first definition."); m->mothurOutEndLine();
-				}
+                    
+				}else { m->mothurOut(group + " is already in your axes file, using first definition.\n");  }
 			}
 			
 			util.gobble(in);
@@ -864,10 +863,7 @@ int CorrAxesCommand::getMetadata(){
 		vector<string> pieces = util.splitWhiteSpace(headerLine);
 		
 		//save names of columns you are reading
-		for (int i = 1; i < pieces.size(); i++) {
-			metadataLabels.push_back(pieces[i]);
-		}
-		int count = metadataLabels.size();
+		for (int i = 1; i < pieces.size(); i++) { metadataLabels.push_back(pieces[i]); }
 			
 		//read rest of file
         lookupFloat = new SharedRAbundFloatVectors();
@@ -875,28 +871,31 @@ int CorrAxesCommand::getMetadata(){
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-			string group = "";
-			in >> group; util.gobble(in);
+            string metadataLine = util.getline(in); util.gobble(in);
+            vector<string> metaPieces = util.splitWhiteSpace(metadataLine);
+			string group = metaPieces[0];
+			
 			groupNames.push_back(group);
+            
+            if (pieces.size() != metaPieces.size()) { //sanity check
+                m->mothurOut("[ERROR]: Your metadata file seems to be mismatched. I read " + toString(pieces.size()) + " column headers, but found " + toString(metaPieces.size()) + " columns for the " + group + " group. Quitting.\n"); m->setControl_pressed(true); in.close(); return 0;
+            }
 				
 			SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
 			tempLookup->setLabel("1");
             tempLookup->setGroup(group);
         
-			for (int i = 0; i < count; i++) {
+			for (int i = 1; i < metaPieces.size(); i++) {
 				float temp = 0.0;
-				in >> temp; 
+                util.mothurConvert(metaPieces[i], temp);
 				tempLookup->push_back(temp);
 			}
             lookupFloat->push_back(tempLookup);
-			
-			util.gobble(in);
 		}
 		in.close();
 		
         lookupFloat->setLabels("1");
         lookupFloat->eliminateZeroOTUS();
-        
         
 		return 0;
 	}

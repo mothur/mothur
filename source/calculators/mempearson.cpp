@@ -47,7 +47,7 @@ EstOutput MemPearson::getValues(vector<SharedRAbundVector*> shared) {
 		
 		double denom = denomTerm1 * denomTerm2;
 
-		if (denom != 0) { 
+		if (!util.isEqual(denom, 0)) {
 			data[0] = (numTerm / denom);
 		}else {
 			data[0] = 1.0;

@@ -166,7 +166,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -392,7 +392,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
                 m->mothurOut("[ERROR]: minoverlap, ostart, oend and mismatches can only be used with a contigs.report file, aborting.\n"); abort=true;
             }
             
-            if ((alignreport == "") && ((minScore != -1) || (maxInsert != -1) || (minSim != -1))) {
+            if ((alignreport == "") && (!util.isEqual(minScore, -1) || (maxInsert != -1) || !util.isEqual(minSim, -1))) {
                 m->mothurOut("[ERROR]: minscore, maxinsert and minsim can only be used with a align.report file, aborting.\n"); abort=true;
             }
             
@@ -688,8 +688,8 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             bool goodSeq = true;		//	innocent until proven guilty
             string trashCode = "";
             if(maxInsert != -1 && maxInsert < LongestInsert)    {	goodSeq = false; trashCode += "insert|";	}
-            if(minScore != -1 && minScore > SearchScore)		{	goodSeq = false; trashCode += "score|";     }
-            if(minSim != -1 && minSim > SimBtwnQueryTemplate)	{	goodSeq = false; trashCode += "sim|";       }
+            if(!util.isEqual(minScore, -1) && minScore > SearchScore)		{	goodSeq = false; trashCode += "score|";     }
+            if(!util.isEqual(minSim, -1) && minSim > SimBtwnQueryTemplate)	{	goodSeq = false; trashCode += "sim|";       }
             
             if(goodSeq){
                 out << name << '\t' << length << '\t' << TemplateName  << '\t' << TemplateLength  << '\t' << SearchMethod  << '\t' << SearchScore  << '\t' << AlignmentMethod  << '\t' << QueryStart  << '\t' << QueryEnd  << '\t' << TemplateStart  << '\t' << TemplateEnd  << '\t' << PairwiseAlignmentLength  << '\t' << GapsInQuery  << '\t' << GapsInTemplate  << '\t' << LongestInsert  << '\t' << SimBtwnQueryTemplate << endl;

@@ -76,7 +76,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 					if (m->getControl_pressed()) { return names; }
 					
 					f >> matrix[i][j];
-					if (matrix[i][j] == -0.0000)
+					if (util.isEqual(matrix[i][j], -0))
 						matrix[i][j] = 0.0000;
 				}
 			}
@@ -93,7 +93,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 				for(int j=0;j<i;j++){
 					if (m->getControl_pressed()) { return names; }
 					f >> matrix[i][j];
-					if (matrix[i][j] == -0.0000)
+					if (util.isEqual(matrix[i][j], -0))
 						matrix[i][j] = 0.0000;
 					matrix[j][i]=matrix[i][j];
 				}

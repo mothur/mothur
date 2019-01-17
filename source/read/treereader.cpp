@@ -111,7 +111,7 @@ bool TreeReader::readTrees()  {
 				
 				//then you did not find it so report it 
 				if (count == Treenames.size()) {
-                    m->mothurOut(namesSeqsCt[i] + " is in your name or group file and not in your tree. It will be disregarded."); m->mothurOutEndLine();
+                    m->mothurOut(namesSeqsCt[i] + " is in your name or group file and not in your tree. It will be disregarded.\n");
                     ct->remove(namesSeqsCt[i]);
 				}
 			}

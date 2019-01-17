@@ -116,7 +116,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 			map<string,string>::iterator it;
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
             vector<string> tempOutNames;
@@ -316,17 +316,17 @@ int PrimerDesignCommand::execute(){
             
             double minTm, maxTm;
             findMeltingPoint(*it, minTm, maxTm);
-            if ((minTM == -1) && (maxTM == -1)) { //user did not set min or max Tm so save this primer
+            if (util.isEqual(minTM, -1) && util.isEqual(maxTM, -1)) { //user did not set min or max Tm so save this primer
                 minTms.push_back(minTm);
                 maxTms.push_back(maxTm);
                 outSum << *it << '\t' << minTm << '\t' << maxTm << endl;
                 it++;
-            }else if ((minTM == -1) && (maxTm <= maxTM)){ //user set max and no min, keep if below max
+            }else if (util.isEqual(minTM, -1) && (maxTm <= maxTM)){ //user set max and no min, keep if below max
                 minTms.push_back(minTm);
                 maxTms.push_back(maxTm);
                 outSum << *it << '\t' << minTm << '\t' << maxTm << endl;
                 it++;
-            }else if ((maxTM == -1) && (minTm >= minTM)){ //user set min and no max, keep if above min
+            }else if (util.isEqual(maxTM, -1) && (minTm >= minTM)){ //user set min and no max, keep if above min
                 minTms.push_back(minTm);
                 maxTms.push_back(maxTm);
                 outSum << *it << '\t' << minTm << '\t' << maxTm << endl;

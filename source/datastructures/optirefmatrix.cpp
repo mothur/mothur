@@ -11,7 +11,7 @@
 #include "counttable.h"
 
 /***********************************************************************/
-OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, float fP) : OptiData(c) {
+OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, float fP, string refWeight) : OptiData(c) {
     
     numFitSingletons = 0;
     numRefSingletons = 0;
@@ -20,6 +20,7 @@ OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile
     numFitDists = 0;
     numRefDists = 0;
     numFitSeqs = 0;
+    refWeightMethod = refWeight;
     
     fitPercent = fP / 100.0;
     if (fitPercent < 0.001) { fitPercent = 0.10; m->mothurOut("[WARNING]: fit percentage must be between 0.001 (0.1%) and 1.0 (100%). Setting to 0.10 or 10%. \n"); } //minumum of 0.1%
@@ -27,7 +28,26 @@ OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile
     
     square = false;
     
-    readFiles(distFile, distFormat, dupsFile, dupsFormat);
+    set<string> noRefNamesSet;
+    readFiles(distFile, distFormat, dupsFile, dupsFormat, noRefNamesSet);
+}
+/***********************************************************************/
+OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, string accnosfile) : OptiData(c) {
+    
+    numFitSingletons = 0;
+    numRefSingletons = 0;
+    numSingletons = 0;
+    numBetweenDists = 0;
+    numFitDists = 0;
+    numRefDists = 0;
+    numFitSeqs = 0;
+    refWeightMethod = "accnos";
+    
+    set<string> accnosRefFileNames = util.readAccnos(accnosfile);
+    
+    square = false;
+    
+    readFiles(distFile, distFormat, dupsFile, dupsFormat, accnosRefFileNames);
 }
 
 /***********************************************************************/
@@ -46,6 +66,7 @@ OptiRefMatrix::OptiRefMatrix(string d, string nc, string f, string df, double c,
     numFitSeqs = 0;
     
     fitPercent = 0;
+    refWeightMethod = "none";
     
     square = false;
     
@@ -442,23 +463,24 @@ void OptiRefMatrix::randomizeRefs() {
     try {
         long long totalSeqs = (isRef.size()+isSingleRef.size());
         long long numToSelect = totalSeqs * fitPercent;
-        long long numSelected = 0;
         long long refSingletonCutoff = isRef.size();
         long long singleSize = isSingleRef.size();
         
+        //select sequences to be reference
         set<long long> fitSeqsIndexes;
-        while (numSelected < numToSelect) {
-            if (m->getControl_pressed()) { break; }
-            
-            fitSeqsIndexes.insert(util.getRandomIndex(totalSeqs-1)); //no repeats
-            
-            numSelected = fitSeqsIndexes.size();
+        if (weights.size() != 0) {  fitSeqsIndexes = subsample.getWeightedSample(weights, numToSelect);  } //you have weighted selection
+        else {
+            long long numSelected = 0;
+            while (numSelected < numToSelect) {
+                if (m->getControl_pressed()) { break; }
+                fitSeqsIndexes.insert(util.getRandomIndex(totalSeqs-1)); //no repeats
+                numSelected = fitSeqsIndexes.size();
+            }
         }
         
         //initilize isRef to true
         isRef.clear(); isRef.resize(refSingletonCutoff, true);
         isSingleRef.clear(); isSingleRef.resize(singleSize, true);
-        
         
         //set isRef values
         for (set<long long>::iterator it = fitSeqsIndexes.begin(); it != fitSeqsIndexes.end(); it++) {
@@ -473,44 +495,7 @@ void OptiRefMatrix::randomizeRefs() {
         }
         
         //find number of fitDists, refDists and between dists
-        numRefDists = 0;
-        numFitDists = 0;
-        numBetweenDists = 0;
-        numFitSingletons = 0;
-        numFitSeqs = 0;
-        numRefSingletons = 0;
-        
-        for (long long i = 0; i < closeness.size(); i++) {
-            if (m->getControl_pressed()) { break; }
-            
-            bool thisSeqIsRef = isRef[i];
-            long long thisSeqsNumRefDists = 0;
-            long long thisSeqsNumFitDists = 0;
-        
-            for (set<long long>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
-                long long newB = *it;
-                
-                if ((thisSeqIsRef) && (isRef[newB])) {  thisSeqsNumRefDists++; } //both refs
-                else if ((thisSeqIsRef) && (!isRef[newB])) { numBetweenDists++; } // ref to fit dist
-                else if ((!thisSeqIsRef) && (isRef[newB])) { numBetweenDists++; } // fit to ref dist
-                else if ((!thisSeqIsRef) && (!isRef[newB])) { thisSeqsNumFitDists++; } // both fit
-            }
-            
-            //a refSingleton or Fitsingleton may not be a true singleton (no valid dists in matrix), but may be a refSeq with no distances to other refs but distances to fitseqs. a fitsingleton may have dists to refs but no dists to other fitseqs.
-            
-            //you are a ref with no refdists, so you are a refsingleton
-            if ((thisSeqIsRef) && (thisSeqsNumRefDists == 0)) {  numRefSingletons++; }
-            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists == 0)) {  numFitSingletons++; }
-            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists != 0)) {  numFitSeqs++; }
-            
-            numRefDists += thisSeqsNumRefDists;
-            numFitDists += thisSeqsNumFitDists;
-        }
-        //counted twice
-        numRefDists /= 2;
-        numFitDists /= 2;
-        numBetweenDists /= 2;
-
+        calcCounts();
     }
     catch(exception& e) {
         m->errorOut(e, "OptiRefMatrix", "randomizeRefs");
@@ -519,7 +504,8 @@ void OptiRefMatrix::randomizeRefs() {
 
 }
 /***********************************************************************/
-int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile, string dupsFormat) {
+//for denovo method
+int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile, string dupsFormat, set<string>& optionalRefNames) {
     try {
         string namefile, countfile;
         if (dupsFormat == "name") { namefile = dupsFile; countfile = ""; }
@@ -534,8 +520,17 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
             for (map<string, int>::iterator it = temp.begin(); it!= temp.end(); it++) {  nameAssignment[it->first] = it->second; }
         }
         
+        //select sequences to be reference
+        set<long long> fitSeqsIndexes;
         long long count = 0;
         for (map<string, long long>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
+            if (refWeightMethod == "abundance")          { weights[count] = it->second; }
+            else if (refWeightMethod == "connectivity")  { weights[count] = 1;          } //initialize
+            else if (refWeightMethod == "accnos") { //fill fit indexes
+                if (optionalRefNames.count(it->first) == 0) { //you are not a reference sequence
+                    fitSeqsIndexes.insert(count); //add as fit seq
+                }
+            }
             it->second = count; count++;
             nameMap.push_back(it->first);
             nameAssignment[it->first] = it->second;
@@ -545,43 +540,16 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         vector<bool> singleton; singleton.resize(count, true);
         map<long long, long long> singletonIndexSwap;
         
-        if (distFormat == "column")        {  singletonIndexSwap = readColumnSingletons(singleton, distFile, nameAssignment);     }
+        if (distFormat == "column")        {  singletonIndexSwap = readColumnSingletons(singleton, distFile, nameAssignment);           }
         else if (distFormat == "phylip")   {  singletonIndexSwap = readPhylipSingletons(singleton, distFile, count, nameAssignment);    }
         
-        //randomly select the "fit" seqs
-        long long numToSelect = nameAssignment.size() * fitPercent;
-        long long numSelected = 0;
-        long long totalSeqs = nameAssignment.size();
-        set<long long> fitSeqsIndexes;
-        
-        while (numSelected < numToSelect) {
-            if (m->getControl_pressed()) { break; }
-            
-            fitSeqsIndexes.insert(util.getRandomIndex(totalSeqs-1)); //no repeats
-            
-            numSelected = fitSeqsIndexes.size();
-        }
-                
         int nonSingletonCount = 0;
         for (int i = 0; i < singleton.size(); i++) {
             if (!singleton[i]) { //if you are not a singleton
                 singletonIndexSwap[i] = nonSingletonCount;
-                
-                if (fitSeqsIndexes.count(i) != 0) { //you are a fit seq
-                    isRef.push_back(false);
-                }else { isRef.push_back(true);  } //its a reference
-
                 nonSingletonCount++;
-            }else {
-                singletons.push_back(nameMap[i]);
-                
-                if (fitSeqsIndexes.count(i) != 0) { //you are a fit seq singleton
-                    isSingleRef.push_back(false);
-                }else { isSingleRef.push_back(true); } //its a singleton reference
-            }
+            }else { singletons.push_back(nameMap[i]); }
         }
-        
-        singleton.clear();
         numSingletons = singletons.size();
         closeness.resize(nonSingletonCount);
         
@@ -600,45 +568,41 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
         if (distFormat == "column")        {  readColumn(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
         else if (distFormat == "phylip")   {  readPhylip(distFile, hasName, names, nameAssignment, singletonIndexSwap);     }
         
-        //find number of fitDists, refDists and between dists
-        numRefDists = 0;
-        numFitDists = 0;
-        numBetweenDists = 0;
-        numFitSingletons = 0;
-        numFitSeqs = 0;
-        numRefSingletons = 0;
         
-        for (long long i = 0; i < closeness.size(); i++) {
-            if (m->getControl_pressed()) { break; }
-            
-            bool thisSeqIsRef = isRef[i];
-            long long thisSeqsNumRefDists = 0;
-            long long thisSeqsNumFitDists = 0;
-            
-            for (set<long long>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
-                long long newB = *it;
-                
-                if ((thisSeqIsRef) && (isRef[newB])) {  thisSeqsNumRefDists++; } //both refs
-                else if ((thisSeqIsRef) && (!isRef[newB])) { numBetweenDists++; } // ref to fit dist
-                else if ((!thisSeqIsRef) && (isRef[newB])) { numBetweenDists++; } // fit to ref dist
-                else if ((!thisSeqIsRef) && (!isRef[newB])) { thisSeqsNumFitDists++; } // both fit
+        //randomly select the "fit" seqs
+        long long numToSelect = nameAssignment.size() * fitPercent;
+        if (weights.size() != 0) {  fitSeqsIndexes = subsample.getWeightedSample(weights, numToSelect);  } //you have weighted selection
+        else {
+            if (refWeightMethod == "accnos") { } //fitIndexes are filled above
+            else { //randomly select references
+                long long numSelected = 0;
+                long long totalSeqs = nameAssignment.size();
+                while (numSelected < numToSelect) {
+                    if (m->getControl_pressed()) { break; }
+                    fitSeqsIndexes.insert(util.getRandomIndex(totalSeqs-1)); //no repeats
+                    numSelected = fitSeqsIndexes.size();
+                }
             }
-            
-            //a refSingleton or Fitsingleton may not be a true singleton (no valid dists in matrix), but may be a refSeq with no distances to other refs but distances to fitseqs. a fitsingleton may have dists to refs but no dists to other fitseqs.
-            
-            //you are a ref with no refdists, so you are a refsingleton
-            if ((thisSeqIsRef) && (thisSeqsNumRefDists == 0)) {  numRefSingletons++; }
-            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists == 0)) {  numFitSingletons++; }
-            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists != 0)) {  numFitSeqs++; }
-            
-            numRefDists += thisSeqsNumRefDists;
-            numFitDists += thisSeqsNumFitDists;
         }
-        //counted twice
-        numRefDists /= 2;
-        numFitDists /= 2;
-        numBetweenDists /= 2;
-
+        
+        //flag reference seqs singleton or not
+        for (int i = 0; i < singleton.size(); i++) {
+            if (!singleton[i]) { //if you are not a singleton
+                
+                if (fitSeqsIndexes.count(i) != 0) { //you are a fit seq
+                    isRef.push_back(false);
+                }else { isRef.push_back(true);  } //its a reference
+            }else {
+                if (fitSeqsIndexes.count(i) != 0) { //you are a fit seq singleton
+                    isSingleRef.push_back(false);
+                }else { isSingleRef.push_back(true); } //its a singleton reference
+            }
+        }
+        singleton.clear();
+        
+        //find number of fitDists, refDists and between dists
+        calcCounts();
+        
         return 0;
     }
     catch(exception& e) {
@@ -647,7 +611,7 @@ int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile
     }
 }
 /***********************************************************************/
-//lets create separate reads for single and combined files.  Will produce some dup code
+//for reading reference and fit files separately, reference method
 int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refcountfile, string refformat, string refdistformat, string fitdistfile, string fitnamefile, string fitcountfile, string fitformat, string fitdistformat, string betweendistfile, string betweendistformat){
     try {
         map<string, long long> nameAssignment;
@@ -766,45 +730,8 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
         else if (betweendistformat == "phylip")   {  readPhylip(betweendistfile, hasName, names, nameAssignment, singletonIndexSwap);     }
         
         //find number of fitDists, refDists and between dists
-        numRefDists = 0;
-        numFitDists = 0;
-        numBetweenDists = 0;
-        numFitSingletons = 0;
-        numFitSeqs = 0;
-        numRefSingletons = 0;
+        calcCounts();
         
-        for (long long i = 0; i < closeness.size(); i++) {
-            if (m->getControl_pressed()) { break; }
-            
-            bool thisSeqIsRef = isRef[i];
-            long long thisSeqsNumRefDists = 0;
-            long long thisSeqsNumFitDists = 0;
-            
-            for (set<long long>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
-                long long newB = *it;
-                
-                if ((thisSeqIsRef) && (isRef[newB])) {  thisSeqsNumRefDists++; } //both refs
-                else if ((thisSeqIsRef) && (!isRef[newB])) { numBetweenDists++; } // ref to fit dist
-                else if ((!thisSeqIsRef) && (isRef[newB])) { numBetweenDists++; } // fit to ref dist
-                else if ((!thisSeqIsRef) && (!isRef[newB])) { thisSeqsNumFitDists++; } // both fit
-            }
-            
-            //a refSingleton or Fitsingleton may not be a true singleton (no valid dists in matrix), but may be a refSeq with no distances to other refs but distances to fitseqs. a fitsingleton may have dists to refs but no dists to other fitseqs.
-            
-            //you are a ref with no refdists, so you are a refsingleton
-            if ((thisSeqIsRef) && (thisSeqsNumRefDists == 0)) {  numRefSingletons++; }
-            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists == 0)) {  numFitSingletons++; }
-            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists != 0)) {  numFitSeqs++; }
-            
-            numRefDists += thisSeqsNumRefDists;
-            numFitDists += thisSeqsNumFitDists;
-        }
-
-        //counted twice
-        numRefDists /= 2;
-        numFitDists /= 2;
-        numBetweenDists /= 2;
-
         return 0;
     }
     catch(exception& e) {
@@ -833,7 +760,7 @@ map<long long, long long> OptiRefMatrix::readColumnSingletons(vector<bool>& sing
             
             if (m->getControl_pressed()) {  break; }
             
-            if (distance == -1) { distance = 1000000; }
+            if (util.isEqual(distance,-1)) { distance = 1000000; }
             
             if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);
@@ -899,7 +826,7 @@ map<long long, long long> OptiRefMatrix::readPhylipSingletons(vector<bool>& sing
                     
                     fileHandle >> distance;
                     
-                    if (distance == -1) { distance = 1000000; }
+                    if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
                     if(distance <= cutoff){
                         singleton[i] = false;
@@ -916,7 +843,7 @@ map<long long, long long> OptiRefMatrix::readPhylipSingletons(vector<bool>& sing
                 for(long long j=0;j<nseqs;j++){
                     fileHandle >> distance;
                     
-                    if (distance == -1) { distance = 1000000; }
+                    if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
                     if(distance <= cutoff && j < i){
                         singleton[i] = false;
@@ -978,9 +905,12 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                     
                     in >> distance; util.gobble(in);
                     
-                    if (distance == -1) { distance = 1000000; } 
+                    if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
                     if(distance <= cutoff){
+                        if (refWeightMethod == "connectivity") { //count dists
+                            weights[i]++; weights[j]++;
+                        }
                         long long newB = singletonIndexSwap[j];
                         long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
@@ -1002,9 +932,12 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                 for(long long j=0;j<nseqs;j++){
                     in >> distance; util.gobble(in);
                     
-                    if (distance == -1) { distance = 1000000; }
+                    if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
                     if(distance <= cutoff && j < i){
+                        if (refWeightMethod == "connectivity") { //count dists
+                            weights[i]++; weights[j]++;
+                        }
                         long long newB = singletonIndexSwap[j];
                         long long newA = singletonIndexSwap[i];
                         closeness[newA].insert(newB);
@@ -1041,7 +974,7 @@ int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>
             
             if (m->getControl_pressed()) {  in.close();   return 0; }
             
-            if (distance == -1) { distance = 1000000; }
+            if (util.isEqual(distance,-1)) { distance = 1000000; }
             
             if(distance <= cutoff){
                 map<string,long long>::iterator itA = nameAssignment.find(firstName);
@@ -1052,6 +985,10 @@ int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>
                 
                 long long indexA = (itA->second);
                 long long indexB = (itB->second);
+                
+                if (refWeightMethod == "connectivity") { //count dists
+                    weights[indexA]++; weights[indexB]++;
+                }
                 
                 long long newB = singletonIndexSwap[indexB];
                 long long newA = singletonIndexSwap[indexA];
@@ -1077,6 +1014,55 @@ int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>
     }
     catch(exception& e) {
         m->errorOut(e, "OptiRefMatrix", "readColumn");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+void OptiRefMatrix::calcCounts(){
+    try {
+        //find number of fitDists, refDists and between dists
+        numRefDists = 0;
+        numFitDists = 0;
+        numBetweenDists = 0;
+        numFitSingletons = 0;
+        numFitSeqs = 0;
+        numRefSingletons = 0;
+        
+        for (long long i = 0; i < closeness.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            bool thisSeqIsRef = isRef[i];
+            long long thisSeqsNumRefDists = 0;
+            long long thisSeqsNumFitDists = 0;
+            
+            for (set<long long>::iterator it = closeness[i].begin(); it != closeness[i].end(); it++) {
+                long long newB = *it;
+                
+                if ((thisSeqIsRef) && (isRef[newB])) {  thisSeqsNumRefDists++; } //both refs
+                else if ((thisSeqIsRef) && (!isRef[newB])) { numBetweenDists++; } // ref to fit dist
+                else if ((!thisSeqIsRef) && (isRef[newB])) { numBetweenDists++; } // fit to ref dist
+                else if ((!thisSeqIsRef) && (!isRef[newB])) { thisSeqsNumFitDists++; } // both fit
+            }
+            
+            //a refSingleton or Fitsingleton may not be a true singleton (no valid dists in matrix), but may be a refSeq with no distances to other refs but distances to fitseqs. a fitsingleton may have dists to refs but no dists to other fitseqs.
+            
+            //you are a ref with no refdists, so you are a refsingleton
+            if ((thisSeqIsRef) && (thisSeqsNumRefDists == 0)) {  numRefSingletons++; }
+            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists == 0)) {  numFitSingletons++; }
+            else if ((!thisSeqIsRef) && (thisSeqsNumFitDists != 0)) {  numFitSeqs++; }
+            
+            numRefDists += thisSeqsNumRefDists;
+            numFitDists += thisSeqsNumFitDists;
+        }
+        
+        //counted twice
+        numRefDists /= 2;
+        numFitDists /= 2;
+        numBetweenDists /= 2;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiRefMatrix", "calcCounts");
         exit(1);
     }
 }

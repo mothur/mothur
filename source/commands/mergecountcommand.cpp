@@ -74,7 +74,7 @@ MergeCountCommand::MergeCountCommand(string option)  {
             
             //check to make sure all parameters are valid for command
             for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) {
-                if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
             }
             
             //initialize outputTypes
@@ -194,7 +194,7 @@ int MergeCountCommand::execute(){
                             newAbunds[newIndex] = abunds[k];
                         }
                     }
-                    completeTable.push_back(seqs[j], newAbunds);
+                    completeTable.push_back(seqs[j], newAbunds, true);
                 }
             }
             else { util.appendFilesWithoutHeaders(fileNames[i], outputFileName); } //No group info so simple append

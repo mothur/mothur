@@ -145,7 +145,7 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
                         mins.push_back(temp);
                         //cout << "adding " << i << '\t' << seqVec[i][j].index << " to mins\n";
                     }
-                    else if(dist == smallDist){  //if a subsequent distance is the same as mins distance add the new iterator to the mins vector
+                    else if(util.isEqual(dist, smallDist)){  //if a subsequent distance is the same as mins distance add the new iterator to the mins vector
                         PDistCellMin temp(i, seqVec[i][j].index);
                         mins.push_back(temp);
                         //cout << "adding " << i << '\t' << seqVec[i][j].index << " to mins\n";

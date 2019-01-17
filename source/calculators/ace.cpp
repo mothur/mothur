@@ -34,8 +34,8 @@ EstOutput Ace::getValues(SAbundVector* rank) {
 			else if(i>abund)	{sabund += rank->get(i);}
 		}
 		double sobs = srare + sabund;
-	
-		if (nrare == 0){ Cace = 0.0000; }
+        
+		if (util.isEqual(nrare,0.0)){ Cace = 0.0000; }
 		else { Cace = 1.0000 -(double)rank->get(1)/(double)nrare; }
 	
 		double denom = Cace * (double)(nrare * (nrare-1));
@@ -48,7 +48,7 @@ EstOutput Ace::getValues(SAbundVector* rank) {
 			if(gamace<0){			gamace = 0;			}
 		}
 	
-		if(Cace == 0.0){
+		if(util.isEqual(Cace, 0.0)){
 			ace = 0.00;}//ace
 		else{
 			ace = (double)sabund+((double)srare+(double)rank->get(1)*gamace)/Cace;//ace
@@ -115,11 +115,11 @@ EstOutput Ace::getValues(SAbundVector* rank) {
 			acelci = ace;
 			acehci = ace;
 		}	
-		else if(ace==0.000){
+		else if(util.isEqual(ace, 0.000)){
 			acelci = ace;
 			acehci = ace;
 		}
-		else if(ace==sobs){
+		else if(util.isEqual(ace, sobs)){
 			double ci = 1.96*pow(se,0.5);
 			acelci = ace-ci;					//ace lci
 			acehci = ace+ci;					//ace hci

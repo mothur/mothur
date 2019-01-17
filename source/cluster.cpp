@@ -88,7 +88,7 @@ bool Cluster::update(double& cutOFF){
                             dMatrix->updateCellCompliment(smallCol, j);
 							break;
 						}else if (dMatrix->seqVec[smallCol][j].index < search) { //we don't have a distance for this cell
-                            if (adjust != -1.0) { //adjust
+                            if (!util.isEqual(adjust, -1)) { //adjust
                                 merged = true;
                                 PDistCell value(search, adjust); //create a distance for the missing value
                                 int location = dMatrix->addCellSorted(smallCol, value);
@@ -132,7 +132,7 @@ bool Cluster::update(double& cutOFF){
         }else {
             for (int i=nColCells-1;i>=0;i--) { //remove any unfound dists from merged column, need special case for nn, since unfound dists mean above the cutoff -> keep smaller dist in col
                 if (foundCol[i] == 0) {  //not found
-                    if (adjust != -1.0) { //adjust
+                    if (!util.isEqual(adjust, -1)) { //adjust
                         PDistCell value(smallCol, adjust); //create a distance for the missing value
                         changed = updateDistance(dMatrix->seqVec[smallCol][i], value);
                         dMatrix->updateCellCompliment(smallCol, i);

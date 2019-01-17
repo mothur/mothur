@@ -14,7 +14,7 @@
 SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& userGroups, string& nextLabel, string& labelTag) : DataVector() {
     try {
         int num;
-        string holdLabel, nextLabel, groupN;
+        string holdLabel, groupN;
         int numUserGroups = userGroups.size();
         
         for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();
@@ -174,6 +174,55 @@ void SharedRAbundFloatVectors::setOTUName(int bin, string otuName){
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundFloatVectors", "setOTUName");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int SharedRAbundFloatVectors::push_back(vector<float> abunds, string binLabel){
+    try {
+        if (abunds.size() != lookup.size()) {  m->mothurOut("[ERROR]: you have provided " + toString(abunds.size()) + " abundances, but mothur was expecting " + toString(lookup.size()) + ", please correct.\n"); m->setControl_pressed(true); return 0; }
+        
+        for (int i = 0; i < lookup.size(); i ++) { lookup[i]->push_back(abunds[i]); }
+        //vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        if (binLabel == "") { //create one
+            int otuNum = 1; bool notDone = true;
+            
+            //find label prefix
+            string prefix = "Otu";
+            if (currentLabels.size() != 0) {
+                if (currentLabels[currentLabels.size()-1][0] == 'P') { prefix = "PhyloType"; }
+                
+                string tempLabel = currentLabels[currentLabels.size()-1];
+                string simpleLastLabel = util.getSimpleLabel(tempLabel);
+                util.mothurConvert(simpleLastLabel, otuNum); otuNum++;
+            }
+            
+            string potentialLabel = toString(otuNum);
+            
+            while (notDone) {
+                if (m->getControl_pressed()) { notDone = false; break; }
+                
+                potentialLabel = toString(otuNum);
+                vector<string>::iterator it = find(currentLabels.begin(), currentLabels.end(), potentialLabel);
+                if (it == currentLabels.end()) {
+                    potentialLabel = prefix + toString(otuNum);
+                    it = find(currentLabels.begin(), currentLabels.end(), potentialLabel);
+                    if (it == currentLabels.end()) {
+                        notDone = false; break;
+                    }
+                }
+                otuNum++;
+            }
+            
+            binLabel = potentialLabel;
+        }
+        currentLabels.push_back(binLabel);
+        numBins++;
+        
+        return lookup.size();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundFloatVectors", "push_back");
         exit(1);
     }
 }
@@ -474,7 +523,7 @@ void SharedRAbundFloatVectors::eliminateZeroOTUS() {
                 float total = getOTUTotal(i);
                 
                 //if they are not all zero add this bin
-                if (total == 0) { removeOTU(i); }
+                if (util.isEqual(total, 0)) { removeOTU(i); }
                 else { ++i;  }
             }
         }

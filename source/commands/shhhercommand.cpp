@@ -113,7 +113,7 @@ ShhherCommand::ShhherCommand(string option) {
 			
 			//check to make sure all parameters are valid for command
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -162,9 +162,7 @@ ShhherCommand::ShhherCommand(string option) {
 			flowFileName = validParameter.validFile(parameters, "flow");
 			flowFilesFileName = validParameter.validFile(parameters, "file");
 			if (flowFileName == "not found" && flowFilesFileName == "not found") {
-				m->mothurOut("values for either flow or file must be provided for the shhh.flows command.");
-				m->mothurOutEndLine();
-				abort = true; 
+				m->mothurOut("values for either flow or file must be provided for the shhh.flows command.\n"); abort = true;
 			}
 			else if (flowFileName == "not open" || flowFilesFileName == "not open") { abort = true; }
 			
@@ -195,60 +193,20 @@ ShhherCommand::ShhherCommand(string option) {
 			}
             
             if(flowFilesFileName != "not found"){
-                string fName;
-                
                 ifstream flowFilesFile;
                 util.openInputFile(flowFilesFileName, flowFilesFile);
                 while(flowFilesFile){
-                    fName = util.getline(flowFilesFile);
+                    string fName = util.getline(flowFilesFile); util.gobble(flowFilesFile);
                     
-                    //test if file is valid
-                    ifstream in;
-                    bool ableToOpen = util.openInputFile(fName, in, "noerror");
-                    in.close();	
-                    if (!ableToOpen) {
-                        if (inputDir != "") { //default path is set
-                            string tryPath = inputDir + fName;
-                            m->mothurOut("Unable to open " + fName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
-                            ifstream in2;
-                            ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-                            in2.close();
-                            fName = tryPath;
-                        }
-                    }
-                    
-                    if (!ableToOpen) {
-                        if (current->getDefaultPath() != "") { //default path is set
-                            string tryPath = current->getDefaultPath() + util.getSimpleName(fName);
-                            m->mothurOut("Unable to open " + fName + ". Trying default " + tryPath); m->mothurOutEndLine();
-                            ifstream in2;
-                            ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-                            in2.close();
-                            fName = tryPath;
-                        }
-                    }
-                    
-                    //if you can't open it its not in current working directory or inputDir, try mothur excutable location
-                    if (!ableToOpen) {
-                        string exepath = current->getProgramPath();
-                        //string tempPath = exepath;
-                        //for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
-                        //exepath = exepath.substr(0, (tempPath.find_last_of('m')));
-                        
-                        string tryPath = util.getFullPathName(exepath) + util.getSimpleName(fName);
-                        m->mothurOut("Unable to open " + fName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
-                        ifstream in2;
-                        ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-                        in2.close();
-                        fName = tryPath;
-                    }
-                    
-                    if (!ableToOpen) {  m->mothurOut("Unable to open " + fName + ". Disregarding. "); m->mothurOutEndLine();  }
-                    else { flowFileVector.push_back(fName); }
-                    util.gobble(flowFilesFile);
+                    //check to make sure both are able to be opened
+                    bool ableToOpen = util.checkLocations(fName, current->getLocations());
+                    if (ableToOpen) {
+                        if (util.isBlank(fName)) { m->mothurOut("[WARNING]: " + fName + " is blank, disregarding.\n"); }
+                        else { flowFileVector.push_back(fName); }
+                    }else { m->mothurOut("Unable to open " + fName + ". Disregarding.\n");  }
                 }
                 flowFilesFile.close();
-                if (flowFileVector.size() == 0) {  m->mothurOut("[ERROR]: no valid files."); m->mothurOutEndLine(); abort = true; }
+                if (flowFileVector.size() == 0) {  m->mothurOut("[ERROR]: no valid files.\n");  abort = true; }
             }
             else{
                 if (outputDir == "") { outputDir = util.hasPath(flowFileName); }
@@ -261,9 +219,6 @@ ShhherCommand::ShhherCommand(string option) {
 			temp = validParameter.validFile(parameters, "lookup");
 			if (temp == "not found")	{	
 				string path = current->getProgramPath();
-                //string tempPath = path;
-                //for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-                //path = path.substr(0, (tempPath.find_last_of('m')));
                 
 #if defined NON_WINDOWS
                 path += "lookupFiles/";
@@ -272,71 +227,23 @@ ShhherCommand::ShhherCommand(string option) {
 #endif
 				lookupFileName = util.getFullPathName(path) + "LookUp_Titanium.pat";
 				
-				bool ableToOpen;
-				ifstream in;
-				ableToOpen = util.openInputFile(lookupFileName, in, "noerror");
-				in.close();	
-				
-				//if you can't open it, try input location
-				if (!ableToOpen) {
-					if (inputDir != "") { //default path is set
-						string tryPath = inputDir + util.getSimpleName(lookupFileName);
-						m->mothurOut("Unable to open " + lookupFileName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
-						ifstream in2;
-						ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-						in2.close();
-						lookupFileName = tryPath;
-					}
-				}
-				
-				//if you can't open it, try default location
-				if (!ableToOpen) {
-					if (current->getDefaultPath() != "") { //default path is set
-						string tryPath = current->getDefaultPath() + util.getSimpleName(lookupFileName);
-						m->mothurOut("Unable to open " + lookupFileName + ". Trying default " + tryPath); m->mothurOutEndLine();
-						ifstream in2;
-						ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-						in2.close();
-						lookupFileName = tryPath;
-					}
-				}
-				
-				//if you can't open it its not in current working directory or inputDir, try mothur excutable location
-				if (!ableToOpen) {
-					string exepath = current->getProgramPath();
-					//string tempPath = exepath;
-					//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
-					//exepath = exepath.substr(0, (tempPath.find_last_of('m')));
-					
-					string tryPath = util.getFullPathName(exepath) + util.getSimpleName(lookupFileName);
-					m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
-					ifstream in2;
-					ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-					in2.close();
-					lookupFileName = tryPath;
-				}
-				
-				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+                //check to make sure both are able to be opened
+                bool ableToOpen = util.checkLocations(lookupFileName, current->getLocations());
+                if (ableToOpen) {
+                    if (util.isBlank(lookupFileName)) { m->mothurOut("[ERROR]: " + lookupFileName + " is blank, aborting.\n"); abort=true;  }
+                }else { m->mothurOut("[ERROR]: Unable to open " + lookupFileName + ".\n");  abort=true;   }
 			}
 			else if(temp == "not open")	{	
 				
 				lookupFileName = validParameter.valid(parameters, "lookup");
 				
-				//if you can't open it its not inputDir, try mothur excutable location
-				string exepath = current->getProgramPath();
-				//string tempPath = exepath;
-				//for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
-				//exepath = exepath.substr(0, (tempPath.find_last_of('m')));
-					
-				string tryPath = util.getFullPathName(exepath) + util.getSimpleName(lookupFileName);
-				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
-				ifstream in2;
-				bool ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-				in2.close();
-				lookupFileName = tryPath;
-				
-				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
-			}else						{	lookupFileName = temp;	}
+                //check to make sure both are able to be opened
+                bool ableToOpen = util.checkLocations(lookupFileName, current->getLocations());
+                if (ableToOpen) {
+                    if (util.isBlank(lookupFileName)) { m->mothurOut("[ERROR]: " + lookupFileName + " is blank, aborting.\n"); abort=true;  }
+                }else { m->mothurOut("[ERROR]: Unable to open " + lookupFileName + ".\n");  abort=true;   }
+                
+            }else						{	lookupFileName = temp;	}
 			
 			temp = validParameter.valid(parameters, "cutoff");	if (temp == "not found"){	temp = "0.01";		}
 			util.mothurConvert(temp, cutoff); 

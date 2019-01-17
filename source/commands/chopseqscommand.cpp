@@ -121,7 +121,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
@@ -690,8 +690,8 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
             delete data[i];
             delete workerThreads[i];
         }
-        delete threadOutputWriter;
-        delete threadAccnosWriter;
+        synchronizedOutputFile->close(); synchronizedAccnosFile->close();
+        delete threadOutputWriter; delete threadAccnosWriter;
         delete dataBundle;
         return wroteAccnos;
     }

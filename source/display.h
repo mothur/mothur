@@ -15,8 +15,6 @@ public:
 	virtual void reset() = 0;
 	virtual void close() = 0;
     virtual bool isCalcMultiple() = 0;
-	virtual void outputTempFiles(string) {}
-	virtual void inputTempFiles(string) {}
 	virtual void setAll(bool){}
 	virtual bool hasLciHci(){ return false; }
 	virtual bool getAll()	{	bool a; return a;	}
