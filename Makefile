@@ -21,8 +21,8 @@ PREFIX := ${CURDIR}
 
 OPTIMIZE ?= yes
 USEREADLINE ?= yes
-USEBOOST ?= yes
-USEHDF5 ?= yes
+USEBOOST ?= no
+USEHDF5 ?= no
 LOGFILE_NAME ?= no
 BOOST_LIBRARY_DIR ?= "\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR ?= "\"Enter_your_boost_include_path_here\""
