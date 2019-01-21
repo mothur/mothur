@@ -133,7 +133,6 @@
 		481FB5911AC1B71B0076CFF3 /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
 		481FB5921AC1B71B0076CFF3 /* anosimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71CB15E130B04A2001E7287 /* anosimcommand.cpp */; };
 		481FB5931AC1B71B0076CFF3 /* binsequencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66012D37EC300DA6239 /* binsequencecommand.cpp */; };
-		481FB5941AC1B71B0076CFF3 /* catchallcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67212D37EC400DA6239 /* catchallcommand.cpp */; };
 		481FB5951AC1B71B0076CFF3 /* chimerabellerophoncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67A12D37EC400DA6239 /* chimerabellerophoncommand.cpp */; };
 		481FB5961AC1B71B0076CFF3 /* chimeraccodecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67C12D37EC400DA6239 /* chimeraccodecommand.cpp */; };
 		481FB5971AC1B71B0076CFF3 /* chimeracheckcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67E12D37EC400DA6239 /* chimeracheckcommand.cpp */; };
@@ -569,7 +568,6 @@
 		A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66812D37EC400DA6239 /* bootstrap.cpp */; };
 		A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66C12D37EC400DA6239 /* bstick.cpp */; };
 		A7E9B89212D37EC400DA6239 /* canberra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67012D37EC400DA6239 /* canberra.cpp */; };
-		A7E9B89312D37EC400DA6239 /* catchallcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67212D37EC400DA6239 /* catchallcommand.cpp */; };
 		A7E9B89412D37EC400DA6239 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67412D37EC400DA6239 /* ccode.cpp */; };
 		A7E9B89512D37EC400DA6239 /* chao1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67612D37EC400DA6239 /* chao1.cpp */; };
 		A7E9B89612D37EC400DA6239 /* mothurchimera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67812D37EC400DA6239 /* mothurchimera.cpp */; };
@@ -858,7 +856,6 @@
 
 /* Begin PBXFileReference section */
 		2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = averagelinkage.cpp; path = source/averagelinkage.cpp; sourceTree = SOURCE_ROOT; };
-		2114A7691C654FBB00D3D8D9 /* catchallcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = catchallcommand.h; path = source/commands/catchallcommand.h; sourceTree = SOURCE_ROOT; };
 		219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = newcommandtemplate.cpp; path = source/commands/newcommandtemplate.cpp; sourceTree = SOURCE_ROOT; };
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = newcommandtemplate.h; path = source/commands/newcommandtemplate.h; sourceTree = SOURCE_ROOT; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getcoremicrobiomecommand.cpp; path = source/commands/getcoremicrobiomecommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1229,7 +1226,6 @@
 		A7E9B66F12D37EC400DA6239 /* calculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = calculator.h; path = source/calculators/calculator.h; sourceTree = SOURCE_ROOT; };
 		A7E9B67012D37EC400DA6239 /* canberra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = canberra.cpp; path = source/calculators/canberra.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B67112D37EC400DA6239 /* canberra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = canberra.h; path = source/calculators/canberra.h; sourceTree = SOURCE_ROOT; };
-		A7E9B67212D37EC400DA6239 /* catchallcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = catchallcommand.cpp; path = source/commands/catchallcommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B67412D37EC400DA6239 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ccode.cpp; path = source/chimera/ccode.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B67512D37EC400DA6239 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = ccode.h; path = source/chimera/ccode.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		A7E9B67612D37EC400DA6239 /* chao1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chao1.cpp; path = source/calculators/chao1.cpp; sourceTree = SOURCE_ROOT; };
@@ -2325,8 +2321,6 @@
 				A7E9B66012D37EC300DA6239 /* binsequencecommand.cpp */,
 				48C728781B728D6B00D40830 /* biominfocommand.h */,
 				48C728771B728D6B00D40830 /* biominfocommand.cpp */,
-				2114A7691C654FBB00D3D8D9 /* catchallcommand.h */,
-				A7E9B67212D37EC400DA6239 /* catchallcommand.cpp */,
 				A7E9B67B12D37EC400DA6239 /* chimerabellerophoncommand.h */,
 				A7E9B67A12D37EC400DA6239 /* chimerabellerophoncommand.cpp */,
 				A7E9B67D12D37EC400DA6239 /* chimeraccodecommand.h */,
@@ -3140,7 +3134,6 @@
 				481FB62F1AC1B7EA0076CFF3 /* fastqread.cpp in Sources */,
 				481FB6901AC1BA9E0076CFF3 /* knn.cpp in Sources */,
 				48E5444A1E9C2BE100FF6AB8 /* specificity.cpp in Sources */,
-				481FB5941AC1B71B0076CFF3 /* catchallcommand.cpp in Sources */,
 				481FB56C1AC1B6BE0076CFF3 /* sharedsorabund.cpp in Sources */,
 				481FB6411AC1B7EA0076CFF3 /* sequenceparser.cpp in Sources */,
 				481FB6381AC1B7EA0076CFF3 /* oligos.cpp in Sources */,
@@ -3374,7 +3367,6 @@
 				A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */,
 				A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */,
 				A7E9B89212D37EC400DA6239 /* canberra.cpp in Sources */,
-				A7E9B89312D37EC400DA6239 /* catchallcommand.cpp in Sources */,
 				48FB99C5209B69FA00FF9F6E /* optirefmatrix.cpp in Sources */,
 				A7E9B89412D37EC400DA6239 /* ccode.cpp in Sources */,
 				A7E9B89512D37EC400DA6239 /* chao1.cpp in Sources */,

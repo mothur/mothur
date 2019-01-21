@@ -70,7 +70,6 @@
 #include "makegroupcommand.h"
 #include "chopseqscommand.h"
 #include "clearcutcommand.h"
-#include "catchallcommand.h"
 #include "splitabundcommand.h"
 #include "clustersplitcommand.h"
 #include "classifyotucommand.h"
@@ -242,7 +241,6 @@ int HelpCommand::execute(){
                 else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
                 else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
                 else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
-                else if(commandName == "catchall")				{	command = new CatchAllCommand(optionString);				}
                 else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}
                 else if(commandName == "cluster.split")			{	command = new ClusterSplitCommand(optionString);			}
                 else if(commandName == "classify.otu")			{	command = new ClassifyOtuCommand(optionString);				}
