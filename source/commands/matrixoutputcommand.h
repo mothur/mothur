@@ -97,7 +97,7 @@ private:
 	
     int createProcesses(SharedRAbundVectors*&);
 	int driver(vector<SharedRAbundVector*>&, vector< vector<seqDist> >&, vector<Calculator*>);
-    void printSims(ostream&, vector< vector<double> >&, vector<string>);
+    void printDists(ostream&, vector< vector<double> >&, vector<string>);
 
 };
 	

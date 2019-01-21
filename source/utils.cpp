@@ -3557,7 +3557,7 @@ bool Utils::isEqual(float num1, float num2){
     try {
         bool equal = false;
         
-        if (fabs(num1-num2) < fabs(num1 * 0.001)) { equal = true; }
+        if (fabs(num1-num2) <= fabs(num1 * 0.001)) { equal = true; }
         
         return equal;
     }
@@ -3571,7 +3571,7 @@ bool Utils::isEqual(double num1, double num2){
     try {
         bool equal = false;
         
-        if (fabs(num1-num2) < fabs(num1 * 0.001)) { equal = true; }
+        if (fabs(num1-num2) <= fabs(num1 * 0.001)) { equal = true; }
         
         return equal;
     }

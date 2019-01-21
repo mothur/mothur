@@ -1229,9 +1229,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         out.close();
         
         util.mothurRemove(outputFNamec);
-        
-        //if (templatefile != "self") {  util.mothurRemove(filename); }
-        
+                
         return 0;
     }
     catch(exception& e) {

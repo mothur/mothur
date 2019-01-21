@@ -325,7 +325,7 @@ int MatrixOutputCommand::execute(){
 	}
 }
 /***********************************************************/
-void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
+void MatrixOutputCommand::printDists(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
     try {
         
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -612,7 +612,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
             ofstream outDist; util.openOutputFile(distFileName, outDist);
             outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
             
-            printSims(outDist, dataBundle->matrices[i], groupNames); outDist.close();
+            printDists(outDist, dataBundle->matrices[i], groupNames); outDist.close();
         }
 
         vector< vector< vector<seqDist> > > calcDistsTotals = dataBundle->calcDistsTotals;
@@ -674,7 +674,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
                 util.openOutputFile(distFileName, outAve);
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
                 
-                printSims(outAve, matrix, groupNames);
+                printDists(outAve, matrix, groupNames);
                 
                 outAve.close();
                 
@@ -685,7 +685,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
                 util.openOutputFile(distFileName, outSTD);
                 outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
                 
-                printSims(outSTD, stdmatrix, thisLookup->getNamesGroups());
+                printDists(outSTD, stdmatrix, thisLookup->getNamesGroups());
                 
                 outSTD.close();
             }

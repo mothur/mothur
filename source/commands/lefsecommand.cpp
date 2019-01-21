@@ -152,7 +152,7 @@ LefseCommand::LefseCommand(string option)  {
 				if(it != parameters.end()){
 					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["desing"] = inputDir + it->second;		}
+					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
 				
                 it = parameters.find("shared");

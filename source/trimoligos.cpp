@@ -231,6 +231,8 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
                         
                         string rawChunk = rawSequence.substr(j, olength+pdiffs);
                         
+                        //if (m->getDebug()) { m->mothurOut(oligo + '\n' + rawChunk + '\n');  }
+                        
                         //use needleman to align first primer.length()+numdiffs of sequence to each barcode
                         alignment->alignPrimer(oligo, rawChunk);
                         oligo = alignment->getSeqAAln();
@@ -238,13 +240,19 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
                         
                         int alnLength = oligo.length();
                         
+                        //if (m->getDebug()) { m->mothurOut(oligo + '\n' + temp + '\n');  }
+                        
                         for(int i=oligo.length()-1;i>=0;i--){
                             if(oligo[i] != '-'){	alnLength = i+1;	break;	}
                         }
                         oligo = oligo.substr(0,alnLength);
                         temp = temp.substr(0,alnLength);
                         
+                        //if (m->getDebug()) { m->mothurOut(oligo + '\n' + temp + '\n');  }
+                        
                         int numDiff = countDiffs(oligo, temp);
+                        
+                        //if (m->getDebug()) { m->mothurOut("[DEBUG]: diffs = " + toString(numDiff) + '\n');  }
                         
                         if(numDiff < minDiff){
                             minDiff = numDiff;
