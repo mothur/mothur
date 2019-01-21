@@ -47,24 +47,26 @@ vector<string> AlignCommand::setParameters(){
 //**********************************************************************************************************************
 string AlignCommand::getHelpString(){	
 	try {
-		string helpString = "";
-		helpString += "The align.seqs command reads a file containing sequences and creates an alignment file and a report file.";
-		helpString += "The align.seqs command parameters are reference, fasta, search, ksize, align, match, mismatch, gapopen, gapextend and processors.";
-		helpString += "The reference and fasta parameters are required. You may leave fasta blank if you have a valid fasta file. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta.";
-		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.";
-		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.";
-		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.";
-		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.";
-		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.";
-		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -5.0.";
-		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.";
-		helpString += "The flip parameter is used to specify whether or not you want mothur to try the reverse complement if a sequence falls below the threshold.  The default is false.";
-		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.";
-		helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported. Default=t";
-		helpString += "The default for the threshold parameter is 0.50, meaning at least 50% of the bases must remain or the sequence is reported as potentially reversed.";
-		helpString += "The align.seqs command should be in the following format:";
-		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty)";
-		helpString += "Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)";
+		string helpString = "\n";
+		helpString += "The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n";
+		helpString += "The align.seqs command parameters are reference, fasta, search, ksize, align, match, mismatch, gapopen, gapextend and processors.\n";
+		helpString += "The reference and fasta parameters are required. You may leave fasta blank if you have a valid fasta file.\n";
+		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix, kmer and blast. The default is kmer.\n";
+		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar reference to a given sequence.  The default is 8.\n";
+		helpString += "The match parameter allows you to specify the bonus for having the same base. Default=1.0.\n";
+		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases. Default=-1.0.\n";
+		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. Default=-5.0.\n";
+		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment. Default=-2.0.\n";
+        helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.";
+		helpString += " By default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining.\n";
+		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.\n";
+		helpString += "The align.seqs command should be in the following format: ";
+		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile)\n";
+		helpString += "Example: align.seqs(candidate=candidate.fasta, template=silva.v4.fasta)\n";
+        
+        helpString += "\n\n";
+        helpString += getCommonQuestions();
 		
 		return helpString;
 	}
@@ -72,6 +74,25 @@ string AlignCommand::getHelpString(){
 		m->errorOut(e, "AlignCommand", "getHelpString");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+string AlignCommand::getCommonQuestions(){
+    try {
+        string commonQuestions = "";
+        commonQuestions += "\nCommon Issues: \n\n";
+        commonQuestions += "1. [ERROR]: template is not aligned, aborting. Mothur requires the reference file to be aligned to generate aligned sequences. You can download mothur's aligned silva references here, https://mothur.org/wiki/Silva_reference_files.\n";
+        commonQuestions += "2. [WARNING]: xxx of your sequences generated alignments that eliminated too many bases... By default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining. \n";
+        
+        commonQuestions += "\nCommon Questions: \n\n";
+        commonQuestions += "1. How do I 'align' ITS sequences? \n\tYou really can't do an alignment because there isn't positional homology. You can use the pre.cluster and pairwise.seqs commands to generate a distance matrix from unaligned sequences. \n";
+        commonQuestions += "2. How do I create a custom reference for the region I am studying? \n\tYou can tailor your reference using this method: http://blog.mothur.org/2016/07/07/Customization-for-your-region/. \n";
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AlignCommand", "getCommonQuestions");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 string AlignCommand::getOutputPattern(string type) {

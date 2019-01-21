@@ -32,6 +32,7 @@ class Command {
 		virtual string getHelpString() = 0;
 		virtual string getCitation() = 0;
 		virtual string getDescription() = 0;
+        virtual string getCommonQuestions() { return "Common Questions for commands... "; }
 		
 		virtual map<string, vector<string> > getOutputFiles() { return outputTypes; }
         string getOutputFileName(string type, map<string, string> variableParts) {  //uses the pattern to create an output filename for a given type and input file name.  
@@ -121,7 +122,8 @@ class Command {
 	
 		virtual int execute() = 0;
 		virtual void help() = 0;
-		void citation() { m->mothurOutEndLine(); m->mothurOut(getCitation()); m->mothurOutEndLine(); }
+		void citation()         { m->mothurOut("\n"+getCitation()+"\n");    }
+        void commonQuestions()  {  m->mothurOut("\n"+getCommonQuestions()+"\n");   }
 		virtual ~Command() { }
 	
 	protected:
