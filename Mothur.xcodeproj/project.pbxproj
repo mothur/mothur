@@ -413,6 +413,8 @@
 		48B44EF21FB9EF8200789C45 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EF01FB9EF8200789C45 /* utils.cpp */; };
 		48B44EF31FB9EF8200789C45 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B44EF01FB9EF8200789C45 /* utils.cpp */; };
 		48B662031BBB1B6600997EE4 /* testrenameseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */; };
+		48BD4EB821F7724C008EA73D /* filefile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BD4EB621F7724C008EA73D /* filefile.cpp */; };
+		48BD4EB921F77258008EA73D /* filefile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BD4EB621F7724C008EA73D /* filefile.cpp */; };
 		48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		48BDDA751ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */; };
@@ -963,6 +965,8 @@
 		48B44EF11FB9EF8200789C45 /* utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = utils.hpp; path = source/utils.hpp; sourceTree = "<group>"; };
 		48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenameseqscommand.cpp; path = TestMothur/testcommands/testrenameseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = TestMothur/testcommands/testrenameseqscommand.h; sourceTree = SOURCE_ROOT; };
+		48BD4EB621F7724C008EA73D /* filefile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filefile.cpp; path = source/datastructures/filefile.cpp; sourceTree = SOURCE_ROOT; };
+		48BD4EB721F7724C008EA73D /* filefile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = filefile.hpp; path = source/datastructures/filefile.hpp; sourceTree = SOURCE_ROOT; };
 		48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvectors.cpp; path = source/datastructures/sharedrabundvectors.cpp; sourceTree = SOURCE_ROOT; };
 		48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvectors.hpp; path = source/datastructures/sharedrabundvectors.hpp; sourceTree = "<group>"; };
 		48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvectors.cpp; path = source/datastructures/sharedrabundfloatvectors.cpp; sourceTree = SOURCE_ROOT; };
@@ -2644,6 +2648,8 @@
 				A7E9B6DF12D37EC400DA6239 /* fastamap.h */,
 				48C51DEE1A76B870004ECDF1 /* fastqread.h */,
 				48C51DEF1A76B888004ECDF1 /* fastqread.cpp */,
+				48BD4EB621F7724C008EA73D /* filefile.cpp */,
+				48BD4EB721F7724C008EA73D /* filefile.hpp */,
 				A7E9B6E812D37EC400DA6239 /* flowdata.h */,
 				A7E9B6E712D37EC400DA6239 /* flowdata.cpp */,
 				A7E9B6EE12D37EC400DA6239 /* fullmatrix.cpp */,
@@ -3186,6 +3192,7 @@
 				481FB5351AC1B5D90076CFF3 /* fasta.cpp in Sources */,
 				481FB6321AC1B7EA0076CFF3 /* groupmap.cpp in Sources */,
 				481FB5FF1AC1B7970076CFF3 /* removeseqscommand.cpp in Sources */,
+				48BD4EB921F77258008EA73D /* filefile.cpp in Sources */,
 				48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */,
 				481FB6771AC1B88F0076CFF3 /* readcluster.cpp in Sources */,
 				481FB5831AC1B6FF0076CFF3 /* ccode.cpp in Sources */,
@@ -3523,6 +3530,7 @@
 				A7E9B92A12D37EC400DA6239 /* readcluster.cpp in Sources */,
 				A7E9B92B12D37EC400DA6239 /* readcolumn.cpp in Sources */,
 				A7E9B92F12D37EC400DA6239 /* readphylip.cpp in Sources */,
+				48BD4EB821F7724C008EA73D /* filefile.cpp in Sources */,
 				A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */,
 				A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */,
 				A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */,
