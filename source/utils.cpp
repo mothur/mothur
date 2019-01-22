@@ -1439,6 +1439,64 @@ string Utils::getStringFromSet(set<int>& list, string delim){
     }
 }
 //**********************************************************************************************************************
+//NOTE: assumes questions.size() == qanswers.size(), issues.size() == ianswers.size(), howtos.size() == hanswers.size()
+string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers, vector<string> issues, vector<string> ianswers, vector<string> howtos,vector<string> hanswers) {
+    try {
+        
+        string commonQuestions = ""; vector<string> headers;
+        string header = "\nCommon Questions: \n"; headers.push_back(header);
+        header = "\nCommon Issues: \n"; headers.push_back(header);
+        header = "\nHow To: \n"; headers.push_back(header);
+        
+        commonQuestions += headers[0]+"\n";
+#if defined NON_WINDOWS
+        cout << BOLDGREEN << headers[0]; cout << RESET << endl;
+#endif
+        
+        for (int i = 0; i < questions.size(); i++) {
+            commonQuestions += toString(i+1) + ". " + questions[i]+"\n"+qanswers[i]+"\n";
+#if defined NON_WINDOWS
+            cout << BOLDBLUE << toString(i+1)+". "+questions[i]; cout << RESET << endl << qanswers[i] << endl;
+#endif
+        }
+        
+        commonQuestions += headers[1]+"\n";
+#if defined NON_WINDOWS
+        cout << BOLDGREEN << headers[1]; cout << RESET << endl;
+#endif
+        
+        for (int i = 0; i < issues.size(); i++) {
+            commonQuestions += toString(i+1)+". "+issues[i]+"\n"+ianswers[i]+"\n";
+#if defined NON_WINDOWS
+            cout << BOLDBLUE << toString(i+1)+". "+issues[i]; cout << RESET << endl << ianswers[i] << endl;
+#endif
+        }
+
+        commonQuestions += headers[2]+"\n";
+#if defined NON_WINDOWS
+        cout << BOLDGREEN << headers[2]; cout << RESET << endl;
+#endif
+        
+        for (int i = 0; i < howtos.size(); i++) {
+            commonQuestions += toString(i+1) + ". " + howtos[i]+"\n"+hanswers[i]+"\n";
+#if defined NON_WINDOWS
+            cout << BOLDBLUE << toString(i+1)+". "+howtos[i]; cout << RESET << endl << hanswers[i] << endl;
+#endif
+        }
+        
+#if defined NON_WINDOWS
+        m->mothurOutJustToLog(commonQuestions);
+#else
+        m->mothurOut(commonQuestions);
+#endif
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getFormattedHelp");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 string Utils::removeNs(string seq){
     try {
         string newSeq = "";

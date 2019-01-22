@@ -63,10 +63,9 @@ string AlignCommand::getHelpString(){
 		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.\n";
 		helpString += "The align.seqs command should be in the following format: ";
 		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile)\n";
-		helpString += "Example: align.seqs(candidate=candidate.fasta, template=silva.v4.fasta)\n";
+		helpString += "Example: align.seqs(candidate=candidate.fasta, template=silva.v4.fasta)\n\n";
         
-        helpString += "\n\n";
-        helpString += getCommonQuestions();
+        getCommonQuestions();
 		
 		return helpString;
 	}
@@ -78,15 +77,23 @@ string AlignCommand::getHelpString(){
 //**********************************************************************************************************************
 string AlignCommand::getCommonQuestions(){
     try {
-        string commonQuestions = "";
-        commonQuestions += "\nCommon Issues: \n\n";
-        commonQuestions += "1. [ERROR]: template is not aligned, aborting. Mothur requires the reference file to be aligned to generate aligned sequences. You can download mothur's aligned silva references here, https://mothur.org/wiki/Silva_reference_files.\n";
-        commonQuestions += "2. [WARNING]: xxx of your sequences generated alignments that eliminated too many bases... By default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining. \n";
+        vector<string> questions, issues, headers, qanswers, ianswers, howtos, hanswers;
         
-        commonQuestions += "\nCommon Questions: \n\n";
-        commonQuestions += "1. How do I 'align' ITS sequences? \n\tYou really can't do an alignment because there isn't positional homology. You can use the pre.cluster and pairwise.seqs commands to generate a distance matrix from unaligned sequences. \n";
-        commonQuestions += "2. How do I create a custom reference for the region I am studying? \n\tYou can tailor your reference using this method: http://blog.mothur.org/2016/07/07/Customization-for-your-region/. \n";
+        string issue = "...template is not aligned, aborting. What do I do?"; issues.push_back(issue);
+        string ianswer = "\tMothur requires the reference file to be aligned to generate aligned sequences. You can download mothur's aligned silva references here, https://mothur.org/wiki/Silva_reference_files. For ITS sequences, see 'how to' below.\n"; ianswers.push_back(ianswer);
         
+        issue = "...xxx of your sequences generated alignments that eliminated too many bases... What does this mean?"; issues.push_back(issue);
+        ianswer = "\tBy default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining.\n"; ianswers.push_back(ianswer);
+        
+        
+        string howto = "How do I 'align' ITS sequences?"; howtos.push_back(howto);
+        string hanswer = "\tYou really can't do an alignment because there isn't positional homology. You can use the pre.cluster and pairwise.seqs commands to generate a distance matrix from unaligned sequences.\n"; hanswers.push_back(hanswer);
+        
+        howto = "How do I create a custom reference for the region I am studying?"; howtos.push_back(howto);
+        hanswer = "\tYou can tailor your reference using this method: http://blog.mothur.org/2016/07/07/Customization-for-your-region/.\n"; hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+
         return commonQuestions;
     }
     catch(exception& e) {
