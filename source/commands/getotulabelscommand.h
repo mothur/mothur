@@ -41,7 +41,7 @@ private:
     vector<string> outputNames;
     set<string> labels;
     ListVector* list;
-    //vector<SharedRAbundVector*> lookup;
+    
     
     int readClassifyOtu();
     int readOtuAssociation();
