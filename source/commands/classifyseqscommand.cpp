@@ -54,15 +54,14 @@ string ClassifySeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n";
-		helpString += "The classify.seqs command parameters are reference, fasta, name, group, count, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted, relabund and probs.\n";
-		helpString += "The reference, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
-		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast, align and distance. The default is kmer.\n";
-		helpString += "The name parameter allows you add a names file with your fasta file, if you enter multiple fasta files, you must enter matching names files for them.\n";
+		helpString += "The classify.seqs command parameters are reference, fasta, name, group, count, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted, relabund and probs. The reference, fasta and taxonomy parameters are required.\n";
+		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix, kmer, blast, align and distance. The default is kmer.\n";
+		helpString += "The name parameter allows you add a names file with your fasta file.\n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
 		helpString += "The method parameter allows you to specify classification method to use.  Your options are: wang, knn and zap. The default is wang.\n";
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
-		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
+		helpString += "The processors parameter allows you to specify the number of processors to use. The default is all available.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
@@ -73,12 +72,14 @@ string ClassifySeqsCommand::getHelpString(){
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the wang method.  The default is 100.\n";
 		helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
-        helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
+        helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the max level in the file.  The default is the max level.  If you select a level greater than the level your sequences classify to, mothur will print all possible levels. \n";
 		helpString += "The classify.seqs command should be in the following format: \n";
-		helpString += "classify.seqs(reference=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n";
-		helpString += "Example classify.seqs(fasta=amazon.fasta, reference=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n";
+		helpString += "classify.seqs(reference=yourReferenceFile, fasta=yourFastaFile, taxonomy=yourTaxonomyFile) \n";
+		helpString += "Example classify.seqs(fasta=amazon.fasta, reference=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax)\n";
 		helpString += "The .taxonomy file consists of 2 columns: 1 = your sequence name, 2 = the taxonomy for your sequence. \n";
 		helpString += "The .tax.summary is a summary of the different taxonomies represented in your fasta file. \n";
+        
+        getCommonQuestions();
 		
 		return helpString;
 	}
@@ -87,6 +88,33 @@ string ClassifySeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string ClassifySeqsCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, headers, qanswers, ianswers, howtos, hanswers;
+        
+        string question = "Does the reference need to be aligned?"; questions.push_back(question);
+        string qanswer = "\tNo, mothur does not require an aligned reference to assign a taxonomy. This is because it uses k-mers to find the probabilities of the taxonomic assignment.\n"; qanswers.push_back(qanswer);
+        
+        question = "What reference should I use to classify?"; questions.push_back(question);
+        qanswer = "\tWe provide mothur formatted references on the wiki. https://www.mothur.org/wiki/RDP_reference_files https://mothur.org/wiki/Silva_reference_files https://www.mothur.org/wiki/Greengenes-formatted_databases Alternatively, mothur allows you to create your own references as long as they are in fasta and taxonomy file format. You can find mothur's files formats here, https://www.mothur.org/wiki/File_Types. \n"; qanswers.push_back(qanswer);
+        
+        string issue = "Why are my sequences 'unclassifed'?"; issues.push_back(issue);
+        string ianswer = "\tWhen it comes to classification there are two things main things that effect the number of unclassified results: the quality of the reads and the reference files. The bayesian classifier calculates the probabilities of reference sequences kmers being in a given genus and then uses those probabilities to classify the sequences. The quality of the query sequences affects the ability of the classifier to find enough kmers to find a good classification. A poor quality sequence is like turning up the noise in a crowded restaurant and trying to hear your date's father's name. Was that John, Tom or Ron? Uh oh... A good reference is also needed for similar reasons.\n"; ianswers.push_back(ianswer);
+        
+        string howto = "How do you recommend classifying to the species level?"; howtos.push_back(howto);
+        string hanswer = "\tUnfortunately I do not. You will never get species level classification if you are using the RDP or Silva references. They only go to the genus level. Even the greengenes database only has 10% or so of sequences with species level names (greengenes hasn’t been updated in quite a few years). I and many others would contend that using 16S and especially a fragment to get a species name is asking too much - you need a culture and genome sequencing to do that. If someone wanted to give it a shot, they would need to add the species level names to the taxonomy strings. Also, they would need to add many more sequences that represent each species. Outside of a few groups of bacteria where the researchers have carefully selected the region (e.g. Lactobacillus or Staphylococcus), I really think this would be a lot of work for little/no benefit.\n"; hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClassifySeqsCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 string ClassifySeqsCommand::getOutputPattern(string type) {
     try {

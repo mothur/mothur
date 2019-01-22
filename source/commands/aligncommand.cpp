@@ -66,7 +66,7 @@ string AlignCommand::getHelpString(){
 		helpString += "Example: align.seqs(candidate=candidate.fasta, template=silva.v4.fasta)\n\n";
         
         getCommonQuestions();
-		
+
 		return helpString;
 	}
 	catch(exception& e) {
