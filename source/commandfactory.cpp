@@ -1003,7 +1003,12 @@ void CommandFactory::printCommandsCategories(ostream& out) {
         }
 
         for (itCat = categories.begin(); itCat != categories.end(); itCat++) {
-            out << itCat->first << " commmands include: " << itCat->second << endl;
+            #if defined NON_WINDOWS
+                out << BOLDMAGENTA << endl << itCat->first << " commmands include: " << RESET << itCat->second << endl;
+            #else
+                out << endl << itCat->first << " commmands include: " << itCat->second << endl;
+            #endif
+            
         }
 
     }
