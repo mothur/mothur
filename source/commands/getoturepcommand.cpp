@@ -793,12 +793,14 @@ int GetOTURepCommand::process(ListVector* processList) {
 			}
 		}
 		
-        map<string, long long> matrixNameIndexes = matrix->getNameIndexMap(); //maps unique names to index in matrix
+        map<string, long long> matrixNameIndexes;
+        if (method != "abundance") {  matrix->getNameIndexMap(); }
         
 		//for each bin in the list vector
         vector<string> binLabels = processList->getLabels();
 		for (int i = 0; i < processList->size(); i++) {
         
+            
 			if (m->getControl_pressed()) { out.close(); if (Groups.size() == 0) { newNamesOutput.close(); } return 0; }
 			
 			string temp = processList->get(i);
