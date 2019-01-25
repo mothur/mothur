@@ -39,7 +39,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:	
-	bool abort, pickedGroups, allLines, persample;
+	bool abort, pickedGroups, allLines, persample, withReplacement;
 	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile, taxonomyfile;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir;

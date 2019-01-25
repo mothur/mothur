@@ -29,6 +29,7 @@ vector<string> SubSampleCommand::setParameters(){
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(psize);
 		CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(ppersample);
+        CommandParameter pwithreplacement("withreplacement", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pwithreplacement);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -47,7 +48,7 @@ string SubSampleCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n";
-		helpString += "The sub.sample command parameters are fasta, name, list, group, count, rabund, sabund, shared, taxonomy, groups, size, persample and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
+		helpString += "The sub.sample command parameters are fasta, name, list, group, count, rabund, sabund, shared, taxonomy, groups, size, persample, withreplacement and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
 		helpString += "The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
@@ -55,6 +56,7 @@ string SubSampleCommand::getHelpString(){
 		helpString += "The persample parameter allows you indicate you want to select subsample of the same size from each of your groups, default=false. It is only used with the list and fasta files if a groupfile is given.\n";
 		helpString += "persample=false will select a random set of sequences of the size you select, but the number of seqs from each group may differ.\n";
 		helpString += "The size parameter is not set: with shared file size=number of seqs in smallest sample, with all other files if a groupfile is given and persample=true, then size=number of seqs in smallest sample, otherwise size=10% of number of seqs.\n";
+        helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
 		helpString += "The sub.sample command should be in the following format: sub.sample(list=yourListFile, group=yourGroupFile, groups=yourGroups, label=yourLabels).\n";
 		helpString += "Example sub.sample(list=abrecovery.fn.list, group=abrecovery.groups, groups=B-C, size=20).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
@@ -307,6 +309,9 @@ SubSampleCommand::SubSampleCommand(string option) {
 			
 			temp = validParameter.valid(parameters, "persample");		if (temp == "not found"){	temp = "f";		}
 			persample = util.isTrue(temp);
+            
+            temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
+            withReplacement = util.isTrue(temp);
 			
 			if ((groupfile == "") && (countfile == "")) { persample = false; }
             if (countfile != "") {
@@ -834,7 +839,7 @@ int SubSampleCommand::getSubSampleShared() {
             lookup->removeGroups(size);
             Groups = lookup->getNamesGroups();
 		}
-		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine();  return 0; }
+		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file.\n");   return 0; }
 		
 		m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();
         bool printHeaders = true;
@@ -919,7 +924,8 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup, bool& prin
 		string outputFileName = getOutputFileName("shared", variables);        
         
         SubSample sample;
-        sample.getSample(thislookup, size);
+        if (withReplacement)    { sample.getSampleWithReplacement(thislookup, size);  }
+        else                    { sample.getSample(thislookup, size);  }
         
         if (m->getControl_pressed()) {  return 0; }
         

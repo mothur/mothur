@@ -192,7 +192,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
                 temp->setLabel(rabunds[i]->getLabel());
                 temp->setGroup(rabunds[i]->getGroup());
                 
-                for (int j = 0; j < size; j++) {
+                for (int j = 0; j < size; j++) { //only allows you to select a read once
                     if (m->getControl_pressed()) {  return currentLabels; }
                     temp->increment(order[j]);
                 }
@@ -218,6 +218,56 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& rabunds, int si
     }
 }
 //**********************************************************************************************************************
+vector<string> SubSample::getSampleWithReplacement(vector<SharedRAbundVector*>& rabunds, int size, vector<string> currentLabels) {
+    try {
+        
+        //save mothurOut's binLabels to restore for next label
+        vector<string> saveBinLabels = currentLabels;
+        SharedRAbundVectors* newLookup = new SharedRAbundVectors();
+        
+        int numBins = rabunds[0]->getNumBins();
+        for (int i = 0; i < rabunds.size(); i++) {
+            int thisSize = rabunds[i]->getNumSeqs();
+
+            vector<int> order;
+            for (int j = 0; j < rabunds[i]->size(); j++) {
+                int abund = rabunds[i]->get(j);
+                for(int k=0;k<abund;k++){ order.push_back(j);  }
+            }
+            
+            SharedRAbundVector* temp = new SharedRAbundVector(numBins);
+            temp->setLabel(rabunds[i]->getLabel());
+            temp->setGroup(rabunds[i]->getGroup());
+            
+            long long orderSize = order.size()-1;
+            for (int j = 0; j < size; j++) { //allows you to select a read multiple times
+                if (m->getControl_pressed()) {  return currentLabels; }
+                //"grab random from bag"
+                long long randomRead = util.getRandomIndex(orderSize);
+                temp->increment(order[randomRead]);
+            }
+            newLookup->push_back(temp);
+
+        }
+        newLookup->setOTUNames(currentLabels);
+        newLookup->eliminateZeroOTUS();
+        
+        for (int i = 0; i < rabunds.size(); i++) { delete rabunds[i]; } rabunds.clear();
+        rabunds = newLookup->getSharedRAbundVectors();
+        
+        //save mothurOut's binLabels to restore for next label
+        vector<string> subsampleBinLabels = newLookup->getOTUNames();
+        delete newLookup;
+        
+        return subsampleBinLabels;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSample", "getSampleWithReplacement-shared");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 vector<string> SubSample::getSample(SharedRAbundVectors*& thislookup, int size) {
 	try {
 		//save mothurOut's binLabels to restore for next label
@@ -239,6 +289,29 @@ vector<string> SubSample::getSample(SharedRAbundVectors*& thislookup, int size) 
 		m->errorOut(e, "SubSample", "getSample-shared");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+vector<string> SubSample::getSampleWithReplacement(SharedRAbundVectors*& thislookup, int size) {
+    try {
+        //save mothurOut's binLabels to restore for next label
+        vector<string> saveBinLabels = thislookup->getOTUNames();
+        vector<SharedRAbundVector*> rabunds = thislookup->getSharedRAbundVectors();
+        
+        vector<string> subsampleBinLabels = getSampleWithReplacement(rabunds, size, saveBinLabels);
+        SharedRAbundVectors* newLookup = new SharedRAbundVectors();
+        
+        for (int i = 0; i < rabunds.size(); i++) { newLookup->push_back(rabunds[i]);  }
+        newLookup->setOTUNames(subsampleBinLabels);
+        delete thislookup;
+        thislookup = newLookup;
+        
+        return subsampleBinLabels;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSample", "getSampleWithReplacement-shared");
+        exit(1);
+    }
 }	
 //**********************************************************************************************************************
 int SubSample::getSample(SAbundVector*& sabund, int size) {
