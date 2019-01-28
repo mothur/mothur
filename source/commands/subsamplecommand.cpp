@@ -25,6 +25,7 @@ vector<string> SubSampleCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "FLSSR", "none","shared",false,false,true); parameters.push_back(pshared);
 		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "FLSSR", "none","rabund",false,false); parameters.push_back(prabund);
 		CommandParameter psabund("sabund", "InputTypes", "", "", "none", "FLSSR", "none","sabund",false,false); parameters.push_back(psabund);
+        CommandParameter ptree("tree", "InputTypes", "", "", "none", "FLSSR", "none","tree",false,false); parameters.push_back(ptree);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(psize);
@@ -48,7 +49,7 @@ string SubSampleCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n";
-		helpString += "The sub.sample command parameters are fasta, name, list, group, count, rabund, sabund, shared, taxonomy, groups, size, persample, withreplacement and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
+		helpString += "The sub.sample command parameters are fasta, name, list, group, count, rabund, sabund, shared, taxonomy, tree, groups, size, persample, withreplacement and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
 		helpString += "The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
@@ -79,6 +80,7 @@ string SubSampleCommand::getOutputPattern(string type) {
         else if (type == "name")        {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],subsample,[extension]";    }
+        else if (type == "tree")        {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],[distance],subsample,[extension]";    }
         else if (type == "taxonomy")    {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[distance],subsample,[extension]";    }
@@ -107,6 +109,7 @@ SubSampleCommand::SubSampleCommand(){
 		outputTypes["group"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         outputTypes["taxonomy"] = tempOutNames;
+        outputTypes["tree"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "GetRelAbundCommand");
@@ -148,6 +151,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			outputTypes["group"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
             outputTypes["taxonomy"] = tempOutNames;
+            outputTypes["tree"] = tempOutNames;
 					
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
@@ -228,6 +232,15 @@ SubSampleCommand::SubSampleCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("tree");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["tree"] = inputDir + it->second;		}
+                }
+
 			}
 			
 			//check for required parameters
@@ -270,6 +283,11 @@ SubSampleCommand::SubSampleCommand(string option) {
 			if (taxonomyfile == "not open") { taxonomyfile = ""; abort = true; }
 			else if (taxonomyfile == "not found") { taxonomyfile = ""; }
 			else { current->setTaxonomyFile(taxonomyfile); }
+            
+            treefile = validParameter.validFile(parameters, "tree");
+            if (treefile == "not open") { treefile = ""; abort = true; }
+            else if (treefile == "not found") { treefile = ""; }
+            else { current->setTreeFile(treefile); }
 			
             countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { countfile = ""; abort = true; }
@@ -280,11 +298,11 @@ SubSampleCommand::SubSampleCommand(string option) {
             }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
 			//check for optional parameter and set defaults
@@ -317,26 +335,26 @@ SubSampleCommand::SubSampleCommand(string option) {
             if (countfile != "") {
                 if (!ct.hasGroupInfo()) { 
                     persample = false; 
-                    if (pickedGroups) { m->mothurOut("You cannot pick groups without group info in your count file."); m->mothurOutEndLine(); abort = true; }
+                    if (pickedGroups) { m->mothurOut("You cannot pick groups without group info in your count file.\n");  abort = true; }
                 }
             }
 			
-			if ((namefile != "") && ((fastafile == "") && (taxonomyfile == ""))) { m->mothurOut("You may only use a name file with a fasta file or taxonomy file."); m->mothurOutEndLine(); abort = true; }
+			if ((namefile != "") && ((fastafile == "") && (taxonomyfile == "") && (treefile == ""))) { m->mothurOut("You may only use a name file with a fasta file, tree file or taxonomy file.\n");  abort = true; }
             
-            if ((taxonomyfile != "") && ((fastafile == "") && (listfile == ""))) { m->mothurOut("You may only use a taxonomyfile with a fastafile or listfile."); m->mothurOutEndLine(); abort = true; }
+            if ((taxonomyfile != "") && ((fastafile == "") && (listfile == ""))) { m->mothurOut("You may only use a taxonomyfile with a fastafile or listfile.\n");  abort = true; }
             
 			
-			if ((fastafile == "") && (listfile == "") && (sabundfile == "") && (rabundfile == "") && (sharedfile == "")) {
-				m->mothurOut("You must provide a fasta, list, sabund, rabund or shared file as an input file."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (listfile == "") && (sabundfile == "") && (rabundfile == "") && (sharedfile == "") && (treefile == "")) {
+				m->mothurOut("You must provide a fasta, list, sabund, rabund, shared or tree file as an input file.\n"); abort = true; }
 			
 			if (pickedGroups && ((groupfile == "") && (sharedfile == "") && (countfile == ""))) { 
-				m->mothurOut("You cannot pick groups without a valid group, count or shared file."); m->mothurOutEndLine(); abort = true; }
+				m->mothurOut("You cannot pick groups without a valid group, count or shared file.\n");  abort = true; }
 			
-			if (((groupfile != "") || (countfile != "")) && ((fastafile == "") && (listfile == ""))) { 
-				m->mothurOut("Group or count files are only valid with listfile or fastafile."); m->mothurOutEndLine(); abort = true; }
+			if (((groupfile != "") || (countfile != "")) && ((fastafile == "") && (listfile == "") && (treefile == ""))) {
+				m->mothurOut("Group or count files are only valid with listfile, fastafile or tree.\n"); abort = true; }
 			
 			if (((groupfile != "") || (countfile != "")) && ((fastafile != "") && (listfile != ""))) { 
-				m->mothurOut("A new group or count file can only be made from the subsample of a listfile or fastafile, not both. Please correct."); m->mothurOutEndLine(); abort = true; }
+				m->mothurOut("A new group or count file can only be made from the subsample of a listfile or fastafile, not both. Please correct.\n"); abort = true; }
 			
             if (countfile == "") {
                 if ((fastafile != "") && (namefile == "")) {
@@ -359,20 +377,14 @@ int SubSampleCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (sharedfile != "")	{   getSubSampleShared();	}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0;}
-		
-		if (listfile != "")		{   getSubSampleList();		}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
-		
-		if (rabundfile != "")	{   getSubSampleRabund();	}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
-		
-		if (sabundfile != "")	{   getSubSampleSabund();	}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
-		
-		if (fastafile != "")	{   getSubSampleFasta();	}
-		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
+		if (sharedfile != "")       {   getSubSampleShared();	}
+		else if (listfile != "")	{   getSubSampleList();		}
+		else if (rabundfile != "")	{   getSubSampleRabund();	}
+		else if (sabundfile != "")	{   getSubSampleSabund();	}
+		else if (fastafile != "")	{   getSubSampleFasta();	}
+		else if (treefile != "")	{   getSubSampleTree();     }
+        
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 			
 		//set fasta file as new current fastafile
 		string currentName = "";
@@ -420,6 +432,11 @@ int SubSampleCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 		}
+        
+        itTypes = outputTypes.find("tree");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTreeFile(currentName); }
+        }
 		
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -430,6 +447,82 @@ int SubSampleCommand::execute(){
 		m->errorOut(e, "SubSampleCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int SubSampleCommand::getSubSampleTree() {
+    try {
+        TreeReader* reader = NULL;
+        string cinputfile = countfile;
+        if (countfile == "") {
+            reader = new TreeReader(treefile, groupfile, namefile);
+            cinputfile = namefile;
+        }else {
+            reader = new TreeReader(treefile, countfile);
+        }
+        
+        vector<Tree*> T; T = reader->getTrees();   //user trees
+        CountTable* ct; ct = T[0]->getCountTable();
+        vector<string> Treenames = T[0]->getTreeNames();
+        delete reader;
+        
+        if (size == 0) { //user has not set size, set size = smallest samples size
+            size = ct->getNumSeqsSmallestGroup();
+        }else {
+            ct->removeGroup(size);
+        }
+        
+        Groups = ct->getNamesOfGroups();
+        if (Groups.size() == 0) {  m->mothurOut("The size you selected is too large, skipping tree file.\n");   return 0; }
+        
+        m->mothurOut("Sampling " + toString(size) + " from each group.\n");
+        
+        //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
+        CountTable* newCt = new CountTable();
+        
+        SubSample sample;
+        Tree* subSampleTree; //sets unwanted seqs to doNotIncludeMe, prune below
+        if (withReplacement)    { subSampleTree = sample.getSampleWithReplacement(T[0], ct, newCt, size, Groups);                   }
+        else                    { subSampleTree = sample.getSample(T[0], ct, newCt, size, Groups);    }
+         
+        if (m->getControl_pressed()) { delete newCt; delete subSampleTree; return 0; }
+        
+        vector<string> newTreeNames = newCt->getNamesOfSeqs(Groups); //without "doNotIncludeMe"
+        
+        Tree* outputTree = new Tree(newTreeNames.size(), ct, Treenames);  //create ouptut tree - respecting pickedGroups
+        
+        outputTree->getSubTree(subSampleTree, newTreeNames); //builds tree with only seqs present in newCt
+        outputTree->assembleTree();
+        newCt->removeGroup("doNotIncludeMe");
+        
+        string treeOutputDir = outputDir;
+        if (outputDir == "") {  treeOutputDir += util.hasPath(treefile);  }
+        map<string, string> variables;
+        variables["[filename]"] = treeOutputDir + util.getRootName(util.getSimpleName(treefile));
+        variables["[extension]"] = util.getExtension(treefile);
+        string treeOutputFileName = getOutputFileName("tree", variables);
+        outputTypes["tree"].push_back(treeOutputFileName);  outputNames.push_back(treeOutputFileName);
+        
+        ofstream outTree; util.openOutputFile(treeOutputFileName, outTree);
+        outputTree->print(outTree, "both"); outTree.close();
+        for (int i = 0; i < T.size(); i++) { delete T[i]; } delete subSampleTree; delete outputTree;
+        
+        string countOutputDir = outputDir;
+        if (outputDir == "") {  countOutputDir += util.hasPath(cinputfile);  }
+        variables["[filename]"] = countOutputDir + util.getRootName(util.getSimpleName(cinputfile));
+        variables["[extension]"] = ".count_table";
+        string countOutputFile = getOutputFileName("count",variables);
+        outputNames.push_back(countOutputFile); outputTypes["count"].push_back(countOutputFile);
+        
+        newCt->printTable(countOutputFile); delete newCt;
+        delete ct;
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getSubSampleTree");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleFasta() {
@@ -445,18 +538,14 @@ int SubSampleCommand::getSubSampleFasta() {
             if (Groups.size() == 0) { Groups = groupMap.getNamesOfGroups(); }
 			//file mismatch quit
 			if (names.size() != groupMap.getNumSeqs()) { 
-				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your groupfile contains " + toString(groupMap.getNumSeqs()) + ", please correct."); 
-				m->mothurOutEndLine();
-				return 0;
+				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your groupfile contains " + toString(groupMap.getNumSeqs()) + ", please correct.\n"); return 0;
 			}			
 		}else if (countfile != "") {
             if (ct.hasGroupInfo()) { if (Groups.size() == 0) { Groups = ct.getNamesOfGroups(); } }
             
             //file mismatch quit
 			if (names.size() != ct.getNumUniqueSeqs()) { 
-				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your count file contains " + toString(ct.getNumUniqueSeqs()) + " unique sequences, please correct."); 
-				m->mothurOutEndLine();
-				return 0;
+				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your count file contains " + toString(ct.getNumUniqueSeqs()) + " unique sequences, please correct.\n"); return 0;
 			}	
         }
 		
@@ -465,7 +554,7 @@ int SubSampleCommand::getSubSampleFasta() {
 		//make sure that if your picked groups size is not too big
 		int thisSize = 0;
         if (countfile == "") { thisSize = names.size();  }
-        else {  thisSize = ct. getNumSeqs();  }  //all seqs not just unique
+        else {  thisSize = ct.getNumSeqs();  }  //all seqs not just unique
         
 		if (persample) { 
 			if (size == 0) { //user has not set size, set size = smallest samples size
@@ -487,13 +576,13 @@ int SubSampleCommand::getSubSampleFasta() {
                     else {  thisSize = ct.getGroupCount(Groups[i]);  }
 					
 					if (thisSize >= size) {	newGroups.push_back(Groups[i]);	}
-					else {  m->mothurOut("You have selected a size that is larger than " + Groups[i] + " number of sequences, removing " + Groups[i] + "."); m->mothurOutEndLine(); }
+					else {  m->mothurOut("You have selected a size that is larger than " + Groups[i] + " number of sequences, removing " + Groups[i] + ".\n");  }
 				}
 				Groups = newGroups;
-                if (newGroups.size() == 0) {  m->mothurOut("[ERROR]: all groups removed."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                if (newGroups.size() == 0) {  m->mothurOut("[ERROR]: all groups removed.\n");  m->setControl_pressed(true); }
 			}
 			
-			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();			
+			m->mothurOut("Sampling " + toString(size) + " from each group.\n");
 		}else {
 			if (pickedGroups) {
 				int total = 0;
@@ -508,12 +597,12 @@ int SubSampleCommand::getSubSampleFasta() {
 				
 				if (total < size) { 
 					if (size != 0) { 
-						m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
+						m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + ".\n");
 					}
 					size = int (total * 0.10);
 				}
 				
-				m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
+				m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + ".\n");
 			}
 			
 			if (size == 0) { //user has not set size, set size = 10% samples size
@@ -522,11 +611,11 @@ int SubSampleCommand::getSubSampleFasta() {
 			}
 			
             
-            if (size > thisSize) { m->mothurOut("Your fasta file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
+            if (size > thisSize) { m->mothurOut("Your fasta file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + ".\n");
                     size = thisSize;
             }
             
-            if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine(); }
+            if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + ".\n");  }
 
 		}
 		util.mothurRandomShuffle(names);
@@ -544,7 +633,7 @@ int SubSampleCommand::getSubSampleFasta() {
                     if (m->getControl_pressed()) { return 0; }
 												
                     string group = groupMap.getGroup(names[j]);
-                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct.\n");  group = "NOTFOUND"; }
                     else{
                         itGroupCounts = groupCounts.find(group);
                         if (itGroupCounts != groupCounts.end()) {
@@ -577,7 +666,7 @@ int SubSampleCommand::getSubSampleFasta() {
                     
                     if (groupfile != "") { //if there is a groupfile given fill in group info
                         string group = groupMap.getGroup(names[j]);
-                        if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+                        if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct.\n"); group = "NOTFOUND"; }
                         
                         if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
                             if (util.inUsersGroups(group, Groups)) {  subset.insert(names[j]); }
@@ -606,7 +695,7 @@ int SubSampleCommand::getSubSampleFasta() {
             }
 		}
 		
-		if (subset.size() == 0) {  m->mothurOut("The size you selected is too large, skipping fasta file."); m->mothurOutEndLine();  return 0; }
+		if (subset.size() == 0) {  m->mothurOut("The size you selected is too large, skipping fasta file.\n");   return 0; }
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
@@ -645,9 +734,7 @@ int SubSampleCommand::getSubSampleFasta() {
 							count++;
 						}
 					}
-				}else{
-					m->mothurOut("[ERROR]: " + thisname + " is not in your namefile, please correct."); m->mothurOutEndLine();
-				}
+				}else{ m->mothurOut("[ERROR]: " + thisname + " is not in your namefile, please correct.\n");  }
 			}
 			util.gobble(in);
 		}
@@ -656,19 +743,19 @@ int SubSampleCommand::getSubSampleFasta() {
         
 		
 		if (count != subset.size()) {
-			m->mothurOut("[ERROR]: The subset selected contained " + toString(subset.size()) + " sequences, but I only found " + toString(count) + " of those in the fastafile."); m->mothurOutEndLine();
+			m->mothurOut("[ERROR]: The subset selected contained " + toString(subset.size()) + " sequences, but I only found " + toString(count) + " of those in the fastafile.\n");
 		}
 		
 		if (namefile != "") {
-			m->mothurOut("Deconvoluting subsampled fasta file... "); m->mothurOutEndLine();
+			m->mothurOut("Deconvoluting subsampled fasta file... \n");
 			map<string, string> variables; 
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
             variables["[extension]"] = util.getExtension(namefile);
             string outputNameFileName = getOutputFileName("name", variables);
 			//use unique.seqs to create new name and fastafile
 			string inputString = "fasta=" + outputFileName;
-			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-			m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+			m->mothurOut("/******************************************/\n");
+			m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
 			current->setMothurCalling(true);
             
 			Command* uniqueCommand = new DeconvoluteCommand(inputString);
@@ -684,9 +771,9 @@ int SubSampleCommand::getSubSampleFasta() {
             
 			outputTypes["name"].push_back(outputNameFileName);  outputNames.push_back(outputNameFileName);
 
-			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+			m->mothurOut("/******************************************/\n");
 			
-			m->mothurOut("Done."); m->mothurOutEndLine();
+			m->mothurOut("Done.\n");
             
             if (taxonomyfile != "") {
                 set<string> tempSubset;
@@ -705,12 +792,12 @@ int SubSampleCommand::getSubSampleFasta() {
                 
                 //send that list to getTax
                 int tcount = getTax(tempSubset);
-                if (tcount != tempSubset.size()) { m->mothurOut("[ERROR]: subsampled fasta file contains " + toString(tempSubset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, please correct."); m->mothurOutEndLine(); }
+                if (tcount != tempSubset.size()) { m->mothurOut("[ERROR]: subsampled fasta file contains " + toString(tempSubset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, please correct.\n"); }
             }
 		}else {
             if (taxonomyfile != "") {
                 int tcount = getTax(subset);
-                if (tcount != subset.size()) { m->mothurOut("[ERROR]: subsampled fasta file contains " + toString(subset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, please correct."); m->mothurOutEndLine(); }
+                if (tcount != subset.size()) { m->mothurOut("[ERROR]: subsampled fasta file contains " + toString(subset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, please correct.\n");  }
             
             }  //should only contain uniques.
         }
@@ -755,9 +842,9 @@ int SubSampleCommand::getSubSampleFasta() {
 			
 			//sanity check
 			if (subset.size() != 0) {  
-				m->mothurOut("Your groupfile does not match your fasta file."); m->mothurOutEndLine();
+				m->mothurOut("Your groupfile does not match your fasta file.\n");
 				for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) {
-					m->mothurOut("[ERROR]: " + *it + " is missing from your groupfile."); m->mothurOutEndLine();
+					m->mothurOut("[ERROR]: " + *it + " is missing from your groupfile.\n");
 				}
 			}
 		}
@@ -841,7 +928,7 @@ int SubSampleCommand::getSubSampleShared() {
 		}
 		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file.\n");   return 0; }
 		
-		m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();
+		m->mothurOut("Sampling " + toString(size) + " from each group.\n");
         bool printHeaders = true;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
@@ -974,17 +1061,14 @@ int SubSampleCommand::getSubSampleList() {
 			
 			//file mismatch quit
 			if (list->getNumSeqs() != groupMap.getNumSeqs()) { 
-				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your groupfile contains " + toString(groupMap.getNumSeqs()) + ", please correct."); 
-				m->mothurOutEndLine(); delete list; delete input;  outGroup.close(); return 0;
+				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your groupfile contains " + toString(groupMap.getNumSeqs()) + ", please correct.\n"); delete list; delete input;  outGroup.close(); return 0;
 			}			
 		}else if (countfile != "") {
             if (ct.hasGroupInfo()) { if (Groups.size() == 0) { Groups = ct.getNamesOfGroups(); } }
             
             //file mismatch quit
 			if (list->getNumSeqs() != ct.getNumUniqueSeqs()) { 
-				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your count file contains " + toString(ct.getNumUniqueSeqs()) + " unique sequences, please correct."); 
-				m->mothurOutEndLine();
-				return 0;
+				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your count file contains " + toString(ct.getNumUniqueSeqs()) + " unique sequences, please correct.\n");  return 0;
 			}	
         }
 
@@ -1009,13 +1093,13 @@ int SubSampleCommand::getSubSampleList() {
                     else {  thisSize = ct.getGroupCount(Groups[i]);  }
 					
 					if (thisSize >= size) {	newGroups.push_back(Groups[i]);	}
-					else {  m->mothurOut("You have selected a size that is larger than " + Groups[i] + " number of sequences, removing " + Groups[i] + "."); m->mothurOutEndLine(); }
+					else {  m->mothurOut("You have selected a size that is larger than " + Groups[i] + " number of sequences, removing " + Groups[i] + ".\n");  }
 				}
 				Groups = newGroups;
-                if (newGroups.size() == 0) {  m->mothurOut("[ERROR]: all groups removed."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                if (newGroups.size() == 0) {  m->mothurOut("[ERROR]: all groups removed.\n"); m->setControl_pressed(true); }
 			}
 			
-			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();		
+			m->mothurOut("Sampling " + toString(size) + " from each group.\n");
 		}else{
             if (pickedGroups) {
 				int total = 0;
@@ -1030,12 +1114,12 @@ int SubSampleCommand::getSubSampleList() {
 				
 				if (total < size) { 
 					if (size != 0) { 
-						m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
+						m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + ".\n");
 					}
 					size = int (total * 0.10);
 				}
 				
-				m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
+				m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + ".\n");
 			}else {
                 if (size == 0) { //user has not set size, set size = 10% samples size
 					if (countfile == "") {  size = int (list->getNumSeqs() * 0.10);  }
@@ -1046,11 +1130,11 @@ int SubSampleCommand::getSubSampleList() {
                 if (countfile == "") { thisSize = list->getNumSeqs();  }
                 else { thisSize = ct.getNumSeqs(); }
                 
-				if (size > thisSize) { m->mothurOut("Your list file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
+				if (size > thisSize) { m->mothurOut("Your list file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + ".\n");
 					size = thisSize;
 				}
 				
-				m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine();
+				m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + ".\n");
             }
         }
 		
@@ -1065,7 +1149,7 @@ int SubSampleCommand::getSubSampleList() {
                 for(int j=0;j<thisBin.size();j++){
                     if (groupfile != "") { //if there is a groupfile given fill in group info
                         string group = groupMap.getGroup(thisBin[j]);
-                        if (group == "not found") { m->mothurOut("[ERROR]: " + thisBin[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+                        if (group == "not found") { m->mothurOut("[ERROR]: " + thisBin[j] + " is not in your groupfile. please correct.\n");  group = "NOTFOUND"; }
                         
 						//if hte user picked groups, we only want to keep the names of sequences from those groups
 						if (pickedGroups) { if (util.inUsersGroups(group, Groups)) { names.push_back(thisBin[j]); }  }
@@ -1089,7 +1173,7 @@ int SubSampleCommand::getSubSampleList() {
                     if (m->getControl_pressed()) { delete list; delete input;  return 0; }
                     
                     string group = groupMap.getGroup(names[j]);
-                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct.\n"); group = "NOTFOUND"; }
                     else{
                         itGroupCounts = groupCounts.find(group);
                         if (itGroupCounts != groupCounts.end()) {
@@ -1139,7 +1223,7 @@ int SubSampleCommand::getSubSampleList() {
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 				
-				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(list->getLabel()+"\n");
 				
 				processList(list,  subset);
 				
@@ -1153,7 +1237,7 @@ int SubSampleCommand::getSubSampleList() {
 				delete list; 
 				
 				list = input->getListVector(lastLabel);
-				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(list->getLabel()+"\n");
 				
 				processList(list,  subset);
 				
@@ -1189,7 +1273,7 @@ int SubSampleCommand::getSubSampleList() {
 			
 			list = input->getListVector(lastLabel);
 			
-			m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(list->getLabel()+"\n");
 			
 			processList(list, subset);
 			
@@ -1214,7 +1298,7 @@ int SubSampleCommand::getSubSampleList() {
                 delete list;
                     
                 int tcount = getTax(subset);
-                if (tcount != subset.size()) { m->mothurOut("[ERROR]: subsampled list file contains " + toString(subset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, did you forget a name file? Please correct."); m->mothurOutEndLine(); }
+                if (tcount != subset.size()) { m->mothurOut("[ERROR]: subsampled list file contains " + toString(subset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, did you forget a name file? Please correct.\n");  }
             }else {
                 string tempAccnos = "temp.accnos";
                 ofstream outAccnos;
@@ -1222,7 +1306,7 @@ int SubSampleCommand::getSubSampleList() {
                 for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) { outAccnos << *it << endl; }
                 outAccnos.close();
                 
-                m->mothurOut("Sampling taxonomy and name file... "); m->mothurOutEndLine();
+                m->mothurOut("Sampling taxonomy and name file... \n");
                 string thisNameOutputDir = outputDir;
                 if (outputDir == "") {  thisNameOutputDir += util.hasPath(namefile);  }
                 map<string, string> variables;
@@ -1329,8 +1413,8 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleRabund() {
 	try {
-		InputData* input = new InputData(rabundfile, "rabund", nullVector);
-		RAbundVector* rabund = input->getRAbundVector();
+		InputData input(rabundfile, "rabund", nullVector);
+		RAbundVector* rabund = input.getRAbundVector();
 		string lastLabel = rabund->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -1339,9 +1423,9 @@ int SubSampleCommand::getSubSampleRabund() {
 		
 		if (size == 0) { //user has not set size, set size = 10%
 			size = int((rabund->getNumSeqs()) * 0.10);
-		}else if (size > rabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping rabund file."); m->mothurOutEndLine(); delete input; delete rabund; return 0; }
+		}else if (size > rabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping rabund file.\n"); delete rabund; return 0; }
 		
-		m->mothurOut("Sampling " + toString(size) + " from " + toString(rabund->getNumSeqs()) + "."); m->mothurOutEndLine();
+		m->mothurOut("Sampling " + toString(size) + " from " + toString(rabund->getNumSeqs()) + ".\n");
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
@@ -1355,11 +1439,11 @@ int SubSampleCommand::getSubSampleRabund() {
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) {  delete input; delete rabund; out.close(); return 0;  }
+			if (m->getControl_pressed()) {  delete rabund; out.close(); return 0;  }
 			
 			if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
 				
-				m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(rabund->getLabel()+"\n");
 				
 				processRabund(rabund, out);
 				
@@ -1372,8 +1456,8 @@ int SubSampleCommand::getSubSampleRabund() {
 				
 				delete rabund; 
 				
-				rabund = input->getRAbundVector(lastLabel);
-				m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
+				rabund = input.getRAbundVector(lastLabel);
+				m->mothurOut(rabund->getLabel()+"\n");
 				
 				processRabund(rabund, out);
 				
@@ -1390,7 +1474,7 @@ int SubSampleCommand::getSubSampleRabund() {
 			delete rabund; rabund = NULL;
 			
 			//get next line to process
-			rabund = input->getRAbundVector();				
+			rabund = input.getRAbundVector();
 		}
 		
 		
@@ -1408,16 +1492,14 @@ int SubSampleCommand::getSubSampleRabund() {
 		if (needToRun )  {
 			if (rabund != NULL) { delete rabund; }
 			
-			rabund = input->getRAbundVector(lastLabel);
+			rabund = input.getRAbundVector(lastLabel);
 			
-			m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(rabund->getLabel()+"\n");
 			
 			processRabund(rabund, out);
 			
 			delete rabund;
 		}
-		
-		delete input;
 		out.close();  
 		
 		return 0;
@@ -1478,8 +1560,8 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 int SubSampleCommand::getSubSampleSabund() {
 	try {
 				
-		InputData* input = new InputData(sabundfile, "sabund", nullVector);
-		SAbundVector* sabund = input->getSAbundVector();
+		InputData input(sabundfile, "sabund", nullVector);
+		SAbundVector* sabund = input.getSAbundVector();
 		string lastLabel = sabund->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -1488,10 +1570,10 @@ int SubSampleCommand::getSubSampleSabund() {
 		
 		if (size == 0) { //user has not set size, set size = 10%
 			size = int((sabund->getNumSeqs()) * 0.10);
-		}else if (size > sabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping sabund file."); m->mothurOutEndLine(); delete input; delete sabund; return 0; }
+		}else if (size > sabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping sabund file.\n"); delete sabund; return 0; }
 		
 		
-		m->mothurOut("Sampling " + toString(size) + " from " + toString(sabund->getNumSeqs()) + "."); m->mothurOutEndLine();
+		m->mothurOut("Sampling " + toString(size) + " from " + toString(sabund->getNumSeqs()) + ".\n");
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
@@ -1506,11 +1588,11 @@ int SubSampleCommand::getSubSampleSabund() {
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) {  delete input; delete sabund; out.close(); return 0;  }
+			if (m->getControl_pressed()) {  delete sabund; out.close(); return 0;  }
 			
 			if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 				
-				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+				m->mothurOut(sabund->getLabel()+"\n");
 				
 				processSabund(sabund, out);
 				
@@ -1523,8 +1605,8 @@ int SubSampleCommand::getSubSampleSabund() {
 				
 				delete sabund; 
 				
-				sabund = input->getSAbundVector(lastLabel);
-				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+				sabund = input.getSAbundVector(lastLabel);
+				m->mothurOut(sabund->getLabel()+"\n");
 				
 				processSabund(sabund, out);
 				
@@ -1541,7 +1623,7 @@ int SubSampleCommand::getSubSampleSabund() {
 			delete sabund; sabund = NULL;
 			
 			//get next line to process
-			sabund = input->getSAbundVector();				
+			sabund = input.getSAbundVector();
 		}
 		
 		
@@ -1559,16 +1641,14 @@ int SubSampleCommand::getSubSampleSabund() {
 		if (needToRun )  {
 			if (sabund != NULL) { delete sabund; }
 			
-			sabund = input->getSAbundVector(lastLabel);
+			sabund = input.getSAbundVector(lastLabel);
 			
-			m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+			m->mothurOut(sabund->getLabel()+"\n");
 			
 			processSabund(sabund, out);
 			
 			delete sabund;
 		}
-		
-		delete input;
 		out.close();  
 		
 		return 0;
@@ -1676,7 +1756,7 @@ int SubSampleCommand::getTax(set<string>& subset) {
                        
                     }
                 }
-            }else{ m->mothurOut("[ERROR]: " + tname + " is missing, please correct."); m->mothurOutEndLine(); }
+            }else{ m->mothurOut("[ERROR]: " + tname + " is missing, please correct.\n");  }
         }
         inTax.close();
         outTax.close();

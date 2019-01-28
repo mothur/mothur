@@ -27,7 +27,6 @@ public:
 	void getCopy(Tree*);  //makes tree a copy of the one passed in.
     void getCopy(Tree* copy, bool); //makes a copy of the tree structure passed in, (just parents, children and br). Used with the Tree(TreeMap*) constructor. Assumes the tmap already has set seqs groups you want.  Used by subsample to reassign seqs you don't want included to group "doNotIncludeMe".
 	void getSubTree(Tree*, vector<string>);  //makes tree a that contains only the names passed in.
-    //int getSubTree(Tree* originalToCopy, vector<string> seqToInclude, map<string, string> nameMap);  //used with (int, TreeMap) constructor. SeqsToInclude contains subsample wanted - assumes these are unique seqs and size of vector=numLeaves passed into constructor. nameMap is unique -> redundantList can be empty if no namesfile was provided. 
     
     //this function takes the leaf info and populates the non leaf nodes
     int assembleTree();
@@ -71,6 +70,7 @@ private:
     void printBranch(int, ostream&, string);
 	int populateNewTree(vector<Node>&, int, int&);
 	void printBranch(int, ostream&, string, vector<Node>&);
+    int pruneNewTree(Tree* copy, vector<string> namesToInclude);
     
 	MothurOut* m;
     vector<string> Treenames;

@@ -29,7 +29,7 @@ class TrimOligos {
     ~TrimOligos(){}
 	
     
-        //codes : 10 means sequence shorter than barcode, 100 means multiple matches, 1e6 no matches, 0 found match.
+        //codes : 10 means sequence shorter than barcode, 100 means multiple matches, MOTHURMAX no matches, 0 found match.
         //[0] = forward for paired, [1] = code for forward, [2] = reverse for paired, [3] = code for reverse
         //[0] = forward for single, [1] = code for forward
 		vector<int> stripBarcode(Sequence&, int&);	

@@ -10,8 +10,6 @@
 //**********************************************************************************************************************
 Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size, vector<string>& mGroups) {
     try {
-        Tree* newTree = NULL;
-        
         //remove seqs not in sample from counttable
         vector<string> Groups = ct->getNamesOfGroups();
         if (mGroups.size() == 0) { mGroups = Groups; }
@@ -55,6 +53,75 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size,
         for (map<string, int>::iterator it = doNotIncludeTotals.begin(); it != doNotIncludeTotals.end(); it++) {  
             newCt->setAbund(it->first, "doNotIncludeMe", it->second);
         } 
+        
+        vector<string> Treenames = T->getTreeNames();
+        Tree* newTree = new Tree(newCt, Treenames);
+        newTree->getCopy(T, true);
+        
+        return newTree;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSample", "getSample-Tree");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+Tree* SubSample::getSampleWithReplacement(Tree* T, CountTable* ct, CountTable* newCt, int size, vector<string>& mGroups) {
+    try {
+        Tree* newTree = NULL;
+        
+        //remove seqs not in sample from counttable
+        vector<string> Groups = ct->getNamesOfGroups();
+        if (mGroups.size() == 0) { mGroups = Groups; }
+        
+        newCt->copy(ct);
+        newCt->addGroup("doNotIncludeMe");
+        
+        map<string, int> doNotIncludeTotals;
+        vector<string> namesSeqs = ct->getNamesOfSeqs();
+        for (int i = 0; i < namesSeqs.size(); i++) {  doNotIncludeTotals[namesSeqs[i]] = 0; }
+        
+        for (int i = 0; i < Groups.size(); i++) {
+            if (util.inUsersGroups(Groups[i], mGroups)) {
+                if (m->getControl_pressed()) { break; }
+                
+                int thisSize = ct->getGroupCount(Groups[i]);
+                
+                vector<string> names = ct->getNamesOfSeqs(Groups[i]);
+                vector<int> random;
+                for (int j = 0; j < names.size(); j++) {
+                    int num = ct->getGroupCount(names[j], Groups[i]);
+                    for (int k = 0; k < num; k++) { random.push_back(j); }
+                }
+                
+                vector<int> sampleRandoms; sampleRandoms.resize(names.size(), 0);
+                long long totalNumReads = random.size()-1;
+                set<long long> selected;
+                for (int j = 0; j < size; j++) { //allows for multiple selection of same read
+                    //"grab random from bag"
+                    long long randomRead = util.getRandomIndex(totalNumReads);
+                    sampleRandoms[random[randomRead]]++;
+                    selected.insert(randomRead);
+                }
+                for (int j = 0; j < sampleRandoms.size(); j++) { //create new count file with updated sequence counts
+                    newCt->setAbund(names[j], Groups[i], sampleRandoms[j]);
+                }
+                
+                //set unselected reads to "do not include"
+                sampleRandoms.clear(); sampleRandoms.resize(names.size(), 0);
+                for (long long j = 0; j < random.size(); j++) {
+                    if (selected.count(j) == 0)  { //we did not selected this read from random
+                        sampleRandoms[random[j]]++;
+                    }
+                }
+                for (int j = 0; j < sampleRandoms.size(); j++) {  doNotIncludeTotals[names[j]] += sampleRandoms[j]; }
+            }
+            
+        }
+        
+        for (map<string, int>::iterator it = doNotIncludeTotals.begin(); it != doNotIncludeTotals.end(); it++) {
+            newCt->setAbund(it->first, "doNotIncludeMe", it->second);
+        }
         
         vector<string> Treenames = T->getTreeNames();
         newTree = new Tree(newCt, Treenames);

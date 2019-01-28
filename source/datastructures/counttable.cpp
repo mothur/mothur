@@ -767,9 +767,10 @@ int CountTable::removeGroup(string groupName) {
                         totals.erase(totals.begin()+i);
                         uniques--;
                         i--;
+                    }else { //remove name from table if no seqs left
+                        newIndexNameMap[reverse[thisIndex]] = i;
+                        thisIndex++;
                     }
-                    newIndexNameMap[reverse[thisIndex]] = i;
-                    thisIndex++;
                 }
                 indexNameMap = newIndexNameMap;
 
@@ -783,6 +784,23 @@ int CountTable::removeGroup(string groupName) {
 		m->errorOut(e, "CountTable", "removeGroup");
 		exit(1);
 	}
+}
+/***********************************************************************/
+int CountTable::removeGroup(int minSize){
+    try {
+        
+        if (hasGroups) {
+            for (int i = 0; i < totalGroups.size(); i++) {
+                if (totalGroups[i] < minSize) { removeGroup(groups[i]); }
+            }
+        }else { m->mothurOut("[ERROR]: your count table does not contain group information, can not remove groups.\n"); m->setControl_pressed(true); }
+        
+        return groups.size();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVector", "removeGroup - minSize");
+        exit(1);
+    }
 }
 /************************************************************/
 //vector of groups for the seq
@@ -1075,6 +1093,26 @@ int CountTable::push_back(string seqName, vector<int> groupCounts) {
 		exit(1);
 	}
 }
+/************************************************************/
+//returns size of smallest group. If no groups, returns total num seqs (includes non uniques)
+int CountTable::getNumSeqsSmallestGroup() {
+    try {
+        int smallestGroupSize = MOTHURMAX;
+        
+        if (hasGroups) {
+            for (int i = 0; i < totalGroups.size(); i++) {
+                if (totalGroups[i] < smallestGroupSize) { smallestGroupSize = totalGroups[i]; }
+            }
+        }
+        else { return total; }
+        
+        return smallestGroupSize;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "getNumSeqsSmallestGroup");
+        exit(1);
+    }
+}
 
 /************************************************************/
 //create ListVector from uniques
@@ -1148,6 +1186,31 @@ vector<string> CountTable::getNamesOfSeqs(string group) {
 		exit(1);
 	}
 }
+/************************************************************/
+//returns the names of all unique sequences in file
+vector<string> CountTable::getNamesOfSeqs(vector<string> chosenGroups) {
+    try {
+        vector<string> names;
+        if (hasGroups) {
+            set<string> uniqueNames;
+            for (int i = 0; i < chosenGroups.size(); i++) {
+                vector<string> namesFromThisGroup = getNamesOfSeqs(chosenGroups[i]);
+                for (int j = 0; j < namesFromThisGroup.size(); j++) { uniqueNames.insert(namesFromThisGroup[j]);  }
+            }
+            
+            //only adds names once. seqs are likely present in more than one group, but we only want to enter them once
+            for (set<string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) { names.push_back(*it); }
+            
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
+        
+        return names;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "getNamesOfSeqs");
+        exit(1);
+    }
+}
+
 /************************************************************/
 //merges counts of seq1 and seq2, saving in seq1
 int CountTable::mergeCounts(string seq1, string seq2) {

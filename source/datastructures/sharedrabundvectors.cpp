@@ -475,7 +475,7 @@ int SharedRAbundVectors::removeGroups(int minSize, bool silent){
 /***********************************************************************/
 int SharedRAbundVectors::getNumSeqsSmallestGroup(){
     try {
-        int smallest = 1e6;
+        int smallest = MOTHURMAX;
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + lookup[i]->getGroup() + " numSeqs = " + toString(lookup[i]->getNumSeqs()) + "\n"); }
             if (lookup[i]->getNumSeqs() < smallest) { smallest = lookup[i]->getNumSeqs(); }

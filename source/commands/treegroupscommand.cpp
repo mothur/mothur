@@ -875,7 +875,6 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
                 if (m->getControl_pressed()) { break; }
                 
                 //create a new filename
-                //create a new filename
                 map<string, string> variables;
                 variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
                 variables["[calc]"] = Estimators[i];

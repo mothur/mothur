@@ -390,7 +390,7 @@ vector<string> SharedRAbundFloatVectors::getNamesGroups(){
 /***********************************************************************/
 float SharedRAbundFloatVectors::getNumSeqsSmallestGroup(){
     try {
-        float smallest = 1e6;
+        float smallest = MOTHURMAX;
         for (int i = 0; i < lookup.size(); i++) {
             if (lookup[i]->getNumSeqs() < smallest) { smallest = lookup[i]->getNumSeqs(); }
         }

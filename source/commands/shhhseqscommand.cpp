@@ -210,7 +210,7 @@ int driver(seqNoise& noise,
         int maxIter = 1000;
         double minDelta = 1e-6;
         int numIters = 0;
-        double maxDelta = 1e6;
+        double maxDelta = MOTHURMAX;
         int numSeqs = sequences.size();
         
         //run cluster command
@@ -272,7 +272,7 @@ int driver(seqNoise& noise,
             for(int i=0;i<numSeqs;i++){
                 if (m->getControl_pressed()) { return 0; }
                 
-                double offset = 1e6;
+                double offset = MOTHURMAX;
                 double norm = 0.0000;
                 double minWeight = 0.1;
                 vector<double> currentTau(numOTUs);

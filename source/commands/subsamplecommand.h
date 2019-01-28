@@ -17,6 +17,7 @@
 #include "inputdata.h"
 #include "sequence.hpp"
 #include "counttable.h"
+#include "treereader.h"
 
 
 class SubSampleCommand : public Command {
@@ -40,7 +41,7 @@ public:
 	
 private:	
 	bool abort, pickedGroups, allLines, persample, withReplacement;
-	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile, taxonomyfile;
+	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile, taxonomyfile, treefile;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir;
 	vector<string> Groups, outputNames;
@@ -54,6 +55,7 @@ private:
 	int getSubSampleRabund();
 	int getSubSampleSabund();
 	int getSubSampleFasta();
+    int getSubSampleTree();
 	int processShared(SharedRAbundVectors*&, bool&);
 	int processRabund(RAbundVector*&, ofstream&);
 	int processSabund(SAbundVector*&, ofstream&);

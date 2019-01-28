@@ -276,7 +276,7 @@ int Tree::assembleTree() {
 	}
 }
 /*****************************************************************/
-//assumes leaf node names are in groups and no names file - used by indicator command
+//assumes leaf node names are in groups and no names file - used by indicator command and subsample
 void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
 	try {
         
@@ -293,158 +293,50 @@ void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
 		for (int i = 0; i < namesOfGroups.size(); i++) {  groupNodeInfo[namesOfGroups[i]].resize(0);  }
 		
 		//initialize tree with correct number of nodes, name and group info.
-		for (int i = 0; i < numNodes; i++) {
-			//initialize leaf nodes
-			if (i <= (numLeaves-1)) {
-				tree[i].setName(Groups[i]);
-				
-				//save group info
+        for (int i = 0; i < numNodes; i++) {
+            //initialize leaf nodes
+            if (i <= (numLeaves-1)) {
+                tree[i].setName(Groups[i]);
+                
+                //save group info
                 int maxPars = 1;
-				vector<string> group;
+                vector<string> group;
                 vector<int> counts = ct->getGroupCounts(Groups[i]);
-				for (int j = 0; j < namesOfGroups.size(); j++) {  
+                for (int j = 0; j < namesOfGroups.size(); j++) {
                     if (counts[j] != 0) { //you have seqs from this group
                         groupNodeInfo[namesOfGroups[j]].push_back(i);
                         group.push_back(namesOfGroups[j]);
                         tree[i].pGroups[namesOfGroups[j]] = counts[j];
                         tree[i].pcount[namesOfGroups[j]] = counts[j];
                         //keep highest group
-						if(counts[j] > maxPars){ maxPars = counts[j]; }
-                    }  
+                        if(counts[j] > maxPars){ maxPars = counts[j]; }
+                    }
                 }
-				tree[i].setGroup(group);
-				setIndex(Groups[i], i);
+                tree[i].setGroup(group);
+                setIndex(Groups[i], i);
                 
                 if (maxPars > 1) { //then we have some more dominant groups
-					//erase all the groups that are less than maxPars because you found a more dominant group.
-					for(it=tree[i].pGroups.begin();it!=tree[i].pGroups.end();){
-						if(it->second < maxPars){
-							tree[i].pGroups.erase(it++);
-						}else { it++; }
-					}
-					//set one remaining groups to 1
-					for(it=tree[i].pGroups.begin();it!=tree[i].pGroups.end();it++){
-						tree[i].pGroups[it->first] = 1;
-					}
-				}//end if
+                    //erase all the groups that are less than maxPars because you found a more dominant group.
+                    for(it=tree[i].pGroups.begin();it!=tree[i].pGroups.end();){
+                        if(it->second < maxPars){
+                            tree[i].pGroups.erase(it++);
+                        }else { it++; }
+                    }
+                    //set one remaining groups to 1
+                    for(it=tree[i].pGroups.begin();it!=tree[i].pGroups.end();it++){
+                        tree[i].pGroups[it->first] = 1;
+                    }
+                }//end if
                 
                 //intialize non leaf nodes
-			}else if (i > (numLeaves-1)) {
-				tree[i].setName("");
-				vector<string> tempGroups;
-				tree[i].setGroup(tempGroups);
-			}
-		}
-        Utils util;
-		set<int> removedLeaves;
-		for (int i = 0; i < copy->getNumLeaves(); i++) {
-			
-			if (removedLeaves.count(i) == 0) {
-			
-			//am I in the group
-			int parent = copy->tree[i].getParent();
-			
-			if (parent != -1) {
-				
-				if (util.inUsersGroups(copy->tree[i].getName(), Groups)) {
-					//find my siblings name
-					int parentRC = copy->tree[parent].getRChild();
-					int parentLC = copy->tree[parent].getLChild();
-					
-					//if I am the right child, then my sib is the left child
-					int sibIndex = parentRC;
-					if (parentRC == i) { sibIndex = parentLC; }
-					
-					string sibsName = copy->tree[sibIndex].getName();
-					
-					//if yes, is my sibling
-					if ((util.inUsersGroups(sibsName, Groups)) || (sibsName == "")) {
-						//we both are okay no trimming required
-					}else{
-						//i am, my sib is not, so remove sib by setting my parent to my grandparent
-						int grandparent = copy->tree[parent].getParent();
-						int grandparentLC = copy->tree[grandparent].getLChild();
-						int grandparentRC = copy->tree[grandparent].getRChild();
-						
-						//whichever of my granparents children was my parent now equals me
-						if (grandparentLC == parent) { grandparentLC = i; }
-						else { grandparentRC = i; }
-						
-						copy->tree[i].setParent(grandparent);
-						copy->tree[i].setBranchLength((copy->tree[i].getBranchLength()+copy->tree[parent].getBranchLength()));
-						if (grandparent != -1) {
-							copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
-						}
-						removedLeaves.insert(sibIndex);
-					}
-				}else{
-					//find my siblings name
-					int parentRC = copy->tree[parent].getRChild();
-					int parentLC = copy->tree[parent].getLChild();
-					
-					//if I am the right child, then my sib is the left child
-					int sibIndex = parentRC;
-					if (parentRC == i) { sibIndex = parentLC; }
-					
-					string sibsName = copy->tree[sibIndex].getName();
-					
-					//if no is my sibling
-					if ((util.inUsersGroups(sibsName, Groups)) || (sibsName == "")) {
-						//i am not, but my sib is
-						int grandparent = copy->tree[parent].getParent();
-						int grandparentLC = copy->tree[grandparent].getLChild();
-						int grandparentRC = copy->tree[grandparent].getRChild();
-						
-						//whichever of my granparents children was my parent now equals my sib
-						if (grandparentLC == parent) { grandparentLC = sibIndex; }
-						else { grandparentRC = sibIndex; }
-						
-						copy->tree[sibIndex].setParent(grandparent);
-						copy->tree[sibIndex].setBranchLength((copy->tree[sibIndex].getBranchLength()+copy->tree[parent].getBranchLength()));
-						if (grandparent != -1) {
-							copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
-						}
-						removedLeaves.insert(i);
-					}else{
-						//neither of us are, so we want to eliminate ourselves and our parent
-						//so set our parents sib to our great-grandparent
-						int parent = copy->tree[i].getParent();
-						int grandparent = copy->tree[parent].getParent();
-						int parentsSibIndex;
-						if (grandparent != -1) {
-							int greatgrandparent = copy->tree[grandparent].getParent();
-							int greatgrandparentLC, greatgrandparentRC;
-							if (greatgrandparent != -1) {
-								greatgrandparentLC = copy->tree[greatgrandparent].getLChild();
-								greatgrandparentRC = copy->tree[greatgrandparent].getRChild();
-							}
-							
-							int grandparentLC = copy->tree[grandparent].getLChild();
-							int grandparentRC = copy->tree[grandparent].getRChild();
-							
-							parentsSibIndex = grandparentLC;
-							if (grandparentLC == parent) { parentsSibIndex = grandparentRC; }
-
-							//whichever of my greatgrandparents children was my grandparent
-							if (greatgrandparentLC == grandparent) { greatgrandparentLC = parentsSibIndex; }
-							else { greatgrandparentRC = parentsSibIndex; }
-							
-							copy->tree[parentsSibIndex].setParent(greatgrandparent);
-							copy->tree[parentsSibIndex].setBranchLength((copy->tree[parentsSibIndex].getBranchLength()+copy->tree[grandparent].getBranchLength()));
-							if (greatgrandparent != -1) {
-								copy->tree[greatgrandparent].setChildren(greatgrandparentLC, greatgrandparentRC);
-							}
-						}else{
-							copy->tree[parent].setParent(-1);
-							
-						}
-						removedLeaves.insert(sibIndex);
-						removedLeaves.insert(i);
-					}
-				}
-			}
-			}
-		}
+            }else if (i > (numLeaves-1)) {
+                tree[i].setName("");
+                vector<string> tempGroups;
+                tree[i].setGroup(tempGroups);
+            }
+        }
+        
+        pruneNewTree(copy, Groups);
 		
 		int root = 0;
 		for (int i = 0; i < copy->getNumNodes(); i++) {
@@ -461,6 +353,128 @@ void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
 		m->errorOut(e, "Tree", "getSubTree");
 		exit(1);
 	}
+}
+/*****************************************************************/
+int Tree::pruneNewTree(Tree* copy, vector<string> namesToInclude) {
+    try {
+        
+        Utils util;
+        set<int> removedLeaves;
+        for (int i = 0; i < copy->getNumLeaves(); i++) {
+            
+            if (removedLeaves.count(i) == 0) {
+                
+                //am I in the group
+                int parent = copy->tree[i].getParent();
+                
+                if (parent != -1) {
+                    
+                    if (util.inUsersGroups(copy->tree[i].getName(), namesToInclude)) {
+                        //find my siblings name
+                        int parentRC = copy->tree[parent].getRChild();
+                        int parentLC = copy->tree[parent].getLChild();
+                        
+                        //if I am the right child, then my sib is the left child
+                        int sibIndex = parentRC;
+                        if (parentRC == i) { sibIndex = parentLC; }
+                        
+                        string sibsName = copy->tree[sibIndex].getName();
+                        
+                        //if yes, is my sibling
+                        if ((util.inUsersGroups(sibsName, namesToInclude)) || (sibsName == "")) {
+                            //we both are okay no trimming required
+                        }else{
+                            //i am, my sib is not, so remove sib by setting my parent to my grandparent
+                            int grandparent = copy->tree[parent].getParent();
+                            int grandparentLC = copy->tree[grandparent].getLChild();
+                            int grandparentRC = copy->tree[grandparent].getRChild();
+                            
+                            //whichever of my granparents children was my parent now equals me
+                            if (grandparentLC == parent) { grandparentLC = i; }
+                            else { grandparentRC = i; }
+                            
+                            copy->tree[i].setParent(grandparent);
+                            copy->tree[i].setBranchLength((copy->tree[i].getBranchLength()+copy->tree[parent].getBranchLength()));
+                            if (grandparent != -1) {
+                                copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
+                            }
+                            removedLeaves.insert(sibIndex);
+                        }
+                    }else{
+                        //find my siblings name
+                        int parentRC = copy->tree[parent].getRChild();
+                        int parentLC = copy->tree[parent].getLChild();
+                        
+                        //if I am the right child, then my sib is the left child
+                        int sibIndex = parentRC;
+                        if (parentRC == i) { sibIndex = parentLC; }
+                        
+                        string sibsName = copy->tree[sibIndex].getName();
+                        
+                        //if no is my sibling
+                        if ((util.inUsersGroups(sibsName, namesToInclude)) || (sibsName == "")) {
+                            //i am not, but my sib is
+                            int grandparent = copy->tree[parent].getParent();
+                            int grandparentLC = copy->tree[grandparent].getLChild();
+                            int grandparentRC = copy->tree[grandparent].getRChild();
+                            
+                            //whichever of my granparents children was my parent now equals my sib
+                            if (grandparentLC == parent) { grandparentLC = sibIndex; }
+                            else { grandparentRC = sibIndex; }
+                            
+                            copy->tree[sibIndex].setParent(grandparent);
+                            copy->tree[sibIndex].setBranchLength((copy->tree[sibIndex].getBranchLength()+copy->tree[parent].getBranchLength()));
+                            if (grandparent != -1) {
+                                copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
+                            }
+                            removedLeaves.insert(i);
+                        }else{
+                            //neither of us are, so we want to eliminate ourselves and our parent
+                            //so set our parents sib to our great-grandparent
+                            int parent = copy->tree[i].getParent();
+                            int grandparent = copy->tree[parent].getParent();
+                            int parentsSibIndex;
+                            if (grandparent != -1) {
+                                int greatgrandparent = copy->tree[grandparent].getParent();
+                                int greatgrandparentLC, greatgrandparentRC;
+                                if (greatgrandparent != -1) {
+                                    greatgrandparentLC = copy->tree[greatgrandparent].getLChild();
+                                    greatgrandparentRC = copy->tree[greatgrandparent].getRChild();
+                                }
+                                
+                                int grandparentLC = copy->tree[grandparent].getLChild();
+                                int grandparentRC = copy->tree[grandparent].getRChild();
+                                
+                                parentsSibIndex = grandparentLC;
+                                if (grandparentLC == parent) { parentsSibIndex = grandparentRC; }
+                                
+                                //whichever of my greatgrandparents children was my grandparent
+                                if (greatgrandparentLC == grandparent) { greatgrandparentLC = parentsSibIndex; }
+                                else { greatgrandparentRC = parentsSibIndex; }
+                                
+                                copy->tree[parentsSibIndex].setParent(greatgrandparent);
+                                copy->tree[parentsSibIndex].setBranchLength((copy->tree[parentsSibIndex].getBranchLength()+copy->tree[grandparent].getBranchLength()));
+                                if (greatgrandparent != -1) {
+                                    copy->tree[greatgrandparent].setChildren(greatgrandparentLC, greatgrandparentRC);
+                                }
+                            }else{
+                                copy->tree[parent].setParent(-1);
+                                
+                            }
+                            removedLeaves.insert(sibIndex);
+                            removedLeaves.insert(i);
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Tree", "pruneNewTree");
+        exit(1);
+    }
 }
 /*****************************************************************/
 int Tree::populateNewTree(vector<Node>& oldtree, int node, int& index) {

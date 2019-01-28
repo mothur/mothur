@@ -71,7 +71,8 @@ class CountTable {
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
         bool setNamesOfGroups(vector<string>);
         int addGroup(string);
-        int removeGroup(string);
+        int removeGroup(string); //pass in group name
+        int removeGroup(int minSize);  //removes any groups with numSeqs < minSize
 
         int renameSeq(string, string); //used to change name of sequence for use with trees
         int setAbund(string, string, int); //set abundance number of seqs for that group for that seq
@@ -91,9 +92,11 @@ class CountTable {
         int setNumSeqs(string, int); //set total seqs for that seq, return -1 if not found
         int getNumSeqs() { return total; } //return total number of seqs
         int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
+        int getNumSeqsSmallestGroup(); //returns size of smallest group. If no groups, returns total num seqs (includes non uniques)
 
         vector<string> getNamesOfSeqs(); //return names of all seqeunce in table
         vector<string> getNamesOfSeqs(string); //returns names of seqs in specific group in table
+        vector<string> getNamesOfSeqs(vector<string>); //returns names of seqs in specific set of groups in table
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
         bool inTable(string);  //accepts sequence name and returns true if sequence is in table, false if not present
         ListVector getListVector();

@@ -303,11 +303,7 @@ int UnifracUnweightedCommand::execute() {
         if (subsample) {
             //user has not set size, set size = smallest samples size
             if (subsampleSize == -1) {
-                subsampleSize = ct->getGroupCount(Groups[0]); //num in first group
-                for (int i = 1; i < Groups.size(); i++) {
-                    int thisSize = ct->getGroupCount(Groups[i]);
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
+                subsampleSize = ct->getNumSeqsSmallestGroup();
                 m->mothurOut("\nSetting subsample size to " + toString(subsampleSize) + ".\n\n");
             }else { //eliminate any too small groups
                 vector<string> newGroups = Groups;
