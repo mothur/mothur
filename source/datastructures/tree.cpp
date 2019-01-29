@@ -276,8 +276,8 @@ int Tree::assembleTree() {
 	}
 }
 /*****************************************************************/
-//assumes leaf node names are in groups and no names file - used by indicator command and subsample
-void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
+//assumes leaf node names are in seqs and no names file - used by indicator command and subsample
+void Tree::getSubTree(Tree* Ctree, vector<string> seqs) {
 	try {
         
         //copy Tree since we are going to destroy it
@@ -296,12 +296,12 @@ void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
         for (int i = 0; i < numNodes; i++) {
             //initialize leaf nodes
             if (i <= (numLeaves-1)) {
-                tree[i].setName(Groups[i]);
+                tree[i].setName(seqs[i]);
                 
                 //save group info
                 int maxPars = 1;
                 vector<string> group;
-                vector<int> counts = ct->getGroupCounts(Groups[i]);
+                vector<int> counts = ct->getGroupCounts(seqs[i]);
                 for (int j = 0; j < namesOfGroups.size(); j++) {
                     if (counts[j] != 0) { //you have seqs from this group
                         groupNodeInfo[namesOfGroups[j]].push_back(i);
@@ -313,7 +313,7 @@ void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
                     }
                 }
                 tree[i].setGroup(group);
-                setIndex(Groups[i], i);
+                setIndex(seqs[i], i);
                 
                 if (maxPars > 1) { //then we have some more dominant groups
                     //erase all the groups that are less than maxPars because you found a more dominant group.
@@ -336,7 +336,7 @@ void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
             }
         }
         
-        pruneNewTree(copy, Groups);
+        pruneNewTree(copy, seqs);
 		
 		int root = 0;
 		for (int i = 0; i < copy->getNumNodes(); i++) {
@@ -346,6 +346,9 @@ void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
         
 		int nextSpot = numLeaves;
 		populateNewTree(copy->tree, root, nextSpot);
+        
+        //update treenames to reflect who is still in tree
+        Treenames = seqs;
         
         delete copy;
 	}

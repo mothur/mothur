@@ -487,7 +487,6 @@ int SubSampleCommand::getSubSampleTree() {
         if (m->getControl_pressed()) { delete newCt; delete subSampleTree; return 0; }
         
         vector<string> newTreeNames = newCt->getNamesOfSeqs(Groups); //without "doNotIncludeMe"
-        
         Tree* outputTree = new Tree(newTreeNames.size(), ct, Treenames);  //create ouptut tree - respecting pickedGroups
         
         outputTree->getSubTree(subSampleTree, newTreeNames); //builds tree with only seqs present in newCt

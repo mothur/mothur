@@ -769,8 +769,8 @@ int CountTable::removeGroup(string groupName) {
                         i--;
                     }else { //remove name from table if no seqs left
                         newIndexNameMap[reverse[thisIndex]] = i;
-                        thisIndex++;
                     }
+                    thisIndex++;
                 }
                 indexNameMap = newIndexNameMap;
 
