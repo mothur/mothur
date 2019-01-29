@@ -461,8 +461,10 @@ int SubSample::getSampleWithReplacement(SAbundVector*& sabund, int size) {
     }
 }
 //**********************************************************************************************************************
-CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups) {
+CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups, bool persample) {
 	try {
+        if (!persample) { return (getSample(ct, size, Groups)); }
+        
         if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: Cannot subsample by group because your count table doesn't have group information.\n"); m->setControl_pressed(true); }
             
         CountTable sampledCt;
@@ -471,13 +473,13 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
             sampledCt.addGroup(Groups[i]);
             
             vector<string> names = ct.getNamesOfSeqs(Groups[i]);
-            vector<string> allNames;
+            vector<int> allNames;
             for (int j = 0; j < names.size(); j++) {
                 
                 if (m->getControl_pressed()) { return sampledCt; }
                 
                 int num = ct. getGroupCount(names[j], Groups[i]);
-                for (int k = 0; k < num; k++) { allNames.push_back(names[j]); }
+                for (int k = 0; k < num; k++) { allNames.push_back(j); }
             }
             
             util.mothurRandomShuffle(allNames);
@@ -488,14 +490,14 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
                     
                     if (m->getControl_pressed()) { return sampledCt; }
                     
-                    map<string, vector<int> >::iterator it = tempCount.find(allNames[j]);
+                    map<string, vector<int> >::iterator it = tempCount.find(names[allNames[j]]);
                     
                     if (it == tempCount.end()) { //we have not seen this sequence at all yet
                         vector<int> tempGroups; tempGroups.resize(Groups.size(), 0);
                         tempGroups[i]++;
-                        tempCount[allNames[j]] = tempGroups;
+                        tempCount[names[allNames[j]]] = tempGroups;
                     }else{
-                        tempCount[allNames[j]][i]++;
+                        tempCount[names[allNames[j]]][i]++;
                     }
                 }
             }
@@ -515,77 +517,220 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
 	}
 }
 //**********************************************************************************************************************
-CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups, bool pickedGroups) {
-	try {
-        CountTable sampledCt;
-        if (!ct.hasGroupInfo() && pickedGroups) { m->mothurOut("[ERROR]: Cannot subsample with groups because your count table doesn't have group information.\n"); m->setControl_pressed(true); return sampledCt; }
+CountTable SubSample::getSampleWithReplacement(CountTable& ct, int size, vector<string> Groups) {
+    try {
+        if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: Cannot subsample by group because your count table doesn't have group information.\n"); m->setControl_pressed(true); }
         
-        if (ct.hasGroupInfo()) {
-            map<string, vector<int> > tempCount;
-            vector<item> allNames;
-            map<string, int> groupMap;
+        CountTable sampledCt;
+        map<string, vector<int> > tempCount;
+        for (int i = 0; i < Groups.size(); i++) {
+            sampledCt.addGroup(Groups[i]);
             
-            vector<string> myGroups;
-            if (pickedGroups) { myGroups = Groups; }
-            else {  myGroups = ct.getNamesOfGroups(); }
-            
-            for (int i = 0; i < myGroups.size(); i++) {
-                sampledCt.addGroup(myGroups[i]);
-                groupMap[myGroups[i]] = i;
+            vector<string> names = ct.getNamesOfSeqs(Groups[i]);
+            vector<int> allNames;
+            for (int j = 0; j < names.size(); j++) {
                 
-                vector<string> names = ct.getNamesOfSeqs(myGroups[i]);
-                for (int j = 0; j < names.size(); j++) {
-                    
-                    if (m->getControl_pressed()) { return sampledCt; }
-                    
-                    int num = ct. getGroupCount(names[j], myGroups[i]);
-                    for (int k = 0; k < num; k++) { 
-                        item temp(names[j], myGroups[i]);
-                        allNames.push_back(temp); 
-                    }
-                }
+                if (m->getControl_pressed()) { return sampledCt; }
+                
+                int num = ct.getGroupCount(names[j], Groups[i]);
+                for (int k = 0; k < num; k++) { allNames.push_back(j); }
             }
             
-            util.mothurRandomShuffle(allNames);
+            long long allNamesSize = allNames.size()-1;
             
-            if (allNames.size() < size) { 
-                if (pickedGroups) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); } 
-                else { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences in the groups you chose.\n"); }
-                m->setControl_pressed(true); return sampledCt; }
+            if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->setControl_pressed(true); }
             else{
                 for (int j = 0; j < size; j++) {
                     
                     if (m->getControl_pressed()) { return sampledCt; }
                     
-                    map<string, vector<int> >::iterator it = tempCount.find(allNames[j].name);
+                    //"grab random from bag"
+                    long long randomRead = util.getRandomIndex(allNamesSize);
+                    
+                    map<string, vector<int> >::iterator it = tempCount.find(names[allNames[randomRead]]);
                     
                     if (it == tempCount.end()) { //we have not seen this sequence at all yet
-                        vector<int> tempGroups; tempGroups.resize(myGroups.size(), 0);
-                        tempGroups[groupMap[allNames[j].group]]++;
-                        tempCount[allNames[j].name] = tempGroups;
+                        vector<int> tempGroups; tempGroups.resize(Groups.size(), 0);
+                        tempGroups[i]++;
+                        tempCount[names[allNames[randomRead]]] = tempGroups;
                     }else{
-                        tempCount[allNames[j].name][groupMap[allNames[j].group]]++;
+                        tempCount[names[allNames[randomRead]]][i]++;
                     }
                 }
             }
+        }
+        
+        //build count table
+        for (map<string, vector<int> >::iterator it = tempCount.begin(); it != tempCount.end();) {
+            sampledCt.push_back(it->first, it->second);
+            tempCount.erase(it++);
+        }
+        
+        return sampledCt;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getSampleWithReplacement");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+GroupMap SubSample::getSample(GroupMap& groupMap, int size, vector<string> Groups, bool persample) {
+    try {
+        if (!persample) { return (getSample(groupMap, size, Groups)); }
+        
+        GroupMap sampledGM;
+        
+        //initialize counts
+        map<string, int> groupCounts;
+        map<string, int>::iterator itGroupCounts;
+        for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
+        
+        for (int i = 0; i < Groups.size(); i++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            string thisGroup = Groups[i];
+            int thisSize = groupMap.getNumSeqs(thisGroup);
+            
+            if (thisSize >= size) {
+                
+                vector<string> names = groupMap.getNamesSeqs(thisGroup);
+                
+                util.mothurRandomShuffle(names);
+                
+                for (int j = 0; j < size; j++) { sampledGM.addSeq(names[j], thisGroup); }
+                
+            }else {  m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->setControl_pressed(true); }
+        }
+
+        return sampledGM;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getSample");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+GroupMap SubSample::getSample(GroupMap& groupMap, int size, vector<string> Groups) {
+    try {
+        GroupMap sampledGM;
+        
+        int thisSize = groupMap.getNumSeqs();
+        
+        if (thisSize >= size) {
+            
+            vector<string> names = groupMap.getNamesSeqs();
+            
+            util.mothurRandomShuffle(names);
+            
+            int numSelected = 0;
+            for (int j = 0; j < names.size(); j++) {
+                string thisGroup = groupMap.getGroup(names[j]);
+                
+                if (util.inUsersGroups(thisGroup, Groups)) {
+                    sampledGM.addSeq(names[j], thisGroup);
+                    numSelected++;
+                }
+                
+                //do we have enough??
+                if (numSelected == size) { break; }
+            }
+            
+        }else {  m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); m->setControl_pressed(true); }
+        
+        return sampledGM;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getSample");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+GroupMap SubSample::getSample(GroupMap& groupMap, int size) {
+    try {
+        GroupMap sampledGM;
+    
+        int thisSize = groupMap.getNumSeqs();
+        
+        if (thisSize >= size) {
+            
+            vector<string> names = groupMap.getNamesSeqs();
+            
+            util.mothurRandomShuffle(names);
+            
+            for (int j = 0; j < size; j++) {
+                string thisGroup = groupMap.getGroup(names[j]);
+                sampledGM.addSeq(names[j], thisGroup);
+            }
+            
+        }else {  m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); m->setControl_pressed(true); }
+        
+        return sampledGM;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getSample");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups) {
+	try {
+        CountTable sampledCt;
+        if (!ct.hasGroupInfo() && (Groups.size() != 0)) { m->mothurOut("[ERROR]: Cannot subsample with groups because your count table doesn't have group information.\n"); m->setControl_pressed(true); return sampledCt; }
+        
+        if (ct.hasGroupInfo()) { //only select reads from Groups
+        
+            map<string, vector<int> > tempCount;
+            for (int i = 0; i < Groups.size(); i++) { sampledCt.addGroup(Groups[i]);  }
+                
+            vector<string> names = ct.getNamesOfSeqs(Groups); //names of sequences in groups
+            vector<item> allNames;
+            for (int j = 0; j < names.size(); j++) {
+                    
+                if (m->getControl_pressed()) { return sampledCt; }
+                
+                for (int i = 0; i < Groups.size(); i++) {
+                    int num = ct.getGroupCount(names[j], Groups[i]); //num reads in this group from this seq
+                    item thisSeq(j,i);
+                    for (int k = 0; k < num; k++) { allNames.push_back(thisSeq); }
+                }
+            }
+                
+            util.mothurRandomShuffle(allNames);
+                
+            if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); m->setControl_pressed(true); }
+            else{
+                for (int j = 0; j < size; j++) {
+                        
+                    if (m->getControl_pressed()) { return sampledCt; }
+                        
+                    map<string, vector<int> >::iterator it = tempCount.find(names[allNames[j].name]);
+                        
+                    if (it == tempCount.end()) { //we have not seen this sequence at all yet
+                        vector<int> tempGroups; tempGroups.resize(Groups.size(), 0);
+                        tempGroups[allNames[j].group]++;
+                        tempCount[names[allNames[j].name]] = tempGroups;
+                    }else{
+                        tempCount[names[allNames[j].name]][allNames[j].group]++;
+                    }
+                }
+            }
+            
             
             //build count table
             for (map<string, vector<int> >::iterator it = tempCount.begin(); it != tempCount.end();) {
                 sampledCt.push_back(it->first, it->second);
                 tempCount.erase(it++);
             }
-            
-            //remove empty groups 
-            for (int i = 0; i < myGroups.size(); i++) { if (sampledCt.getGroupCount(myGroups[i]) == 0) { sampledCt.removeGroup(myGroups[i]); } }
-            
-        }else {
+
+        }else { //no groups
             vector<string> names = ct.getNamesOfSeqs();
-            map<string, int> nameMap;
-            vector<string> allNames;
+            map<int, int> nameMap;
+            vector<int> allNames;
             
             for (int i = 0; i < names.size(); i++) {
                 int num = ct.getNumSeqs(names[i]);
-                for (int j = 0; j < num; j++) { allNames.push_back(names[i]); }
+                for (int j = 0; j < num; j++) { allNames.push_back(i); }
             }
             
             if (allNames.size() < size) { m->mothurOut("[ERROR]: You have selected a size that is larger than the number of sequences.\n"); m->setControl_pressed(true); return sampledCt; }
@@ -595,7 +740,7 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
                 for (int j = 0; j < size; j++) {
                     if (m->getControl_pressed()) { return sampledCt; }
                     
-                    map<string, int>::iterator it = nameMap.find(allNames[j]);
+                    map<int, int>::iterator it = nameMap.find(allNames[j]);
                     
                     //we have not seen this sequence at all yet
                     if (it == nameMap.end()) { nameMap[allNames[j]] = 1;  }
@@ -603,8 +748,8 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups,
                 }
                 
                 //build count table
-                for (map<string, int>::iterator it = nameMap.begin(); it != nameMap.end();) {
-                    sampledCt.push_back(it->first, it->second);
+                for (map<int, int>::iterator it = nameMap.begin(); it != nameMap.end();) {
+                    sampledCt.push_back(names[it->first], it->second);
                     nameMap.erase(it++);
                 }
             }

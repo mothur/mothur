@@ -18,13 +18,17 @@
 
 class GroupMap {
 public:
-	GroupMap() { m = MothurOut::getInstance(); }
+	GroupMap() { m = MothurOut::getInstance(); groupFileName = ""; }
 	GroupMap(string);
 	~GroupMap();
+    
+    int getCopy(GroupMap*);
+    
 	int readMap();
     int readMap(string);
 	int readDesignMap();
     int readDesignMap(string);
+    
 	int getNumGroups();
 	bool isValidGroup(string);  //return true if string is a valid group
 	string getGroup(string);
@@ -35,23 +39,27 @@ public:
 		for (int i = 0; i < namesOfGroups.size(); i++) { groupIndex[namesOfGroups[i]] = i; }
 		return namesOfGroups;
 	}
+    
     vector<string> getNamesSeqs();
+    vector<string> getNamesSeqs(string); //get names of seqs belonging to group passed in
+    vector<string> getNamesSeqs(vector<string>); //get names of seqs belonging to the set of groups passed in
 	void setNamesOfGroups(vector<string> sn) { namesOfGroups = sn; }
 	int getNumSeqs()  {  return (int)groupmap.size();  }
-	vector<string> getNamesSeqs(vector<string>); //get names of seqs belonging to a group or set of groups
-	int getNumSeqs(string); //return the number of seqs in a given group
-    int getCopy(GroupMap*);
+    int getNumSeqs(string); //return the number of seqs in a given group
+    int getNumSeqsSmallestGroup(); //returns size of smallest group
+	
     int renameSeq(string, string);
+    int addSeq(string name, string group);
+    
+    int print(string);
     int print(ofstream&);
     int print(ofstream&, vector<string>); //print certain groups
-    int addSeq(string name, string group);
     
     map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays and libshuff commands.
     
 private:
 	vector<string> namesOfGroups;
 	MothurOut* m;
-	ifstream fileHandle;
 	string groupFileName;
     int index;
 	map<string, string>::iterator it;

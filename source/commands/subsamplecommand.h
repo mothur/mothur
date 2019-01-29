@@ -46,7 +46,7 @@ private:
 	string groups, label, outputDir;
 	vector<string> Groups, outputNames;
 	int size;
-	vector<string> names;
+	//vector<string> names;
 	map<string, vector<string> > nameMap;
     CountTable ct;
 	
@@ -60,8 +60,8 @@ private:
 	int processRabund(RAbundVector*&, ofstream&);
 	int processSabund(SAbundVector*&, ofstream&);
 	int processList(ListVector*&, set<string>&);
-	int getNames();
-	int readNames();
+	vector<string> getNames();
+	vector<string> readNames();
     int getTax(set<string>&);
 	
 };

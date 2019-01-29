@@ -171,11 +171,11 @@ struct diffPair {
 };
 
 struct item {
-    string name;
-    string group;
+    int name;
+    int group;
     
     item() {}
-    item(string n, string g) : name(n), group(g) {}
+    item(int n, int g) : name(n), group(g) {}
     ~item() {}
 };
 

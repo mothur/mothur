@@ -39,8 +39,13 @@ class SubSample {
         int getSample(SAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
         int getSampleWithReplacement(SAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
     
-        CountTable getSample(CountTable&, int, vector<string>); //subsample a countTable bygroup(same number sampled from each group, returns subsampled countTable 
-        CountTable getSample(CountTable&, int, vector<string>, bool); //subsample a countTable. If you want to only sample from specific groups, pass in groups in the vector and set bool=true, otherwise set bool=false.
+        CountTable getSample(CountTable&, int, vector<string>, bool persample); // if persample then subsample 'size' members from each group - bygroup(same number sampled from each group), returns subsampled. If not persample then subsample 'size' members from the set of groups passed in.
+        CountTable getSampleWithReplacement(CountTable&, int, vector<string>); //subsample a countTable bygroup(same number sampled from each group), returns subsampled countTable
+    
+        GroupMap getSample(GroupMap&, int, vector<string> groupsWanted, bool persample); // if persample then subsample 'size' members from each group - bygroup(same number sampled from each group), returns subsampled. If not persample then subsample 'size' members from the set of groups passed in.
+        GroupMap getSample(GroupMap&, int size); //returns subsampled GroupMap with 'size' members
+
+    
         set<long long> getWeightedSample(map<long long, long long>&, long long); //map of sequence names -> weight (could be abundance or some other measure), num to sample
     
     private:
@@ -48,7 +53,8 @@ class SubSample {
         MothurOut* m;
         Utils util;
         map<string, string> deconvolute(map<string, string> wholeSet, vector<string>& subsampleWanted); //returns new nameMap containing only subsampled names, and removes redundants from subsampled wanted because it makes the new nameMap.
-
+        GroupMap getSample(GroupMap&, int, vector<string> groupsWanted);
+        CountTable getSample(CountTable&, int, vector<string>); //subsample a countTable bygroup(same number sampled from each group), returns subsampled countTable
 
 };
 

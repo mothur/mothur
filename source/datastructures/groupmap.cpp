@@ -14,7 +14,6 @@
  GroupMap::GroupMap(string filename) {
 	m = MothurOut::getInstance();
 	groupFileName = filename;
-	util.openInputFile(filename, fileHandle);
 	index = 0;
 }
 
@@ -49,12 +48,18 @@ int GroupMap::addSeq(string name, string group) {
 /************************************************************/
 int GroupMap::readMap() {
     try {
+        
+        if (groupFileName == "") { m->mothurOut("[ERROR]: missing groupfile name, aborting.\n");  m->setControl_pressed(true); return 0; }
+        
         string seqName, seqGroup;
 		int error = 0;
         string rest = "";
         char buffer[4096];
         bool pairDone = false;
         bool columnOne = true;
+        
+        ifstream fileHandle;
+        util.openInputFile(groupFileName, fileHandle);
         
         string header = util.getline(fileHandle);
         vector<string> pieces = util.splitWhiteSpace(header);
@@ -146,6 +151,12 @@ int GroupMap::readDesignMap() {
         bool pairDone = false;
         bool columnOne = true;
         
+        if (groupFileName == "") { m->mothurOut("[ERROR]: missing groupfile name, aborting.\n");  m->setControl_pressed(true); return 0; }
+        
+        ifstream fileHandle;
+        util.openInputFile(groupFileName, fileHandle);
+
+        
         while (!fileHandle.eof()) {
             if (m->getControl_pressed()) { fileHandle.close();  return 1; }
             
@@ -212,6 +223,7 @@ int GroupMap::readDesignMap() {
 int GroupMap::readMap(string filename) {
     try {
         groupFileName = filename;
+        ifstream fileHandle;
         util.openInputFile(filename, fileHandle);
         index = 0;
         string seqName, seqGroup;
@@ -286,6 +298,7 @@ int GroupMap::readMap(string filename) {
 int GroupMap::readDesignMap(string filename) {
     try {
         groupFileName = filename;
+        ifstream fileHandle;
         util.openInputFile(filename, fileHandle);
         index = 0;
         string seqName, seqGroup;
@@ -456,6 +469,23 @@ int GroupMap::getNumSeqs(string group) {
 	}
 }
 /************************************************************/
+int GroupMap::getNumSeqsSmallestGroup() {
+    try {
+        
+        int smallestGroup = MOTHURMAX;
+        
+        for (map<string, int>::iterator itNum = seqsPerGroup.begin(); itNum != seqsPerGroup.end(); itNum++) {
+            if (itNum->second < smallestGroup) {  smallestGroup = itNum->second; }
+        }
+    
+        return smallestGroup;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "getNumSeqsSmallestGroup");
+        exit(1);
+    }
+}
+/************************************************************/
 int GroupMap::renameSeq(string oldName, string newName) {
 	try {
 		
@@ -480,6 +510,24 @@ int GroupMap::renameSeq(string oldName, string newName) {
 		m->errorOut(e, "GroupMap", "renameSeq");
 		exit(1);
 	}
+}
+/************************************************************/
+int GroupMap::print(string outputName) {
+    try {
+        ofstream out;
+        util.openOutputFile(outputName, out);
+        
+        for (map<string, string>::iterator itName = groupmap.begin(); itName != groupmap.end(); itName++) {
+            out << itName->first << '\t' << itName->second << endl;
+        }
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "print");
+        exit(1);
+    }
 }
 /************************************************************/
 int GroupMap::print(ofstream& out) {
@@ -552,6 +600,25 @@ vector<string> GroupMap::getNamesSeqs(vector<string> picked){
 		exit(1);
 	}
 }
-
+/************************************************************/
+vector<string> GroupMap::getNamesSeqs(string picked){
+    try {
+        
+        vector<string> names;
+        
+        for (it = groupmap.begin(); it != groupmap.end(); it++) {
+            //if you are belong to one the the groups in the picked vector add you
+            if (it->second == picked) {
+                names.push_back(it->first);
+            }
+        }
+        
+        return names;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "getNamesSeqs");
+        exit(1);
+    }
+}
 /************************************************************/
 
