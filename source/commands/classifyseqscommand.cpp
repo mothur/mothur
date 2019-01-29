@@ -683,13 +683,6 @@ void driverClassifier(classifyData* params){
             }
             delete candidateSeq;
             
-#if defined NON_WINDOWS
-            unsigned long long pos = inFASTA.tellg();
-            if ((pos == -1) || (pos >= params->end)) { break; }
-#else
-            if (params->count == params->end) { break; }
-#endif
-            
             //report progress
             if((params->count) % 100 == 0){
                 params->m->mothurOutJustToScreen(toString(params->count) +"\n");
@@ -698,7 +691,14 @@ void driverClassifier(classifyData* params){
                 if (accnosBuffer != "") { params->accnosWriter->write(accnosBuffer); accnosBuffer = ""; }
             }
             
-        }
+#if defined NON_WINDOWS
+            unsigned long long pos = inFASTA.tellg();
+            if ((pos == -1) || (pos >= params->end)) { break; }
+#else
+            if (params->count == params->end) { break; }
+#endif
+            
+    }
         //report progress
         if((params->count) % 100 != 0){
             params->m->mothurOutJustToScreen(toString(params->count)+"\n");
