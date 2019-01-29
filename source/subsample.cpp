@@ -420,6 +420,47 @@ int SubSample::getSample(SAbundVector*& sabund, int size) {
 	}
 }
 //**********************************************************************************************************************
+int SubSample::getSampleWithReplacement(SAbundVector*& sabund, int size) {
+    try {
+        
+        int numBins = sabund->getNumBins();
+        int thisSize = sabund->getNumSeqs();
+        
+        OrderVector order = sabund->getOrderVector();
+        
+        if (thisSize > size) {
+            RAbundVector rabund(numBins);
+            rabund.setLabel(sabund->getLabel());
+            
+            long long orderSize = order.size()-1;
+            for (int j = 0; j < size; j++) {
+                
+                if (m->getControl_pressed()) { return 0; }
+                
+                //"grab random from bag"
+                long long randomRead = util.getRandomIndex(orderSize);
+                
+                int abund = rabund.get(order.get(randomRead));
+                rabund.set(order.get(randomRead), (abund+1));
+            }
+            
+            delete sabund;
+            sabund = new SAbundVector();
+            *sabund = rabund.getSAbundVector();
+            
+        }else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the sabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your sabund vector.\n"); m->setControl_pressed(true); }
+        
+        if (m->getControl_pressed()) { return 0; }
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getSampleWithReplacement");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups) {
 	try {
         if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: Cannot subsample by group because your count table doesn't have group information.\n"); m->setControl_pressed(true); }
