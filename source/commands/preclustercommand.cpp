@@ -576,287 +576,287 @@ vector<int> calcMisMatchesIndels(string seq1, string seq2, preClusterData* param
 /**************************************************************************************************/
 
 int process(string group, string newMapFile, preClusterData* params){
-  try {
-    ofstream out;
-
-		if(params->pc_method != "deblur"){
-	    params->util.openOutputFile(newMapFile, out);
-			out << "ideal_seq\terror_seq\tabundance\tdiffs\tsequence" << endl;
-		}
-
-    int count = 0;
-    long long numSeqs = params->alignSeqs.size();
-
-    vector<int> originalCount(numSeqs);
-
-    for (int i = 0; i < numSeqs; i++) {
-			originalCount[i] = params->alignSeqs[i]->numIdentical;
-		}
-
-
-		if(params->pc_method == "simple"){
-	    for (int i = 0; i < numSeqs; i++) {
-
-	      if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
-
-	        string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
-
-	        //try to merge it with all smaller seqs
-	        for (int j = i+1; j < numSeqs; j++) {
-
-	          if (params->m->getControl_pressed()) { out.close(); return 0; }
-
-	          if (params->alignSeqs[j]->active && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet
-	            //are you within "diff" bases
-	            int mismatch = params->length;
-	            if (params->align_method == "unaligned") {
-								mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
-	 																				params->alignSeqs[j]->seq.getAligned(), params);
-							} else {
-								mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq,
-																					params->alignSeqs[j]->filteredSeq, params);
-							}
-
-	            if (mismatch <= params->diffs) {
-	              //merge
-	              params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
-	              params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
-
-	              chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(originalCount[j]) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
-
-	              params->alignSeqs[j]->active = 0;
-	              params->alignSeqs[j]->numIdentical = 0;
-	              params->alignSeqs[j]->diffs = mismatch;
-	              count++;
-	            }
-	          }//end if j active
-	        }//end for loop j
-
-		      //remove from active list
-		      params->alignSeqs[i]->active = 0;
-
-		      out << chunk;
-
-		     }//end if active i
-	      if(i % 100 == 0)	{
-					params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");
-				}
-	    }
-
-			if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
-
- 		} else if(params->pc_method == "unoise") {
-
-			vector<double> beta(params->diffs, 0);
-			for(int i=0;i<beta.size();i++){
-				beta[i] = pow(0.5, params->alpha * i + 1.0);
-			}
-
-
-	    for (int i = 0; i < numSeqs; i++) {
-
-	      if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
-
-	        string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
-
-	        //try to merge it with all smaller seqs
-	        for (int j = i+1; j < numSeqs; j++) {
-
-	          if (params->m->getControl_pressed()) { out.close(); return 0; }
-
-	          if (params->alignSeqs[j]->active && originalCount[j] < originalCount[i]) {  //this sequence has not been merged yet
-
-	            int mismatch = params->length;
-							double skew = (double)originalCount[j]/(double)originalCount[i];
-
-	            if (params->align_method == "unaligned") {
-								mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
-	 																				params->alignSeqs[j]->seq.getAligned(), params);
-							} else {
-								mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq,
-																					params->alignSeqs[j]->filteredSeq, params);
-							}
-
-	            if (mismatch <= params->diffs && skew <= beta[mismatch]) { //merge
-	              params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
-	              params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
-
-	              chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(originalCount[j]) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
-
-	              params->alignSeqs[j]->active = 0;
-	              params->alignSeqs[j]->numIdentical = 0;
-	              params->alignSeqs[j]->diffs = mismatch;
-	              count++;
-	            }
-	          }//end if j active
-	        }//end for loop j
-
-		      //remove from active list
-		      params->alignSeqs[i]->active = 0;
-
-		      out << chunk;
-
-		    }//end if active i
-	      if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
-
-	    }
-
-	  	if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + 	toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
-
-		} else if(params->pc_method == "tree") {
-
-			vector<int> cluster(numSeqs, -1);
-			for(int i=0;i<cluster.size();i++){
-				cluster[i] = i;
-			}
-
-	    for (int i=0;i<numSeqs-1;i++) {
-
-        if (params->m->getControl_pressed()) { out.close(); return 0; }
-
-        for (int j=i+1;j<numSeqs;j++) {
-
-          if (params->m->getControl_pressed()) { out.close(); return 0; }
-
-          int mismatches = params->length;
-
-					if(originalCount[i] > originalCount[j] * params->delta){
-	          if (params->align_method == "unaligned") {
-							mismatches = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
-																					params->alignSeqs[j]->seq.getAligned(), params);
-						} else {
-							mismatches = calcMisMatches(params->alignSeqs[i]->filteredSeq,
-																				params->alignSeqs[j]->filteredSeq, params);
-						}
-
-						if(mismatches == 1){
-							cluster[j] = cluster[i];
-						}
-					}
+    try {
+        ofstream out;
+        
+        if(params->pc_method != "deblur"){
+            params->util.openOutputFile(newMapFile, out);
+            out << "ideal_seq\terror_seq\tabundance\tdiffs\tsequence" << endl;
         }
-
-				if(cluster[i] == i) count++;
-
-	      if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
-      }
-	     params->m->mothurOutJustToScreen(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");
-
-
-			count = 0;
-			vector<string> chunk(numSeqs, "");
-
-			for(int i=0;i<numSeqs;i++){
-
-				if(i == cluster[i] || cluster[i] == -1){
-
-	        chunk[i] = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
-
-				} else {
-
-	        params->alignSeqs[cluster[i]]->names += ',' + params->alignSeqs[i]->names;
-	        params->alignSeqs[cluster[i]]->numIdentical += params->alignSeqs[i]->numIdentical;
-
-					int mismatches;
-					params->diffs = params->length;
-
-          if (params->align_method == "unaligned") {
-						mismatches = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
-																				params->alignSeqs[cluster[i]]->seq.getAligned(), params);
-					} else {
-						mismatches = calcMisMatches(params->alignSeqs[i]->filteredSeq,
-																			params->alignSeqs[cluster[i]]->filteredSeq, params);
-					}
-
-        	chunk[cluster[i]] += params->alignSeqs[cluster[i]]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(mismatches) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
-
-        	params->alignSeqs[i]->active = 0;
-        	params->alignSeqs[i]->numIdentical = 0;
-
-        	count++;
-
-				}
-			}
-
-			for(int i=0;i<numSeqs;i++){
-				if(chunk[i] != ""){
-					out << chunk[i];
-				}
-			}
-
-	  } else if(params->pc_method == "deblur") {
-
-			vector<double> weights(numSeqs, 0);
-			for(int i=0;i<numSeqs;i++){
-				weights[i] = (double)params->alignSeqs[i]->numIdentical;
-			}
-
-			for(int i=0;i<numSeqs;i++){
-
-        if (params->m->getControl_pressed()) { out.close(); return 0; }
-
-				if(i % 100 == 0){ cout << i << endl; }
-
-				if(weights[i] <= 0){	continue;	}
-
-				int max_h_dist = params->error_dist.size();
-				vector<double> expected_bad_reads(max_h_dist, 0);
- 				for(int j=0;j<max_h_dist;j++){
- 					expected_bad_reads[j] = params->error_dist[j] * weights[i];
-				}
-
-				if(expected_bad_reads[1] < 0.1){	continue;	}
-
-				for(int j=0;j<numSeqs;j++){
-
-        	if (params->m->getControl_pressed()) { out.close(); return 0; }
-
-					if(i == j) { continue; }
-					if(weights[j] <= 0){	continue;	}
-
-					vector<int> nSubsInDels(2, 0);
-          if (params->align_method == "unaligned") {
-						nSubsInDels = calcMisMatchesIndels(params->alignSeqs[i]->seq.getAligned(),
-																				params->alignSeqs[j]->seq.getAligned(), params);
-					} else {
-						nSubsInDels = calcMisMatchesIndels(params->alignSeqs[i]->filteredSeq,
-																				params->alignSeqs[j]->filteredSeq, params);
-					}
-
-					if(nSubsInDels[0] >= max_h_dist) { continue; }
-
-					double correction = expected_bad_reads[nSubsInDels[0]];
-
-					if(nSubsInDels[1] > params->max_indels){
-						correction = 0;
-					} else if(nSubsInDels[1] > 0){
-						correction = correction * params->indel_prob;
-					}
-
-					weights[j] -= correction;
-				}
-			}
-
-			for(int i=0;i<numSeqs;i++){
-				params->alignSeqs[i]->numIdentical = round(weights[i]);
-
-				if(weights[i] <= 0){
-					params->alignSeqs[i]->numIdentical = 0;
-					params->alignSeqs[i]->active = 0;
-					count++;
-				}
-			}
-
-		} else {
-
-			cout << "fail!\n";
-
-		}
-
-		if(params->pc_method != "deblur"){
-	  	out.close();
-		}
-
-		return count;
+        
+        int count = 0;
+        long long numSeqs = params->alignSeqs.size();
+        
+        vector<int> originalCount(numSeqs);
+        
+        for (int i = 0; i < numSeqs; i++) {
+            originalCount[i] = params->alignSeqs[i]->numIdentical;
+        }
+        
+        
+        if(params->pc_method == "simple"){
+            for (int i = 0; i < numSeqs; i++) {
+                
+                if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
+                    
+                    string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+                    
+                    //try to merge it with all smaller seqs
+                    for (int j = i+1; j < numSeqs; j++) {
+                        
+                        if (params->m->getControl_pressed()) { out.close(); return 0; }
+                        
+                        if (params->alignSeqs[j]->active && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet
+                            //are you within "diff" bases
+                            int mismatch = params->length;
+                            if (params->align_method == "unaligned") {
+                                mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
+                                                          params->alignSeqs[j]->seq.getAligned(), params);
+                            } else {
+                                mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq,
+                                                          params->alignSeqs[j]->filteredSeq, params);
+                            }
+                            
+                            if (mismatch <= params->diffs) {
+                                //merge
+                                params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
+                                params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
+                                
+                                chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(originalCount[j]) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
+                                
+                                params->alignSeqs[j]->active = 0;
+                                params->alignSeqs[j]->numIdentical = 0;
+                                params->alignSeqs[j]->diffs = mismatch;
+                                count++;
+                            }
+                        }//end if j active
+                    }//end for loop j
+                    
+                    //remove from active list
+                    params->alignSeqs[i]->active = 0;
+                    
+                    out << chunk;
+                    
+                }//end if active i
+                if(i % 100 == 0)	{
+                    params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");
+                }
+            }
+            
+            if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
+            
+        } else if(params->pc_method == "unoise") {
+            
+            vector<double> beta(params->diffs, 0);
+            for(int i=0;i<beta.size();i++){
+                beta[i] = pow(0.5, params->alpha * i + 1.0);
+            }
+            
+            
+            for (int i = 0; i < numSeqs; i++) {
+                
+                if (params->alignSeqs[i]->active) {  //this sequence has not been merged yet
+                    
+                    string chunk = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+                    
+                    //try to merge it with all smaller seqs
+                    for (int j = i+1; j < numSeqs; j++) {
+                        
+                        if (params->m->getControl_pressed()) { out.close(); return 0; }
+                        
+                        if (params->alignSeqs[j]->active && originalCount[j] < originalCount[i]) {  //this sequence has not been merged yet
+                            
+                            int mismatch = params->length;
+                            double skew = (double)originalCount[j]/(double)originalCount[i];
+                            
+                            if (params->align_method == "unaligned") {
+                                mismatch = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
+                                                          params->alignSeqs[j]->seq.getAligned(), params);
+                            } else {
+                                mismatch = calcMisMatches(params->alignSeqs[i]->filteredSeq,
+                                                          params->alignSeqs[j]->filteredSeq, params);
+                            }
+                            
+                            if (mismatch <= params->diffs && skew <= beta[mismatch]) { //merge
+                                params->alignSeqs[i]->names += ',' + params->alignSeqs[j]->names;
+                                params->alignSeqs[i]->numIdentical += params->alignSeqs[j]->numIdentical;
+                                
+                                chunk += params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[j]->seq.getName() + "\t" + toString(originalCount[j]) + "\t" + toString(mismatch) + "\t" + params->alignSeqs[j]->seq.getAligned() + "\n";
+                                
+                                params->alignSeqs[j]->active = 0;
+                                params->alignSeqs[j]->numIdentical = 0;
+                                params->alignSeqs[j]->diffs = mismatch;
+                                count++;
+                            }
+                        }//end if j active
+                    }//end for loop j
+                    
+                    //remove from active list
+                    params->alignSeqs[i]->active = 0;
+                    
+                    out << chunk;
+                    
+                }//end if active i
+                if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
+                
+            }
+            
+            if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + 	toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
+            
+        } else if(params->pc_method == "tree") {
+            
+            vector<int> cluster(numSeqs, -1);
+            for(int i=0;i<cluster.size();i++){
+                cluster[i] = i;
+            }
+            
+            for (int i=0;i<numSeqs-1;i++) {
+                
+                if (params->m->getControl_pressed()) { out.close(); return 0; }
+                
+                for (int j=i+1;j<numSeqs;j++) {
+                    
+                    if (params->m->getControl_pressed()) { out.close(); return 0; }
+                    
+                    int mismatches = params->length;
+                    
+                    if(originalCount[i] > originalCount[j] * params->delta){
+                        if (params->align_method == "unaligned") {
+                            mismatches = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
+                                                        params->alignSeqs[j]->seq.getAligned(), params);
+                        } else {
+                            mismatches = calcMisMatches(params->alignSeqs[i]->filteredSeq,
+                                                        params->alignSeqs[j]->filteredSeq, params);
+                        }
+                        
+                        if(mismatches == 1){
+                            cluster[j] = cluster[i];
+                        }
+                    }
+                }
+                
+                if(cluster[i] == i) count++;
+                
+                if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
+            }
+            params->m->mothurOutJustToScreen(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");
+            
+            
+            count = 0;
+            vector<string> chunk(numSeqs, "");
+            
+            for(int i=0;i<numSeqs;i++){
+                
+                if(i == cluster[i] || cluster[i] == -1){
+                    
+                    chunk[i] = params->alignSeqs[i]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(0) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+                    
+                } else {
+                    
+                    params->alignSeqs[cluster[i]]->names += ',' + params->alignSeqs[i]->names;
+                    params->alignSeqs[cluster[i]]->numIdentical += params->alignSeqs[i]->numIdentical;
+                    
+                    int mismatches;
+                    params->diffs = params->length;
+                    
+                    if (params->align_method == "unaligned") {
+                        mismatches = calcMisMatches(params->alignSeqs[i]->seq.getAligned(),
+                                                    params->alignSeqs[cluster[i]]->seq.getAligned(), params);
+                    } else {
+                        mismatches = calcMisMatches(params->alignSeqs[i]->filteredSeq,
+                                                    params->alignSeqs[cluster[i]]->filteredSeq, params);
+                    }
+                    
+                    chunk[cluster[i]] += params->alignSeqs[cluster[i]]->seq.getName() + "\t" + params->alignSeqs[i]->seq.getName() + "\t" + toString(originalCount[i]) + "\t" + toString(mismatches) + "\t" + params->alignSeqs[i]->seq.getAligned() + "\n";
+                    
+                    params->alignSeqs[i]->active = 0;
+                    params->alignSeqs[i]->numIdentical = 0;
+                    
+                    count++;
+                    
+                }
+            }
+            
+            for(int i=0;i<numSeqs;i++){
+                if(chunk[i] != ""){
+                    out << chunk[i];
+                }
+            }
+            
+        } else if(params->pc_method == "deblur") {
+            
+            vector<double> weights(numSeqs, 0);
+            for(int i=0;i<numSeqs;i++){
+                weights[i] = (double)params->alignSeqs[i]->numIdentical;
+            }
+            
+            for(int i=0;i<numSeqs;i++){
+                
+                if (params->m->getControl_pressed()) { out.close(); return 0; }
+                
+                if(i % 100 == 0){ cout << i << endl; }
+                
+                if(weights[i] <= 0){	continue;	}
+                
+                int max_h_dist = params->error_dist.size();
+                vector<double> expected_bad_reads(max_h_dist, 0);
+                for(int j=0;j<max_h_dist;j++){
+                    expected_bad_reads[j] = params->error_dist[j] * weights[i];
+                }
+                
+                if(expected_bad_reads[1] < 0.1){	continue;	}
+                
+                for(int j=0;j<numSeqs;j++){
+                    
+                    if (params->m->getControl_pressed()) { out.close(); return 0; }
+                    
+                    if(i == j) { continue; }
+                    if(weights[j] <= 0){	continue;	}
+                    
+                    vector<int> nSubsInDels(2, 0);
+                    if (params->align_method == "unaligned") {
+                        nSubsInDels = calcMisMatchesIndels(params->alignSeqs[i]->seq.getAligned(),
+                                                           params->alignSeqs[j]->seq.getAligned(), params);
+                    } else {
+                        nSubsInDels = calcMisMatchesIndels(params->alignSeqs[i]->filteredSeq,
+                                                           params->alignSeqs[j]->filteredSeq, params);
+                    }
+                    
+                    if(nSubsInDels[0] >= max_h_dist) { continue; }
+                    
+                    double correction = expected_bad_reads[nSubsInDels[0]];
+                    
+                    if(nSubsInDels[1] > params->max_indels){
+                        correction = 0;
+                    } else if(nSubsInDels[1] > 0){
+                        correction = correction * params->indel_prob;
+                    }
+                    
+                    weights[j] -= correction;
+                }
+            }
+            
+            for(int i=0;i<numSeqs;i++){
+                params->alignSeqs[i]->numIdentical = round(weights[i]);
+                
+                if(weights[i] <= 0){
+                    params->alignSeqs[i]->numIdentical = 0;
+                    params->alignSeqs[i]->active = 0;
+                    count++;
+                }
+            }
+            
+        } else {
+            
+            cout << "fail!\n";
+            
+        }
+        
+        if(params->pc_method != "deblur"){
+            out.close();
+        }
+        
+        return count;
   }
   catch(exception& e) {
       params->m->errorOut(e, "PreClusterCommand", "process");
@@ -1191,11 +1191,11 @@ void printData(string group, preClusterData* params){
                     if (params->alignSeqs[i]->numIdentical != 0) {
                         params->alignSeqs[i]->seq.printSequence(params->newFName);
                         
-                        if(params->pc_method == "deblur"){
+                        //if(params->pc_method == "deblur"){
                             params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + toString(params->alignSeqs[i]->numIdentical) + '\n');
-                        } else {
-                            params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + params->alignSeqs[i]->names + '\n');
-                        }
+                        //} else {
+                           // params->newNName->write(group + '\t' + params->alignSeqs[i]->seq.getName() + '\t' + toString(params->alignSeqs[i]->numIdentical) + '\t' + params->alignSeqs[i]->names + '\n');
+                        //}
                     }
                 }
             }
@@ -1303,10 +1303,12 @@ long long driverGroups(preClusterData* params){
 }
 
 /**************************************************************************************************/
-
+//only called with out table including groups
 int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string newfasta){
 	try {
         m->mothurOut("\nDeconvoluting count table results...\n");
+        
+        ct.zeroOutTable();
         
         ifstream inNames;
         util.openInputFile(newname, inNames);
@@ -1314,69 +1316,26 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
         time_t start = time(NULL);
         long long count = 0;
         
-        if(pc_method != "deblur"){
-            string group, first, second;
-            set<string> uniqueNames;
-            
-            
-            while (!inNames.eof()) {
-                
-                if (m->getControl_pressed()) { break; }
-                
-                inNames >> group; util.gobble(inNames);
-                inNames >> first; util.gobble(inNames);
-                inNames >> second; util.gobble(inNames);
-                
-                vector<string> names;
-                util.splitAtComma(second, names);
-                
-                uniqueNames.insert(first);
-                
-                int total = ct.getGroupCount(first, group);
-                for (int i = 1; i < names.size(); i++) {
-                    total += ct.getGroupCount(names[i], group);
-                    ct.setAbund(names[i], group, 0);
-                }
-                ct.setAbund(first, group, total);
-                
-                count++;
-                
-                //report progress
-                if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
-                
-            }
-            //report progress
-            if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+        string group, unique_sequence;
+        int numDups;
 
-            inNames.close();
+        while (!inNames.eof()) {
             
-        } else { //for deblur
+            if (m->getControl_pressed()) { break; }
             
-            string group, unique_sequence;
-            int count;
+            inNames >> group; util.gobble(inNames);
+            inNames >> unique_sequence; util.gobble(inNames);
+            inNames >> numDups; util.gobble(inNames);
             
-            ct.zeroOutTable();
+            ct.setAbund(unique_sequence, group, numDups); count++;
             
-            while (!inNames.eof()) {
-                
-                if (m->getControl_pressed()) { break; }
-                
-                inNames >> group; util.gobble(inNames);
-                inNames >> unique_sequence; util.gobble(inNames);
-                inNames >> count; util.gobble(inNames);
-                
-                ct.setAbund(unique_sequence, group, count);
-                
-                count++;
-                
-                //report progress
-                if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
-                
-            }
             //report progress
-            if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
-
+            if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
         }
+        //report progress
+        if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+        
+        inNames.close();
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.\n\nRemoving merged reads from count table...");
         start = time(NULL);
@@ -1386,40 +1345,37 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
         util.mothurRemove(newname);
         
         m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to remove merged reads.\n");
+        start = time(NULL);
+        m->mothurOut("\nDeconvolute fasta...");
         
-        if (bygroup) { //if by group, must remove the duplicate seqs that are named the same
-                start = time(NULL);
-             m->mothurOut("\nDeconvolute fasta...");
+        ifstream in;
+        util.openInputFile(newfasta, in);
+        
+        ofstream out;
+        util.openOutputFile(newfasta+"temp", out);
+        
+        count = 0;
+        set<string> already;
+        while(!in.eof()) {
+            if (m->getControl_pressed()) { break; }
             
-            ifstream in;
-            util.openInputFile(newfasta, in);
+            Sequence seq(in); util.gobble(in);
             
-            ofstream out;
-            util.openOutputFile(newfasta+"temp", out);
-            
-            int count = 0;
-            set<string> already;
-            while(!in.eof()) {
-                if (m->getControl_pressed()) { break; }
-                
-                Sequence seq(in); util.gobble(in);
-                
-                if (seq.getName() != "") {
-                    count++;
-                    if (already.count(seq.getName()) == 0) {
-                        seq.printSequence(out);
-                        already.insert(seq.getName());
-                    }
+            if (seq.getName() != "") {
+                count++;
+                if (already.count(seq.getName()) == 0) {
+                    seq.printSequence(out);
+                    already.insert(seq.getName());
                 }
             }
-            in.close();
-            out.close();
-            util.mothurRemove(newfasta);
-            util.renameFile(newfasta+"temp", newfasta);
-            
-            m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to deconvolute the fasta file.\n");
         }
-
+        in.close();
+        out.close();
+        util.mothurRemove(newfasta);
+        util.renameFile(newfasta+"temp", newfasta);
+        
+        m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to deconvolute the fasta file.\n");
+        
 		return 0;
 	}
 	catch(exception& e) {
