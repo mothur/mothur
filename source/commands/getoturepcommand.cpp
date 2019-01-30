@@ -794,7 +794,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 		}
 		
         map<string, long long> matrixNameIndexes;
-        if (method != "abundance") {  matrix->getNameIndexMap(); }
+        if (method != "abundance") {  matrix->getNameIndexMap(); } //maps unique names to index in matrix
         
 		//for each bin in the list vector
         vector<string> binLabels = processList->getLabels();
