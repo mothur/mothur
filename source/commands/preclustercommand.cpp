@@ -1306,86 +1306,119 @@ long long driverGroups(preClusterData* params){
 
 int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string newfasta){
 	try {
-		ifstream inNames;
-    util.openInputFile(newname, inNames);
+        m->mothurOut("\nDeconvoluting count table results...\n");
+        
+        ifstream inNames;
+        util.openInputFile(newname, inNames);
+        
+        time_t start = time(NULL);
+        long long count = 0;
+        
+        if(pc_method != "deblur"){
+            string group, first, second;
+            set<string> uniqueNames;
+            
+            
+            while (!inNames.eof()) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                inNames >> group; util.gobble(inNames);
+                inNames >> first; util.gobble(inNames);
+                inNames >> second; util.gobble(inNames);
+                
+                vector<string> names;
+                util.splitAtComma(second, names);
+                
+                uniqueNames.insert(first);
+                
+                int total = ct.getGroupCount(first, group);
+                for (int i = 1; i < names.size(); i++) {
+                    total += ct.getGroupCount(names[i], group);
+                    ct.setAbund(names[i], group, 0);
+                }
+                ct.setAbund(first, group, total);
+                
+                count++;
+                
+                //report progress
+                if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+                
+            }
+            //report progress
+            if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
 
-		if(pc_method != "deblur"){
-	    string group, first, second;
-	    set<string> uniqueNames;
+            inNames.close();
+            
+        } else { //for deblur
+            
+            string group, unique_sequence;
+            int count;
+            
+            ct.zeroOutTable();
+            
+            while (!inNames.eof()) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                inNames >> group; util.gobble(inNames);
+                inNames >> unique_sequence; util.gobble(inNames);
+                inNames >> count; util.gobble(inNames);
+                
+                ct.setAbund(unique_sequence, group, count);
+                
+                count++;
+                
+                //report progress
+                if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+                
+            }
+            //report progress
+            if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
 
-	    while (!inNames.eof()) {
-
-	      if (m->getControl_pressed()) { break; }
-
-	      inNames >> group; util.gobble(inNames);
-	      inNames >> first; util.gobble(inNames);
-	      inNames >> second; util.gobble(inNames);
-
-	      vector<string> names;
-	      util.splitAtComma(second, names);
-
-	      uniqueNames.insert(first);
-
-	      int total = ct.getGroupCount(first, group);
-	      for (int i = 1; i < names.size(); i++) {
-	          total += ct.getGroupCount(names[i], group);
-	          ct.setAbund(names[i], group, 0);
-	      }
-	      ct.setAbund(first, group, total);
-	    }
-	    inNames.close();
-
-		} else { //for deblur
-
-	    string group, unique_sequence;
-			int count;
-
-			ct.zeroOutTable();
-
-	    while (!inNames.eof()) {
-
-	      if (m->getControl_pressed()) { break; }
-
-	      inNames >> group; util.gobble(inNames);
-	      inNames >> unique_sequence; util.gobble(inNames);
-	      inNames >> count; util.gobble(inNames);
-
-				ct.setAbund(unique_sequence, group, count);
-
-			}
-		}
-
-    ct.eliminateZeroSeqs();
-    ct.printTable(newcount);
-    util.mothurRemove(newname);
-
-    if (bygroup) { //if by group, must remove the duplicate seqs that are named the same
-      ifstream in;
-      util.openInputFile(newfasta, in);
-
-      ofstream out;
-      util.openOutputFile(newfasta+"temp", out);
-
-      int count = 0;
-      set<string> already;
-      while(!in.eof()) {
-        if (m->getControl_pressed()) { break; }
-
-        Sequence seq(in); util.gobble(in);
-
-        if (seq.getName() != "") {
-          count++;
-          if (already.count(seq.getName()) == 0) {
-            seq.printSequence(out);
-            already.insert(seq.getName());
-          }
         }
-      }
-      in.close();
-      out.close();
-      util.mothurRemove(newfasta);
-      util.renameFile(newfasta+"temp", newfasta);
-    }
+        
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.\n\nRemoving merged reads from count table...");
+        start = time(NULL);
+        
+        ct.eliminateZeroSeqs();
+        ct.printTable(newcount);
+        util.mothurRemove(newname);
+        
+        m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to remove merged reads.\n");
+        
+        if (bygroup) { //if by group, must remove the duplicate seqs that are named the same
+                start = time(NULL);
+             m->mothurOut("\nDeconvolute fasta...");
+            
+            ifstream in;
+            util.openInputFile(newfasta, in);
+            
+            ofstream out;
+            util.openOutputFile(newfasta+"temp", out);
+            
+            int count = 0;
+            set<string> already;
+            while(!in.eof()) {
+                if (m->getControl_pressed()) { break; }
+                
+                Sequence seq(in); util.gobble(in);
+                
+                if (seq.getName() != "") {
+                    count++;
+                    if (already.count(seq.getName()) == 0) {
+                        seq.printSequence(out);
+                        already.insert(seq.getName());
+                    }
+                }
+            }
+            in.close();
+            out.close();
+            util.mothurRemove(newfasta);
+            util.renameFile(newfasta+"temp", newfasta);
+            
+            m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to deconvolute the fasta file.\n");
+        }
 
 		return 0;
 	}

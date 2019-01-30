@@ -173,11 +173,7 @@ HelpCommand::HelpCommand(string option)  {
 string HelpCommand::getCommonQuestions(){
     try {
         vector<string> questions, issues, headers, qanswers, ianswers, howtos, hanswers;
-        
-        string header = "\nCommon Questions: \n"; headers.push_back(header);
-        header = "\nCommon Issues: \n"; headers.push_back(header);
-        header = "\nHow To: \n"; headers.push_back(header);
-        
+    
         string question = "How do I site mothur?"; questions.push_back(question);
         string qanswer = "\tSchloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n"; qanswers.push_back(qanswer);
         
@@ -196,25 +192,7 @@ string HelpCommand::getCommonQuestions(){
         question = "Why does the cutoff change when I cluster with average neighbor?"; questions.push_back(question);
         qanswer = "\tThis is a product of using the average neighbor algorithm with a sparse distance matrix. When you run cluster, the algorithm looks for pairs of sequences to merge in the rows and columns that are getting merged together. Let's say you set the cutoff to 0.05. If one cell has a distance of 0.03 and the cell it is getting merged with has a distance above 0.05 then the cutoff is reset to 0.03, because it's not possible to merge at a higher level and keep all the data. All of the sequences are still there from multiple phyla. Incidentally, although we always see this, it is a bigger problem for people that include sequences that do not fully overlap.\n"; qanswers.push_back(qanswer);
         
-        string commonQuestions = "";
-        commonQuestions += headers[0]+"\n";
-        #if defined NON_WINDOWS
-            cout << BOLDGREEN << headers[0]; cout << RESET << endl;
-        #endif
-        
-        for (int i = 0; i < questions.size(); i++) {
-            commonQuestions += toString(i+1) + ". " + questions[i]+"\n"+qanswers[i]+"\n";
-            #if defined NON_WINDOWS
-                cout << BOLDBLUE << toString(i+1)+". "+questions[i]; cout << RESET << endl << qanswers[i] << endl;
-            #endif
-        }
-        
-        commonQuestions += headers[1]+"\n";
-        #if defined NON_WINDOWS
-            cout << BOLDGREEN << headers[1]; cout << RESET << endl;
-        #endif
 
-        
         
         string issue = "Mothur can't find my input files. What wrong?"; issues.push_back(issue);
         string ianswer = "\tBy default, mothur will then look for the input files in the directory where mothur's executable is located. Mothur will also search the input, output and temporary default locations. You can set these locations using the set.dir command: set.dir(input=/users/myuser/desktop/mothurdata). Alternatively you can provide complete file names, or move the input files to mothur's executable location.\n"; ianswers.push_back(ianswer);
@@ -238,13 +216,6 @@ string HelpCommand::getCommonQuestions(){
         ianswer = "\tThis error indicates your computer is running out of memory. The shhh.flows command is very memory intensive. This error is most commonly caused by trying to process a dataset too large, using multiple processors, or failing to run trim.flows before shhh.flows. If you are using multiple processors, try running the command with processors=1, the more processors you use the more memory is required. Running trim.flows with an oligos file, and then shhh.flows with the file option may also resolve the issue. If for some reason you are unable to run shhh.flows with your data, a good alternative is to use the trim.seqs command using a 50-bp sliding window and to trim the sequence when the average quality score over that window drops below 35. Our results suggest that the sequencing error rates by this method are very good, but not quite as good as by shhh.flows and that the resulting sequences tend to be a bit shorter.\n"; ianswers.push_back(ianswer);
         
         
-        for (int i = 0; i < issues.size(); i++) {
-            commonQuestions += toString(i+1)+". "+issues[i]+"\n"+ianswers[i]+"\n";
-            #if defined NON_WINDOWS
-                cout << BOLDBLUE << toString(i+1)+". "+issues[i]; cout << RESET << endl << ianswers[i] << endl;
-            #endif
-        }
-        
         string howto = "How do I make a tree?"; howtos.push_back(howto);
         string hanswer = "\tMothur has two commands that create trees: clearcut and tree.shared.\n\n\tThe clearcut commands creates a phylogenetic tree that represents how sequences relate. The clearcut program written by Initiative for Bioinformatics and Evolutionary Studies (IBEST) at the University of Idaho. For more information about clearcut please refer to http://bioinformatics.hungry.com/clearcut/\n\n\tThe tree.shared command will generate a newick-formatted tree file that describes the dissimilarity (1-similarity) among multiple groups. Groups are clustered using the UPGMA algorithm using the distance between communities as calculated using any of the calculators describing the similarity in community membership or structure.\n"; hanswers.push_back(hanswer);
         
@@ -260,25 +231,7 @@ string HelpCommand::getCommonQuestions(){
         howto = "How do I visualize my results from mothur?"; howtos.push_back(howto);
         hanswer = "\tTo visual your data with R follow this tutorial http://www.riffomonas.org/minimalR/06_line_plots.html.\n"; hanswers.push_back(hanswer);
 
-        
-        
-        commonQuestions += headers[2]+"\n";
-#if defined NON_WINDOWS
-        cout << BOLDGREEN << headers[2]; cout << RESET << endl;
-#endif
-        
-        for (int i = 0; i < howtos.size(); i++) {
-            commonQuestions += toString(i+1) + ". " + howtos[i]+"\n"+hanswers[i]+"\n";
-#if defined NON_WINDOWS
-            cout << BOLDBLUE << toString(i+1)+". "+howtos[i]; cout << RESET << endl << hanswers[i] << endl;
-#endif
-        }
-        
-#if defined NON_WINDOWS
-        m->mothurOutJustToLog(commonQuestions);
-#else
-        m->mothurOut(commonQuestions);
-#endif
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
         
         return commonQuestions;
     }

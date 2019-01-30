@@ -185,7 +185,6 @@ public:
     bool mothurConvert(char, string&);
 
     
-    
     //string manipulation
     string addUnclassifieds(string tax, int maxlevel, bool probs);
     string trimTax(string tax, int trimLevel);
@@ -195,21 +194,26 @@ public:
     int getNumNames(string);
     int getNumChar(string, char);
     string getSimpleLabel(string);
+    
     string getStringFromVector(vector<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+    string getFormattedHelp(vector<string> question, vector<string> aquestion, vector<string> issue, vector<string> aissue, vector<string> howto,vector<string> ahowto);
+    
     bool inUsersGroups(vector<string>, vector<string>); //returns true if any of the strings in first vector are in second vector
     bool inUsersGroups(vector<int>, vector< vector<int> >);
     bool inUsersGroups(string, vector<string>);
     bool inUsersGroups(int, vector<int>);
     bool isSubset(vector<string>, vector<string>); //bigSet, subset
+    
     string makeList(vector<string>&);
     map<string, vector<string> > parseClasses(string);
     int removeBlanks(vector<string>&);
     float removeConfidences(string&);
     string removeQuotes(string);
     bool stringBlank (string);
+    
     void splitAtComma(string&, string&);
     void splitAtComma(string&, vector<string>&);
     void splitAtComma(string&, vector<int>&);
@@ -224,6 +228,7 @@ public:
     vector<string> splitWhiteSpace(string& rest, char[], int);
     vector<string> splitWhiteSpace(string);
     int splitWhiteSpace(string, vector<float>&, int);
+    
     int getOTUNames(vector<string>&, int, string);
     string getTag(string); //filename
     string findEdianness();
