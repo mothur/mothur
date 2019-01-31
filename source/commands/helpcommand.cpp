@@ -172,7 +172,7 @@ HelpCommand::HelpCommand(string option)  {
 //**********************************************************************************************************************
 string HelpCommand::getCommonQuestions(){
     try {
-        vector<string> questions, issues, headers, qanswers, ianswers, howtos, hanswers;
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
     
         string question = "How do I site mothur?"; questions.push_back(question);
         string qanswer = "\tSchloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n"; qanswers.push_back(qanswer);

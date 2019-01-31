@@ -1460,6 +1460,14 @@ string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers
 #endif
         }
         
+        if (questions.size() == 0) {
+            commonQuestions += "Can't find your question? Please feel free to ask questions on our forum, https://forum.mothur.org.\n\n";
+#if defined NON_WINDOWS
+            cout << RESET "Can't find your question? Please feel free to ask questions on our forum, https://forum.mothur.org.\n\n";
+#endif
+
+        }
+        
         commonQuestions += headers[1]+"\n";
 #if defined NON_WINDOWS
         cout << BOLDGREEN << headers[1]; cout << RESET << endl;
@@ -1471,6 +1479,15 @@ string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers
             cout << BOLDBLUE << toString(i+1)+". "+issues[i]; cout << RESET << endl << ianswers[i] << endl;
 #endif
         }
+        
+        if (issues.size() == 0) {
+            commonQuestions += "Can't find your issue? Please feel free to ask questions on our forum, https://forum.mothur.org or send bug reports to mothur.bugs@gmail.com.\n\n";
+#if defined NON_WINDOWS
+            cout << RESET "Can't find your issue? Please feel free to ask questions on our forum, https://forum.mothur.org or send bug reports to mothur.bugs@gmail.com.\n\n";
+#endif
+            
+        }
+
 
         commonQuestions += headers[2]+"\n";
 #if defined NON_WINDOWS
@@ -1484,11 +1501,23 @@ string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers
 #endif
         }
         
+        if (howtos.size() == 0) {
+            commonQuestions += "Not sure how to do what you want? Please feel free to ask questions on our forum, https://forum.mothur.org.\n\n";
+#if defined NON_WINDOWS
+            cout << RESET "Not sure how to do what you want? Please feel free to ask questions on our forum, https://forum.mothur.org.\n\n";
+#endif
+            
+        }
+        
 #if defined NON_WINDOWS
         m->mothurOutJustToLog(commonQuestions);
+        
+        cout << BOLDMAGENTA << "\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki.\n"; cout << RESET << endl;
+        m->mothurOutJustToLog("\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki.\n");
 #else
-        m->mothurOut(commonQuestions);
+        m->mothurOut(commonQuestions + "\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki.\n");
 #endif
+
         return commonQuestions;
     }
     catch(exception& e) {
