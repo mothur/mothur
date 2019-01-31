@@ -32,7 +32,13 @@ class Command {
 		virtual string getHelpString() = 0;
 		virtual string getCitation() = 0;
 		virtual string getDescription() = 0;
-        virtual string getCommonQuestions() { return "Common Questions for commands... "; }
+        virtual string getCommonQuestions()     {  return "Common Questions for commands."; }
+        virtual string getCommandParameters() {
+            vector<string> parameterNames = setParameters();
+            sort(parameterNames.begin(), parameterNames.end());
+            string results = util.getStringFromVector(parameterNames, ", ");
+            return results;
+        }
 		
 		virtual map<string, vector<string> > getOutputFiles() { return outputTypes; }
         string getOutputFileName(string type, map<string, string> variableParts) {  //uses the pattern to create an output filename for a given type and input file name.  

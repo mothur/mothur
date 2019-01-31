@@ -49,7 +49,7 @@ string AlignCommand::getHelpString(){
 	try {
 		string helpString = "\n";
 		helpString += "The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n";
-		helpString += "The align.seqs command parameters are reference, fasta, search, ksize, align, match, mismatch, gapopen, gapextend and processors.\n";
+		helpString += "The align.seqs command parameters are " + getCommandParameters() + ".\n";
 		helpString += "The reference and fasta parameters are required. You may leave fasta blank if you have a valid fasta file.\n";
 		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix, kmer and blast. The default is kmer.\n";
 		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
@@ -62,8 +62,8 @@ string AlignCommand::getHelpString(){
 		helpString += " By default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining.\n";
 		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.\n";
 		helpString += "The align.seqs command should be in the following format: ";
-		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile)\n";
-		helpString += "Example: align.seqs(candidate=candidate.fasta, template=silva.v4.fasta)\n\n";
+		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourUnalignedFastaFile)\n";
+		helpString += "Example: align.seqs(fasta=water.fasta, template=silva.v4.fasta)\n\n";
         
         getCommonQuestions();
 

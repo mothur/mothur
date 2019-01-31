@@ -54,7 +54,7 @@ string ClassifySeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n";
-		helpString += "The classify.seqs command parameters are reference, fasta, name, group, count, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted, relabund and probs. The reference, fasta and taxonomy parameters are required.\n";
+		helpString += "The classify.seqs command parameters are " + getCommandParameters() + ". The reference, fasta and taxonomy parameters are required.\n";
 		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix, kmer, blast, align and distance. The default is kmer.\n";
 		helpString += "The name parameter allows you add a names file with your fasta file.\n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
