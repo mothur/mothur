@@ -91,7 +91,7 @@ string ClassifySeqsCommand::getHelpString(){
 //**********************************************************************************************************************
 string ClassifySeqsCommand::getCommonQuestions(){
     try {
-        vector<string> questions, issues, headers, qanswers, ianswers, howtos, hanswers;
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
         
         string question = "Does the reference need to be aligned?"; questions.push_back(question);
         string qanswer = "\tNo, mothur does not require an aligned reference to assign a taxonomy. This is because it uses k-mers to find the probabilities of the taxonomic assignment.\n"; qanswers.push_back(qanswer);

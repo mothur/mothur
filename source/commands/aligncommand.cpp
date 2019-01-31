@@ -77,7 +77,7 @@ string AlignCommand::getHelpString(){
 //**********************************************************************************************************************
 string AlignCommand::getCommonQuestions(){
     try {
-        vector<string> questions, issues, headers, qanswers, ianswers, howtos, hanswers;
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
         
         string issue = "...template is not aligned, aborting. What do I do?"; issues.push_back(issue);
         string ianswer = "\tMothur requires the reference file to be aligned to generate aligned sequences. You can download mothur's aligned silva references here, https://mothur.org/wiki/Silva_reference_files. For ITS sequences, see 'how to' below.\n"; ianswers.push_back(ianswer);
