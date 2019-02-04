@@ -41,8 +41,8 @@ private:
 	string format;
 	float freq;
 	
-     map<int, string> file2Group; //index in outputNames[i] -> group
-	bool abort, allLines, jumble, groupMode, subsample;
+    map<int, string> file2Group; //index in outputNames[i] -> group
+	bool abort, allLines, jumble, groupMode, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, outputDir, sharedfile, designfile;
 	vector<string>  Estimators, Groups, outputNames, Sets;
