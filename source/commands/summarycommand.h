@@ -40,7 +40,7 @@ private:
 	SAbundVector* sabund;
 	int abund, size, iters, subsampleSize, alpha;
 
-	bool abort, allLines, groupMode, subsample;
+	bool abort, allLines, groupMode, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
 	string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
