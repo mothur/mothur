@@ -307,6 +307,8 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         }
         
         SharedRAbundVectors* subset = new SharedRAbundVectors();
+        subset->setLabels(lookup->getLabel());
+        subset->setOTUNames(lookup->getOTUNames());
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         if (thisSet != "") {//remove unwanted groups
             for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
