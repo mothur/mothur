@@ -423,9 +423,8 @@ int GetGroupsCommand::execute(){
 		
 		
 		if (outputNames.size() != 0) {
-			m->mothurOutEndLine();
-			m->mothurOut("Output File names: "); m->mothurOutEndLine();
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+			m->mothurOut("\nOutput File names:\n");
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	}
 			m->mothurOutEndLine();
 			
 			//set fasta file as new current fastafile

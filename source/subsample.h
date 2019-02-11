@@ -27,8 +27,8 @@ class SubSample {
         SubSample() { m = MothurOut::getInstance(); }
         ~SubSample() {}
     
-        vector<string> getSample(SharedRAbundVectors*&, int); //returns the bin labels for the subsample, mothurOuts binlabels are preserved so you can run this multiple times. Overwrites original vector passed in, if you need to preserve it deep copy first.
-        vector<string> getSampleWithReplacement(SharedRAbundVectors*&, int); //returns the bin labels for the subsample, mothurOuts binlabels are preserved so you can run this multiple times. Overwrites original vector passed in, if you need to preserve it deep copy first. 
+        vector<string> getSample(SharedRAbundVectors*&, int); //returns the bin labels for the subsample. Overwrites original vector passed in, if you need to preserve it deep copy first.
+        vector<string> getSampleWithReplacement(SharedRAbundVectors*&, int); //returns the bin labels for the subsample. Overwrites original vector passed in, if you need to preserve it deep copy first.
     
         vector<string> getSample(vector<SharedRAbundVector*>&, int, vector<string>); //returns the bin labels for the subsample. Overwrites original vector passed in, if you need to preserve it deep copy first.
         vector<string> getSampleWithReplacement(vector<SharedRAbundVector*>&, int, vector<string>); //returns the bin labels for the subsample. Overwrites original vector passed in, if you need to preserve it deep copy first.
