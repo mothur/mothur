@@ -1541,7 +1541,7 @@ string Utils::removeNs(string seq){
 int Utils::getOTUNames(vector<string>& currentLabels, int numBins, string tagHeader){
     try {
 
-        if (currentLabels.size() == numBins) { return 0; }
+        if (currentLabels.size() == numBins) {  return 0; }
 
         int maxLabelNumber = 0;
         if (currentLabels.size() < numBins) {
