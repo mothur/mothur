@@ -21,6 +21,7 @@ vector<string> TreeGroupCommand::setParameters(){
         CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName-countcolumn","tree",false,false); parameters.push_back(pcolumn);		
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+        CommandParameter pwithreplacement("withreplacement", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pwithreplacement);
         CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);		
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
@@ -55,6 +56,7 @@ string TreeGroupCommand::getHelpString(){
 		helpString += "The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n";
         helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group. The subsample parameter may only be used with a shared file.\n";
+        helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
 		helpString += "Example tree.shared(groups=A-B-C, calc=jabund-sorabund).\n";
 		helpString += "The default value for groups is all the groups in your groupfile.\n";
 		helpString += "The default value for calc is jclass-thetayc.\n";
@@ -196,31 +198,31 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to shared, then column, then phylip
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") {  inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					columnfile = current->getColumnFile(); 
-					if (columnfile != "") { inputfile = columnfile; format = "column";  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+					if (columnfile != "") { inputfile = columnfile; format = "column";  m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 					else { 
 						phylipfile = current->getPhylipFile(); 
-						if (phylipfile != "") { inputfile = phylipfile;  format = "phylip";  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+						if (phylipfile != "") { inputfile = phylipfile;  format = "phylip";  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 						else { 
-							m->mothurOut("No valid current files. You must provide a shared, phylip or column file."); m->mothurOutEndLine(); 
+							m->mothurOut("No valid current files. You must provide a shared, phylip or column file.\n");
 							abort = true;
 						}
 					}
 				}
 			}
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the tree.shared command with a distance file you may not use both the column and the phylip parameters."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the tree.shared command with a distance file you may not use both the column and the phylip parameters.\n");  abort = true; }
 			
 			if (columnfile != "") {
 				if ((namefile == "") && (countfile == "")){ 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 					else { 
 						countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else { 
-                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format.\n");
                             abort = true; 
                         }	
 					}	
@@ -279,6 +281,9 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
             
             if (!subsample) { iters = 1; }
             
+            temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
+            withReplacement = util.isTrue(temp);
+            
             if (subsample && (format != "sharedfile")) { m->mothurOut("[ERROR]: the subsample parameter can only be used with a shared file.\n"); abort=true; }
             
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -311,7 +316,7 @@ int TreeGroupCommand::execute(){
 			lastLabel = lookup->getLabel();
             Groups = lookup->getNamesGroups();
 			
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine();  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");   return 0; }
 			
 			//create treemap class from groupmap for tree class to use
 			CountTable ct;
@@ -510,7 +515,7 @@ int driverTreeShared(vector<SharedRAbundVector*>& thisLookup, vector< vector<seq
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "MatrixOutputCommand", "driver");
+        m->errorOut(e, "MatrixOutputCommand", "driverTreeShared");
         exit(1);
     }
 }
@@ -528,7 +533,7 @@ int TreeGroupCommand::makeSimsShared(InputData& input, SharedRAbundVectors*& loo
                 Treenames = Groups;
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");  m->setControl_pressed(true); return 0; }
         }
         numGroups = lookup->size();
         
@@ -607,10 +612,10 @@ struct treeSharedData {
     long long numIters;
     MothurOut* m;
     int count, subsampleSize;
-    bool mainThread, subsample;
+    bool mainThread, subsample, withReplacement;
     
     treeSharedData(){}
-    treeSharedData(long long st, bool mt, bool su, int subsize, vector<string> est, SharedRAbundVectors* lu) {
+    treeSharedData(long long st, bool mt, bool su, bool wr, int subsize, vector<string> est, SharedRAbundVectors* lu) {
         m = MothurOut::getInstance();
         numIters = st;
         Estimators = est;
@@ -618,6 +623,7 @@ struct treeSharedData {
         count = 0;
         mainThread = mt;
         subsample = su;
+        withReplacement = wr;
         subsampleSize = subsize;
     }
 };
@@ -728,7 +734,10 @@ int process(treeSharedData* params) {
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) { sample.getSample(thisItersLookup, params->subsampleSize); }
+            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) {
+                if (params->withReplacement)    { sample.getSampleWithReplacement(thisItersLookup, params->subsampleSize);  }
+                else                            { sample.getSample(thisItersLookup, params->subsampleSize);                 }
+            }
             
             vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
             vector<string> thisItersGroupNames = params->thisLookup->getNamesGroups();
@@ -736,6 +745,7 @@ int process(treeSharedData* params) {
             driverTreeShared(thisItersRabunds, calcDists, treeCalculators, params->m);
             
             for (int i = 0; i < thisItersRabunds.size(); i++) { delete thisItersRabunds[i]; }
+            
             if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ){
                 if((thisIter+1) % 100 == 0){	params->m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
                 params->calcDistsTotals.push_back(calcDists);
@@ -803,7 +813,7 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
             
             //make copy of lookup so we don't get access violations
             SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
-            treeSharedData* dataBundle = new treeSharedData(lines[i+1], false, subsample, subsampleSize, Estimators, newLookup);
+            treeSharedData* dataBundle = new treeSharedData(lines[i+1], false, subsample, withReplacement, subsampleSize, Estimators, newLookup);
             
             data.push_back(dataBundle);
             workerThreads.push_back(new thread(process, dataBundle));
@@ -811,14 +821,13 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
         
         //make copy of lookup so we don't get access violations
         SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
-        treeSharedData* dataBundle = new treeSharedData(lines[0], true, subsample, subsampleSize, Estimators, newLookup);
+        treeSharedData* dataBundle = new treeSharedData(lines[0], true, subsample, withReplacement, subsampleSize, Estimators, newLookup);
         process(dataBundle);
         delete newLookup;
         
         Estimators.clear(); Estimators = dataBundle->Estimators;
         vector< vector< vector<seqDist> > > calcDistsTotals = dataBundle->calcDistsTotals;
         vector< vector< vector<double> > > matrices = dataBundle->matrices;
-        
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
