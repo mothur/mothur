@@ -27,6 +27,7 @@ public:
     string getCommandCategory()		{ return "Sequence Processing"; }
     
     string getHelpString();
+    string getCommonQuestions();
     string getOutputPattern(string);
     string getCitation() { return "vsearch by https://github.com/torognes/vsearch.\nhttp://www.mothur.org/wiki/Chimera.vsearch\n"; }
     string getDescription()		{ return "detect chimeric sequences"; }

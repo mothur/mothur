@@ -76,6 +76,24 @@ string ChimeraVsearchCommand::getHelpString(){
     }
 }
 //**********************************************************************************************************************
+string ChimeraVsearchCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string issue = "... vsearch file does not exist. mothur requires the vsearch executable."; issues.push_back(issue);
+        string ianswer = "\tThe chimera.vsearch command is a wrapper for the vsearch program, https://github.com/torognes/vsearch. We distribute the vsearch executable with the executable versions of mothur. By default, mothur will look for vsearch in the same location mothur's executable is as well as looking in your $PATH variable.\n"; ianswers.push_back(ianswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraVsearchCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
 string ChimeraVsearchCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
@@ -512,12 +530,6 @@ int ChimeraVsearchCommand::execute(){
                         c.eliminateZeroSeqs();
                         vector<string> namesInTable = c.getNamesOfSeqs();
                         for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
-                        /*vector<string> namesInTable = c.getNamesOfSeqs();
-                         for (int i = 0; i < namesInTable.size(); i++) {
-                         int temp = c.getNumSeqs(namesInTable[i]);
-                         if (temp == 0) {  c.remove(namesInTable[i]);  }
-                         else { doNotRemove.insert((namesInTable[i])); }
-                         }*/
 
                         //remove names we want to keep from accnos file.
                         set<string> accnosNames = util.readAccnos(accnosFileName);
