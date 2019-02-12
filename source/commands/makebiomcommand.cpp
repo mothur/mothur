@@ -851,6 +851,11 @@ vector<string> MakeBiomCommand::getMetaData(SharedRAbundVectors*& lookup){
                 }
             }
             
+            //sanity check for file issues - do you have the same number of bins in the shared and constaxonomy file
+            if (lookup->getNumBins() != labelTaxMap.size()) {
+                m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(lookup->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
+            }
+            
             //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
             if (picrust) {  getGreenGenesOTUIDs(lookup, labelTaxMap);  }
             
@@ -1070,20 +1075,20 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
             
         }
         
-        vector<SharedRAbundVector*> newLookup;
+        SharedRAbundVectors* newLookup = new SharedRAbundVectors();
         vector<string> namesOfGroups = lookup->getNamesGroups();
 		for (int i = 0; i < namesOfGroups.size(); i++) {
 			SharedRAbundVector* temp = new SharedRAbundVector();
 			temp->setLabel(lookup->getLabel());
 			temp->setGroup(namesOfGroups[i]);
-			newLookup.push_back(temp);
+			newLookup->push_back(temp);
 		}
 		
         map<string, int> labelIndex;
         vector<string> currentLabels = lookup->getOTUNames();
 		for (int i = 0; i < currentLabels.size(); i++) {  labelIndex[util.getSimpleLabel(currentLabels[i])] = i; }
         
-        vector<string> newBinLabels;
+        //vector<string> newBinLabels;
         map<string, string> newLabelTaxMap;
         //loop through ggOTUID list combining mothur otus and adjusting labels
         //ggOTUIDs = 16097 -> <OTU01, OTU10, OTU22>
@@ -1117,11 +1122,23 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
                     }
                 }else { scoresNULL = true; }
                 
+                if ((itMap->second)[j] == "10308") {
+                    cout << "here" << endl;
+                }
+                
                 //merge abunds
                 mergeString += (itMap->second)[j] + " ";
-                for (int i = 0; i < lookup->size(); i++) { abunds[i] += lookup->get(labelIndex[util.getSimpleLabel((itMap->second)[j])], namesOfGroups[i]); }
+                string simpleLabel = util.getSimpleLabel((itMap->second)[j]);
+                int otuindex = labelIndex[simpleLabel];
+                vector<int> otuAbunds = lookup->getOTU(otuindex);
+                for (int i = 0; i < otuAbunds.size(); i++) {
+                    //string groupName = namesOfGroups[i];
+                    //int thisGroupAbund = lookup->get(otuindex, groupName);
+                    abunds[i] += otuAbunds[i];
+                    //abunds[i] += lookup->get(labelIndex[util.getSimpleLabel((itMap->second)[j])], namesOfGroups[i]);
+                }
             }
-            
+            cout << mergeString << endl;
             if (m->getDebug()) { m->mothurOut("[DEBUG]: merging " + mergeString + " for ggOTUid = " + itMap->first + ".\n");  }
             
             //average scores
@@ -1141,17 +1158,20 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
             newLabelTaxMap[itMap->first] = newTaxString;
             
             //add merged otu to new lookup
-            for (int j = 0; j < abunds.size(); j++) { newLookup[j]->push_back(abunds[j]); }
+            newLookup->push_back(abunds, itMap->first);
+            //for (int j = 0; j < abunds.size(); j++) { newLookup[j]->push_back(abunds[j]); }
             
             //saved otu label
-            newBinLabels.push_back(itMap->first);
+            //newBinLabels.push_back(itMap->first);
         }
 		
-        lookup->clear();
-        for (int i = 0; i < newLookup.size(); i++) { lookup->push_back(newLookup[i]);  }
-        lookup->eliminateZeroOTUS();
+        //lookup->clear();
+        //for (int i = 0; i < newLookup.size(); i++) { lookup->push_back(newLookup[i]);  }
+        //lookup->eliminateZeroOTUS();
 		
-		lookup->setOTUNames(newBinLabels);
+		//lookup->setOTUNames(newBinLabels);
+        delete lookup;
+        lookup = newLookup;
         labelTaxMap = newLabelTaxMap;
         
         map<string, string> variables;
