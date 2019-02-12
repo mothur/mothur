@@ -39,6 +39,9 @@ class SubSample {
         int getSample(SAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
         int getSampleWithReplacement(SAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
     
+        int getSample(RAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
+        int getSampleWithReplacement(RAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
+    
         CountTable getSample(CountTable&, int, vector<string>, bool persample); // if persample then subsample 'size' members from each group - bygroup(same number sampled from each group), returns subsampled. If not persample then subsample 'size' members from the set of groups passed in.
         CountTable getSampleWithReplacement(CountTable&, int, vector<string>, bool persample); // if persample then subsample 'size' members from each group - bygroup(same number sampled from each group), returns subsampled. If not persample then subsample 'size' members from the set of groups passed in.
     

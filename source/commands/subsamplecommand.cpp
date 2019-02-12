@@ -1378,39 +1378,15 @@ int SubSampleCommand::getSubSampleRabund() {
 int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 	try {
 		
-		int numBins = rabund->getNumBins();
-		int thisSize = rabund->getNumSeqs();
-			
-		if (thisSize != size) {
-				
-			vector<int> order;
-			for(int p=0;p<numBins;p++){
-				for(int j=0;j<rabund->get(p);j++){
-					order.push_back(p);
-				}
-			}
-			util.mothurRandomShuffle(order);
-			
-			RAbundVector* temp = new RAbundVector(numBins);
-			temp->setLabel(rabund->getLabel());
-			
-			delete rabund;
-			rabund = temp;
-			
-			for (int j = 0; j < size; j++) {
-				
-				if (m->getControl_pressed()) {  return 0; }
-				
-				int bin = order[j];
-				
-				int abund = rabund->get(bin);
-				rabund->set(bin, (abund+1));
-			}
-		}
-		
-		if (m->getControl_pressed()) { return 0; }
-		
-		rabund->print(out);
+        RAbundVector* copy = new RAbundVector(*rabund);
+        SubSample sample;
+        if (withReplacement) {
+            sample.getSampleWithReplacement(copy, size);
+        }else {
+            sample.getSample(copy, size);
+        }
+        copy->print(out);
+        delete copy;
 		
 		return 0;
 		
@@ -1526,51 +1502,17 @@ int SubSampleCommand::getSubSampleSabund() {
 //**********************************************************************************************************************
 int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 	try {
-		
-		RAbundVector* rabund = new RAbundVector();
-		*rabund = sabund->getRAbundVector();
-		
-		int numBins = rabund->getNumBins();
-		int thisSize = rabund->getNumSeqs();
-	
-		if (thisSize != size) {
-			
-			vector<int> order;
-			for(int p=0;p<numBins;p++){
-				for(int j=0;j<rabund->get(p);j++){
-					order.push_back(p);
-				}
-			}
-			util.mothurRandomShuffle(order);
-			
-			RAbundVector* temp = new RAbundVector(numBins);
-			temp->setLabel(rabund->getLabel());
-			
-			delete rabund;
-			rabund = temp;
-			
-			for (int j = 0; j < size; j++) {
-	
-				if (m->getControl_pressed()) {  return 0; }
-				
-				int bin = order[j];
-				
-				int abund = rabund->get(bin);
-				rabund->set(bin, (abund+1));
-			}
-		}
-		
-		if (m->getControl_pressed()) { return 0; }
-
-		delete sabund;
-		sabund = new SAbundVector();
-		*sabund = rabund->getSAbundVector();
-		delete rabund;
-	
-		sabund->print(out);
-		
+		SAbundVector* copy = new SAbundVector(*sabund);
+        SubSample sample;
+        if (withReplacement) {
+            sample.getSampleWithReplacement(copy, size);
+        }else {
+            sample.getSample(copy, size);
+        }
+        copy->print(out);
+        delete copy;
+        
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "processSabund");

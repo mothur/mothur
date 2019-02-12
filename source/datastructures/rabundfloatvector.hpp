@@ -59,7 +59,7 @@ public:
     RAbundFloatVector getRAbundFloatVector();
     RAbundVector getRAbundVector();
     SAbundVector getSAbundVector();
-    OrderVector getOrderVector(map<string,int>*);
+    OrderVector getOrderVector(map<string,int>* hold = NULL);
     
     string getGroup() { return group; } //group = "" for rabunds without groupInfo
     void setGroup(string g) { group = g;  }

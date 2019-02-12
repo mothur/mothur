@@ -408,8 +408,6 @@ int SubSample::getSample(SAbundVector*& sabund, int size) {
             *sabund = rabund.getSAbundVector();
             
 		}else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the sabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your sabund vector.\n"); m->setControl_pressed(true); }
-		
-		if (m->getControl_pressed()) { return 0; }
         
 		return 0;
 		
@@ -450,10 +448,81 @@ int SubSample::getSampleWithReplacement(SAbundVector*& sabund, int size) {
             
         }else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the sabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your sabund vector.\n"); m->setControl_pressed(true); }
         
-        if (m->getControl_pressed()) { return 0; }
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getSampleWithReplacement");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int SubSample::getSample(RAbundVector*& rabund, int size) {
+    try {
+        
+        int numBins = rabund->getNumBins();
+        int thisSize = rabund->getNumSeqs();
+        
+        OrderVector order = rabund->getOrderVector(NULL);
+        
+        if (thisSize > size) {
+            util.mothurRandomShuffle(order);
+            
+            RAbundVector sampledRabund(numBins);
+            sampledRabund.setLabel(rabund->getLabel());
+            
+            for (int j = 0; j < size; j++) {
+                
+                if (m->getControl_pressed()) { return 0; }
+                
+                int abund = sampledRabund.get(order.get(j));
+                sampledRabund.set(order.get(j), (abund+1));
+            }
+            
+            delete rabund;
+            rabund = new RAbundVector(sampledRabund);
+            
+        }else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the rabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your rabund vector.\n"); m->setControl_pressed(true); }
         
         return 0;
         
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getSample");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int SubSample::getSampleWithReplacement(RAbundVector*& rabund, int size) {
+    try {
+        
+        int numBins = rabund->getNumBins();
+        int thisSize = rabund->getNumSeqs();
+        
+        OrderVector order = rabund->getOrderVector(NULL);
+        
+        if (thisSize > size) {
+            RAbundVector sampledRabund(numBins);
+            sampledRabund.setLabel(rabund->getLabel());
+            
+            long long orderSize = order.size()-1;
+            for (int j = 0; j < size; j++) {
+                
+                if (m->getControl_pressed()) { return 0; }
+                
+                //"grab random from bag"
+                long long randomRead = util.getRandomIndex(orderSize);
+                
+                int abund = sampledRabund.get(order.get(randomRead));
+                sampledRabund.set(order.get(randomRead), (abund+1));
+            }
+            
+            delete rabund;
+            rabund = new RAbundVector(sampledRabund);
+            
+        }else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the sabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your sabund vector.\n"); m->setControl_pressed(true); }
+        
+        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "SubSampleCommand", "getSampleWithReplacement");
