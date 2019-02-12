@@ -41,7 +41,7 @@ class UnifracUnweightedCommand : public Command {
 
 		string sumFile, allGroups;
 		vector<string> groupComb; // AB. AC, BC...
-		int iters, numGroups, numComp, counter, processors, subsampleSize, subsampleIters;
+		int iters, numGroups, numComp, counter, processors, subsampleSize, subsampleIters, withReplacement;
 		vector< vector<float> > utreeScores; //scores for users trees for each comb.
 		vector< vector<float> > UWScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or higher.
 		map<float, float>  validScores;  //map contains scores from random
