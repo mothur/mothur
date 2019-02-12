@@ -378,10 +378,10 @@ int SubSampleCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (sharedfile != "")       {   getSubSampleShared();	}
-		else if (listfile != "")	{   getSubSampleList();		}
+		else if (listfile != "")	{   getSubSampleList();		} //can only use with replacement if a count file is provided
 		else if (rabundfile != "")	{   getSubSampleRabund();	}
 		else if (sabundfile != "")	{   getSubSampleSabund();	}
-		else if (fastafile != "")	{   getSubSampleFasta();	}
+		else if (fastafile != "")	{   getSubSampleFasta();	} //can only use with replacement if a count file is provided
 		else if (treefile != "")	{   getSubSampleTree();     }
         
         if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
@@ -552,7 +552,10 @@ int SubSampleCommand::getSubSampleFasta() {
 		
 		//make sure that if your picked groups size is not too big
 		int thisSize = 0;
-        if (countfile == "") { thisSize = names.size();  }
+        if (countfile == "") {
+            thisSize = names.size();
+            if (withReplacement) {  m->mothurOut("[WARNING]: To use the withreplacement option with a fasta file, you need to provide a count file, running without replacement.\n"); withReplacement = false; }
+        }
         else {  thisSize = ct.getNumSeqs();  }  //all seqs not just unique
         
 		if (persample) { 
@@ -625,7 +628,10 @@ int SubSampleCommand::getSubSampleFasta() {
             }
         }else {
             SubSample sample;
-            CountTable sampledCt = sample.getSample(ct, size, Groups, persample);
+            CountTable sampledCt;
+            if (withReplacement)    {  sampledCt = sample.getSampleWithReplacement(ct, size, Groups, persample);    }
+            else                    {  sampledCt = sample.getSample(ct, size, Groups, persample);                   }
+            
             vector<string> sampledSeqs = sampledCt.getNamesOfSeqs();
             for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
             
@@ -935,6 +941,7 @@ int SubSampleCommand::getSubSampleList() {
 	try {
         
 		if (namefile != "") { util.readNames(namefile, nameMap); }
+        if ((countfile == "") && withReplacement) { m->mothurOut("[WARNING]: To use the withreplacement option with a fasta file, you need to provide a count file, running without replacement.\n"); withReplacement = false;  }
         
 		InputData input(listfile, "list", nullVector);
 		ListVector* list = input.getListVector();
@@ -1066,7 +1073,9 @@ int SubSampleCommand::getSubSampleList() {
             }
         }else {
             SubSample sample;
-            CountTable sampledCt = sample.getSample(ct, size, Groups, persample);
+            CountTable sampledCt;
+            if (withReplacement)    { sampledCt = sample.getSampleWithReplacement(ct, size, Groups, persample);     }
+            else                    { sampledCt = sample.getSample(ct, size, Groups, persample);                    }
         
             vector<string> sampledSeqs = sampledCt.getNamesOfSeqs();
             for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
