@@ -37,7 +37,6 @@ string ChimeraBellerophonCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.bellerophon command reads a fastafile and creates list of potentially chimeric sequences.\n";
 		helpString += "The chimera.bellerophon command parameters are fasta, filter, correction, processors, window, increment. The fasta parameter is required, unless you have a valid current file.\n";
-		helpString += "The fasta parameter is required.  You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
 		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter, default=false. \n";
 		helpString += "The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs, default=true.\n";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default is 1/4 sequence length. \n";
