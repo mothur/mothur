@@ -52,10 +52,9 @@ protected:
 	long long createProcesses(string, string, string, string, vector<long long>&);
 	void appendReportFiles(string, string);
 		
-	string candidateFileName, templateFileName, distanceFileName, search, align, outputDir;
+	string fastafile, templateFileName, distanceFileName, search, align, outputDir;
 	float match, misMatch, gapOpen, gapExtend, threshold;
 	int processors, kmerSize;
-	vector<string> candidateFileNames;
 	vector<string> outputNames;
 	
 	bool abort, flip, calledHelp, save;
