@@ -251,7 +251,7 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
         if (abunds.size() != lookup.size()) {  m->mothurOut("[ERROR]: you have provided " + toString(abunds.size()) + " abundances, but mothur was expecting " + toString(lookup.size()) + ", please correct.\n"); m->setControl_pressed(true); return 0; }
         
         for (int i = 0; i < lookup.size(); i ++) { lookup[i]->push_back(abunds[i]); }
-        //vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        
         if (binLabel == "") { //create one
             int otuNum = 1; bool notDone = true;
             

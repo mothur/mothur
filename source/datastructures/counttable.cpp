@@ -537,13 +537,13 @@ int CountTable::printSeq(ofstream& out, string seqName) {
 	}
 }
 /************************************************************/
-SharedRAbundVectors* CountTable::getShared(vector<string> selected) {
+SharedRAbundVectors* CountTable::getShared(vector<string> selected, map<string, string>& seqNameToOtuName) {
     try {
         
         if (selected.size() == 0) {}
         else { setNamesOfGroups(selected); }
         
-        return getShared();
+        return getShared(seqNameToOtuName);
     }
     catch(exception& e) {
         m->errorOut(e, "CountTable", "getShared");
@@ -551,7 +551,7 @@ SharedRAbundVectors* CountTable::getShared(vector<string> selected) {
     }
 }
 /************************************************************/
-SharedRAbundVectors* CountTable::getShared() {
+SharedRAbundVectors* CountTable::getShared(map<string, string>& seqNameToOtuName) {
     try {
         SharedRAbundVectors* lookup = new SharedRAbundVectors();
         
@@ -562,8 +562,15 @@ SharedRAbundVectors* CountTable::getShared() {
                 lookup->push_back(thisGroupsRabund);
             }
             
+            //generate OTULabels
+            vector<string> otuNames;
+            util.getOTUNames(otuNames, counts.size(), "Otu");
+            
+            //create name map for seq -> otuName for use by other commands with associated files
+            for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) { seqNameToOtuName[it->first] = otuNames[it->second]; }
+            
             //add each "otu"
-            for (int i = 0; i < counts.size(); i++) { lookup->push_back(counts[i]); }
+            for (int i = 0; i < counts.size(); i++) { lookup->push_back(counts[i], otuNames[i]); }
             
         }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
         

@@ -100,8 +100,8 @@ class CountTable {
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
         bool inTable(string);  //accepts sequence name and returns true if sequence is in table, false if not present
         ListVector getListVector();
-        SharedRAbundVectors* getShared();
-        SharedRAbundVectors* getShared(vector<string>); //set of groups selected
+        SharedRAbundVectors* getShared(map<string, string>&);
+        SharedRAbundVectors* getShared(vector<string>, map<string, string>&); //set of groups selected
         map<string, int> getNameMap();  //sequenceName -> total number of sequences it represents
         void eliminateZeroSeqs();
 
