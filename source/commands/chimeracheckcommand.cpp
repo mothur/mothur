@@ -39,13 +39,11 @@ string ChimeraCheckCommand::getHelpString(){
 		helpString += "This command was created using the algorithms described in CHIMERA_CHECK version 2.7 written by Niels Larsen. \n";
 		helpString += "The chimera.check command parameters are fasta, reference, processors, ksize, increment, svg and name.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required unless you have a valid current fasta file. \n";
-		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. \n";
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default is 10.\n";
 		helpString += "The ksize parameter allows you to input kmersize, default is 7. \n";
 		helpString += "The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence, default is False.\n";
 		helpString += "The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n";
-		helpString += "You may enter multiple name files by separating their names with dashes. ie. fasta=abrecovery.svg.names-amzon.svg.names \n";
         helpString += "The chimera.check command should be in the following format: \n";
 		helpString += "chimera.check(fasta=yourFastaFile, reference=yourTemplateFile, processors=yourProcessors, ksize=yourKmerSize) \n";
 		helpString += "Example: chimera.check(fasta=AD.fasta, reference=core_set_aligned,imputed.fasta, processors=4, ksize=8) \n";
