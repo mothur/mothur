@@ -50,7 +50,7 @@ string SffInfoCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The sffinfo command reads a sff file and extracts the sequence data, or you can use it to parse a sff file.\n";
 		helpString += "The sffinfo command parameters are sff, fasta, qfile, accnos, flow, sfftxt, oligos, group, bdiffs, tdiffs, ldiffs, sdiffs, pdiffs, checkorient and trim. sff is required. \n";
-		helpString += "The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n";
+		helpString += "The sff parameter allows you to enter the sff file you would like to extract data from.\n";
 		helpString += "The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n";
 		helpString += "The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n";
         helpString += "The oligos parameter allows you to provide an oligos file to split your sff file into separate sff files by barcode. \n";
@@ -65,7 +65,7 @@ string SffInfoCommand::getHelpString(){
 		helpString += "The sfftxt parameter allows you to indicate if you would like a sff.txt file generated.  Default=False. \n";
 		helpString += "If you want to parse an existing sfftxt file into flow, fasta and quality file, enter the file name using the sfftxt parameter. \n";
 		helpString += "The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n";
-		helpString += "The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted. You may enter multiple files by separating them by -'s. \n";
+		helpString += "The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted.\n";
 		helpString += "Example sffinfo(sff=mySffFile.sff, trim=F).\n";
 		return helpString;
 	}

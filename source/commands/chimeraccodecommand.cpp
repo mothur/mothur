@@ -130,6 +130,13 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
 			}
 
             fastafile = validParameter.validFile(parameters, "fasta");

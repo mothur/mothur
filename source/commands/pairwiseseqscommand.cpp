@@ -46,7 +46,7 @@ string PairwiseSeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The pairwise.seqs command reads a fasta file and creates distance matrix.\n";
 		helpString += "The pairwise.seqs command parameters are fasta, align, match, mismatch, gapopen, gapextend, calc, output, cutoff, oldfasta, column and processors.\n";
-		helpString += "The fasta parameter is required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
+		helpString += "The fasta parameter is required.\n";
 		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";

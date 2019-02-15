@@ -111,8 +111,19 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			outputTypes["accnos"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
+            string inputDir = validParameter.valid(parameters, "inputdir");
+            if (inputDir == "not found"){	inputDir = "";		}
+            else {
+                string path;
+                
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
+            }
+            
 			
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
