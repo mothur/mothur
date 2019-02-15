@@ -44,11 +44,7 @@ private:
 	string fastafile, groupfile, countfile, outputDir, namefile;
 	int processors, alignLength;
 	double cutoff, alpha, beta;
-	
-	vector<string> outputNames;
-	vector<string> fastaFileNames;
-	vector<string> nameFileNames;
-	vector<string> groupFileNames;
+    vector<string> outputNames;
 	
 	string getNamesFile(string&);
 	vector<seqData> readFiles(string, string);
