@@ -88,16 +88,14 @@ private:
 	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount, hasName, dups;
 	string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation, strand;
 	int processors;
-    uchimeVariables* vars;
+    //uchimeVariables* vars;
 	vector<string> outputNames;
-	vector<string> fastaFileNames;
-	vector<string> nameFileNames;
-	vector<string> groupFileNames;
+    uchimeVariables* vars;
 	
 	string getNamesFile(string&);
 	int readFasta(string, map<string, string>&);
 	int deconvoluteResults(map<string, string>&, string, string, string);
-	int createProcessesGroups(string, string, string, string, string, vector<string>, string, string, string, map<string, string>&);
+	int createProcessesGroups(string, string, string, string, string, vector<string>, map<string, string>&);
 };
 /**************************************************************************************************/
 
