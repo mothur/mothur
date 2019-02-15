@@ -1122,23 +1122,15 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
                     }
                 }else { scoresNULL = true; }
                 
-                if ((itMap->second)[j] == "10308") {
-                    cout << "here" << endl;
-                }
-                
                 //merge abunds
                 mergeString += (itMap->second)[j] + " ";
                 string simpleLabel = util.getSimpleLabel((itMap->second)[j]);
                 int otuindex = labelIndex[simpleLabel];
                 vector<int> otuAbunds = lookup->getOTU(otuindex);
-                for (int i = 0; i < otuAbunds.size(); i++) {
-                    //string groupName = namesOfGroups[i];
-                    //int thisGroupAbund = lookup->get(otuindex, groupName);
-                    abunds[i] += otuAbunds[i];
-                    //abunds[i] += lookup->get(labelIndex[util.getSimpleLabel((itMap->second)[j])], namesOfGroups[i]);
-                }
+                
+                for (int i = 0; i < otuAbunds.size(); i++) { abunds[i] += otuAbunds[i]; }
             }
-            cout << mergeString << endl;
+            
             if (m->getDebug()) { m->mothurOut("[DEBUG]: merging " + mergeString + " for ggOTUid = " + itMap->first + ".\n");  }
             
             //average scores
@@ -1159,17 +1151,8 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
             
             //add merged otu to new lookup
             newLookup->push_back(abunds, itMap->first);
-            //for (int j = 0; j < abunds.size(); j++) { newLookup[j]->push_back(abunds[j]); }
-            
-            //saved otu label
-            //newBinLabels.push_back(itMap->first);
         }
 		
-        //lookup->clear();
-        //for (int i = 0; i < newLookup.size(); i++) { lookup->push_back(newLookup[i]);  }
-        //lookup->eliminateZeroOTUS();
-		
-		//lookup->setOTUNames(newBinLabels);
         delete lookup;
         lookup = newLookup;
         labelTaxMap = newLabelTaxMap;
