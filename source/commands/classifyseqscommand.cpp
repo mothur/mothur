@@ -203,142 +203,72 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("name");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("group");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["group"] = inputDir + it->second;		}
+                }
             }
 
-			fastaFileName = validParameter.valid(parameters, "fasta");
-			if (fastaFileName == "not found") { 				
-				//if there is a current fasta file, use it
-				string filename = current->getFastaFile(); 
-				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}
-			else { 
-				util.splitAtDash(fastaFileName, fastaFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < fastaFileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = current->getFastaFile(); 
-						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
-                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
-                    }
-                }
-				
-				//make sure there is at least one valid file left
-				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
-
-			namefile = validParameter.valid(parameters, "name");
-			if (namefile == "not found") { namefile = "";  }
-			else { 
-				util.splitAtDash(namefile, namefileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < namefileNames.size(); i++) {
-					bool ignore = false;
-					if (namefileNames[i] == "current") { 
-						namefileNames[i] = current->getNameFile(); 
-						if (namefileNames[i] != "") {  m->mothurOut("Using " + namefileNames[i] + " as input file for the name parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current namefile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							namefileNames.erase(namefileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(namefileNames[i], current->getLocations())) { current->setNameFile(namefileNames[i]); }
-                        else { namefileNames.erase(namefileNames.begin()+i); i--; } //erase from file list
-                    }
-                }
-			}
+            fastafile = validParameter.validFile(parameters, "fasta");
+            if (fastafile == "not found") {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
+                else { 	m->mothurOut("[ERROR]: You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
+            }
+            else if (fastafile == "not open") { abort = true; }
+            else { current->setFastaFile(fastafile); }
             
-            if (namefileNames.size() != 0) { hasName = true; }
+            namefile = validParameter.validFile(parameters, "name");
+            if (namefile == "not open") { namefile = ""; abort = true; }
+            else if (namefile == "not found") {  namefile = "";  }
+            else { current->setNameFile(namefile); }
+            if (namefile != "") { hasName = true; }
             
-			if (namefile != "") {
-				if (namefileNames.size() != fastaFileNames.size()) { abort = true; m->mothurOut("If you provide a name file, you must have one for each fasta file."); m->mothurOutEndLine(); }
-			}
-			
             //check for required parameters
-			countfile = validParameter.valid(parameters, "count");
-			if (countfile == "not found") { 
-                countfile = "";  
-			}else { 
-				util.splitAtDash(countfile, countfileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < countfileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (countfileNames[i] == "current") { 
-						countfileNames[i] = current->getCountFile(); 
-						if (countfileNames[i] != "") {  m->mothurOut("Using " + countfileNames[i] + " as input file for the count parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current count file, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							countfileNames.erase(countfileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(countfileNames[i], current->getLocations())) { current->setCountFile(countfileNames[i]); }
-                        else { countfileNames.erase(countfileNames.begin()+i); i--; } //erase from file list
-                    }
-                }
-			}
+            countfile = validParameter.validFile(parameters, "count");
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found") { countfile = "";  }
+            else { current->setCountFile(countfile); }
+            if (countfile != "") { hasCount = true; }
             
-            if (countfileNames.size() != 0) { hasCount = true; if (countfileNames.size() != fastaFileNames.size()) {m->mothurOut("If you provide a count file, you must have one for each fasta file."); m->mothurOutEndLine(); } }
+            //make sure there is at least one valid file left
+            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
-			//make sure there is at least one valid file left
-            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
-
-			groupfile = validParameter.valid(parameters, "group");
-			if (groupfile == "not found") { groupfile = "";  }
-			else { 
-				util.splitAtDash(groupfile, groupfileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < groupfileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (groupfileNames[i] == "current") { 
-						groupfileNames[i] = current->getGroupFile(); 
-						if (groupfileNames[i] != "") {  m->mothurOut("Using " + groupfileNames[i] + " as input file for the group parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current group file, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							groupfileNames.erase(groupfileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(groupfileNames[i], current->getLocations())) { current->setGroupFile(groupfileNames[i]); }
-                        else { groupfileNames.erase(groupfileNames.begin()+i); i--; } //erase from file list
-                    }
-                }
-			}
-
-			if (groupfile != "") {
-				if (groupfileNames.size() != fastaFileNames.size()) { abort = true; m->mothurOut("If you provide a group file, you must have one for each fasta file."); m->mothurOutEndLine(); }
-                if (hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
-			}else {
-				for (int i = 0; i < fastaFileNames.size(); i++) {  groupfileNames.push_back("");  }
-			}
+            bool hasGroup = false;
+            groupfile = validParameter.validFile(parameters, "group");
+            if (groupfile == "not open") { abort = true; }
+            else if (groupfile == "not found") {  groupfile = "";  }
+            else { current->setGroupFile(groupfile); hasGroup = true; }
+            
+            if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
+            
+            //if the user changes the output directory command factory will send this info to us in the output parameter
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -418,9 +348,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			
             if (!abort) {
                 if (!hasCount) {
-                    if (namefileNames.size() == 0){
-                        if (fastaFileNames.size() != 0) {
-                            vector<string> files; files.push_back(fastaFileNames[fastaFileNames.size()-1]); 
+                    if (namefile == ""){
+                        if (fastafile != "") {
+                            vector<string> files; files.push_back(fastafile);
                             if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                         }
                     }
@@ -435,11 +365,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 }
 
 //**********************************************************************************************************************
-ClassifySeqsCommand::~ClassifySeqsCommand(){	
-	if (!abort) {
-		for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-	}
-}
+ClassifySeqsCommand::~ClassifySeqsCommand(){}
 //**********************************************************************************************************************
 
 int ClassifySeqsCommand::execute(){
@@ -462,139 +388,127 @@ int ClassifySeqsCommand::execute(){
 		
 		if (m->getControl_pressed()) { delete classify; return 0; }
 				
-		for (int s = 0; s < fastaFileNames.size(); s++) {
-		
-			m->mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
-			
-			string baseTName = util.getSimpleName(taxonomyFileName);
-			
-            //set rippedTaxName to 
-			string RippedTaxName = "";
-            bool foundDot = false;
-            for (int i = baseTName.length()-1; i >= 0; i--) {
-                if (foundDot && (baseTName[i] != '.')) {  RippedTaxName = baseTName[i] + RippedTaxName; }
-                else if (foundDot && (baseTName[i] == '.')) {  break; }
-                else if (!foundDot && (baseTName[i] == '.')) {  foundDot = true; }
-            }
-            //if (RippedTaxName != "") { RippedTaxName +=  "."; }   
-          
-			if (outputDir == "") { outputDir += util.hasPath(fastaFileNames[s]); }
-            map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
-            variables["[tag]"] = RippedTaxName;
-            variables["[tag2]"] = outputMethodTag;
-			string newTaxonomyFile = getOutputFileName("taxonomy", variables);
-			string newaccnosFile = getOutputFileName("accnos", variables);
-			string tempTaxonomyFile = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
-			string taxSummary = getOutputFileName("taxsummary", variables);
+        m->mothurOut("Classifying sequences from " + fastafile + " ...\n" );
+        
+        string baseTName = util.getSimpleName(taxonomyFileName);
+        
+        //set rippedTaxName to
+        string RippedTaxName = "";
+        bool foundDot = false;
+        for (int i = baseTName.length()-1; i >= 0; i--) {
+            if (foundDot && (baseTName[i] != '.')) {  RippedTaxName = baseTName[i] + RippedTaxName; }
+            else if (foundDot && (baseTName[i] == '.')) {  break; }
+            else if (!foundDot && (baseTName[i] == '.')) {  foundDot = true; }
+        }
+        
+        if (outputDir == "") { outputDir += util.hasPath(fastafile); }
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[tag]"] = RippedTaxName;
+        variables["[tag2]"] = outputMethodTag;
+        string newTaxonomyFile = getOutputFileName("taxonomy", variables);
+        string newaccnosFile = getOutputFileName("accnos", variables);
+        string tempTaxonomyFile = outputDir + util.getRootName(util.getSimpleName(fastafile)) + "taxonomy.temp";
+        string taxSummary = getOutputFileName("taxsummary", variables);
+        
+        if ((method == "knn") && (search == "distance")) {
+            string DistName = getOutputFileName("matchdist", variables);
+            classify->setDistName(DistName);  outputNames.push_back(DistName); outputTypes["matchdist"].push_back(DistName);
+        }
+        
+        outputNames.push_back(newTaxonomyFile); outputTypes["taxonomy"].push_back(newTaxonomyFile);
+        outputNames.push_back(taxSummary);	outputTypes["taxsummary"].push_back(taxSummary);
+        
+        long start = time(NULL);
+        int numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastafile);
+        
+        if (!util.isBlank(newaccnosFile)) { m->mothurOut("\n[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences.\n");
+            outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
+        }else { util.mothurRemove(newaccnosFile); }
+        
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences.\n\n");
+        start = time(NULL);
+        
+        //read namefile
+        map<string, vector<string> > nameMap;
+        map<string,  vector<string> >::iterator itNames;
+        if(namefile != "") {
+            m->mothurOut("Reading " + namefile + "..."); cout.flush();
+            nameMap.clear(); //remove old names
+            util.readNames(namefile, nameMap);
+            m->mothurOut("  Done.\n");
+        }
+        
+        //output taxonomy with the unclassified bins added
+        ifstream inTax;
+        util.openInputFile(newTaxonomyFile, inTax);
+        
+        ofstream outTax;
+        string unclass = newTaxonomyFile + ".unclass.temp";
+        util.openOutputFile(unclass, outTax);
+        
+        //get maxLevel from phylotree so you know how many 'unclassified's to add
+        int maxLevel = classify->getMaxLevel();
+        
+        //read taxfile - this reading and rewriting is done to preserve the confidence scores.
+        string name, taxon;
+        GroupMap* groupMap = NULL;
+        CountTable* ct = NULL;
+        PhyloSummary* taxaSum;
+        
+        if (hasCount) {
+            ct = new CountTable();
+            ct->readTable(countfile, true, false);
+            taxaSum = new PhyloSummary(ct, relabund, printlevel);
+        }else {
+            if (groupfile != "") {  groupMap = new GroupMap(groupfile); groupMap->readMap(); }
+            taxaSum = new PhyloSummary(groupMap, relabund, printlevel);
+        }
+        
+        while (!inTax.eof()) {
+            if (m->getControl_pressed()) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
             
-			
-			if ((method == "knn") && (search == "distance")) { 
-				string DistName = getOutputFileName("matchdist", variables);
-				classify->setDistName(DistName);  outputNames.push_back(DistName); outputTypes["matchdist"].push_back(DistName);
-			}
-			
-			outputNames.push_back(newTaxonomyFile); outputTypes["taxonomy"].push_back(newTaxonomyFile);
-			outputNames.push_back(taxSummary);	outputTypes["taxsummary"].push_back(taxSummary);
-			
-			long start = time(NULL);
-			int numFastaSeqs = 0;
-			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-		
-						
-            numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastaFileNames[s]);
-			
-			if (!util.isBlank(newaccnosFile)) { m->mothurOut("\n[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences.\n");
-                outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
-            }else { util.mothurRemove(newaccnosFile); }
-
-            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences.\n\n");
-            start = time(NULL);
+            inTax >> name; util.gobble(inTax);
+            taxon = util.getline(inTax); util.gobble(inTax);
             
-            //read namefile
-            if(namefile != "") {
-                m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();
-                nameMap.clear(); //remove old names
-                util.readNames(namefileNames[s], nameMap);
-                m->mothurOut("  Done."); m->mothurOutEndLine();
-            }
+            string newTax = util.addUnclassifieds(taxon, maxLevel, probs);
             
-            //output taxonomy with the unclassified bins added
-            ifstream inTax;
-            util.openInputFile(newTaxonomyFile, inTax);
+            outTax << name << '\t' << newTax << endl;
             
-            ofstream outTax;
-            string unclass = newTaxonomyFile + ".unclass.temp";
-            util.openOutputFile(unclass, outTax);
-            
-            //get maxLevel from phylotree so you know how many 'unclassified's to add
-            int maxLevel = classify->getMaxLevel();
-            
-            //read taxfile - this reading and rewriting is done to preserve the confidence scores.
-            string name, taxon;
-            string group = "";
-            GroupMap* groupMap = NULL;
-            CountTable* ct = NULL;
-            PhyloSummary* taxaSum;
-            
-            if (hasCount) {
-                ct = new CountTable();
-                ct->readTable(countfileNames[s], true, false);
-                taxaSum = new PhyloSummary(ct, relabund, printlevel);
-            }else {
-                if (groupfile != "") {  group = groupfileNames[s]; groupMap = new GroupMap(group); groupMap->readMap(); }
-                taxaSum = new PhyloSummary(groupMap, relabund, printlevel);
-            }
-            
-            while (!inTax.eof()) {
-                if (m->getControl_pressed()) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
+            if (namefile != "") {
+                itNames = nameMap.find(name);
                 
-                inTax >> name; util.gobble(inTax);
-                taxon = util.getline(inTax); util.gobble(inTax);
-                
-                string newTax = util.addUnclassifieds(taxon, maxLevel, probs);
-                
-                outTax << name << '\t' << newTax << endl;
-                
-                if (namefile != "") {
-                    itNames = nameMap.find(name);
-                    
-                    if (itNames == nameMap.end()) {
-                        m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
-                    }else{
-                        for (int i = 0; i < itNames->second.size(); i++) {
-                            taxaSum->addSeqToTree(itNames->second[i], newTax);  //add it as many times as there are identical seqs
-                        }
-                        itNames->second.clear();
-                        nameMap.erase(itNames->first);
-                    }
-                }else {
-                    taxaSum->addSeqToTree(name, newTax);
+                if (itNames == nameMap.end()) {
+                    m->mothurOut(name + " is not in your name file please correct.\n");  exit(1);
+                }else{
+                    //add it as many times as there are identical seqs
+                    for (int i = 0; i < itNames->second.size(); i++) { taxaSum->addSeqToTree(itNames->second[i], newTax); }
+                    itNames->second.clear();
+                    nameMap.erase(itNames->first);
                 }
-            }
-            inTax.close();
-            outTax.close();
-            
-            util.mothurRemove(newTaxonomyFile);
-            util.renameFile(unclass, newTaxonomyFile);
-            
-            if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
-            
-            //print summary file
-            ofstream outTaxTree;
-            util.openOutputFile(taxSummary, outTaxTree);
-            taxaSum->print(outTaxTree, output);
-            outTaxTree.close();
-            
-            if (ct != NULL) { delete ct; }
-            if (groupMap != NULL) { delete groupMap; } delete taxaSum;
-            util.mothurRemove(tempTaxonomyFile);
-            
-            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences.\n\n");
-			
-		}
+            }else { taxaSum->addSeqToTree(name, newTax); }
+        }
+        inTax.close();
+        outTax.close();
+        
+        util.mothurRemove(newTaxonomyFile);
+        util.renameFile(unclass, newTaxonomyFile);
+        
+        if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
+        
+        //print summary file
+        ofstream outTaxTree;
+        util.openOutputFile(taxSummary, outTaxTree);
+        taxaSum->print(outTaxTree, output);
+        outTaxTree.close();
+        
+        if (ct != NULL) { delete ct; }
+        if (groupMap != NULL) { delete groupMap; } delete taxaSum;
+        util.mothurRemove(tempTaxonomyFile);
         delete classify;
         
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences.\n\n");
+
         m->mothurOut("\nOutput File Names: \n");
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
         m->mothurOutEndLine();
@@ -718,7 +632,6 @@ void driverClassifier(classifyData* params){
 
 int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string accnos, string filename) {
 	try {
-        
         //create array of worker threads
         vector<thread*> workerThreads;
         vector<classifyData*> data;
@@ -729,22 +642,21 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         time(&start);
 
         vector<unsigned long long> positions;
+        vector<linePair> lines;
 #if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);
-        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
+        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
-        
-            positions = util.setFilePosFasta(filename, num);
-            if (num < processors) { processors = num; }
+        positions = util.setFilePosFasta(filename, num);
+        if (num < processors) { processors = num; }
             
-            //figure out how many sequences you have to process
-            int numSeqsPerProcessor = num / processors;
-            for (int i = 0; i < processors; i++) {
-                int startIndex =  i * numSeqsPerProcessor;
-                if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
-                lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
-            }
-       
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = num / processors;
+        for (int i = 0; i < processors; i++) {
+            int startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){	numSeqsPerProcessor = num - i * numSeqsPerProcessor; 	}
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
 #endif
         auto synchronizedAccnosFile = std::make_shared<SynchronizedOutputFile>(accnos);
         auto synchronizedTaxFile = std::make_shared<SynchronizedOutputFile>(taxFileName);
@@ -756,7 +668,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
             OutputWriter* threadTaxTWriter = new OutputWriter(synchronizedTaxTFile);
             OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedAccnosFile);
             
-            classifyData* dataBundle = new classifyData(threadAccnosWriter, probs, threadTaxWriter, threadTaxTWriter, filename, lines[i+1]->start, lines[i+1]->end, flip, classify);
+            classifyData* dataBundle = new classifyData(threadAccnosWriter, probs, threadTaxWriter, threadTaxTWriter, filename, lines[i+1].start, lines[i+1].end, flip, classify);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverClassifier, dataBundle));
@@ -766,7 +678,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         OutputWriter* threadTaxTWriter = new OutputWriter(synchronizedTaxTFile);
         OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedAccnosFile);
         
-        classifyData* dataBundle = new classifyData(threadAccnosWriter, probs, threadTaxWriter, threadTaxTWriter, filename, lines[0]->start, lines[0]->end, flip, classify);
+        classifyData* dataBundle = new classifyData(threadAccnosWriter, probs, threadTaxWriter, threadTaxTWriter, filename, lines[0].start, lines[0].end, flip, classify);
         driverClassifier(dataBundle);
         num = dataBundle->count;
         

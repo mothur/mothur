@@ -55,20 +55,11 @@ public:
 	
 	
 private:
-
-	vector<int> processIDS;   //processid
-	vector<linePair*> lines;
-	vector<string> fastaFileNames;
-	vector<string> namefileNames;
-    vector<string> countfileNames;
-	vector<string> groupfileNames;
 	vector<string> outputNames;
-	map<string, vector<string> > nameMap;
-	map<string,  vector<string> >::iterator itNames;
 	
 	Classify* classify;
 	
-	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile, output;
+	string fastafile, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile, output;
 	int processors, kmerSize, numWanted, cutoff, iters, printlevel;
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts, relabund;
