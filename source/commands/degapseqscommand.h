@@ -39,7 +39,7 @@ private:
 	bool abort;
 	string fastafile, outputDir;
 	vector<string> outputNames;
-	vector<string> fastaFileNames;
+	
     
     long long createProcesses(string, string);
 	

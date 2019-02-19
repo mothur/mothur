@@ -104,44 +104,27 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
 		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			
-			//check for required parameters
-			fastafile = validParameter.valid(parameters, "fasta");
-			if (fastafile == "not found") { 				
-				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { fastaFileNames.push_back(fastafile); m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}
-			else { 
-				util.splitAtDash(fastafile, fastaFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < fastaFileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = current->getFastaFile(); 
-						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
-                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
-                    }
+            string inputDir = validParameter.valid(parameters, "inputdir");
+            if (inputDir == "not found"){	inputDir = "";		}
+            else {
+                string path;
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
                 }
-				
-				//make sure there is at least one valid file left
-				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
+            }
+            
+            fastafile = validParameter.validFile(parameters, "fasta");
+            if (fastafile == "not found") {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
+                else { 	m->mothurOut("[ERROR]: You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
+            }
+            else if (fastafile == "not open") { abort = true; }
+            else { current->setFastaFile(fastafile); }
+
             
             string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
             processors = current->setProcessors(temp);
@@ -164,26 +147,23 @@ int DegapSeqsCommand::execute(){
 	try{
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-		for (int s = 0; s < fastaFileNames.size(); s++) {
-				
-			m->mothurOut("Degapping sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
-			
-			string tempOutputDir = outputDir;
-			if (outputDir == "") { tempOutputDir = util.hasPath(fastaFileNames[s]); }
-            map<string, string> variables; 
-            variables["[filename]"] = tempOutputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
-			string degapFile = getOutputFileName("fasta", variables);
-            outputNames.push_back(degapFile); outputTypes["fasta"].push_back(degapFile);
-            
-            long start = time(NULL);
-			
-            int numSeqs = createProcesses(fastaFileNames[s], degapFile);
-			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to degap " + toString(numSeqs) + " sequences.\n\n");
-            
-			if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
-		}
+
+        m->mothurOut("Degapping sequences from " + fastafile + " ...\n" );
+        
+        string tempOutputDir = outputDir;
+        if (outputDir == "") { tempOutputDir = util.hasPath(fastafile); }
+        map<string, string> variables;
+        variables["[filename]"] = tempOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        string degapFile = getOutputFileName("fasta", variables);
+        outputNames.push_back(degapFile); outputTypes["fasta"].push_back(degapFile);
+        
+        long start = time(NULL);
+        
+        int numSeqs = createProcesses(fastafile, degapFile);
+        
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to degap " + toString(numSeqs) + " sequences.\n\n");
+        
+        if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
 		
 		//set fasta file as new current fastafile
 		string currentName = "";
@@ -196,9 +176,7 @@ int DegapSeqsCommand::execute(){
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
 		m->mothurOutEndLine();
 
-		
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DegapSeqsCommand", "execute");
