@@ -38,7 +38,7 @@ public:
 	
 private:
 	string sffFilename, sfftxtFilename, outputDir, accnosName, currentFileName, oligosfile, noMatchFile, groupfile;
-	vector<string> filenames, outputNames, accnosFileNames, oligosFileNames, groupFileNames;
+	vector<string> outputNames;
 	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos, hasOligos, hasGroup, reorient, pairedOligos;
 	int mycount, split, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, numNoMatch;
 	set<string> seqNames;
