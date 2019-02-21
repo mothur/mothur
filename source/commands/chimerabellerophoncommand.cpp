@@ -37,7 +37,6 @@ string ChimeraBellerophonCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.bellerophon command reads a fastafile and creates list of potentially chimeric sequences.\n";
 		helpString += "The chimera.bellerophon command parameters are fasta, filter, correction, processors, window, increment. The fasta parameter is required, unless you have a valid current file.\n";
-		helpString += "The fasta parameter is required.  You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
 		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter, default=false. \n";
 		helpString += "The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs, default=true.\n";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default is 1/4 sequence length. \n";
@@ -112,42 +111,28 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			outputTypes["accnos"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
+            string inputDir = validParameter.valid(parameters, "inputdir");
+            if (inputDir == "not found"){	inputDir = "";		}
+            else {
+                string path;
+                
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
+            }
+            
 			
-			fastafile = validParameter.valid(parameters, "fasta");
-			if (fastafile == "not found") { 				
-				//if there is a current fasta file, use it
-				string filename = current->getFastaFile(); 
-				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { 
-				util.splitAtDash(fastafile, fastaFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < fastaFileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = current->getFastaFile(); 
-						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-					if (!ignore) {
-                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
-                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
-					}
-				}
-				
-				//make sure there is at least one valid file left
-				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
+            fastafile = validParameter.validFile(parameters, "fasta");
+            if (fastafile == "not found") {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
+                else { 	m->mothurOut("[ERROR]: You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
+            }
+            else if (fastafile == "not open") { abort = true; }
+            else { current->setFastaFile(fastafile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
@@ -177,44 +162,36 @@ int ChimeraBellerophonCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		for (int i = 0; i < fastaFileNames.size(); i++) {
-			
-			m->mothurOut("Checking sequences from " + fastaFileNames[i] + " ..." ); m->mothurOutEndLine();
-			
-			long start = time(NULL);	
-			
-			chimera = new Bellerophon(fastaFileNames[i], filter, correction, window, increment, outputDir);	
-			
-			if (outputDir == "") { outputDir = util.hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it	
-            map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[i]));
-			string outputFileName = getOutputFileName("chimera", variables);
-			string accnosFileName = getOutputFileName("accnos", variables);
-			
-			chimera->getChimeras();
-			
-			if (m->getControl_pressed()) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;	}
-					
-			ofstream out;
-			util.openOutputFile(outputFileName, out);
-			
-			ofstream out2;
-			util.openOutputFile(accnosFileName, out2);
-			
-			numSeqs = chimera->print(out, out2, "");
-			out.close();
-			out2.close(); 
-						
-			if (m->getControl_pressed()) { util.mothurRemove(accnosFileName); util.mothurRemove(outputFileName); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); delete chimera;	return 0;	}
-			
-			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine(); m->mothurOutEndLine();
-			
-			outputNames.push_back(outputFileName);  outputTypes["chimera"].push_back(outputFileName);
-			outputNames.push_back(accnosFileName);  outputTypes["accnos"].push_back(accnosFileName);
-			
-			delete chimera;
-		}
-		
+        m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
+        
+        long start = time(NULL);
+
+        MothurChimera* chimera = new Bellerophon(fastafile, filter, correction, window, increment, outputDir);
+        
+        chimera->getChimeras();
+        
+        if (m->getControl_pressed()) { delete chimera;  return 0;	}
+        
+        if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        string outputFileName = getOutputFileName("chimera", variables);
+        string accnosFileName = getOutputFileName("accnos", variables);
+        
+        ofstream out; util.openOutputFile(outputFileName, out); outputNames.push_back(outputFileName);  outputTypes["chimera"].push_back(outputFileName);
+        ofstream out2; util.openOutputFile(accnosFileName, out2); outputNames.push_back(accnosFileName);  outputTypes["accnos"].push_back(accnosFileName);
+        
+        //print results
+        numSeqs = chimera->print(out, out2, "");
+        
+        out.close(); out2.close();
+        
+        delete chimera;
+        
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); 	return 0;	}
+        
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n\n");
+
 		//set accnos file as new current accnosfile
 		string currentName = "";
 		itTypes = outputTypes.find("accnos");

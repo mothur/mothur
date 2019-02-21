@@ -36,8 +36,6 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter pminchunk("minchunk", "Number", "", "64", "", "", "","",false,false); parameters.push_back(pminchunk);
 		CommandParameter pidsmoothwindow("idsmoothwindow", "Number", "", "32", "", "", "","",false,false); parameters.push_back(pidsmoothwindow);
         CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdups);
-
-		//CommandParameter pminsmoothid("minsmoothid", "Number", "", "0.95", "", "", "",false,false); parameters.push_back(pminsmoothid);
 		CommandParameter pmaxp("maxp", "Number", "", "2", "", "", "","",false,false); parameters.push_back(pmaxp);
 		CommandParameter pskipgaps("skipgaps", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pskipgaps);
 		CommandParameter pskipgaps2("skipgaps2", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pskipgaps2);
@@ -65,7 +63,6 @@ string ChimeraUchimeCommand::getHelpString(){
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
         helpString += "The count parameter allows you to provide a count file, if you are using template=self. When you use a count file with group info and dereplicate=T, mothur will create a *.pick.count_table file containing seqeunces after chimeras are removed. \n";
-		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The group parameter allows you to provide a group file. The group file can be used with a namesfile and reference=self. When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
         helpString += "If the dereplicate parameter is false, then if one group finds the sequence to be chimeric, then all groups find it to be chimeric, default=f.\n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
@@ -163,179 +160,94 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
             outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			
-			//check for required parameters
-			fastafile = validParameter.valid(parameters, "fasta");
-			if (fastafile == "not found") { 				
-				//if there is a current fasta file, use it
-				string filename = current->getFastaFile(); 
-				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { 
-				util.splitAtDash(fastafile, fastaFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < fastaFileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = current->getFastaFile(); 
-						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
-                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
-                    }
-				}
-				
-				//make sure there is at least one valid file left
-				if (fastaFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
-			
-			
-			//check for required parameters
-			namefile = validParameter.valid(parameters, "name");
-			if (namefile == "not found") { namefile = "";  	}
-			else { 
-				util.splitAtDash(namefile, nameFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < nameFileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (nameFileNames[i] == "current") { 
-						nameFileNames[i] = current->getNameFile(); 
-						if (nameFileNames[i] != "") {  m->mothurOut("Using " + nameFileNames[i] + " as input file for the name parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current namefile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							nameFileNames.erase(nameFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(nameFileNames[i], current->getLocations())) { current->setNameFile(nameFileNames[i]); }
-                        else { nameFileNames.erase(nameFileNames.begin()+i); i--; } //erase from file list
-                    }
+            string inputDir = validParameter.valid(parameters, "inputdir");
+            if (inputDir == "not found"){	inputDir = "";		}
+            else {
+                string path;
+                it = parameters.find("count");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
                 }
-			}
+                
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("name");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("group");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["group"] = inputDir + it->second;		}
+                }
+            }
             
-            if (nameFileNames.size() != 0) { hasName = true; }
+            fastafile = validParameter.validFile(parameters, "fasta");
+            if (fastafile == "not found") {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
+                else { 	m->mothurOut("[ERROR]: You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
+            }
+            else if (fastafile == "not open") { abort = true; }
+            else { current->setFastaFile(fastafile); }
+            
+            namefile = validParameter.validFile(parameters, "name");
+            if (namefile == "not open") { namefile = ""; abort = true; }
+            else if (namefile == "not found") {  namefile = "";  }
+            else { current->setNameFile(namefile); }
+            if (namefile != "") { hasName = true; }
             
             //check for required parameters
-            vector<string> countfileNames;
-			countfile = validParameter.valid(parameters, "count");
-			if (countfile == "not found") { 
-                countfile = "";  
-			}else { 
-				util.splitAtDash(countfile, countfileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < countfileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (countfileNames[i] == "current") { 
-						countfileNames[i] = current->getCountFile(); 
-						if (nameFileNames[i] != "") {  m->mothurOut("Using " + countfileNames[i] + " as input file for the count parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current count file, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							countfileNames.erase(countfileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(countfileNames[i], current->getLocations())) { current->setCountFile(countfileNames[i]); }
-                        else { countfileNames.erase(countfileNames.begin()+i); i--; } //erase from file list
-                    }
-				}
-			}
-            
-            if (countfileNames.size() != 0) { hasCount = true; }
+            countfile = validParameter.validFile(parameters, "count");
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found") { countfile = "";  }
+            else { current->setCountFile(countfile); }
+            if (countfile != "") { hasCount = true; }
             
 			//make sure there is at least one valid file left
-            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
-            
-            if (!hasName && hasCount) { nameFileNames = countfileNames; }
-            
-			if ((hasCount || hasName) && (nameFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of name or count files does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
+            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
-			bool hasGroup = true;
-			groupfile = validParameter.valid(parameters, "group");
-			if (groupfile == "not found") { groupfile = "";  hasGroup = false; }
-			else { 
-				util.splitAtDash(groupfile, groupFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < groupFileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (groupFileNames[i] == "current") { 
-						groupFileNames[i] = current->getGroupFile(); 
-						if (groupFileNames[i] != "") {  m->mothurOut("Using " + groupFileNames[i] + " as input file for the group parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current namefile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							groupFileNames.erase(groupFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(groupFileNames[i], current->getLocations())) { current->setGroupFile(groupFileNames[i]); }
-                        else { groupFileNames.erase(groupFileNames.begin()+i); i--; } //erase from file list
+            bool hasGroup = false;
+            groupfile = validParameter.validFile(parameters, "group");
+            if (groupfile == "not open") { abort = true; }
+            else if (groupfile == "not found") {  groupfile = "";  }
+            else { current->setGroupFile(groupfile); hasGroup = true; }
+            
+            if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
+            
+            //if the user changes the output directory command factory will send this info to us in the output parameter
+            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+            
+            it = parameters.find("reference");
+            //user has given a template file
+            if(it != parameters.end()){
+                if (it->second == "self") {  templatefile = "self";  }
+                else {
+                    string path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["reference"] = inputDir + it->second;		}
+                    
+                    templatefile = validParameter.validFile(parameters, "reference");
+                    if (templatefile == "not open") { abort = true; }
+                    else if (templatefile == "not found") { //check for saved reference sequences
+                        m->mothurOut("[ERROR]: The reference parameter is a required, aborting.\n"); abort = true;
                     }
                 }
-				
-				//make sure there is at least one valid file left
-				if (groupFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid group files."); m->mothurOutEndLine(); abort = true; }
-			}
+            }else if ((hasName) || (hasCount) || (hasGroup)) {  templatefile = "self"; }
+            else {  m->mothurOut("[ERROR]: The reference parameter is a required, aborting.\n"); templatefile = ""; abort = true; }
 			
-			if (hasGroup && (groupFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of groupfiles does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
-			
-            if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
-			
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
-			
-			string path;
-			it = parameters.find("reference");
-			//user has given a template file
-			if(it != parameters.end()){ 
-				if (it->second == "self") { templatefile = "self"; }
-				else {
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-					
-					templatefile = validParameter.validFile(parameters, "reference");
-					if (templatefile == "not open") { abort = true; }
-					else if (templatefile == "not found") { //check for saved reference sequences
-						m->mothurOut("[ERROR]: The reference parameter is a required.\n"); abort = true;
-					}
-				}
-			}else if (hasName) {  templatefile = "self"; }
-            else if (hasCount) {  templatefile = "self"; }
-			else {
-                m->mothurOut("[ERROR]: The reference parameter is a required.");
-					
-                templatefile = ""; abort = true;
-			}
-				
 			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
 			processors = current->setProcessors(temp);
 			
@@ -377,12 +289,12 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			dups = util.isTrue(temp);
 
 			
-			if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
-            if (hasCount && (templatefile != "self")) { m->mothurOut("You have provided a countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
-			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
+			if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
+            if (hasCount && (templatefile != "self")) { m->mothurOut("You have provided a countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
+			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
 			
 			//look for uchime exe
-			path = current->getProgramPath();
+			string path = current->getProgramPath();
 			string uchimeCommand = path + "uchime" + EXECUTABLE_EXT;
 			ifstream in;
 			uchimeCommand = util.getFullPathName(uchimeCommand);
@@ -800,156 +712,149 @@ int ChimeraUchimeCommand::execute(){
         vars = new uchimeVariables();
         vars->setBooleans(dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
         vars->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand);
-		
-		for (int s = 0; s < fastaFileNames.size(); s++) {
-			
-			m->mothurOut("Checking sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
-			
-			long start = time(NULL);
-			string nameFile = "";
-			if (outputDir == "") { outputDir = util.hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
-			map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
-            variables["[tag]"] = "denovo";
-            if (templatefile != "self") { variables["[tag]"] = "ref"; }
-			string outputFileName = getOutputFileName("chimera", variables);
-			string accnosFileName = getOutputFileName("accnos", variables);
-			string alnsFileName = getOutputFileName("alns", variables);
-			string newFasta = util.getRootName(fastaFileNames[s]) + "temp";
-            string newCountFile = "";
-				
-			//you provided a groupfile
-			string groupFile = "";
-            bool hasGroup = false;
-            vector<string> groups;
-			if (groupFileNames.size() != 0) { groupFile = groupFileNames[s]; hasGroup = true; }
-            else if (hasCount) {
+
+        m->mothurOut("Checking sequences from " + fastafile + " ...\n" ); 
+        
+        long start = time(NULL);
+        if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[tag]"] = "denovo";
+        if (templatefile != "self") { variables["[tag]"] = "ref"; }
+        string outputFileName = getOutputFileName("chimera", variables);
+        string accnosFileName = getOutputFileName("accnos", variables);
+        string alnsFileName = getOutputFileName("alns", variables);
+        string newFasta = util.getRootName(fastafile) + "temp";
+        string newCountFile = "";
+        
+        //you provided a groupfile
+        bool hasGroup = false;
+        vector<string> groups;
+        if (hasCount) {
+            CountTable ct;
+            if (ct.testGroups(countfile, groups)) { hasGroup = true; }
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+            newCountFile = getOutputFileName("count", variables);
+        }else if (groupfile != "") {  hasGroup = true;  }
+        
+        if ((templatefile == "self") && (!hasGroup)) { //you want to run uchime with a template=self and no groups
+            
+            if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing.\n"); processors = 1; }
+            
+            if (hasName || hasCount) { }
+            else { namefile = getNamesFile(fastafile); }
+            
+            map<string, string> seqs;
+            readFasta(fastafile, seqs);  if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
+            
+            //read namefile
+            vector<seqPriorityNode> nameMapCount;
+            int error;
+            if (hasCount) {
                 CountTable ct;
-                if (ct.testGroups(nameFileNames[s], groups)) { hasGroup = true; }
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(nameFileNames[s]));
-                newCountFile = getOutputFileName("count", variables);
+                ct.readTable(countfile, true, false);
+                for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+                    int num = ct.getNumSeqs(it->first);
+                    if (num == 0) { error = 1; }
+                    else {
+                        seqPriorityNode temp(num, it->second, it->first);
+                        nameMapCount.push_back(temp);
+                    }
+                }
+            }else {
+                error = util.readNames(namefile, nameMapCount, seqs); if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
             }
-			
-			if ((templatefile == "self") && (!hasGroup)) { //you want to run uchime with a template=self and no groups
-
-				if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
-				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
-					nameFile = nameFileNames[s];
-				}else { nameFile = getNamesFile(fastaFileNames[s]); }
-										
-				map<string, string> seqs;  
-				readFasta(fastaFileNames[s], seqs);  if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
-
-				//read namefile
-				vector<seqPriorityNode> nameMapCount;
-                int error;
-                if (hasCount) {
-                    CountTable ct;
-                    ct.readTable(nameFile, true, false);
-                    for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
-                        int num = ct.getNumSeqs(it->first);
-                        if (num == 0) { error = 1; }
-                        else {
-                            seqPriorityNode temp(num, it->second, it->first);
-                            nameMapCount.push_back(temp);
-                        }
-                    }
-                }else {
-                    error = util.readNames(nameFile, nameMapCount, seqs); if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
-                }
-				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
-				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
-				
-                util.printVsearchFile(nameMapCount, newFasta, "/ab=", "/");
-				fastaFileNames[s] = newFasta;
-			}
-			
-            if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars; return 0;	}
-			
-			if (hasGroup) {
-				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
-					nameFile = nameFileNames[s];
-				}else { nameFile = getNamesFile(fastaFileNames[s]); }
-				
-                if (!hasCount) { GroupMap g; g.readMap(groupFile); groups = g.getNamesOfGroups();  }
-					
-				if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0; }
-								
-				//clears files
-				ofstream out, out1, out2;
-				util.openOutputFile(outputFileName, out); out.close(); 
-				util.openOutputFile(accnosFileName, out1); out1.close();
-				if (chimealns) { util.openOutputFile(alnsFileName, out2); out2.close(); }
-                map<string, string> uniqueNames;
-				int totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, nameFile, groupFile, fastaFileNames[s], uniqueNames);
-
-				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars;  return 0;	}
-               
-                if (!dups) { 
-                    int totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, alnsFileName);
-				
-                    m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.");	m->mothurOutEndLine();
-                    m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
-				}else {
-                    if (hasCount) {
-                        set<string> doNotRemove;
-                        CountTable c; c.readTable(newCountFile, true, true);
-                        c.eliminateZeroSeqs();
-                        vector<string> namesInTable = c.getNamesOfSeqs();
-                        for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
-                        /*vector<string> namesInTable = c.getNamesOfSeqs();
-                         for (int i = 0; i < namesInTable.size(); i++) {
-                         int temp = c.getNumSeqs(namesInTable[i]);
-                         if (temp == 0) {  c.remove(namesInTable[i]);  }
-                         else { doNotRemove.insert((namesInTable[i])); }
-                         }*/
-                        //remove names we want to keep from accnos file.
-                        set<string> accnosNames = util.readAccnos(accnosFileName);
-                        ofstream out2;
-                        util.openOutputFile(accnosFileName, out2);
-                        for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
-                            if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
-                        }
-                        out2.close();
-                        c.printTable(newCountFile);
-                        outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
-                    }
-                }
+            if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
+            if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting.\n"); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
+            
+            util.printVsearchFile(nameMapCount, newFasta, "/ab=", "/");
+            fastafile = newFasta;
+        }
+        
+        if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars; return 0;	}
+        
+        if (hasGroup) {
+            if (hasName || hasCount) { }
+            else { namefile = getNamesFile(fastafile); }
+            
+            if (!hasCount) { GroupMap g; g.readMap(groupfile); groups = g.getNamesOfGroups();  }
+            
+            if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0; }
+            
+            //clears files
+            ofstream out, out1, out2;
+            util.openOutputFile(outputFileName, out); out.close();
+            util.openOutputFile(accnosFileName, out1); out1.close();
+            if (chimealns) { util.openOutputFile(alnsFileName, out2); out2.close(); }
+            map<string, string> uniqueNames;
+            
+            int totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, uniqueNames);
+            
+            if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars;  return 0;	}
+            
+            if (!dups) {
+                int totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, alnsFileName);
                 
-				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0;	}
-			}else{
-				if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0;	}
-			
-				int numSeqs = 0;
-				int numChimeras = 0;
-                uchimeData* dataBundle = new uchimeData(outputFileName, uchimeLocation, templatefile, fastaFileNames[s], fastaFileNames[s], nameFile, groupFile, accnosFileName, alnsFileName, accnosFileName+".byCount.temp", nullVector, vars);
-
-                numSeqs = driver(dataBundle);
-                numChimeras = dataBundle->numChimeras;
-                delete dataBundle;
-
-				//add headings
-				ofstream out;
-				util.openOutputFile(outputFileName+".temp", out); 
-				out << "Score\tQuery\tParentA\tParentB\tIdQM\tIdQA\tIdQB\tIdAB\tIdQT\tLY\tLN\tLA\tRY\tRN\tRA\tDiv\tYN\n";
-				out.close();
-				
-				util.appendFiles(outputFileName, outputFileName+".temp");
-				util.mothurRemove(outputFileName); rename((outputFileName+".temp").c_str(), outputFileName.c_str());
-				
-				if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars; return 0; }
-			
-				//remove file made for uchime
-				if (templatefile == "self") {  util.mothurRemove(fastaFileNames[s]); }
-			
-				m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.");	m->mothurOutEndLine();
-			}
-			
-			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
-			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
-			if (chimealns) { outputNames.push_back(alnsFileName); outputTypes["alns"].push_back(alnsFileName); }
-		}
-	
+                m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.");	m->mothurOutEndLine();
+                m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine();
+            }else {
+                if (hasCount) {
+                    set<string> doNotRemove;
+                    CountTable c; c.readTable(newCountFile, true, true);
+                    c.eliminateZeroSeqs();
+                    vector<string> namesInTable = c.getNamesOfSeqs();
+                    for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
+                    
+                    //remove names we want to keep from accnos file.
+                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    ofstream out2;
+                    util.openOutputFile(accnosFileName, out2);
+                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                        if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
+                    }
+                    out2.close();
+                    c.printTable(newCountFile);
+                    outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
+                }
+            }
+            
+            if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0;	}
+        }else{
+            if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0;	}
+            
+            int numSeqs = 0;
+            int numChimeras = 0;
+            
+            string dupsFileName = namefile;
+            if (hasCount) {  dupsFileName = countfile; }
+            
+            uchimeData* dataBundle = new uchimeData(outputFileName, uchimeLocation, templatefile, fastafile, fastafile, dupsFileName, groupfile, accnosFileName, alnsFileName, accnosFileName+".byCount.temp", nullVector, vars);
+            
+            numSeqs = driver(dataBundle);
+            numChimeras = dataBundle->numChimeras;
+            delete dataBundle;
+            
+            //add headings
+            ofstream out;
+            util.openOutputFile(outputFileName+".temp", out);
+            out << "Score\tQuery\tParentA\tParentB\tIdQM\tIdQA\tIdQB\tIdAB\tIdQT\tLY\tLN\tLA\tRY\tRN\tRA\tDiv\tYN\n";
+            out.close();
+            
+            util.appendFiles(outputFileName, outputFileName+".temp");
+            util.mothurRemove(outputFileName); rename((outputFileName+".temp").c_str(), outputFileName.c_str());
+            
+            if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars; return 0; }
+            
+            //remove file made for uchime
+            if (templatefile == "self") {  util.mothurRemove(fastafile); }
+            
+            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.\n");
+        }
+        
+        outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
+        outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
+        if (chimealns) { outputNames.push_back(alnsFileName); outputTypes["alns"].push_back(alnsFileName); }
+        
         delete vars;
         
 		//set accnos file as new current accnosfile
@@ -1383,9 +1288,7 @@ void driverGroups(uchimeData* params){
         if (params->vars->hasCount) { delete cparser; }
         else { delete parser; }
         
-        if (!params->m->getControl_pressed()) {
-            if (params->vars->hasCount && params->vars->dups) { outCountList.close(); }
-        }
+        if (!params->m->getControl_pressed()) { if (params->vars->hasCount && params->vars->dups) { outCountList.close(); } }
         params->count = totalSeqs;
 		
 	}
@@ -1396,11 +1299,11 @@ void driverGroups(uchimeData* params){
 }	
 /**************************************************************************************************/
 
-int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups, string nameFile, string groupFile, string fastaFile, map<string, string>& allSeqsMap) {
+int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups, map<string, string>& allSeqsMap) {
 	try {
-        //numChimeras = 0;
         CountTable newCount;
-        if (hasCount && dups) { newCount.readTable(nameFile, true, false); }
+        string dupsFileName = namefile;
+        if (hasCount && dups) { newCount.readTable(countfile, true, false); dupsFileName = countfile; }
         
         //sanity check
         if (groups.size() < processors) { processors = groups.size(); m->mothurOut("Reducing processors to " + toString(groups.size()) + ".\n"); }
@@ -1430,7 +1333,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
             string extension = toString(i+1) + ".temp";
             vector<string> thisGroups;
             for (int j = lines[i+1].start; j < lines[i+1].end; j++) { thisGroups.push_back(groups[j]); }
-            uchimeData* dataBundle = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
+            uchimeData* dataBundle = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastafile, dupsFileName, groupfile, accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new thread(driverGroups, dataBundle));
@@ -1438,7 +1341,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
         
         vector<string> thisGroups;
         for (int j = lines[0].start; j < lines[0].end; j++) { thisGroups.push_back(groups[j]); }
-        uchimeData* dataBundle = new uchimeData(outputFName, uchimeLocation, templatefile, filename, fastaFile, nameFile, groupFile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
+        uchimeData* dataBundle = new uchimeData(outputFName, uchimeLocation, templatefile, filename, fastafile, dupsFileName, groupfile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
         driverGroups(dataBundle);
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;

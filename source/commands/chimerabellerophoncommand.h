@@ -41,9 +41,8 @@ private:
 	bool abort, filter, correction;
 	string fastafile, outputDir;
 	int processors, window, increment, numSeqs;
-	MothurChimera* chimera;
 	vector<string> outputNames;
-	vector<string> fastaFileNames;
+
 };
 
 /***********************************************************/

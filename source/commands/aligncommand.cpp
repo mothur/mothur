@@ -179,46 +179,28 @@ AlignCommand::AlignCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
 			}
 
             templateFileName = validParameter.validFile(parameters, "reference");
             if (templateFileName == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required for the align.seqs command, aborting.\n"); abort = true;
             }else if (templateFileName == "not open") { abort = true; }
             
-			candidateFileName = validParameter.valid(parameters, "fasta");
-			if (candidateFileName == "not found") { 
-				//if there is a current fasta file, use it
-				string filename = current->getFastaFile();
-				if (filename != "") { candidateFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the candidate parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { 
-				util.splitAtDash(candidateFileName, candidateFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < candidateFileNames.size(); i++) {
-					//candidateFileNames[i] = util.getFullPathName(candidateFileNames[i]);
-					
-					bool ignore = false;
-					if (candidateFileNames[i] == "current") { 
-						candidateFileNames[i] = current->getFastaFile();
-						if (candidateFileNames[i] != "") {  m->mothurOut("Using " + candidateFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							candidateFileNames.erase(candidateFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-					if (!ignore) {
-                        if (util.checkLocations(candidateFileNames[i], current->getLocations())) { current->setFastaFile(candidateFileNames[i]); }
-                        else { candidateFileNames.erase(candidateFileNames.begin()+i); i--; } //erase from file list
-                    }
-				}
-				
-				//make sure there is at least one valid file left
-				if (candidateFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
+            fastafile = validParameter.validFile(parameters, "fasta");
+            if (fastafile == "not found") {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
+                else { 	m->mothurOut("[ERROR]: You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
+            }
+            else if (fastafile == "not open") { abort = true; }
+            else { current->setFastaFile(fastafile); }
+
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -273,41 +255,42 @@ int AlignCommand::execute(){
 
 		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, util.getRandomNumber(), true);
 		
-		for (int s = 0; s < candidateFileNames.size(); s++) {
-			if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
-			
-			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
-			
-			if (outputDir == "") {  outputDir += util.hasPath(candidateFileNames[s]); }
-            map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(candidateFileNames[s]));
-			string alignFileName = getOutputFileName("fasta", variables);  
-			string reportFileName = getOutputFileName("alignreport", variables);
-			string accnosFileName = getOutputFileName("accnos", variables);
-            
-			bool hasAccnos = true;
-            vector<long long> numFlipped;
-            numFlipped.push_back(0); //numflipped because reverse was better
-            numFlipped.push_back(0); //total number of sequences with over 50% of bases removed
-			
-            long long numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
-				
-			if (m->getControl_pressed()) { util.mothurRemove(accnosFileName); util.mothurRemove(alignFileName); util.mothurRemove(reportFileName); outputTypes.clear();  return 0; }
-			
-			//delete accnos file if its blank else report to user
-			if (util.isBlank(accnosFileName)) {  util.mothurRemove(accnosFileName);  hasAccnos = false; }
-			else { 
-				m->mothurOut("[WARNING]: " + toString(numFlipped[1]) + " of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
-				if (!flip) {
-					m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well. flip=t");
-				}else{  m->mothurOut("\n[NOTE]: " + toString(numFlipped[0]) + " of your sequences were reversed to produce a better alignment.");  }
-				m->mothurOutEndLine();
-			}
-
-			outputNames.push_back(alignFileName); outputTypes["fasta"].push_back(alignFileName);
-			outputNames.push_back(reportFileName); outputTypes["alignreport"].push_back(reportFileName);
-			if (hasAccnos)	{	outputNames.push_back(accnosFileName);	outputTypes["accnos"].push_back(accnosFileName);  }
-		}
+        if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
+        
+        time_t start = time(NULL);
+        m->mothurOut("\nAligning sequences from " + fastafile + " ...\n" );
+        
+        if (outputDir == "") {  outputDir += util.hasPath(fastafile); }
+        map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        string alignFileName = getOutputFileName("fasta", variables);
+        string reportFileName = getOutputFileName("alignreport", variables);
+        string accnosFileName = getOutputFileName("accnos", variables);
+        
+        bool hasAccnos = true;
+        vector<long long> numFlipped;
+        numFlipped.push_back(0); //numflipped because reverse was better
+        numFlipped.push_back(0); //total number of sequences with over 50% of bases removed
+        
+        long long numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, fastafile, numFlipped);
+        
+        if (m->getControl_pressed()) { util.mothurRemove(accnosFileName); util.mothurRemove(alignFileName); util.mothurRemove(reportFileName); outputTypes.clear();  return 0; }
+        
+        //delete accnos file if its blank else report to user
+        if (util.isBlank(accnosFileName)) {  util.mothurRemove(accnosFileName);  hasAccnos = false; }
+        else {
+            m->mothurOut("[WARNING]: " + toString(numFlipped[1]) + " of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+            if (!flip) {
+                m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well. flip=t");
+            }else{  m->mothurOut("\n[NOTE]: " + toString(numFlipped[0]) + " of your sequences were reversed to produce a better alignment.");  }
+            m->mothurOutEndLine();
+        }
+        
+        outputNames.push_back(alignFileName); outputTypes["fasta"].push_back(alignFileName);
+        outputNames.push_back(reportFileName); outputTypes["alignreport"].push_back(reportFileName);
+        if (hasAccnos)	{	outputNames.push_back(accnosFileName);	outputTypes["accnos"].push_back(accnosFileName);  }
 		
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to align " + toString(numFastaSeqs) + " sequences.\n");
+        
 		//set align file as new current fastafile
 		string currentFasta = "";
 		itTypes = outputTypes.find("fasta");

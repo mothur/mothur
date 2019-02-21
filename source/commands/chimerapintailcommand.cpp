@@ -43,7 +43,6 @@ string ChimeraPintailCommand::getHelpString(){
 		helpString += "This command was created using the algorithms described in the 'At Least 1 in 20 16S rRNA Sequence Records Currently Held in the Public Repositories is Estimated To Contain Substantial Anomalies' paper by Kevin E. Ashelford 1, Nadia A. Chuzhanova 3, John C. Fry 1, Antonia J. Jones 2 and Andrew J. Weightman 1.\n";
 		helpString += "The chimera.pintail command parameters are fasta, reference, filter, mask, processors, window, increment, conservation and quantile.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required unless you have a valid current fasta file. \n";
-		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. \n";
 		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n";
 		helpString += "The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences, by default no mask is applied.  You can apply an ecoli mask by typing, mask=default. \n";
@@ -149,43 +148,26 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["quantile"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
 			}
 
 			
 			//check for required parameters
-			fastafile = validParameter.valid(parameters, "fasta");
-			if (fastafile == "not found") { 				
-				//if there is a current fasta file, use it
-				string filename = current->getFastaFile(); 
-				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { 
-				util.splitAtDash(fastafile, fastaFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < fastaFileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = current->getFastaFile(); 
-						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
-                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
-                    }
-                }
-				
-				//make sure there is at least one valid file left
-				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
+            fastafile = validParameter.validFile(parameters, "fasta");
+            if (fastafile == "not found") {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
+                else { 	m->mothurOut("[ERROR]: You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
+            }
+            else if (fastafile == "not open") { abort = true; }
+            else { current->setFastaFile(fastafile); }
+            
 			
 			string temp;
 			temp = validParameter.valid(parameters, "filter");			if (temp == "not found") { temp = "F"; }
@@ -208,12 +190,12 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  {
                 if (util.checkLocations(maskfile, current->getLocations())) {  }
-                else { m->mothurOut("Unable to open " + maskfile + "."); m->mothurOutEndLine(); abort = true; } //erase from file list
-			}
+                else { m->mothurOut("Unable to open " + maskfile + ".\n"); abort = true; } //erase from file list
+            }else if (maskfile == "default") { m->mothurOut("Using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013.\n");  }
 
-			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+            if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
 		
 			consfile = validParameter.validFile(parameters, "conservation");
 			if (consfile == "not open") { abort = true; }
@@ -226,7 +208,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
                     string line = util.getline(FileTest);
                     bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
 					if (GoodFile) {  
-						m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  consfile = tempConsFile;  FileTest.close();	
+						m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time.\n"); consfile = tempConsFile;  FileTest.close();
 					}
 				}else {
 					string tempConsFile = current->getDefaultPath() + util.getRootName(util.getSimpleName(templatefile)) + "freq";
@@ -235,7 +217,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
                         string line = util.getline(FileTest2);
 						bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
 						if (GoodFile) {  
-							m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  consfile = tempConsFile;  FileTest2.close();	
+							m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time.\n"); consfile = tempConsFile;  FileTest2.close();
 						}
 					}
 				}
@@ -258,91 +240,19 @@ int ChimeraPintailCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		for (int s = 0; s < fastaFileNames.size(); s++) {
-				
-			m->mothurOut("Checking sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
-
-			long start = time(NULL);	
-			
-			//set user options
-			if (maskfile == "default") { m->mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); m->mothurOutEndLine();  }
-			
-			//check for quantile to save the time
-			string baseName = templatefile;
-			
-			string tempQuan = "";
-			if ((!filter) && (maskfile == "")) {
-				tempQuan = inputDir + util.getRootName(util.getSimpleName(baseName)) + "pintail.quan";
-			}else if ((!filter) && (maskfile != "")) { 
-				tempQuan = inputDir + util.getRootName(util.getSimpleName(baseName)) + "pintail.masked.quan";
-			}else if ((filter) && (maskfile != "")) { 
-				tempQuan = inputDir + util.getRootName(util.getSimpleName(baseName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastaFileNames[s])) + "masked.quan";
-			}else if ((filter) && (maskfile == "")) { 
-				tempQuan = inputDir + util.getRootName(util.getSimpleName(baseName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastaFileNames[s])) + "quan";
-			}
-			
-			ifstream FileTest(tempQuan.c_str());
-			if(FileTest){
-                string line = util.getline(FileTest);
-				bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
-				if (GoodFile) {  
-					m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  quanfile = tempQuan;  FileTest.close();	
-				}
-			}else {
-				string tryPath = current->getDefaultPath();
-				string tempQuan = "";
-				if ((!filter) && (maskfile == "")) {
-					tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.quan";
-				}else if ((!filter) && (maskfile != "")) { 
-					tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.masked.quan";
-				}else if ((filter) && (maskfile != "")) { 
-					tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastaFileNames[s])) + "masked.quan";
-				}else if ((filter) && (maskfile == "")) { 
-					tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastaFileNames[s])) + "quan";
-				}
-				
-				ifstream FileTest2(tempQuan.c_str());
-				if(FileTest2){
-                    string line = util.getline(FileTest2);
-					bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
-					if (GoodFile) {  
-						m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  quanfile = tempQuan;  FileTest2.close();	
-					}
-				}
-			}
-			chimera = new Pintail(fastaFileNames[s], templatefile, filter, maskfile, consfile, quanfile, window, increment, outputDir, current->getVersion());
-			
-			if (outputDir == "") { outputDir = util.hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
-			string outputFileName, accnosFileName;
-            map<string, string> variables;
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileNames[s]));
-			if (maskfile != "") { variables["[tag]"] = util.getSimpleName(util.getRootName(maskfile)); }
-            outputFileName = getOutputFileName("chimera", variables);
-            accnosFileName = getOutputFileName("accnos", variables);
-			
-			
-			if (m->getControl_pressed()) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
-			
-			if (chimera->getUnaligned()) { 
-				m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); 
-				delete chimera;
-				return 0; 
-			}
-			templateSeqsLength = chimera->getLength();
-		
-            numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName);
-            
-            if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outputFileName); util.mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete chimera; return 0; }
-								
-			delete chimera;
-			
-			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
-			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
-			
-			m->mothurOutEndLine();
-			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
-		}
-		
+        m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
+        
+        long start = time(NULL);
+        
+        //check for quantile to save the time
+        lookForShortcutFiles(templatefile);
+        
+        numSeqs = checkChiemras();
+        
+        if (m->getControl_pressed()) { outputTypes.clear();  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
+        
+        m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
+        
 		//set accnos file as new current accnosfile
 		string currentName = "";
 		itTypes = outputTypes.find("accnos");
@@ -364,16 +274,34 @@ int ChimeraPintailCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int ChimeraPintailCommand::driver(string outputFName, string filename, string accnos){
+int ChimeraPintailCommand::checkChiemras(){
 	try {
+        MothurChimera* chimera = new Pintail(fastafile, templatefile, filter, maskfile, consfile, quanfile, window, increment, outputDir, current->getVersion());
+        
+        if (m->getControl_pressed()) { delete chimera;  return 0;	}
+        
+        if (chimera->getUnaligned()) { m->mothurOut("[ERROR]: Your reference sequences are unaligned, please correct.\n"); delete chimera; return 0; }
+        
+        templateSeqsLength = chimera->getLength();
+        
+        string outputFileName, accnosFileName;
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        if (maskfile != "") { variables["[tag]"] = util.getSimpleName(util.getRootName(maskfile)); }
+        outputFileName = getOutputFileName("chimera", variables);
+        accnosFileName = getOutputFileName("accnos", variables);
+
+        outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
+        outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
+
 		ofstream out;
-		util.openOutputFile(outputFName, out);
+		util.openOutputFile(outputFileName, out);
 		
 		ofstream out2;
-		util.openOutputFile(accnos, out2);
+		util.openOutputFile(accnosFileName, out2);
 		
 		ifstream inFASTA;
-		util.openInputFile(filename, inFASTA);
+		util.openInputFile(fastafile, inFASTA);
 
 		int count = 0;
 	
@@ -386,7 +314,7 @@ int ChimeraPintailCommand::driver(string outputFName, string filename, string ac
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
 				if (candidateSeq->getAligned().length() != templateSeqsLength)  {  //chimeracheck does not require seqs to be aligned
-					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); m->mothurOutEndLine();
+					m->mothurOut("[WARNING]: " + candidateSeq->getName() + " is not the same length as the template sequences. Skipping.\n");
 				}else{
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
@@ -409,14 +337,66 @@ int ChimeraPintailCommand::driver(string outputFName, string filename, string ac
 		out.close();
 		out2.close();
 		inFASTA.close();
+        delete chimera;
 				
 		return count;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraPintailCommand", "driver");
+		m->errorOut(e, "ChimeraPintailCommand", "checkChiemras");
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+
+int ChimeraPintailCommand::lookForShortcutFiles(string baseName){
+    try {
+        string tempQuan = "";
+        if ((!filter) && (maskfile == "")) {
+            tempQuan = inputDir + util.getRootName(util.getSimpleName(baseName)) + "pintail.quan";
+        }else if ((!filter) && (maskfile != "")) {
+            tempQuan = inputDir + util.getRootName(util.getSimpleName(baseName)) + "pintail.masked.quan";
+        }else if ((filter) && (maskfile != "")) {
+            tempQuan = inputDir + util.getRootName(util.getSimpleName(baseName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastafile)) + "masked.quan";
+        }else if ((filter) && (maskfile == "")) {
+            tempQuan = inputDir + util.getRootName(util.getSimpleName(baseName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastafile)) + "quan";
+        }
+        
+        ifstream FileTest(tempQuan.c_str());
+        if(FileTest){
+            string line = util.getline(FileTest);
+            bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
+            if (GoodFile) {
+                m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time.\n"); quanfile = tempQuan;  FileTest.close();
+            }
+        }else {
+            string tryPath = current->getDefaultPath();
+            string tempQuan = "";
+            if ((!filter) && (maskfile == "")) {
+                tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.quan";
+            }else if ((!filter) && (maskfile != "")) {
+                tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.masked.quan";
+            }else if ((filter) && (maskfile != "")) {
+                tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastafile)) + "masked.quan";
+            }else if ((filter) && (maskfile == "")) {
+                tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.filtered." + util.getSimpleName(util.getRootName(fastafile)) + "quan";
+            }
+            
+            ifstream FileTest2(tempQuan.c_str());
+            if(FileTest2){
+                string line = util.getline(FileTest2);
+                bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
+                if (GoodFile) {  
+                    m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time.\n");  quanfile = tempQuan;  FileTest2.close();	
+                }
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraPintailCommand", "lookForShortcutFiles");
+        exit(1);
+    }
+}
+
 /**************************************************************************************************/
 
 

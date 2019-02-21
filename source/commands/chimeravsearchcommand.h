@@ -46,9 +46,6 @@ private:
     SequenceParser* sparser;
     SequenceCountParser* cparser;
     vector<string> outputNames;
-    vector<string> fastaFileNames;
-    vector<string> nameFileNames;
-    vector<string> groupFileNames;
     
     string getNamesFile(string&);
     int readFasta(string, map<string, string>&);
