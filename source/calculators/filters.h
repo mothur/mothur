@@ -101,16 +101,23 @@ public:
 
 	void getFreqs(Sequence seq) {
 	
-        string curAligned = seq.getAligned(); numSeqs++;
-	
-		for(int j=0;j<alignmentLength;j++){
-			if(toupper(curAligned[j]) == 'A')										{	a[j]++;		}
-			else if(toupper(curAligned[j]) == 'T' || toupper(curAligned[j]) == 'U')	{	t[j]++;		}
-			else if(toupper(curAligned[j]) == 'G')									{	g[j]++;		}
-			else if(toupper(curAligned[j]) == 'C')									{	c[j]++;		}
-			else if(curAligned[j] == '-' || curAligned[j] == '.')					{	gap[j]++;	}
-		}
-	}
+        string curAligned = seq.getAligned();
+        
+        getFreqs(curAligned);
+    }
+    
+    void getFreqs(string seq) {
+        
+        string curAligned = seq; numSeqs++;
+        
+        for(int j=0;j<alignmentLength;j++){
+            if(toupper(curAligned[j]) == 'A')										{	a[j]++;		}
+            else if(toupper(curAligned[j]) == 'T' || toupper(curAligned[j]) == 'U')	{	t[j]++;		}
+            else if(toupper(curAligned[j]) == 'G')									{	g[j]++;		}
+            else if(toupper(curAligned[j]) == 'C')									{	c[j]++;		}
+            else if(curAligned[j] == '-' || curAligned[j] == '.')					{	gap[j]++;	}
+        }
+    }
 		
 protected:
 	string filter;

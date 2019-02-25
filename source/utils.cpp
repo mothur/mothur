@@ -891,6 +891,8 @@ int Utils::renameFile(string oldName, string newName){
 #else
         mothurRemove(newName);
         int renameOk = rename(oldName.c_str(), newName.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
 #endif
         return 0;
 
@@ -2839,6 +2841,55 @@ int Utils::readNames(string namefile, map<string, string>& nameMap) {
     }
 }
 /**********************************************************************************************************************/
+int Utils::readNames(string namefile, map<string, string>& nameMap, set<string>& namesToInclude) {
+    try {
+        //open input file
+        ifstream in;
+        openInputFile(namefile, in);
+        
+        string firstCol, secondCol;
+        
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+            
+            in >> firstCol; gobble(in);
+            in >> secondCol; gobble(in);
+            
+            checkName(firstCol);
+            checkName(secondCol);
+            
+            vector<string> secondNames; splitAtComma(secondCol, secondNames);
+            
+            secondCol = ""; firstCol = "";
+            
+            for (int i = 0; i < secondNames.size(); i++) {
+                if (namesToInclude.count(secondNames[i]) != 0) { //we want to include you
+                    secondCol += secondNames[i] + ",";
+                    if (firstCol == "") {   firstCol = secondNames[i]; }
+                }
+            }
+            
+            if (secondCol != "") {
+                //remove last comma
+                secondCol = secondCol.substr(0,secondCol.length()-1);
+            
+                nameMap[firstCol] = secondCol;
+            }
+            
+        }
+        in.close();
+        
+        
+        return nameMap.size();
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "readNames");
+        exit(1);
+    }
+}
+
+/**********************************************************************************************************************/
 int Utils::readNames(string namefile, map<string, vector<string> >& nameMap) {
     try {
         //open input file
@@ -3533,6 +3584,32 @@ bool Utils::mothurConvert(string item, intDist& num){
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "mothurConvert-intDist");
+        exit(1);
+    }
+}
+/***********************************************************************/
+set<string> Utils::mothurConvert(vector<string>& input){
+    try {
+        set<string> output(input.begin(), input.end());
+        
+        
+        return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-vectorToSet");
+        exit(1);
+    }
+}
+/***********************************************************************/
+vector<string> Utils::mothurConvert(set<string>& input){
+    try {
+        vector<string> output(input.begin(), input.end());
+        
+        
+        return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-SetToVector");
         exit(1);
     }
 }

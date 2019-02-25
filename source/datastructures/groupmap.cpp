@@ -46,6 +46,82 @@ int GroupMap::addSeq(string name, string group) {
     }
 }
 /************************************************************/
+int GroupMap::readMap(string filename, vector<string> g) {
+    try {
+        groupFileName = filename;
+        
+        return (readMap(g));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "readMap");
+        exit(1);
+    }
+}
+/************************************************************/
+int GroupMap::readMap(vector<string> g) {
+    try {
+        int error = 0;
+        
+        if (g.size() == 0) { return readMap(); }
+        else {
+            if (groupFileName == "") { m->mothurOut("[ERROR]: missing groupfile name, aborting.\n");  m->setControl_pressed(true); return 0; }
+            
+            ifstream fileHandle;
+            util.openInputFile(groupFileName, fileHandle);
+            
+            string header = util.getline(fileHandle);
+            vector<string> pieces = util.splitWhiteSpace(header);
+            string seqName = pieces[0];
+            string seqGroup = pieces[1];
+            if (seqName != "group") { //first group, not header
+                if (util.inUsersGroups(seqGroup, g)) {
+                    util.checkGroupName(seqGroup);
+                    setNamesOfGroups(seqGroup);
+                    
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    util.checkName(seqName);
+                    it = groupmap.find(seqName);
+                    
+                    if (it != groupmap.end()) { error = 1; m->mothurOut("[ERROR]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");  }
+                    else {
+                        groupmap[seqName] = seqGroup;	//store data in map
+                        seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
+                    }
+                }
+            }
+            
+            while (!fileHandle.eof()) {
+                if (m->getControl_pressed()) { fileHandle.close();  return 1; }
+                
+                fileHandle >> seqName; util.gobble(fileHandle);
+                fileHandle >> seqGroup; util.gobble(fileHandle);
+                
+                if (util.inUsersGroups(seqGroup, g)) {
+                    util.checkGroupName(seqGroup);
+                    setNamesOfGroups(seqGroup);
+                    
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    util.checkName(seqName);
+                    it = groupmap.find(seqName);
+                    
+                    if (it != groupmap.end()) { error = 1; m->mothurOut("[ERROR]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");  }
+                    else {
+                        groupmap[seqName] = seqGroup;	//store data in map
+                        seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
+                    }
+                }
+            }
+            fileHandle.close();
+        }
+        
+        return error;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "readMap");
+        exit(1);
+    }
+}
+/************************************************************/
 int GroupMap::readMap() {
     try {
         
@@ -381,11 +457,67 @@ string GroupMap::getGroup(string sequenceName) {
 	}else {
         //look for it in names of groups to see if the user accidently used the wrong file
         if (util.inUsersGroups(sequenceName, namesOfGroups)) {
-            m->mothurOut("[WARNING]: Your group or design file contains a group named " + sequenceName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine(); 
+            m->mothurOut("[WARNING]: Your group or design file contains a group named " + sequenceName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n");
         }
 		return "not found";
 	}
 }
+/************************************************************/
+vector<string> GroupMap::getGroups(string sequenceNames) {
+    try{
+        vector<string> names; util.splitAtComma(sequenceNames, names);
+        
+        return (getGroups(names));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "getGroups");
+        exit(1);
+    }
+}
+/************************************************************/
+vector<string> GroupMap::getGroups(vector<string> sequenceNames) {
+    try{
+        set<string> repGroups;
+        for (int i = 0; i < sequenceNames.size(); i++) {
+            repGroups.insert(getGroup(sequenceNames[i]));
+        }
+        
+        return (util.mothurConvert(repGroups));
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "getGroups");
+        exit(1);
+    }
+}
+/************************************************************/
+int GroupMap::getNumSeqs(string sequenceNames, string group) {
+    try{
+        vector<string> names; util.splitAtComma(sequenceNames, names);
+        
+        return (getNumSeqs(names, group));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "getGroups");
+        exit(1);
+    }
+}
+/************************************************************/
+int GroupMap::getNumSeqs(vector<string> sequenceNames, string group) {
+    try{
+        int count = 0;
+        for (int i = 0; i < sequenceNames.size(); i++) {
+            if (group == getGroup(sequenceNames[i])) { count++; }
+        }
+        
+        return count;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GroupMap", "getGroups");
+        exit(1);
+    }
+}
+
 
 /************************************************************/
 

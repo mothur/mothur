@@ -24,7 +24,9 @@ public:
     
     int getCopy(GroupMap*);
     
-	int readMap();
+    int readMap();
+	int readMap(vector<string> groups); //selected groups read in. If groups.size() == 0, all groups are read
+    int readMap(string, vector<string> groups); //filename, selected groups. selected groups read in. If groups.size() == 0, all groups are read
     int readMap(string);
 	int readDesignMap();
     int readDesignMap(string);
@@ -32,6 +34,11 @@ public:
 	int getNumGroups();
 	bool isValidGroup(string);  //return true if string is a valid group
 	string getGroup(string);
+    vector<string> getGroups(string); //returns groups represented by the seqs passed in. Think column two from a namefile row (seq1,seq2,seq3,seq4,seq5) -> (group1,group2). seqs1,seq3 are from group1, seq2,seq4,seq5 are from group2.
+    vector<string> getGroups(vector<string>); //returns groups represented by the seqs passed in. Think column two from a namefile row (seq1,seq2,seq3,seq4,seq5) stored as a vector of names -> (group1,group2). seqs1,seq3 are from group1, seq2,seq4,seq5 are from group2.
+    int getNumSeqs(string, string); //list of seq names, group. returns number of seqs from group passed represented by the seqs passed in. Think column two from a namefile row (seq1,seq2,seq3,seq4,seq5), group1 -> 2. seqs1,seq3 are from group1, seq2,seq4,seq5 are from group2.
+    int getNumSeqs(vector<string>, string); //vector of seq names, group. returns number of seqs from group passed represented by the seqs passed in. Think column two from a namefile row (seq1,seq2,seq3,seq4,seq5), group1 -> 2. seqs1,seq3 are from group1, seq2,seq4,seq5 are from group2.
+    
 	void setGroup(string, string);
 	vector<string> getNamesOfGroups() {
 		sort(namesOfGroups.begin(), namesOfGroups.end());
@@ -39,6 +46,8 @@ public:
 		for (int i = 0; i < namesOfGroups.size(); i++) { groupIndex[namesOfGroups[i]] = i; }
 		return namesOfGroups;
 	}
+    
+    void removeGroups(vector<string> groups);
     
     vector<string> getNamesSeqs();
     vector<string> getNamesSeqs(string); //get names of seqs belonging to group passed in

@@ -137,6 +137,7 @@ public:
     map<string, int> readNames(string, unsigned long int&);
     int readNames(string, map<string, string>&, map<string, int>&);
     int readNames(string, map<string, string>&);
+    int readNames(string, map<string, string>&, set<string>&);
     int readNames(string, map<string, string>&, bool);
     int readNames(string, map<string, string>&, int);
     int readNames(string, map<string, vector<string> >&);
@@ -183,6 +184,8 @@ public:
     bool mothurConvert(string, float&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
     bool mothurConvert(string, double&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
     bool mothurConvert(char, string&);
+    set<string> mothurConvert(vector<string>&);
+    vector<string> mothurConvert(set<string>&);
 
     
     //string manipulation
