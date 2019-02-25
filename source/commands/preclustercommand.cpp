@@ -1084,71 +1084,6 @@ catch(exception& e) {
     exit(1);
 }
 }
-
-/**************************************************************************************************/
-//seqPNode(string na, string seq, int n, string nm) : numIdentical(n), name(na), sequence(seq), clusteredNames(nm) { diffs = 0; active = true; }
-vector<seqPNode*> loadSeqs(map<string, string>& thisName, vector<Sequence>& thisSeqs, map<string, int>& thisCount, string group, long long& num, bool hasName, bool hasCount, int& length, string& align_method){
-    MothurOut* m = MothurOut::getInstance();
-    try {
-        set<int> lengths;
-        bool error = false; num = 0;
-        Utils util;
-        vector<seqPNode*> alignSeqs;
-
-        for (int i = 0; i < thisSeqs.size(); i++) {
-
-            if (m->getControl_pressed()) { return alignSeqs; }
-
-            if (hasName) {
-                map<string, string>::iterator it = thisName.find(thisSeqs[i].getName());
-
-                //should never be true since parser checks for this
-                if (it == thisName.end()) { m->mothurOut("[ERROR]: " + thisSeqs[i].getName() + " is not in your names file, please correct.\n"); error = true; }
-                else{
-                    //get number of reps
-                    int numReps = util.getNumNames(it->second);
-                    seqPNode* tempNode = new seqPNode(thisSeqs[i].getName(), thisSeqs[i].getAligned(), numReps, it->second);
-                    alignSeqs.push_back(tempNode);
-                    lengths.insert(thisSeqs[i].getAligned().length());
-                }
-            }else { //no names file, you are identical to yourself
-                int numReps = 1;
-                if (hasCount) {
-                    map<string, int>::iterator it2 = thisCount.find(thisSeqs[i].getName());
-
-                    //should never be true since parser checks for this
-                    if (it2 == thisCount.end()) { m->mothurOut("[ERROR]: " + thisSeqs[i].getName() + " is not in your count file, please correct.\n"); error = true; }
-                    else { numReps = it2->second;  }
-                }
-                seqPNode* tempNode = new seqPNode(thisSeqs[i].getName(), thisSeqs[i].getAligned(), numReps, thisSeqs[i].getName());
-                alignSeqs.push_back(tempNode);
-                lengths.insert(thisSeqs[i].getAligned().length());
-            }
-        }
-
-        length = *(lengths.begin());
-
-        if (lengths.size() > 1) { align_method = "unaligned"; }
-        else if (lengths.size() == 1) {  align_method = "aligned"; filterSeqs(alignSeqs, length, m); }
-
-        //sanity check
-        if (error) { m->setControl_pressed(true); }
-
-        thisSeqs.clear();
-
-        //sort seqs by number of identical seqs
-        sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);
-
-        num = alignSeqs.size();
-
-        return alignSeqs;
-    }
-    catch(exception& e) {
-      m->errorOut(e, "PreClusterCommand", "loadSeqs");
-      exit(1);
-    }
-}
-
 /**************************************************************************************************/
 
 void printData(string group, preClusterData* params){
@@ -1221,19 +1156,18 @@ long long driverGroups(preClusterData* params){
             params->m->mothurOut("\nProcessing group " + params->groups[i] + ":\n");
             
             time_t start = time(NULL);
-            map<string, string> thisNameMap;
-            vector<Sequence> thisSeqs;
+            bool aligned = false;
             
-            if (params->groupfile != "")        {  thisSeqs = parser->getSeqs(params->groups[i]);       }
-            else if (params->hasCount)          { thisSeqs = cparser->getSeqs(params->groups[i]);       }
+            if (params->groupfile != "")        {   aligned = parser->fillWeighted(params->alignSeqs, params->groups[i], params->length);       }
+            else if (params->hasCount)          {   aligned = cparser->fillWeighted(params->alignSeqs, params->groups[i], params->length);      }
             
-            if (params->hasName)                {  thisNameMap = parser->getNameMap(params->groups[i]); }
+            if (!aligned) { params->align_method = "unaligned";                         }
+            else {  params->align_method = "aligned"; filterSeqs(params->alignSeqs, params->length, params->m); }
             
-            map<string, int> thisCount;
-            if (params->hasCount) { thisCount = cparser->getCountTable(params->groups[i]);  }
+            //sort seqs by number of identical seqs
+            sort(params->alignSeqs.begin(), params->alignSeqs.end(), comparePriorityTopDown);
             
-            long long num = 0;
-            params->alignSeqs = loadSeqs(thisNameMap, thisSeqs, thisCount, params->groups[i], num, params->hasName, params->hasCount, params->length, params->align_method);
+            long long num = params->alignSeqs.size();
             numSeqs += num;
             
             if (params->m->getControl_pressed()) {   return 0; }
@@ -1258,7 +1192,9 @@ long long driverGroups(preClusterData* params){
             
             params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(params->alignSeqs.size()) + ".\n");
             params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
+            
             printData(params->groups[i], params);
+            
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
             
             params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(num) + " sequences.\n");
