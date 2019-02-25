@@ -15,29 +15,27 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 	try {
 		
 		m = MothurOut::getInstance();
+        hasName = true;
 		
 		//read group file
-		GroupMap groupMap(groupFile);
-		int error = groupMap.readMap();
+		int error = groupMap.readMap(groupFile, groupsSelected); //only store info for groups selected
 		
 		if (error == 1) { m->setControl_pressed(true); }
 		
 		//initialize maps
         namesOfGroups = groupMap.getNamesOfGroups();
-        set<string> selectedGroups;
-        if (groupsSelected.size() != 0) { namesOfGroups = groupsSelected; }
         
-        for (int i = 0; i < namesOfGroups.size(); i++) {
-            vector<Sequence> temp;
-            map<string, string> tempMap;
-            seqs[namesOfGroups[i]] = temp;
-            nameMapPerGroup[namesOfGroups[i]] = tempMap;
-            selectedGroups.insert(namesOfGroups[i]);
-        }
+        groupToSeqs.resize(namesOfGroups.size()); //allocate space for samples
+        
+        for (int i = 0; i < namesOfGroups.size(); i++) { groupIndexMap[namesOfGroups[i]] = i; }
         
         map<string, string>::iterator it;
-        map<string, string> nameMap;
-        util.readNames(nameFile, nameMap);
+        vector<string> input = groupMap.getNamesSeqs();
+        set<string> namesToInclude = util.mothurConvert(input); input.clear();
+        util.readNames(nameFile, nameMap, namesToInclude); //only reads names included in group map
+        input.clear();
+        
+        int count = 0;
         
 		//read fasta file making sure each sequence is in the group file
 		ifstream in;
@@ -53,48 +51,29 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
                 
                 it = nameMap.find(seq.getName());
                 
-                if (it != nameMap.end()) { //in namefile
+                if (it != nameMap.end()) { //in namefile and users selected groups
+                    
+                    seqs.push_back(seq);
                     
                     vector<string> names;
                     string secondCol = it->second;
                     util.splitAtChar(secondCol, names, ',');
                     
-                    map<string, string> splitMap; //group -> name1,name2,...
-                    map<string, string>::iterator itSplit;
-                    for (int i = 0; i < names.size(); i++) {
-                        string group = groupMap.getGroup(names[i]);
+                    //fills allSeqsMap
+                    for (int i = 0; i < names.size(); i++) { allSeqsMap[names[i]] = names[0]; }
+                    
+                    //fill groupsToSeqs
+                    vector<string> representedGroups = groupMap.getGroups(names);
+                    for (int i = 0; i < representedGroups.size(); i++) {
+                        map<string, int>::iterator itGroupIndex = groupIndexMap.find(representedGroups[i]); //find index of group in groupsToSeqs
                         
-                        if (selectedGroups.count(group) != 0) { //this is a group we want
-                            if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + names[i] + " is in your names file and not in your group file, please correct.\n");  }
-                            else {
-                                allSeqsMap[names[i]] = names[0];
-                                
-                                itSplit = splitMap.find(group);
-                                if (itSplit != splitMap.end()) { //adding seqs to this group
-                                    (itSplit->second) += "," + names[i];
-                                }else { //first sighting of this group
-                                    splitMap[group] = names[i];
-                                }
-                            }
+                        if (itGroupIndex != groupIndexMap.end()) {
+                            groupToSeqs[itGroupIndex->second].push_back(count);
                         }
                     }
                     
-                    //fill nameMapPerGroup - holds all lines in namefile separated by group
-                    for (itSplit = splitMap.begin(); itSplit != splitMap.end(); itSplit++) {
-                        //grab first name
-                        string firstName = "";
-                        for(int i = 0; i < (itSplit->second).length(); i++) {
-                            if (((itSplit->second)[i]) != ',') {
-                                firstName += ((itSplit->second)[i]);
-                            }else { break; }
-                        }
-                        
-                        //group1 -> seq1 -> seq1,seq2,seq3
-                        nameMapPerGroup[itSplit->first][firstName] = itSplit->second;
-                        seqs[itSplit->first].push_back(Sequence(firstName, seq.getAligned()));
-                    }
-
-                }else { error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your name file, please correct.\n"); }
+                    count++;
+                }//else ignore seq, its not from groups we want
             }
         }
 		in.close();
@@ -108,33 +87,30 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 	}
 }
 /************************************************************/
+//leaves all seqs map blank to be filled when asked for
 SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string> groupsSelected) {
 	try {
 		
-		m = MothurOut::getInstance();
-		int error;
-		
-		//read group file
-		GroupMap groupMap(groupFile);
-		error = groupMap.readMap();
-		
-		if (error == 1) { m->setControl_pressed(true); }
-		
-		//initialize maps
-        namesOfGroups = groupMap.getNamesOfGroups();
-        set<string> selectedGroups;
-        if (groupsSelected.size() != 0) { namesOfGroups = groupsSelected; }
+        m = MothurOut::getInstance();
+        hasName = false;
         
-		for (int i = 0; i < namesOfGroups.size(); i++) {
-			vector<Sequence> temp;
-			seqs[namesOfGroups[i]] = temp;
-            selectedGroups.insert(namesOfGroups[i]);
-		}
-		
+        //read group file
+        int error = groupMap.readMap(groupFile, groupsSelected); //only store info for groups selected
+        
+        if (error == 1) { m->setControl_pressed(true); }
+        
+        //initialize maps
+        namesOfGroups = groupMap.getNamesOfGroups();
+        
+        groupToSeqs.resize(namesOfGroups.size()); //allocate space for samples
+        
+        for (int i = 0; i < namesOfGroups.size(); i++) { groupIndexMap[namesOfGroups[i]] = i; }
+
 		//read fasta file making sure each sequence is in the group file
 		ifstream in;
 		util.openInputFile(fastaFile, in);
 		
+        int count = 0;
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { break; }
@@ -143,11 +119,19 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string
 			
 			if (seq.getName() != "") {
                 
-				string group = groupMap.getGroup(seq.getName());
-                if (selectedGroups.count(group) != 0) { //this is a group we want
-                    if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your groupfile, please correct.\n");  }
-                    else { seqs[group].push_back(seq); }
+                seqs.push_back(seq);
+                
+                //fill groupsToSeqs
+                string group = groupMap.getGroup(seq.getName());
+                
+                map<string, int>::iterator itGroupIndex = groupIndexMap.find(group); //find index of group in groupsToSeqs
+                
+                if (itGroupIndex != groupIndexMap.end()) {
+                    groupToSeqs[itGroupIndex->second].push_back(count);
                 }
+                
+                count++;
+
 			}
 		}
 		in.close();
@@ -169,17 +153,17 @@ vector<string> SequenceParser::getNamesOfGroups(){ return namesOfGroups; }
 /************************************************************/
 int SequenceParser::getNumSeqs(string g){ 
 	try {
-		map<string, vector<Sequence> >::iterator it;
-		int num = 0;
-		
-		it = seqs.find(g);
-		if(it == seqs.end()) {
-			m->mothurOut("[ERROR]: " + g + " is not a valid group, please correct."); m->mothurOutEndLine();
-		}else {
-			num = (it->second).size();
-		}
-		
-		return num; 
+        map<string, int>::iterator it;
+        int num = 0;
+        
+        it = groupIndexMap.find(g);
+        if(it == groupIndexMap.end()) {
+            m->mothurOut("[ERROR]: " + g + " is not a valid group, please correct.\n");
+        }else {
+            num = groupToSeqs[it->second].size();
+        }
+        
+        return num;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SequenceParser", "getNumSeqs");
@@ -189,18 +173,47 @@ int SequenceParser::getNumSeqs(string g){
 /************************************************************/
 vector<Sequence> SequenceParser::getSeqs(string g){ 
 	try {
-		map<string, vector<Sequence> >::iterator it;
-		vector<Sequence> seqForThisGroup;
-		
-		it = seqs.find(g);
-		if(it == seqs.end()) {
-			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
-		}else {
-			seqForThisGroup = it->second;
-            if (m->getDebug()) {  m->mothurOut("[DEBUG]: group " + g + " fasta file has " + toString(seqForThisGroup.size()) + " sequences.");  }
-		}
-		
-		return seqForThisGroup; 
+        vector<Sequence> seqForThisGroup;
+        map<string, int>::iterator it;
+        
+        it = groupIndexMap.find(g);
+        if(it == groupIndexMap.end()) {
+            m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct.\n");
+        }else {
+            if (hasName) {
+                for (int i = 0; i < groupToSeqs[it->second].size(); i++) {
+                    string uniqueSeqName = seqs[groupToSeqs[it->second][i]].getName();
+                    string aligned = seqs[groupToSeqs[it->second][i]].getAligned();
+                    
+                    string dupNameForThisGroup = ""; //we want to set this to the first seq name we find in the dups names from group g
+                    
+                    map<string, string>::iterator it = nameMap.find(uniqueSeqName);
+                    if (it != nameMap.end()) {
+                        string dups = it->second;
+                        vector<string> dupsNames; util.splitAtComma(dups, dupsNames);
+                        
+                        for (int j = 0; j < dupsNames.size(); j++) {
+                            string dupsGroup = groupMap.getGroup(dupsNames[j]);
+                            if (dupsGroup == g) {
+                                dupNameForThisGroup = dupsNames[j];
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (dupNameForThisGroup != "") {
+                        Sequence thisDupSeq(dupNameForThisGroup, aligned);
+                        seqForThisGroup.push_back(thisDupSeq);
+                    }else { m->mothurOut("[ERROR]: should never get here\n");  m->setControl_pressed(true); }
+                }
+            }else { //seq names are unique
+                for (int i = 0; i < groupToSeqs[it->second].size(); i++) {
+                    seqForThisGroup.push_back(seqs[groupToSeqs[it->second][i]]);
+                }
+            }
+        }
+        
+        return seqForThisGroup;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SequenceParser", "getSeqs");
@@ -208,25 +221,68 @@ vector<Sequence> SequenceParser::getSeqs(string g){
 	}
 }
 /************************************************************/
+bool SequenceParser::fillWeighted(vector< seqPNode* >& seqForThisGroup, string group, int& length){
+    try {
+        set<int> lengths;
+        
+        map<string, int>::iterator it;
+        
+        it = groupIndexMap.find(group);
+        if(it == groupIndexMap.end()) {
+            m->mothurOut("[ERROR]: No sequences available for group " + group + ", please correct.\n"); return false;
+        }else {
+            for (int i = 0; i < groupToSeqs[it->second].size(); i++) {
+                
+                Sequence thisSeq = seqs[groupToSeqs[it->second][i]];
+                int numReps = 1;
+                
+                if (hasName) {
+                    //find your nameFile dups
+                    map<string, string>::iterator it = nameMap.find(thisSeq.getName());
+                    if (it != nameMap.end()) {
+                        string dups = it->second;
+                        numReps = groupMap.getNumSeqs(dups, group);
+                    }
+                }
+                
+                seqPNode* tempNode = new seqPNode(thisSeq.getName(), thisSeq.getAligned(), numReps, thisSeq.getName());
+                seqForThisGroup.push_back(tempNode);
+                
+                lengths.insert(thisSeq.getAligned().length());
+            }
+        }
+        
+        length = *(lengths.begin());
+        
+        if (lengths.size() > 1) { return false; } //unaligned
+        else if (lengths.size() == 1) {  return true; } //aligned
+        
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SequenceParser", "fillWeighted");
+        exit(1);
+    }
+}
+/************************************************************/
 int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, long long& numSeqs, bool uchimeFormat=false){
 	try {
-		map<string, vector<Sequence> >::iterator it;
+		map<string, int>::iterator it;
 		vector<Sequence> seqForThisGroup;
 		vector<seqPriorityNode> nameVector;
 		
-		it = seqs.find(g);
-		if(it == seqs.end()) {
-			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
-		}else {
+        it = groupIndexMap.find(g);
+        if(it == groupIndexMap.end()) {
+            m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct.\n");
+        }else {
 
 			ofstream out;
 			util.openOutputFile(filename, out);
 			
-			seqForThisGroup = it->second;
+			seqForThisGroup = getSeqs(g);
             
             numSeqs = seqForThisGroup.size();
 
-			
 			if (uchimeFormat) {
 				// format should look like 
 				//>seqName /ab=numRedundantSeqs/
@@ -282,19 +338,71 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
 		exit(1);
 	}
 }
-
+/************************************************************/
+map<string, string> SequenceParser::getAllSeqsMap(){
+    try {
+        map<string, string> uniqueAllSeqs;
+        
+        if (hasName) { return allSeqsMap; }
+        else { //create unique allSeqsMap
+            for (int i = 0; i < seqs.size(); i++) {
+                uniqueAllSeqs[seqs[i].getName()] = seqs[i].getName();
+            }
+        }
+        return uniqueAllSeqs;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SequenceParser", "getAllSeqsMap");
+        exit(1);
+    }
+}
 /************************************************************/
 map<string, string> SequenceParser::getNameMap(string g){ 
 	try {
-		map<string, map<string, string> >::iterator it;
 		map<string, string> nameMapForThisGroup;
-		
-		it = nameMapPerGroup.find(g);
-		if(it == nameMapPerGroup.end()) {
-			m->mothurOut("[ERROR]: No nameMap available for group " + g + ", please correct."); m->mothurOutEndLine();
-		}else {
-			nameMapForThisGroup = it->second;
-            if (m->getDebug()) {  m->mothurOut("[DEBUG]: group " + g + " name file has " + toString(nameMapForThisGroup.size()) + " unique sequences.");  }
+        map<string, int>::iterator it;
+        
+        it = groupIndexMap.find(g);
+        if(it == groupIndexMap.end()) {
+            m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct.\n"); return nameMapForThisGroup;
+        }else {
+
+            if (hasName) {
+                for (int i = 0; i < groupToSeqs[it->second].size(); i++) {
+                    string uniqueSeqName = seqs[groupToSeqs[it->second][i]].getName();
+                    string secondCol = "";
+                    
+                    map<string, string>::iterator it = nameMap.find(uniqueSeqName);
+                    if (it != nameMap.end()) {
+                        string dups = it->second; //contains all groups
+                        vector<string> dupsNames; util.splitAtComma(dups, dupsNames);
+                        
+                        for (int j = 0; j < dupsNames.size(); j++) {
+                            string dupsGroup = groupMap.getGroup(dupsNames[j]);
+                            if (dupsGroup == g) {
+                                secondCol += dupsNames[j] +",";
+                            }
+                        }
+                    }
+                    
+                    if (secondCol != "") {
+                        //remove last comma
+                        secondCol = secondCol.substr(0,secondCol.length()-1);
+                        int pos = secondCol.find_first_of(',');
+                        string firstCol = secondCol;
+                        if (pos != string::npos) {
+                            firstCol = secondCol.substr(0, pos);
+                        }
+                        nameMap[firstCol] = secondCol;
+                        
+                    }else { m->mothurOut("[ERROR]: should never get here\n");  m->setControl_pressed(true); }
+                }
+            }else { //seq names are unique
+                for (int i = 0; i < groupToSeqs[it->second].size(); i++) {
+                    nameMapForThisGroup[seqs[groupToSeqs[it->second][i]].getName()] = seqs[groupToSeqs[it->second][i]].getName();
+                }
+            }
+
 		}
 		
 		return nameMapForThisGroup; 
@@ -307,27 +415,20 @@ map<string, string> SequenceParser::getNameMap(string g){
 /************************************************************/
 int SequenceParser::getNameMap(string g, string filename){ 
 	try {
-		map<string, map<string, string> >::iterator it;
-		map<string, string> nameMapForThisGroup;
 		
-		it = nameMapPerGroup.find(g);
-		if(it == nameMapPerGroup.end()) {
-			m->mothurOut("[ERROR]: No nameMap available for group " + g + ", please correct."); m->mothurOutEndLine();
-		}else {
-			nameMapForThisGroup = it->second;
-			
-			ofstream out;
-			util.openOutputFile(filename, out);
-			
-			for (map<string, string>::iterator itFile = nameMapForThisGroup.begin(); itFile != nameMapForThisGroup.end(); itFile++) {
-				
-				if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
-				
-				out << itFile->first << '\t' << itFile->second << endl;
-			}
-			
-			out.close();
-		}
+        map<string, string> nameMapForThisGroup = getNameMap(g);
+
+        ofstream out;
+        util.openOutputFile(filename, out);
+        
+        for (map<string, string>::iterator itFile = nameMapForThisGroup.begin(); itFile != nameMapForThisGroup.end(); itFile++) {
+            
+            if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
+            
+            out << itFile->first << '\t' << itFile->second << endl;
+        }
+        
+        out.close();
 		
 		return 0; 
 	}

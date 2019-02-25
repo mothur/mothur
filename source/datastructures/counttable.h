@@ -103,6 +103,7 @@ class CountTable {
         SharedRAbundVectors* getShared(map<string, string>&);
         SharedRAbundVectors* getShared(vector<string>, map<string, string>&); //set of groups selected
         map<string, int> getNameMap();  //sequenceName -> total number of sequences it represents
+        map<string, int> getNameMap(string);  //sequenceName -> total number of sequences it represents in that group
         void eliminateZeroSeqs();
 
     private:

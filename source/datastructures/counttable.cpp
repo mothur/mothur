@@ -949,6 +949,21 @@ int CountTable::push_back(string seqName) {
 	}
 }
 /************************************************************/
+//
+bool CountTable::inTable(string seqName) {
+    try {
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it != indexNameMap.end()) { return true; }
+        return false;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "inTable");
+        exit(1);
+    }
+}
+
+/************************************************************/
 //remove sequence
 int CountTable::remove(string seqName) {
     try {
@@ -1169,6 +1184,30 @@ map<string, int> CountTable::getNameMap() {
 		m->errorOut(e, "CountTable", "getNameMap");
 		exit(1);
 	}
+}
+/************************************************************/
+//returns the names of all unique sequences in file mapped to their seqCounts
+map<string, int> CountTable::getNameMap(string group) {
+    try {
+        map<string, int> names;
+        
+        if (hasGroups) {
+            map<string, int>::iterator it = indexGroupMap.find(group);
+            if (it == indexGroupMap.end()) {
+                m->mothurOut("[ERROR]: " + group + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
+            }else {
+                for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 != indexNameMap.end(); it2++) {
+                    if (counts[it2->second][it->second] != 0) {  names[it2->first] = counts[it2->second][it->second]; }
+                }
+            }
+        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
+
+        return names;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "getNameMap");
+        exit(1);
+    }
 }
 /************************************************************/
 //returns the names of all unique sequences in file

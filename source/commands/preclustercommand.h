@@ -22,6 +22,7 @@
 #include "blastalign.hpp"
 #include "noalign.hpp"
 #include "filters.h"
+#include "getseqscommand.h"
 
 
 //************************************************************/

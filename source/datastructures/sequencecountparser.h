@@ -28,7 +28,7 @@ class SequenceCountParser {
 public:
 	
     SequenceCountParser(string, string, vector<string>);			//count, fasta - file mismatches will set m->setControl_pressed(true)
-    SequenceCountParser(string, CountTable&, vector<string>);		//fasta, counttable - file mismatches will set m->setControl_pressed(true)
+    SequenceCountParser(string, CountTable, vector<string>);		//fasta, counttable - file mismatches will set m->setControl_pressed(true)
     ~SequenceCountParser();
     
     //general operations
@@ -37,6 +37,7 @@ public:
     
     int getNumSeqs(string);		//returns the number of unique sequences in a specific group
     vector<Sequence> getSeqs(string); //returns unique sequences in a specific group
+    bool fillWeighted(vector< seqPNode* >&, string group, int& length); //return true for aligned and false for unaligned
     map<string, int> getCountTable(string); //returns seqName -> numberOfRedundantSeqs for a specific group - the count file format, but each line is parsed by group.
     
     int getSeqs(string, string, string, string, long long&, bool); //prints unique sequences in a specific group to a file - group, filename, uchimeFormat=false, tag (/ab= or ;size=), tag2(/ or ;)
@@ -46,13 +47,14 @@ public:
 private:
     CountTable countTable;
     MothurOut* m;
-	
-    int numSeqs;
-    vector<int> indexes;
-    map<string, vector<Sequence> > seqs; //a vector for each group
-    map<string, map<string, int> > countTablePerGroup; //countTable for each group
-    vector<string> namesOfGroups;
-    int readFasta(string fastafile, CountTable&);
+    Utils util;
+    
+    vector<Sequence> seqs;
+    map<string, int> groupIndexMap; //maps sample name to index in namesOfGroups and groupsToSeqs
+    vector< vector<int> > groupToSeqs; //maps group -> vector of sequences indexes that belong to the group. (groupToSeqs[0] contains sequence info for sample namesOfGroups[0]).  groupToSeqs[0] = <1,4,7,8> means seqs[1], seqs[4], seq[7], seqs[8] belong to group namesOfGroups[0]. namesOfGroups in same order as groupToSeqs
+    vector<string> namesOfGroups; //namesOfGroups in same order as groupToSeqs
+    
+    int readFasta(string fastafile);
 };
 
 

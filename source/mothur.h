@@ -214,6 +214,18 @@ struct colDist {
     float dist;
     colDist(int r, int c, double d) : row(r), col(c), dist(d) {}
 };
+/************************************************************/
+struct seqPNode {
+    int numIdentical;
+    string name;
+    string sequence;
+    string clusteredNames;
+    int diffs;
+    bool active;
+    seqPNode() { diffs = 0; active = true; numIdentical = 0; name = ""; sequence = ""; clusteredNames = ""; }
+    seqPNode(string na, string seq, int n, string nm) : numIdentical(n), name(na), sequence(seq), clusteredNames(nm) { diffs = 0; active = true; }
+    ~seqPNode() {}
+};
 /**********************************************************/
 struct CommonHeader {
 	unsigned int magicNumber;

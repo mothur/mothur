@@ -909,7 +909,7 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
                 //find unique name
                 itUnique = uniqueNames.find(name);
                 
-                if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find " + name + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find " + name + ".\n");  m->setControl_pressed(true); }
                 else {
                     itChimeras = chimerasInFile.find((itUnique->second));
                     
