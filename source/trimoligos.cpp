@@ -781,17 +781,6 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             
             //if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(it->first) + " barcode pair = '" + foligo + " " + roligo + "'\n"); m->mothurOut("[DEBUG]: sequence pair = '" + rawFSequence + " " + rawRSequence + "'\n");}
             
-            if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
-                success[0] = rawFSequence.length();
-                success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                break;
-            }
-            if(rawRSequence.length() < roligo.length()){	//let's just assume that the barcodes are the same length
-                success[2] = rawRSequence.length();
-                success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                break;
-            }
-            
             if (foligo == "NONE") {
                 if (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length()))) {
                     group = it->first;
@@ -813,6 +802,18 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     break;
                 }
             }else if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length())))) {
+                if(rawRSequence.length() < roligo.length()){	//let's just assume that the barcodes are the same length
+                    success[2] = rawRSequence.length();
+                    success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                    break;
+                }
+                
+                if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
+                    success[0] = rawFSequence.length();
+                    success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                    break;
+                }
+                
                 group = it->first;
                 if (!hasIndex) { //if you are using index file then just matching
                     forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
@@ -854,12 +855,13 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             for(map<string, vector<int> >::iterator it=ifbarcodes.begin();it!=ifbarcodes.end();it++){
                 string oligo = it->first;
                 
-                if(rawFSequence.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
-                    success[0] = rawFSequence.length();
-                    success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                    break;
-                }
                 if (oligo != "NONE") {
+                    
+                    if(rawFSequence.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
+                        success[0] = rawFSequence.length();
+                        success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                        break;
+                    }
                     
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                     alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+bdiffs));
@@ -926,13 +928,14 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                 for(map<string, vector<int> >::iterator it=irbarcodes.begin();it!=irbarcodes.end();it++){
                     string oligo = it->first;
                     
-                    if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
-                        success[2] = rawRSequence.length();
-                        success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                        break;
-                    }
-                    
                     if (oligo != "NONE") {
+                        
+                        if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
+                            success[2] = rawRSequence.length();
+                            success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                            break;
+                        }
+                        
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                         alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs));
                         oligo = alignment->getSeqAAln();
@@ -1045,17 +1048,6 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
             string foligo = it->second.forward;
             string roligo = it->second.reverse;
             
-            if(rawSeq.length() < foligo.length()){	//let's just assume that the barcodes are the same length
-                success[0] = rawSeq.length();
-                success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                break;
-            }
-            if(rawSeq.length() < roligo.length()){	//let's just assume that the barcodes are the same length
-                success[2] = rawSeq.length();
-                success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                break;
-            }
-            
             if (rawSeq.length() < (foligo.length() + roligo.length())) {
                 success[0] = rawSeq.length();
                 success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
@@ -1081,6 +1073,17 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                     break;
                 }
             }else if((compareDNASeq(foligo, rawSeq.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length())))) {
+                if(rawSeq.length() < foligo.length()){	//let's just assume that the barcodes are the same length
+                    success[0] = rawSeq.length();
+                    success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                    break;
+                }
+                if(rawSeq.length() < roligo.length()){	//let's just assume that the barcodes are the same length
+                    success[2] = rawSeq.length();
+                    success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                    break;
+                }
+
                 group = it->first;
                 string trimmedSeq = rawSeq.substr(foligo.length()); //trim forward barcode
                 seq.setUnaligned(trimmedSeq.substr(0,(trimmedSeq.length()-roligo.length()))); //trim reverse barcode
@@ -1122,14 +1125,14 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
             
             for(map<string, vector<int> >::iterator it=ifbarcodes.begin();it!=ifbarcodes.end();it++){
                 string oligo = it->first;
-                
-                if(rawSeq.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
-                    success[0] = rawSeq.length();
-                    success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                    break;
-                }
-                
+
                 if (oligo != "NONE") {
+                    if(rawSeq.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
+                        success[0] = rawSeq.length();
+                        success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                        break;
+                    }
+                    
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                     alignment->alignPrimer(oligo, rawSeq.substr(0,oligo.length()+bdiffs));
                     oligo = alignment->getSeqAAln();
@@ -1200,13 +1203,14 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                     string oligo = it->first;
                     if (oligo != "NONE") { oligo = reverseOligo(oligo); }
                     
-                    if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
-                        success[2] = rawRSequence.length();
-                        success[3] = bdiffs + 1000;
-                        break;
-                    }
-                    
                     if (oligo != "NONE") {
+                        
+                        if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
+                            success[2] = rawRSequence.length();
+                            success[3] = bdiffs + 1000;
+                            break;
+                        }
+                        
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                         alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs));
                         oligo = alignment->getSeqAAln();
