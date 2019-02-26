@@ -170,14 +170,24 @@ struct diffPair {
 	}
 };
 
+struct countTableItem {
+    int abund;
+    int group;
+    
+    countTableItem() { abund = 0; group = -1; }
+    countTableItem(int a, int g) : abund(a), group(g) {}
+    ~countTableItem() {}
+};
+
 struct item {
     int name;
     int group;
     
-    item() {}
+    item() { name = -1; group = -1; }
     item(int n, int g) : name(n), group(g) {}
     ~item() {}
 };
+
 
 struct weightedSeq {
     long long name;
@@ -367,8 +377,12 @@ struct spearmanRank {
 	spearmanRank(string n, float s) : name(n), score(s) {}
 };
 //***********************************************************************
+inline bool compareGroups(countTableItem left, countTableItem right){
+	return (left.group > right.group);
+}
+//***********************************************************************
 inline bool compareIndexes(PDistCell left, PDistCell right){
-	return (left.index > right.index);	
+    return (left.index > right.index);
 }
 //********************************************************************************************************************
 inline bool compareSpearman(spearmanRank left, spearmanRank right){

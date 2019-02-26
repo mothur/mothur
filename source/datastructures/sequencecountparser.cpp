@@ -16,22 +16,9 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
 		m = MothurOut::getInstance();
 		
 		//read count file
-		countTable.readTable(countfile, true, false);
-        vector<string> allNames = countTable.getNamesOfGroups();
-		
-		//initialize maps
-        if (groupsSelected.size() == 0) { //select all
-            namesOfGroups = countTable.getNamesOfGroups();
-        }else{
-            namesOfGroups = groupsSelected;
-            //remove groups from count table that we don't want
-            for (int i = 0; i < allNames.size(); i++) {
-                if (!util.inUsersGroups(allNames[i], groupsSelected)) { //we want to remove unwanted groups from memory
-                    countTable.removeGroup(allNames[i]);
-                }
-            }
-        }
-        
+		countTable.readTable(countfile, true, false, groupsSelected);
+        namesOfGroups = countTable.getNamesOfGroups();
+
         groupToSeqs.resize(namesOfGroups.size()); //allocate space for samples
         
         for (int i = 0; i < namesOfGroups.size(); i++) { groupIndexMap[namesOfGroups[i]] = i; }

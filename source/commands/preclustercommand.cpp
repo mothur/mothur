@@ -1190,7 +1190,7 @@ long long driverGroups(preClusterData* params){
             
             if (params->m->getControl_pressed()) {  return 0; }
             
-            params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(params->alignSeqs.size()) + ".\n");
+            params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(num) + ".\n");
             params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
             
             printData(params->groups[i], params);

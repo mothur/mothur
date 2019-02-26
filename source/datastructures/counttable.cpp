@@ -9,6 +9,7 @@
 #include "counttable.h"
 
 /************************************************************/
+//used by tree commands
 int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>& gs) {
     try {
         hasGroups = false;
@@ -36,11 +37,11 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
 
             string seqName = *it;
 
-            vector<int> groupCounts; groupCounts.resize(numGroups, 0);
+            vector<countTableItem> groupCounts;
             map<string, string>::iterator itGroup = g.find(seqName);
 
             if (itGroup != g.end()) {
-                groupCounts[indexGroupMap[itGroup->second]] = 1;
+                groupCounts.push_back(countTableItem(1, indexGroupMap[itGroup->second]));
                 totalGroups[indexGroupMap[itGroup->second]]++;
             }else {
                 //look for it in names of groups to see if the user accidently used the wrong file
@@ -52,14 +53,14 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
 
             map<string, int>::iterator it2 = indexNameMap.find(seqName);
             if (it2 == indexNameMap.end()) {
-                if (hasGroups) {  counts.push_back(groupCounts);  }
+                if (hasGroups) { counts.push_back(groupCounts); }
                 indexNameMap[seqName] = uniques;
                 totals.push_back(1);
                 total++;
                 uniques++;
             }else {
                 error = true;
-                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();
+                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");
             }
 
         }
@@ -199,20 +200,21 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
             map<string, int> groupCounts;
             int thisTotal = 0;
             if (groupfile != "") {
-                //set to 0
-                for (int i = 0; i < groups.size(); i++) { groupCounts[groups[i]] = 0; }
-
+                
                 //get counts for each of the users groups
                 for (int i = 0; i < names.size(); i++) {
                     string group = groupMap->getGroup(names[i]);
 
-                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[i] + " is not in your groupfile, please correct."); m->mothurOutEndLine(); error=true; }
+                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[i] + " is not in your groupfile, please correct.\n");  error=true; }
                     else {
                         map<string, int>::iterator it = groupCounts.find(group);
 
                         //if not found, then this sequence is not from a group we care about
                         if (it != groupCounts.end()) {
                             it->second++;
+                            thisTotal++;
+                        }else {
+                            groupCounts[group] = 1;
                             thisTotal++;
                         }
                     }
@@ -226,10 +228,12 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
             }else { thisTotal = names.size();  }
 
             //if group info, then read it
-            vector<int> thisGroupsCount; thisGroupsCount.resize(numGroups, 0);
-            for (int i = 0; i < numGroups; i++) {
-                thisGroupsCount[i] = groupCounts[groups[i]];
-                totalGroups[i] += thisGroupsCount[i];
+            vector<countTableItem> thisGroupsCount;
+            for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
+                int groupIndex = indexGroupMap[it->first];
+                countTableItem thisAbund(it->second, groupIndex);
+                thisGroupsCount.push_back(thisAbund);
+                totalGroups[groupIndex] += it->second;
             }
 
             map<string, int>::iterator it = indexNameMap.find(firstCol);
@@ -241,7 +245,7 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
                 uniques++;
             }else {
                 error = true;
-                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + firstCol + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();
+                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + firstCol + ", sequence names must be unique. Please correct.\n");
             }
         }
         in.close();
@@ -311,10 +315,21 @@ int CountTable::readTable(string file, string format) {
         exit(1);
     }
 }
-
 /************************************************************/
 int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
     try {
+        return (readTable(file, readGroups, mothurRunning, nullVector));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "readTable");
+        exit(1);
+    }
+}
+/************************************************************/
+int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vector<string> selectedGroups) {
+    try {
+        if (!readGroups) { selectedGroups.clear(); }
+        
         filename = file;
         ifstream in;
         util.openInputFile(filename, in);
@@ -322,18 +337,34 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
         string headers = util.getline(in); util.gobble(in);
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
 
-        int numGroups = 0;
+        int numGroupsInFile = 0;
         groups.clear();
         totalGroups.clear();
         indexGroupMap.clear();
         indexNameMap.clear();
         counts.clear();
         map<int, string> originalGroupIndexes;
-        if ((columnHeaders.size() > 2) && readGroups) { hasGroups = true; numGroups = columnHeaders.size() - 2;  }
-        if (readGroups) {  for (int i = 2; i < columnHeaders.size(); i++) {  groups.push_back(columnHeaders[i]);  originalGroupIndexes[i-2] = columnHeaders[i]; totalGroups.push_back(0); } }
+        if ((columnHeaders.size() > 2) && readGroups) { hasGroups = true; numGroupsInFile = columnHeaders.size() - 2;  }
+        
+        set<int> selectedGroupIndexes;
+        if (readGroups) {
+            for (int i = 2; i < columnHeaders.size(); i++) {
+                bool saveGroup = true;
+                if (selectedGroups.size() != 0) { if (!util.inUsersGroups(columnHeaders[i], selectedGroups)) { saveGroup = false; } } //is this group in selected groups
+                
+                if (saveGroup) {
+                    groups.push_back(columnHeaders[i]);
+                    originalGroupIndexes[i-2] = columnHeaders[i];
+                    totalGroups.push_back(0);
+                    selectedGroupIndexes.insert(i-2);
+                }
+            }
+        }
+        
         //sort groups to keep consistent with how we store the groups in groupmap
         sort(groups.begin(), groups.end());
         for (int i = 0; i < groups.size(); i++) {  indexGroupMap[groups[i]] = i; }
+        int numGroupsSelected = groups.size();
 
         bool error = false;
         string name;
@@ -351,22 +382,48 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
             }
 
             //if group info, then read it
-            vector<int> groupCounts; groupCounts.resize(numGroups, 0);
+            vector<int> groupCounts; groupCounts.resize(numGroupsSelected, 0);
             if (columnHeaders.size() > 2) { //file contains groups
                 if (readGroups) { //user wants to save them
-                    for (int i = 0; i < numGroups; i++) {  int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; util.gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex];  }
+                    if (selectedGroups.size() != 0) {
+                        //read this seqs groups abundances
+                        vector<int> allGroupCounts; allGroupCounts.resize(numGroupsInFile, 0); //groups in order of file, not sorted
+                        for (int i = 0; i < numGroupsInFile; i++) { in >> allGroupCounts[i]; util.gobble(in); }
+                        
+                        for (set<int>::iterator it = selectedGroupIndexes.begin(); it != selectedGroupIndexes.end(); it++) {
+                            string groupName = originalGroupIndexes[*it];
+                            int thisIndex = indexGroupMap[groupName];
+                            groupCounts[thisIndex] = allGroupCounts[*it];
+                            totalGroups[thisIndex] += groupCounts[thisIndex];
+                        }
+                    }else {
+                        for (int i = 0; i < numGroupsInFile; i++) {  int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; util.gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex];  }
+                    }
                 }else { //read and discard
                     util.getline(in); util.gobble(in);
                 }
             }
-
+            
             map<string, int>::iterator it = indexNameMap.find(name);
             if (it == indexNameMap.end()) {
-                if (hasGroups && readGroups) {  counts.push_back(groupCounts);  }
-                indexNameMap[name] = uniques;
-                totals.push_back(thisTotal);
-                total += thisTotal;
-                uniques++;
+                bool saveSeq = true;
+                if (hasGroups && readGroups) {
+                    vector<countTableItem> thisGroupsCount;
+                    for (int i = 0; i < numGroupsSelected; i++) {
+                        if (groupCounts[i] != 0) {
+                            countTableItem temp(groupCounts[i], i);
+                            thisGroupsCount.push_back(temp);
+                        }
+                    }
+                    if (thisGroupsCount.size() == 0) {  saveSeq = false; }
+                    else { counts.push_back(thisGroupsCount); }
+                }
+                if (saveSeq) {
+                    indexNameMap[name] = uniques;
+                    totals.push_back(thisTotal);
+                    total += thisTotal;
+                    uniques++;
+                }
             }else {
                 error = true;
                 m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct.\n");
@@ -398,7 +455,7 @@ int CountTable::zeroOutTable() {
 
 		for(int i=0;i<counts.size();i++){
 			for(int j=0;j<counts[0].size();j++){
-				counts[i][j] = 0;
+				counts[i][j].abund = 0;
 			}
 		}
 
@@ -447,9 +504,7 @@ int CountTable::printTable(string file) {
             if (itR != reverse.end()) {
                 out << itR->second << '\t' << totals[i];
                 if (hasGroups) {
-                    for (int j = 0; j < groups.size(); j++) {
-                        out << '\t' << counts[i][j];
-                    }
+                    printGroupAbunds(out, i);
                 }
                 out << endl;
             }
@@ -463,6 +518,107 @@ int CountTable::printTable(string file) {
 	}
 }
 /************************************************************/
+//returns index of countTableItem for group passed in. If group is not present in seq, returns -1
+int CountTable::find(int seq, int group) {
+    try {
+        int index = -1;
+        
+        for (int i = 0; i < counts[seq].size(); i++) {
+            if (counts[seq][i].group >= group) { //found it or done looking
+                if (counts[seq][i].group == group) { index = i; }
+                break;
+            }
+        }
+        return index;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "find");
+        exit(1);
+    }
+}
+/************************************************************/
+//returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
+int CountTable::getAbund(int seq, int group) {
+    try {
+        int index = find(seq, group);
+        
+        if (index != -1) { //this seq has a non zero abundance for this group
+            return counts[seq][index].abund;
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "getAbund");
+        exit(1);
+    }
+}
+/************************************************************/
+vector<int> CountTable::expandAbunds(vector<countTableItem>& items) {
+    try {
+        vector<int> abunds; abunds.resize(groups.size(), 0); //prefill with 0's
+        
+        for (int i = 0; i < items.size(); i++) { //for each non zero entry
+            abunds[items[i].group] = items[i].abund; //set abund for group
+        }
+        
+        return abunds;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "expandAbunds");
+        exit(1);
+    }
+}
+/************************************************************/
+vector<int> CountTable::expandAbunds(int index) {
+    try {
+        vector<int> abunds; abunds.resize(groups.size(), 0); //prefill with 0's
+        
+        for (int i = 0; i < counts[index].size(); i++) { //for each non zero entry
+            abunds[counts[index][i].group] = counts[index][i].abund; //set abund for group
+        }
+        
+        return abunds;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "expandAbunds");
+        exit(1);
+    }
+}
+/************************************************************/
+//assumes same order as groups
+vector<countTableItem> CountTable::compressAbunds(vector<int> abunds) {
+    try {
+        vector<countTableItem> row;
+        
+        for (int i = 0; i < abunds.size(); i++) {
+            if (abunds[i] != 0) {
+                countTableItem thisAbund(abunds[i], i);
+                row.push_back(thisAbund);
+            }
+        }
+        
+        return row;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "compressAbunds");
+        exit(1);
+    }
+}
+/************************************************************/
+int CountTable::printGroupAbunds(ofstream& out, int index) {
+    try {
+        
+        vector<int> abunds = expandAbunds(index);
+        
+        for (int i = 0; i < abunds.size(); i++) { out << '\t' << abunds[i]; }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "printGroupAbunds");
+        exit(1);
+    }
+}
+/************************************************************/
 int CountTable::printSortedTable(string file) {
     try {
         ofstream out;
@@ -474,9 +630,7 @@ int CountTable::printSortedTable(string file) {
             int index = it->second;
             out << seqName << '\t' << totals[index];
             if (hasGroups) {
-                for (int j = 0; j < groups.size(); j++) {
-                    out << '\t' << counts[index][j];
-                }
+                printGroupAbunds(out, index);
             }
             out << endl;
         }
@@ -523,9 +677,7 @@ int CountTable::printSeq(ofstream& out, string seqName) {
         }else {
             out << it->first << '\t' << totals[it->second];
             if (hasGroups) {
-                for (int i = 0; i < groups.size(); i++) {
-                    out << '\t' << counts[it->second][i];
-                }
+                printGroupAbunds(out, it->second);
             }
             out << endl;
         }
@@ -570,7 +722,10 @@ SharedRAbundVectors* CountTable::getShared(map<string, string>& seqNameToOtuName
             for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) { seqNameToOtuName[it->first] = otuNames[it->second]; }
             
             //add each "otu"
-            for (int i = 0; i < counts.size(); i++) { lookup->push_back(counts[i], otuNames[i]); }
+            for (int i = 0; i < counts.size(); i++) {
+                vector<int> abunds = expandAbunds(i);
+                lookup->push_back(abunds, otuNames[i]);
+            }
             
         }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
         
@@ -586,7 +741,20 @@ SharedRAbundVectors* CountTable::getShared(map<string, string>& seqNameToOtuName
 //group counts for a seq
 vector<int> CountTable::getGroupCounts(string seqName) {
     try {
-        vector<int> temp;
+        vector<countTableItem> temp = getItems(seqName);
+        return (expandAbunds(temp)); 
+        
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "getGroupCounts");
+		exit(1);
+	}
+}
+/************************************************************/
+//group counts for a seq
+vector<countTableItem> CountTable::getItems(string seqName) {
+    try {
+        vector<countTableItem> temp;
         if (hasGroups) {
             map<string, int>::iterator it = indexNameMap.find(seqName);
             if (it == indexNameMap.end()) {
@@ -599,13 +767,13 @@ vector<int> CountTable::getGroupCounts(string seqName) {
                 temp = counts[it->second];
             }
         }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n"); m->setControl_pressed(true); }
-
+        
         return temp;
     }
-	catch(exception& e) {
-		m->errorOut(e, "CountTable", "getGroupCounts");
-		exit(1);
-	}
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "getGroupCounts");
+        exit(1);
+    }
 }
 /************************************************************/
 //total number of sequences for the group
@@ -644,7 +812,7 @@ int CountTable::getGroupCount(string seqName, string groupName) {
                     }
                     m->mothurOut("[ERROR]: seq " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                 }else {
-                    return counts[it2->second][it->second];
+                    return expandAbunds(it2->second)[it->second];
                 }
             }
         }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
@@ -673,8 +841,18 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
                     }
                     m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                 }else {
-                    int oldCount = counts[it2->second][it->second];
-                    counts[it2->second][it->second] = num;
+                    int indexOfGroup = find(it2->second, it->second);
+                    int oldCount = 0;
+                    
+                    if (indexOfGroup == -1) { //create item for this group
+                        countTableItem newItem(num, it->second);
+                        counts[it2->second].push_back(newItem);
+                        sortRow(it2->second);
+                    }else { //update total for group
+                        oldCount = counts[it2->second][indexOfGroup].abund;
+                        counts[it2->second][indexOfGroup].abund = num;
+                    }
+                    
                     totalGroups[it->second] += (num - oldCount);
                     total += (num - oldCount);
                     totals[it2->second] += (num - oldCount);
@@ -699,7 +877,6 @@ int CountTable::addGroup(string groupName) {
         groups.push_back(groupName);
         if (!hasGroups) { counts.resize(uniques);  }
 
-        for (int i = 0; i < counts.size(); i++) { counts[i].push_back(0); }
         totalGroups.push_back(0);
         indexGroupMap[groupName] = groups.size()-1;
         map<string, int> originalGroupMap = indexGroupMap;
@@ -717,16 +894,6 @@ int CountTable::addGroup(string groupName) {
         }
         totalGroups = newTotals;
 
-        //fix counts vectors
-        for (int i = 0; i < counts.size(); i++) {
-            vector<int> newCounts; newCounts.resize(groups.size(), 0);
-            for (int j = 0; j < groups.size(); j++) {
-                //find original spot of group[i]
-                int index = originalGroupMap[groups[j]];
-                newCounts[j] = counts[i][index];
-            }
-            counts[i] = newCounts;
-        }
         hasGroups = true;
 
         return 0;
@@ -765,18 +932,25 @@ int CountTable::removeGroup(string groupName) {
                 int thisIndex = 0;
                 map<string, int> newIndexNameMap;
                 for (int i = 0; i < counts.size(); i++) {
-                    int num = counts[i][indexOfGroupToRemove];
-                    counts[i].erase(counts[i].begin()+indexOfGroupToRemove);
-                    totals[i] -= num;
-                    total -= num;
-                    if (totals[i] == 0) { //your sequences are only from the group we want to remove, then remove you.
-                        counts.erase(counts.begin()+i);
-                        totals.erase(totals.begin()+i);
-                        uniques--;
-                        i--;
-                    }else { //remove name from table if no seqs left
-                        newIndexNameMap[reverse[thisIndex]] = i;
-                    }
+                    
+                    if (m->getControl_pressed()) { break; }
+                    
+                    int indexOfGroup = find(i, indexOfGroupToRemove);
+                    
+                    if (indexOfGroup != -1) { //you have an abundance for this group
+                        int num = counts[i][indexOfGroup].abund;
+                        counts[i].erase(counts[i].begin()+indexOfGroup);
+                        totals[i] -= num;
+                        total -= num;
+                        if (totals[i] == 0) { //your sequences are only from the group we want to remove, then remove you.
+                            counts.erase(counts.begin()+i);
+                            totals.erase(totals.begin()+i);
+                            uniques--;
+                            i--;
+                        }else { //remove name from table if no seqs left
+                            newIndexNameMap[reverse[thisIndex]] = i;
+                        }
+                    }////you don't have this group, nothing to remove
                     thisIndex++;
                 }
                 indexNameMap = newIndexNameMap;
@@ -814,12 +988,17 @@ int CountTable::removeGroup(int minSize){
 vector<string> CountTable::getGroups(string seqName) {
     try {
         vector<string> thisGroups;
-        if (hasGroups) {
-            vector<int> thisCounts = getGroupCounts(seqName);
-            for (int i = 0; i < thisCounts.size(); i++) {
-                if (thisCounts[i] != 0) {  thisGroups.push_back(groups[i]); }
-            }
-        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it == indexNameMap.end()) {
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
+        }else {
+            if (hasGroups) {
+                int index = it->second;
+                for (int i = 0; i < counts[index].size(); i++) {
+                    thisGroups.push_back(groups[counts[index][i].group]);
+                }
+            }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
+        }
 
         return thisGroups;
     }
@@ -913,7 +1092,7 @@ int CountTable::get(string seqName) {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
                 if (util.inUsersGroups(seqName, groups)) {
-                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n");
                 }
             }
             m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
@@ -932,13 +1111,13 @@ int CountTable::push_back(string seqName) {
     try {
         map<string, int>::iterator it = indexNameMap.find(seqName);
         if (it == indexNameMap.end()) {
-            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + "."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + ".\n");  m->setControl_pressed(true);  }
             indexNameMap[seqName] = uniques;
             totals.push_back(1);
             total++;
             uniques++;
         }else {
-            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");  m->setControl_pressed(true);
         }
 
         return 1;
@@ -972,7 +1151,7 @@ int CountTable::remove(string seqName) {
             int seqIndexIntoCounts = it->second;
             uniques--;
             if (hasGroups){ //remove this sequences counts from group totals
-                for (int i = 0; i < totalGroups.size(); i++) {  totalGroups[i] -= counts[seqIndexIntoCounts][i];   }
+                for (int i = 0; i < counts[seqIndexIntoCounts].size(); i++) { totalGroups[counts[seqIndexIntoCounts][i].group] -= counts[seqIndexIntoCounts][i].abund; }
             }
             
             //save for later in case removing a group means we need to remove a seq.
@@ -1070,7 +1249,7 @@ int CountTable::push_back(string seqName, vector<int> groupCounts, bool ignoreDu
             if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct.\n");  m->setControl_pressed(true);  }
             
             for (int i = 0; i < getNumGroups(); i++) {   totalGroups[i] += groupCounts[i];  thisTotal += groupCounts[i]; }
-            if (hasGroups) {  counts.push_back(groupCounts);  }
+            if (hasGroups) {  counts.push_back(compressAbunds(groupCounts));  }
             indexNameMap[seqName] = uniques;
             totals.push_back(thisTotal);
             total+= thisTotal;
@@ -1099,7 +1278,7 @@ int CountTable::push_back(string seqName, vector<int> groupCounts) {
             if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct.\n");  m->setControl_pressed(true);  }
 
             for (int i = 0; i < getNumGroups(); i++) {   totalGroups[i] += groupCounts[i];  thisTotal += groupCounts[i]; }
-            if (hasGroups) {  counts.push_back(groupCounts);  }
+            if (hasGroups) {  counts.push_back(compressAbunds(groupCounts));  }
             indexNameMap[seqName] = uniques;
             totals.push_back(thisTotal);
             total+= thisTotal;
@@ -1197,7 +1376,8 @@ map<string, int> CountTable::getNameMap(string group) {
                 m->mothurOut("[ERROR]: " + group + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else {
                 for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 != indexNameMap.end(); it2++) {
-                    if (counts[it2->second][it->second] != 0) {  names[it2->first] = counts[it2->second][it->second]; }
+                    int abund = getAbund(it2->second, it->second);
+                    if (abund != 0) {  names[it2->first] = abund; }
                 }
             }
         }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
@@ -1220,7 +1400,7 @@ vector<string> CountTable::getNamesOfSeqs(string group) {
                 m->mothurOut("[ERROR]: " + group + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else {
                 for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 != indexNameMap.end(); it2++) {
-                    if (counts[it2->second][it->second] != 0) {  names.push_back(it2->first); }
+                    if (getAbund(it2->second, it->second) != 0) {  names.push_back(it2->first); }
                 }
             }
         }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
@@ -1282,7 +1462,13 @@ int CountTable::mergeCounts(string seq1, string seq2) {
                 m->mothurOut("[ERROR]: " + seq2 + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else {
                 //merge data
-                for (int i = 0; i < groups.size(); i++) { counts[it->second][i] += counts[it2->second][i]; }
+                vector<int> countsSeq1 = expandAbunds(it->second);
+                vector<int> countsSeq2 = expandAbunds(it2->second);
+                
+                for (int i = 0; i < groups.size(); i++) { countsSeq1[i] += countsSeq2[i]; }
+                
+                counts[it->second] = compressAbunds(countsSeq1);
+                
                 totals[it->second] += totals[it2->second];
                 uniques--;
                 indexNameMap.erase(it2);
@@ -1313,6 +1499,37 @@ int CountTable::copy(CountTable* ct) {
 		m->errorOut(e, "CountTable", "copy");
 		exit(1);
 	}
+}
+/***********************************************************************/
+
+int CountTable::sortCountTable(){
+    try {
+        
+        //sorts each rows abunds by group
+        //counts[i] = (1,4),(1,2),(3,7) -> (1,2),(1,4),(3,7)
+        for (int i = 0; i < counts.size(); i++) {  sort(counts[i].begin(), counts[i].end(), compareGroups); }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "sortCountTable");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+int CountTable::sortRow(int index){
+    try {
+        
+        //saves time in getSmallestCell, by making it so you dont search the repeats
+        sort(counts[index].begin(), counts[index].end(), compareGroups);
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "sortRow");
+        exit(1);
+    }
 }
 
 /************************************************************/

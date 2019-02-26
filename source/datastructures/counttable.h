@@ -53,6 +53,7 @@ class CountTable {
         int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames
         int createTable(string, string, bool); //namefile, groupfile, createGroup
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
+        int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
         int zeroOutTable(); //turn all counts to zeros
         int clearTable();
@@ -84,7 +85,7 @@ class CountTable {
         int get(string); //returns unique sequence index for reading distance matrices like NameAssignment
         int size() { return (int)indexNameMap.size(); }
 
-        vector<string> getGroups(string); //returns vector of groups represented by this sequences
+        vector<string> getGroups(string); //returns vector of groups represented by this sequence
         vector<int> getGroupCounts(string);  //returns group counts for a seq passed in, if no group info is in file vector is blank. Order is the same as the groups returned by getGroups function.
         int getGroupCount(string, string); //returns number of seqs for that group for that seq
         int getGroupCount(string); // returns total seqs for that group
@@ -113,11 +114,21 @@ class CountTable {
         bool hasGroups;
         int total, uniques;
         vector<string> groups;
-        vector< vector<int> > counts;
+        vector< vector<countTableItem> > counts; //countTableItem ((int)abund, (int)group). each line in counts represents a sequence line from the count table file(sparse). The vector<ountTableItem> are sorted by group, so that you can stop search early if group is not found. For example:  seq1 10 5 0 0 1 0 0 0 3 0 0 1 0 0 - 13 groups, but seq1 is only present in 4 samples. Let's save space by not storing 0 abunds. seq1's vector<ountTableItem> (5,0),(1,3),(3,7),(1,10). Group0 = 5, Group3 = 1, Group7 = 3, Group10 = 1.  
         vector<int> totals;
         vector<int> totalGroups;
         map<string, int> indexNameMap; //maps seqName -> vector index in counts. seq1 -> 1 would mean seq1's counts are stored in counts[1].
         map<string, int> indexGroupMap;
+    
+        int find(int seq, int group); //returns index of countTableItem for group passed in. If group is not present in seq, returns -1
+        int getAbund(int seq, int group); //returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
+        vector<countTableItem> getItems(string); //returns group counts for a seq passed in, if no group info is in file vector is blank. sorted by group
+        vector<int> expandAbunds(int index);
+        vector<int> expandAbunds(vector<countTableItem>& items);
+        vector<countTableItem> compressAbunds(vector<int> abunds);
+        int printGroupAbunds(ofstream& out, int index);
+        int sortCountTable();
+        int sortRow(int);
 
 };
 

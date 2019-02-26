@@ -400,7 +400,7 @@ int GetOTURepCommand::execute(){
                 m->mothurOut("/******************************************/\n");
                 string inputString = "name=" + namefile + ", group=" + groupfile;
                 
-                m->mothurOut("/nRunning command: count.seqs(" + inputString + ")\n");
+                m->mothurOut("\nRunning command: count.seqs(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 
                 Command* countSeqsCommand = new CountSeqsCommand(inputString);
@@ -421,7 +421,7 @@ int GetOTURepCommand::execute(){
                 
                 inputString = "list=" + listfile + ", accnos=temp.accnos";
                 
-                m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
+                m->mothurOut("\nRunning command: get.seqs(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 
                 Command* getSeqsCommand = new GetSeqsCommand(inputString);
