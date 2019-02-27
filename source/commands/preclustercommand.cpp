@@ -14,29 +14,29 @@
 //**********************************************************************************************************************
 vector<string> PreClusterCommand::setParameters(){
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
-    CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
-		CommandParameter pdiffs("diffs", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pdiffs);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-    CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
-    CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
-    CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
-    CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
-    CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
-    CommandParameter palpha("alpha", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(palpha);
-    CommandParameter pdelta("delta", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(pdelta);
-    CommandParameter pmethod("method", "Multiple", "simple-unoise-tree-deblur", "simple", "", "", "","",false,false); parameters.push_back(pmethod);
-
-    CommandParameter perror_rate("error_rate", "Number", "", "0.005", "", "", "","",false,false); parameters.push_back(perror_rate);
-    CommandParameter pindel_prob("indel_prob", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(pindel_prob);
-    CommandParameter pmax_indels("max_indels", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pmax_indels);
-    CommandParameter perror_dist("error_dist", "String", "", "1-0.06-0.02-0.02-0.01-0.005-0.005-0.005-0.001-0.001-0.001-0.0005", "", "", "","",false,false); parameters.push_back(perror_dist);
-
-		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
-    CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
+        CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pdiffs("diffs", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pdiffs);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
+        CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
+        CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
+        CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
+        CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
+        CommandParameter palpha("alpha", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(palpha);
+        CommandParameter pdelta("delta", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(pdelta);
+        CommandParameter pmethod("method", "Multiple", "simple-unoise-tree-deblur", "simple", "", "", "","",false,false); parameters.push_back(pmethod);
+        
+        CommandParameter perror_rate("error_rate", "Number", "", "0.005", "", "", "","",false,false); parameters.push_back(perror_rate);
+        CommandParameter pindel_prob("indel_prob", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(pindel_prob);
+        CommandParameter pmax_indels("max_indels", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pmax_indels);
+        CommandParameter perror_dist("error_dist", "String", "", "1-0.06-0.02-0.02-0.01-0.005-0.005-0.005-0.001-0.001-0.001-0.0005", "", "", "","",false,false); parameters.push_back(perror_dist);
+        
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -218,8 +218,8 @@ PreClusterCommand::PreClusterCommand(string option) {
             else if (countfile == "not open") { abort = true; countfile =  ""; }
             else {
                 current->setCountFile(countfile);
-                ct.readTable(countfile, true, false);
-                if (ct.hasGroupInfo()) { bygroup = true; }
+                CountTable ct;
+                if (ct.testGroups(countfile)) { bygroup = true; } //check for groups without reading
                 else { bygroup = false;  }
             }
             
@@ -849,17 +849,20 @@ void filterSeqs(vector<seqPNode*>& alignSeqs, int length, MothurOut* m){
 
 /**************************************************************************************************/
 //seqPNode(string na, string seq, int n, string nm) : numIdentical(n), name(na), sequence(seq), clusteredNames(nm) { diffs = 0; active = true; }
-vector<seqPNode*> readFASTA(CountTable ct, preClusterData* params, long long& num){
+vector<seqPNode*> readFASTA(preClusterData* params, long long& num){
     try {
+        CountTable ct;
+        
         map<string, string> nameMap;
         map<string, string>::iterator it;
-        if (params->hasName) { params->util.readNames(params->namefile, nameMap); }
+        if (params->hasName) { params->util.readNames(params->namefile, nameMap);   }
+        else if (params->hasCount) {  ct.readTable(params->countfile, false, true); } //don't read groups to save space
 
         ifstream inFasta;
         params->util.openInputFile(params->fastafile, inFasta);
         set<int> lengths;
         vector<seqPNode*> alignSeqs;
-
+        
         while (!inFasta.eof()) {
 
             if (params->m->getControl_pressed()) { inFasta.close(); break; }
@@ -995,8 +998,6 @@ int PreClusterCommand::execute(){
             createProcessesGroups(newFastaFile, newNamesFile, newMapFile);
             
             if (countfile != "") { mergeGroupCounts(newCountFile, newNamesFile, newFastaFile);  }
-            
-            
             else {
                 //run unique.seqs for deconvolute results
                 string inputString = "fasta=" + newFastaFile;
@@ -1030,7 +1031,7 @@ int PreClusterCommand::execute(){
         params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
         
         //reads fasta file and return number of seqs
-        long long numSeqs = 0; params->alignSeqs = readFASTA(ct, params, numSeqs); //fills alignSeqs and makes all seqs active
+        long long numSeqs = 0; params->alignSeqs = readFASTA(params, numSeqs); //fills alignSeqs and makes all seqs active
         length = params->length;
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
@@ -1216,6 +1217,10 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
 	try {
         m->mothurOut("\nDeconvoluting count table results...\n");
         
+        CountTable ct; vector<string> groups;
+        ct.testGroups(countfile, groups);
+        ct.readTable(countfile, false, true); //read table no groups
+        for (int i = 0; i < groups.size(); i++)  { ct.addGroup(groups[i]); } //add groups
         ct.zeroOutTable();
         
         ifstream inNames;
@@ -1226,7 +1231,8 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
         
         string group, unique_sequence;
         int numDups;
-
+        
+        //build table
         while (!inNames.eof()) {
             
             if (m->getControl_pressed()) { break; }

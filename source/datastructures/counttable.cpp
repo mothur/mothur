@@ -439,6 +439,9 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
                 }
             }
         }
+        
+        //if the file has groups, but we didn't read them
+        hasGroups = readGroups;
 
         return 0;
     }
@@ -455,7 +458,7 @@ int CountTable::zeroOutTable() {
 
 		for(int i=0;i<counts.size();i++){
 			for(int j=0;j<counts[0].size();j++){
-				counts[i][j].abund = 0;
+                counts[j].clear();
 			}
 		}
 
