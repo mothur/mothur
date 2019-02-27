@@ -401,7 +401,7 @@ struct preClusterData {
 	vector<float> error_dist;
   vector<string> outputNames;
   map<string, vector<string> > outputTypes;
-  vector<seqPNode*> alignSeqs; //maps the number of identical seqs to a sequence
+  vector<seqPNode*> alignSeqs; //maps the number of identical seqs to a sequence. filled and freed by functions
   Alignment* alignment;
 
 				// double error_rate = 0.005;error_rate
@@ -459,9 +459,7 @@ struct preClusterData {
           alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);
       }
     } else { alignment = NULL; }
-
   }
-
 };
 
 /**************************************************************************************************/

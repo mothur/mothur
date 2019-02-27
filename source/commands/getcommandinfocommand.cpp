@@ -77,7 +77,7 @@ int GetCommandInfoCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		commandFactory = CommandFactory::getInstance();
+		CommandFactory* commandFactory; commandFactory = CommandFactory::getInstance();
 		
 		ofstream out;
 		util.openOutputFile(output+".temp", out);
@@ -174,8 +174,8 @@ int GetCommandInfoCommand::execute(){
 						out << it2->first << "=" << it2->second << endl;
 					}
 				}
-				
 			}
+            delete thisCommand;
 		}
 		
 		out.close();

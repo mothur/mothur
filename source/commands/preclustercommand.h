@@ -46,7 +46,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }
 
 private:
-    //CountTable ct;
     int diffs, length, processors;
     float match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels;
     vector<float> error_dist;

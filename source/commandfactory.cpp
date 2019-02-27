@@ -173,10 +173,6 @@ CommandFactory::CommandFactory(){
 	m = MothurOut::getInstance();
     current = CurrentFile::getInstance();
 
-	command = new NoCommand(s);
-	shellcommand = new NoCommand(s);
-	pipecommand = new NoCommand(s);
-
 	current->setOutputDir(""); current->setInputDir("");
 	append = false;
 
@@ -336,9 +332,6 @@ CommandFactory::CommandFactory(){
 /***********************************************************/
 CommandFactory::~CommandFactory(){
 	_uniqueInstance = 0;
-	delete command;
-	delete shellcommand;
-	delete pipecommand;
 }
 /***********************************************************/
 
@@ -419,7 +412,7 @@ int CommandFactory::checkForRedirects(string optionString) {
 Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
 
-		delete command;   //delete the old command
+        Command* command = NULL;
         
         if (commandName != "help") {
             checkForRedirects(optionString);
@@ -596,7 +589,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 //This function calls the appropriate command fucntions based on user input.
 Command* CommandFactory::getCommand(string commandName, string optionString, string mode){
 	try {
-		delete pipecommand;   //delete the old command
+		Command* pipecommand = NULL;   //delete the old command
         
         if (commandName != "help") {
             checkForRedirects(optionString);
@@ -773,7 +766,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 //This function calls the appropriate command fucntions based on user input, this is used by the pipeline command to check a users piepline for errors before running
 Command* CommandFactory::getCommand(string commandName){
 	try {
-		delete shellcommand;   //delete the old command
+		Command* shellcommand = NULL;   //delete the old command
 
 		if(commandName == "cluster")				{	shellcommand = new ClusterCommand();				}
 		else if(commandName == "unique.seqs")			{	shellcommand = new DeconvoluteCommand();			}
