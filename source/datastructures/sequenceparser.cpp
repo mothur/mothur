@@ -245,7 +245,8 @@ bool SequenceParser::fillWeighted(vector< seqPNode* >& seqForThisGroup, string g
                     }
                 }
                 
-                seqPNode* tempNode = new seqPNode(thisSeq.getName(), thisSeq.getAligned(), numReps, thisSeq.getName());
+                set<int> clusteredIndexes; clusteredIndexes.insert(seqForThisGroup.size());
+                seqPNode* tempNode = new seqPNode(thisSeq.getName(), thisSeq.getAligned(), numReps, clusteredIndexes);
                 seqForThisGroup.push_back(tempNode);
                 
                 lengths.insert(thisSeq.getAligned().length());

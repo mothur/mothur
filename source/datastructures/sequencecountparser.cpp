@@ -183,7 +183,8 @@ bool SequenceCountParser::fillWeighted(vector< seqPNode* >& seqForThisGroup, str
                 Sequence thisSeq = seqs[groupToSeqs[it->second][i]];
                 int numReps = countTable.getGroupCount(thisSeq.getName(), group);
                 
-                seqPNode* tempNode = new seqPNode(thisSeq.getName(), thisSeq.getAligned(), numReps, thisSeq.getName());
+                set<int> clusteredIndexes; //don't use indexes for precluster with count file
+                seqPNode* tempNode = new seqPNode(thisSeq.getName(), thisSeq.getAligned(), numReps, clusteredIndexes);
                 seqForThisGroup.push_back(tempNode);
                 
                 lengths.insert(thisSeq.getAligned().length());

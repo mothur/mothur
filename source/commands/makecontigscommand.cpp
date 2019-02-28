@@ -472,7 +472,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 int MakeContigsCommand::execute(){
 	try {
         bool debugIndex = false;
-        if (debugIndex) { //allows you to run the oligos and index file independantly to check for barcode issues. make.contigs(findex=yourIndexFile, bdiffs=1, oligos=yourOligosFile, checkorient=t)
+        if (debugIndex) { //allows you to run the oligos and index file independantly to check for barcode issues. make.contigs(findex=yourIndexFile, bdiffs=1, oligos=yourOligosFile, checkorient=t). just used for user support
             
             map<int, oligosPair> pairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reorientedPairedPrimers;
             vector<string> barcodeNames, primerNames;

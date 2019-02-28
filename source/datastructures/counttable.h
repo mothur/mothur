@@ -46,7 +46,7 @@ class CountTable {
 
     public:
 
-        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; }
+        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; isCompressed = false; }
         ~CountTable() {}
 
         //reads and creates smart enough to eliminate groups with zero counts
@@ -58,6 +58,7 @@ class CountTable {
         int zeroOutTable(); //turn all counts to zeros
         int clearTable();
 
+        int printCompressedTable(string);
         int printTable(string); //preserves order in original
         int printSortedTable(string); //sorted by seqName
         int printHeaders(ofstream&);
@@ -65,6 +66,9 @@ class CountTable {
         int printSeq(ofstream&, string);
         bool testGroups(string file); //used to check if file has group data without reading it
         bool testGroups(string file, vector<string>&); //used to check if file has group data without reading it, return groups if found.
+    
+        bool isCountTable(string);
+        bool isTableCompressed() { return isCompressed; }
         int copy(CountTable*); //copy countable
 
         bool hasGroupInfo() { return hasGroups; }
@@ -111,7 +115,7 @@ class CountTable {
         string filename;
         MothurOut* m;
         Utils util;
-        bool hasGroups;
+        bool hasGroups, isCompressed;
         int total, uniques;
         vector<string> groups;
         vector< vector<countTableItem> > counts; //countTableItem ((int)abund, (int)group). each line in counts represents a sequence line from the count table file(sparse). The vector<ountTableItem> are sorted by group, so that you can stop search early if group is not found. For example:  seq1 10 5 0 0 1 0 0 0 3 0 0 1 0 0 - 13 groups, but seq1 is only present in 4 samples. Let's save space by not storing 0 abunds. seq1's vector<ountTableItem> (5,0),(1,3),(3,7),(1,10). Group0 = 5, Group3 = 1, Group7 = 3, Group10 = 1.  

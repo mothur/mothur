@@ -18,6 +18,7 @@ vector<string> CountSeqsCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "NameSHared", "NameSHared", "none","count",false,false,true); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+        CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcompress);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -37,6 +38,7 @@ string CountSeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The count.seqs aka. make.table command reads a name or shared file and outputs a .count_table file.  You may also provide a group with the names file to get the counts broken down by group.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
+        helpString += "The compress parameter allows you to indicate you want the count table printed in compressed format. Default=F.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
 		helpString += "The count.seqs command should be in the following format: count.seqs(name=yourNameFile).\n";
 		helpString += "Example count.seqs(name=amazon.names) or make.table(name=amazon.names).\n";
@@ -165,7 +167,10 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			if (groups == "not found") { groups = "all"; }
 			util.splitAtDash(groups, Groups);
             if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
-			
+            
+            string temp = validParameter.valid(parameters, "compress");			if (temp == "not found") { temp = "F"; }
+            compress = util.isTrue(temp);
+
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 		}
@@ -312,24 +317,25 @@ unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& 
         string outputFileName = getOutputFileName("count", variables);
         outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
         
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
+        CountTable ct;
         
-        out << "OTU_Label\ttotal";
-        for (int i = 0; i < lookup.size(); i++) { out << '\t' << lookup[i]->getGroup(); } out << endl;
+        for (int i = 0; i < lookup.size(); i++) { ct.addGroup(lookup[i]->getGroup()); }
         
         for (int j = 0; j < lookup[0]->getNumBins(); j++) {
             if (m->getControl_pressed()) { break; }
             
-            int total = 0;
-            string output = "";
+            vector<int> outputs;
             for (int i = 0; i < lookup.size(); i++) {
-                total += lookup[i]->get(j);
-                output += '\t' + toString(lookup[i]->get(j));
+                outputs.push_back(lookup[i]->get(j));
             }
-            out << currentLabels[j] << '\t' << total << output << endl;
+            ct.push_back(currentLabels[j], outputs);
         }
-        out.close();
+        
+        if (compress) {
+            ct.printCompressedTable(outputFileName);
+        }else {
+            ct.printTable(outputFileName);
+        }
         
         return 0;
     }
@@ -342,10 +348,7 @@ unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& 
 
 unsigned long long CountSeqsCommand::process(string outputFileName){
 	try {
-        ofstream out;
-        util.openOutputFile(outputFileName, out); outputTypes["count"].push_back(outputFileName);
-        outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
-		out << "Representative_Sequence\ttotal";
+        CountTable ct;
         
         GroupMap* groupMap = NULL;
 		if (groupfile != "") { 
@@ -358,74 +361,68 @@ unsigned long long CountSeqsCommand::process(string outputFileName){
 			sort(Groups.begin(), Groups.end());
 			
 			//print groupNames
-			for (int i = 0; i < Groups.size(); i++) { out << '\t' << Groups[i]; }
+			for (int i = 0; i < Groups.size(); i++) { ct.addGroup(Groups[i]); }
 		}
-		out << endl;
         
-        unsigned long long total = driver(out, groupMap);
+        ifstream in;
+        util.openInputFile(namefile, in);
         
+        unsigned long long total = 0;
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+            
+            string firstCol, secondCol;
+            in >> firstCol; util.gobble(in); in >> secondCol; util.gobble(in);
+            
+            util.checkName(firstCol);
+            util.checkName(secondCol);
+            
+            vector<string> names;
+            util.splitAtChar(secondCol, names, ',');
+            
+            if (groupfile != "") {
+                //set to 0
+                map<string, int> groupCounts;
+                int total = 0;
+                for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
+                
+                //get counts for each of the users groups
+                for (int i = 0; i < names.size(); i++) {
+                    string group = groupMap->getGroup(names[i]);
+                    
+                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[i] + " is not in your groupfile, please correct."); m->mothurOutEndLine(); }
+                    else {
+                        map<string, int>::iterator it = groupCounts.find(group);
+                        
+                        //if not found, then this sequence is not from a group we care about
+                        if (it != groupCounts.end()) { it->second++; total++; }
+                    }
+                }
+                
+                vector<int> sortedAbunds;
+                for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { sortedAbunds.push_back(it->second); }
+                
+                if (total != 0) { ct.push_back(firstCol, sortedAbunds); }
+                
+            }else { ct.push_back(firstCol, names.size()); }
+            
+            total += names.size();
+        }
+        in.close();
+
+        if (compress) {
+            ct.printCompressedTable(outputFileName);
+        }else {
+            ct.printTable(outputFileName);
+        }
+        
+        outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
         if (groupfile != "") { delete groupMap; }
         
         return total;
     }
 	catch(exception& e) {
 		m->errorOut(e, "CountSeqsCommand", "processSmall");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-unsigned long long CountSeqsCommand::driver(ofstream& out, GroupMap*& groupMap) {
-	try {
-        ifstream in;
-		util.openInputFile(namefile, in);
-		
-        unsigned long long total = 0;
-		while (!in.eof()) {
-			if (m->getControl_pressed()) { break; }
-			
-			string firstCol, secondCol;
-			in >> firstCol; util.gobble(in); in >> secondCol; util.gobble(in);
-            
-            util.checkName(firstCol);
-            util.checkName(secondCol);
-            
-			vector<string> names;
-			util.splitAtChar(secondCol, names, ',');
-			
-			if (groupfile != "") {
-				//set to 0
-				map<string, int> groupCounts;
-				int total = 0;
-				for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
-				
-				//get counts for each of the users groups
-				for (int i = 0; i < names.size(); i++) {
-					string group = groupMap->getGroup(names[i]);
-					
-					if (group == "not found") { m->mothurOut("[ERROR]: " + names[i] + " is not in your groupfile, please correct."); m->mothurOutEndLine(); }
-					else {
-						map<string, int>::iterator it = groupCounts.find(group);
-						
-						//if not found, then this sequence is not from a group we care about
-						if (it != groupCounts.end()) { it->second++; total++; }
-					}
-				}
-				
-				if (total != 0) {
-					out << firstCol << '\t' << total;
-					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { out << '\t' << it->second; } out << endl;
-				}
-			}else { out << firstCol << '\t' << names.size() << endl; }
-			
-			total += names.size();
-        }
-		in.close();
-        out.close();
-        
-        return total;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "CountSeqsCommand", "driver");
 		exit(1);
 	}
 }
