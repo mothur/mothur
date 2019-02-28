@@ -466,14 +466,14 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
                             }
                         }
                     }else {
-                        for (int i = 0; i < numGroupsInFile; i++) {
+                        
                             if (isCompressed) {
                                 string groupInfo = util.getline(in); util.gobble(in);
                                 vector<string> groupNodes = util.splitWhiteSpace(groupInfo);
                                 
                                 vector<countTableItem> abunds;
                                 for (int i = 0; i < groupNodes.size(); i++) { //for each non zero group count
-                                    string abund = ""; string thisgroup = groupNodes[i];
+                                    string abund = groupNodes[i]; string thisgroup = "";
                                     util.splitAtComma(thisgroup, abund);
                                     int a; util.mothurConvert(abund, a);
                                     int g; util.mothurConvert(thisgroup, g); g--;
@@ -487,8 +487,10 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
                                 
                                 groupCounts = expandAbunds(abunds);
                             }
-                            else { int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; util.gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex]; }
-                        }
+                            else {
+                                for (int i = 0; i < numGroupsInFile; i++) { int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; util.gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex]; }
+                            }
+                        
                     }
                 }else { //read and discard
                     util.getline(in); util.gobble(in);
@@ -606,6 +608,37 @@ int CountTable::printTable(string file) {
 		m->errorOut(e, "CountTable", "printTable");
 		exit(1);
 	}
+}
+/************************************************************/
+int CountTable::printTable(string file, bool compressedFormat) {
+    try {
+        if (compressedFormat) { printCompressedTable(file); return 0; }
+        
+        ofstream out;
+        util.openOutputFile(file, out);
+        printHeaders(out);
+        
+        map<int, string> reverse; //use this to preserve order
+        for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+        
+        for (int i = 0; i < totals.size(); i++) {
+            map<int, string>::iterator itR = reverse.find(i);
+            
+            if (itR != reverse.end()) {
+                out << itR->second << '\t' << totals[i];
+                if (hasGroups) {
+                    printGroupAbunds(out, i);
+                }
+                out << endl;
+            }
+        }
+        out.close();
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "printTable");
+        exit(1);
+    }
 }
 /************************************************************/
 int CountTable::printCompressedTable(string file) {

@@ -59,7 +59,8 @@ class CountTable {
         int clearTable();
 
         int printCompressedTable(string);
-        int printTable(string); //preserves order in original
+        int printTable(string); //preserves order in original, defaults compress to state of original file
+        int printTable(string, bool compress); //preserves order in original, printing compressed or not based on compress flag pasted in
         int printSortedTable(string); //sorted by seqName
         int printHeaders(ofstream&);
         vector<string> getHardCodedHeaders(); //Representative_Sequence, total

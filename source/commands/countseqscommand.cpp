@@ -15,6 +15,7 @@
 vector<string> CountSeqsCommand::setParameters(){	
 	try {
         CommandParameter pshared("shared", "InputTypes", "", "", "NameSHared-sharedGroup", "NameSHared", "none","count",false,false,true); parameters.push_back(pshared);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameSHared-sharedGroup", "NameSHared", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pname("name", "InputTypes", "", "", "NameSHared", "NameSHared", "none","count",false,false,true); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
@@ -37,6 +38,7 @@ string CountSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The count.seqs aka. make.table command reads a name or shared file and outputs a .count_table file.  You may also provide a group with the names file to get the counts broken down by group.\n";
+        helpString += "You can also inflate or deflate an existing count table using the count and compress parameters. ie. count.seqs(count=current, compress=t)\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
         helpString += "The compress parameter allows you to indicate you want the count table printed in compressed format. Default=F.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
@@ -133,6 +135,14 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
+                }
 			}
 			
 			//check for required parameters
@@ -146,19 +156,24 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			else if (sharedfile == "not found"){	sharedfile = ""; }
             else { current->setSharedFile(sharedfile); }
             
+            countfile = validParameter.validFile(parameters, "count");
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found"){	countfile = ""; }
+            else { current->setCountFile(countfile); }
+            
 			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
 			else { current->setGroupFile(groupfile); }
             
-            if ((namefile == "") && (sharedfile == "")) {
+            if ((namefile == "") && (sharedfile == "") && (countfile == "")) {
                 namefile = current->getNameFile();
-				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 				else {
                     sharedfile = current->getSharedFile();
-                    if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+                    if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
                     else {
-                        m->mothurOut("You have no current namefile or sharedfile and the name or shared parameter is required."); m->mothurOutEndLine(); abort = true;
+                        m->mothurOut("You have no current namefile or sharedfile and the name or shared parameter is required, unless inflating or deflating an existing count file.\n");  abort = true;
                     }
                 }
 			}
@@ -190,7 +205,27 @@ int CountSeqsCommand::execute(){
         
         map<string, string> variables;
 
-        if (namefile != "") {
+        if (countfile != "") {
+            CountTable ct;
+            ct.readTable(countfile, true, false, Groups);
+            
+            if (outputDir == "") { outputDir = util.hasPath(countfile); }
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+            
+            if (compress) {
+                variables["[distance]"] = "sparse";
+                string outputFileName = getOutputFileName("count", variables);
+                outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
+                
+                ct.printCompressedTable(outputFileName);
+            }else {
+                variables["[distance]"] = "full";
+                string outputFileName = getOutputFileName("count", variables);
+                outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
+                
+                ct.printTable(outputFileName, false);
+            }
+                    }else if (namefile != "") {
             if (outputDir == "") { outputDir = util.hasPath(namefile); }
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(namefile));
             string outputFileName = getOutputFileName("count", variables);

@@ -36,7 +36,7 @@ public:
 	
 private:
     
-	string namefile, groupfile, outputDir, groups, sharedfile;
+	string namefile, groupfile, outputDir, groups, sharedfile, countfile;
 	bool abort, allLines, compress;
 	vector<string> Groups, outputNames;
     set<string> labels;
