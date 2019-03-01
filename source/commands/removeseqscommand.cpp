@@ -626,55 +626,19 @@ int RemoveSeqsCommand::readCount(){
         variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(countfile, in);
-		
-		bool wroteSomething = false;
-		int removedCount = 0;
-		
-        string headers = util.getline(in); util.gobble(in);
-        out << headers << endl;
-        string test = headers; vector<string> pieces = util.splitWhiteSpace(test);
+        CountTable ct; ct.readTable(countfile, true, false); int originalCount = ct.getNumSeqs();
         
-        string name, rest; int thisTotal; rest = "";
-        set<string> uniqueNames;
-        while (!in.eof()) {
-            
-            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
-            
-            in >> name; util.gobble(in); 
-            in >> thisTotal; util.gobble(in);
-            if (pieces.size() > 2) {  rest = util.getline(in); util.gobble(in);  }
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
-            
-            if (names.count(name) == 0) {
-                if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
-                    uniqueNames.insert(name);
-                    out << name << '\t' << thisTotal << '\t' << rest << endl;
-                    wroteSomething = true;
-                }else {
-                    m->mothurOut("[WARNING]: " + name + " is in your count file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
-                }
-            }else { removedCount += thisTotal; }
-        }
-        in.close();
-		out.close();
+        for (set<string>::iterator it = names.begin(); it != names.end(); it++) { ct.remove(*it); }
         
-        //check for groups that have been eliminated
-        CountTable ct;
-        if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName, true, false);
-            ct.printTable(outputFileName);
-        }
-
-		
-		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+        if (ct.getNumSeqs() == 0) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");   return 0; }
+        
+        ct.printTable(outputFileName);
+        
+        int removedCount = originalCount - ct.getNumSeqs();
+        
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file.\n");
         
 		return 0;
 	}

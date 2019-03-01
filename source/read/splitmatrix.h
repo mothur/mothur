@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "mothurout.h"
 #include "utils.hpp"
+#include "counttable.h"
 
 /******************************************************/
 

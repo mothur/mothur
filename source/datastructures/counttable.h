@@ -54,6 +54,7 @@ class CountTable {
         int createTable(string, string, bool); //namefile, groupfile, createGroup
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
         int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
+        int readTable(string, bool, bool, set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
         int zeroOutTable(); //turn all counts to zeros
         int clearTable();

@@ -537,7 +537,133 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
 		exit(1);
 	}
 }
-
+/************************************************************/
+int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<string> selectedSeqs) {
+    try {
+        filename = file;
+        ifstream in;
+        util.openInputFile(filename, in);
+        
+        string headers = util.getline(in); util.gobble(in);
+        
+        if (headers[0] == '#') { //is this a count file in compressed form
+            isCompressed = true;
+            
+            //read headers
+            headers = util.getline(in); util.gobble(in); //gets compressed group name map line
+            headers = util.getline(in); util.gobble(in);
+        }
+        
+        vector<string> columnHeaders = util.splitWhiteSpace(headers);
+        
+        int numGroupsInFile = 0;
+        groups.clear();
+        totalGroups.clear();
+        indexGroupMap.clear();
+        indexNameMap.clear();
+        counts.clear();
+        map<int, string> originalGroupIndexes;
+        if ((columnHeaders.size() > 2) && readGroups) { hasGroups = true; numGroupsInFile = columnHeaders.size() - 2;  }
+        
+        if (readGroups) {
+            for (int i = 2; i < columnHeaders.size(); i++) {
+                groups.push_back(columnHeaders[i]);
+                originalGroupIndexes[i-2] = columnHeaders[i];
+                totalGroups.push_back(0);
+            }
+        }
+        
+        //sort groups to keep consistent with how we store the groups in groupmap
+        sort(groups.begin(), groups.end());
+        for (int i = 0; i < groups.size(); i++) {  indexGroupMap[groups[i]] = i; }
+        int numGroups = groups.size();
+        
+        bool error = false;
+        string name;
+        int thisTotal;
+        uniques = 0;
+        total = 0;
+        while (!in.eof()) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            in >> name; util.gobble(in); in >> thisTotal; util.gobble(in);
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
+            
+            if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct.\n");
+            }
+            
+            vector<int> groupCounts; groupCounts.resize(numGroups, 0);
+            if (columnHeaders.size() > 2) { //file contains groups
+                if (readGroups) { //user wants to save them
+                    if (isCompressed) {
+                        string groupInfo = util.getline(in); util.gobble(in);
+                        vector<string> groupNodes = util.splitWhiteSpace(groupInfo);
+                        
+                        vector<countTableItem> abunds;
+                        for (int i = 0; i < groupNodes.size(); i++) { //for each non zero group count
+                            string abund = groupNodes[i]; string thisgroup = "";
+                            util.splitAtComma(thisgroup, abund);
+                            int a; util.mothurConvert(abund, a);
+                            int g; util.mothurConvert(thisgroup, g); g--;
+                            string groupName = originalGroupIndexes[g]; //order of groups in file may not be sorted
+                            int thisIndex = indexGroupMap[groupName];
+                            countTableItem item(a, thisIndex);
+                            
+                            abunds.push_back(item);
+                            totalGroups[thisIndex] += a;
+                        }
+                        
+                        groupCounts = expandAbunds(abunds);
+                    }
+                    else {
+                        for (int i = 0; i < numGroupsInFile; i++) { int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; util.gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex]; }
+                    }
+                }else { util.getline(in); util.gobble(in); }//read and discard
+            }
+            
+            map<string, int>::iterator it = indexNameMap.find(name);
+            if (it == indexNameMap.end()) {
+                bool saveSeq = true;
+                if (selectedSeqs.count(name) == 0) { //don't save
+                    saveSeq = false;
+                }
+                if (saveSeq) {
+                    if (hasGroups && readGroups) {
+                        vector<countTableItem> thisGroupsCount = compressAbunds(groupCounts);
+                        counts.push_back(thisGroupsCount);
+                    }
+                    indexNameMap[name] = uniques;
+                    totals.push_back(thisTotal);
+                    total += thisTotal;
+                    uniques++;
+                }
+            }else {
+                error = true;
+                m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct.\n");
+            }
+        }
+        in.close();
+        
+        if (error) { m->setControl_pressed(true); }
+        else { //check for zero groups
+            if (hasGroups && readGroups) {
+                for (int i = 0; i < totalGroups.size(); i++) {
+                    if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+                }
+            }
+        }
+        
+        //if the file has groups, but we didn't read them
+        hasGroups = readGroups;
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "readTable");
+        exit(1);
+    }
+}
 /************************************************************/
 
 int CountTable::zeroOutTable() {
@@ -571,6 +697,7 @@ int CountTable::clearTable() {
         totalGroups.clear();
         indexNameMap.clear();
         indexGroupMap.clear();
+        
         return 0;
     }
     catch(exception& e) {

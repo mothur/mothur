@@ -899,22 +899,20 @@ vector<seqPNode*> readFASTA(preClusterData* params, long long& num){
 void print(string newfasta, string newname, preClusterData* params){
     try {
         ofstream outAccnos;
-        ofstream outNames;
-
         string outAccnosFileName = newfasta + ".temp";
         params->util.openOutputFile(outAccnosFileName, outAccnos);
-        params->util.openOutputFile(newname, outNames);
-
-        if (params->countfile != "")  { outNames << "Representative_Sequence\ttotal\n";  }
-
+        
+        CountTable ct;
         if (params->countfile != "") {
             for (int i = 0; i < params->alignSeqs.size(); i++) {
                 if (params->alignSeqs[i]->numIdentical != 0) {
                     outAccnos << params->alignSeqs[i]->name << endl;
-                    outNames << params->alignSeqs[i]->name << '\t' << params->alignSeqs[i]->numIdentical << endl;
+                    ct.push_back(params->alignSeqs[i]->name, params->alignSeqs[i]->numIdentical);
                 }
             }
         }else {
+            ofstream outNames;
+            params->util.openOutputFile(newname, outNames);
             map<string, string> nameMap; Utils util; util.readNames(params->namefile, nameMap);
             for (int i = 0; i < params->alignSeqs.size(); i++) {
                 if (params->alignSeqs[i]->numIdentical != 0) {
@@ -932,10 +930,12 @@ void print(string newfasta, string newname, preClusterData* params){
                     outNames << params->alignSeqs[i]->name << '\t' << clusteredNames << endl;
                 }
             }
+            outNames.close();
         }
         outAccnos.close();
-        outNames.close();
         
+        if (params->countfile != "")  { ct.printTable(newname); }
+
         //use unique.seqs to create new name and fastafile
         string inputString = "fasta=" + params->fastafile + ", accnos=" + outAccnosFileName;
         params->m->mothurOut("/******************************************/\n");

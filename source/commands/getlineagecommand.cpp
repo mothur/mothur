@@ -489,45 +489,14 @@ int GetLineageCommand::readCount(){
         variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(countfile, in);
-		
-		bool wroteSomething = false;
-		
-        string headers = util.getline(in); util.gobble(in);
-        out << headers << endl;
-        string test = headers; vector<string> pieces = util.splitWhiteSpace(test);
+        CountTable ct; ct.readTable(countfile, true, false, names);
         
-        string name, rest; int thisTotal; rest = "";
-        while (!in.eof()) {
-            
-            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
-            
-            in >> name; util.gobble(in); 
-            in >> thisTotal; util.gobble(in);
-            if (pieces.size() > 2) {  rest = util.getline(in); util.gobble(in);  }
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
-            
-            if (names.count(name) != 0) {
-                out << name << '\t' << thisTotal << '\t' << rest << endl;
-                wroteSomething = true;
-            }
-        }
-        in.close();
-		out.close();
+        bool wroteSomething = false;
+        if (ct.getNumSeqs() != 0) { wroteSomething = true; }
+    
+        ct.printTable(outputFileName);
         
-        //check for groups that have been eliminated
-        CountTable ct;
-        if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName, true, false);
-            ct.printTable(outputFileName);
-        }
-
-		
-		if (wroteSomething == false) {  m->mothurOut("Your file contains does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains does not contain any sequences from " + taxons + ".\n"); }
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		       
 		return 0;

@@ -399,7 +399,7 @@ int SplitGroupCommand::splitFlow(){
             namesGroups = groupMap->getNamesOfGroups();
         }else if (countfile != ""){
             ct = new CountTable();
-            ct->readTable(countfile, true, true);
+            ct->readTable(countfile, true, true, Groups);
             namesGroups = ct->getNamesOfGroups();
         }else { m->mothurOut("[ERROR]: you must provide a count or group file to split by group. quitting... \n"); m->setControl_pressed(true);  }
         
@@ -504,7 +504,7 @@ int SplitGroupCommand::splitFastq(){
             namesGroups = groupMap->getNamesOfGroups();
         }else if (countfile != ""){
             ct = new CountTable();
-            ct->readTable(countfile, true, true);
+            ct->readTable(countfile, true, true, Groups);
             namesGroups = ct->getNamesOfGroups();
         }else { m->mothurOut("[ERROR]: you must provide a count or group file to split by group. quitting... \n"); m->setControl_pressed(true);  }
         
