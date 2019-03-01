@@ -13,6 +13,7 @@
 
 
 #include "command.hpp"
+#include "counttable.h"
 
 class SortSeqsCommand : public Command {
 	
@@ -37,16 +38,14 @@ public:
 	
 private:
     map<string, int> names;
-    string accnosfile, fastafile, namefile, groupfile, countfile, taxfile, qualfile, flowfile, outputDir;
+    string accnosfile, fastafile, namefile, taxfile, qualfile, flowfile, outputDir;
     bool abort, large;
     vector<string> outputNames;
     
     int readFasta();
     int readFlow();
     int readName();
-    int readGroup();
     int readTax();
-    int readCount();
     int readQual();
     
 };
