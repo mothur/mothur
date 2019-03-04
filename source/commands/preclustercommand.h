@@ -53,8 +53,10 @@ private:
     string fastafile, namefile, outputDir, groupfile, countfile, pc_method, align_method, align;
     vector<string> outputNames;
     
-    void createProcessesGroups(string, string, string);
-    int mergeGroupCounts(string, string, string);
+    void createProcessesGroups(string, string);
+    string mergeGroupCounts(string, string);
+    string mergeGroupNames(string, string);
+    void printFasta(string newFastaFileName, string accnosFile);
 };
 
 

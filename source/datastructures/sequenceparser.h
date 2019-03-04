@@ -54,7 +54,7 @@ class SequenceParser {
         map<string, string> allSeqsMap;
         map<string, string> nameMap;
 	
-        vector<Sequence> seqs;
+        vector<Sequence> seqs; //unique
         map<string, int> groupIndexMap; //maps sample name to index in namesOfGroups and groupsToSeqs
         vector< vector<int> > groupToSeqs; //maps group -> vector of sequences indexes that belong to the group. (groupToSeqs[0] contains sequence info for sample namesOfGroups[0]).  groupToSeqs[0] = <1,4,7,8> means seqs[1], seqs[4], seq[7], seqs[8] belong to group namesOfGroups[0]. namesOfGroups in same order as groupToSeqs
         vector<string> namesOfGroups; //namesOfGroups in same order as groupToSeqs

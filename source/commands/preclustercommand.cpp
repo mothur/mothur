@@ -390,7 +390,6 @@ inline bool comparePriorityTopDown(seqPNode* first, seqPNode* second) {
 
 struct preClusterData {
   string fastafile, namefile, groupfile, countfile, pc_method, align_method, align, newMName;
-  OutputWriter* newFName;
   OutputWriter* newNName;
   MothurOut* m;
   int start, end, count, diffs, length;
@@ -412,12 +411,11 @@ struct preClusterData {
 
   preClusterData(){}
 
-  preClusterData(string f, string n, string g, string c, string pcm, string am, OutputWriter* nff,  OutputWriter* nnf, string nmf, vector<string> gr) {
+  preClusterData(string f, string n, string g, string c, string pcm, string am,  OutputWriter* nnf, string nmf, vector<string> gr) {
     fastafile = f;
     groupfile = g;
 		pc_method = pcm;
 		align_method = am;
-    newFName = nff;
     newNName = nnf;
     newMName = nmf;
     groups = gr;
@@ -963,122 +961,136 @@ void print(string newfasta, string newname, preClusterData* params){
 
 /**************************************************************************************************/
 int PreClusterCommand::execute(){
-	try {
-
-		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-
-		long start = time(NULL);
-
-		string fileroot = outputDir + util.getRootName(util.getSimpleName(fastafile));
-		map<string, string> variables;
-		variables["[filename]"] = fileroot;
-
-		string newNamesFile = getOutputFileName("name",variables);
-		string newCountFile = getOutputFileName("count",variables);
-		string newMapFile = getOutputFileName("map",variables); //add group name if by group
-
-		variables["[extension]"] = util.getExtension(fastafile);
-		string newFastaFile = getOutputFileName("fasta", variables);
-		outputNames.push_back(newFastaFile); outputTypes["fasta"].push_back(newFastaFile);
-
+    try {
+        
+        if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        
+        long start = time(NULL);
+        
+        string fileroot = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        map<string, string> variables;
+        variables["[filename]"] = fileroot;
+        
+        string newNamesFile = getOutputFileName("name",variables);
+        string newCountFile = getOutputFileName("count",variables);
+        string newMapFile = getOutputFileName("map",variables); //add group name if by group
+        
+        variables["[extension]"] = util.getExtension(fastafile);
+        string newFastaFile = getOutputFileName("fasta", variables);
+        outputNames.push_back(newFastaFile); outputTypes["fasta"].push_back(newFastaFile);
+        
         if (countfile == "")    { outputNames.push_back(newNamesFile); outputTypes["name"].push_back(newNamesFile);     }
-		else                    { outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);    }
-
+        else                    { outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);    }
+        
         if (bygroup) {
             //clear out old files
             ofstream outFasta; util.openOutputFile(newFastaFile, outFasta); outFasta.close();
             ofstream outNames; util.openOutputFile(newNamesFile, outNames);  outNames.close();
+            
             newMapFile = fileroot + "precluster.";
+            string convolutedNamesFile = newNamesFile + ".temp";
             
-            createProcessesGroups(newFastaFile, newNamesFile, newMapFile);
+            createProcessesGroups(convolutedNamesFile, newMapFile);
             
-            if (countfile != "") { mergeGroupCounts(newCountFile, newNamesFile, newFastaFile);  }
-            else {
-                //run unique.seqs for deconvolute results
-                string inputString = "fasta=" + newFastaFile;
-                if (namefile != "") { inputString += ", name=" + newNamesFile; }
-                
-                m->mothurOut("\n/******************************************/\n");
-                m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
-                current->setMothurCalling(true);
-                
-                Command* uniqueCommand = new DeconvoluteCommand(inputString);
-                uniqueCommand->execute();
-                
-                map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
-                
-                delete uniqueCommand;
-                current->setMothurCalling(false);
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-                
-                util.renameFile(filenames["fasta"][0], newFastaFile);
-                util.renameFile(filenames["name"][0], newNamesFile);
+            string accnosFile;
+            if (countfile != "") {  accnosFile = mergeGroupCounts(newCountFile, convolutedNamesFile); }
+            else { accnosFile = mergeGroupNames(newNamesFile, convolutedNamesFile);   }
+            
+            printFasta(newFastaFile, accnosFile);
+            util.mothurRemove(convolutedNamesFile);
+            
+            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}	 return 0; }
+            
+            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster.\n");
+            
+        }else {
+            if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing.\n");  processors = 1; }
+            
+            preClusterData* params = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, NULL, newMapFile, nullVector);
+            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
+            
+            //reads fasta file and return number of seqs
+            long long numSeqs = 0; params->alignSeqs = readFASTA(params, numSeqs); //fills alignSeqs and makes all seqs active
+            length = params->length;
+            
+            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
+            
+            if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct.\n");  return 0;  }
+            if (diffs > length) { m->mothurOut("Error: diffs is set to " + toString(diffs) + " which is greater than your sequence length of " + toString(length) + ".\n");   return 0;  }
+            
+            int count = process("", newMapFile, params);
+            if(params->pc_method != "deblur"){
+                outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
             }
-        
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}	 return 0; }
-        
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster.\n");
-        
-    }else {
-        if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing.\n");  processors = 1; }
-        
-        preClusterData* params = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, NULL, NULL, newMapFile, nullVector);
-        params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
-        
-        //reads fasta file and return number of seqs
-        long long numSeqs = 0; params->alignSeqs = readFASTA(params, numSeqs); //fills alignSeqs and makes all seqs active
-        length = params->length;
-        
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
-        
-        if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct.\n");  return 0;  }
-        if (diffs > length) { m->mothurOut("Error: diffs is set to " + toString(diffs) + " which is greater than your sequence length of " + toString(length) + ".\n");   return 0;  }
-        
-        int count = process("", newMapFile, params);
-        if(params->pc_method != "deblur"){
-            outputNames.push_back(newMapFile); outputTypes["map"].push_back(newMapFile);
+            
+            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
+            
+            m->mothurOut("Total number of sequences before precluster was " + toString(params->alignSeqs.size()) + ".\n");
+            m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
+            if (countfile != "") { newNamesFile = newCountFile; }
+            print(newFastaFile, newNamesFile, params);
+            for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
+            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
         }
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
         
-        m->mothurOut("Total number of sequences before precluster was " + toString(params->alignSeqs.size()) + ".\n");
-        m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
-        if (countfile != "") { newNamesFile = newCountFile; }
-        print(newFastaFile, newNamesFile, params);
-        for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("\nOutput File Names: \n");
+        for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+        m->mothurOutEndLine();
+        
+        //set fasta file as new current fastafile
+        string currentName = "";
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+        }
+        
+        itTypes = outputTypes.find("name");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
+        }
+        
+        itTypes = outputTypes.find("count");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
+        }
+        
+        return 0;
+        
     }
-    
-    if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
-    
-    m->mothurOut("\nOutput File Names: \n");
-    for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-    m->mothurOutEndLine();
-    
-    //set fasta file as new current fastafile
-    string currentName = "";
-    itTypes = outputTypes.find("fasta");
-    if (itTypes != outputTypes.end()) {
-        if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+    catch(exception& e) {
+        m->errorOut(e, "PreClusterCommand", "execute");
+        exit(1);
     }
-    
-    itTypes = outputTypes.find("name");
-    if (itTypes != outputTypes.end()) {
-        if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
-    }
-    
-    itTypes = outputTypes.find("count");
-    if (itTypes != outputTypes.end()) {
-        if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
-    }
-    
-    return 0;
-    
 }
-catch(exception& e) {
-    m->errorOut(e, "PreClusterCommand", "execute");
-    exit(1);
-}
+/**************************************************************************************************/
+
+void PreClusterCommand::printFasta(string newFastaFileName, string accnosFile){
+    try {
+        
+        //run unique.seqs for deconvolute results
+        string inputString = "fasta=" + fastafile + ", accnos=" + accnosFile;
+        
+        m->mothurOut("\n/******************************************/\n");
+        m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
+        current->setMothurCalling(true);
+        
+        Command* getCommand = new GetSeqsCommand(inputString);
+        getCommand->execute();
+        
+        map<string, vector<string> > filenames = getCommand->getOutputFiles();
+        
+        delete getCommand;
+        current->setMothurCalling(false);
+        m->mothurOut("/******************************************/\n");
+        
+        util.renameFile(filenames["fasta"][0], newFastaFileName);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PreClusterCommand", "printFasta");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 
@@ -1093,9 +1105,6 @@ void printData(string group, preClusterData* params, map<string, string>& option
                 
                 for (int i = 0; i < params->alignSeqs.size(); i++) {
                     if (params->alignSeqs[i]->numIdentical != 0) {
-                        Sequence seq(params->alignSeqs[i]->name, params->alignSeqs[i]->sequence);
-                        seq.printSequence(params->newFName);
-                        
                         params->newNName->write(group + '\t' + params->alignSeqs[i]->name + '\t' + toString(params->alignSeqs[i]->numIdentical) + '\n');
                     }
                 }
@@ -1103,8 +1112,6 @@ void printData(string group, preClusterData* params, map<string, string>& option
             else {
                 for (int i = 0; i < params->alignSeqs.size(); i++) {
                     if (params->alignSeqs[i]->numIdentical != 0) {
-                        Sequence seq(params->alignSeqs[i]->name, params->alignSeqs[i]->sequence);
-                        seq.printSequence(params->newFName);
                         params->newNName->write(params->alignSeqs[i]->name  + '\t' + toString(params->alignSeqs[i]->numIdentical) + '\n');
                     }
                 }
@@ -1112,15 +1119,16 @@ void printData(string group, preClusterData* params, map<string, string>& option
         }else {
             for (int i = 0; i < params->alignSeqs.size(); i++) {
                 if (params->alignSeqs[i]->numIdentical != 0) {
-                    Sequence seq(params->alignSeqs[i]->name, params->alignSeqs[i]->sequence);
-                    seq.printSequence(params->newFName);
-                    
                     string clusteredNames = "";
-                    for (set<int>::iterator it = params->alignSeqs[i]->clusteredIndexes.begin(); it != params->alignSeqs[i]->clusteredIndexes.end(); it++) {
+                    for (set<int>::iterator it = params->alignSeqs[i]->clusteredIndexes.begin(); it != params->alignSeqs[i]->clusteredIndexes.end(); it++) { //make names from indexes
                         int indexOfSeq = *it;
                         string repName = params->alignSeqs[indexOfSeq]->name;
-                        string dupNames = optionalNameMap[repName];
-                        clusteredNames += dupNames + ",";
+                        string dupNames = "";
+                        map<string, string>::iterator itDupName = optionalNameMap.find(repName);
+                        if (itDupName != optionalNameMap.end()) {
+                            dupNames = itDupName->second;
+                            clusteredNames += dupNames + ",";
+                        }
                     }
                     
                     clusteredNames = clusteredNames.substr(0,clusteredNames.length()-1); //remove last comma
@@ -1200,7 +1208,9 @@ long long driverGroups(preClusterData* params){
             params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
             
             map<string, string> thisGroupsNameMap;
-            if (params->hasName) { thisGroupsNameMap = parser->getNameMap(params->groups[i]);  }
+            if (params->hasName) {
+                thisGroupsNameMap = parser->getNameMap(params->groups[i]);
+            }
             printData(params->groups[i], params, thisGroupsNameMap);
             
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
@@ -1219,8 +1229,8 @@ long long driverGroups(preClusterData* params){
 }
 
 /**************************************************************************************************/
-//only called with out table including groups
-int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string newfasta){
+//only called with count table including groups
+string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
 	try {
         m->mothurOut("\nDeconvoluting count table results...\n");
         
@@ -1266,48 +1276,90 @@ int PreClusterCommand::mergeGroupCounts(string newcount, string newname, string 
         util.mothurRemove(newname);
         
         m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to remove merged reads.\n");
-        start = time(NULL);
-        m->mothurOut("\nDeconvolute fasta...");
         
-        ifstream in;
-        util.openInputFile(newfasta, in);
+        ofstream outAccnos; util.openOutputFile(newname, outAccnos);
+        vector<string> namesOfSeqs = ct.getNamesOfSeqs();
+        for (int i = 0; i < namesOfSeqs.size(); i++) { outAccnos << namesOfSeqs[i] << endl; }
+        outAccnos.close();
         
-        ofstream out;
-        util.openOutputFile(newfasta+"temp", out);
-        
-        count = 0;
-        set<string> already;
-        while(!in.eof()) {
-            if (m->getControl_pressed()) { break; }
-            
-            Sequence seq(in); util.gobble(in);
-            
-            if (seq.getName() != "") {
-                count++;
-                if (already.count(seq.getName()) == 0) {
-                    seq.printSequence(out);
-                    already.insert(seq.getName());
-                }
-            }
-        }
-        in.close();
-        out.close();
-        util.mothurRemove(newfasta);
-        util.renameFile(newfasta+"temp", newfasta);
-        
-        m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to deconvolute the fasta file.\n");
-        
-		return 0;
+		return newname;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PreClusterCommand", "mergeGroupCounts");
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+//only called with out table including groups
+string PreClusterCommand::mergeGroupNames(string deconvolutedNameFile, string newnamefile){
+    try {
+        m->mothurOut("\nDeconvoluting name file results...\n");
+        
+        map<string, string> nameMap; map<string, string>::iterator itName;
+        util.readNames(namefile, nameMap, true);
+        
+        ifstream inNames;
+        util.openInputFile(newnamefile, inNames);
+        
+        time_t start = time(NULL);
+        long long count = 0;
+        
+        string dupSequencesForGroup, uniqueSequenceForGroup;
+        
+        //build table
+        map<string, string> mergedNameMap; map<string, string>::iterator itMergedName;
+        while (!inNames.eof()) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            inNames >> uniqueSequenceForGroup; util.gobble(inNames);
+            inNames >> dupSequencesForGroup; util.gobble(inNames);
+            
+            itName = nameMap.find(uniqueSequenceForGroup);
+            if (itName != nameMap.end()) {
+                itMergedName = mergedNameMap.find(itName->second); //have we seen this read before? If so, add these names to dups else create entry for this seq
+                if (itMergedName != mergedNameMap.end()) {
+                    itMergedName->second += "," + dupSequencesForGroup;
+                }else {
+                    mergedNameMap[itName->second] = dupSequencesForGroup;
+                }
+            }else {
+                cout << "should not get here" << endl;
+            }
+            
+            count++;
+            
+            //report progress
+            if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+        }
+        //report progress
+        if((count) % 1000 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
+        
+        inNames.close();
+        nameMap.clear();
+        util.mothurRemove(newnamefile);
+        
+        ofstream out; util.openOutputFile(deconvolutedNameFile, out);
+        ofstream outAccnos; util.openOutputFile(newnamefile, outAccnos);
+        for (itMergedName = mergedNameMap.begin(); itMergedName != mergedNameMap.end(); itMergedName++) {
+            out << itMergedName->first << '\t' << itMergedName->second << endl;
+            outAccnos << itMergedName->first << endl;
+        }
+        out.close(); outAccnos.close();
+        
+        m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to condense merged reads.\n");
+        
+        return (newnamefile);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PreClusterCommand", "mergeGroupNames");
+        exit(1);
+    }
+}
 
 /**************************************************************************************************/
 
-void PreClusterCommand::createProcessesGroups(string newFName, string newNName, string newMFile) {
+void PreClusterCommand::createProcessesGroups(string newNName, string newMFile) {
   try {
     //parse fasta and name file by group
     vector<string> groups;
@@ -1332,26 +1384,22 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
     //create array of worker threads
     vector<thread*> workerThreads;
     vector<preClusterData*> data;
-
-    auto synchronizedFastaFile = std::make_shared<SynchronizedOutputFile>(newFName);
+      
     auto synchronizedNameFile = std::make_shared<SynchronizedOutputFile>(newNName);
 
     //Lauch worker threads
     for (int i = 0; i < processors-1; i++) {
-      OutputWriter* threadFastaWriter = new OutputWriter(synchronizedFastaFile);
       OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 
-      preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadFastaWriter, threadNameWriter, newMFile, groups);
+      preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadNameWriter, newMFile, groups);
       dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
       data.push_back(dataBundle);
 
       workerThreads.push_back(new thread(driverGroups, dataBundle));
     }
-
-    OutputWriter* threadFastaWriter = new OutputWriter(synchronizedFastaFile);
     OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 
-    preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadFastaWriter, threadNameWriter, newMFile, groups);
+    preClusterData* dataBundle = new preClusterData(fastafile, namefile, groupfile, countfile, pc_method, align_method, threadNameWriter, newMFile, groups);
     dataBundle->setVariables(lines[0].start, lines[0].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
 
     driverGroups(dataBundle);
@@ -1362,7 +1410,6 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
     for (int i = 0; i < processors-1; i++) {
       workerThreads[i]->join();
 
-      delete data[i]->newFName;
       delete data[i]->newNName;
 
       outputNames.insert(outputNames.end(), data[i]->outputNames.begin(), data[i]->outputNames.end());
@@ -1371,7 +1418,6 @@ void PreClusterCommand::createProcessesGroups(string newFName, string newNName, 
       delete data[i];
       delete workerThreads[i];
     }
-    delete threadFastaWriter;
     delete threadNameWriter;
     delete dataBundle;
 

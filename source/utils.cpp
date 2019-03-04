@@ -2600,6 +2600,7 @@ int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfi
     }
 }
 /**********************************************************************************************************************/
+//nameMap is filled with redundant names mapped to unique name
 int Utils::readNames(string namefile, map<string, string>& nameMap, bool redund) {
     try {
         //open input file

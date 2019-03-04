@@ -236,17 +236,26 @@ bool SequenceParser::fillWeighted(vector< seqPNode* >& seqForThisGroup, string g
                 Sequence thisSeq = seqs[groupToSeqs[it->second][i]];
                 int numReps = 1;
                 
+                string uniqueSeqNameForGroup = thisSeq.getName(); //if the representative sequence for this read is not from the group we are looking for we need to change the name
                 if (hasName) {
                     //find your nameFile dups
                     map<string, string>::iterator it = nameMap.find(thisSeq.getName());
                     if (it != nameMap.end()) {
                         string dups = it->second;
                         numReps = groupMap.getNumSeqs(dups, group);
+                        
+                        string d = it->second;
+                        vector<string> dupsNames; util.splitAtComma(d, dupsNames);
+                        for ( int j = 0; j < dupsNames.size(); j++) {
+                            if (groupMap.getGroup(dupsNames[j]) == group) {
+                                uniqueSeqNameForGroup = dupsNames[j]; break;
+                            }
+                        }
                     }
                 }
                 
                 set<int> clusteredIndexes; clusteredIndexes.insert(seqForThisGroup.size());
-                seqPNode* tempNode = new seqPNode(thisSeq.getName(), thisSeq.getAligned(), numReps, clusteredIndexes);
+                seqPNode* tempNode = new seqPNode(uniqueSeqNameForGroup, thisSeq.getAligned(), numReps, clusteredIndexes);
                 seqForThisGroup.push_back(tempNode);
                 
                 lengths.insert(thisSeq.getAligned().length());
@@ -394,9 +403,9 @@ map<string, string> SequenceParser::getNameMap(string g){
                         if (pos != string::npos) {
                             firstCol = secondCol.substr(0, pos);
                         }
-                        nameMap[firstCol] = secondCol;
+                        nameMapForThisGroup[firstCol] = secondCol;
                         
-                    }else { m->mothurOut("[ERROR]: should never get here\n");  m->setControl_pressed(true); }
+                    }else { m->mothurOut("[ERROR]: should never get here\n"); m->setControl_pressed(true); }
                 }
             }else { //seq names are unique
                 for (int i = 0; i < groupToSeqs[it->second].size(); i++) {
