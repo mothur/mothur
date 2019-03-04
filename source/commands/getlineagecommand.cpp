@@ -354,17 +354,18 @@ int GetLineageCommand::execute(){
 		//read through the correct file and output lines you want to keep
 		if (taxfile != "")			{
             readTax(); //fills the set of names to get
-            if (namefile != "")			{		readName();		}
-            if (fastafile != "")		{		readFasta();	}
-            if (countfile != "")		{		readCount();	}
-            if (groupfile != "")		{		readGroup();	}
-            if (alignfile != "")		{		readAlign();	}
-            if (listfile != "")			{		readList();		}
-
+            
+            if (!util.isBlank(accnosFileName)) {
+                outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
+                runGetSeqs();
+            }else { util.mothurRemove(accnosFileName); }
         }else {
             readConsTax();
-            if (listfile != "")			{		readConsList();		}
-            if (sharedfile != "")		{		readShared();		}
+            
+            if (!util.isBlank(accnosFileName)) {
+                outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
+                runGetOTUs();
+            }else { util.mothurRemove(accnosFileName); }
         }
 				
 		
@@ -372,7 +373,7 @@ int GetLineageCommand::execute(){
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
-			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+			m->mothurOut("Output File Names:\n");
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 			
@@ -430,566 +431,111 @@ int GetLineageCommand::execute(){
 }
 
 //**********************************************************************************************************************
-int GetLineageCommand::readFasta(){
-	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
-		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
-        variables["[extension]"] = util.getExtension(fastafile);
-		string outputFileName = getOutputFileName("fasta", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		
-		ifstream in;
-		util.openInputFile(fastafile, in);
-		string name;
-		
-		bool wroteSomething = false;
-		
-		while(!in.eof()){
-		
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
-			
-			Sequence currSeq(in);
-			name = currSeq.getName();
-			
-			if (name != "") {
-				//if this name is in the accnos file
-				if (names.count(name) != 0) {
-					wroteSomething = true;
-					
-					currSeq.printSequence(out);
-				}
-			}
-			util.gobble(in);
-		}
-		in.close();	
-		out.close();
-		
-		if (wroteSomething == false) { m->mothurOut("Your file contains does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
-		
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "readFasta");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int GetLineageCommand::readCount(){
-	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
-		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
-        variables["[extension]"] = util.getExtension(countfile);
-		string outputFileName = getOutputFileName("count", variables);
-		
-        CountTable ct; ct.readTable(countfile, true, false, names);
-        
-        bool wroteSomething = false;
-        if (ct.getNumSeqs() != 0) { wroteSomething = true; }
-    
-        ct.printTable(outputFileName);
-        
-		if (wroteSomething == false) {  m->mothurOut("Your file contains does not contain any sequences from " + taxons + ".\n"); }
-		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
-		       
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "readCount");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int GetLineageCommand::readList(){
-	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
-		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
-        variables["[extension]"] = util.getExtension(listfile);
-        InputData input(listfile, "list", nullVector);
-        ListVector* list = input.getListVector();
-        
-		bool wroteSomething = false;
-		
-        while(list != NULL) {
-			
-			//make a new list vector
-			ListVector newList;
-			newList.setLabel(list->getLabel());
+int GetLineageCommand::runGetSeqs(){
+    try {
+        //use remove.seqs to create new list and shared files
+        if ((namefile != "") || (fastafile != "") || (countfile != "") || (groupfile != "") || (alignfile != "") || (listfile != "")) {
+            string inputString = "accnos=" + accnosFileName;
             
-            variables["[distance]"] = list->getLabel();
-            string outputFileName = getOutputFileName("list", variables);
-			
-			ofstream out;
-			util.openOutputFile(outputFileName, out);
-			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+            if (namefile != "")     {  inputString += ", name=" + namefile;             }
+            if (countfile != "")    {   inputString += ", count=" + countfile;          }
+            if (fastafile != "")    {  inputString += ", fasta=" + fastafile;           }
+            if (groupfile != "")    {   inputString += ", group=" + groupfile;          }
+            if (alignfile != "")    {   inputString += ", alignreport=" + alignfile;    }
+            if (listfile != "")		{	inputString += ", list=" + listfile;            }
             
-            if (m->getControl_pressed()) {  out.close(); return 0; }
+            m->mothurOut("\n/******************************************/\n");
+            m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
+            current->setMothurCalling(true);
             
-            vector<string> binLabels = list->getLabels();
-            vector<string> newBinLabels;
-			
-			//for each bin
-			for (int i = 0; i < list->getNumBins(); i++) {
-			
-				//parse out names that are in accnos file
-				string binnames = list->get(i);
-                vector<string> bnames;
-                util.splitAtComma(binnames, bnames);
-				
-				string newNames = "";
-                for (int j = 0; j < bnames.size(); j++) {
-					string name = bnames[j];
-					//if that name is in the .accnos file, add it
-					if (names.count(name) != 0) {  newNames += name + ",";  }
-				}
-
-
-				//if there are names in this bin add to new list
-				if (newNames != "") { 
-					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);
-                    newBinLabels.push_back(binLabels[i]);
-				}
-			}
-				
-			//print new listvector
-			if (newList.getNumBins() != 0) {
-				wroteSomething = true;
-				newList.setLabels(newBinLabels);
-				newList.print(out, false);
-			}
-
-            out.close();
+            Command* getCommand = new GetSeqsCommand(inputString);
+            getCommand->execute();
             
-            delete list;
-            list = input.getListVector();
-		}
-		
-		
-		if (wroteSomething == false) { m->mothurOut("Your file contains does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "readList");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int GetLineageCommand::readConsList(){
-	try {
-		getListVector();
-        
-        if (m->getControl_pressed()) { delete list; return 0;}
-        
-        ListVector newList;
-        newList.setLabel(list->getLabel());
-        int selectedCount = 0;
-        bool wroteSomething = false;
-        string snumBins = toString(list->getNumBins());
-        
-        vector<string> binLabels = list->getLabels();
-        vector<string> newBinLabels;
-        for (int i = 0; i < list->getNumBins(); i++) {
+            map<string, vector<string> > filenames = getCommand->getOutputFiles();
             
-            if (m->getControl_pressed()) { delete list; return 0;}
+            delete getCommand;
+            current->setMothurCalling(false);
+            m->mothurOut("/******************************************/\n");
             
-            //create a label for this otu
-            string otuLabel = "Otu";
-            string sbinNumber = toString(i+1);
-            if (sbinNumber.length() < snumBins.length()) {
-                int diff = snumBins.length() - sbinNumber.length();
-                for (int h = 0; h < diff; h++) { otuLabel += "0"; }
+            outputTypes.insert(filenames.begin(), filenames.end());
+            
+            if (listfile != "")         {
+                vector<string> files = filenames["list"];
+                outputNames.insert(outputNames.end(), files.begin(), files.end());
             }
-            otuLabel += sbinNumber;
+            if (namefile != "")		{
+                vector<string> files = filenames["name"];
+                outputNames.insert(outputNames.end(), files.begin(), files.end());
+            }
             
-            if (names.count(util.getSimpleLabel(otuLabel)) != 0) {
-				selectedCount++;
-                newList.push_back(list->get(i));
-                newBinLabels.push_back(binLabels[i]);
+            if (countfile != "")         {
+                vector<string> files = filenames["count"];
+                outputNames.insert(outputNames.end(), files.begin(), files.end());
+            }
+            if (fastafile != "")		{
+                vector<string> files = filenames["fasta"];
+                outputNames.insert(outputNames.end(), files.begin(), files.end());
+            }
+            
+            if (groupfile != "")         {
+                vector<string> files = filenames["group"];
+                outputNames.insert(outputNames.end(), files.begin(), files.end());
+            }
+            if (alignfile != "")		{
+                vector<string> files = filenames["alignreport"];
+                outputNames.insert(outputNames.end(), files.begin(), files.end());
             }
         }
         
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
-        map<string, string> variables;
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
-        variables["[extension]"] = util.getExtension(listfile);
-        variables["[distance]"] = list->getLabel();
-		string outputFileName = getOutputFileName("list", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
+        return 0;
         
-		delete list;
-        //print new listvector
-        if (newList.getNumBins() != 0) {
-            wroteSomething = true;
-            newList.setLabels(newBinLabels);
-            newList.print(out);
-        }
-		out.close();
-		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain OTUs from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
-		
-		m->mothurOut("Selected " + toString(selectedCount) + " OTUs from your list file."); m->mothurOutEndLine();
-        
-		return 0;
-        
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "readConsList");
-		exit(1);
-	}
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetLineageCommand", "runGetSeqs");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
-int GetLineageCommand::getListVector(){
-	try {
-		InputData input(listfile, "list", nullVector);
-		list = input.getListVector();
-		string lastLabel = list->getLabel();
-		
-		if (label == "") { label = lastLabel;  return 0; }
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> labels; labels.insert(label);
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && (userLabels.size() != 0)) {
-			if (m->getControl_pressed()) {  return 0;  }
-			
-			if(labels.count(list->getLabel()) == 1){
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				break;
-			}
-			
-			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = list->getLabel();
-				
-				delete list;
-				list = input.getListVector(lastLabel);
-				
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				
-				//restore real lastlabel to save below
-				list->setLabel(saveLabel);
-				break;
-			}
-			
-			lastLabel = list->getLabel();
-			
-			//get next line to process
-			//prevent memory leak
-			delete list;
-			list = input.getListVector();
-		}
-		
-		
-		if (m->getControl_pressed()) {  return 0;  }
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it);
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			delete list;
-			list = input.getListVector(lastLabel);
-		}
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "getListVector");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-int GetLineageCommand::readShared(){
-	try {
-        
-        SharedRAbundVectors* lookup = getShared();
-        
-        if (m->getControl_pressed()) { delete lookup; }
-        
-        vector<string> newLabels;
-        
-        bool wroteSomething = false;
-        int numSelected = 0;
-        bool printHeaders = true;
-        for (int i = 0; i < lookup->getNumBins();) {
+int GetLineageCommand::runGetOTUs(){
+    try {
+        //use remove.otus to create new list and shared files
+        if ((listfile != "") || (sharedfile != "")) {
+            string inputString = "accnos=" + accnosFileName;
             
-            if (m->getControl_pressed()) {  delete lookup; return 0; }
+            if (listfile != "")         {  inputString += ", list=" + listfile;         }
+            if (sharedfile != "")		{	inputString += ", shared=" + sharedfile;    }
             
-            //is this otu on the list
-            if (names.count(util.getSimpleLabel(lookup->getOTUName(i))) != 0) {
-                numSelected++; wroteSomething = true; ++i;
-            }else { lookup->removeOTU(i);  }
+            m->mothurOut("\n/******************************************/\n");
+            m->mothurOut("Running command: get.otus(" + inputString + ")\n");
+            current->setMothurCalling(true);
+            
+            Command* getCommand = new GetOtuLabelsCommand(inputString);
+            getCommand->execute();
+            
+            map<string, vector<string> > filenames = getCommand->getOutputFiles();
+            
+            delete getCommand;
+            current->setMothurCalling(false);
+            m->mothurOut("/******************************************/\n");
+            
+            outputTypes.insert(filenames.begin(), filenames.end());
+            
+            if (listfile != "")         {
+                vector<string> files = filenames["list"];
+                outputNames.insert(outputNames.end(), files.begin(), files.end());
+            }
+            if (sharedfile != "")		{
+                vector<string> files = filenames["shared"];
+                outputNames.insert(outputNames.end(), files.begin(), files.end());
+            }
         }
-        
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
-        map<string, string> variables;
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
-        variables["[extension]"] = util.getExtension(sharedfile);
-        variables["[distance]"] = lookup->getLabel();
-		string outputFileName = getOutputFileName("shared", variables);
-        ofstream out;
-		util.openOutputFile(outputFileName, out);
-		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-        
-        lookup->print(out, printHeaders);
-		out.close();
-        
-        delete lookup;
-        
-        if (wroteSomething == false) { m->mothurOut("Your file does not contain OTUs from " + taxons + "."); m->mothurOutEndLine();  }
-        
-		m->mothurOut("Selected " + toString(numSelected) + " OTUs from your shared file."); m->mothurOutEndLine();
         
         return 0;
     }
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "readShared");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-SharedRAbundVectors* GetLineageCommand::getShared(){
-	try {
-		InputData input(sharedfile, "sharedfile", nullVector);
-		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup->getLabel();
-		
-		if (label == "") { label = lastLabel;  return lookup; }
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> labels; labels.insert(label);
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && (userLabels.size() != 0)) {
-			if (m->getControl_pressed()) {   return 0;  }
-			
-			if(labels.count(lookup->getLabel()) == 1){
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				break;
-			}
-			
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup->getLabel();
-				
-				delete lookup;
-				lookup = input.getSharedRAbundVectors(lastLabel);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup->setLabels(saveLabel);
-				break;
-			}
-			
-			lastLabel = lookup->getLabel();
-			
-			//get next line to process
-			//prevent memory leak
-            delete lookup;
-			lookup = input.getSharedRAbundVectors();
-		}
-		
-		
-		if (m->getControl_pressed()) {  return 0;  }
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it);
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-            delete lookup;
-			lookup = input.getSharedRAbundVectors(lastLabel);
-		}
-		
-		return lookup;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "getShared");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-int GetLineageCommand::readName(){
-	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
-		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
-        variables["[extension]"] = util.getExtension(namefile);
-		string outputFileName = getOutputFileName("name", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-
-		ifstream in;
-		util.openInputFile(namefile, in);
-		string name, firstCol, secondCol;
-		
-		bool wroteSomething = false;
-		
-		
-		while(!in.eof()){
-		
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
-
-			in >> firstCol;				
-			in >> secondCol;
-			
-			string hold = "";
-			if (dups) { hold = secondCol; }
-			
-			vector<string> parsedNames;
-			util.splitAtComma(secondCol, parsedNames);
-			
-			vector<string> validSecond;
-			for (int i = 0; i < parsedNames.size(); i++) {
-				if (names.count(parsedNames[i]) != 0) {
-					validSecond.push_back(parsedNames[i]);
-				}
-			}
-
-			if ((dups) && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
-				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]);  }
-				out << firstCol << '\t' << hold << endl;
-				wroteSomething = true;
-			}else {
-				//if the name in the first column is in the set then print it and any other names in second column also in set
-				if (names.count(firstCol) != 0) {
-				
-					wroteSomething = true;
-					
-					out << firstCol << '\t';
-					
-					//you know you have at least one valid second since first column is valid
-					for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
-					out << validSecond[validSecond.size()-1] << endl;
-					
-				
-				//make first name in set you come to first column and then add the remaining names to second column
-				}else {
-					//you want part of this row
-					if (validSecond.size() != 0) {
-					
-						wroteSomething = true;
-						
-						out << validSecond[0] << '\t';
-					
-						//you know you have at least one valid second since first column is valid
-						for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
-						out << validSecond[validSecond.size()-1] << endl;
-					}
-				}
-			}
-			util.gobble(in);
-		}
-		in.close();
-		out.close();
-		
-		if (wroteSomething == false) { m->mothurOut("Your file contains does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName);  outputTypes["name"].push_back(outputFileName);
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "readName");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-int GetLineageCommand::readGroup(){
-	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
-		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
-        variables["[extension]"] = util.getExtension(groupfile);
-		string outputFileName = getOutputFileName("group", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-
-		ifstream in;
-		util.openInputFile(groupfile, in);
-		string name, group;
-		
-		bool wroteSomething = false;
-		
-		while(!in.eof()){
-
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
-
-
-			in >> name;				//read from first column
-			in >> group;			//read from second column
-			
-			//if this name is in the accnos file
-			if (names.count(name) != 0) {
-				wroteSomething = true;
-				
-				out << name << '\t' << group << endl;
-			}
-					
-			util.gobble(in);
-		}
-		in.close();
-		out.close();
-		
-		if (wroteSomething == false) { m->mothurOut("Your file contains does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName);  outputTypes["group"].push_back(outputFileName);
-		
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "readGroup");
-		exit(1);
-	}
+    catch(exception& e) {
+        m->errorOut(e, "GetLineageCommand", "runGetOTUs");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int GetLineageCommand::readTax(){
@@ -1000,14 +546,16 @@ int GetLineageCommand::readTax(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
-		ofstream out;
+		
+        ofstream out, outAccnos;
 		util.openOutputFile(outputFileName, out);
+        util.openOutputFile(accnosFileName, outAccnos);
 		
 		ifstream in;
 		util.openInputFile(taxfile, in);
 		string name, tax;
 		
-		//bool wroteSomething = false;
+		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
 		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
 		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
@@ -1030,13 +578,15 @@ int GetLineageCommand::readTax(){
             string noQuotesTax = util.removeQuotes(tax);
             
 			if (util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
-                names.insert(name); out << name << '\t' << tax << endl;
+                out << name << '\t' << tax << endl;
+                outAccnos << name << endl; wroteSomething = true;
             }
         }
 		in.close();
 		out.close();
+        outAccnos.close();
 		
-		if (names.size() == 0) { m->mothurOut("Your taxonomy file does not contain any sequences from " + taxons + ".\n");  }
+		if (!wroteSomething) { m->mothurOut("Your taxonomy file does not contain any sequences from " + taxons + ".\n");  }
 		outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
 			
 		return 0;
@@ -1056,8 +606,10 @@ int GetLineageCommand::readConsTax(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomy));
         variables["[extension]"] = util.getExtension(constaxonomy);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
-		ofstream out;
+		
+        ofstream out, outAccnos;
 		util.openOutputFile(outputFileName, out);
+        util.openOutputFile(accnosFileName, outAccnos);
 		
 		ifstream in;
 		util.openInputFile(constaxonomy, in);
@@ -1068,7 +620,7 @@ int GetLineageCommand::readConsTax(){
         string headers = util.getline(in);
         out << headers << endl;
 		
-		//bool wroteSomething = false;
+		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
 		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
 		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
@@ -1092,92 +644,21 @@ int GetLineageCommand::readConsTax(){
             string noQuotesTax = util.removeQuotes(tax);
             
             if (util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
-                names.insert(util.getSimpleLabel(otuLabel));
+                wroteSomething = true; outAccnos << otuLabel << endl;
                 out << otuLabel << '\t' << numReps << '\t' << tax << endl;
             }
         }
 		in.close();
 		out.close();
+        outAccnos.close();
 		
-		if (names.size() == 0) { m->mothurOut("Your taxonomy file does not contain any OTUs from " + taxons + "."); m->mothurOutEndLine();  }
+		if (!wroteSomething) { m->mothurOut("Your taxonomy file does not contain any OTUs from " + taxons + ".\n");   }
 		outputNames.push_back(outputFileName); outputTypes["constaxonomy"].push_back(outputFileName);
         
 		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetLineageCommand", "readConsTax");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-//alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
-int GetLineageCommand::readAlign(){
-	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(alignfile);  }
-        map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
-        variables["[extension]"] = util.getExtension(alignfile);
-		string outputFileName = getOutputFileName("alignreport", variables);
-		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-
-		ifstream in;
-		util.openInputFile(alignfile, in);
-		string name, junk;
-		
-		bool wroteSomething = false;
-		
-		//read column headers
-		for (int i = 0; i < 16; i++) {  
-			if (!in.eof())	{	in >> junk;	 out << junk << '\t';	}
-			else			{	break;			}
-		}
-		out << endl;
-		
-		while(!in.eof()){
-		
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
-
-
-			in >> name;				//read from first column
-			
-			//if this name is in the accnos file
-			if (names.count(name) != 0) {
-				wroteSomething = true;
-				
-				out << name << '\t';
-				
-				//read rest
-				for (int i = 0; i < 15; i++) {  
-					if (!in.eof())	{	in >> junk;	 out << junk << '\t';	}
-					else			{	break;			}
-				}
-				out << endl;
-				
-			}else {//still read just don't do anything with it
-				//read rest
-				for (int i = 0; i < 15; i++) {  
-					if (!in.eof())	{	in >> junk;		}
-					else			{	break;			}
-				}
-			}
-			
-			util.gobble(in);
-		}
-		in.close();
-		out.close();
-		
-		if (wroteSomething == false) { m->mothurOut("Your file contains does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); outputTypes["alignreport"].push_back(outputFileName);
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "readAlign");
 		exit(1);
 	}
 }

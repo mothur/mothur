@@ -13,6 +13,8 @@
 #include "command.hpp"
 #include "sharedrabundvectors.hpp"
 #include "listvector.hpp"
+#include "getseqscommand.h"
+#include "getotulabelscommand.h"
 
 class GetLineageCommand : public Command {
 	
@@ -37,24 +39,17 @@ class GetLineageCommand : public Command {
 	
 	
 	private:
-		set<string> names;
 		vector<string> outputNames, listOfTaxons;
-		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label;
+		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label, accnosFileName;
 		bool abort, dups;
-        ListVector* list;
 		
-		int readFasta();
-		int readName();
-        int readCount();
-		int readGroup();
-		int readAlign();
-		int readList();
 		int readTax();
-        int readShared();
         int readConsTax();
-        int readConsList();
-        SharedRAbundVectors* getShared();
-        int getListVector();
+    
+        int runGetOTUs();
+        int runGetSeqs();
+    
+    
 		
 };
 

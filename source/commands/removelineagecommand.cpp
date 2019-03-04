@@ -382,7 +382,7 @@ int RemoveLineageCommand::execute(){
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
-			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+			m->mothurOut("Output File Names:\n"); 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 			
@@ -567,7 +567,6 @@ int RemoveLineageCommand::readTax(){
         util.openOutputFile(outputFileName, out);
         util.openOutputFile(accnosFileName, outAccnos);
 
-		
 		ifstream in;
 		util.openInputFile(taxfile, in);
 		string name, tax;
@@ -597,7 +596,7 @@ int RemoveLineageCommand::readTax(){
             
             if (!util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
                 wroteSomething = true; out << name << '\t' << tax << endl;
-            }else { names.insert(name); outAccnos << name << endl; }
+            }else { outAccnos << name << endl; }
 		}
 		in.close();
 		out.close();
@@ -636,7 +635,7 @@ int RemoveLineageCommand::readConsTax(){
         string headers = util.getline(in);
         out << headers << endl;
 		
-		//bool wroteSomething = false;
+		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
 		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
 		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
@@ -662,8 +661,8 @@ int RemoveLineageCommand::readConsTax(){
             
             if (!util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
                 out << otuLabel << '\t' << numReps << '\t' << tax << endl;
+                wroteSomething = true;
             }else {
-                names.insert(util.getSimpleLabel(otuLabel));
                 outAccnos << otuLabel << endl;
                 numR++;
             }
@@ -672,7 +671,7 @@ int RemoveLineageCommand::readConsTax(){
 		out.close();
         outAccnos.close();
 		
-		if (names.size() == 0) { m->mothurOut("Your constaxonomy file contains OTUs only from " + taxons + ".\n");  }
+		if (!wroteSomething) { m->mothurOut("Your constaxonomy file contains OTUs only from " + taxons + ".\n");  }
         else { m->mothurOut("Removed " + toString(numR) + " OTUs from your cons.taxonomy file.\n");  }
         
 		outputNames.push_back(outputFileName); outputTypes["constaxonomy"].push_back(outputFileName);
