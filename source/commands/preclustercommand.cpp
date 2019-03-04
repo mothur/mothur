@@ -1268,14 +1268,11 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         
         inNames.close();
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.\n\nRemoving merged reads from count table...");
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.");
         start = time(NULL);
         
-        ct.eliminateZeroSeqs();
         ct.printTable(newcount);
         util.mothurRemove(newname);
-        
-        m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to remove merged reads.\n");
         
         ofstream outAccnos; util.openOutputFile(newname, outAccnos);
         vector<string> namesOfSeqs = ct.getNamesOfSeqs();

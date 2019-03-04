@@ -706,26 +706,31 @@ int CountTable::clearTable() {
     }
 }
 /************************************************************/
+//zeroed reads are not printed
 int CountTable::printTable(string file) {
     try {
         if (isCompressed) { printCompressedTable(file); return 0; }
         
         ofstream out;
         util.openOutputFile(file, out);
-        printHeaders(out);
-
-        map<int, string> reverse; //use this to preserve order
-        for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
-
-        for (int i = 0; i < totals.size(); i++) {
-            map<int, string>::iterator itR = reverse.find(i);
-
-            if (itR != reverse.end()) {
-                out << itR->second << '\t' << totals[i];
-                if (hasGroups) {
-                    printGroupAbunds(out, i);
+        if (total != 0) {
+            printHeaders(out);
+            
+            map<int, string> reverse; //use this to preserve order
+            for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+            
+            for (int i = 0; i < totals.size(); i++) {
+                if (totals[i] != 0) {
+                    map<int, string>::iterator itR = reverse.find(i);
+                
+                    if (itR != reverse.end()) {
+                        out << itR->second << '\t' << totals[i];
+                        if (hasGroups) {
+                            printGroupAbunds(out, i);
+                        }
+                        out << endl;
+                    }
                 }
-                out << endl;
             }
         }
         out.close();
@@ -737,26 +742,32 @@ int CountTable::printTable(string file) {
 	}
 }
 /************************************************************/
+//zeroed reads are not printed
 int CountTable::printTable(string file, bool compressedFormat) {
     try {
         if (compressedFormat) { printCompressedTable(file); return 0; }
         
         ofstream out;
         util.openOutputFile(file, out);
-        printHeaders(out);
         
-        map<int, string> reverse; //use this to preserve order
-        for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
-        
-        for (int i = 0; i < totals.size(); i++) {
-            map<int, string>::iterator itR = reverse.find(i);
+        if (total != 0) {
+            printHeaders(out);
             
-            if (itR != reverse.end()) {
-                out << itR->second << '\t' << totals[i];
-                if (hasGroups) {
-                    printGroupAbunds(out, i);
+            map<int, string> reverse; //use this to preserve order
+            for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+            
+            for (int i = 0; i < totals.size(); i++) {
+                if (totals[i] != 0) {
+                    map<int, string>::iterator itR = reverse.find(i);
+                    
+                    if (itR != reverse.end()) {
+                        out << itR->second << '\t' << totals[i];
+                        if (hasGroups) {
+                            printGroupAbunds(out, i);
+                        }
+                        out << endl;
+                    }
                 }
-                out << endl;
             }
         }
         out.close();
@@ -768,42 +779,47 @@ int CountTable::printTable(string file, bool compressedFormat) {
     }
 }
 /************************************************************/
+//zeroed seqs are not printed
 int CountTable::printCompressedTable(string file) {
     try {
         ofstream out;
         util.openOutputFile(file, out);
         
-        if (hasGroups) {
-            out << "#Compressed Format: groupIndex,abundance. For example 1,6 would mean the read has an abundance of 6 for group 1." << endl;
-            out << "#";
-            
-            map<int, string> reverse;
-            for (map<string, int>::iterator it = indexGroupMap.begin(); it !=indexGroupMap.end(); it++) {
-                reverse[it->second] = it->first;
-            }
-            
-            for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
-                out << it->first+1 << "_" << it->second << "\t";
-            }
-            out << endl;
-        }
-        
-        printHeaders(out);
-        
-        map<int, string> reverse; //use this to preserve order
-        for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
-        
-        for (int i = 0; i < totals.size(); i++) {
-            map<int, string>::iterator itR = reverse.find(i);
-            
-            if (itR != reverse.end()) {
-                out << itR->second << '\t' << totals[i];
-                if (hasGroups) {
-                    for (int j = 0; j < counts[i].size(); j++) {
-                        out  << '\t' << counts[i][j].group+1 << ',' << counts[i][j].abund;
-                    }
+        if (total != 0) {
+            if (hasGroups) {
+                out << "#Compressed Format: groupIndex,abundance. For example 1,6 would mean the read has an abundance of 6 for group 1." << endl;
+                out << "#";
+                
+                map<int, string> reverse;
+                for (map<string, int>::iterator it = indexGroupMap.begin(); it !=indexGroupMap.end(); it++) {
+                    reverse[it->second] = it->first;
+                }
+                
+                for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
+                    out << it->first+1 << "_" << it->second << "\t";
                 }
                 out << endl;
+            }
+            
+            printHeaders(out);
+            
+            map<int, string> reverse; //use this to preserve order
+            for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+            
+            for (int i = 0; i < totals.size(); i++) {
+                if (total != 0) {
+                    map<int, string>::iterator itR = reverse.find(i);
+                    
+                    if (itR != reverse.end()) {
+                        out << itR->second << '\t' << totals[i];
+                        if (hasGroups) {
+                            for (int j = 0; j < counts[i].size(); j++) {
+                                out  << '\t' << counts[i][j].group+1 << ',' << counts[i][j].abund;
+                            }
+                        }
+                        out << endl;
+                    }
+                }
             }
         }
         out.close();
@@ -972,11 +988,13 @@ int CountTable::printSeq(ofstream& out, string seqName) {
         if (it == indexNameMap.end()) {
             m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
         }else {
-            out << it->first << '\t' << totals[it->second];
-            if (hasGroups) {
-                printGroupAbunds(out, it->second);
+            if (totals[it->second] != 0) {
+                out << it->first << '\t' << totals[it->second];
+                
+                if (hasGroups) { printGroupAbunds(out, it->second); }
+                
+                out << endl;
             }
-            out << endl;
         }
         return 0;
     }
