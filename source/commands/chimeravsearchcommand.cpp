@@ -869,7 +869,7 @@ int ChimeraVsearchCommand::driverGroups(string outputFName, string filename, str
             int error;
             long long thisGroupsSeqs = 0;
             if (hasCount) { error = cparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
-            else { error = sparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, ";size=", ";", thisGroupsSeqs, "", true); if ((error == 1) || m->getControl_pressed()) {  return 0; } }
             
             totalSeqs += thisGroupsSeqs;
             driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);

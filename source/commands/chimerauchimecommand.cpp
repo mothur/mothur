@@ -1230,7 +1230,7 @@ void driverGroups(uchimeData* params){
 			int error;
             long long numSeqs = 0;
             if (params->vars->hasCount) { error = cparser->getSeqs(params->groups[i], params->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || params->m->getControl_pressed()) {  break; } }
-            else { error = parser->getSeqs(params->groups[i], params->filename, "/ab=", "/", numSeqs, true); if ((error == 1) || params->m->getControl_pressed()) {  break; } }
+            else { error = parser->getSeqs(params->groups[i], params->filename, "/ab=", "/", numSeqs, "", true); if ((error == 1) || params->m->getControl_pressed()) {  break; } }
 			totalSeqs += numSeqs;
             
             params->setDriverNames((params->outputFName + params->groups[i]), (params->alns+ params->groups[i]), (params->accnos+params->groups[i]));

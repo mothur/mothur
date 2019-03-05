@@ -41,7 +41,7 @@ class SequenceParser {
         bool fillWeighted(vector< seqPNode* >&, string group, int& length); //return true for aligned and false for unaligned
 		map<string, string> getNameMap(string); //returns seqName -> namesOfRedundantSeqs separated by commas for a specific group - the name file format, but each line is parsed by group.
 		
-		int getSeqs(string, string, string, string, long long&, bool); //prints unique sequences in a specific group to a file - group, filename, uchimeFormat=false, tag(/ab= or ;size=), tag2(/ or ;)
+		int getSeqs(string, string, string, string, long long&, string, bool); //prints unique sequences in a specific group to a file - group, filename, uchimeFormat=false, tag(/ab= or ;size=), tag2(/ or ;)
 		int getNameMap(string, string); //print seqName -> namesOfRedundantSeqs separated by commas for a specific group - group, filename
 		
         map<string, string> getAllSeqsMap();  //returns map where the key=sequenceName and the value=representativeSequence - helps us remove duplicates after group by group processing

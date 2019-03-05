@@ -7,6 +7,7 @@
  *
  */
 
+#include "splitgroupscommand.h"
 #include "preclustercommand.h"
 #include "deconvolutecommand.h"
 #include "summary.hpp"
@@ -1146,37 +1147,120 @@ void printData(string group, preClusterData* params, map<string, string>& option
 }
 /**************************************************************************************************/
 
+bool fillWeighted(preClusterData* params, string fastafileName, string groupOrCountFile, string optionalNameFile){
+    try {
+        set<int> lengths;
+        
+        map<string, int> counts;
+        if (params->hasCount) {
+            CountTable ct; ct.readTable(groupOrCountFile, false, true); //don't read groups because it only contains one group
+            counts = ct.getNameMap();
+            params->util.mothurRemove(groupOrCountFile);
+        }else { //group file with optional name file
+            //assumes name and group contain the same reads since we used a mothur command to parse them
+            if (params->hasName) {
+                counts = params->util.readNames(optionalNameFile);
+            }else {
+                GroupMap groupMap; groupMap.readMap(groupOrCountFile); //only contains one group
+                vector<string> namesOfSeqs = groupMap.getNamesSeqs();
+                for (int i = 0; i < namesOfSeqs.size(); i++) {   counts[namesOfSeqs[i]] = 1;  }
+            }
+        }
+        
+        ifstream in;
+        params->util.openInputFile(fastafileName, in);
+        
+        while (!in.eof()) {
+            
+            if (params->m->getControl_pressed()) { break; }
+            
+            Sequence seq(in); params->util.gobble(in);
+            
+            if (seq.getName() != "") {
+                
+                map<string, int>::iterator it = counts.find(seq.getName());
+                if (it != counts.end()) {
+                    set<int> clusteredIndexes; //don't use indexes for precluster with count file
+                    if (!params->hasCount) {  clusteredIndexes.insert(params->alignSeqs.size());  }
+                    
+                    seqPNode* tempNode = new seqPNode(seq.getName(), seq.getAligned(), it->second, clusteredIndexes);
+                    params->alignSeqs.push_back(tempNode);
+                    lengths.insert(seq.getAligned().length());
+                }
+            }
+        }
+        in.close();
+        
+        params->length = *(lengths.begin());
+        
+        if (lengths.size() > 1) { params->align_method = "unaligned";  return false; } //unaligned
+        else if (lengths.size() == 1) {  params->align_method = "aligned"; filterSeqs(params->alignSeqs, params->length, params->m);  return true; } //aligned
+        
+        return true;
+
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "PreClusterCommand", "fillWeighted");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+
 long long driverGroups(preClusterData* params){
     try {
         vector<string> subsetGroups;
         for (int i = params->start; i < params->end; i++) {  subsetGroups.push_back(params->groups[i]);  }
         
-        //parse fasta and name file by group
-        SequenceCountParser* cparser = NULL;
-        SequenceParser* parser = NULL;
-        if (params->hasCount) {
-            cparser = new SequenceCountParser(params->countfile, params->fastafile, subsetGroups);
-        }else {
-            if (params->hasName) { parser = new SequenceParser(params->groupfile, params->fastafile, params->namefile, subsetGroups);	}
-            else				{ parser = new SequenceParser(params->groupfile, params->fastafile, subsetGroups);                      }
+        //run splitGroups command to parse files
+        string inputString = "groups=" + params->util.getStringFromVector(subsetGroups, "-");
+        inputString += ", fasta=" + params->fastafile;
+        
+        if (params->hasCount) {  inputString += ", count=" + params->countfile;  }
+        else {
+            inputString += ", group=" + params->groupfile;
+            if (params->hasName) { inputString += ", name=" + params->namefile; 	}
         }
         
-        long long numSeqs = 0;
+        params->m->mothurOut("\n/******************************************/\n");
+        params->m->mothurOut("Running command: split.groups(" + inputString + ")\n");
         
+        Command* splitCommand = new SplitGroupCommand(inputString);
+        splitCommand->execute();
+        
+        //type -> files in groups order. fasta -> vector<string>. fastaFileForGroup1 stored in filenames["fasta"][1]
+        map<string, vector<string> > filenames = splitCommand->getOutputFiles();
+        
+        delete splitCommand;
+        params->m->mothurOut("/******************************************/\n");
+    
+        if (params->m->getControl_pressed()) { return 0; }
+        
+        long long numSeqs = 0;
+    
         //precluster each group
+        int fileIndex = 0;
         for (int i = params->start; i < params->end; i++) {
-            if (params->m->getControl_pressed()) { if (params->hasCount) { delete cparser; }else { delete parser; } return numSeqs; }
+            if (params->m->getControl_pressed()) { return numSeqs; }
             
             params->m->mothurOut("\nProcessing group " + params->groups[i] + ":\n");
             
             time_t start = time(NULL);
             bool aligned = false;
             
-            if (params->groupfile != "")        {   aligned = parser->fillWeighted(params->alignSeqs, params->groups[i], params->length);       }
-            else if (params->hasCount)          {   aligned = cparser->fillWeighted(params->alignSeqs, params->groups[i], params->length);      }
-            
-            if (!aligned) { params->align_method = "unaligned";                         }
-            else {  params->align_method = "aligned"; filterSeqs(params->alignSeqs, params->length, params->m); }
+            string thisGroupsFasta = filenames["fasta"][fileIndex];
+            if (params->groupfile != "")        {
+                string thisGroupsGroup = filenames["group"][fileIndex];
+                string thisGroupsName = "";
+                if (params->hasName) {  thisGroupsName = filenames["name"][fileIndex];  }
+                
+                aligned = fillWeighted(params, thisGroupsFasta, thisGroupsGroup, thisGroupsName);
+                
+            }else if (params->hasCount)          {
+                string thisGroupsCount = filenames["count"][fileIndex];
+                
+                aligned = fillWeighted(params, thisGroupsFasta, thisGroupsCount, "");
+            }
+            fileIndex++;
             
             //sort seqs by number of identical seqs
             sort(params->alignSeqs.begin(), params->alignSeqs.end(), comparePriorityTopDown);
@@ -1208,17 +1292,14 @@ long long driverGroups(preClusterData* params){
             params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
             
             map<string, string> thisGroupsNameMap;
-            if (params->hasName) {
-                thisGroupsNameMap = parser->getNameMap(params->groups[i]);
-            }
+            if (params->hasName) {  params->util.readNames(params->namefile, thisGroupsNameMap, true);  }
+                
             printData(params->groups[i], params, thisGroupsNameMap);
             
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
             
             params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(num) + " sequences.\n");
         }
-        
-        if (params->hasCount) { delete cparser; }else { delete parser; }
         
         return numSeqs;
     }

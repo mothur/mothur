@@ -8,7 +8,6 @@
  */
 
 #include "splitgroupscommand.h"
-
 #include "sequenceparser.h"
 #include "counttable.h"
 
@@ -67,6 +66,7 @@ string SplitGroupCommand::getOutputPattern(string type) {
         else if (type == "flow")    {  pattern = "[filename],[group],flow";         }
         else if (type == "name")    {  pattern = "[filename],[group],names";        }
         else if (type == "count")   {  pattern = "[filename],[group],count_table";  }
+        else if (type == "group")   {  pattern = "[filename],[group],groups";  }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -88,6 +88,7 @@ SplitGroupCommand::SplitGroupCommand(){
         outputTypes["fastq"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SplitGroupCommand", "SplitGroupCommand");
@@ -124,6 +125,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
             outputTypes["fastq"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
+            outputTypes["group"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.valid(parameters, "inputdir");		
@@ -339,6 +341,7 @@ int SplitGroupCommand::runNameGroup(){
 		
 		string fastafileRoot = outputDir + util.getRootName(util.getSimpleName(fastafile));
 		string namefileRoot = outputDir + util.getRootName(util.getSimpleName(namefile));
+        string groupfileRoot = outputDir + util.getRootName(util.getSimpleName(groupfile));
 		
 		m->mothurOutEndLine();
 		for (int i = 0; i < Groups.size(); i++) {
@@ -352,10 +355,14 @@ int SplitGroupCommand::runNameGroup(){
 			string newFasta = getOutputFileName("fasta",variables);
             variables["[filename]"] = namefileRoot;
 			string newName = getOutputFileName("name",variables);
-			
+            
+            variables["[filename]"] = groupfileRoot;
+            string newGroup = getOutputFileName("group",variables);
+            
             long long numSeqs = 0;
-			parser->getSeqs(Groups[i], newFasta, "/ab=", "/", numSeqs, false);
+			parser->getSeqs(Groups[i], newFasta, "/ab=", "/", numSeqs, newGroup, false);
 			outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
+            outputNames.push_back(newGroup); outputTypes["group"].push_back(newGroup);
 			if (m->getControl_pressed()) { delete parser; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0; }
             
 			if (namefile != "") { 
@@ -595,7 +602,7 @@ int SplitGroupCommand::runCount(){
 	try {
         
         CountTable ct;
-        ct.readTable(countfile, true, false);
+        ct.readTable(countfile, true, false, Groups);
         if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); m->setControl_pressed(true); }
         
         if (m->getControl_pressed()) { return 0; }
@@ -631,15 +638,17 @@ int SplitGroupCommand::runCount(){
             
             if (m->getControl_pressed()) { break; }
             if (seq.getName() != "") {
-                vector<string> thisSeqsGroups = ct.getGroups(seq.getName());
-                for (int i = 0; i < thisSeqsGroups.size(); i++) {
-                    if (util.inUsersGroups(thisSeqsGroups[i], Groups)) { //if this sequence belongs to a group we want them print
-                        ofstream outf, outc;
-                        util.openOutputFileAppend(ffiles[thisSeqsGroups[i]], outf);
-                        seq.printSequence(outf); outf.close();
-                        int numSeqs = ct.getGroupCount(seq.getName(), thisSeqsGroups[i]);
-                        util.openOutputFileAppend(cfiles[thisSeqsGroups[i]], outc);
-                        outc << seq.getName() << '\t' << numSeqs << '\t' << numSeqs << endl; outc.close();
+                if (ct.inTable(seq.getName())) {
+                    vector<string> thisSeqsGroups = ct.getGroups(seq.getName());
+                    for (int i = 0; i < thisSeqsGroups.size(); i++) {
+                        if (util.inUsersGroups(thisSeqsGroups[i], Groups)) { //if this sequence belongs to a group we want them print
+                            ofstream outf, outc;
+                            util.openOutputFileAppend(ffiles[thisSeqsGroups[i]], outf);
+                            seq.printSequence(outf); outf.close();
+                            int numSeqs = ct.getGroupCount(seq.getName(), thisSeqsGroups[i]);
+                            util.openOutputFileAppend(cfiles[thisSeqsGroups[i]], outc);
+                            outc << seq.getName() << '\t' << numSeqs << '\t' << numSeqs << endl; outc.close();
+                        }
                     }
                 }
             }

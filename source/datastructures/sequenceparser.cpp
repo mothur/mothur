@@ -275,7 +275,7 @@ bool SequenceParser::fillWeighted(vector< seqPNode* >& seqForThisGroup, string g
     }
 }
 /************************************************************/
-int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, long long& numSeqs, bool uchimeFormat=false){
+int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, long long& numSeqs, string optionalGroupFileName, bool uchimeFormat=false){
 	try {
 		map<string, int>::iterator it;
 		vector<Sequence> seqForThisGroup;
@@ -329,16 +329,24 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
 					out << ">" <<  nameVector[i].name << tag << nameVector[i].numIdentical << tag2 << endl << nameVector[i].seq << endl; //
 				}
 				
-			}else { 
-                //m->mothurOut("Group " + g +  " contains " + toString(seqForThisGroup.size()) + " unique seqs.\n");
+			}else {
+                
+                ofstream outGroup;
+                if (optionalGroupFileName != "") { util.openOutputFile(optionalGroupFileName, outGroup); }
+                
 				for (int i = 0; i < seqForThisGroup.size(); i++) {
 					
 					if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
 					
-					seqForThisGroup[i].printSequence(out);	
+					seqForThisGroup[i].printSequence(out);
+                    
+                    if (optionalGroupFileName != "") {  outGroup << seqForThisGroup[i].getName() << '\t' << g << endl;  }
 				}
+                
+                if (optionalGroupFileName != "") {  outGroup.close();  }
 			}
 			out.close();
+            
 		}
 		
 		return 0; 
