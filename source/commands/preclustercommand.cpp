@@ -1331,6 +1331,7 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         int numDups;
         
         //build table
+        vector<string> namesOfSeqs;
         while (!inNames.eof()) {
             
             if (m->getControl_pressed()) { break; }
@@ -1340,6 +1341,7 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
             inNames >> numDups; util.gobble(inNames);
             
             ct.setAbund(unique_sequence, group, numDups); count++;
+            namesOfSeqs.push_back(unique_sequence);
             
             //report progress
             if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
@@ -1356,7 +1358,6 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         util.mothurRemove(newname);
         
         ofstream outAccnos; util.openOutputFile(newname, outAccnos);
-        vector<string> namesOfSeqs = ct.getNamesOfSeqs();
         for (int i = 0; i < namesOfSeqs.size(); i++) { outAccnos << namesOfSeqs[i] << endl; }
         outAccnos.close();
         
