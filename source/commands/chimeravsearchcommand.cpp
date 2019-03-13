@@ -31,6 +31,7 @@ vector<string> ChimeraVsearchCommand::setParameters(){
         CommandParameter pxn("xn", "Number", "", "8.0", "", "", "","",false,false); parameters.push_back(pxn);
         CommandParameter pdn("dn", "Number", "", "1.4", "", "", "","",false,false); parameters.push_back(pdn);
         CommandParameter pmindiffs("mindiffs", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pmindiffs);
+        CommandParameter pvsearchlocation("vsearch", "String", "", "", "", "", "","",false,false); parameters.push_back(pvsearchlocation);
         CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdups);
         
         vector<string> myArray;
@@ -63,6 +64,7 @@ string ChimeraVsearchCommand::getHelpString(){
         helpString += "The xn parameter - weight of a no vote. Default 8.0. Decreasing this weight to around 3 or 4 may give better performance on denoised data.\n";
         helpString += "The dn parameter - pseudo-count prior on number of no votes. Default 1.4. Probably no good reason to change this unless you can retune to a good benchmark for your data. Reasonable values are probably in the range from 0.2 to 2.\n";
         helpString += "The mindiffs parameter - minimum number of differences in segment Default = (3).\n";
+        helpString += "The vsearch parameter allows you to specify the name and location of your vsearch executable. By default mothur will look in your path and mothur's executable.  You can set the vsearch location as follows, vsearch=/usr/bin/vsearch.\n";
         helpString += "The chimera.vsearch command should be in the following format: \n";
         helpString += "chimera.vsearch(fasta=yourFastaFile, reference=yourTemplate) \n";
         helpString += "Example: chimera.vsearch(fasta=AD.align, reference=silva.gold.align) \n";
@@ -264,6 +266,16 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             if (temp == "not found") { temp = "false";			}
             dups = util.isTrue(temp);
             
+            vsearchLocation = validParameter.valid(parameters, "vsearch");
+            if (vsearchLocation == "not found") { vsearchLocation = ""; }
+            else {
+                //test to make sure vsearch exists
+                ifstream in;
+                vsearchLocation = util.getFullPathName(vsearchLocation);
+                bool ableToOpen = util.openInputFile(vsearchLocation, in, "no error"); in.close();
+                if(!ableToOpen) { m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = ""; }
+            }
+
             
             if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
             if (hasCount && (templatefile != "self")) { m->mothurOut("You have provided a countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
@@ -271,43 +283,46 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
 
             //look for uchime exe
             path = current->getProgramPath();
+            
+            if (vsearchLocation == "") {
 
-            string vsearchCommand;
+                string vsearchCommand;
 #if defined NON_WINDOWS
-            vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
-            if (m->getDebug()) {
-                m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
-                Command* newCommand = new SystemCommand("which vsearch\n");
-                newCommand->execute();
-                delete newCommand;
-                m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
-                newCommand = new SystemCommand("which mothur\n");
-                newCommand->execute();
-                delete newCommand;
-            }
+                vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
+                if (m->getDebug()) {
+                    m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
+                    Command* newCommand = new SystemCommand("which vsearch\n");
+                    newCommand->execute();
+                    delete newCommand;
+                    m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
+                    newCommand = new SystemCommand("which mothur\n");
+                    newCommand->execute();
+                    delete newCommand;
+                }
 #else
-            vsearchCommand = path + "\\vsearch.exe";
+                vsearchCommand = path + "\\vsearch.exe";
 #endif
-            
-            //test to make sure uchime exists
-            ifstream in;
-            vsearchCommand = util.getFullPathName(vsearchCommand);
-            bool ableToOpen = util.openInputFile(vsearchCommand, in, "no error"); in.close();
-            if(!ableToOpen) {
-                m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-                //check to see if uchime is in the path??
                 
-                ifstream in2;
-                string programName = "vsearch"; programName += EXECUTABLE_EXT;
-                string uLocation = util.findProgramPath(programName);
-                uLocation += programName;
-                ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
+                //test to make sure vsearch exists
+                ifstream in;
+                vsearchCommand = util.getFullPathName(vsearchCommand);
+                bool ableToOpen = util.openInputFile(vsearchCommand, in, "no error"); in.close();
+                if(!ableToOpen) {
+                    m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
+                    //check to see if vsearch is in the path??
+                    
+                    ifstream in2;
+                    string programName = "vsearch"; programName += EXECUTABLE_EXT;
+                    string uLocation = util.findProgramPath(programName);
+                    uLocation += programName;
+                    ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
+                    
+                    if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  abort = true; }
+                    else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
+                }else {  vsearchLocation = vsearchCommand; }
                 
-                if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  abort = true; }
-                else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
-            }else {  vsearchLocation = vsearchCommand; }
-            
-            vsearchLocation = util.getFullPathName(vsearchLocation);
+                vsearchLocation = util.getFullPathName(vsearchLocation);
+            }
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n"); }
         }
