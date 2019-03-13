@@ -609,14 +609,6 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
             in >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> temp9 >> temp10 >> temp11 >> temp12 >> temp13 >> flag;
             util.gobble(in);
             
-            //parse name - name will look like U68590/ab=1/
-            string restOfName = "";
-            int pos = name.find_first_of(';');
-            if (pos != string::npos) {
-                restOfName = name.substr(pos);
-                name = name.substr(0, pos);
-            }
-            
             //find unique name
             itUnique = uniqueNames.find(name);
             
@@ -638,49 +630,28 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
             }
             
             if (print) {
-                out << temp1 << '\t' << name << restOfName << '\t';
+                out << temp1 << '\t' << name << '\t';
                 namesInFile.insert(name);
                 
                 //parse parent1 names
                 if (parent1 != "*") {
-                    restOfName = "";
-                    pos = parent1.find_first_of(';');
-                    if (pos != string::npos) {
-                        restOfName = parent1.substr(pos);
-                        parent1 = parent1.substr(0, pos);
-                    }
-                    
                     itUnique = uniqueNames.find(parent1);
                     if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + ".\n");  m->setControl_pressed(true); }
-                    else {	out << itUnique->second << restOfName << '\t';	}
+                    else {	out << itUnique->second << '\t';	}
                 }else { out << parent1 << '\t'; }
                 
                 //parse parent2 names
                 if (parent2 != "*") {
-                    restOfName = "";
-                    pos = parent2.find_first_of(';');
-                    if (pos != string::npos) {
-                        restOfName = parent2.substr(pos);
-                        parent2 = parent2.substr(0, pos);
-                    }
-                    
                     itUnique = uniqueNames.find(parent2);
                     if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentB "+ parent2 + ".\n"); m->setControl_pressed(true); }
-                    else {	out << itUnique->second << restOfName << '\t';	}
+                    else {	out << itUnique->second << '\t';	}
                 }else { out << parent2 << '\t'; }
                 
                 //parse parent3 names
                 if (parent3 != "*") {
-                    restOfName = "";
-                    pos = parent3.find_first_of(';');
-                    if (pos != string::npos) {
-                        restOfName = parent3.substr(pos);
-                        parent3 = parent3.substr(0, pos);
-                    }
-                    
                     itUnique = uniqueNames.find(parent3);
                     if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentC "+ parent3 + ".\n"); m->setControl_pressed(true); }
-                    else {	out << itUnique->second << restOfName << '\t';	}
+                    else {	out << itUnique->second << '\t';	}
                 }else { out << parent3 << '\t'; }
                 
                 out << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << temp9 << '\t' << temp10 << '\t' << temp11 << '\t' << temp12 << '\t' << temp13 << '\t' << flag << endl;
@@ -763,14 +734,6 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                             
                             name = line.substr(spot+2);
                             
-                            //parse name - name will either look like U68590/ab=1/ or U68590
-                            string restOfName = "";
-                            int pos = name.find_first_of(';');
-                            if (pos != string::npos) {
-                                restOfName = name.substr(pos);
-                                name = name.substr(0, pos);
-                            }
-                            
                             //find unique name
                             itUnique = uniqueNames.find(name);
                             
@@ -781,10 +744,10 @@ int ChimeraVsearchCommand::deconvoluteResults(map<string, string>& uniqueNames, 
                                     itNames = namesInFile.find((itUnique->second));
                                     
                                     if (itNames == namesInFile.end()) {
-                                        out << itUnique->second << restOfName << endl;
+                                        out << itUnique->second << endl;
                                         namesInFile.insert((itUnique->second));
                                     }
-                                }else { out << itUnique->second << restOfName << endl;  }
+                                }else { out << itUnique->second << endl;  }
                             }
                             
                         }
@@ -1152,14 +1115,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
             
             Sequence seq(in); util.gobble(in);
             
-            string name = seq.getName();
-            
-            if (templatefile == "self") {
-                name = name.substr(0, name.length()-1); //rip off last ;
-                name = name.substr(0, name.find_last_of(';'));
-            }
-            
-            out << name << endl; numChimeras++;
+            out << seq.getName() << endl; numChimeras++;
         }
         in.close();
         out.close();
