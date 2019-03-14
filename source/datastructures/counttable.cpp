@@ -1392,7 +1392,7 @@ int CountTable::setNumSeqs(string seqName, int abund) {
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "CountTable", "getNumSeqs");
+        m->errorOut(e, "CountTable", "setNumSeqs");
         exit(1);
     }
 }

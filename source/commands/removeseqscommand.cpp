@@ -628,7 +628,10 @@ int RemoveSeqsCommand::readCount(){
 		
         CountTable ct; ct.readTable(countfile, true, false); int originalCount = ct.getNumSeqs();
         
-        for (set<string>::iterator it = names.begin(); it != names.end(); it++) { ct.remove(*it); }
+        for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
+            ct.setNumSeqs(*it, 0);
+            if (m->getControl_pressed()) {  return 0; }
+        }
         
         if (ct.getNumSeqs() == 0) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");   return 0; }
         

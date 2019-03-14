@@ -607,11 +607,10 @@ int SplitGroupCommand::runCount(){
         
         if (m->getControl_pressed()) { return 0; }
         
-        vector<string> namesGroups = ct.getNamesOfGroups();
+        Groups = ct.getNamesOfGroups();
         
         //fill filehandles with neccessary ofstreams
         map<string, string> ffiles; //group -> filename
-        map<string, string> cfiles; //group -> filename
         for (int i=0; i<Groups.size(); i++) {
             ofstream ftemp, ctemp;
             map<string, string> variables; 
@@ -625,9 +624,12 @@ int SplitGroupCommand::runCount(){
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
             string newCount = getOutputFileName("count",variables);
             outputNames.push_back(newCount); outputTypes["count"].push_back(newCount);
-            cfiles[Groups[i]] = newCount;
             util.openOutputFile(newCount, ctemp);
-            ctemp << "Representative_Sequence\ttotal\t" << Groups[i] << endl; ctemp.close();
+            ctemp << "Representative_Sequence\ttotal\t" << Groups[i] << endl;
+            
+            map<string, int> thisGroupsCounts = ct.getNameMap(Groups[i]);
+            for (map<string, int>::iterator it = thisGroupsCounts.begin(); it != thisGroupsCounts.end(); it++) { ctemp << it->first << '\t' << it->second << '\t' << it->second << endl; }
+            ctemp.close();
         }
         
         ifstream in; 
@@ -637,19 +639,13 @@ int SplitGroupCommand::runCount(){
             Sequence seq(in); util.gobble(in);
             
             if (m->getControl_pressed()) { break; }
-            if (seq.getName() != "") {
-                if (ct.inTable(seq.getName())) {
-                    vector<string> thisSeqsGroups = ct.getGroups(seq.getName());
-                    for (int i = 0; i < thisSeqsGroups.size(); i++) {
-                        if (util.inUsersGroups(thisSeqsGroups[i], Groups)) { //if this sequence belongs to a group we want them print
-                            ofstream outf, outc;
-                            util.openOutputFileAppend(ffiles[thisSeqsGroups[i]], outf);
-                            seq.printSequence(outf); outf.close();
-                            int numSeqs = ct.getGroupCount(seq.getName(), thisSeqsGroups[i]);
-                            util.openOutputFileAppend(cfiles[thisSeqsGroups[i]], outc);
-                            outc << seq.getName() << '\t' << numSeqs << '\t' << numSeqs << endl; outc.close();
-                        }
-                    }
+            
+            if (ct.inTable(seq.getName())) {
+                vector<string> thisSeqsGroups = ct.getGroups(seq.getName());
+                for (int i = 0; i < thisSeqsGroups.size(); i++) {
+                    ofstream outf;
+                    util.openOutputFileAppend(ffiles[thisSeqsGroups[i]], outf);
+                    seq.printSequence(outf); outf.close();
                 }
             }
         }
