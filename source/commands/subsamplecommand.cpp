@@ -26,6 +26,7 @@ vector<string> SubSampleCommand::setParameters(){
 		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "FLSSR", "none","rabund",false,false); parameters.push_back(prabund);
 		CommandParameter psabund("sabund", "InputTypes", "", "", "none", "FLSSR", "none","sabund",false,false); parameters.push_back(psabund);
         CommandParameter ptree("tree", "InputTypes", "", "", "none", "FLSSR", "none","tree",false,false); parameters.push_back(ptree);
+        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "none", "none","constaxonomy",false,false, true); parameters.push_back(pconstaxonomy);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(psize);
@@ -49,7 +50,7 @@ string SubSampleCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n";
-		helpString += "The sub.sample command parameters are fasta, name, list, group, count, rabund, sabund, shared, taxonomy, tree, groups, size, persample, withreplacement and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
+		helpString += "The sub.sample command parameters are " + getCommandParameters() + ".  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
 		helpString += "The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
@@ -83,6 +84,7 @@ string SubSampleCommand::getOutputPattern(string type) {
         else if (type == "tree")        {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],[distance],subsample,[extension]";    }
         else if (type == "taxonomy")    {   pattern = "[filename],subsample,[extension]";    }
+        else if (type == "constaxonomy"){   pattern = "[filename],subsample,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[distance],subsample,[extension]";    }
         else if (type == "rabund")      {   pattern = "[filename],subsample,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
@@ -109,6 +111,7 @@ SubSampleCommand::SubSampleCommand(){
 		outputTypes["group"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         outputTypes["taxonomy"] = tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
         outputTypes["tree"] = tempOutNames;
 	}
 	catch(exception& e) {
@@ -151,6 +154,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			outputTypes["group"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
             outputTypes["taxonomy"] = tempOutNames;
+            outputTypes["constaxonomy"] = tempOutNames;
             outputTypes["tree"] = tempOutNames;
 					
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -233,6 +237,15 @@ SubSampleCommand::SubSampleCommand(string option) {
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
                 
+                it = parameters.find("constaxonomy");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
+                }
+
+                
                 it = parameters.find("tree");
                 //user has given a template file
                 if(it != parameters.end()){
@@ -283,6 +296,11 @@ SubSampleCommand::SubSampleCommand(string option) {
 			if (taxonomyfile == "not open") { taxonomyfile = ""; abort = true; }
 			else if (taxonomyfile == "not found") { taxonomyfile = ""; }
 			else { current->setTaxonomyFile(taxonomyfile); }
+            
+            constaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
+            if (constaxonomyfile == "not open") { constaxonomyfile = ""; abort = true; }
+            else if (constaxonomyfile == "not found") { constaxonomyfile = ""; }
+            else { current->setConsTaxonomyFile(constaxonomyfile); }
             
             treefile = validParameter.validFile(parameters, "tree");
             if (treefile == "not open") { treefile = ""; abort = true; }
@@ -341,7 +359,8 @@ SubSampleCommand::SubSampleCommand(string option) {
 			
 			if ((namefile != "") && ((fastafile == "") && (taxonomyfile == "") && (treefile == ""))) { m->mothurOut("You may only use a name file with a fasta file, tree file or taxonomy file.\n");  abort = true; }
             
-            if ((taxonomyfile != "") && ((fastafile == "") && (listfile == ""))) { m->mothurOut("You may only use a taxonomyfile with a fastafile or listfile.\n");  abort = true; }
+            if ((taxonomyfile != "") && ((fastafile == "") && (listfile == ""))) { m->mothurOut("You may only use a taxonomy file with a fasta file or list file.\n");  abort = true; }
+            if ((constaxonomyfile != "") && ((sharedfile == "") && (listfile == ""))) { m->mothurOut("You may only use a constaxonomy file with a shared file or list file.\n");  abort = true; }
             
 			
 			if ((fastafile == "") && (listfile == "") && (sabundfile == "") && (rabundfile == "") && (sharedfile == "") && (treefile == "")) {
@@ -351,10 +370,10 @@ SubSampleCommand::SubSampleCommand(string option) {
 				m->mothurOut("You cannot pick groups without a valid group, count or shared file.\n");  abort = true; }
 			
 			if (((groupfile != "") || (countfile != "")) && ((fastafile == "") && (listfile == "") && (treefile == ""))) {
-				m->mothurOut("Group or count files are only valid with listfile, fastafile or tree.\n"); abort = true; }
+				m->mothurOut("Group or count files are only valid with list file, fasta file or tree file.\n"); abort = true; }
 			
 			if (((groupfile != "") || (countfile != "")) && ((fastafile != "") && (listfile != ""))) { 
-				m->mothurOut("A new group or count file can only be made from the subsample of a listfile or fastafile, not both. Please correct.\n"); abort = true; }
+				m->mothurOut("A new group or count file can only be made from the subsample of a list file or fasta file, not both. Please correct.\n"); abort = true; }
 			
             if (countfile == "") {
                 if ((fastafile != "") && (namefile == "")) {
@@ -432,6 +451,11 @@ int SubSampleCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setTaxonomyFile(currentName); }
 		}
+        
+        itTypes = outputTypes.find("constaxonomy");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setConsTaxonomyFile(currentName); }
+        }
         
         itTypes = outputTypes.find("tree");
         if (itTypes != outputTypes.end()) {
@@ -822,6 +846,13 @@ int SubSampleCommand::getSubSampleShared() {
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
         
+        if (constaxonomyfile != "") { //you have a constaxonomy file and have not set the labels parameter. Either your sharedfile has one label or we only want to use one since the constaxonomy file is related to one label
+            if (labels.size() == 0) {
+                labels.insert(lastLabel); allLines = 0;
+                m->mothurOut("\n[WARNING]: The constaxonomy file represents a single label in your shared file. You did not set the label parameter, so mothur is assuming you want to use label " + lastLabel + ". If this is not correct file mismatches can occur.\n\n");
+            }
+        }
+        
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -835,7 +866,6 @@ int SubSampleCommand::getSubSampleShared() {
 		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file.\n");   return 0; }
 		
 		m->mothurOut("Sampling " + toString(size) + " from each group.\n");
-        bool printHeaders = true;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -845,7 +875,7 @@ int SubSampleCommand::getSubSampleShared() {
 				
 				m->mothurOut(lookup->getLabel()+"\n"); 
 				
-				processShared(lookup, printHeaders);
+				processShared(lookup);
 				
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
@@ -858,7 +888,7 @@ int SubSampleCommand::getSubSampleShared() {
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup->getLabel()+"\n"); 
 				
-				processShared(lookup, printHeaders);
+				processShared(lookup);
 				
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 				
@@ -892,7 +922,7 @@ int SubSampleCommand::getSubSampleShared() {
 			
 			m->mothurOut(lookup->getLabel()+"\n"); 
 			
-			processShared(lookup, printHeaders);
+			processShared(lookup);
 			
 			if (lookup != NULL) { delete lookup; lookup = NULL; }
 		}
@@ -906,7 +936,7 @@ int SubSampleCommand::getSubSampleShared() {
 	}
 }
 //**********************************************************************************************************************
-int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup, bool& printHeaders) {
+int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
 	try {
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
@@ -925,8 +955,50 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup, bool& prin
         ofstream out;
 		util.openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        bool printHeaders = true;
 		thislookup->print(out, printHeaders);
         out.close();
+        
+        if (constaxonomyfile != "") { //select otus from constaxonomy that are in new shared file. Also adjust the size column in the constaxonomy file
+            string thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
+            map<string, string> variables;
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
+            variables["[extension]"] = util.getExtension(constaxonomyfile);
+            variables["[distance]"] = thislookup->getLabel();
+            string consOutputFileName = getOutputFileName("constaxonomy", variables);
+            
+            ifstream in;
+            util.openInputFile(constaxonomyfile, in);
+            
+            //read headers
+            string headers = util.getline(in); util.gobble(in);
+            
+            ofstream outCons;
+            util.openOutputFile(consOutputFileName, outCons);
+            outputTypes["constaxonomy"].push_back(consOutputFileName);  outputNames.push_back(consOutputFileName);
+
+            outCons << headers << endl;
+            
+            while (!in.eof()) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                string otu = ""; string tax = "unknown";
+                int size = 0;
+                
+                in >> otu; util.gobble(in); in >> size; util.gobble(in);
+                tax = util.getline(in); util.gobble(in);
+                
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
+                
+                size = thislookup->getOTUTotal(otu);
+                
+                if (size != 0) {  outCons << otu << '\t' << size << '\t' << tax << endl; }
+            }
+            in.close();
+            outCons.close();
+        }
 		
 		return 0;
 		

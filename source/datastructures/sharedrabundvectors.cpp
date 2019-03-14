@@ -307,6 +307,29 @@ int SharedRAbundVectors::getOTUTotal(int bin){
     }
 }
 /***********************************************************************/
+int SharedRAbundVectors::getOTUTotal(string otuLabel){
+    try {
+        //find bin number
+        int binNumber = -1;
+        
+        getOTUNames();
+        
+        for (int i = 0; i < currentLabels.size(); i++) {
+            if (util.getSimpleLabel(currentLabels[i]) == util.getSimpleLabel(otuLabel)) {
+                binNumber = i; break;
+            }
+        }
+        
+        if (binNumber == -1) { return 0; }
+        
+        return getOTUTotal(binNumber);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVectors", "getOTUTotal");
+        exit(1);
+    }
+}
+/***********************************************************************/
 vector<int> SharedRAbundVectors::getOTU(int bin){
     try {
         vector<int> abunds;

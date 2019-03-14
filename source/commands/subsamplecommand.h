@@ -41,7 +41,7 @@ public:
 	
 private:	
 	bool abort, pickedGroups, allLines, persample, withReplacement;
-	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile, taxonomyfile, treefile;
+	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile, taxonomyfile, treefile, constaxonomyfile;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir;
 	vector<string> Groups, outputNames;
@@ -56,7 +56,7 @@ private:
 	int getSubSampleSabund();
 	int getSubSampleFasta();
     int getSubSampleTree();
-	int processShared(SharedRAbundVectors*&, bool&);
+	int processShared(SharedRAbundVectors*&);
 	int processRabund(RAbundVector*&, ofstream&);
 	int processSabund(SAbundVector*&, ofstream&);
 	int processList(ListVector*&, set<string>&);
