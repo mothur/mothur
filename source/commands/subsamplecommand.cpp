@@ -1018,6 +1018,14 @@ int SubSampleCommand::getSubSampleList() {
 		InputData input(listfile, "list", nullVector);
 		ListVector* list = input.getListVector();
 		string lastLabel = list->getLabel();
+        
+        if (constaxonomyfile != "") { //you have a constaxonomy file and have not set the labels parameter. Either your list file has one label or we only want to use one since the constaxonomy file is related to one label
+            if (labels.size() == 0) {
+                labels.insert(lastLabel); allLines = 0;
+                m->mothurOut("\n[WARNING]: The constaxonomy file represents a single label in your list file. You did not set the label parameter, so mothur is assuming you want to use label " + lastLabel + ". If this is not correct file mismatches can occur.\n\n");
+            }
+        }
+
 		
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -1346,6 +1354,48 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 		
 		list->print(out, false);
         out.close();
+        
+        if (constaxonomyfile != "") { //select otus from constaxonomy that are in new list file. Also adjust the size column in the constaxonomy file
+            string thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
+            map<string, string> variables;
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
+            variables["[extension]"] = util.getExtension(constaxonomyfile);
+            variables["[distance]"] = list->getLabel();
+            string consOutputFileName = getOutputFileName("constaxonomy", variables);
+            
+            ifstream in;
+            util.openInputFile(constaxonomyfile, in);
+            
+            //read headers
+            string headers = util.getline(in); util.gobble(in);
+            
+            ofstream outCons;
+            util.openOutputFile(consOutputFileName, outCons);
+            outputTypes["constaxonomy"].push_back(consOutputFileName);  outputNames.push_back(consOutputFileName);
+            
+            outCons << headers << endl;
+            
+            while (!in.eof()) {
+                
+                if (m->getControl_pressed()) { break; }
+                
+                string otu = ""; string tax = "unknown";
+                int size = 0;
+                
+                in >> otu; util.gobble(in); in >> size; util.gobble(in);
+                tax = util.getline(in); util.gobble(in);
+                
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
+                
+                size = list->getOTUTotal(otu);
+                
+                if (size != 0) {  outCons << otu << '\t' << size << '\t' << tax << endl; }
+            }
+            in.close();
+            outCons.close();
+        }
+
 		
 		return 0;
 		

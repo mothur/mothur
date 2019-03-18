@@ -31,6 +31,7 @@ public:
     string get(int);
     vector<string> getLabels();
     string getOTUName(int bin);
+    int getOTUTotal(string otuLabel); //returns 0 if otuLabel is not found
     void setLabels(vector<string>);
     bool getPrintedLabels();
     void setPrintedLabels(bool pl) { printListHeaders = pl; }

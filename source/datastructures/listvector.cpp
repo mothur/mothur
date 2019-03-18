@@ -172,7 +172,9 @@ void ListVector::set(int binNumber, string seqNames){
 /***********************************************************************/
 
 string ListVector::get(int index){
-	return data[index];
+    if (index < data.size()) {  return data[index];  }
+    
+	return "";
 }
 /***********************************************************************/
 
@@ -214,6 +216,30 @@ string ListVector::getOTUName(int bin){
         exit(1);
     }
 }
+/***********************************************************************/
+int ListVector::getOTUTotal(string otuLabel){
+    try {
+        //find bin number
+        int binNumber = -1;
+        
+        getLabels();
+        
+        for (int i = 0; i < binLabels.size(); i++) {
+            if (util.getSimpleLabel(binLabels[i]) == util.getSimpleLabel(otuLabel)) {
+                binNumber = i; break;
+            }
+        }
+        
+        if (binNumber == -1) { return 0; }
+        
+        return (util.getNumNames(get(binNumber)));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListVector", "getOTUTotal");
+        exit(1);
+    }
+}
+
 /***********************************************************************/
 
 void ListVector::push_back(string seqNames){
