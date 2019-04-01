@@ -17,6 +17,7 @@
 #include "fastamap.h"
 #include "groupmap.h"
 #include "counttable.h"
+#include "getseqscommand.h"
 
 class BinSeqCommand : public Command {
 	
@@ -41,11 +42,10 @@ private:
 	CountTable ct;
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string filename, fastafile, listfile, namesfile, groupfile, countfile, label, outputDir;
+	string filename, fastafile, listfile, countfile, label, outputDir;
 	vector<string> outputNames;
 	
-	void readNamesFile(FastaMap&);
-	int process(ListVector*, FastaMap&, GroupMap&);
+	int process(ListVector*, FastaMap&);
 };
 
 #endif

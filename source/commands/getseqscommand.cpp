@@ -803,7 +803,7 @@ int GetSeqsCommand::readName(){
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
 
 			in >> firstCol;			util.gobble(in);
-			in >> secondCol;
+			in >> secondCol;        util.gobble(in);
 			
 			string hold = "";
 			if (dups) { hold = secondCol; }
@@ -881,7 +881,6 @@ int GetSeqsCommand::readName(){
                     }
                 }
 			}
-			util.gobble(in);
 		}
 		in.close();
 		out.close();

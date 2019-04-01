@@ -16,9 +16,9 @@
 vector<string> PreClusterCommand::setParameters(){
 	try {
         CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        //CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
-        CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        //CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
         CommandParameter pdiffs("diffs", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pdiffs);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
@@ -53,10 +53,10 @@ string PreClusterCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The pre.cluster command groups sequences that are within a given number of base mismatches.\n";
-		helpString += "The pre.cluster command outputs a new fasta and name file.\n";
-		helpString += "The pre.cluster command parameters are fasta, name, group, count, method, processors and diffs. The fasta parameter is required. \n";
-		helpString += "The name parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n";
-		helpString += "The group parameter allows you to provide a group file so you can cluster by group. \n";
+		helpString += "The pre.cluster command outputs a new fasta and count file.\n";
+		helpString += "The pre.cluster command parameters are fasta, count, method, processors and diffs. The fasta parameter is required. \n";
+		//helpString += "The name parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n";
+		//helpString += "The group parameter allows you to provide a group file so you can cluster by group. \n";
     helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
     helpString += "The method parameter allows you to specify the algorithm to use to complete the preclusterign step. Possible methods include simple, tree, unoise, and deblur.  Default=simple.\n";
@@ -89,7 +89,7 @@ string PreClusterCommand::getOutputPattern(string type) {
         string pattern = "";
 
         if (type == "fasta") {  pattern = "[filename],precluster,[extension]"; }
-        else if (type == "name") {  pattern = "[filename],precluster.names"; }
+        //else if (type == "name") {  pattern = "[filename],precluster.names"; }
         else if (type == "count") {  pattern = "[filename],precluster.count_table"; }
         else if (type == "map") {  pattern =  "[filename],precluster.map"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
@@ -108,8 +108,8 @@ PreClusterCommand::PreClusterCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-    outputTypes["count"] = tempOutNames;
+		//outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 		outputTypes["map"] = tempOutNames;
 	}
 	catch(exception& e) {
@@ -144,7 +144,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
+			//outputTypes["name"] = tempOutNames;
 			outputTypes["map"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
 
@@ -161,7 +161,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
 
-				it = parameters.find("name");
+				/*it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){
 					path = util.hasPath(it->second);
@@ -175,7 +175,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
+				}*/
 
                 it = parameters.find("count");
 				//user has given a template file
@@ -204,7 +204,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			namefile = validParameter.validFile(parameters, "name");
+			/*namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { namefile = ""; abort = true; }
 			else {  current->setNameFile(namefile); }
@@ -212,7 +212,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not found") { groupfile =  "";  bygroup = false; }
 			else if (groupfile == "not open") { abort = true; groupfile =  ""; }
-			else {   current->setGroupFile(groupfile); bygroup = true;  }
+			else {   current->setGroupFile(groupfile); bygroup = true;  }*/
 
             countfile = validParameter.validFile(parameters, "count");
             if (countfile == "not found") { countfile =  "";   }
@@ -558,12 +558,13 @@ vector<int> calcMisMatchesIndels(string seq1, string seq2, preClusterData* param
 }
 /**************************************************************************************************/
 
-void mergeSeqs(seqPNode*& representative, seqPNode*& duplicate, string& chunk, int mismatch, int originalCount, preClusterData* params){
+void mergeSeqs(seqPNode* representative, seqPNode* duplicate, string& chunk, int mismatch, int originalCount, preClusterData* params){
     try {
         //merge
         if (params->hasCount) { representative->clusteredIndexes.clear(); duplicate->clusteredIndexes.clear(); } //we use numIdentical to build the count table, don't need the names.
         else {
-            representative->clusteredIndexes.insert(duplicate->clusteredIndexes.begin(), duplicate->clusteredIndexes.end()); duplicate->clusteredIndexes.clear();
+            representative->clusteredIndexes.insert(representative->clusteredIndexes.end(), duplicate->clusteredIndexes.begin(), duplicate->clusteredIndexes.end());
+            duplicate->clusteredIndexes.clear();
         }
         representative->numIdentical += duplicate->numIdentical;
         
@@ -702,7 +703,7 @@ int process(string group, string newMapFile, preClusterData* params){
                     
                 } else {
                     
-                    params->alignSeqs[cluster[i]]->clusteredIndexes.insert(params->alignSeqs[i]->clusteredIndexes.begin(), params->alignSeqs[i]->clusteredIndexes.end());  params->alignSeqs[i]->clusteredIndexes.clear();
+                    params->alignSeqs[cluster[i]]->clusteredIndexes.insert(params->alignSeqs[i]->clusteredIndexes.begin(), params->alignSeqs[i]->clusteredIndexes.end(), params->alignSeqs[cluster[i]]->clusteredIndexes.end());  params->alignSeqs[i]->clusteredIndexes.clear();
                     params->alignSeqs[cluster[i]]->numIdentical += params->alignSeqs[i]->numIdentical;
                     
                     params->diffs = params->length;
@@ -859,7 +860,7 @@ vector<seqPNode*> readFASTA(preClusterData* params, long long& num){
                     else{
                         string second = it->second;
                         int numReps = params->util.getNumNames(second);
-                        set<int> clusteredIndexes; clusteredIndexes.insert(alignSeqs.size());
+                        vector<int> clusteredIndexes; clusteredIndexes.push_back(alignSeqs.size());
                         seqPNode* tempNode = new seqPNode(seq.getName(), seq.getAligned(), numReps, clusteredIndexes);
                         alignSeqs.push_back(tempNode);
                         lengths.insert(seq.getAligned().length());
@@ -867,7 +868,7 @@ vector<seqPNode*> readFASTA(preClusterData* params, long long& num){
                 }else { //no names file, you are identical to yourself
                     int numReps = 1;
                     if (params->hasCount) { numReps = ct.getNumSeqs(seq.getName()); }
-                    set<int> clusteredIndexes; clusteredIndexes.insert(alignSeqs.size());
+                    vector<int> clusteredIndexes; clusteredIndexes.push_back(alignSeqs.size());
                     seqPNode* tempNode = new seqPNode(seq.getName(), seq.getAligned(), numReps, clusteredIndexes);
                     alignSeqs.push_back(tempNode);
                     lengths.insert(seq.getAligned().length());
@@ -918,8 +919,8 @@ void print(string newfasta, string newname, preClusterData* params){
                     outAccnos << params->alignSeqs[i]->name << endl;
                     
                     string clusteredNames = "";
-                    for (set<int>::iterator it = params->alignSeqs[i]->clusteredIndexes.begin(); it != params->alignSeqs[i]->clusteredIndexes.end(); it++) {
-                        int indexOfSeq = *it;
+                    for (int i = 0; i < params->alignSeqs[i]->clusteredIndexes.size(); i++) {
+                        int indexOfSeq = params->alignSeqs[i]->clusteredIndexes[i];
                         string repName = params->alignSeqs[indexOfSeq]->name;
                         string dupNames = nameMap[repName];
                         clusteredNames += dupNames + ",";
@@ -1121,8 +1122,9 @@ void printData(string group, preClusterData* params, map<string, string>& option
             for (int i = 0; i < params->alignSeqs.size(); i++) {
                 if (params->alignSeqs[i]->numIdentical != 0) {
                     string clusteredNames = "";
-                    for (set<int>::iterator it = params->alignSeqs[i]->clusteredIndexes.begin(); it != params->alignSeqs[i]->clusteredIndexes.end(); it++) { //make names from indexes
-                        int indexOfSeq = *it;
+                    for (int j = 0; j < params->alignSeqs[i]->clusteredIndexes.size(); j++) {
+                        int indexOfSeq = params->alignSeqs[i]->clusteredIndexes[j];
+            
                         string repName = params->alignSeqs[indexOfSeq]->name;
                         string dupNames = "";
                         map<string, string>::iterator itDupName = optionalNameMap.find(repName);
@@ -1180,8 +1182,8 @@ bool fillWeighted(preClusterData* params, string fastafileName, string groupOrCo
                 
                 map<string, int>::iterator it = counts.find(seq.getName());
                 if (it != counts.end()) {
-                    set<int> clusteredIndexes; //don't use indexes for precluster with count file
-                    if (!params->hasCount) {  clusteredIndexes.insert(params->alignSeqs.size());  }
+                    vector<int> clusteredIndexes; //don't use indexes for precluster with count file
+                    if (!params->hasCount) {  clusteredIndexes.push_back(params->alignSeqs.size());  }
                     
                     seqPNode* tempNode = new seqPNode(seq.getName(), seq.getAligned(), it->second, clusteredIndexes);
                     params->alignSeqs.push_back(tempNode);
@@ -1248,6 +1250,8 @@ long long driverGroups(preClusterData* params){
             bool aligned = false;
             
             string thisGroupsFasta = filenames["fasta"][fileIndex];
+            
+            map<string, string> thisGroupsNameMap;
             if (params->groupfile != "")        {
                 string thisGroupsGroup = filenames["group"][fileIndex];
                 string thisGroupsName = "";
@@ -1255,15 +1259,28 @@ long long driverGroups(preClusterData* params){
                 
                 aligned = fillWeighted(params, thisGroupsFasta, thisGroupsGroup, thisGroupsName);
                 
+                params->util.mothurRemove(thisGroupsGroup);
+                if (params->hasName) { params->util.readNames(thisGroupsName, thisGroupsNameMap); params->util.mothurRemove(thisGroupsName);   }
+                
             }else if (params->hasCount)          {
                 string thisGroupsCount = filenames["count"][fileIndex];
                 
                 aligned = fillWeighted(params, thisGroupsFasta, thisGroupsCount, "");
+                
+                params->util.mothurRemove(thisGroupsCount);
             }
+            params->util.mothurRemove(thisGroupsFasta);
             fileIndex++;
             
             //sort seqs by number of identical seqs
             sort(params->alignSeqs.begin(), params->alignSeqs.end(), comparePriorityTopDown);
+            
+            if (params->hasName) { //adjust clusteredIndexes since seqs have changed location from the sort
+                for (int i = 0; i < params->alignSeqs.size(); i++) {
+                    params->alignSeqs[i]->clusteredIndexes.clear();
+                    params->alignSeqs[i]->clusteredIndexes.push_back(i);
+                }
+            }
             
             long long num = params->alignSeqs.size();
             numSeqs += num;
@@ -1290,9 +1307,6 @@ long long driverGroups(preClusterData* params){
             
             params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(num) + ".\n");
             params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
-            
-            map<string, string> thisGroupsNameMap;
-            if (params->hasName) {  params->util.readNames(params->namefile, thisGroupsNameMap, true);  }
                 
             printData(params->groups[i], params, thisGroupsNameMap);
             
@@ -1386,7 +1400,7 @@ string PreClusterCommand::mergeGroupNames(string deconvolutedNameFile, string ne
         string dupSequencesForGroup, uniqueSequenceForGroup;
         
         //build table
-        map<string, string> mergedNameMap; map<string, string>::iterator itMergedName;
+        map<string, set<string> > mergedNameMap; map<string, set<string> >::iterator itMergedName;
         while (!inNames.eof()) {
             
             if (m->getControl_pressed()) { break; }
@@ -1394,13 +1408,27 @@ string PreClusterCommand::mergeGroupNames(string deconvolutedNameFile, string ne
             inNames >> uniqueSequenceForGroup; util.gobble(inNames);
             inNames >> dupSequencesForGroup; util.gobble(inNames);
             
-            itName = nameMap.find(uniqueSequenceForGroup);
+            itName = nameMap.find(uniqueSequenceForGroup); //itName->second = unique name in names file (column one)
+            
             if (itName != nameMap.end()) {
-                itMergedName = mergedNameMap.find(itName->second); //have we seen this read before? If so, add these names to dups else create entry for this seq
+                
+                string repName = itName->second;
+                set<string> redundSeqs; util.splitAtChar(dupSequencesForGroup, redundSeqs, ',');
+                
+                itMergedName = mergedNameMap.find(repName); //have we seen a rep read for this? If so, add these names to dups else create entry for this seq
+                
                 if (itMergedName != mergedNameMap.end()) {
-                    itMergedName->second += "," + dupSequencesForGroup;
+                    
+                    itMergedName->second.insert(redundSeqs.begin(), redundSeqs.end());
+                    
                 }else {
-                    mergedNameMap[itName->second] = dupSequencesForGroup;
+                    //find dups names for
+                    mergedNameMap[repName] = redundSeqs;
+                    
+                    //go through redundant seqs and reset maps
+                    for (set<string>::iterator itRedund  = redundSeqs.begin(); itRedund != redundSeqs.end(); itRedund++) {
+                        nameMap[*itRedund] = repName;
+                    }
                 }
             }else {
                 cout << "should not get here" << endl;
@@ -1421,8 +1449,16 @@ string PreClusterCommand::mergeGroupNames(string deconvolutedNameFile, string ne
         ofstream out; util.openOutputFile(deconvolutedNameFile, out);
         ofstream outAccnos; util.openOutputFile(newnamefile, outAccnos);
         for (itMergedName = mergedNameMap.begin(); itMergedName != mergedNameMap.end(); itMergedName++) {
-            out << itMergedName->first << '\t' << itMergedName->second << endl;
-            outAccnos << itMergedName->first << endl;
+            set<string> names = itMergedName->second;
+            string repName = itMergedName->first;
+            names.erase(repName);
+            
+            string dupsNames = repName;
+            if (names.size() != 0) {  dupsNames += "," + util.getStringFromSet(names, ","); }
+            
+            out << repName << '\t' << dupsNames << endl;
+            
+            outAccnos << repName << endl;
         }
         out.close(); outAccnos.close();
         

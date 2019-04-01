@@ -51,7 +51,7 @@ class CountTable {
 
         //reads and creates smart enough to eliminate groups with zero counts
         int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames
-        int createTable(string, string, bool); //namefile, groupfile, createGroup
+        int createTable(string, string, vector<string>, bool createGroup=false); //namefile, groupfile, selectedGroups, createGroup,
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
         int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(string, bool, bool, set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
@@ -67,11 +67,11 @@ class CountTable {
 
 
         //all print commands ignore zeroed out seqs
-        int printCompressedTable(string);
-        int printTable(string); //preserves order in original, defaults compress to state of original file
-        int printTable(string, bool compress); //preserves order in original, printing compressed or not based on compress flag pasted in
-        int printSortedTable(string); //sorted by seqName
-        int printHeaders(ofstream&);
+        vector<string> printCompressedTable(string, vector<string> optionalGroups=nullVector); //nameOfFile, optionalVectorOfGroups (if empty, prints all possible groups), returns names of seqs in table - excludes zeroed reads
+        vector<string> printTable(string); //preserves order in original, defaults compress to state of original file
+        vector<string> printTable(string, bool compress); //preserves order in original, printing compressed or not based on compress flag pasted in
+        vector<string> printSortedTable(string); //sorted by seqName
+        int printHeaders(ofstream&, vector<string> optionalGroups=nullVector);
         vector<string> getHardCodedHeaders(); //Representative_Sequence, total
         int printSeq(ofstream&, string);
     

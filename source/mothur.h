@@ -229,11 +229,11 @@ struct seqPNode {
     int numIdentical;
     string name;
     string sequence;
-    set<int> clusteredIndexes; //indexes of merge nodes. Can use this later to construct names
+    vector<int> clusteredIndexes; //indexes of merge nodes. Can use this later to construct names
     int diffs;
     
     seqPNode() { diffs = 0; numIdentical = 0; name = ""; sequence = "";  }
-    seqPNode(string na, string seq, int n, set<int> nm) : numIdentical(n), name(na), sequence(seq), clusteredIndexes(nm) { diffs = 0; }
+    seqPNode(string na, string seq, int n, vector<int> nm) : numIdentical(n), name(na), sequence(seq), clusteredIndexes(nm) { diffs = 0; }
     ~seqPNode() {}
 };
 /**********************************************************/

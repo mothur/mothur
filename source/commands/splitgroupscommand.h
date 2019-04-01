@@ -18,6 +18,7 @@
 #include "groupmap.h"
 #include "sequence.hpp"
 #include "fastqread.h"
+#include "getseqscommand.h"
 
 /***************************************************************************************/
 

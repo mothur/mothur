@@ -152,7 +152,7 @@ int main(int argc, char *argv[]){
 			m->appendLogBuffer("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n\n");
 			m->appendLogBuffer("Distributed under the GNU General Public License\n\n");
 			m->appendLogBuffer("Type 'help()' for information on the commands that are available\n\n");
-			m->appendLogBuffer("For questions and analysis support, please visit our forum at https://www.mothur.org/forum\n\n");
+			m->appendLogBuffer("For questions and analysis support, please visit our forum at https://forum.mothur.org\n\n");
 			m->appendLogBuffer("Type 'quit()' to exit program\n\n");
 		}
 		

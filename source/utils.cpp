@@ -902,6 +902,48 @@ int Utils::renameFile(string oldName, string newName){
         exit(1);
     }
 }
+/***********************************************************************/
+
+int Utils::copyFile(string oldName, string newName){
+    try {
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: renaming " + oldName + " to " + newName + "\n"); }
+        
+        if (oldName == newName) { return 0; }
+        
+        ifstream inTest;
+        bool exist = openInputFile(newName, inTest, "");
+        inTest.close();
+        
+#if defined NON_WINDOWS
+        if (exist) { //you could open it so you want to delete it
+            if(m->getDebug()) { m->mothurOut("[DEBUG]: removing old copy of " + newName + "\n"); }
+            string command = "rm " + newName;
+            system(command.c_str());
+        }
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: cp " + oldName + " to " + newName + "\n"); }
+        
+        string command = "cp " + oldName + " " + newName;
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command cp " + oldName + " " + newName + "\n"); }
+        
+        int returnCode = system(command.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: system command cp " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
+#else
+        mothurRemove(newName);
+        appendFiles(oldName, newName);
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
+#endif
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "copyFile");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 
@@ -1430,6 +1472,27 @@ string Utils::getStringFromSet(set<int>& list, string delim){
             if (m->getControl_pressed()) { break;  }
             int value = *it;
             vlist.push_back(value);
+        }
+        result = getStringFromVector(vlist, delim);
+        
+        return result;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string Utils::getStringFromSet(set<string>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        vector<string> vlist;
+        for (set<string>::iterator it = list.begin(); it != list.end(); it++) {
+            if (m->getControl_pressed()) { break;  }
+            vlist.push_back(*it);
         }
         result = getStringFromVector(vlist, delim);
         
@@ -3304,6 +3367,44 @@ set<string> Utils::readAccnos(string accnosfile){
     }
 }
 //**********************************************************************************************************************
+int Utils::printAccnos(string accnosfile, vector<string>& names){
+    try {
+        ofstream out; openOutputFile(accnosfile, out);
+        
+        //output to .accnos file
+        for (int i = 0; i < names.size(); i++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            out << names[i] << endl;
+        }
+        out.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "printAccnos");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int Utils::printAccnos(string accnosfile, set<string>& names){
+    try {
+        ofstream out; openOutputFile(accnosfile, out);
+        
+        //output to .accnos file
+        for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            out << *it << endl;
+        }
+        out.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "printAccnos");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 int Utils::readAccnos(string accnosfile, vector<string>& names){
     try {
         names.clear();
@@ -4157,6 +4258,33 @@ void Utils::splitAtChar(string& estim, vector<string>& container, char symbol) {
         }
         container.push_back(individual);
 
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtChar");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+//This function parses the estimator options and puts them in a vector
+void Utils::splitAtChar(string& estim, set<string>& container, char symbol) {
+    try {
+        
+        if (symbol == '-') { splitAtDash(estim, container); return; }
+        
+        string individual = "";
+        int estimLength = estim.size();
+        for(int i=0;i<estimLength;i++){
+            if(estim[i] == symbol){
+                container.insert(individual);
+                individual = "";
+            }
+            else{
+                individual += estim[i];
+            }
+        }
+        container.insert(individual);
+        
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "splitAtChar");

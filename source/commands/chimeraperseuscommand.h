@@ -40,17 +40,16 @@ public:
 	void help() { m->mothurOut(getHelpString()); }		
 	
 private:
-	bool abort, hasName, hasCount, dups;
-	string fastafile, groupfile, countfile, outputDir, namefile;
+	bool abort, hasCount, dups;
+	string fastafile, countfile, outputDir;
 	int processors, alignLength;
 	double cutoff, alpha, beta;
     vector<string> outputNames;
 	
-	string getNamesFile(string&);
-	vector<seqData> readFiles(string, string);
-    vector<seqData> readFiles(string inputFile, CountTable* ct);
-	int deconvoluteResults(map<string, string>&, string, string);
-	int createProcessesGroups(string, string, string, vector<string>, string, string, string, int&);
+	string getCountFile(string&);
+	vector<seqData> readFiles(string, map<string, int>);
+	int deconvoluteResults(string, string);
+	int createProcessesGroups(string, string, string, string, vector<string>, string, string, int&);
 };
 /***********************************************************/
 

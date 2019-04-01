@@ -112,6 +112,7 @@ public:
     
     int printVsearchFile(vector<seqPriorityNode>&, string, string, string); //sorts and prints by abundance adding /ab=xxx/
     int renameFile(string, string); //oldname, newname
+    int copyFile(string, string); //oldname, newname
     vector<unsigned long long> setFilePosEachLine(string, long long&);
     vector<unsigned long long> setFilePosEachLine(string, unsigned long long&);
     vector<unsigned long long> setFilePosFasta(string, long long&);
@@ -130,6 +131,8 @@ public:
     set<string> readAccnos(string);
     int readAccnos(string, vector<string>&);
     int readAccnos(string, vector<string>&, string);
+    int printAccnos(string, set<string>&);
+    int printAccnos(string, vector<string>&);
     vector<consTax> readConsTax(string);
     int readConsTax(string, map<int, consTax2>&);
     void readNames(string, map<string, long long>&);
@@ -202,6 +205,7 @@ public:
     string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+    string getStringFromSet(set<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getFormattedHelp(vector<string> question, vector<string> aquestion, vector<string> issue, vector<string> aissue, vector<string> howto,vector<string> ahowto);
     
     bool inUsersGroups(vector<string>, vector<string>); //returns true if any of the strings in first vector are in second vector
@@ -223,6 +227,7 @@ public:
     void splitAtDash(string&, set<int>&);
     void splitAtDash(string&, set<string>&);
     void splitAtDash(string&, vector<string>&);
+    void splitAtChar(string&, set<string>&, char);
     void splitAtChar(string&, vector<string>&, char);
     void splitAtChar(string&, string&, char);
     void splitAtEquals(string&, string&);

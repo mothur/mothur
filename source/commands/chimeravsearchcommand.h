@@ -39,21 +39,19 @@ private:
     vector<int> processIDS;   //processid
     int driver(string, string, string, string, int&);
     
-    bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, ucl, useMindiffs, hasCount, hasName, dups;
-    string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, mindiffs, vsearchLocation;
+    bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, ucl, useMindiffs, hasCount, dups;
+    string fastafile, templatefile, outputDir, countfile, abskew, minh, mindiv, xn, dn, mindiffs, vsearchLocation;
     int processors;
     
-    SequenceParser* sparser;
-    SequenceCountParser* cparser;
     vector<string> outputNames;
     
-    string getNamesFile(string&);
+    string getCountFile(string&);
     int readFasta(string, map<string, string>&);
-    int deconvoluteResults(map<string, string>&, string, string, string);
-    int driverGroups(string, string, string, string, string, int, int, vector<string>);
+    int deconvoluteResults(string, string, string, long long&);
+    int driverGroups(map<string, vector<string> >, string, string, string, string, string);
+    int getSeqs(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename, string tag, string tag2, long long& numSeqs, string thisGroupsFastaFile);
+
     int prepFile(string filename, string);
-    
-    
 };
 
 /***********************************************************/

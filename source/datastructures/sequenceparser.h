@@ -15,6 +15,7 @@
 #include "mothurout.h"
 #include "sequence.hpp"
 #include "groupmap.h"
+#include "splitgroupscommand.h"
 
 /* This class reads a fasta and group file with a namesfile as optional and parses the data by group. 
  
@@ -36,31 +37,17 @@ class SequenceParser {
 		int getNumGroups();
 		vector<string> getNamesOfGroups();	
 		
-		int getNumSeqs(string);		//returns the number of unique sequences in a specific group
-		vector<Sequence> getSeqs(string); //returns unique sequences in a specific group
-        bool fillWeighted(vector< seqPNode* >&, string group, int& length); //return true for aligned and false for unaligned
-		map<string, string> getNameMap(string); //returns seqName -> namesOfRedundantSeqs separated by commas for a specific group - the name file format, but each line is parsed by group.
-		
-		int getSeqs(string, string, string, string, long long&, string, bool); //prints unique sequences in a specific group to a file - group, filename, uchimeFormat=false, tag(/ab= or ;size=), tag2(/ or ;)
-		int getNameMap(string, string); //print seqName -> namesOfRedundantSeqs separated by commas for a specific group - group, filename
-		
-        map<string, string> getAllSeqsMap();  //returns map where the key=sequenceName and the value=representativeSequence - helps us remove duplicates after group by group processing
+        vector<string> getFiles(string);  //returns fasta and count file a specific group.
+        map<string, vector<string> > getFiles() { return groupToFiles; } //returns all files groupName - > vector of groups files (fasta, optionalName, group);
     
 	private:
 		MothurOut* m;
-        GroupMap groupMap;
         Utils util;
         bool hasName;
-        map<string, string> allSeqsMap;
-        map<string, string> nameMap;
-	
-        vector<Sequence> seqs; //unique
-        map<string, int> groupIndexMap; //maps sample name to index in namesOfGroups and groupsToSeqs
-        vector< vector<int> > groupToSeqs; //maps group -> vector of sequences indexes that belong to the group. (groupToSeqs[0] contains sequence info for sample namesOfGroups[0]).  groupToSeqs[0] = <1,4,7,8> means seqs[1], seqs[4], seq[7], seqs[8] belong to group namesOfGroups[0]. namesOfGroups in same order as groupToSeqs
-        vector<string> namesOfGroups; //namesOfGroups in same order as groupToSeqs
     
-        int readFasta(string fastafile);
-};
+        map<string, vector<string> > groupToFiles; //groupName -> fasta, name, group or groupName -> fasta, group
+        vector<string> namesOfGroups; //namesOfGroups in same order as groupToSeqs;
+ };   
 
 #endif
 
