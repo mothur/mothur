@@ -572,7 +572,6 @@ int GetSeqsCommand::readQual(){
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
 		
-		
 		ifstream in;
 		util.openInputFile(qualfile, in);
 		string name;

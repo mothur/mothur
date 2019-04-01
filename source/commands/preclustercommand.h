@@ -50,12 +50,11 @@ private:
     float match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels;
     vector<float> error_dist;
     bool abort, bygroup;
-    string fastafile, namefile, outputDir, groupfile, countfile, pc_method, align_method, align;
+    string fastafile, outputDir, countfile, pc_method, align_method, align;
     vector<string> outputNames;
     
     void createProcessesGroups(string, string);
     string mergeGroupCounts(string, string);
-    string mergeGroupNames(string, string);
     void printFasta(string newFastaFileName, string accnosFile);
 };
 
