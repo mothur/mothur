@@ -363,19 +363,21 @@ int RemoveLineageCommand::execute(){
 		
 		//read through the correct file and output lines you want to keep
 		if (taxfile != "")			{
-            readTax(); //fills the set of names to get
+            string accnosFileName = readTax(); //fills the set of names to get
             
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
-                runRemoveSeqs();
-            }else { util.mothurRemove(accnosFileName); }
+                runRemoveSeqs(accnosFileName);
+            }
+            util.mothurRemove(accnosFileName);
         }else {
-            readConsTax(); //writes accnos file with otuNames
+            string accnosFileName = readConsTax(); //writes accnos file with otuNames
             
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
-                runRemoveOTUs();
-            }else { util.mothurRemove(accnosFileName); }
+                runRemoveOTUs(accnosFileName);
+            }
+            util.mothurRemove(accnosFileName);
         }
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
@@ -446,7 +448,7 @@ int RemoveLineageCommand::execute(){
 }
 
 //**********************************************************************************************************************
-int RemoveLineageCommand::runRemoveSeqs(){
+int RemoveLineageCommand::runRemoveSeqs(string accnosFileName){
 	try {
         //use remove.seqs to create new list and shared files
         if ((namefile != "") || (fastafile != "") || (countfile != "") || (groupfile != "") || (alignfile != "") || (listfile != "")) {
@@ -511,7 +513,7 @@ int RemoveLineageCommand::runRemoveSeqs(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveLineageCommand::runRemoveOTUs(){
+int RemoveLineageCommand::runRemoveOTUs(string accnosFileName){
 	try {
         //use remove.otus to create new list and shared files
         if ((listfile != "") || (sharedfile != "")) {
@@ -553,15 +555,15 @@ int RemoveLineageCommand::runRemoveOTUs(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveLineageCommand::readTax(){
+string RemoveLineageCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
-        accnosFileName = getOutputFileName("accnos", variables);
         variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
+        string accnosFileName = getOutputFileName("accnos", variables);
         
         ofstream out, outAccnos;
         util.openOutputFile(outputFileName, out);
@@ -587,7 +589,7 @@ int RemoveLineageCommand::readTax(){
 		
 		while(!in.eof()){
 
-			if (m->getControl_pressed()) { in.close(); out.close(); outAccnos.close(); util.mothurRemove(outputFileName);  util.mothurRemove(accnosFileName);  return 0; }
+			if (m->getControl_pressed()) { break; }
 
             in >> name; util.gobble(in);
             tax = util.getline(in); util.gobble(in);
@@ -605,7 +607,7 @@ int RemoveLineageCommand::readTax(){
 		if (!wroteSomething) { m->mothurOut("Your taxonomy file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
         
-		return 0;
+		return accnosFileName;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "readTax");
@@ -613,13 +615,13 @@ int RemoveLineageCommand::readTax(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveLineageCommand::readConsTax(){
+string RemoveLineageCommand::readConsTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomy);  }
 		map<string, string> variables;
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomy));
-        accnosFileName = getOutputFileName("accnos", variables);
+        string accnosFileName = getOutputFileName("accnos", variables);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
 
         ofstream out, outAccnos;
@@ -651,7 +653,7 @@ int RemoveLineageCommand::readConsTax(){
         int numR = 0;
 		while(!in.eof()){
             
-			if (m->getControl_pressed()) { in.close(); out.close(); outAccnos.close(); util.mothurRemove(outputFileName); util.mothurRemove(accnosFileName);  return 0; }
+			if (m->getControl_pressed()) { break; }
             
 			in >> otuLabel;	 		util.gobble(in);
             in >> numReps;          util.gobble(in);
@@ -676,7 +678,7 @@ int RemoveLineageCommand::readConsTax(){
         
 		outputNames.push_back(outputFileName); outputTypes["constaxonomy"].push_back(outputFileName);
         
-		return 0;
+		return accnosFileName;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "readConsTax");

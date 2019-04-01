@@ -353,19 +353,22 @@ int GetLineageCommand::execute(){
         
 		//read through the correct file and output lines you want to keep
 		if (taxfile != "")			{
-            readTax(); //fills the set of names to get
+            string accnosFileName = readTax(); //fills the set of names to get
             
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
-                runGetSeqs();
-            }else { util.mothurRemove(accnosFileName); }
+                runGetSeqs(accnosFileName);
+            }
+            util.mothurRemove(accnosFileName);
+            
         }else {
-            readConsTax();
+            string accnosFileName = readConsTax();
             
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
-                runGetOTUs();
-            }else { util.mothurRemove(accnosFileName); }
+                runGetOTUs(accnosFileName);
+            }
+            util.mothurRemove(accnosFileName);
         }
 				
 		
@@ -431,7 +434,7 @@ int GetLineageCommand::execute(){
 }
 
 //**********************************************************************************************************************
-int GetLineageCommand::runGetSeqs(){
+int GetLineageCommand::runGetSeqs(string accnosFileName){
     try {
         //use remove.seqs to create new list and shared files
         if ((namefile != "") || (fastafile != "") || (countfile != "") || (groupfile != "") || (alignfile != "") || (listfile != "")) {
@@ -496,7 +499,7 @@ int GetLineageCommand::runGetSeqs(){
     }
 }
 //**********************************************************************************************************************
-int GetLineageCommand::runGetOTUs(){
+int GetLineageCommand::runGetOTUs(string accnosFileName){
     try {
         //use remove.otus to create new list and shared files
         if ((listfile != "") || (sharedfile != "")) {
@@ -538,7 +541,7 @@ int GetLineageCommand::runGetOTUs(){
     }
 }
 //**********************************************************************************************************************
-int GetLineageCommand::readTax(){
+string GetLineageCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
@@ -546,6 +549,7 @@ int GetLineageCommand::readTax(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
+        string accnosFileName = outputFileName + ".accnos";
 		
         ofstream out, outAccnos;
 		util.openOutputFile(outputFileName, out);
@@ -570,7 +574,7 @@ int GetLineageCommand::readTax(){
 		
 		while(!in.eof()){
 
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { break; }
 
             in >> name; util.gobble(in);
             tax = util.getline(in); util.gobble(in);
@@ -589,7 +593,7 @@ int GetLineageCommand::readTax(){
 		if (!wroteSomething) { m->mothurOut("Your taxonomy file does not contain any sequences from " + taxons + ".\n");  }
 		outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
 			
-		return 0;
+		return accnosFileName;
 
 	}
 	catch(exception& e) {
@@ -598,7 +602,7 @@ int GetLineageCommand::readTax(){
 	}
 }
 //**********************************************************************************************************************
-int GetLineageCommand::readConsTax(){
+string GetLineageCommand::readConsTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomy);  }
@@ -606,6 +610,7 @@ int GetLineageCommand::readConsTax(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomy));
         variables["[extension]"] = util.getExtension(constaxonomy);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
+        string accnosFileName = outputFileName + ".accnos";
 		
         ofstream out, outAccnos;
 		util.openOutputFile(outputFileName, out);
@@ -635,7 +640,7 @@ int GetLineageCommand::readConsTax(){
         
 		while(!in.eof()){
             
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
+			if (m->getControl_pressed()) { break; }
             
 			in >> otuLabel;	 		util.gobble(in);
             in >> numReps;          util.gobble(in);
@@ -655,7 +660,7 @@ int GetLineageCommand::readConsTax(){
 		if (!wroteSomething) { m->mothurOut("Your taxonomy file does not contain any OTUs from " + taxons + ".\n");   }
 		outputNames.push_back(outputFileName); outputTypes["constaxonomy"].push_back(outputFileName);
         
-		return 0;
+		return accnosFileName;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetLineageCommand", "readConsTax");

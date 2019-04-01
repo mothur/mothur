@@ -547,10 +547,10 @@ int GetSeqsCommand::readFasta(){
 		in.close();	
 		out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
 		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName); 
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your fasta file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your fasta file.\n");
 		
 		return 0;
 

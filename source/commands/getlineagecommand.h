@@ -40,14 +40,14 @@ class GetLineageCommand : public Command {
 	
 	private:
 		vector<string> outputNames, listOfTaxons;
-		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label, accnosFileName;
+		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label;
 		bool abort, dups;
 		
-		int readTax();
-        int readConsTax();
+		string readTax();
+        string readConsTax();
     
-        int runGetOTUs();
-        int runGetSeqs();
+        int runGetOTUs(string);
+        int runGetSeqs(string);
     
     
 		

@@ -38,13 +38,13 @@ class RemoveLineageCommand : public Command {
 	
 	private:
 		vector<string> outputNames, listOfTaxons;
-		string fastafile, namefile, groupfile, alignfile, listfile, countfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label, accnosFileName;
+		string fastafile, namefile, groupfile, alignfile, listfile, countfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label;
 		bool abort, dups;
 		
-        int readTax();
-        int readConsTax();
-        int runRemoveOTUs();
-        int runRemoveSeqs();
+        string readTax();
+        string readConsTax();
+        int runRemoveOTUs(string);
+        int runRemoveSeqs(string);
 		vector< map<string, float> > getTaxons(string);
 };
 
