@@ -273,7 +273,8 @@ PreClusterCommand::PreClusterCommand(string option) {
                     error_dist.push_back(stof(probability));
                 }
             }
-             
+ 
+            
             temp = validParameter.valid(parameters, "error_rate");	if (temp == "not found"){	temp = "0.005";			}
             util.mothurConvert(temp, error_rate);
             if (error_rate < 0) { m->mothurOut("[ERROR]: error_rate must be positive.\n"); abort=true; }
