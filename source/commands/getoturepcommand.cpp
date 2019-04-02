@@ -793,6 +793,7 @@ int GetOTURepCommand::process(ListVector* processList) {
         vector<string> binLabels = processList->getLabels();
 		for (int i = 0; i < processList->size(); i++) {
         
+            
 			if (m->getControl_pressed()) { out.close(); if (Groups.size() == 0) { newNamesOutput.close(); } return 0; }
 			
 			string temp = processList->get(i);
