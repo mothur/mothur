@@ -934,7 +934,7 @@ int main(int argc, char *argv[]){
 	vector<vector<int> > aanI = otuBySeqLookUp;
 	
 	int numIters = 0;
-	double maxDelta = 1e6;
+	double maxDelta = MOTHURMAX;
 	
 	while(numIters < minIter || ((maxDelta > minDelta) && (numIters < maxIter))){
 		
@@ -949,7 +949,7 @@ int main(int argc, char *argv[]){
 		int total = 0;
 		
 		for(int i=0;i<numSeqs;i++){
-			double offset = 1e6;
+			double offset = MOTHURMAX;
 			double norm = 0.0000;
 			double minWeight = MIN_WEIGHT;
 			vector<double> currentTau(numOTUs);

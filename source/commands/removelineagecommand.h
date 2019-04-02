@@ -13,7 +13,8 @@
 #include "command.hpp"
 #include "sharedrabundvectors.hpp"
 #include "listvector.hpp"
-
+#include "removeseqscommand.h"
+#include "removeotulabelscommand.h"
 
 class RemoveLineageCommand : public Command {
 	
@@ -36,24 +37,14 @@ class RemoveLineageCommand : public Command {
 		void help() { m->mothurOut(getHelpString()); }	
 	
 	private:
-		set<string> names;
 		vector<string> outputNames, listOfTaxons;
 		string fastafile, namefile, groupfile, alignfile, listfile, countfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label;
 		bool abort, dups;
-        ListVector* list;
 		
-		int readFasta();
-		int readName();
-		int readGroup();
-        int readCount();
-		int readAlign();
-		int readList();
-		int readTax();
-        int readShared();
-        int readConsTax();
-        int readConsList();
-        SharedRAbundVectors* getShared();
-        int getListVector();
+        string readTax();
+        string readConsTax();
+        int runRemoveOTUs(string);
+        int runRemoveSeqs(string);
 		vector< map<string, float> > getTaxons(string);
 };
 

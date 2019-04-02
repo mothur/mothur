@@ -31,23 +31,13 @@ public:
   void help() { m->mothurOut(getHelpString()); }
 
 private:
-    bool abort;
-    string outputDir;
+    bool abort, allLines, useTiming, doPruning, discardHighErrorTrees;
+    string outputDir, sharedfile, designfile, sets, treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
     vector<string> outputNames, Groups, Sets;
-  
-    string sharedfile, designfile, sets;
-    set<string> labels;
-    bool allLines;
-  
-    int processors;
-    bool useTiming;
-
-    DesignMap designMap;
-  
-    int numDecisionTrees;
-    string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
-    bool doPruning, discardHighErrorTrees;
     double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
+    int numDecisionTrees, processors;
+    set<string> labels;
+    DesignMap designMap;
     
     void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
 };

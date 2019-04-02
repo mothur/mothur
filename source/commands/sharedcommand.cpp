@@ -326,12 +326,21 @@ int SharedCommand::createSharedFromCount() {
         
         CountTable ct;  ct.readTable(countfile, true, false);
         
-        SharedRAbundVectors* lookup = ct.getShared(Groups);
+        map<string, string> seqNameToOtuName;
+        SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);
         lookup->setLabels(*labels.begin());
         lookup->print(out, printHeaders);
         
         out.close();
         delete lookup;
+        
+        string mapFilename = getOutputFileName("map",variables);
+        outputNames.push_back(mapFilename); outputTypes["map"].push_back(mapFilename);
+        ofstream outMap;
+        util.openOutputFile(mapFilename, outMap);
+        
+        for (map<string, string>::iterator it = seqNameToOtuName.begin(); it != seqNameToOtuName.end(); it++) { outMap << it->first << '\t' << it->second << endl; }
+        outMap.close();
         
         return 0;
     }

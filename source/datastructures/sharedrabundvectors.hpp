@@ -38,6 +38,7 @@ public:
     
     void setLabels(string l);
     int getOTUTotal(int bin);
+    int getOTUTotal(string otuLabel); //returns 0 if otuLabel is not found
     vector<int> getOTU(int bin);
     int get(int bin, string group);
     void set(int bin, int binSize, string group);

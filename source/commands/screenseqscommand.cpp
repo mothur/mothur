@@ -472,7 +472,9 @@ int ScreenSeqsCommand::execute(){
         if (wroteAccnos) {
             //use remove.seqs to create new name, group and count file
             if ((countfile != "") || (namefile != "") || (groupfile != "") || (qualfile != "") || (taxonomy != "")) {
-                string inputString = "accnos=" + badAccnosFile;
+                string strippedAccnos = printAccnos(badSeqNames);
+            
+                string inputString = "accnos=" + strippedAccnos;
                 
                 if (countfile != "") {  inputString += ", count=" + countfile;  }
                 else{
@@ -482,8 +484,8 @@ int ScreenSeqsCommand::execute(){
                 if(qualfile != "")						{	inputString += ", qfile=" + qualfile;       }
                 if(taxonomy != "")						{	inputString += ", taxonomy=" + taxonomy;	}
                 
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-                m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 
                 Command* removeCommand = new RemoveSeqsCommand(inputString);
@@ -493,7 +495,9 @@ int ScreenSeqsCommand::execute(){
                 
                 delete removeCommand;
                 current->setMothurCalling(false);
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n");
+                
+                util.mothurRemove(strippedAccnos);
                 
                 if (groupfile != "") {
                     string thisOutputDir = outputDir;
@@ -599,6 +603,24 @@ int ScreenSeqsCommand::execute(){
 		m->errorOut(e, "ScreenSeqsCommand", "execute");
 		exit(1);
 	}
+}
+//***************************************************************************************************************/
+string ScreenSeqsCommand::printAccnos(map<string, string>& badSeqNames){
+    try{
+        string filename = badAccnosFile + ".temp";
+        ofstream out;
+        util.openOutputFile(filename, out);
+        
+        for (map<string, string>::iterator it = badSeqNames.begin(); it != badSeqNames.end(); it++) {
+            out << it->first << endl;
+        }
+        out.close();
+        return filename;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ScreenSeqsCommand", "printAccnos");
+        exit(1);
+    }
 }
 //***************************************************************************************************************/
 int ScreenSeqsCommand::runFastaScreening(map<string, string>& badSeqNames){

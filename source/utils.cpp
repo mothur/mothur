@@ -891,12 +891,56 @@ int Utils::renameFile(string oldName, string newName){
 #else
         mothurRemove(newName);
         int renameOk = rename(oldName.c_str(), newName.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
 #endif
         return 0;
 
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "renameFile");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+int Utils::copyFile(string oldName, string newName){
+    try {
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: renaming " + oldName + " to " + newName + "\n"); }
+        
+        if (oldName == newName) { return 0; }
+        
+        ifstream inTest;
+        bool exist = openInputFile(newName, inTest, "");
+        inTest.close();
+        
+#if defined NON_WINDOWS
+        if (exist) { //you could open it so you want to delete it
+            if(m->getDebug()) { m->mothurOut("[DEBUG]: removing old copy of " + newName + "\n"); }
+            string command = "rm " + newName;
+            system(command.c_str());
+        }
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: cp " + oldName + " to " + newName + "\n"); }
+        
+        string command = "cp " + oldName + " " + newName;
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command cp " + oldName + " " + newName + "\n"); }
+        
+        int returnCode = system(command.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: system command cp " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
+#else
+        mothurRemove(newName);
+        appendFiles(oldName, newName);
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
+#endif
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "copyFile");
         exit(1);
     }
 }
@@ -1439,6 +1483,27 @@ string Utils::getStringFromSet(set<int>& list, string delim){
     }
 }
 //**********************************************************************************************************************
+string Utils::getStringFromSet(set<string>& list, string delim){
+    try {
+        string result = "";
+        
+        if (list.size() == 0) { return result; }
+        
+        vector<string> vlist;
+        for (set<string>::iterator it = list.begin(); it != list.end(); it++) {
+            if (m->getControl_pressed()) { break;  }
+            vlist.push_back(*it);
+        }
+        result = getStringFromVector(vlist, delim);
+        
+        return result;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 //NOTE: assumes questions.size() == qanswers.size(), issues.size() == ianswers.size(), howtos.size() == hanswers.size()
 string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers, vector<string> issues, vector<string> ianswers, vector<string> howtos,vector<string> hanswers) {
     try {
@@ -1460,6 +1525,14 @@ string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers
 #endif
         }
         
+        if (questions.size() == 0) {
+            commonQuestions += "Can't find your question? Please feel free to ask questions on our forum, https://forum.mothur.org.\n\n";
+#if defined NON_WINDOWS
+            cout << RESET "Can't find your question? Please feel free to ask questions on our forum, https://forum.mothur.org.\n\n";
+#endif
+
+        }
+        
         commonQuestions += headers[1]+"\n";
 #if defined NON_WINDOWS
         cout << BOLDGREEN << headers[1]; cout << RESET << endl;
@@ -1471,6 +1544,15 @@ string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers
             cout << BOLDBLUE << toString(i+1)+". "+issues[i]; cout << RESET << endl << ianswers[i] << endl;
 #endif
         }
+        
+        if (issues.size() == 0) {
+            commonQuestions += "Can't find your issue? Please feel free to ask questions on our forum, https://forum.mothur.org or send bug reports to mothur.bugs@gmail.com.\n\n";
+#if defined NON_WINDOWS
+            cout << RESET "Can't find your issue? Please feel free to ask questions on our forum, https://forum.mothur.org or send bug reports to mothur.bugs@gmail.com.\n\n";
+#endif
+            
+        }
+
 
         commonQuestions += headers[2]+"\n";
 #if defined NON_WINDOWS
@@ -1484,11 +1566,23 @@ string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers
 #endif
         }
         
+        if (howtos.size() == 0) {
+            commonQuestions += "Not sure how to do what you want? Please feel free to ask questions on our forum, https://forum.mothur.org.\n\n";
+#if defined NON_WINDOWS
+            cout << RESET "Not sure how to do what you want? Please feel free to ask questions on our forum, https://forum.mothur.org.\n\n";
+#endif
+            
+        }
+        
 #if defined NON_WINDOWS
         m->mothurOutJustToLog(commonQuestions);
+        
+        cout << BOLDMAGENTA << "\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki.\n"; cout << RESET << endl;
+        m->mothurOutJustToLog("\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki.\n");
 #else
-        m->mothurOut(commonQuestions);
+        m->mothurOut(commonQuestions + "\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki.\n");
 #endif
+
         return commonQuestions;
     }
     catch(exception& e) {
@@ -1512,7 +1606,7 @@ string Utils::removeNs(string seq){
 int Utils::getOTUNames(vector<string>& currentLabels, int numBins, string tagHeader){
     try {
 
-        if (currentLabels.size() == numBins) { return 0; }
+        if (currentLabels.size() == numBins) {  return 0; }
 
         int maxLabelNumber = 0;
         if (currentLabels.size() < numBins) {
@@ -2569,6 +2663,7 @@ int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfi
     }
 }
 /**********************************************************************************************************************/
+//nameMap is filled with redundant names mapped to unique name
 int Utils::readNames(string namefile, map<string, string>& nameMap, bool redund) {
     try {
         //open input file
@@ -2809,6 +2904,55 @@ int Utils::readNames(string namefile, map<string, string>& nameMap) {
         exit(1);
     }
 }
+/**********************************************************************************************************************/
+int Utils::readNames(string namefile, map<string, string>& nameMap, set<string>& namesToInclude) {
+    try {
+        //open input file
+        ifstream in;
+        openInputFile(namefile, in);
+        
+        string firstCol, secondCol;
+        
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+            
+            in >> firstCol; gobble(in);
+            in >> secondCol; gobble(in);
+            
+            checkName(firstCol);
+            checkName(secondCol);
+            
+            vector<string> secondNames; splitAtComma(secondCol, secondNames);
+            
+            secondCol = ""; firstCol = "";
+            
+            for (int i = 0; i < secondNames.size(); i++) {
+                if (namesToInclude.count(secondNames[i]) != 0) { //we want to include you
+                    secondCol += secondNames[i] + ",";
+                    if (firstCol == "") {   firstCol = secondNames[i]; }
+                }
+            }
+            
+            if (secondCol != "") {
+                //remove last comma
+                secondCol = secondCol.substr(0,secondCol.length()-1);
+            
+                nameMap[firstCol] = secondCol;
+            }
+            
+        }
+        in.close();
+        
+        
+        return nameMap.size();
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "readNames");
+        exit(1);
+    }
+}
+
 /**********************************************************************************************************************/
 int Utils::readNames(string namefile, map<string, vector<string> >& nameMap) {
     try {
@@ -3223,6 +3367,44 @@ set<string> Utils::readAccnos(string accnosfile){
     }
 }
 //**********************************************************************************************************************
+int Utils::printAccnos(string accnosfile, vector<string>& names){
+    try {
+        ofstream out; openOutputFile(accnosfile, out);
+        
+        //output to .accnos file
+        for (int i = 0; i < names.size(); i++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            out << names[i] << endl;
+        }
+        out.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "printAccnos");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int Utils::printAccnos(string accnosfile, set<string>& names){
+    try {
+        ofstream out; openOutputFile(accnosfile, out);
+        
+        //output to .accnos file
+        for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            out << *it << endl;
+        }
+        out.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "printAccnos");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 int Utils::readAccnos(string accnosfile, vector<string>& names){
     try {
         names.clear();
@@ -3504,6 +3686,32 @@ bool Utils::mothurConvert(string item, intDist& num){
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "mothurConvert-intDist");
+        exit(1);
+    }
+}
+/***********************************************************************/
+set<string> Utils::mothurConvert(vector<string>& input){
+    try {
+        set<string> output(input.begin(), input.end());
+        
+        
+        return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-vectorToSet");
+        exit(1);
+    }
+}
+/***********************************************************************/
+vector<string> Utils::mothurConvert(set<string>& input){
+    try {
+        vector<string> output(input.begin(), input.end());
+        
+        
+        return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-SetToVector");
         exit(1);
     }
 }
@@ -4050,6 +4258,33 @@ void Utils::splitAtChar(string& estim, vector<string>& container, char symbol) {
         }
         container.push_back(individual);
 
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtChar");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+//This function parses the estimator options and puts them in a vector
+void Utils::splitAtChar(string& estim, set<string>& container, char symbol) {
+    try {
+        
+        if (symbol == '-') { splitAtDash(estim, container); return; }
+        
+        string individual = "";
+        int estimLength = estim.size();
+        for(int i=0;i<estimLength;i++){
+            if(estim[i] == symbol){
+                container.insert(individual);
+                individual = "";
+            }
+            else{
+                individual += estim[i];
+            }
+        }
+        container.insert(individual);
+        
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "splitAtChar");

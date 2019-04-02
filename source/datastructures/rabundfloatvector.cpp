@@ -324,7 +324,7 @@ SAbundVector RAbundFloatVector::getSAbundVector() {
 
 /***********************************************************************/
 
-OrderVector RAbundFloatVector::getOrderVector(map<string,int>* nameMap = NULL) {
+OrderVector RAbundFloatVector::getOrderVector(map<string,int>* nameMap) {
     try {
         OrderVector ov;
         

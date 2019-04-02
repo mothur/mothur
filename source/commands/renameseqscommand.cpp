@@ -20,6 +20,7 @@ vector<string> RenameSeqsCommand::setParameters(){
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "fileFasta-file", "fileFasta", "none","fasta",false,false,true); parameters.push_back(pfasta);
         CommandParameter pqfile("qfile", "InputTypes", "", "", "file", "none", "none","qfile",false,false,true); parameters.push_back(pqfile);
         CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "file", "none", "none","contigsreport",false,false,true); parameters.push_back(pcontigsreport);
+        CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "file", "none","taxonomy",false,false,true); parameters.push_back(ptaxonomy);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount-file", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup-file", "none", "none","count",false,false,true); parameters.push_back(pcount);
         CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup-file", "none", "none","group",false,false,true); parameters.push_back(pgroup);
@@ -42,9 +43,10 @@ vector<string> RenameSeqsCommand::setParameters(){
 string RenameSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The rename.seqs command reads a fastafile or file file and renames the sequences using a count. Optionally you can add a groupfile or count file with an optional namefile. Then it will create files with the sequence names concatenated with the group.";
-		helpString += "The rename.seqs command parameters are fasta, name, group, count, qfile, placement, contigsreport and delim. Fasta is required, unless a current file is available for both.\n";
-        helpString += "The qfile allows you to provide an associated quality file.\n";
+		helpString += "The rename.seqs command renames sequences in the input files. By default, mothur will generate new names based on your inputs. Alternatively, you can provide a map file.\n";
+        helpString += "The rename.seqs command parameters are " + getCommandParameters() + ". Fasta or file are required, unless a current file is available for both.\n";
+        helpString += "The qfile parameter allows you to provide an associated quality file.\n";
+        helpString += "The taxonomy parameter allows you to provide an associated taxonomy file.\n";
         helpString += "The contigsreport allows you to provide an associated contigsreport file.\n";
         helpString += "The file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples. \n";
         helpString += "The placement parameter allows you to indicate whether you would like the group name appended to the front or back of the sequence number.  Options are front or back. Default=back.\n";
@@ -70,6 +72,7 @@ string RenameSeqsCommand::getOutputPattern(string type) {
         else if (type == "name")                {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "group")               {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "count")               {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "taxonomy")            {   pattern = "[filename],renamed,[extension]";    }
         else if (type == "qfile")               {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "contigsreport")       {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "map")                 {  pattern = "[filename],renamed_map"; }
@@ -95,6 +98,7 @@ RenameSeqsCommand::RenameSeqsCommand(){
         outputTypes["map"] = tempOutNames;
         outputTypes["qfile"] = tempOutNames;
         outputTypes["contigsreport"] = tempOutNames;
+        outputTypes["taxonomy"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RenameSeqsCommand", "RenameSeqsCommand");
@@ -132,6 +136,7 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             outputTypes["map"] = tempOutNames;
             outputTypes["qfile"] = tempOutNames;
             outputTypes["contigsreport"] = tempOutNames;
+            outputTypes["taxonomy"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
 			string inputDir = validParameter.valid(parameters, "inputdir");
@@ -186,6 +191,14 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
                     if (path == "") {	parameters["contigsreport"] = inputDir + it->second;		}
                 }
                 
+                it = parameters.find("taxonomy");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+                }
+                
                 it = parameters.find("map");
                 //user has given a template file
                 if(it != parameters.end()){
@@ -219,11 +232,11 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             
             if ((fastaFile == "") && (fileFile == "")) {
                 fastaFile = current->getFastaFile();
-                if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter.\n");  }
                 else {
                     fileFile = current->getFileFile();
-                    if (fileFile != "") { m->mothurOut("Using " + fileFile + " as input file for the file parameter."); m->mothurOutEndLine(); }
-                    else {  m->mothurOut("You have no current fastafile or file file and the fasta or file parameter is required."); m->mothurOutEndLine(); abort = true; }
+                    if (fileFile != "") { m->mothurOut("Using " + fileFile + " as input file for the file parameter.\n");  }
+                    else {  m->mothurOut("You have no current fastafile or file file and the fasta or file parameter is required.\n");  abort = true; }
                 }
             }
 			
@@ -255,14 +268,19 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             if (contigsfile == "not open") { abort = true; }
             else if (contigsfile == "not found"){ contigsfile = ""; }
             
-            if ((countfile != "") && (nameFile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            taxfile = validParameter.validFile(parameters, "taxonomy");
+            if (taxfile == "not open") { taxfile = ""; abort = true; }
+            else if (taxfile == "not found") {  taxfile = "";  }
+            else { current->setTaxonomyFile(taxfile); }
             
-            if ((fileFile != "") && (fastaFile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: file or fasta."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (nameFile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name.\n"); abort = true; }
             
-            if ((countfile != "") && (groupfile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
+            if ((fileFile != "") && (fastaFile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: file or fasta.\n"); abort = true; }
+            
+            if ((countfile != "") && (groupfile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
             
             if ((fileFile != "") && ((nameFile != "") || (groupfile != "") || (qualfile != "") || (contigsfile != "") || (countfile != "") || (fastaFile != "")) ) {
-                m->mothurOut("[ERROR]: The file option cannot be used with any other files except the map file."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: The file option cannot be used with any other files except the map file.\n");  abort = true;
             }
 
             placement = validParameter.valid(parameters, "placement");		if (placement == "not found") { placement = "back"; }
@@ -369,7 +387,7 @@ int RenameSeqsCommand::execute() {
             map<string, int> counts; for (int i = 0; i < Groups.size(); i++) {  counts[Groups[i]] = 1; }
             map<string, string> old2NewNameMap;
             bool fillOld2NewNameMap = false;
-            if ((qualfile != "") || (contigsfile != "")) { fillOld2NewNameMap = true; }
+            if ((qualfile != "") || (contigsfile != "") || (taxfile != "")) { fillOld2NewNameMap = true; }
             
             while (!in.eof()) {
                 if (m->getControl_pressed()) { break; }
@@ -454,6 +472,7 @@ int RenameSeqsCommand::execute() {
             
             if (qualfile != "")         { readQual(old2NewNameMap);     }
             if (contigsfile != "")      { readContigs(old2NewNameMap);  }
+            if (taxfile != "")          { readTax(old2NewNameMap);      }
         }
         
         if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]);  } return 0; }
@@ -536,6 +555,51 @@ int RenameSeqsCommand::readQual(map<string, string>& oldMap){
     }
     catch(exception& e) {
         m->errorOut(e, "RenameSeqsCommand", "readQual");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int RenameSeqsCommand::readTax(map<string, string>& oldMap){
+    try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
+        variables["[extension]"] = util.getExtension(taxfile);
+        string outputFileName = getOutputFileName("taxonomy", variables);
+        outputNames.push_back(outputFileName);  outputTypes["taxonomy"].push_back(outputFileName);
+        
+        ofstream out;
+        util.openOutputFile(outputFileName, out);
+        
+        ifstream in;
+        util.openInputFile(taxfile, in);
+        string name, tax;
+        
+        map<string, string>::iterator it;
+        while(!in.eof()){
+            
+            if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
+            
+            in >> name; util.gobble(in);
+            tax = util.getline(in); util.gobble(in);
+            
+            it = oldMap.find(name);
+            if (it == oldMap.end()) {
+                m->mothurOut("[ERROR]: " + name + " is not in your map file, please correct.\n"); m->setControl_pressed(true);
+            }else {
+                name = it->second;
+            }
+            
+            out << name << '\t' << tax << endl;
+        }
+        in.close();
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RenameSeqsCommand", "readTax");
         exit(1);
     }
 }

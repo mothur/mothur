@@ -44,28 +44,25 @@ private:
 	
 	int driver(string, string, string, string, map<string, int>&);
 	int divideInHalf(Sequence, string&, string&);
-	map<string, int> sortFastaFile(string, string);
-	map<string, int> sortFastaFile(vector<Sequence>&, map<string, string>&, string newFile);
-    int sortFastaFile(vector<Sequence>&, map<string, int>&, string newFile);
-	string getNamesFile(string&);
-	//int setupChimera(string,);
-    int deconvoluteResults(map<string, string>&, string, string, string);
-	map<string, int> priority;
-	int setUpForSelfReference(SequenceParser*&, map<string, string>&, map<string, map<string, int> >&, int);
-    int setUpForSelfReference(SequenceCountParser*&, map<string, string>&, map<string, map<string, int> >&, int);
+
+	map<string, int> sortFastaFile(string fasta, string dups, string newFile);
+
+	string getCountFile(string&);
+    int deconvoluteResults(string, string, string);
+	int setUpForSelfReference(map<string, string>&, map<string, map<string, int> >&);
+
 	int driverGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string);
 
-	bool abort, realign, trim, trimera, save, hasName, hasCount, dups;
-	string fastafile, groupfile, templatefile, outputDir, search, namefile, countfile, blastlocation;
+	bool abort, realign, trim, trimera, hasCount, dups;
+	string fastafile, templatefile, outputDir, search, countfile, blastlocation;
 	int window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, templateSeqsLength;
     long long numSeqs;
 	float divR;
+    map<string, int> priority;
+    
 	
-    map<string, map<string, string> > group2NameMap;
+    map<string, string> group2NameFile;
 	vector<string> outputNames;
-	vector<string> fastaFileNames;
-	vector<string> nameFileNames;
-	vector<string> groupFileNames;
 	
 };
 

@@ -25,6 +25,7 @@ vector<string> UnifracUnweightedCommand::setParameters(){
 		CommandParameter prandom("random", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prandom);
 		CommandParameter pdistance("distance", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false); parameters.push_back(pdistance);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+        CommandParameter pwithreplacement("withreplacement", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pwithreplacement);
         CommandParameter pconsensus("consensus", "Boolean", "", "F", "", "", "","tree",false,false); parameters.push_back(pconsensus);
         CommandParameter proot("root", "Boolean", "F", "", "", "", "","",false,false); parameters.push_back(proot);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -53,6 +54,7 @@ string UnifracUnweightedCommand::getHelpString(){
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group. The subsample parameter may only be used with a group file.\n";
+        helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
         helpString += "The consensus parameter allows you to indicate you would like trees built from distance matrices created with the results of the subsampling, as well as a consensus tree built from these trees. Default=F.\n";
 		helpString += "Example unifrac.unweighted(groups=A-B-C, iters=500).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and iters is 1000.\n";
@@ -196,11 +198,11 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n"); abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n"); abort=true;
             }
 			
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
@@ -222,7 +224,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			else{
                 if (temp=="phylip") { temp = "lt"; }
 				if ((temp == "lt") || (temp == "column") || (temp == "square")) {  phylip = true;  outputForm = temp; }
-				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt."); m->mothurOutEndLine(); phylip = true; outputForm = "lt"; }
+				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt.\n");  phylip = true; outputForm = "lt"; }
 			}
 			
 			temp = validParameter.valid(parameters, "random");					if (temp == "not found") { temp = "f"; }
@@ -258,6 +260,9 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
             }
             if (subsample && (!phylip)) { phylip=true; outputForm = "lt"; }
             if (consensus && (!subsample)) { m->mothurOut("[ERROR]: you cannot use consensus without subsample.\n"); abort=true; }
+            
+            temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
+            withReplacement = util.isTrue(temp);
 
 			if (!random) {  iters = 0;  } //turn off random calcs
 			
@@ -303,11 +308,7 @@ int UnifracUnweightedCommand::execute() {
         if (subsample) {
             //user has not set size, set size = smallest samples size
             if (subsampleSize == -1) {
-                subsampleSize = ct->getGroupCount(Groups[0]); //num in first group
-                for (int i = 1; i < Groups.size(); i++) {
-                    int thisSize = ct->getGroupCount(Groups[i]);
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
+                subsampleSize = ct->getNumSeqsSmallestGroup();
                 m->mothurOut("\nSetting subsample size to " + toString(subsampleSize) + ".\n\n");
             }else { //eliminate any too small groups
                 vector<string> newGroups = Groups;
@@ -378,7 +379,9 @@ int UnifracUnweightedCommand::execute() {
                 int sampleTime = 0;
                 if (m->getDebug()) { sampleTime = time(NULL); }
                 
-                Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);
+                Tree* subSampleTree;
+                if (withReplacement)    { subSampleTree = sample.getSampleWithReplacement(T[i], ct, newCt, subsampleSize, Groups);  }
+                else                    { subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);                 }
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
                 
@@ -395,7 +398,7 @@ int UnifracUnweightedCommand::execute() {
                 
                 if((thisIter+1) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
             }
-            if (subsample) { m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling."); m->mothurOutEndLine(); }
+            if (subsample) { m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling.\n");  }
             
             if (m->getControl_pressed()) { break; }
 
@@ -416,7 +419,7 @@ int UnifracUnweightedCommand::execute() {
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }	return 0; }
 		
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.unweighted."); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.unweighted.\n");
 		
 		//set phylip file as new current phylipfile
 		string currentName = "";

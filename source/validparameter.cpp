@@ -265,7 +265,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                 //check for blank file
                 if (ableToOpen) {
                     if (util.isBlank(container[parameter])) {
-                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting."); m->mothurOutEndLine(); return "not found"; 
+                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting.\n");  return "not found"; 
                     }
                 }
                 }

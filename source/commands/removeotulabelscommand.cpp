@@ -274,9 +274,6 @@ int RemoveOtuLabelsCommand::execute(){
             if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setConsTaxonomyFile(currentName); }
         }
         
-        m->mothurOut("\nOutput File Names:\n");
-        for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	} m->mothurOutEndLine();
-        
         return 0;
     }
 	catch(exception& e) {

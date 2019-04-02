@@ -81,16 +81,16 @@ public:
 private:
 	vector<linePair> lines;
 	
-	bool abort, allLines, mult, all, createPhylip, subsample;
+	bool abort, allLines, mult, all, createPhylip, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, sharedfile, output;
 	vector<string>  Estimators, Groups, outputNames, sumCalculatorsNames;
 	
 	string format, outputDir;
 	int numGroups, processors, subsampleSize, iters, numCalcs;
-	int process(vector<SharedRAbundVector*>, string, string, vector<string>);
+	int process(SharedRAbundVectors*, string, string, vector<string>);
     int printSims(ostream&, vector< vector<double> >&, vector<string>);
-    int runCalcs(vector<SharedRAbundVector*>&, string, string, vector< vector<seqDist>  >&);
+    int runCalcs(SharedRAbundVectors*&, string, string, vector< vector<seqDist>  >&);
 
 };
 
@@ -112,19 +112,19 @@ struct summarySharedData {
     Utils util;
     
 	summarySharedData(){}
-	summarySharedData(string sf, string sfa, MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu, bool mai, bool mu) {
+	summarySharedData(string sf, string sfa, MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, SharedRAbundVectors*& lu, bool mai, bool mu) {
 		sumFile = sf;
         sumAllFile = sfa;
 		m = mout;
 		start = st;
 		end = en;
         Estimators = est;
-        thisLookup = lu;
+        thisLookup = lu->getSharedRAbundVectors();
         count=0;
         main = mai;
         mult = mu;
 	}
-    ~summarySharedData() {  }
+    ~summarySharedData() { for (int j = 0; j < thisLookup.size(); j++) { delete thisLookup[j]; } thisLookup.clear(); }
 };
 /**************************************************************************************************/
 

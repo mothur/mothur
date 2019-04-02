@@ -39,7 +39,7 @@ string SeqSummaryCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The summary.seqs command reads a fastafile, summary, contigsreport or alignreport file and summarizes it.\n";
-		helpString += "The summary.seqs command parameters are fasta, name, count, summary, contigsreport, alignreport and processors, fasta, contigsreport , alignreport or summary is required, unless you have a valid current files.\n";
+		helpString += "The summary.seqs command parameters are fasta, name, count, summary, contigsreport, alignreport and processors, fasta, contigsreport, alignreport or summary is required, unless you have a valid current files.\n";
 		helpString += "The name parameter allows you to enter a name file associated with your fasta file. \n";
         helpString += "The count parameter allows you to enter a count file associated with your fasta file. \n";
 		helpString += "The summary.seqs command should be in the following format: \n";

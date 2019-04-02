@@ -22,6 +22,7 @@
 #include "blastalign.hpp"
 #include "noalign.hpp"
 #include "filters.h"
+#include "getseqscommand.h"
 
 
 //************************************************************/
@@ -45,16 +46,16 @@ public:
 	void help() { m->mothurOut(getHelpString()); }
 
 private:
-  CountTable ct;
-	int diffs, length, processors;
-  float match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels;
-	vector<float> error_dist;
-	bool abort, bygroup;
-	string fastafile, namefile, outputDir, groupfile, countfile, pc_method, align_method, align;
-	vector<string> outputNames;
-
-	void createProcessesGroups(string, string, string);
-  int mergeGroupCounts(string, string, string);
+    int diffs, length, processors;
+    float match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels;
+    vector<float> error_dist;
+    bool abort, bygroup;
+    string fastafile, outputDir, countfile, pc_method, align_method, align;
+    vector<string> outputNames;
+    
+    void createProcessesGroups(string, string);
+    string mergeGroupCounts(string, string);
+    void printFasta(string newFastaFileName, string accnosFile);
 };
 
 

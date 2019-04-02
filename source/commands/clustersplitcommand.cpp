@@ -1629,8 +1629,8 @@ int ClusterSplitCommand::runSensSpec() {
         else if (countfile != "")   { inputString += ", count=" + countfile; }
         else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a name or count file, skipping."); return 0;  }
         
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-        m->mothurOut("Running command: sens.spec(" + inputString + ")"); m->mothurOutEndLine();
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("Running command: sens.spec(" + inputString + ")\n");
         current->setMothurCalling(true);
         
         Command* sensspecCommand = new SensSpecCommand(inputString);
@@ -1645,7 +1645,7 @@ int ClusterSplitCommand::runSensSpec() {
         
         outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("/******************************************/\n"); 
         m->mothurOut("Done.\n\n"); m->mothurOutEndLine();
         
         ifstream in;

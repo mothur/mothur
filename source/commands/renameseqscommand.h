@@ -39,12 +39,13 @@ public:
 	
 private:
     
-	string fastaFile, nameFile, groupfile, outputDir, placement, delim, countfile, qualfile, contigsfile, fileFile, mapFile;
+	string fastaFile, nameFile, groupfile, outputDir, placement, delim, countfile, qualfile, contigsfile, fileFile, mapFile, taxfile;
 	vector<string> outputNames;
 	bool abort;
 	
 	map<string, string> nameMap;
     int readQual(map<string, string>&);
+    int readTax(map<string, string>&);
     int readContigs(map<string, string>&);
     int readFasta(string, map<string, string>&);
     int processFile(map<string, string>&);

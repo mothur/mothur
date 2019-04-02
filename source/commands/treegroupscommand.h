@@ -40,7 +40,6 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-//#include "sharedjackknife.h"
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
@@ -99,7 +98,7 @@ private:
 	float precision, cutoff;
     vector<string> Treenames;
 
-	bool abort, allLines, subsample;
+	bool abort, allLines, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
 	string phylipfile, columnfile, namefile, calc, groups, label, outputDir;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used

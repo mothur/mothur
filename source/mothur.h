@@ -133,6 +133,8 @@ using namespace std;
 
 #endif
 
+#define MOTHURMAX 1e6
+
 typedef unsigned long ull;
 typedef unsigned short intDist;
 const vector<string> nullVector; //used to pass blank vector
@@ -168,14 +170,24 @@ struct diffPair {
 	}
 };
 
-struct item {
-    string name;
-    string group;
+struct countTableItem {
+    int abund;
+    int group;
     
-    item() {}
-    item(string n, string g) : name(n), group(g) {}
+    countTableItem() { abund = 0; group = -1; }
+    countTableItem(int a, int g) : abund(a), group(g) {}
+    ~countTableItem() {}
+};
+
+struct item {
+    int name;
+    int group;
+    
+    item() { name = -1; group = -1; }
+    item(int n, int g) : name(n), group(g) {}
     ~item() {}
 };
+
 
 struct weightedSeq {
     long long name;
@@ -211,6 +223,18 @@ struct colDist {
     int row;
     float dist;
     colDist(int r, int c, double d) : row(r), col(c), dist(d) {}
+};
+/************************************************************/
+struct seqPNode {
+    int numIdentical;
+    string name;
+    string sequence;
+    vector<int> clusteredIndexes; //indexes of merge nodes. Can use this later to construct names
+    int diffs;
+    
+    seqPNode() { diffs = 0; numIdentical = 0; name = ""; sequence = "";  }
+    seqPNode(string na, string seq, int n, vector<int> nm) : numIdentical(n), name(na), sequence(seq), clusteredIndexes(nm) { diffs = 0; }
+    ~seqPNode() {}
 };
 /**********************************************************/
 struct CommonHeader {
@@ -353,8 +377,12 @@ struct spearmanRank {
 	spearmanRank(string n, float s) : name(n), score(s) {}
 };
 //***********************************************************************
+inline bool compareGroups(countTableItem left, countTableItem right){
+	return (left.group > right.group);
+}
+//***********************************************************************
 inline bool compareIndexes(PDistCell left, PDistCell right){
-	return (left.index > right.index);	
+    return (left.index > right.index);
 }
 //********************************************************************************************************************
 inline bool compareSpearman(spearmanRank left, spearmanRank right){

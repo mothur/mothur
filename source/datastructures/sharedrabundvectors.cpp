@@ -251,7 +251,7 @@ int SharedRAbundVectors::push_back(vector<int> abunds, string binLabel){
         if (abunds.size() != lookup.size()) {  m->mothurOut("[ERROR]: you have provided " + toString(abunds.size()) + " abundances, but mothur was expecting " + toString(lookup.size()) + ", please correct.\n"); m->setControl_pressed(true); return 0; }
         
         for (int i = 0; i < lookup.size(); i ++) { lookup[i]->push_back(abunds[i]); }
-        //vector<string> currentLabels = m->getCurrentSharedBinLabels();
+        
         if (binLabel == "") { //create one
             int otuNum = 1; bool notDone = true;
             
@@ -300,6 +300,29 @@ int SharedRAbundVectors::getOTUTotal(int bin){
         int totalOTUAbund = 0;
         for (int i = 0; i < lookup.size(); i++) { totalOTUAbund += lookup[i]->get(bin); }
         return totalOTUAbund;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVectors", "getOTUTotal");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int SharedRAbundVectors::getOTUTotal(string otuLabel){
+    try {
+        //find bin number
+        int binNumber = -1;
+        
+        getOTUNames();
+        
+        for (int i = 0; i < currentLabels.size(); i++) {
+            if (util.getSimpleLabel(currentLabels[i]) == util.getSimpleLabel(otuLabel)) {
+                binNumber = i; break;
+            }
+        }
+        
+        if (binNumber == -1) { return 0; }
+        
+        return getOTUTotal(binNumber);
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundVectors", "getOTUTotal");
@@ -475,7 +498,7 @@ int SharedRAbundVectors::removeGroups(int minSize, bool silent){
 /***********************************************************************/
 int SharedRAbundVectors::getNumSeqsSmallestGroup(){
     try {
-        int smallest = 1e6;
+        int smallest = MOTHURMAX;
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + lookup[i]->getGroup() + " numSeqs = " + toString(lookup[i]->getNumSeqs()) + "\n"); }
             if (lookup[i]->getNumSeqs() < smallest) { smallest = lookup[i]->getNumSeqs(); }

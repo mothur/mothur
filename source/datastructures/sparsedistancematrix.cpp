@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-SparseDistanceMatrix::SparseDistanceMatrix() : numNodes(0), smallDist(1e6){  m = MothurOut::getInstance(); sorted=false; aboveCutoff = 1e6; }
+SparseDistanceMatrix::SparseDistanceMatrix() : numNodes(0), smallDist(MOTHURMAX){  m = MothurOut::getInstance(); sorted=false; aboveCutoff = MOTHURMAX; }
 
 /***********************************************************************/
 
@@ -126,7 +126,7 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
         //print();
         
         vector<PDistCellMin> mins;
-        smallDist = 1e6;
+        smallDist = MOTHURMAX;
        
         for (int i = 0; i < seqVec.size(); i++) {
             for (int j = 0; j < seqVec[i].size(); j++) {

@@ -115,7 +115,7 @@ int GetCurrentCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-		cFactory = CommandFactory::getInstance();
+		CommandFactory* cFactory; cFactory = CommandFactory::getInstance();
         
 		//user wants to clear a type
 		if (types.size() != 0) {

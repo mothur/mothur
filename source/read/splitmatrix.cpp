@@ -542,33 +542,55 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
         
         bool wroteExtra = false;
         
-        ifstream bigNameFile;
-        util.openInputFile(inputFile, bigNameFile);
-        
-        //grab header line 
-        string headers = "";
-        if (countfile != "") { headers = util.getline(bigNameFile); util.gobble(bigNameFile); }
-        
-        string name, nameList;
-        numSingleton = 0;
-        while(!bigNameFile.eof()){
-            bigNameFile >> name >> nameList;  
-            util.getline(bigNameFile); util.gobble(bigNameFile); //extra getline is for rest of countfile line if groups are given.
-            
-            //did this sequence get assigned a group
-            it = seqGroup.find(name);
-            
-            if (it != seqGroup.end()) {  
-                util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
-                outFile << name << '\t' << nameList << endl;
-                outFile.close();
-            }else{
-                wroteExtra = true;
-                remainingNames << name << '\t' << nameList << endl;
-                numSingleton++;
+        //grab header line
+        string defaultCountTableHeaders = "";
+        if (countfile != "") {
+            map<string, int> ctMap;
+            CountTable ct; ct.readTable(countfile, false, true); ctMap = ct.getNameMap();
+            vector<string> headers = ct.getHardCodedHeaders();
+            defaultCountTableHeaders = util.getStringFromVector(headers, "\t");
+            for (map<string, int>::iterator itCtMap = ctMap.begin(); itCtMap != ctMap.end(); itCtMap++) {
+                string name = itCtMap->first;
+                int abundance = itCtMap->second;
+                
+                //did this sequence get assigned a group
+                it = seqGroup.find(name);
+                
+                if (it != seqGroup.end()) {
+                    util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
+                    outFile << name << '\t' << abundance << endl;
+                    outFile.close();
+                }else{
+                    wroteExtra = true;
+                    remainingNames << name << '\t' << abundance << endl;
+                    numSingleton++;
+                }
             }
+        }else {
+            ifstream bigNameFile;
+            util.openInputFile(inputFile, bigNameFile);
+            
+            string name, nameList;
+            numSingleton = 0;
+            while(!bigNameFile.eof()){
+                bigNameFile >> name; util.gobble(bigNameFile); bigNameFile >> nameList; util.gobble(bigNameFile);
+                
+                //did this sequence get assigned a group
+                it = seqGroup.find(name);
+                
+                if (it != seqGroup.end()) {
+                    util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
+                    outFile << name << '\t' << nameList << endl;
+                    outFile.close();
+                }else{
+                    wroteExtra = true;
+                    remainingNames << name << '\t' << nameList << endl;
+                    numSingleton++;
+                }
+            }
+            bigNameFile.close();
         }
-        bigNameFile.close();
+        
         
 		for(int i=0;i<numGroups;i++){
 			string tempNameFile = inputFile + "." + toString(i) + ".temp";
@@ -577,6 +599,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
             //if there are valid distances
             ifstream fileHandle;
             fileHandle.open(tempDistFile.c_str());
+            
             bool removeDist = false;
             if(fileHandle) 	{
                 util.gobble(fileHandle);
@@ -587,7 +610,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
                         ofstream out;
                         string newtempNameFile = tempNameFile + "2";
                         util.openOutputFile(newtempNameFile, out);
-                        out << "Representative_Sequence\ttotal" << endl;
+                        out << defaultCountTableHeaders << endl;
                         out.close();
                         util.appendFiles(tempNameFile, newtempNameFile);
                         util.mothurRemove(tempNameFile);
@@ -599,6 +622,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
                     ifstream in;
                     util.openInputFile(tempNameFile, in);
                     
+                    string name, nameList;
                     while(!in.eof()) {
                         in >> name >> nameList;  util.gobble(in);
                         wroteExtra = true;
@@ -625,7 +649,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
             ofstream out;
             string newtempNameFile = singleton + "2";
             util.openOutputFile(newtempNameFile, out);
-            out << "Representative_Sequence\ttotal" << endl; 
+            out << defaultCountTableHeaders << endl;
             out.close();
             util.appendFiles(singleton, newtempNameFile);
             util.mothurRemove(singleton);
@@ -657,36 +681,63 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
         bool wroteExtra = false;
         string errorMessage = "name";
         
-        ifstream bigNameFile;
-        util.openInputFile(inputFile, bigNameFile);
+       
         
         //grab header line
-        string headers = ""; bool hasGroups = false;
-        if (countfile != "") {  errorMessage = "count"; headers = util.getline(bigNameFile); util.gobble(bigNameFile);
-            vector<string> pieces = util.splitWhiteSpace(headers); if (pieces.size() != 2) { hasGroups = true; } }
-        
         string name, nameList;
+        string defaultCountTableHeaders = "";
         numSingleton = 0;
-        while(!bigNameFile.eof()){
-            bigNameFile >> name >> nameList; util.gobble(bigNameFile);
-            if (hasGroups) { util.getline(bigNameFile); util.gobble(bigNameFile);  }
+        string headers = ""; bool hasGroups = false;
+        if (countfile != "") {
+            errorMessage = "count"; map<string, int> ctMap;
+            CountTable ct; ct.readTable(countfile, true, true); ctMap = ct.getNameMap();
+            hasGroups = ct.hasGroupInfo();
+            vector<string> headers = ct.getHardCodedHeaders();
+            defaultCountTableHeaders = util.getStringFromVector(headers, "\t");
             
-            //did this sequence get assigned a group
-            it = seqGroup.find(name);
-            
-            if (it != seqGroup.end()) {
-                util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
-                outFile << name << '\t' << nameList << endl;
-                outFile.close();
-            }else{
-                wroteExtra = true;
-                remainingNames << name << '\t' << nameList << endl;
-                numSingleton++;
+            for (map<string, int>::iterator itCtMap = ctMap.begin(); itCtMap != ctMap.end(); itCtMap++) {
+                string name = itCtMap->first;
+                int abundance = itCtMap->second;
+                
+                //did this sequence get assigned a group
+                it = seqGroup.find(name);
+                
+                if (it != seqGroup.end()) {
+                    util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
+                    outFile << name << '\t' << abundance << endl;
+                    outFile.close();
+                }else{
+                    wroteExtra = true;
+                    remainingNames << name << '\t' << abundance << endl;
+                    numSingleton++;
+                }
+                
             }
-        }
-        bigNameFile.close();
+        }else {
+            ifstream bigNameFile;
+            util.openInputFile(inputFile, bigNameFile);
+            
+            while(!bigNameFile.eof()){
+                bigNameFile >> name >> nameList; util.gobble(bigNameFile);
+                if (hasGroups) { util.getline(bigNameFile); util.gobble(bigNameFile);  }
+                
+                //did this sequence get assigned a group
+                it = seqGroup.find(name);
+                
+                if (it != seqGroup.end()) {
+                    util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
+                    outFile << name << '\t' << nameList << endl;
+                    outFile.close();
+                }else{
+                    wroteExtra = true;
+                    remainingNames << name << '\t' << nameList << endl;
+                    numSingleton++;
+                }
+            }
+            bigNameFile.close();
 
-        
+        }
+
         for(int i=0;i<numGroups;i++){
             string tempNameFile = inputFile + "." + toString(i) + ".temp";
             string tempDistFile = tempDistFiles[i];
@@ -703,7 +754,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
                         ofstream out;
                         string newtempNameFile = tempNameFile + "2";
                         util.openOutputFile(newtempNameFile, out);
-                        out << "Representative_Sequence\ttotal" << endl;
+                        out << defaultCountTableHeaders << endl;
                         out.close();
                         util.appendFiles(tempNameFile, newtempNameFile);
                         util.mothurRemove(tempNameFile);
@@ -739,7 +790,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
             ofstream out;
             string newtempNameFile = singleton + "2";
             util.openOutputFile(newtempNameFile, out);
-            out << "Representative_Sequence\ttotal" << endl;
+            out << defaultCountTableHeaders << endl;
             out.close();
             util.appendFiles(singleton, newtempNameFile);
             util.mothurRemove(singleton);

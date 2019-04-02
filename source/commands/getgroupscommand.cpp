@@ -423,9 +423,8 @@ int GetGroupsCommand::execute(){
 		
 		
 		if (outputNames.size() != 0) {
-			m->mothurOutEndLine();
-			m->mothurOut("Output File names: "); m->mothurOutEndLine();
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+			m->mothurOut("\nOutput File names:\n");
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	}
 			m->mothurOutEndLine();
 			
 			//set fasta file as new current fastafile
@@ -839,68 +838,18 @@ int GetGroupsCommand::readCount(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
         variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
-		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(countfile, in);
-		
-		bool wroteSomething = false;
-		int selectedCount = 0;
-		
-        string headers = util.getline(in); util.gobble(in);
-        vector<string> columnHeaders = util.splitWhiteSpace(headers);
-        
-        vector<string> groups;
-        map<int, string> originalGroupIndexes;
-        map<string, int> GroupIndexes;
-        set<int> indexOfGroupsChosen;
-        for (int i = 2; i < columnHeaders.size(); i++) {  groups.push_back(columnHeaders[i]);  originalGroupIndexes[i-2] = columnHeaders[i]; }
-        //sort groups to keep consistent with how we store the groups in groupmap
-        sort(groups.begin(), groups.end());
-        for (int i = 0; i < groups.size(); i++) {  GroupIndexes[groups[i]] = i; }
-        sort(Groups.begin(), Groups.end());
-        out << "Representative_Sequence\ttotal";
-        for (int i = 0; i < Groups.size(); i++) { out  << '\t' << Groups[i]; indexOfGroupsChosen.insert(GroupIndexes[Groups[i]]); }
-        out << endl;
-        
-        string name; int oldTotal;
-        while (!in.eof()) {
-            
-            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
-            
-            in >> name; util.gobble(in); in >> oldTotal; util.gobble(in);
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(oldTotal) + "\n"); }
-            
-            if (names.count(name) != 0) {
-                //if group info, then read it
-                vector<int> selectedCounts; int thisTotal = 0; int temp;
-                for (int i = 0; i < groups.size(); i++) {  
-                    int thisIndex = GroupIndexes[originalGroupIndexes[i]]; 
-                    in >> temp;  util.gobble(in);
-                    if (indexOfGroupsChosen.count(thisIndex) != 0) { //we want this group
-                        selectedCounts.push_back(temp); thisTotal += temp;
-                    }
-                }
 
-                out << name << '\t' << thisTotal;
-                for (int i = 0; i < selectedCounts.size(); i++) {  out  << '\t' << selectedCounts[i]; }
-                out << endl;
-                
-                wroteSomething = true;
-                selectedCount+= thisTotal;
-            }else {  util.getline(in); }
-            
-            util.gobble(in);
+        CountTable ct; ct.readTable(countfile, true, false, Groups); //reads only groups found in Groups
+				
+        int selectedCount = ct.getNumUniqueSeqs();
+        
+		if (selectedCount == 0) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");   }
+        else {
+            ct.printTable(outputFileName);
+            outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
         }
-        in.close();
-		out.close();
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
-		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
-		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your count file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your count file.\n");
         
 		return 0;
 	}

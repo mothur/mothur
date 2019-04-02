@@ -757,7 +757,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
         }
                 
         //go through classes
-        int minCl = 1e6;
+        int minCl = MOTHURMAX;
         map<int, string> indexToClass;
         vector<string> classes;
         for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it != class2GroupIndex.end(); it++) {

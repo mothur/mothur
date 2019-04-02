@@ -35,7 +35,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	CommandFactory* commandFactory;
 	string name, outputDir;
 	bool abort, append;
 	vector<string> outputNames;

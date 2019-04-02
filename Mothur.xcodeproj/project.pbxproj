@@ -1142,8 +1142,8 @@
 		A77E193A161B289600DB1A2A /* rftreenode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rftreenode.cpp; path = source/randomforest/rftreenode.cpp; sourceTree = SOURCE_ROOT; };
 		A77EBD2C1523707F00ED407C /* createdatabasecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = createdatabasecommand.h; path = source/commands/createdatabasecommand.h; sourceTree = SOURCE_ROOT; };
 		A77EBD2E1523709100ED407C /* createdatabasecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = createdatabasecommand.cpp; path = source/commands/createdatabasecommand.cpp; sourceTree = SOURCE_ROOT; };
-		A7876A25152A017C00A0AE86 /* subsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = subsample.cpp; path = source/subsample.cpp; sourceTree = "<group>"; };
-		A7876A28152A018B00A0AE86 /* subsample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = subsample.h; path = source/subsample.h; sourceTree = "<group>"; };
+		A7876A25152A017C00A0AE86 /* subsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = subsample.cpp; path = source/subsample.cpp; sourceTree = SOURCE_ROOT; };
+		A7876A28152A018B00A0AE86 /* subsample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = subsample.h; path = source/subsample.h; sourceTree = SOURCE_ROOT; };
 		A79234D513C74BF6002B08E2 /* mothurfisher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mothurfisher.h; path = source/metastats/mothurfisher.h; sourceTree = SOURCE_ROOT; };
 		A79234D613C74BF6002B08E2 /* mothurfisher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mothurfisher.cpp; path = source/metastats/mothurfisher.cpp; sourceTree = SOURCE_ROOT; };
 		A795840B13F13CD900F201D5 /* countgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = countgroupscommand.h; path = source/commands/countgroupscommand.h; sourceTree = SOURCE_ROOT; };
@@ -1860,8 +1860,8 @@
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
 				A7876A28152A018B00A0AE86 /* subsample.h */,
 				A7876A25152A017C00A0AE86 /* subsample.cpp */,
-				4889EA201E8962D50054E0BB /* summary.cpp */,
 				4889EA211E8962D50054E0BB /* summary.hpp */,
+				4889EA201E8962D50054E0BB /* summary.cpp */,
 				7B17437A17AF6F02004C161B /* svm */,
 				A7C3DC0E14FE469500FE1924 /* trialswap2.h */,
 				A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */,
@@ -3763,7 +3763,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.41.0\\\"\"",
+					"VERSION=\"\\\"1.42.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"silent\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3805,7 +3805,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.41.0\\\"\"",
+					"VERSION=\"\\\"1.42.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3858,7 +3858,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.41.0\\\"\"",
+					"VERSION=\"\\\"1.42.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
@@ -3927,7 +3927,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.41.0\\\"\"",
+					"VERSION=\"\\\"1.42.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);

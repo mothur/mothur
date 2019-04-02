@@ -34,7 +34,6 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    CommandFactory* commandFactory;
     bool abort;
     int random;
     vector<string> outputNames;

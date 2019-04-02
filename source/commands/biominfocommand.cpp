@@ -38,16 +38,18 @@ string BiomInfoCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The biom.info command reads a biom file creates a shared file. If your biom file contains metadata mothur will also create taxonomy or constaxonomy along with tax.summary files.\n";
-        helpString += "The biom.info command parameters are biom, label and relabund. The biom parameter is required.\n";
+        helpString += "The biom.info command parameters are " + getCommandParameters() + ". The biom parameter is required.\n";
+        helpString += "The format parameter allows you indicate type of biom file you have. Options hdf5 or classic. Default is hdf5.\n";
         helpString += "The label parameter allows you to enter a distance label to be used in the shared file created from your biom file.\n";
         helpString += "The relabund parameter allows you to indicate you want the tax.summary file values to be relative abundances rather than raw abundances. Default=F. \n";
         helpString += "The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n";
         helpString += "The output parameter allows you to specify format of your summary file. Options are simple and detail. The default is detail.\n";
         helpString += "The printlevel parameter allows you to specify taxlevel of your summary file to print to. Options are 1 to the maz level in the file.  The default is -1, meaning max level.  If you select a level greater than the level your sequences classify to, mothur will print to the level your max level. \n";
-        helpString += "The format parameter allows you indicate type of biom file you have. Options hdf5 or classic. Default is hdf5.\n";
-        helpString += "For example consider the following basis=sequence could give Clostridiales	3	105, where 105 is the total number of sequences whose otu classified to Clostridiales.\n";
-        helpString += "Now for basis=otu could give Clostridiales	3	7, where 7 is the number of otus that classified to Clostridiales.\n";
+        helpString += "For example consider the following basis=sequence could give Clostridiales 3 105, where 105 is the total number of sequences whose OTU classified to Clostridiales. ";
+        helpString += "Now for basis=otu could give Clostridiales 3 7, where 7 is the number of OTUs that classified to Clostridiales.\n";
         helpString += "The biom.info command should be in the following format: biom.info(biom=test.biom, label=0.03).\n";
+        
+        getCommonQuestions();
         
         return helpString;
     }
@@ -56,6 +58,27 @@ string BiomInfoCommand::getHelpString(){
         exit(1);
     }
 }
+//**********************************************************************************************************************
+string BiomInfoCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string issue = "Cannot convert error. What do I do?"; issues.push_back(issue);
+        string ianswer = "\tThis issue is caused by a matrix_element_type mismatch. The biom file contains a field called 'matrix_element_type'. This field tells mothur what form your observation data is in: int or float. Mothur expects 'int' (an interger value) because the shared file contains interger value abundance counts. If your file contains float values mothur will round down to the nearest integer value. But if your matrix_element_type=int and yet the file contains integer counts in float form, (ie. 31.0 instead of 31) you will get this error. You can resolve this issue by setting matrix_element_type=float in the biom file.\n"; ianswers.push_back(ianswer);
+        
+        issue = "Mothur can't read my biom file. What does this mean?"; issues.push_back(issue);
+        ianswer = "\tThis likely caused by failure to set format=hdf5. Mothur allows for 2 formats: classic (http://biom-format.org/documentation/format_versions/biom-1.0.html) and hdf5 (http://biom-format.org/documentation/format_versions/biom-2.0.html). By default mothur assumes your files are in classic form. If your file is in hdf5 format, then set format=hdf5. NOTE: you can only process hdf5 files if you are using our pre-built version or have built your version of mothur with USEHDF5=yes.\n"; ianswers.push_back(ianswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomInfoCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 string BiomInfoCommand::getOutputPattern(string type) {
     try {

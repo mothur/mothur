@@ -36,8 +36,8 @@ public:
 	
 private:
     
-	string namefile, groupfile, outputDir, groups, sharedfile;
-	bool abort, allLines;
+	string namefile, groupfile, outputDir, groups, sharedfile, countfile;
+	bool abort, allLines, compress;
 	vector<string> Groups, outputNames;
     set<string> labels;
     
@@ -45,7 +45,6 @@ private:
     map<int, string> processNameFile(string);
     map<int, string> getGroupNames(string, set<string>&);
     
-    unsigned long long driver(ofstream&, GroupMap*&);
     unsigned long long processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables, vector<string>);
 };
 

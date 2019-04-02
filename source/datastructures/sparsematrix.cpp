@@ -5,7 +5,7 @@
 
 /***********************************************************************/
 
-SparseMatrix::SparseMatrix() : numNodes(0), minsIndex(0), smallDist(1e6){  m = MothurOut::getInstance();  }
+SparseMatrix::SparseMatrix() : numNodes(0), minsIndex(0), smallDist(MOTHURMAX){  m = MothurOut::getInstance();  }
 
 /***********************************************************************/
 
@@ -63,7 +63,7 @@ void SparseMatrix::clear(){
 		mins.clear();
 		numNodes = 0;
 		minsIndex = 0;
-		smallDist = 1e6;
+		smallDist = MOTHURMAX;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SparseMatrix", "clear");

@@ -99,6 +99,7 @@ bool InteractEngine::getInput(){
                 
                 Command* command = cFactory->getCommand(commandName, options);
                 quitCommandCalled = command->execute();
+                delete command;
                 
                 //if we aborted command
                 if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
@@ -207,7 +208,6 @@ bool BatchEngine::getInput(){
 		string commandName = "";
 		string options = "";
 		
-		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
 	    int count = 0;
 		while(quitCommandCalled != 1){
@@ -237,6 +237,7 @@ bool BatchEngine::getInput(){
 							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
+                    delete command;
 							
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }
@@ -322,8 +323,6 @@ bool ScriptEngine::getInput(){
 		string commandName = "";
 		string options = "";
 		
-		
-		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
 	
 		while(quitCommandCalled != 1){
@@ -353,6 +352,7 @@ bool ScriptEngine::getInput(){
                
                 Command* command = cFactory->getCommand(commandName, options);
                 quitCommandCalled = command->execute();
+                delete command;
                 
                 //if we aborted command
                 if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + ".\n");  }

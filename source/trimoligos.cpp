@@ -179,7 +179,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
         string rawSequence = seq.getUnaligned();
         vector<int> success;
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6); //no matches found
+        success.push_back(MOTHURMAX); //no matches found
         
         for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
             string oligo = it->first;
@@ -209,7 +209,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
         else { //try aligning and see if you can find it
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             
             Alignment* alignment;
@@ -266,8 +266,8 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
             
             if (alignment != NULL) { delete alignment; }
             
-            if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = 1e6; return success;	}	//no good matches
-            else if(minCount > 1)	{	minDiff = 1e6; primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = pdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
+            if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = MOTHURMAX; return success;	}	//no good matches
+            else if(minCount > 1)	{	minDiff = MOTHURMAX; primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = pdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
             else{  success[0] = minDiff; success[1] = 0; return success; }
         }
         
@@ -286,7 +286,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
         int maxRevPrimerLength = revPrimer[0].length();
         vector<int> success;
         success.push_back(rdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6); //no matches found
+        success.push_back(MOTHURMAX); //no matches found
         
         for(int i=0;i<revPrimer.size();i++){
             string oligo = revPrimer[i];
@@ -320,7 +320,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
             else{ alignment = NULL; }
             
             //can you find the revPrimer
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             
             string rawRSequence = reverseOligo(seq.getUnaligned());
@@ -366,7 +366,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
             
             if (alignment != NULL) { delete alignment; }
             
-            if(minDiff > rdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = 1e6; return success;	}	//no good matches
+            if(minDiff > rdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = MOTHURMAX; return success;	}	//no good matches
             else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = rdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
             else{  success[0] = minDiff; success[1] = 0; return success; }
         }
@@ -385,7 +385,7 @@ string TrimOligos::getCodeValue(int code, int diffs){
         string value = "unknown";
         if (code == 0)                      { value = "match"; }
         else if (code == (diffs+10000))     { value = "multipleMatches"; }
-        else if (code == 1e6)               { value = "noMatch"; }
+        else if (code == MOTHURMAX)               { value = "noMatch"; }
         else if (code == (diffs+1000))      { value = "shortSeq"; }
         //cout << code << '\t' << value << endl;
         return value;
@@ -404,7 +404,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& gr
         
         string rawSequence = seq.getUnaligned();
         success.push_back(bdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6); //no matches found
+        success.push_back(MOTHURMAX); //no matches found
         
         //can you find the barcode
         for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
@@ -438,7 +438,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& gr
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minGroup = -1;
             int minPos = 0;
@@ -486,7 +486,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& gr
                 
             }
             
-            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
+            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
             else if(minCount > 1)	{	success[0] = minDiff; success[1] = bdiffs + 10000;	}	//can't tell the difference between multiple barcodes
             else{	//use the best match
                 group = minGroup;
@@ -518,9 +518,9 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
         string rawFSequence = forwardSeq.getUnaligned();
         string rawRSequence = reverseSeq.getUnaligned();
         success.push_back(bdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         success.push_back(bdiffs + 1000);
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         //can you find the forward barcode
         for(map<int,oligosPair>::iterator it=ipbarcodes.begin();it!=ipbarcodes.end();it++){
@@ -569,7 +569,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             vector< vector<int> > minFGroup;
             vector<int> minFPos;
@@ -647,7 +647,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             }
             
             
-            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
+            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
             else{
                 success[0] = minDiff;
                 
@@ -658,7 +658,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                 else{ alignment = NULL; }
                 
                 //can you find the barcode
-                minDiff = 1e6;
+                minDiff = MOTHURMAX;
                 minCount = 1;
                 vector< vector<int> > minRGroup;
                 vector<int> minRPos;
@@ -720,7 +720,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     
                 }
                 
-                if(minDiff > bdiffs)	{	success[2] = minDiff;  success[3] = 1e6;	}	//no good matches
+                if(minDiff > bdiffs)	{	success[2] = minDiff;  success[3] = MOTHURMAX;	}	//no good matches
                 else {
                     bool foundMatch = false;
                     vector<int> matches;
@@ -770,9 +770,9 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
         string rawFSequence = forwardSeq.getUnaligned();
         string rawRSequence = reverseSeq.getUnaligned();
         success.push_back(bdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         success.push_back(bdiffs + 1000);
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         //can you find the forward barcode
         for(map<int,oligosPair>::iterator it=ipbarcodes.begin();it!=ipbarcodes.end();it++){
@@ -780,17 +780,6 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             string roligo = it->second.reverse;
             
             //if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(it->first) + " barcode pair = '" + foligo + " " + roligo + "'\n"); m->mothurOut("[DEBUG]: sequence pair = '" + rawFSequence + " " + rawRSequence + "'\n");}
-            
-            if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
-                success[0] = rawFSequence.length();
-                success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                break;
-            }
-            if(rawRSequence.length() < roligo.length()){	//let's just assume that the barcodes are the same length
-                success[2] = rawRSequence.length();
-                success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                break;
-            }
             
             if (foligo == "NONE") {
                 if (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length()))) {
@@ -813,6 +802,18 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     break;
                 }
             }else if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length())))) {
+                if(rawRSequence.length() < roligo.length()){	//let's just assume that the barcodes are the same length
+                    success[2] = rawRSequence.length();
+                    success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                    break;
+                }
+                
+                if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
+                    success[0] = rawFSequence.length();
+                    success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                    break;
+                }
+                
                 group = it->first;
                 if (!hasIndex) { //if you are using index file then just matching
                     forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
@@ -833,7 +834,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             vector< vector<int> > minFGroup;
             vector<int> minFPos;
@@ -854,12 +855,13 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             for(map<string, vector<int> >::iterator it=ifbarcodes.begin();it!=ifbarcodes.end();it++){
                 string oligo = it->first;
                 
-                if(rawFSequence.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
-                    success[0] = rawFSequence.length();
-                    success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                    break;
-                }
                 if (oligo != "NONE") {
+                    
+                    if(rawFSequence.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
+                        success[0] = rawFSequence.length();
+                        success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                        break;
+                    }
                     
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                     alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+bdiffs));
@@ -907,7 +909,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
             }
             
             
-            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
+            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
             else{
                 success[0] = minDiff; //set forward barcode diffs
                 
@@ -918,7 +920,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                 else{ alignment = NULL; }
                 
                 //can you find the barcode
-                minDiff = 1e6;
+                minDiff = MOTHURMAX;
                 minCount = 1;
                 vector< vector<int> > minRGroup;
                 vector<int> minRPos;
@@ -926,13 +928,14 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                 for(map<string, vector<int> >::iterator it=irbarcodes.begin();it!=irbarcodes.end();it++){
                     string oligo = it->first;
                     
-                    if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
-                        success[2] = rawRSequence.length();
-                        success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                        break;
-                    }
-                    
                     if (oligo != "NONE") {
+                        
+                        if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
+                            success[2] = rawRSequence.length();
+                            success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                            break;
+                        }
+                        
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                         alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs));
                         oligo = alignment->getSeqAAln();
@@ -979,7 +982,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     
                 }
                 
-                if(minDiff > bdiffs)	{	success[2] = minDiff;  success[3] = 1e6;	}	//no good matches
+                if(minDiff > bdiffs)	{	success[2] = minDiff;  success[3] = MOTHURMAX;	}	//no good matches
                 else {
                     bool foundMatch = false;
                     vector<int> matches;
@@ -1009,7 +1012,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                             reverseQual.trimQScores(rStart, -1);
                         }
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
-                    }else { minDiff = 1e6; success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
+                    }else { minDiff = MOTHURMAX; success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
                 }
             }
             
@@ -1035,26 +1038,15 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
         string rawSeq = seq.getUnaligned();
         
         success.push_back(bdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         success.push_back(bdiffs + 1000);
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         
         //can you find the forward barcode
         for(map<int,oligosPair>::iterator it=ipbarcodes.begin();it!=ipbarcodes.end();it++){
             string foligo = it->second.forward;
             string roligo = it->second.reverse;
-            
-            if(rawSeq.length() < foligo.length()){	//let's just assume that the barcodes are the same length
-                success[0] = rawSeq.length();
-                success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                break;
-            }
-            if(rawSeq.length() < roligo.length()){	//let's just assume that the barcodes are the same length
-                success[2] = rawSeq.length();
-                success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                break;
-            }
             
             if (rawSeq.length() < (foligo.length() + roligo.length())) {
                 success[0] = rawSeq.length();
@@ -1081,6 +1073,17 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                     break;
                 }
             }else if((compareDNASeq(foligo, rawSeq.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length())))) {
+                if(rawSeq.length() < foligo.length()){	//let's just assume that the barcodes are the same length
+                    success[0] = rawSeq.length();
+                    success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                    break;
+                }
+                if(rawSeq.length() < roligo.length()){	//let's just assume that the barcodes are the same length
+                    success[2] = rawSeq.length();
+                    success[3] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                    break;
+                }
+
                 group = it->first;
                 string trimmedSeq = rawSeq.substr(foligo.length()); //trim forward barcode
                 seq.setUnaligned(trimmedSeq.substr(0,(trimmedSeq.length()-roligo.length()))); //trim reverse barcode
@@ -1101,7 +1104,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             vector< vector<int> > minFGroup;
             vector<int> minFPos;
@@ -1122,14 +1125,14 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
             
             for(map<string, vector<int> >::iterator it=ifbarcodes.begin();it!=ifbarcodes.end();it++){
                 string oligo = it->first;
-                
-                if(rawSeq.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
-                    success[0] = rawSeq.length();
-                    success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
-                    break;
-                }
-                
+
                 if (oligo != "NONE") {
+                    if(rawSeq.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
+                        success[0] = rawSeq.length();
+                        success[1] = bdiffs + 1000;	//if the sequence is shorter than the barcode then bail out
+                        break;
+                    }
+                    
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                     alignment->alignPrimer(oligo, rawSeq.substr(0,oligo.length()+bdiffs));
                     oligo = alignment->getSeqAAln();
@@ -1178,7 +1181,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
             fMinDiff = minDiff;
             
            
-            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
+            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
             else{
                 success[0] = minDiff; //set forward barcode diffs
                 
@@ -1189,7 +1192,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                 else{ alignment = NULL; }
                 
                 //can you find the barcode
-                minDiff = 1e6;
+                minDiff = MOTHURMAX;
                 minCount = 1;
                 vector< vector<int> > minRGroup;
                 vector<int> minRPos;
@@ -1200,13 +1203,14 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                     string oligo = it->first;
                     if (oligo != "NONE") { oligo = reverseOligo(oligo); }
                     
-                    if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
-                        success[2] = rawRSequence.length();
-                        success[3] = bdiffs + 1000;
-                        break;
-                    }
-                    
                     if (oligo != "NONE") {
+                        
+                        if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
+                            success[2] = rawRSequence.length();
+                            success[3] = bdiffs + 1000;
+                            break;
+                        }
+                        
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                         alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs));
                         oligo = alignment->getSeqAAln();
@@ -1250,7 +1254,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                     }
                 }
 
-                if(minDiff > bdiffs)	{	success[2] = minDiff;  success[3] = 1e6;	}	//no good matches
+                if(minDiff > bdiffs)	{	success[2] = minDiff;  success[3] = MOTHURMAX;	}	//no good matches
                 else {
                     bool foundMatch = false;
                     vector<int> matches;
@@ -1282,7 +1286,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                         }
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
                         
-                    }else { minDiff = 1e6; success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
+                    }else { minDiff = MOTHURMAX; success[1] = bdiffs + 10000; success[2] = minDiff; success[3] = bdiffs + 10000;	} //too many matches
                 }
             }
             rMinDiff = minDiff;
@@ -1309,9 +1313,9 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
         
         vector<int> success;
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         success.push_back(pdiffs + 1000);
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         
         //can you find the forward
@@ -1381,7 +1385,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             vector< vector<int> > minFGroup;
             vector<int> minFPos;
@@ -1459,7 +1463,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
             fMinDiff = minDiff;
 
             
-            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
+            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
             else{
                 success[0] = minDiff; //set forward primer diffs
                 
@@ -1470,7 +1474,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
                 else{ alignment = NULL; }
                 
                 //can you find the barcode
-                minDiff = 1e6;
+                minDiff = MOTHURMAX;
                 minCount = 1;
                 vector< vector<int> > minRGroup;
                 vector<int> minRPos;
@@ -1531,7 +1535,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
                     }
                 }
             
-                if(minDiff > pdiffs)	{	success[2] = minDiff;  success[3] = 1e6;	}	//no good matches
+                if(minDiff > pdiffs)	{	success[2] = minDiff;  success[3] = MOTHURMAX;	}	//no good matches
                 else {
                     bool foundMatch = false;
                     vector<int> matches;
@@ -1565,7 +1569,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
                         }
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
                        
-                    }else { minDiff = 1e6; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
+                    }else { minDiff = MOTHURMAX; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
                 }
             }
 
@@ -1592,9 +1596,9 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
         
         vector<int> success;
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         success.push_back(pdiffs + 1000);
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         //can you find the forward barcode
         for(map<int,oligosPair>::iterator it=ipprimers.begin();it!=ipprimers.end();it++){
@@ -1647,7 +1651,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             vector< vector<int> > minFGroup;
             vector<int> minFPos;
@@ -1724,7 +1728,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
             }
             
             
-            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
+            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
             else{
                 success[0] = minDiff; //set forward primer diffs
                 
@@ -1735,7 +1739,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                 else{ alignment = NULL; }
                 
                 //can you find the barcode
-                minDiff = 1e6;
+                minDiff = MOTHURMAX;
                 minCount = 1;
                 vector< vector<int> > minRGroup;
                 vector<int> minRPos;
@@ -1794,7 +1798,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                     }
                 }
                 
-                if(minDiff > pdiffs)	{	success[2] = minDiff;  success[3] = 1e6;	}	//no good matches
+                if(minDiff > pdiffs)	{	success[2] = minDiff;  success[3] = MOTHURMAX;	}	//no good matches
                 else {
                     bool foundMatch = false;
                     vector<int> matches;
@@ -1822,7 +1826,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                         forwardQual.trimQScores(fStart, -1);
                         reverseQual.trimQScores(rStart, -1);
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
-                    }else { minDiff = 1e6; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
+                    }else { minDiff = MOTHURMAX; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
 
                 }
             }
@@ -1848,9 +1852,9 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
         
         vector<int> success;
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         success.push_back(pdiffs + 1000);
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         //can you find the forward barcode
         for(map<int,oligosPair>::iterator it=ipprimers.begin();it!=ipprimers.end();it++){
@@ -1899,7 +1903,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             vector< vector<int> > minFGroup;
             vector<int> minFPos;
@@ -1976,7 +1980,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
             }
             
             
-            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
+            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
             else{
                 success[0] = minDiff; //set forward primer diffs
                 
@@ -1987,7 +1991,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                 else{ alignment = NULL; }
                 
                 //can you find the barcode
-                minDiff = 1e6;
+                minDiff = MOTHURMAX;
                 minCount = 1;
                 vector< vector<int> > minRGroup;
                 vector<int> minRPos;
@@ -2049,7 +2053,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                     
                 }
                 
-                if(minDiff > pdiffs)	{	success[2] = minDiff;  success[3] = 1e6;	}	//no good matches
+                if(minDiff > pdiffs)	{	success[2] = minDiff;  success[3] = MOTHURMAX;	}	//no good matches
                 else {
                     bool foundMatch = false;
                     vector<int> matches;
@@ -2075,7 +2079,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                         forwardSeq.setUnaligned(rawFSequence.substr(fStart));
                         reverseSeq.setUnaligned(rawRSequence.substr(rStart));
                         success[1] = 0; success[2] = minDiff; success[3] = 0;
-                    }else { minDiff = 1e6; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
+                    }else { minDiff = MOTHURMAX; success[1] = pdiffs + 10000; success[2] = minDiff; success[3] = pdiffs + 10000;	} //too many matches
                 }
             }
             
@@ -2099,7 +2103,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
         
         vector<int> success;
         success.push_back(bdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         //can you find the barcode
         for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
@@ -2127,7 +2131,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minGroup = -1;
             int minPos = 0;
@@ -2176,7 +2180,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
                 
             }
             
-            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
+            if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
             else if(minCount > 1)	{	success[0] = minDiff; success[1] = bdiffs + 10000;	}	//can't tell the difference between multiple barcodes
             else{	//use the best match
                 group = minGroup;
@@ -2204,7 +2208,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
         string rawSequence = seq.getUnaligned();
         vector<int> success;
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         //can you find the primer
         for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
@@ -2232,7 +2236,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minGroup = -1;
             int minPos = 0;
@@ -2281,8 +2285,8 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
                 
             }
             
-            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
-            else if(minCount > 1)	{	minDiff = 1e6; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
+            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
+            else if(minCount > 1)	{	minDiff = MOTHURMAX; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
             else{	//use the best match
                 group = minGroup;
                 seq.setUnaligned(rawSequence.substr(minPos));
@@ -2310,7 +2314,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
         if (paired) { success = stripPairedPrimers(seq, qual, group, keepForward); return success; }
         
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         string rawSequence = seq.getUnaligned();
         
@@ -2343,7 +2347,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minGroup = -1;
             int minPos = 0;
@@ -2392,8 +2396,8 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
                 
             }
             
-            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
-            else if(minCount > 1)	{	minDiff = 1e6; success[0] = minDiff; success[1] = pdiffs + 10000;	}//no good matches
+            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
+            else if(minCount > 1)	{	minDiff = MOTHURMAX; success[0] = minDiff; success[1] = pdiffs + 10000;	}//no good matches
             else{	//use the best match
                 group = minGroup;
                 if (!keepForward) { seq.setUnaligned(rawSequence.substr(minPos)); }
@@ -2422,7 +2426,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
         
         vector<int> success;
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
         
         int maxRevPrimerLength = revPrimer[0].length();
         
@@ -2454,7 +2458,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
             else{ alignment = NULL; }
         
             //can you find the revPrimer
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minGroup = -1;
             int minPos = 0;
@@ -2498,8 +2502,8 @@ vector<int> TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
                 }
             }
             
-            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
-            else if(minCount > 1)	{	minDiff = 1e6; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
+            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
+            else if(minCount > 1)	{	minDiff = MOTHURMAX; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
             else{	//use the best match
                 seq.setUnaligned(rawSequence.substr(0, (rawSequence.length() - minPos)));
                 if(qual.getName() != ""){
@@ -2528,7 +2532,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
         
         vector<int> success;
         success.push_back(pdiffs + 1000);	//guilty until proven innocent
-        success.push_back(1e6);
+        success.push_back(MOTHURMAX);
 
         int maxRevPrimerLength = revPrimer[0].length();
         
@@ -2560,7 +2564,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
             else{ alignment = NULL; }
             
             //can you find the revPrimer
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minGroup = -1;
             int minPos = 0;
@@ -2602,8 +2606,8 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
                 }
             }
             
-            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = 1e6;	}	//no good matches
-            else if(minCount > 1)	{	minDiff = 1e6; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
+            if(minDiff > pdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
+            else if(minCount > 1)	{	minDiff = MOTHURMAX; success[0] = minDiff; success[1] = pdiffs + 10000;	}	//can't tell the difference between multiple primers
             else{	//use the best match
                 seq.setUnaligned(rawSequence.substr(0, (rawSequence.length() - minPos)));
                 success[0] = minDiff; success[1] = 0;
@@ -2653,7 +2657,7 @@ int TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minPos = 0;
             
@@ -2752,7 +2756,7 @@ int TrimOligos::stripLinker(Sequence& seq){
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minPos = 0;
             
@@ -2846,7 +2850,7 @@ int TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minPos = 0;
             
@@ -2945,7 +2949,7 @@ int TrimOligos::stripSpacer(Sequence& seq){
             else{ alignment = NULL; }
             
             //can you find the barcode
-            int minDiff = 1e6;
+            int minDiff = MOTHURMAX;
             int minCount = 1;
             int minPos = 0;
             
