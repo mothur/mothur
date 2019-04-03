@@ -933,8 +933,6 @@ int Utils::copyFile(string oldName, string newName){
 #else
         mothurRemove(newName);
         appendFiles(oldName, newName);
-        
-        //if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
 #endif
         return 0;
         

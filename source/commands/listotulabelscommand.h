@@ -38,7 +38,7 @@ public:
     
 private:
     bool abort, allLines;
-    string outputDir, sharedfile, relabundfile, label, inputFileName, format, listfile;
+    string outputDir, sharedfile, relabundfile, label, inputFileName, format, listfile, constaxonomy;
     vector<string> outputNames;
     vector<string> Groups;
     set<string> labels;
@@ -46,6 +46,7 @@ private:
     int createList(SharedRAbundFloatVectors*&);
     int createList(SharedRAbundVectors*&);
     int createList(ListVector*&);
+    int createList(string);
 
 };
 
