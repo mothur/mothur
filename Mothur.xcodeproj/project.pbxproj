@@ -369,6 +369,8 @@
 		4827A4DC1CB3ED2200345170 /* fastqdataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4827A4DA1CB3ED2100345170 /* fastqdataset.cpp */; };
 		4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */; };
 		483C952E188F0CAD0035E7B7 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		484976DF22552E0B00F3A291 /* erarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976DD22552E0B00F3A291 /* erarefaction.cpp */; };
+		484976E022552E0B00F3A291 /* erarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976DD22552E0B00F3A291 /* erarefaction.cpp */; };
 		48576EA11D05DBC600BBC9C0 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48576EA51D05E8F600BBC9C0 /* testoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */; };
@@ -898,6 +900,8 @@
 		4829D9661B8387D0002EEED4 /* testbiominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testbiominfocommand.h; path = TestMothur/testbiominfocommand.h; sourceTree = SOURCE_ROOT; };
 		4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testtrimoligos.cpp; path = TestMothur/testtrimoligos.cpp; sourceTree = SOURCE_ROOT; };
 		4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testtrimoligos.hpp; path = TestMothur/testtrimoligos.hpp; sourceTree = SOURCE_ROOT; };
+		484976DD22552E0B00F3A291 /* erarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = erarefaction.cpp; path = source/calculators/diversitycalcs/erarefaction.cpp; sourceTree = SOURCE_ROOT; };
+		484976DE22552E0B00F3A291 /* erarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = erarefaction.hpp; path = source/calculators/diversitycalcs/erarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		484F21691BA1C5F8001C1B5F /* makefile-internal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "makefile-internal"; sourceTree = SOURCE_ROOT; };
 		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = TestMothur/testcontainers/testoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = TestMothur/testcontainers/testoptimatrix.h; sourceTree = SOURCE_ROOT; };
@@ -2001,6 +2005,15 @@
 			path = TestMothur;
 			sourceTree = SOURCE_ROOT;
 		};
+		484976DC22552BEA00F3A291 /* diversitycalcs */ = {
+			isa = PBXGroup;
+			children = (
+				484976DD22552E0B00F3A291 /* erarefaction.cpp */,
+				484976DE22552E0B00F3A291 /* erarefaction.hpp */,
+			);
+			name = diversitycalcs;
+			sourceTree = "<group>";
+		};
 		48789AEE206176EF00A7D848 /* utf8 */ = {
 			isa = PBXGroup;
 			children = (
@@ -2612,6 +2625,7 @@
 				A7E9B66F12D37EC400DA6239 /* calculator.h */,
 				A7E9B6E212D37EC400DA6239 /* filters.h */,
 				A7E9B86112D37EC400DA6239 /* treecalculator.h */,
+				484976DC22552BEA00F3A291 /* diversitycalcs */,
 				48E544691E9D17E000FF6AB8 /* clearcutcalcs */,
 				48E544671E9D14C500FF6AB8 /* distcalcs */,
 				48E5443E1E9C28CC00FF6AB8 /* clustercalcs */,
@@ -3088,6 +3102,7 @@
 				481FB5481AC1B61F0076CFF3 /* hellinger.cpp in Sources */,
 				481FB5D41AC1B75C0076CFF3 /* listseqscommand.cpp in Sources */,
 				481FB6521AC1B8100076CFF3 /* fileoutput.cpp in Sources */,
+				484976E022552E0B00F3A291 /* erarefaction.cpp in Sources */,
 				481FB6851AC1B8B80076CFF3 /* validcalculator.cpp in Sources */,
 				489AF690210618A80028155E /* optiblastmatrix.cpp in Sources */,
 				481FB56D1AC1B6C10076CFF3 /* sharedsorclass.cpp in Sources */,
@@ -3694,6 +3709,7 @@
 				A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */,
 				A74D59A4159A1E2000043046 /* counttable.cpp in Sources */,
 				48E5447C1E9D3F0400FF6AB8 /* fdr.cpp in Sources */,
+				484976DF22552E0B00F3A291 /* erarefaction.cpp in Sources */,
 				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
 				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,
 				A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */,
