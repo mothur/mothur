@@ -46,43 +46,57 @@ class CountTable {
 
     public:
 
-        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; }
+        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; isCompressed = false; }
         ~CountTable() {}
 
         //reads and creates smart enough to eliminate groups with zero counts
         int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames
-        int createTable(string, string, bool); //namefile, groupfile, createGroup
+        int createTable(string, string, vector<string>, bool createGroup=false); //namefile, groupfile, selectedGroups, createGroup,
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
+        int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
+        int readTable(string, bool, bool, set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
+    
         int zeroOutTable(); //turn all counts to zeros
+        void eliminateZeroSeqs();
         int clearTable();
+        bool isCountTable(string);
+        bool isTableCompressed() { return isCompressed; }
+        int copy(CountTable*); //copy countable
+        bool inTable(string);  //accepts sequence name and returns true if sequence is in table, false if not present
 
-        int printTable(string); //preserves order in original
-        int printSortedTable(string); //sorted by seqName
-        int printHeaders(ofstream&);
+
+        //all print commands ignore zeroed out seqs
+        vector<string> printCompressedTable(string, vector<string> optionalGroups=nullVector); //nameOfFile, optionalVectorOfGroups (if empty, prints all possible groups), returns names of seqs in table - excludes zeroed reads
+        vector<string> printTable(string); //preserves order in original, defaults compress to state of original file
+        vector<string> printTable(string, bool compress); //preserves order in original, printing compressed or not based on compress flag pasted in
+        vector<string> printSortedTable(string); //sorted by seqName
+        int printHeaders(ofstream&, vector<string> optionalGroups=nullVector);
         vector<string> getHardCodedHeaders(); //Representative_Sequence, total
         int printSeq(ofstream&, string);
+    
         bool testGroups(string file); //used to check if file has group data without reading it
         bool testGroups(string file, vector<string>&); //used to check if file has group data without reading it, return groups if found.
-        int copy(CountTable*); //copy countable
-
         bool hasGroupInfo() { return hasGroups; }
         int getNumGroups() { return (int)groups.size(); }
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
         bool setNamesOfGroups(vector<string>);
         int addGroup(string);
-        int removeGroup(string);
+        int removeGroup(string); //pass in group name
+        int removeGroup(int minSize);  //removes any groups with numSeqs < minSize
 
         int renameSeq(string, string); //used to change name of sequence for use with trees
         int setAbund(string, string, int); //set abundance number of seqs for that group for that seq
+        int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
         int push_back(string); //add a sequence
         int push_back(string, int); //add a sequence
         int push_back(string, vector<int>); //add a sequence with group info
+        int push_back(string, vector<int>, bool); //add a sequence with group info, no error - ignore dups
         int remove(string); //remove seq
         int get(string); //returns unique sequence index for reading distance matrices like NameAssignment
         int size() { return (int)indexNameMap.size(); }
 
-        vector<string> getGroups(string); //returns vector of groups represented by this sequences
+        vector<string> getGroups(string); //returns vector of groups represented by this sequence
         vector<int> getGroupCounts(string);  //returns group counts for a seq passed in, if no group info is in file vector is blank. Order is the same as the groups returned by getGroups function.
         int getGroupCount(string, string); //returns number of seqs for that group for that seq
         int getGroupCount(string); // returns total seqs for that group
@@ -90,28 +104,41 @@ class CountTable {
         int setNumSeqs(string, int); //set total seqs for that seq, return -1 if not found
         int getNumSeqs() { return total; } //return total number of seqs
         int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
+        int getNumSeqsSmallestGroup(); //returns size of smallest group. If no groups, returns total num seqs (includes non uniques)
 
         vector<string> getNamesOfSeqs(); //return names of all seqeunce in table
         vector<string> getNamesOfSeqs(string); //returns names of seqs in specific group in table
-        int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
+        vector<string> getNamesOfSeqs(vector<string>); //returns names of seqs in specific set of groups in table
+    
         ListVector getListVector();
-        SharedRAbundVectors* getShared();
-        SharedRAbundVectors* getShared(vector<string>); //set of groups selected
+        SharedRAbundVectors* getShared(map<string, string>&);
+        SharedRAbundVectors* getShared(vector<string>, map<string, string>&); //set of groups selected
         map<string, int> getNameMap();  //sequenceName -> total number of sequences it represents
-        void eliminateZeroSeqs();
+        map<string, int> getNameMap(string);  //sequenceName -> total number of sequences it represents in that group
+    
 
     private:
         string filename;
         MothurOut* m;
         Utils util;
-        bool hasGroups;
+        bool hasGroups, isCompressed;
         int total, uniques;
         vector<string> groups;
-        vector< vector<int> > counts;
+        vector< vector<countTableItem> > counts; //countTableItem ((int)abund, (int)group). each line in counts represents a sequence line from the count table file(sparse). The vector<ountTableItem> are sorted by group, so that you can stop search early if group is not found. For example:  seq1 10 5 0 0 1 0 0 0 3 0 0 1 0 0 - 13 groups, but seq1 is only present in 4 samples. Let's save space by not storing 0 abunds. seq1's vector<ountTableItem> (5,0),(1,3),(3,7),(1,10). Group0 = 5, Group3 = 1, Group7 = 3, Group10 = 1.  
         vector<int> totals;
         vector<int> totalGroups;
         map<string, int> indexNameMap; //maps seqName -> vector index in counts. seq1 -> 1 would mean seq1's counts are stored in counts[1].
         map<string, int> indexGroupMap;
+    
+        int find(int seq, int group); //returns index of countTableItem for group passed in. If group is not present in seq, returns -1
+        int getAbund(int seq, int group); //returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
+        vector<countTableItem> getItems(string); //returns group counts for a seq passed in, if no group info is in file vector is blank. sorted by group
+        vector<int> expandAbunds(int index);
+        vector<int> expandAbunds(vector<countTableItem>& items);
+        vector<countTableItem> compressAbunds(vector<int> abunds);
+        int printGroupAbunds(ofstream& out, int index);
+        int sortCountTable();
+        int sortRow(int);
 
 };
 

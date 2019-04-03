@@ -9,98 +9,63 @@
 
 #include "sequenceparser.h"
 
-
 /************************************************************/
 SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFile, vector<string> groupsSelected) {
 	try {
 		
 		m = MothurOut::getInstance();
+        hasName = true;
 		
 		//read group file
-		GroupMap groupMap(groupFile);
-		int error = groupMap.readMap();
+        GroupMap groupMap;
+		int error = groupMap.readMap(groupFile, groupsSelected); //only store info for groups selected
 		
 		if (error == 1) { m->setControl_pressed(true); }
 		
 		//initialize maps
         namesOfGroups = groupMap.getNamesOfGroups();
-        set<string> selectedGroups;
-        if (groupsSelected.size() != 0) { namesOfGroups = groupsSelected; }
         
-        for (int i = 0; i < namesOfGroups.size(); i++) {
-            vector<Sequence> temp;
-            map<string, string> tempMap;
-            seqs[namesOfGroups[i]] = temp;
-            nameMapPerGroup[namesOfGroups[i]] = tempMap;
-            selectedGroups.insert(namesOfGroups[i]);
+        //run splitGroups command to parse files
+        string inputString = "";
+        if (groupsSelected.size() != 0) { sort(groupsSelected.begin(), groupsSelected.end());   }
+        else                            { groupsSelected = namesOfGroups;                       }
+        
+        inputString += "groups=" + util.getStringFromVector(groupsSelected, "-");
+        inputString += ", fasta=" + fastaFile;
+        inputString += ", name=" + nameFile;
+        inputString += ", group=" + groupFile;
+        
+        m->mothurOut("\n/******************************************/\n");
+        m->mothurOut("Running command: split.groups(" + inputString + ")\n");
+        
+        Command* splitCommand = new SplitGroupCommand(inputString);
+        splitCommand->execute();
+        
+        //type -> files in groups order. fasta -> vector<string>. fastaFileForGroup1 stored in filenames["fasta"][1]
+        map<string, vector<string> > filenames = splitCommand->getOutputFiles();
+        
+        delete splitCommand;
+        m->mothurOut("/******************************************/\n");
+        
+        vector<string> parsedFastaFiles = filenames["fasta"]; //sorted in groups order
+        vector<string> parsedNameFiles = filenames["name"]; //sorted in groups order
+        vector<string> parsedGroupFiles = filenames["group"]; //sorted in groups order
+        
+        if (parsedNameFiles.size() != groupsSelected.size()) { cout << "should never get here, quitting\n\n"; m->setControl_pressed(true);  }
+        
+        for (int i = 0; i < groupsSelected.size(); i++) {
+            vector<string> thisSamplesFiles;
+            thisSamplesFiles.push_back(parsedFastaFiles[i]);
+            thisSamplesFiles.push_back(parsedNameFiles[i]);
+            thisSamplesFiles.push_back(parsedGroupFiles[i]);
+            groupToFiles[groupsSelected[i]] = thisSamplesFiles;
         }
         
-        map<string, string>::iterator it;
-        map<string, string> nameMap;
-        util.readNames(nameFile, nameMap);
-        
-		//read fasta file making sure each sequence is in the group file
-		ifstream in;
-		util.openInputFile(fastaFile, in);
-        
-        while (!in.eof()) {
-            
-            if (m->getControl_pressed()) { break; }
-            
-            Sequence seq(in); util.gobble(in);
-            
-            if (seq.getName() != "") {
-                
-                it = nameMap.find(seq.getName());
-                
-                if (it != nameMap.end()) { //in namefile
-                    
-                    vector<string> names;
-                    string secondCol = it->second;
-                    util.splitAtChar(secondCol, names, ',');
-                    
-                    map<string, string> splitMap; //group -> name1,name2,...
-                    map<string, string>::iterator itSplit;
-                    for (int i = 0; i < names.size(); i++) {
-                        string group = groupMap.getGroup(names[i]);
-                        
-                        if (selectedGroups.count(group) != 0) { //this is a group we want
-                            if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + names[i] + " is in your names file and not in your group file, please correct.\n");  }
-                            else {
-                                allSeqsMap[names[i]] = names[0];
-                                
-                                itSplit = splitMap.find(group);
-                                if (itSplit != splitMap.end()) { //adding seqs to this group
-                                    (itSplit->second) += "," + names[i];
-                                }else { //first sighting of this group
-                                    splitMap[group] = names[i];
-                                }
-                            }
-                        }
-                    }
-                    
-                    //fill nameMapPerGroup - holds all lines in namefile separated by group
-                    for (itSplit = splitMap.begin(); itSplit != splitMap.end(); itSplit++) {
-                        //grab first name
-                        string firstName = "";
-                        for(int i = 0; i < (itSplit->second).length(); i++) {
-                            if (((itSplit->second)[i]) != ',') {
-                                firstName += ((itSplit->second)[i]);
-                            }else { break; }
-                        }
-                        
-                        //group1 -> seq1 -> seq1,seq2,seq3
-                        nameMapPerGroup[itSplit->first][firstName] = itSplit->second;
-                        seqs[itSplit->first].push_back(Sequence(firstName, seq.getAligned()));
-                    }
-
-                }else { error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your name file, please correct.\n"); }
-            }
-        }
-		in.close();
-				 
-		if (error == 1) { m->setControl_pressed(true); }
-		
+        //reset current files changed by split.groups
+        CurrentFile* current; current = CurrentFile::getInstance();
+        current->setNameFile(nameFile);
+        current->setFastaFile(fastaFile);
+        current->setGroupFile(groupFile);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SequenceParser", "SequenceParser");
@@ -108,51 +73,61 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 	}
 }
 /************************************************************/
+//leaves all seqs map blank to be filled when asked for
 SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string> groupsSelected) {
 	try {
 		
-		m = MothurOut::getInstance();
-		int error;
-		
-		//read group file
-		GroupMap groupMap(groupFile);
-		error = groupMap.readMap();
-		
-		if (error == 1) { m->setControl_pressed(true); }
-		
-		//initialize maps
-        namesOfGroups = groupMap.getNamesOfGroups();
-        set<string> selectedGroups;
-        if (groupsSelected.size() != 0) { namesOfGroups = groupsSelected; }
+        m = MothurOut::getInstance();
+        hasName = false;
         
-		for (int i = 0; i < namesOfGroups.size(); i++) {
-			vector<Sequence> temp;
-			seqs[namesOfGroups[i]] = temp;
-            selectedGroups.insert(namesOfGroups[i]);
-		}
-		
-		//read fasta file making sure each sequence is in the group file
-		ifstream in;
-		util.openInputFile(fastaFile, in);
-		
-		while (!in.eof()) {
-			
-			if (m->getControl_pressed()) { break; }
-			
-			Sequence seq(in); util.gobble(in);
-			
-			if (seq.getName() != "") {
-                
-				string group = groupMap.getGroup(seq.getName());
-                if (selectedGroups.count(group) != 0) { //this is a group we want
-                    if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your groupfile, please correct.\n");  }
-                    else { seqs[group].push_back(seq); }
-                }
-			}
-		}
-		in.close();
-		
-		if (error == 1) { m->setControl_pressed(true); }
+        //read group file
+        GroupMap groupMap;
+        int error = groupMap.readMap(groupFile, groupsSelected); //only store info for groups selected
+        
+        if (error == 1) { m->setControl_pressed(true); }
+        
+        //initialize maps
+        namesOfGroups = groupMap.getNamesOfGroups();
+        
+        //run splitGroups command to parse files
+        string inputString = "";
+        if (groupsSelected.size() != 0) {
+            sort(groupsSelected.begin(), groupsSelected.end());
+            inputString += "groups=" + util.getStringFromVector(groupsSelected, "-");
+        }else {
+            groupsSelected = namesOfGroups;
+        }
+        
+        inputString += ", fasta=" + fastaFile;
+        inputString += ", group=" + groupFile;
+        
+        m->mothurOut("\n/******************************************/\n");
+        m->mothurOut("Running command: split.groups(" + inputString + ")\n");
+        
+        Command* splitCommand = new SplitGroupCommand(inputString);
+        splitCommand->execute();
+        
+        //type -> files in groups order. fasta -> vector<string>. fastaFileForGroup1 stored in filenames["fasta"][1]
+        map<string, vector<string> > filenames = splitCommand->getOutputFiles();
+        
+        delete splitCommand;
+        m->mothurOut("/******************************************/\n");
+        
+        vector<string> parsedFastaFiles = filenames["fasta"]; //sorted in groups order
+        vector<string> parsedGroupFiles = filenames["group"]; //sorted in groups order
+        
+        if (parsedFastaFiles.size() != groupsSelected.size()) { cout << "should never get here, quitting\n\n"; m->setControl_pressed(true);  }
+        
+        for (int i = 0; i < groupsSelected.size(); i++) {
+            vector<string> thisSamplesFiles;
+            thisSamplesFiles.push_back(parsedFastaFiles[i]);
+            thisSamplesFiles.push_back(parsedGroupFiles[i]);
+            groupToFiles[groupsSelected[i]] = thisSamplesFiles;
+        }
+        //reset current files changed by split.groups
+        CurrentFile* current; current = CurrentFile::getInstance();
+        current->setFastaFile(fastaFile);
+        current->setGroupFile(groupFile);
 		
 	}
 	catch(exception& e) {
@@ -167,66 +142,43 @@ int SequenceParser::getNumGroups(){ return namesOfGroups.size(); }
 /************************************************************/
 vector<string> SequenceParser::getNamesOfGroups(){ return namesOfGroups; }
 /************************************************************/
-int SequenceParser::getNumSeqs(string g){ 
-	try {
-		map<string, vector<Sequence> >::iterator it;
-		int num = 0;
-		
-		it = seqs.find(g);
-		if(it == seqs.end()) {
-			m->mothurOut("[ERROR]: " + g + " is not a valid group, please correct."); m->mothurOutEndLine();
-		}else {
-			num = (it->second).size();
-		}
-		
-		return num; 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SequenceParser", "getNumSeqs");
-		exit(1);
-	}
+vector<string> SequenceParser::getFiles(string group){
+    try {
+        map<string, vector<string> >::iterator it;
+        
+        it = groupToFiles.find(group);
+        if (it != groupToFiles.end()) {
+            return it->second;
+        }else {
+            m->mothurOut("[ERROR]: cannot find files for group " + group + ", quitting.\n"); m->setControl_pressed(true);
+        }
+        
+        return nullVector;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SequenceParser", "getFiles");
+        exit(1);
+    }
 }
-/************************************************************/
-vector<Sequence> SequenceParser::getSeqs(string g){ 
+/************************************************************
+int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, long long& numSeqs, string optionalGroupFileName, bool uchimeFormat=false){
 	try {
-		map<string, vector<Sequence> >::iterator it;
-		vector<Sequence> seqForThisGroup;
-		
-		it = seqs.find(g);
-		if(it == seqs.end()) {
-			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
-		}else {
-			seqForThisGroup = it->second;
-            if (m->getDebug()) {  m->mothurOut("[DEBUG]: group " + g + " fasta file has " + toString(seqForThisGroup.size()) + " sequences.");  }
-		}
-		
-		return seqForThisGroup; 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SequenceParser", "getSeqs");
-		exit(1);
-	}
-}
-/************************************************************/
-int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, long long& numSeqs, bool uchimeFormat=false){
-	try {
-		map<string, vector<Sequence> >::iterator it;
+		map<string, int>::iterator it;
 		vector<Sequence> seqForThisGroup;
 		vector<seqPriorityNode> nameVector;
 		
-		it = seqs.find(g);
-		if(it == seqs.end()) {
-			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
-		}else {
+        it = groupIndexMap.find(g);
+        if(it == groupIndexMap.end()) {
+            m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct.\n");
+        }else {
 
 			ofstream out;
 			util.openOutputFile(filename, out);
 			
-			seqForThisGroup = it->second;
+			seqForThisGroup = getSeqs(g);
             
             numSeqs = seqForThisGroup.size();
 
-			
 			if (uchimeFormat) {
 				// format should look like 
 				//>seqName /ab=numRedundantSeqs/
@@ -263,76 +215,30 @@ int SequenceParser::getSeqs(string g, string filename, string tag, string tag2, 
 					out << ">" <<  nameVector[i].name << tag << nameVector[i].numIdentical << tag2 << endl << nameVector[i].seq << endl; //
 				}
 				
-			}else { 
-                //m->mothurOut("Group " + g +  " contains " + toString(seqForThisGroup.size()) + " unique seqs.\n");
+			}else {
+                
+                ofstream outGroup;
+                if (optionalGroupFileName != "") { util.openOutputFile(optionalGroupFileName, outGroup); }
+                
 				for (int i = 0; i < seqForThisGroup.size(); i++) {
 					
 					if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
 					
-					seqForThisGroup[i].printSequence(out);	
+					seqForThisGroup[i].printSequence(out);
+                    
+                    if (optionalGroupFileName != "") {  outGroup << seqForThisGroup[i].getName() << '\t' << g << endl;  }
 				}
+                
+                if (optionalGroupFileName != "") {  outGroup.close();  }
 			}
 			out.close();
+            
 		}
 		
 		return 0; 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SequenceParser", "getSeqs");
-		exit(1);
-	}
-}
-
-/************************************************************/
-map<string, string> SequenceParser::getNameMap(string g){ 
-	try {
-		map<string, map<string, string> >::iterator it;
-		map<string, string> nameMapForThisGroup;
-		
-		it = nameMapPerGroup.find(g);
-		if(it == nameMapPerGroup.end()) {
-			m->mothurOut("[ERROR]: No nameMap available for group " + g + ", please correct."); m->mothurOutEndLine();
-		}else {
-			nameMapForThisGroup = it->second;
-            if (m->getDebug()) {  m->mothurOut("[DEBUG]: group " + g + " name file has " + toString(nameMapForThisGroup.size()) + " unique sequences.");  }
-		}
-		
-		return nameMapForThisGroup; 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SequenceParser", "getNameMap");
-		exit(1);
-	}
-}
-/************************************************************/
-int SequenceParser::getNameMap(string g, string filename){ 
-	try {
-		map<string, map<string, string> >::iterator it;
-		map<string, string> nameMapForThisGroup;
-		
-		it = nameMapPerGroup.find(g);
-		if(it == nameMapPerGroup.end()) {
-			m->mothurOut("[ERROR]: No nameMap available for group " + g + ", please correct."); m->mothurOutEndLine();
-		}else {
-			nameMapForThisGroup = it->second;
-			
-			ofstream out;
-			util.openOutputFile(filename, out);
-			
-			for (map<string, string>::iterator itFile = nameMapForThisGroup.begin(); itFile != nameMapForThisGroup.end(); itFile++) {
-				
-				if(m->getControl_pressed()) { out.close(); util.mothurRemove(filename); return 1; }
-				
-				out << itFile->first << '\t' << itFile->second << endl;
-			}
-			
-			out.close();
-		}
-		
-		return 0; 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SequenceParser", "getNameMap");
 		exit(1);
 	}
 }

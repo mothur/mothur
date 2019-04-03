@@ -38,14 +38,11 @@ public:
 	
 	
 private:
-	int driver(string, string);
+	int checkChimeras();
 
 	bool abort, svg, save;
 	string fastafile, templatefile, namefile, outputDir;
 	int increment, ksize, numSeqs, templateSeqsLength;
-	MothurChimera* chimera;
-	vector<string> fastaFileNames;
-	vector<string> nameFileNames;
 	vector<string> outputNames;
 };
 

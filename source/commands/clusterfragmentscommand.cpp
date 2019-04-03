@@ -184,7 +184,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			else if (countfile == "not found") { countfile = ""; }
 			else { ct.readTable(countfile, true, false); current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.fragments command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.fragments command you must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
 			string temp;
 			temp = validParameter.valid(parameters, "diffs");		if (temp == "not found"){	temp = "0";				}

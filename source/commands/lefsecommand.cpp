@@ -152,7 +152,7 @@ LefseCommand::LefseCommand(string option)  {
 				if(it != parameters.end()){
 					path = util.hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["desing"] = inputDir + it->second;		}
+					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
 				
                 it = parameters.find("shared");
@@ -757,7 +757,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, map<in
         }
                 
         //go through classes
-        int minCl = 1e6;
+        int minCl = MOTHURMAX;
         map<int, string> indexToClass;
         vector<string> classes;
         for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it != class2GroupIndex.end(); it++) {

@@ -280,7 +280,7 @@ int VennCommand::execute(){
 		}
 			
 		//if the users entered no valid calculators don't execute command
-		if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); return 0;  }
+		if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct.\n"); return 0;  }
 		
 		venn = new Venn(outputDir, nseqs, inputfile, fontsize, sharedOtus); 
 		InputData input(inputfile, format, Groups);
@@ -307,7 +307,8 @@ int VennCommand::execute(){
 			
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
+                vector<string> otuLabels = lookup->getOTUNames();
+                
 				if (m->getControl_pressed()) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
                     delete lookup;  delete venn;
@@ -329,11 +330,11 @@ int VennCommand::execute(){
 							vector<SharedRAbundVector*> subset;
 							for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
 							
-							vector<string> outfilenames = venn->getPic(subset, vennCalculators);
+							vector<string> outfilenames = venn->getPic(subset, vennCalculators, otuLabels);
 							for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }  }
 						}		
 					}else {
-						vector<string> outfilenames = venn->getPic(data, vennCalculators);
+						vector<string> outfilenames = venn->getPic(data, vennCalculators, otuLabels);
 						for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
 					}
                     for (int i = 0; i < data.size(); i++) {	delete data[i];  } data.clear();
@@ -358,11 +359,11 @@ int VennCommand::execute(){
                             vector<SharedRAbundVector*> subset;
                             for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
                             
-                            vector<string> outfilenames = venn->getPic(subset, vennCalculators);
+                            vector<string> outfilenames = venn->getPic(subset, vennCalculators, otuLabels);
                             for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }  }
                         }
                     }else {
-                        vector<string> outfilenames = venn->getPic(data, vennCalculators);
+                        vector<string> outfilenames = venn->getPic(data, vennCalculators, otuLabels);
                         for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
                     }
                     for (int i = 0; i < data.size(); i++) {	delete data[i];  } data.clear();
@@ -408,6 +409,7 @@ int VennCommand::execute(){
 					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 
                 vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
+                vector<string> otuLabels = lookup->getOTUNames();
                 if (lookup->size() > 4) {
                     set< set<int> >::iterator it3;
                     set<int>::iterator it2;
@@ -417,23 +419,19 @@ int VennCommand::execute(){
                         vector<SharedRAbundVector*> subset;
                         for (it2 = poss.begin(); it2 != poss.end(); it2++) {   subset.push_back(data[*it2]);   }
                         
-                        vector<string> outfilenames = venn->getPic(subset, vennCalculators);
+                        vector<string> outfilenames = venn->getPic(subset, vennCalculators, otuLabels);
                         for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }  }
                     }
                 }else {
-                    vector<string> outfilenames = venn->getPic(data, vennCalculators);
+                    vector<string> outfilenames = venn->getPic(data, vennCalculators, otuLabels);
                     for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
                 }
                 for (int i = 0; i < data.size(); i++) {	delete data[i];  } data.clear();
                 delete lookup;
 			}
-		
-
-			//reset groups parameter
-			  
 			
 			if (m->getControl_pressed()) {
-					 delete venn;
+                    delete venn;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }
 					return 0;

@@ -29,9 +29,9 @@ public:
 	map<string, string> getListCommands()	{	return commands;		}
 	
 private:
-	Command* command;
-	Command* shellcommand;
-	Command* pipecommand;
+	//Command* command;
+	//Command* shellcommand;
+	//Command* pipecommand;
 	MothurOut* m;
 	CurrentFile* current;
     Utils util;

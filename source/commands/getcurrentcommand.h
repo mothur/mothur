@@ -35,7 +35,6 @@ class GetCurrentCommand : public Command {
 	
 	private:
 		
-        CommandFactory* cFactory;
 		vector<string> outputNames;
 		bool abort;
 	

@@ -16,6 +16,7 @@ vector<string> SummarySharedCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","phylip",false,false); parameters.push_back(psubsample);
+        CommandParameter pwithreplacement("withreplacement", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pwithreplacement);
 		CommandParameter pdistance("distance", "Boolean", "", "F", "", "", "","phylip",false,false); parameters.push_back(pdistance);
 		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson-jsd-rjsd", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "","",true,false,true); parameters.push_back(pcalc);
         CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "","",false,false); parameters.push_back(poutput);
@@ -41,13 +42,14 @@ string SummarySharedCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The summary.shared command parameters are shared, label, calc, distance, processors, subsample, iters and all.  shared is required if there is no current sharedfile.\n";
+		helpString += "The summary.shared command parameters are " + getCommandParameters() + ".\nThe shared is required if there is no current sharedfile.\n";
 		helpString += "The summary.shared command should be in the following format: \n";
-		helpString += "summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n";
-		helpString += "Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n";
+		helpString += "summary.shared(shared=yourSharedFile).\n";
+		helpString += "Example summary.shared(shared=final.opti_mcc.shared)\n";
 		helpString +=  validCalculator.printCalc("sharedsummary");
         helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
+        helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
         helpString += "The output parameter allows you to specify format of your distance matrix. Options are lt, and square. The default is lt.\n";
 		helpString += "The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n";
 		helpString += "The default value for groups is all the groups in your groupfile.\n";
@@ -143,8 +145,8 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n"); abort = true; }
 			}else { current->setSharedFile(sharedfile); }
 			
 			
@@ -188,7 +190,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
             output = validParameter.valid(parameters, "output");
             if(output == "not found"){	output = "lt"; }
             else { createPhylip = true; }
-			if ((output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
+			if ((output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt.\n"); output = "lt"; }
             
             temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
 			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
@@ -198,6 +200,9 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
             }
             
             if (!subsample) { iters = 0; }
+            
+            temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
+            withReplacement = util.isTrue(temp);
             
             temp = validParameter.valid(parameters, "distance");					if (temp == "not found") { temp = "false"; }
 			createPhylip = util.isTrue(temp);
@@ -378,7 +383,7 @@ int SummarySharedCommand::execute(){
                 Groups = lookup->getNamesGroups();
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n"); m->setControl_pressed(true);  return 0; }
         }
 
 		
@@ -402,17 +407,12 @@ int SummarySharedCommand::execute(){
 			
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) {
-				if (mult) {  util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName);  delete lookup; for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0;
-			}
+			if (m->getControl_pressed()) { if (mult) {  util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName);  delete lookup; for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0; }
 
 		
 			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
 				m->mothurOut(lookup->getLabel()+"\n");
-                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                process(data, outputFileName, outAllFileName, currentLabels);
-                for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
-				
+                process(lookup, outputFileName, outAllFileName, currentLabels);
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 			}
 			
@@ -422,11 +422,8 @@ int SummarySharedCommand::execute(){
 					delete lookup;
 					lookup = input.getSharedRAbundVectors(lastLabel);
 
-					m->mothurOut(lookup->getLabel()+"\n"); 
-                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                    process(data, outputFileName, outAllFileName, currentLabels);
-                    for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
-					
+					m->mothurOut(lookup->getLabel()+"\n");
+                    process(lookup, outputFileName, outAllFileName, currentLabels);
 					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
 					
 					//restore real lastlabel to save below
@@ -441,9 +438,7 @@ int SummarySharedCommand::execute(){
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->getControl_pressed()) {
-			if (mult) { util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName); for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0;
-		}
+		if (m->getControl_pressed()) { if (mult) { util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName); for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0; }
 
 		//output error messages about any remaining user labels
 		bool needToRun = false;
@@ -458,10 +453,8 @@ int SummarySharedCommand::execute(){
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
 
-            m->mothurOut(lookup->getLabel()+"\n"); 
-            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-            process(data, outputFileName, outAllFileName, currentLabels);
-            for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
+            m->mothurOut(lookup->getLabel()+"\n");
+            process(lookup, outputFileName, outAllFileName, currentLabels);
             delete lookup;
 		}
 		
@@ -470,10 +463,10 @@ int SummarySharedCommand::execute(){
 		
 		if (m->getControl_pressed()) { util.mothurRemove(outAllFileName);   util.mothurRemove(outputFileName);  return 0; }
 		
-		m->mothurOut("\nOutput File Names: \n"); 
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
-		if (mult) { m->mothurOut(outAllFileName); m->mothurOutEndLine();	outputTypes["summary"].push_back(outAllFileName); }
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	} outputTypes["summary"].push_back(outputFileName);
+		m->mothurOut("\nOutput File Names:\n");
+		m->mothurOut(outputFileName+"\n");
+		if (mult) { m->mothurOut(outAllFileName+"\n"); outputTypes["summary"].push_back(outAllFileName); }
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	} outputTypes["summary"].push_back(outputFileName);
 		m->mothurOutEndLine();
 
 		return 0;
@@ -703,7 +696,7 @@ void driverSummaryShared(summarySharedData* params) {
 }
 
 /***********************************************************/
-int SummarySharedCommand::runCalcs(vector<SharedRAbundVector*>& thisItersLookup, string sumFileName, string sumAllFile, vector< vector<seqDist>  >& calcDists) {
+int SummarySharedCommand::runCalcs(SharedRAbundVectors*& thisItersLookup, string sumFileName, string sumAllFile, vector< vector<seqDist>  >& calcDists) {
     try{
         //create array of worker threads
         vector<thread*> workerThreads;
@@ -711,44 +704,24 @@ int SummarySharedCommand::runCalcs(vector<SharedRAbundVector*>& thisItersLookup,
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            
-            //make copy of lookup so we don't get access violations
-            vector<SharedRAbundVector*> newLookup;
-            for (int k = 0; k < thisItersLookup.size(); k++) {
-                SharedRAbundVector* temp = new SharedRAbundVector(*thisItersLookup[k]); //deep copy
-                temp->setLabel(thisItersLookup[k]->getLabel());
-                temp->setGroup(thisItersLookup[k]->getGroup());
-                newLookup.push_back(temp);
-            }
-            
-            
             // Allocate memory for thread data.
             string extension = toString(i+1) + ".temp";
-            summarySharedData* dataBundle = new summarySharedData(sumFileName+extension, sumAllFile+extension, m, lines[i+1].start, lines[i+1].end, Estimators, newLookup, false, mult);
+            summarySharedData* dataBundle = new summarySharedData(sumFileName+extension, sumAllFile+extension, m, lines[i+1].start, lines[i+1].end, Estimators, thisItersLookup, false, mult);
             
             data.push_back(dataBundle);
-            
             workerThreads.push_back(new thread(driverSummaryShared, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations
-        vector<SharedRAbundVector*> newLookup;
-        for (int k = 0; k < thisItersLookup.size(); k++) {
-            SharedRAbundVector* temp = new SharedRAbundVector(*thisItersLookup[k]); //deep copy
-            temp->setLabel(thisItersLookup[k]->getLabel());
-            temp->setGroup(thisItersLookup[k]->getGroup());
-            newLookup.push_back(temp);
-        }
+        //SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisItersLookup);
         string extension = toString(0) + ".temp";
-        summarySharedData* dataBundle = new summarySharedData(sumFileName+extension, sumAllFile+extension, m, lines[0].start, lines[0].end, Estimators, newLookup, true, mult);
+        summarySharedData* dataBundle = new summarySharedData(sumFileName+extension, sumAllFile+extension, m, lines[0].start, lines[0].end, Estimators, thisItersLookup, true, mult);
         
         driverSummaryShared(dataBundle);
         for (int k = 0; k < calcDists.size(); k++) {
             int size = dataBundle->calcDists[k].size();
             for (int j = 0; j < size; j++) {    calcDists[k].push_back(dataBundle->calcDists[k][j]);    }
         }
-        
-        for (int i = 0; i < newLookup.size(); i++) { delete newLookup[i]; } newLookup.clear();
         
         util.appendFiles((sumFileName + extension), sumFileName);
         util.mothurRemove((sumFileName + extension));
@@ -761,15 +734,12 @@ int SummarySharedCommand::runCalcs(vector<SharedRAbundVector*>& thisItersLookup,
             util.appendFiles((sumFileName + extension), sumFileName);
             util.mothurRemove((sumFileName + extension));
             
-            //delete pDataArray[i]->thisLookup;
             if (createPhylip) {
                 for (int k = 0; k < calcDists.size(); k++) {
                     int size = data[i]->calcDists[k].size();
                     for (int j = 0; j < size; j++) {    calcDists[k].push_back(data[i]->calcDists[k][j]);    }
                 }
             }
-            
-            for (int j = 0; j < data[i]->thisLookup.size(); j++) { delete data[i]->thisLookup[j]; } data[i]->thisLookup.clear();
             delete data[i];
             delete workerThreads[i];
         }
@@ -783,7 +753,7 @@ int SummarySharedCommand::runCalcs(vector<SharedRAbundVector*>& thisItersLookup,
     }
 }
 /***********************************************************/
-int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string sumFileName, string sumAllFileName, vector<string> currentLabels) {
+int SummarySharedCommand::process(SharedRAbundVectors* thisLookup, string sumFileName, string sumAllFileName, vector<string> currentLabels) {
 	try {
         vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(numCalcs);
@@ -791,29 +761,24 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
         SubSample sample;
         for (int thisIter = 0; thisIter < iters+1; thisIter++) {
             
-            vector<SharedRAbundVector*> thisItersLookup = thisLookup;
+            SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
             
             if (subsample && (thisIter != 0)) { //we want the summary results for the whole dataset, then the subsampling
                 //make copy of lookup so we don't get access violations
-                vector<SharedRAbundVector*> newLookup;
-                for (int k = 0; k < thisItersLookup.size(); k++) {
-                    SharedRAbundVector* temp = new SharedRAbundVector(*thisItersLookup[k]); //deep copy
-                    temp->setLabel(thisItersLookup[k]->getLabel());
-                    temp->setGroup(thisItersLookup[k]->getGroup());
-                    newLookup.push_back(temp);
-                }
+                SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisItersLookup);
                 
-                sample.getSample(newLookup, subsampleSize, currentLabels);
+                if (withReplacement)    {  currentLabels = sample.getSampleWithReplacement(newLookup, subsampleSize);    }
+                else                    {  currentLabels = sample.getSample(newLookup, subsampleSize);                   }
+                
+                delete thisItersLookup;
                 thisItersLookup = newLookup;
             }
             
             runCalcs(thisItersLookup, sumFileName, sumAllFileName, calcDists);
             
             if (subsample && (thisIter != 0)) { //we want the summary results for the whole dataset, then the subsampling
-                calcDistsTotals.push_back(calcDists); 
-                //clean up memory
-                for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
-                thisItersLookup.clear();
+                calcDistsTotals.push_back(calcDists);
+                delete thisItersLookup;
             }else {
                 if (createPhylip) {
                     for (int i = 0; i < calcDists.size(); i++) {
@@ -821,9 +786,9 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         
                         //initialize matrix
                         vector< vector<double> > matrix; //square matrix to represent the distance
-                        matrix.resize(thisLookup.size());
-                        vector<string> GroupNames;
-                        for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); GroupNames.push_back(thisLookup[k]->getGroup()); }
+                        matrix.resize(thisLookup->size());
+                        vector<string> GroupNames = thisLookup->getNamesGroups();
+                        for (int k = 0; k < thisLookup->size(); k++) {  matrix[k].resize(thisLookup->size(), 0.0);  }
                         
                         for (int j = 0; j < calcDists[i].size(); j++) {
                             int row = calcDists[i][j].seq1;
@@ -837,7 +802,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         map<string, string> variables; 
                         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
                         variables["[calc]"] = sumCalculatorsNames[i];
-                        variables["[distance]"] = thisLookup[0]->getLabel();
+                        variables["[distance]"] = thisLookup->getLabel();
                         variables["[outputtag]"] = output;
                         variables["[tag2]"] = "";
                         string distFileName = getOutputFileName("phylip",variables);
@@ -865,14 +830,13 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
             //print results
             for (int i = 0; i < calcDists.size(); i++) {
                 vector< vector<double> > matrix; //square matrix to represent the distance
-                matrix.resize(thisLookup.size());
-                for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                matrix.resize(thisLookup->size());
+                for (int k = 0; k < thisLookup->size(); k++) {  matrix[k].resize(thisLookup->size(), 0.0); }
                 
                 vector< vector<double> > stdmatrix; //square matrix to represent the stdDev
-                stdmatrix.resize(thisLookup.size());
-                vector<string> GroupNames;
-                for (int k = 0; k < thisLookup.size(); k++) {  stdmatrix[k].resize(thisLookup.size(), 0.0); GroupNames.push_back(thisLookup[k]->getGroup()); }
-                
+                stdmatrix.resize(thisLookup->size());
+                vector<string> GroupNames = thisLookup->getNamesGroups();
+                for (int k = 0; k < thisLookup->size(); k++) {  stdmatrix[k].resize(thisLookup->size(), 0.0);  }
                 
                 for (int j = 0; j < calcAverages[i].size(); j++) {
                     int row = calcAverages[i][j].seq1;
@@ -889,7 +853,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 map<string, string> variables; 
                 variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
                 variables["[calc]"] = sumCalculatorsNames[i];
-                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[distance]"] = thisLookup->getLabel();
                 variables["[outputtag]"] = output;
                 variables["[tag2]"] = "ave";
                 string distFileName = getOutputFileName("phylip",variables);
@@ -898,9 +862,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 util.openOutputFile(distFileName, outAve);
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
                 
-                printSims(outAve, matrix, GroupNames);
-                
-                outAve.close();
+                printSims(outAve, matrix, GroupNames); outAve.close();
                 
                 variables["[tag2]"] = "std";
                 distFileName = getOutputFileName("phylip",variables);
@@ -909,10 +871,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 util.openOutputFile(distFileName, outSTD);
                 outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
                 
-                printSims(outSTD, stdmatrix, GroupNames);
-                
-                outSTD.close();
-                
+                printSims(outSTD, stdmatrix, GroupNames); outSTD.close();
             }
         }
         

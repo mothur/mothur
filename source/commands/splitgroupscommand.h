@@ -17,6 +17,8 @@
 #include "command.hpp"
 #include "groupmap.h"
 #include "sequence.hpp"
+#include "fastqread.h"
+#include "getseqscommand.h"
 
 /***************************************************************************************/
 
@@ -43,13 +45,14 @@ public:
 private:
 	vector<string> outputNames;
 		
-	string outputDir, namefile, groupfile, countfile, groups, fastafile, flowfile;
+	string outputDir, namefile, groupfile, countfile, groups, fastafile, flowfile, fastqfile, format;
 	vector<string> Groups;
 	bool abort;
     
     int runNameGroup();
     int runCount();
     int splitFlow();
+    int splitFastq();
 };
 
 /***************************************************************************************/

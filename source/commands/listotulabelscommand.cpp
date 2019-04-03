@@ -15,9 +15,9 @@ vector<string> ListOtuLabelsCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false,true); parameters.push_back(pshared);
 		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false); parameters.push_back(prelabund);
         CommandParameter plist("list", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false); parameters.push_back(plist);
+        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false); parameters.push_back(pconstaxonomy);
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-        //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -35,7 +35,7 @@ vector<string> ListOtuLabelsCommand::setParameters(){
 string ListOtuLabelsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The list.otulabels lists otu labels from shared, relabund or list file. The results can be used by the get.otulabels to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
+		helpString += "The list.otulabels lists otu labels from shared, relabund, list or constaxonomy file. The results can be used by the get.otulabels to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
 		helpString += "The list.otulabels parameters are: shared, relabund, label and groups.\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.\n";
@@ -53,7 +53,7 @@ string ListOtuLabelsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "otulabels") {  pattern = "[filename],[distance],otulabels"; } 
+        if (type == "otulabels") {  pattern = "[filename],[distance],otulabels-[filename],otulabels"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -132,6 +132,14 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("constaxonomy");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
+                }
             }
             
             vector<string> tempOutNames;
@@ -152,22 +160,31 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
 			else { inputFileName = listfile; format = "list"; current->setListFile(listfile); }
+            
+            constaxonomy = validParameter.validFile(parameters, "constaxonomy");
+            if (constaxonomy == "not open") { abort = true; }
+            else if (constaxonomy == "not found") { constaxonomy = ""; }
+            else { inputFileName = constaxonomy; format = "constaxonomy"; current->setConsTaxonomyFile(constaxonomy); }
 
             
-            if ((relabundfile == "") && (sharedfile == "") && (listfile== "")) { 
+            if ((relabundfile == "") && (sharedfile == "") && (constaxonomy == "") && (listfile== "")) {
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") {  inputFileName = sharedfile; format="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  inputFileName = sharedfile; format="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					relabundfile = current->getRelAbundFile(); 
-					if (relabundfile != "") {  inputFileName = relabundfile; format="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					if (relabundfile != "") {  inputFileName = relabundfile; format="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 					else { 
                         listfile = current->getListFile();
-						if (listfile != "") {  inputFileName = listfile; format="list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+						if (listfile != "") {  inputFileName = listfile; format="list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
                         else { 
-                            m->mothurOut("No valid current files. You must provide a shared, list or relabund."); m->mothurOutEndLine(); 
-                            abort = true;
+                            constaxonomy = current->getConsTaxonomyFile();
+                            if (constaxonomy != "") {  inputFileName = constaxonomy; format="constaxonomy"; m->mothurOut("Using " + constaxonomy + " as input file for the constaxonomy parameter.\n");  }
+                            else {
+                                m->mothurOut("No valid current files. You must provide a shared, list, relabund or constaxonomy file.\n");
+                                abort = true;
+                            }
                         }
 					}
 				}
@@ -203,9 +220,9 @@ int ListOtuLabelsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        InputData input(inputFileName, format, Groups);
-        
         if (format == "relabund") {
+            InputData input(inputFileName, format, Groups);
+            
             SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
             Groups = lookup->getNamesGroups();
             string lastLabel = lookup->getLabel();
@@ -263,10 +280,10 @@ int ListOtuLabelsCommand::execute(){
             for (it = userLabels.begin(); it != userLabels.end(); it++) {  
                 m->mothurOut("Your file does not include the label " + *it); 
                 if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                    m->mothurOut(". I will use " + lastLabel + ".\n");
                     needToRun = true;
                 }else {
-                    m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+                    m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
                 }
             }
             
@@ -282,6 +299,7 @@ int ListOtuLabelsCommand::execute(){
                 delete lookup;
             }
         }else if (format == "sharedfile") {
+            InputData input(inputFileName, format, Groups);
             
             SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
             Groups = lookup->getNamesGroups();
@@ -340,10 +358,10 @@ int ListOtuLabelsCommand::execute(){
             for (it = userLabels.begin(); it != userLabels.end(); it++) {  
                 m->mothurOut("Your file does not include the label " + *it); 
                 if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                    m->mothurOut(". I will use " + lastLabel + ".\n");
                     needToRun = true;
                 }else {
-                    m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+                    m->mothurOut(". Please refer to " + lastLabel + ".\n");
                 }
             }
             
@@ -358,7 +376,8 @@ int ListOtuLabelsCommand::execute(){
                 
                 delete lookup;
             }
-        }else {
+        }else if (format == "list") {
+            InputData input(inputFileName, format, Groups);
             ListVector* list = input.getListVector();
             string lastLabel = list->getLabel();
             
@@ -373,7 +392,7 @@ int ListOtuLabelsCommand::execute(){
                 
                 if(allLines == 1 || labels.count(list->getLabel()) == 1){			
                     
-                    m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(list->getLabel()+"\n");
                     
                     createList(list);
                     
@@ -386,7 +405,7 @@ int ListOtuLabelsCommand::execute(){
                     
                     delete list; 
                     list = input.getListVector(lastLabel);
-                    m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+                    m->mothurOut(list->getLabel()+"\n");
                     
                     createList(list);
                     
@@ -415,10 +434,10 @@ int ListOtuLabelsCommand::execute(){
             for (it = userLabels.begin(); it != userLabels.end(); it++) {  
                 m->mothurOut("Your file does not include the label " + *it); 
                 if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                    m->mothurOut(". I will use " + lastLabel + ".\n");
                     needToRun = true;
                 }else {
-                    m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+                    m->mothurOut(". Please refer to " + lastLabel + ".\n");
                 }
             }
             
@@ -427,13 +446,13 @@ int ListOtuLabelsCommand::execute(){
                 delete list;  
                 list = input.getListVector(lastLabel);
                 
-                m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+                m->mothurOut(list->getLabel() +"\n");
                 
                 createList(list);
                 
                 delete list;
             }
-        }
+        }else if (format == "constaxonomy") { createList(constaxonomy); }
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
         
@@ -520,6 +539,46 @@ int ListOtuLabelsCommand::createList(ListVector*& list){
 		m->errorOut(e, "ListOtuLabelsCommand", "createList");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+
+int ListOtuLabelsCommand::createList(string constaxFile){
+    try {
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        string outputFileName = getOutputFileName("otulabels",variables);
+        outputNames.push_back(outputFileName);  outputTypes["otulabels"].push_back(outputFileName);
+        ofstream out;
+        util.openOutputFile(outputFileName, out);
+        
+        ifstream in;
+        util.openInputFile(constaxFile, in);
+        string otuLabel, tax;
+        int numReps;
+        
+        //read headers
+        string headers = util.getline(in);
+        
+        while(!in.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            in >> otuLabel;	 		util.gobble(in);
+            in >> numReps;          util.gobble(in);
+            tax = util.getline(in);   util.gobble(in);
+            
+            out << otuLabel << endl;
+        }
+        in.close();
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListOtuLabelsCommand", "createList");
+        exit(1);
+    }
 }
 
 //**********************************************************************************************************************

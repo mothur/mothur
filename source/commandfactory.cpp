@@ -69,7 +69,6 @@
 #include "makegroupcommand.h"
 #include "chopseqscommand.h"
 #include "clearcutcommand.h"
-#include "catchallcommand.h"
 #include "splitabundcommand.h"
 #include "clustersplitcommand.h"
 #include "classifyotucommand.h"
@@ -174,10 +173,6 @@ CommandFactory::CommandFactory(){
 	m = MothurOut::getInstance();
     current = CurrentFile::getInstance();
 
-	command = new NoCommand(s);
-	shellcommand = new NoCommand(s);
-	pipecommand = new NoCommand(s);
-
 	current->setOutputDir(""); current->setInputDir("");
 	append = false;
 
@@ -230,7 +225,6 @@ CommandFactory::CommandFactory(){
 	commands["make.group"]			= "make.group";
 	commands["chop.seqs"]			= "chop.seqs";
 	commands["clearcut"]			= "clearcut";
-	commands["catchall"]			= "catchall";
 	commands["split.abund"]			= "split.abund";
 	commands["classify.otu"]		= "classify.otu";
 	commands["degap.seqs"]			= "degap.seqs";
@@ -338,9 +332,6 @@ CommandFactory::CommandFactory(){
 /***********************************************************/
 CommandFactory::~CommandFactory(){
 	_uniqueInstance = 0;
-	delete command;
-	delete shellcommand;
-	delete pipecommand;
 }
 /***********************************************************/
 
@@ -421,7 +412,7 @@ int CommandFactory::checkForRedirects(string optionString) {
 Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
 
-		delete command;   //delete the old command
+        Command* command = NULL;
         
         if (commandName != "help") {
             checkForRedirects(optionString);
@@ -503,7 +494,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
 		else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
-		else if(commandName == "catchall")				{	command = new CatchAllCommand(optionString);				}
 		else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}
 		else if(commandName == "cluster.split")			{	command = new ClusterSplitCommand(optionString);			}
 		else if(commandName == "classify.otu")			{	command = new ClassifyOtuCommand(optionString);				}
@@ -599,7 +589,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 //This function calls the appropriate command fucntions based on user input.
 Command* CommandFactory::getCommand(string commandName, string optionString, string mode){
 	try {
-		delete pipecommand;   //delete the old command
+		Command* pipecommand = NULL;   //delete the old command
         
         if (commandName != "help") {
             checkForRedirects(optionString);
@@ -680,7 +670,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "make.group")			{	pipecommand = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	pipecommand = new ChopSeqsCommand(optionString);				}
 		else if(commandName == "clearcut")				{	pipecommand = new ClearcutCommand(optionString);				}
-		else if(commandName == "catchall")				{	pipecommand = new CatchAllCommand(optionString);				}
 		else if(commandName == "split.abund")			{	pipecommand = new SplitAbundCommand(optionString);				}
 		else if(commandName == "cluster.split")			{	pipecommand = new ClusterSplitCommand(optionString);			}
 		else if(commandName == "classify.otu")			{	pipecommand = new ClassifyOtuCommand(optionString);				}
@@ -777,7 +766,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 //This function calls the appropriate command fucntions based on user input, this is used by the pipeline command to check a users piepline for errors before running
 Command* CommandFactory::getCommand(string commandName){
 	try {
-		delete shellcommand;   //delete the old command
+		Command* shellcommand = NULL;   //delete the old command
 
 		if(commandName == "cluster")				{	shellcommand = new ClusterCommand();				}
 		else if(commandName == "unique.seqs")			{	shellcommand = new DeconvoluteCommand();			}
@@ -843,7 +832,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "make.group")			{	shellcommand = new MakeGroupCommand();				}
 		else if(commandName == "chop.seqs")				{	shellcommand = new ChopSeqsCommand();				}
 		else if(commandName == "clearcut")				{	shellcommand = new ClearcutCommand();				}
-		else if(commandName == "catchall")				{	shellcommand = new CatchAllCommand();				}
 		else if(commandName == "split.abund")			{	shellcommand = new SplitAbundCommand();				}
 		else if(commandName == "cluster.split")			{	shellcommand = new ClusterSplitCommand();			}
 		else if(commandName == "classify.otu")			{	shellcommand = new ClassifyOtuCommand();			}
@@ -1008,7 +996,12 @@ void CommandFactory::printCommandsCategories(ostream& out) {
         }
 
         for (itCat = categories.begin(); itCat != categories.end(); itCat++) {
-            out << itCat->first << " commmands include: " << itCat->second << endl;
+            #if defined NON_WINDOWS
+                out << BOLDMAGENTA << endl << itCat->first << " commmands include: " << RESET << itCat->second << endl;
+            #else
+                out << endl << itCat->first << " commmands include: " << itCat->second << endl;
+            #endif
+            
         }
 
     }

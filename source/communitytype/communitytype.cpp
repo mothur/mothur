@@ -520,7 +520,7 @@ int CommunityTypeFinder::findkMeans(){
 double CommunityTypeFinder::rMedoid(vector< vector<double> > x, vector< vector<double> > d){
     try {
         vector<double> results; results.resize(numOTUs, 0.0);
-        double minSumDist = 1e6;
+        double minSumDist = MOTHURMAX;
         int minGroup = -1;
         
         for (int i = 0; i < d.size(); i++) {
@@ -569,7 +569,7 @@ double CommunityTypeFinder::calcCHIndex(vector< vector< double> > dists){
         
         map<int, int> clusterMap; //map sample to partition
         for (int j = 0; j < numSamples; j++) {
-            double maxValue = -1e6;
+            double maxValue = -MOTHURMAX;
             for (int i = 0; i < numPartitions; i++) {
                 if (m->getControl_pressed()) { return 0.0; }
                 if (zMatrix[i][j] > maxValue) { //for kmeans zmatrix contains values for each sample in each partition. partition with highest value for that sample is the partition where the sample should be
@@ -670,7 +670,7 @@ vector<vector<double> > CommunityTypeFinder::calcCenters(vector<vector<double> >
             
             //sum dist to all other samples in cluster
             vector<int> members = it->second;
-            double minSumDist = 1e6;
+            double minSumDist = MOTHURMAX;
             for (int i = 0; i < members.size(); i++) {
                 if (m->getControl_pressed()) { return centers; }
                 if (sums[members[i]] < minSumDist) {

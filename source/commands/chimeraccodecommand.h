@@ -37,13 +37,12 @@ public:
 	
 		
 private:
-	int driver(string, string, string);
 	bool abort, filter, save;
 	string fastafile, templatefile, outputDir, maskfile;
 	int window, numwanted, numSeqs, templateSeqsLength;
-	MothurChimera* chimera;
-	vector<string> fastaFileNames;
 	vector<string> outputNames;
+    
+    int driver(string, string, string);
 };
 
 /***********************************************************/

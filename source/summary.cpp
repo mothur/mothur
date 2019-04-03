@@ -32,28 +32,8 @@ void Summary::processNameCount(string n) { //name or count file to include in co
 //**********************************************************************************************************************
 bool Summary::isCountFile(string inputfile){
     try {
-        bool isCount = true;
-
-        ifstream in;
-        Utils util; util.openInputFile(inputfile, in);
-
-        //read headers
-        string line = util.getline(in);
-
-        in.close();
-
-        vector<string> pieces = util.splitWhiteSpace(line);
-
-        if (pieces.size() >= 2) {
-            CountTable ct;
-            vector<string> defaultHeaders = ct.getHardCodedHeaders();
-            if (defaultHeaders.size() >= 2) {
-                if ((pieces[0] != defaultHeaders[0]) && (pieces[0] != "OTU_Label")) { isCount = false; }
-                if (pieces[1] != defaultHeaders[1]) { isCount = false; }
-            }else { isCount = false; }
-        }else { isCount = false; }
-
-
+        CountTable ct;
+        bool isCount = ct.isCountTable(inputfile);
         return isCount;
     }
     catch(exception& e) {
@@ -61,7 +41,6 @@ bool Summary::isCountFile(string inputfile){
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
 vector<long long> Summary::getDefaults() {
     try {

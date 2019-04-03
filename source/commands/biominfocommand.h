@@ -30,6 +30,7 @@ public:
     string getCommandName()			{ return "biom.info";				}
     string getCommandCategory()		{ return "OTU-Based Approaches";	}
     
+    string getCommonQuestions();
     string getHelpString();
     string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/Biom.info"; }

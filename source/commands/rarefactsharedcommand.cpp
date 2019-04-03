@@ -25,6 +25,7 @@ vector<string> RareFactSharedCommand::setParameters(){
 		CommandParameter pcalc("calc", "Multiple", "sharednseqs-sharedobserved", "sharedobserved", "", "", "","",true,false,true); parameters.push_back(pcalc);
         CommandParameter psubsampleiters("subsampleiters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(psubsampleiters);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+        CommandParameter pwithreplacement("withreplacement", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pwithreplacement);
 		CommandParameter pjumble("jumble", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pjumble);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
         CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
@@ -58,6 +59,7 @@ string RareFactSharedCommand::getHelpString(){
 		helpString += "The default values for iters is 1000, freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness.\n";
         helpString += "The subsampleiters parameter allows you to choose the number of times you would like to run the subsample.\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
+        helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
 		helpString += "The default value for groups is all the groups in your groupfile, and jumble is true.\n";
 		helpString += validCalculator.printCalc("sharedrarefaction");
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
@@ -236,6 +238,9 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
             }
             
             if (subsample == false) { iters = 1; }
+            
+            temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
+            withReplacement = util.isTrue(temp);
 				
 		}
 
@@ -302,6 +307,8 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         }
         
         SharedRAbundVectors* subset = new SharedRAbundVectors();
+        subset->setLabels(lookup->getLabel());
+        subset->setOTUNames(lookup->getOTUNames());
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         if (thisSet != "") {//remove unwanted groups
             for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
@@ -312,21 +319,15 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         /******************************************************/
         if (subsample) {
             //user has not set size, set size = smallest samples size
-            if (subsampleSize == -1) { subsampleSize = subset->getNumSeqsSmallestGroup(); }
-            else {
-                vector<string> lookupGroups = subset->getNamesGroups();
-                newGroups.clear();
-                vector<string> temp;
-                for (int i = 0; i < lookupGroups.size(); i++) {
-                    if (lookup->getNumSeqs(lookupGroups[i]) < subsampleSize) {
-                        m->mothurOut(lookupGroups[i] + " contains " + toString(subset->getNumSeqs(lookupGroups[i])) + ". Eliminating."); m->mothurOutEndLine();
-                        temp.push_back(lookupGroups[i]);
-                    }else { newGroups.push_back(lookupGroups[i]); }
-                }
-                subset->removeGroups(temp);
+            if (subsampleSize == -1) {
+                subsampleSize = subset->getNumSeqsSmallestGroup();
+                m->mothurOut("Setting subsample size to " + toString(subsampleSize) + ".\n\n");
             }
             
-            if (subset->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
+            subset->removeGroups(subsampleSize);
+            newGroups = subset->getNamesGroups();
+            
+            if (subset->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n\n"); m->setControl_pressed(true); return 0; }
         }
         /******************************************************/
         
@@ -490,16 +491,15 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
         for (int thisIter = 0; thisIter < iters; thisIter++) {
             
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
-            sample.getSample(thisItersLookup, subsampleSize);
             
-            Rarefact* rCurve;
-            vector<Display*> rDisplays;
-            
+            if (withReplacement)    {  sample.getSampleWithReplacement(thisItersLookup, subsampleSize);     }
+            else                    {  sample.getSample(thisItersLookup, subsampleSize);                    }
+
             string thisfileNameRoot = fileNameRoot + toString(thisIter);
-            
             map<string, string> variables; 
             variables["[filename]"] = thisfileNameRoot;
             
+            vector<Display*> rDisplays;
             ValidCalculators validCalculator;
             for (int i=0; i<Estimators.size(); i++) {
                 if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) ) { 
@@ -513,13 +513,14 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
                 }
             }
             
-            rCurve = new Rarefact(thisItersLookup, rDisplays, jumble, processors);
-			rCurve->getSharedCurve(freq, nIters);
-			delete rCurve;
+            Rarefact rCurve(thisItersLookup, rDisplays, jumble, processors);
+			rCurve.getSharedCurve(freq, nIters);
             
             //clean up memory
             for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
             delete thisItersLookup;
+            
+            if((thisIter+1) % 100 == 0)	{ m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 	}
         }
         
         //create std and ave outputs

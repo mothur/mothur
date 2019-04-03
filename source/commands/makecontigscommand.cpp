@@ -471,8 +471,112 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 //**********************************************************************************************************************
 int MakeContigsCommand::execute(){
 	try {
-		if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        bool debugIndex = false;
+        if (debugIndex) { //allows you to run the oligos and index file independantly to check for barcode issues. make.contigs(findex=yourIndexFile, bdiffs=1, oligos=yourOligosFile, checkorient=t). just used for user support
+            
+            map<int, oligosPair> pairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reorientedPairedPrimers;
+            vector<string> barcodeNames, primerNames;
+            
+            if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, reorientedPairedPrimers, pairedBarcodes, reorientedPairedBarcodes, barcodeNames, primerNames);    }
+            
+            int numPrimers = pairedPrimers.size();
+            TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes, true);
+            int numBarcodes = pairedBarcodes.size();
+            TrimOligos* rtrimOligos = NULL;
+            if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, reorientedPairedPrimers, reorientedPairedBarcodes, true); numBarcodes = reorientedPairedBarcodes.size();   numPrimers = reorientedPairedPrimers.size();  }
 
+            ifstream in;
+            util.openInputFile(findexfile, in);
+            
+            while (!in.eof()) {
+                if (m->getControl_pressed()) { break; }
+                
+                bool ignore = false;
+                FastqRead index(in, ignore, format); util.gobble(in);
+                
+                int success = 1;
+                string trashCode = "";
+                string commentString = "";
+                int currentSeqsDiffs = 0;
+                int barcodeIndex = 0;
+                
+                Sequence fSeq, rSeq;
+                QualityScores* fQual = NULL; QualityScores* rQual = NULL;
+                QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
+                Sequence findexBarcode("findex", index.getSeq());  Sequence rindexBarcode("rindex", "NONE");
+                Sequence savedFindex("findex", index.getSeq());  Sequence savedRIndex("rindex", "NONE");
+                
+                if(numBarcodes != 0){
+                    vector<int> results;
+                    
+                    results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
+                    
+                    success = results[0] + results[2];
+                    commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], bdiffs) + ") ";
+                    if(success > bdiffs)		{	trashCode += 'b';	}
+                    else{ currentSeqsDiffs += success;  }
+                }
+                
+                if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+                    int thisSuccess = 0;
+                    string thisTrashCode = "";
+                    string thiscommentString = "";
+                    int thisCurrentSeqsDiffs = 0;
+                    
+                    int thisBarcodeIndex = 0;
+                    
+                    if(numBarcodes != 0){
+                        vector<int> results;
+                        
+                        results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
+                        
+                        thisSuccess = results[0] + results[2];
+                        thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                        if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
+                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                    }
+                    
+                    if (thisTrashCode == "") {
+                        trashCode = thisTrashCode;
+                        success = thisSuccess;
+                        currentSeqsDiffs = thisCurrentSeqsDiffs;
+                        commentString = thiscommentString;
+                        barcodeIndex = thisBarcodeIndex;
+                    }else { trashCode += "(" + thisTrashCode + ")";  }
+                }
+                
+                
+                if (trashCode == "") {
+                    string thisGroup = "";
+                    if(numBarcodes != 0){ thisGroup = barcodeNames[barcodeIndex]; }
+                    
+                    
+                    int pos = thisGroup.find("ignore");
+                    if (pos == string::npos) {
+                        if (thisGroup != "") {
+                            groupMap[index.getName()] = thisGroup;
+                            
+                            map<string, int>::iterator it = groupCounts.find(thisGroup);
+                            if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
+                            else { groupCounts[it->first] ++; }
+                        }
+                    }
+                }
+                
+                cout << index.getName() << '\t' << commentString << endl;
+            }
+            in.close();
+            
+            int total = 0;
+            if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
+            for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
+            if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
+            
+            exit(1);
+        }
+        
+        if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        
         unsigned long long numReads = 0;
         long start = time(NULL);
         string outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, inputFile;
@@ -570,7 +674,7 @@ int MakeContigsCommand::createGroupFile(string outputGroupFile, string resultFas
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "processNamesCountFiles");
+        m->errorOut(e, "MakeContigsCommand", "createGroupFile");
         exit(1);
     }
 }
@@ -2620,7 +2724,7 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
         if (groupNames.size() == 0) { allFiles = 0; allBlank = true;  }
 
         if (allBlank) {
-            m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
+            m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile.\n"); 
             allFiles = false;
             return false;
         }

@@ -334,7 +334,7 @@ int PcrSeqsCommand::execute(){
         set<string> badNames;
         long long numFastaSeqs = createProcesses(fastafile, trimSeqFile, badSeqFile, badNames);
 		
-		if (m->getControl_pressed()) {  return 0; }		
+		if (m->getControl_pressed()) {  return 0; }
         
         thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
@@ -562,7 +562,8 @@ int driverPcr(pcrData* params){
         bool done = false;
         params->count = 0;
         set<int> lengths;
-        set<int> locations; //locations[0] = beginning locations,
+        set<int> startLocations; //locations[0] = beginning locations,
+        set<int> endLocations;
         
         Oligos oligos;
         params->numFPrimers = 0; params->numRPrimers = 0;
@@ -633,11 +634,11 @@ int driverPcr(pcrData* params){
                             if (aligned) {
                                 if (!params->keepprimer)    {
                                     if (params->keepdots)   { currSeq.filterToPos(mapAligned[primerEnd-1]+1);   } //mapAligned[primerEnd-1] is the location of the last base in the primer. we want to trim to the space just after that.  The -1 & +1 ensures if the primer is followed by gaps they are not trimmed causing an aligned sequence dataset to become unaligned.
-                                    else            {
+                                    else{
                                         currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerEnd-1]+1));
                                         if (params->fileAligned) {
                                             thisPStart = mapAligned[primerEnd-1]+1; //locations[0].insert(mapAligned[primerEnd-1]+1);
-                                            thisSeqsLocations.push_back((mapAligned[primerEnd-1]+1));
+                                            thisSeqsLocations.push_back(thisPStart);
                                         }
                                     }
                                 }else                {
@@ -646,7 +647,7 @@ int driverPcr(pcrData* params){
                                         currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));
                                         if (params->fileAligned) {
                                             thisPStart = mapAligned[primerStart]; //locations[0].insert(mapAligned[primerStart]);
-                                            thisSeqsLocations.push_back((mapAligned[primerStart]));
+                                            thisSeqsLocations.push_back(thisPStart);
                                         }
                                     }
                                 }
@@ -677,7 +678,7 @@ int driverPcr(pcrData* params){
                                         currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerStart]));
                                         if (params->fileAligned) {
                                             thisPEnd = mapAligned[primerStart]; //locations[1].insert(mapAligned[primerStart]);
-                                            thisSeqsLocations.push_back((mapAligned[primerStart]));
+                                            thisSeqsLocations.push_back(thisPEnd);
                                         }
                                     }
                                 }
@@ -687,7 +688,7 @@ int driverPcr(pcrData* params){
                                         currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerEnd-1]+1));
                                         if (params->fileAligned) {
                                             thisPEnd = mapAligned[primerEnd-1]+1; //locations[1].insert(mapAligned[primerEnd-1]+1);
-                                            thisSeqsLocations.push_back((mapAligned[primerEnd-1]+1));
+                                            thisSeqsLocations.push_back(thisPEnd);
                                         }
                                     }
                                 }
@@ -722,7 +723,7 @@ int driverPcr(pcrData* params){
                             else {
                                 if (params->keepdots)   { currSeq.filterFromPos(params->end); }
                                 else {
-                                    string seqString = currSeq.getAligned().substr(0, (params->end-1));
+                                    string seqString = currSeq.getAligned().substr(0, (params->end));
                                     currSeq.setAligned(seqString);
                                 }
                             }
@@ -750,7 +751,8 @@ int driverPcr(pcrData* params){
                 
                 if(goodSeq)    {
                     currSeq.printSequence(params->goodFasta);
-                    if (thisPStart != -1)   { locations.insert(thisPStart);  }
+                    if (thisPStart != -1)   { startLocations.insert(thisPStart);    }
+                    if (thisPEnd != -1)     { endLocations.insert(thisPEnd);        }
                     if (thisSeqsLocations.size() != 0) { params->locations[currSeq.getName()] = thisSeqsLocations; }
                 }
                 else {
@@ -779,8 +781,16 @@ int driverPcr(pcrData* params){
         if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: fileAligned = " + toString(params->fileAligned) +'\n'); }
         
         if (params->fileAligned && !params->keepdots) { //print out smallest start value and largest end value
-            if (locations.size() > 1) { params->adjustNeeded = true; }
-            if (primers.size() != 0)    {   set<int>::iterator it = locations.begin();  params->pstart = *it;  }
+            if (startLocations.size() > 1)  { params->adjustNeeded = true; }
+            if (endLocations.size() > 1)    { params->adjustNeeded = true; }
+            if (primers.size() != 0)        {
+                set<int>::iterator it = startLocations.begin();  params->pstart = *it;
+                if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: " + params->util.getStringFromSet(startLocations, " ")+"\n"); }
+            }
+            if (revPrimer.size() != 0)      {
+                set<int>::reverse_iterator it = endLocations.rbegin();  params->pend = *it;
+                if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: " + params->util.getStringFromSet(endLocations, " ")+"\n"); }
+            }
         }
         
         return params->count;
@@ -801,7 +811,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         vector<linePair> lines;
         long long numFastaSeqs = 0;
 #if defined NON_WINDOWS
-        positions = util.divideFile(fastafile, processors);
+        positions = util.divideFile(filename, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
         
@@ -822,8 +832,8 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         vector<thread*> workerThreads;
         vector<pcrData*> data;
         
-        auto synchronizedGoodFastaFile = std::make_shared<SynchronizedOutputFile>(goodFileName);
-        auto synchronizedBadFastaFile = std::make_shared<SynchronizedOutputFile>(badFileName);
+        auto synchronizedGoodFastaFile = make_shared<SynchronizedOutputFile>(goodFileName);
+        auto synchronizedBadFastaFile = make_shared<SynchronizedOutputFile>(badFileName);
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
@@ -849,8 +859,10 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         bool adjustNeeded = dataBundle->adjustNeeded;
         int pstart = -1; int pend = -1;
         pstart = dataBundle->pstart; pend = dataBundle->pend;
-        int numFPrimers = dataBundle->numFPrimers;
-        int numRPrimers = dataBundle->numRPrimers;
+        bool hasFPrimers = false; if (dataBundle->numFPrimers != 0) { hasFPrimers = true;  }
+        bool hasRPrimers = false; if (dataBundle->numRPrimers != 0) { hasRPrimers = true;  }
+        
+        if (m->getDebug()) {  m->mothurOut("[DEBUG]: pstart = " + toString(pstart) + ", pend = " + toString(pend) + "\n");  }
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
@@ -864,15 +876,26 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
                 if (data[i]->pstart < pstart)   { pstart = data[i]->pstart;     }
             } //smallest start
             
+            if (data[i]->pend != -1)   {
+                if (data[i]->pend != pend)      { adjustNeeded = true;          }
+                if (data[i]->pend > pend)       { pend = data[i]->pend;         }
+            }//largest end
+            
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: process " + toString(i) + " pstart = " + toString(data[i]->pstart) + ", pend = " + toString(data[i]->pend) + "\n");  }
+            
             badSeqNames.insert(data[i]->badSeqNames.begin(), data[i]->badSeqNames.end());
             locations.insert(data[i]->locations.begin(), data[i]->locations.end());
             
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedGoodFastaFile->close(); //must explicitly close or file may still be open when reading and writing in adjustDots
+        synchronizedBadFastaFile->close(); //must explicitly close or file may still be open when reading and writing in adjustDots
         delete threadFastaWriter;
         delete threadFastaScrapWriter;
         delete dataBundle;
+        
+        if (m->getDebug()) {  m->mothurOut("[DEBUG]: pstart = " + toString(pstart) + ", pend = " + toString(pend) + "\n");  }
 
         if (fileAligned && adjustNeeded) {
             //find pend - pend is the biggest ending value, but we must account for when we adjust the start.  That adjustment may make the "new" end larger then the largest end. So lets find out what that "new" end will be.
@@ -881,18 +904,26 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
                 
                 string name = it->first;
                 int thisStart = -1; int thisEnd = -1;
-                if (numFPrimers != 0)       { thisStart = it->second[0];    }
-                if (numRPrimers != 0)       { thisEnd = it->second[1];      }
+                if (hasFPrimers)       { thisStart = it->second[0];    }
+                if (hasRPrimers)       { thisEnd = it->second[1];      }
                 else { pend = -1; break; }
                 
                 int myDiff = 0;
-                if (pstart != -1) { if (thisStart != -1) { if (thisStart != pstart) { myDiff += (thisStart - pstart); } } }
+                if (thisStart != -1) { //my start
+                    if (thisStart != pstart) { //my start is after where the first start occurs, so I need to pad in the front
+                        myDiff += (thisStart - pstart); //size of my pad
+                    }
+                }
                 
                 int myEnd = thisEnd + myDiff;
-                if (thisEnd != -1) { if (myEnd > pend) { pend = myEnd; } }
+                if (thisEnd != -1) {
+                    if (myEnd > pend) { pend = myEnd; }
+                }
             }
             
-            adjustDots(goodFileName, locations, pstart, pend, numFPrimers, numRPrimers);
+            if (m->getDebug()) {  m->mothurOut("[DEBUG]: pstart = " + toString(pstart) + ", pend = " + toString(pend) + "\n");  }
+            
+            adjustDots(goodFileName, locations, pstart, pend, hasFPrimers, hasRPrimers); 
         }
         
         return numFastaSeqs;
@@ -903,7 +934,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
 	}
 }
 //**********************************************************************************************************************
-int PcrSeqsCommand::adjustDots(string goodFasta, map<string, vector<int> > locations, int pstart, int pend, int numFPrimers, int numRPrimers){
+int PcrSeqsCommand::adjustDots(string goodFasta, map<string, vector<int> > locations, int pstart, int pend, bool hasFPrimers, bool hasRPrimers){
     try {
         ifstream inFasta;
         util.openInputFile(goodFasta, inFasta);
@@ -921,33 +952,26 @@ int PcrSeqsCommand::adjustDots(string goodFasta, map<string, vector<int> > locat
             int thisStart = -1; int thisEnd = -1;
             map<string, vector<int> >::iterator it = locations.find(name);
             if (it != locations.end()) {
-                if (numFPrimers != 0)       { thisStart = it->second[0];    }
-                if (numRPrimers != 0)       { thisEnd = it->second[1];      }
-            }
+                if (hasFPrimers)       { thisStart = it->second[0];    }
+                if (hasRPrimers)       { thisEnd = it->second[1];      }
+            }else { m->mothurOut("[ERROR]: should never get here in pcr.seqs.\n"); }
             
             if (name != seq.getName()) { m->mothurOut("[ERROR]: name mismatch in pcr.seqs.\n"); }
             else {
-                if (pstart != -1) {
-                    if (thisStart != -1) {
-                        if (thisStart != pstart) {
-                            string dots = "";
-                            for (int i = pstart; i < thisStart; i++) { dots += "."; }
-                            thisEnd += dots.length();
-                            dots += seq.getAligned();
-                            seq.setAligned(dots);
-                        }
-                    }
+                
+                string forwardPad = "";  string reversePad = "";
+                
+                if ((pstart != -1) && (thisStart != -1) && (thisStart != pstart)) {
+                    for (int i = pstart; i < thisStart; i++) { forwardPad += "."; }
+                    thisEnd += forwardPad.length();
                 }
                 
-                if (pend != -1) {
-                    if (thisEnd != -1) {
-                        if (thisEnd != pend) {
-                            string dots = seq.getAligned();
-                            for (int i = thisEnd; i < pend; i++) { dots += "."; }
-                            seq.setAligned(dots);
-                        }
-                    }
+                if ((pend != -1) && (thisEnd != -1) && (thisEnd != pend)) {
+                    for (int i = thisEnd; i < pend; i++) { reversePad += "."; }
                 }
+                
+                string aligned = forwardPad + seq.getAligned() + reversePad;
+                seq.setAligned(aligned);
                 lengths.insert(seq.getAligned().length());
             }
             

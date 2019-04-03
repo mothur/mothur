@@ -23,7 +23,6 @@ vector<string> SharedCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "BiomListGroup", "BiomListGroup", "ListGroup","shared",false,false,true); parameters.push_back(plist);
         CommandParameter pcount("count", "InputTypes", "", "", "none", "GroupCount", "none","",false,false); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "GroupCount", "ListGroup","",false,false,true); parameters.push_back(pgroup);
-		//CommandParameter pordergroup("ordergroup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pordergroup);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","group",false,false); parameters.push_back(pgroups);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -43,12 +42,11 @@ vector<string> SharedCommand::setParameters(){
 string SharedCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The make.shared command reads a list and group / count file or a biom file, or simply a count file and creates a shared file. If a list and group are provided a rabund file is created for each group.\n";
+		helpString += "The make.shared command reads a list and group / count file or a biom file, or simply a count file and creates a shared file.\n";
 		helpString += "The make.shared command parameters are list, group, biom, groups, count and label. list and group or count are required unless a current file is available or you provide a biom file.\n";
         helpString += "The count parameter allows you to provide a count file containing the group info for the list file.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include, group names should be separated by dashes. ex. groups=A-B-C. Default is all groups in your groupfile.\n";
 		helpString += "The label parameter is only valid with the list and group option and allows you to indicate which labels you want to include, label names should be separated by dashes. Default is all labels in your list file.\n";
-		//helpString += "The ordergroup parameter allows you to indicate the order of the groups in the sharedfile, by default the groups are listed alphabetically.\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -62,7 +60,6 @@ string SharedCommand::getOutputPattern(string type) {
         string pattern = "";
 
         if (type == "shared") {  pattern = "[filename],shared-[filename],[distance],shared"; }
-        // else if (type == "rabund") {  pattern = "[filename],[group],rabund"; }
         else if (type == "group") {  pattern = "[filename],[group],groups"; }
         else if (type == "map") {  pattern = "[filename],map"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
@@ -79,9 +76,8 @@ SharedCommand::SharedCommand(){
 	try {
 		abort = true; calledHelp = true;
 		setParameters();
-		//initialize outputTypes
+		
 		vector<string> tempOutNames;
-		// outputTypes["rabund"] = tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
         outputTypes["map"] = tempOutNames;
@@ -155,7 +151,6 @@ SharedCommand::SharedCommand(string option)  {
 			 }
 
              vector<string> tempOutNames;
-            //  outputTypes["rabund"] = tempOutNames;
              outputTypes["shared"] = tempOutNames;
              outputTypes["group"] = tempOutNames;
              outputTypes["map"] = tempOutNames;
@@ -189,14 +184,34 @@ SharedCommand::SharedCommand(string option)  {
              else {
                  current->setCountFile(countfile);
                  CountTable temp;
-                 if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting."); m->mothurOutEndLine(); abort=true; }
+                 if (!temp.testGroups(countfile)) {
+                     m->mothurOut("\n[WARNING]: Your count file does not have group info, all reads will be assigned to mothurGroup.\n");
+                     
+                     temp.readTable(countfile, false, false); //dont read groups
+                     map<string, int> seqs = temp.getNameMap();
+                     
+                     CountTable newCountTable;
+                     newCountTable.addGroup("mothurGroup");
+                     
+                     for (map<string, int>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+                         vector<int> counts; counts.push_back(it->second);
+                         newCountTable.push_back(it->first, counts);
+                     }
+                     
+                     string newCountfileName = util.getRootName(countfile) + "mothurGroup" + util.getExtension(countfile);
+                     newCountTable.printTable(newCountfileName);
+                     
+                     current->setCountFile(newCountfileName);
+                     countfile = newCountfileName;
+                     outputNames.push_back(newCountfileName);
+                 }
              }
 
             if ((biomfile == "") && (listfile == "") && (countfile == "")) { //you must provide at least one of the following
 				//is there are current file available for either of these?
 				//give priority to list, then biom, then count
 				listfile = current->getListFile();
-				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 				else {
 					biomfile = current->getBiomFile();
                     if (biomfile != "") {  m->mothurOut("Using " + biomfile + " as input file for the biom parameter.\n"); }
@@ -210,19 +225,16 @@ SharedCommand::SharedCommand(string option)  {
 					}
 				}
 			}
-			else if ((biomfile != "") && (listfile != "")) { m->mothurOut("When executing a make.shared command you must enter ONLY ONE of the following: list or biom."); m->mothurOutEndLine(); abort = true; }
+			else if ((biomfile != "") && (listfile != "")) { m->mothurOut("When executing a make.shared command you must enter ONLY ONE of the following: list or biom.\n"); abort = true; }
 
 			if (listfile != "") {
 				if ((groupfile == "") && (countfile == "")) {
 					groupfile = current->getGroupFile();
-					if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+					if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n");  }
 					else {
 						countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
-                        else {
-                            m->mothurOut("[ERROR]: You need to provide a groupfile or countfile if you are going to use the list format."); m->mothurOutEndLine();
-                            abort = true;
-                        }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); }
+                        else { m->mothurOut("[ERROR]: You need to provide a groupfile or countfile if you are going to use the list format.\n");  abort = true; }
 					}
 				}
 			}
@@ -314,12 +326,21 @@ int SharedCommand::createSharedFromCount() {
         
         CountTable ct;  ct.readTable(countfile, true, false);
         
-        SharedRAbundVectors* lookup = ct.getShared(Groups);
+        map<string, string> seqNameToOtuName;
+        SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);
         lookup->setLabels(*labels.begin());
         lookup->print(out, printHeaders);
         
         out.close();
         delete lookup;
+        
+        string mapFilename = getOutputFileName("map",variables);
+        outputNames.push_back(mapFilename); outputTypes["map"].push_back(mapFilename);
+        ofstream outMap;
+        util.openOutputFile(mapFilename, outMap);
+        
+        for (map<string, string>::iterator it = seqNameToOtuName.begin(); it != seqNameToOtuName.end(); it++) { outMap << it->first << '\t' << it->second << endl; }
+        outMap.close();
         
         return 0;
     }
@@ -802,7 +823,7 @@ int SharedCommand::createSharedFromListGroup() {
         int error = ListGroupSameSeqs(namesSeqs, SharedList);
 
         if ((!pickedGroups) && (SharedList->getNumSeqs() != numGroupNames)) {  //if the user has not specified any groups and their files don't match exit with error
-            m->mothurOut("Your group file contains " + toString(numGroupNames) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
+            m->mothurOut("Your group file contains " + toString(numGroupNames) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct.\n");  m->setControl_pressed(true);
 
             out.close(); if (!pickedGroups) { util.mothurRemove(filename); } //remove blank shared file you made
 

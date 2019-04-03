@@ -381,7 +381,9 @@ void driverRunFilter(filterRunData* params) {
                 }
 				params->count++;
         
-        
+            //report progress
+            if((params->count) % 1000 == 0){	params->outputWriter->write(outBuffer); outBuffer = "";  params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
+
 			#if defined NON_WINDOWS
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= params->end)) { break; }
@@ -389,8 +391,6 @@ void driverRunFilter(filterRunData* params) {
 				if (params->count == params->end) { break; }
 			#endif
 			
-			//report progress
-            if((params->count) % 1000 == 0){	params->outputWriter->write(outBuffer); outBuffer = "";  params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
         }
 		//report progress
 		if((params->count) % 1000 != 0){	params->outputWriter->write(outBuffer);  params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 		}
@@ -443,6 +443,7 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedOutputFile->close();
         delete threadWriter;
         delete dataBundle;
         time(&end);

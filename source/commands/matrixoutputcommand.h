@@ -90,14 +90,14 @@ private:
 	int numGroups, processors, iters, subsampleSize;
 	ofstream out;
 
-	bool abort, allLines, subsample;
+	bool abort, allLines, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
 	string outputFile, calc, groups, label, outputDir, mode;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	
     int createProcesses(SharedRAbundVectors*&);
 	int driver(vector<SharedRAbundVector*>&, vector< vector<seqDist> >&, vector<Calculator*>);
-    void printSims(ostream&, vector< vector<double> >&, vector<string>);
+    void printDists(ostream&, vector< vector<double> >&, vector<string>);
 
 };
 	
@@ -110,10 +110,10 @@ struct distSharedData {
     long long numIters;
 	MothurOut* m;
     int count, subsampleSize;
-    bool mainThread, subsample;
+    bool mainThread, subsample, withReplacement;
 	
 	distSharedData(){}
-	distSharedData(long long st, bool mt, bool su, int subsize, vector<string> est, SharedRAbundVectors* lu) {
+	distSharedData(long long st, bool mt, bool su, int subsize, bool wr, vector<string> est, SharedRAbundVectors* lu) {
         m = MothurOut::getInstance();
 		numIters = st;
         Estimators = est;
@@ -122,6 +122,7 @@ struct distSharedData {
         mainThread = mt;
         subsample = su;
         subsampleSize = subsize;
+        withReplacement = wr;
 	}
 };
 /**************************************************************************************************/

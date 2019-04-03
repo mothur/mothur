@@ -879,72 +879,30 @@ int RemoveGroupsCommand::readCount(){
         variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(countfile, in);
-		
-		bool wroteSomething = false;
-		int removedCount = 0;
-		
-        string headers = util.getline(in); util.gobble(in);
-        vector<string> columnHeaders = util.splitWhiteSpace(headers);
+        CountTable ct; ct.readTable(countfile, false, false);
+        int oldTotal = ct.getNumSeqs();
+        ct.clearTable();
         
-        vector<string> groups;
-        map<int, string> originalGroupIndexes;
-        map<string, int> GroupIndexes;
-        set<int> indexOfGroupsChosen;
-        for (int i = 2; i < columnHeaders.size(); i++) {  groups.push_back(columnHeaders[i]);  originalGroupIndexes[i-2] = columnHeaders[i]; }
-        //sort groups to keep consistent with how we store the groups in groupmap
-        sort(groups.begin(), groups.end());
-        for (int i = 0; i < groups.size(); i++) {  GroupIndexes[groups[i]] = i; }
-
-		vector<string> groupsToKeep;
-		for (int i = 0; i < groups.size(); i++) {
-			if (!util.inUsersGroups(groups[i], Groups)) { groupsToKeep.push_back(groups[i]); }
-		}
-        sort(groupsToKeep.begin(), groupsToKeep.end());
-        out << "Representative_Sequence\ttotal";
-        for (int i = 0; i < groupsToKeep.size(); i++) { out  << '\t' << groupsToKeep[i]; indexOfGroupsChosen.insert(GroupIndexes[groupsToKeep[i]]); }
-        out << endl;
+        vector<string> groupsInFile;
+        ct.testGroups(countfile, groupsInFile);
         
-        string name; int oldTotal;
-        while (!in.eof()) {
-            
-            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
-            
-            in >> name; util.gobble(in); in >> oldTotal; util.gobble(in);
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(oldTotal) + "\n"); }
-            
-            if (names.count(name) == 0) {
-                //if group info, then read it
-                vector<int> selectedCounts; int thisTotal = 0; int temp;
-                for (int i = 0; i < groups.size(); i++) {  
-                    int thisIndex = GroupIndexes[originalGroupIndexes[i]]; 
-                    in >> temp;  util.gobble(in);
-                    if (indexOfGroupsChosen.count(thisIndex) != 0) { //we want this group
-                        selectedCounts.push_back(temp); thisTotal += temp;
-                    }
-                }
-                
-                out << name << '\t' << thisTotal;
-                for (int i = 0; i < selectedCounts.size(); i++) {  out << '\t' << selectedCounts[i]; }
-                out << endl;
-                
-                wroteSomething = true;
-                removedCount+= (oldTotal - thisTotal);
-            }else {  util.getline(in); removedCount += oldTotal; }
-            
-            util.gobble(in);
+        vector<string> groupsToKeep;
+        for (int i = 0; i < groupsInFile.size(); i++) {
+            if (!util.inUsersGroups(groupsInFile[i], Groups)) { groupsToKeep.push_back(groupsInFile[i]); }
         }
-        in.close();
-		out.close();
-		
-		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
-		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
-		
-		m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file."); m->mothurOutEndLine();
+        ct.readTable(countfile, true, false, groupsToKeep); //reads only groups found in Groups
+        
+        int selectedCount = ct.getNumSeqs();
+        
+        if (selectedCount == 0) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");   }
+        else {
+            ct.printTable(outputFileName);
+            outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
+        }
+        
+        int removedCount = oldTotal - selectedCount;
+        
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file.\n");
         
 		return 0;
 	}

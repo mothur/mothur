@@ -8,12 +8,12 @@
  */
 
 #include "clusterclassic.h"
-
 #include "utils.hpp"
 
 /***********************************************************************/
-ClusterClassic::ClusterClassic(float c, string f, bool s) : method(f), smallDist(1e6), nseqs(0), sim(s) {
+ClusterClassic::ClusterClassic(float c, string f, bool s) : method(f),  nseqs(0), sim(s) {
 	try {
+        smallDist = MOTHURMAX;
 		mapWanted = false;  //set to true by mgcluster to speed up overlap merge
 	
 		//save so you can modify as it changes in average neighbor

@@ -1025,12 +1025,12 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
             delete data[i];
             delete workerThreads[i];
         }
-        
+        synchronizedOutputFastaTrimFile->close(); synchronizedOutputQScrapFile->close();
         delete threadFastaTrimWriter;
         delete threadFastaScrapWriter;
         if (qFileName != "") {
-            delete threadQTrimWriter;
-            delete threadQScrapWriter;
+            synchronizedOutputQTrimFile->close(); synchronizedOutputFastaTrimFile->close();
+            delete threadQTrimWriter; delete threadQScrapWriter;
         }
         delete dataBundle;
         

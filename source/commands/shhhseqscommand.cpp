@@ -210,7 +210,7 @@ int driver(seqNoise& noise,
         int maxIter = 1000;
         double minDelta = 1e-6;
         int numIters = 0;
-        double maxDelta = 1e6;
+        double maxDelta = MOTHURMAX;
         int numSeqs = sequences.size();
         
         //run cluster command
@@ -272,7 +272,7 @@ int driver(seqNoise& noise,
             for(int i=0;i<numSeqs;i++){
                 if (m->getControl_pressed()) { return 0; }
                 
-                double offset = 1e6;
+                double offset = MOTHURMAX;
                 double norm = 0.0000;
                 double minWeight = 0.1;
                 vector<double> currentTau(numOTUs);
@@ -532,24 +532,44 @@ struct shhhseqsData {
 void driverShhSeqsGroups(shhhseqsData* params){
     try {
         //Parse sequences by group
-        SequenceParser parser(params->groupfile, params->fastafile, params->namefile, params->groups); //only stores seqs in groups
-        params->groups = parser.getNamesOfGroups();
+        //Parse sequences by group
+        vector<string> groups;
+        map<string, vector<string> > group2Files;
+        
+        SequenceParser sparser(params->groupfile, params->fastafile, params->namefile, params->groups);
+        groups = sparser.getNamesOfGroups();
+        group2Files = sparser.getFiles();
+
         string fileroot = params->outputDir + params->util.getRootName(params->util.getSimpleName(params->fastafile));
         
-        for (int i = 0; i < params->groups.size(); i++) {
-            if (params->m->getControl_pressed()) {  break; }
+        for (map<string, vector<string> >::iterator it = group2Files.begin(); it != group2Files.end(); it++) {
+            long start = time(NULL);	 if (params->m->getControl_pressed()) {  break; }
             
-            int start = time(NULL);
-            string lowerCaseName = params->groups[i];
+            int error;
+            long long thisGroupsSeqs = 0;
+            string thisGroup = it->first;
+            
+            string lowerCaseName = thisGroup;
             for (int j = 0; j < lowerCaseName.length(); j++) { lowerCaseName[j] = tolower(lowerCaseName[j]);    }
             
             if (lowerCaseName == "ignore") {   }
             else {
-                params->m->mothurOut("\nProcessing group " + params->groups[i] + ":\n");
+                params->m->mothurOut("\nProcessing group " + thisGroup + ":\n");
                 
-                map<string, string> thisNameMap = parser.getNameMap(params->groups[i]);
-                vector<Sequence> thisSeqs       = parser.getSeqs(params->groups[i]);
-                
+                map<string, string> thisNameMap;
+                params->util.readNames(it->second[1], thisNameMap);
+
+                vector<Sequence> thisSeqs;
+                ifstream in; params->util.openInputFile(it->second[0], in);
+                while (!in.eof()) {
+                    if (params->m->getControl_pressed()) { break; }
+                    
+                    Sequence seq(in); params->util.gobble(in);
+                    
+                    if (seq.getName() != "") { thisSeqs.push_back(seq); }
+                }
+                in.close();
+
                 vector<string> sequences;
                 vector<string> uniqueNames;
                 vector<string> redundantNames;
@@ -563,21 +583,21 @@ void driverShhSeqsGroups(shhhseqsData* params){
                 if (params->m->getControl_pressed()) { break; }
                 
                 //calc distances for cluster
-                string distFileName = fileroot + params->groups[i] + ".shhh.dist";
+                string distFileName = fileroot + thisGroup + ".shhh.dist";
                 correct->execute(distFileName);
                 delete correct;
                 
                 if (params->m->getControl_pressed()) { params->util.mothurRemove(distFileName); break; }
                 
-                driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, params->newFFile+params->groups[i], params->newNFile+params->groups[i], params->newMFile+params->groups[i]+".map", params->m, params->sigma);
+                driver(noise, sequences, uniqueNames, redundantNames, seqFreq, distFileName, params->newFFile+thisGroup, params->newNFile+thisGroup, params->newMFile+thisGroup+".map", params->m, params->sigma);
                 
                 if (params->m->getControl_pressed()) { break; }
                 
-                params->util.appendFiles(params->newFFile+params->groups[i], params->newFFile+params->extension); params->util.mothurRemove(params->newFFile+params->groups[i]);
-                params->util.appendFiles(params->newNFile+params->groups[i], params->newNFile+params->extension); params->util.mothurRemove(params->newNFile+params->groups[i]);
-                params->mapfileNames.push_back(params->newMFile+params->groups[i]+".map");
+                params->util.appendFiles(params->newFFile+thisGroup, params->newFFile+params->extension); params->util.mothurRemove(params->newFFile+thisGroup);
+                params->util.appendFiles(params->newNFile+thisGroup, params->newNFile+params->extension); params->util.mothurRemove(params->newNFile+thisGroup);
+                params->mapfileNames.push_back(params->newMFile+thisGroup+".map");
                 
-                params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + params->groups[i] + ".\n");
+                params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + thisGroup + ".\n");
             }
         }
     }

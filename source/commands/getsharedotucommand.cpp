@@ -202,7 +202,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
             else {
                 current->setCountFile(countfile);
                 CountTable temp;
-                if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting."); m->mothurOutEndLine(); abort=true; }
+                if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting.\n");  abort=true; }
             }
             
             if ((sharedfile == "") && (listfile == "")) { //look for currents

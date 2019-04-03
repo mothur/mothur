@@ -44,6 +44,7 @@ private:
     int runFastaScreening(map<string, string>&);
     int screenFasta(map<string, string>&);
     int screenReports(map<string, string>&);
+    string printAccnos(map<string, string>& badSeqNames);
 	int getSummary();
     int getSummaryReport();
  

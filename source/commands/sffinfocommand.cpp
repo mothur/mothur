@@ -50,7 +50,7 @@ string SffInfoCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The sffinfo command reads a sff file and extracts the sequence data, or you can use it to parse a sff file.\n";
 		helpString += "The sffinfo command parameters are sff, fasta, qfile, accnos, flow, sfftxt, oligos, group, bdiffs, tdiffs, ldiffs, sdiffs, pdiffs, checkorient and trim. sff is required. \n";
-		helpString += "The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n";
+		helpString += "The sff parameter allows you to enter the sff file you would like to extract data from.\n";
 		helpString += "The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n";
 		helpString += "The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n";
         helpString += "The oligos parameter allows you to provide an oligos file to split your sff file into separate sff files by barcode. \n";
@@ -65,7 +65,7 @@ string SffInfoCommand::getHelpString(){
 		helpString += "The sfftxt parameter allows you to indicate if you would like a sff.txt file generated.  Default=False. \n";
 		helpString += "If you want to parse an existing sfftxt file into flow, fasta and quality file, enter the file name using the sfftxt parameter. \n";
 		helpString += "The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n";
-		helpString += "The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted. You may enter multiple files by separating them by -'s. \n";
+		helpString += "The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted.\n";
 		helpString += "Example sffinfo(sff=mySffFile.sff, trim=F).\n";
 		return helpString;
 	}
@@ -147,143 +147,92 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");	  if (inputDir == "not found"){	inputDir = "";		}
+            //if the user changes the input directory command factory will send this info to us in the output parameter
+            map<string,string>::iterator it;
+            string inputDir = validParameter.valid(parameters, "inputdir");
+            if (inputDir == "not found"){	inputDir = "";		}
+            else {
+                string path;
+                it = parameters.find("sff");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["sff"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("accnos");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("oligos");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
+                }
+                
+                it = parameters.find("group");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["group"] = inputDir + it->second;		}
+                }
+            }
 
-			sffFilename = validParameter.valid(parameters, "sff");
-			if (sffFilename == "not found") { sffFilename = "";  }
-			else { 
-				util.splitAtDash(sffFilename, filenames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < filenames.size(); i++) {
-					bool ignore = false;
-					if (filenames[i] == "current") { 
-						filenames[i] = current->getSFFFile(); 
-						if (filenames[i] != "") {  m->mothurOut("Using " + filenames[i] + " as input file for the sff parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current sfffile, ignoring current.\n"); ignore=true; 
-							//erase from file list
-							filenames.erase(filenames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(filenames[i], current->getLocations())) { current->setSFFFile(filenames[i]); }
-                        else { m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded.\n"); filenames.erase(filenames.begin()+i); i--; } //erase from file list
-                    }
-				}
-				
-				//make sure there is at least one valid file left
-				if (filenames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
+            sffFilename = validParameter.validFile(parameters, "sff");
+            if (sffFilename == "not found") {
+                sffFilename = current->getSFFFile();
+                if (sffFilename != "") { m->mothurOut("Using " + sffFilename + " as input file for the sff parameter.\n"); }
+                else { 	m->mothurOut("[ERROR]: You have no current sff file and the sff parameter is required.\n");  abort = true; }
+            }
+            else if (sffFilename == "not open") { abort = true; }
+            else { current->setSFFFile(sffFilename); }
 			
-			accnosName = validParameter.valid(parameters, "accnos");
-			if (accnosName == "not found") { accnosName = "";  }
-			else { 
-				hasAccnos = true;
-				util.splitAtDash(accnosName, accnosFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < accnosFileNames.size(); i++) {
-					bool ignore = false;
-					if (accnosFileNames[i] == "current") { 
-						accnosFileNames[i] = current->getAccnosFile(); 
-						if (accnosFileNames[i] != "") {  m->mothurOut("Using " + accnosFileNames[i] + " as input file for the accnos parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current accnosfile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							accnosFileNames.erase(accnosFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        if (util.checkLocations(accnosFileNames[i], current->getLocations())) { current->setAccnosFile(accnosFileNames[i]); }
-                        else { m->mothurOut("Unable to open " + accnosFileNames[i] + ". It will be disregarded.\n"); accnosFileNames.erase(accnosFileNames.begin()+i); i--; } //erase from file list
-                    }
-				}
-				
-				//make sure there is at least one valid file left
-				if (accnosFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
+            accnosName = validParameter.validFile(parameters, "accnos");
+            if (accnosName == "not found") { accnosName = ""; }
+            else if (accnosName == "not open") { accnosName = ""; abort = true; }
+            else { current->setAccnosFile(accnosName);  hasAccnos = true; }
             
-            oligosfile = validParameter.valid(parameters, "oligos");
+            oligosfile = validParameter.validFile(parameters, "oligos");
 			if (oligosfile == "not found") { oligosfile = "";  }
-			else { 
-				hasOligos = true;
-				util.splitAtDash(oligosfile, oligosFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < oligosFileNames.size(); i++) {
-					bool ignore = false;
-					if (oligosFileNames[i] == "current") { 
-						oligosFileNames[i] = current->getOligosFile(); 
-						if (oligosFileNames[i] != "") {  m->mothurOut("Using " + oligosFileNames[i] + " as input file for the oligos parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current oligosfile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							oligosFileNames.erase(oligosFileNames.begin()+i);
-							i--;
-						}
-					}
-                    
-                    if (!ignore) {
-                        if (util.checkLocations(oligosFileNames[i], current->getLocations())) { current->setOligosFile(oligosFileNames[i]); }
-                        else { m->mothurOut("Unable to open " + oligosFileNames[i] + ". It will be disregarded.\n"); oligosFileNames.erase(oligosFileNames.begin()+i); i--; } //erase from file list
-                    }
-				}
-				
-				//make sure there is at least one valid file left
-				if (oligosFileNames.size() == 0) { m->mothurOut("no valid oligos files."); m->mothurOutEndLine(); abort = true; }
-			}
+            else if (oligosfile == "not open") { oligosfile = ""; abort = true; }
+            else { current->setOligosFile(oligosfile); hasOligos = true;  }
             
-            groupfile = validParameter.valid(parameters, "group");
+            groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not found") { groupfile = "";  }
-			else {
-				hasGroup = true;
-				util.splitAtDash(groupfile, groupFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < groupFileNames.size(); i++) {
-					bool ignore = false;
-					if (groupFileNames[i] == "current") {
-						groupFileNames[i] = current->getGroupFile();
-						if (groupFileNames[i] != "") {  m->mothurOut("Using " + groupFileNames[i] + " as input file for the group parameter where you had given current."); m->mothurOutEndLine(); }
-						else {
-							m->mothurOut("You have no current group file, ignoring current."); m->mothurOutEndLine(); ignore=true;
-							//erase from file list
-							groupFileNames.erase(groupFileNames.begin()+i);
-							i--;
-						}
-					}
-                    
-                    if (!ignore) {
-                        if (util.checkLocations(groupFileNames[i], current->getLocations())) { current->setGroupFile(groupFileNames[i]); }
-                        else { m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded.\n"); groupFileNames.erase(groupFileNames.begin()+i); i--; } //erase from file list
+            else if (groupfile == "not open") { groupfile = ""; abort = true; }
+            else { current->setGroupFile(groupfile);  hasGroup = true; }
+            
+            sfftxtFilename = validParameter.valid(parameters, "sfftxt");
+            if (sfftxtFilename == "not found")      { sfftxt = false; sfftxtFilename = "";          }
+            else if (util.isTrue(sfftxtFilename))	{	sfftxt = true;		sfftxtFilename = "";	}
+            else {
+                //you are a filename
+                if (inputDir != "") {
+                    map<string,string>::iterator it = parameters.find("sfftxt");
+                    //user has given a template file
+                    if(it != parameters.end()){
+                        string path = util.hasPath(it->second);
+                        //if the user has not given a path then, add inputdir. else leave path alone.
+                        if (path == "") {	parameters["sfftxt"] = inputDir + it->second;		}
                     }
-				}
-				
-				//make sure there is at least one valid file left
-				if (groupFileNames.size() == 0) { m->mothurOut("no valid group files."); m->mothurOutEndLine(); abort = true; }
-			}
+                }
+                
+                sfftxtFilename = validParameter.validFile(parameters, "sfftxt");
+                if (sfftxtFilename == "not found") { sfftxtFilename = "";  }
+                else if (sfftxtFilename == "not open") { sfftxtFilename = "";  abort = true; }
+            }
 
-			if (hasGroup) {
-                split = 2;
-				if (groupFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide a group file, you must have one for each sff file."); m->mothurOutEndLine(); }
-			}
+			if ((hasGroup) || (hasOligos)) { split = 2; }
             
-            if (hasOligos) {
-                split = 2;
-				if (oligosFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide an oligos file, you must have one for each sff file."); m->mothurOutEndLine(); }
-			}
-            
-            if (hasGroup && hasOligos) { m->mothurOut("You must enter ONLY ONE of the following: oligos or group."); m->mothurOutEndLine(); abort = true;}
-            
-			if (hasAccnos) {
-				if (accnosFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide a accnos file, you must have one for each sff file."); m->mothurOutEndLine(); }
-			}
+            if (hasGroup && hasOligos) { m->mothurOut("[ERROR]: You may enter ONLY ONE of the following: oligos or group.\n"); abort = true; }
 			
 			string temp = validParameter.valid(parameters, "qfile");			if (temp == "not found"){	temp = "T";				}
 			qual = util.isTrue(temp); 
@@ -314,33 +263,6 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
             
-			temp = validParameter.valid(parameters, "sfftxt");
-			if (temp == "not found")	{	temp = "F";	 sfftxt = false; sfftxtFilename = "";		}
-			else if (util.isTrue(temp))	{	sfftxt = true;		sfftxtFilename = "";				}
-			else {
-				//you are a filename
-				if (inputDir != "") {
-					map<string,string>::iterator it = parameters.find("sfftxt");
-					//user has given a template file
-					if(it != parameters.end()){ 
-						string path = util.hasPath(it->second);
-						//if the user has not given a path then, add inputdir. else leave path alone.
-						if (path == "") {	parameters["sfftxt"] = inputDir + it->second;		}
-					}
-				}
-				
-				sfftxtFilename = validParameter.validFile(parameters, "sfftxt");
-				if (sfftxtFilename == "not found") { sfftxtFilename = "";  }
-				else if (sfftxtFilename == "not open") { sfftxtFilename = "";  }
-			}
-			
-			if ((sfftxtFilename == "") && (filenames.size() == 0)) {  
-				//if there is a current sff file, use it
-				string filename = current->getSFFFile(); 
-				if (filename != "") { filenames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the sff parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("[ERROR]: you must provide a valid sff or sfftxt file."); m->mothurOutEndLine(); abort=true;  }
-			}
-            
             temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "F"; }
 			reorient = util.isTrue(temp);
             
@@ -355,27 +277,21 @@ SffInfoCommand::SffInfoCommand(string option)  {
 int SffInfoCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-     
-		for (int s = 0; s < filenames.size(); s++) {
-			
-			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
-			
-			long start = time(NULL);
-			
-            filenames[s] = util.getFullPathName(filenames[s]);
-			m->mothurOut("Extracting info from " + filenames[s] + " ..." ); m->mothurOutEndLine();
-			
-			string accnos = "";
-			if (hasAccnos) { accnos = accnosFileNames[s]; }
-            
-            string oligos = "";
-            if (hasOligos) { oligos = oligosFileNames[s]; }
-            if (hasGroup) { oligos = groupFileNames[s]; }
-            
-			int numReads = extractSffInfo(filenames[s], accnos, oligos);
-
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to extract " + toString(numReads) + ".\n");
-		}
+	
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
+        
+        long start = time(NULL);
+        
+        sffFilename = util.getFullPathName(sffFilename);
+        m->mothurOut("Extracting info from " + sffFilename + " ...\n" );
+        
+        string oligos = "";
+        if (hasOligos) { oligos = oligosfile; }
+        if (hasGroup) { oligos = groupfile; }
+        
+        int numReads = extractSffInfo(sffFilename, accnosName, oligos);
+        
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to extract " + toString(numReads) + ".\n");
 		
 		if (sfftxtFilename != "") {  parseSffTxt(); }
 		
@@ -399,9 +315,8 @@ int SffInfoCommand::execute(){
 		}
 		
 		//report output filenames
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOut("\nOutput File Names:\n");
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	}
 		m->mothurOutEndLine();
 
 		return 0;
@@ -460,8 +375,8 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		int count = 0;
 		
 		//check magic number and version
-		if (header.magicNumber != 779314790) { m->mothurOut("Magic Number is not correct, not a valid .sff file"); m->mothurOutEndLine(); delete oligosObject; if (hasOligos)   { delete trimOligos; if (reorient) { delete  rtrimOligos; } } return count; }
-		if (header.version != "0001") { m->mothurOut("Version is not supported, only support version 0001."); m->mothurOutEndLine(); delete oligosObject; if (hasOligos)   { delete trimOligos; if (reorient) { delete  rtrimOligos; } } return count; }
+		if (header.magicNumber != 779314790) { m->mothurOut("[ERROR]: Magic Number is not correct, not a valid .sff file\n");  delete oligosObject; if (hasOligos)   { delete trimOligos; if (reorient) { delete  rtrimOligos; } } return count; }
+		if (header.version != "0001") { m->mothurOut("[ERROR]: Version is not supported, only support version 0001.\n");  delete oligosObject; if (hasOligos)   { delete trimOligos; if (reorient) { delete  rtrimOligos; } } return count; }
 	
 		//print common header
 		if (sfftxt) {	printCommonHeader(outSfftxt, header);		}
@@ -492,7 +407,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 			count++;
             
 			//report progress
-			if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
+			if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)+"\n"); 		}
 		
 			if (m->getControl_pressed()) { count = 0; break;   }
 			
@@ -500,7 +415,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		}
 		
 		//report progress
-		if (!m->getControl_pressed()) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
+		if (!m->getControl_pressed()) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)+"\n"); 	}  }
 		
 		in.close();
 		
@@ -644,9 +559,7 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			unsigned long long spot = (spotInFile + 7)& ~7;  // ~ inverts
 			in.seekg(spot);
             
-        }else{
-			m->mothurOut("Error reading sff common header."); m->mothurOutEndLine();
-		}
+        }else{ m->mothurOut("Error reading sff common header.\n");  }
         
 		return 0;
         
@@ -1483,7 +1396,7 @@ bool SffInfoCommand::sanityCheck(Header& header, seqRead& read) {
             okay = false; message += "Clip Qual Right = " + toString(header.clipQualRight) + ", but we only read " + toString(read.qualScores.size()) + " quality scores.\n";
         }
         
-        if (!okay) { m->mothurOut(message); m->mothurOutEndLine(); }
+        if (!okay) { m->mothurOut(message+"\n");  }
         
 		return okay;
 	}
@@ -1707,7 +1620,7 @@ int SffInfoCommand::parseSffTxt() {
 		for(int i=0;i<numReads;i++){
 			
 			//sanity check
-			if (inSFF.eof()) { m->mothurOut("[ERROR]: Expected " + toString(numReads) + " but reached end of file at " + toString(i+1) + "."); m->mothurOutEndLine(); break; }
+			if (inSFF.eof()) { m->mothurOut("[ERROR]: Expected " + toString(numReads) + " but reached end of file at " + toString(i+1) + ".\n");  break; }
 			
 			Header header;
 			
@@ -1763,13 +1676,13 @@ int SffInfoCommand::parseSffTxt() {
 			}
 			
 			//report progress
-			if((i+1) % 10000 == 0){	m->mothurOut(toString(i+1)); m->mothurOutEndLine();		}
+			if((i+1) % 10000 == 0){	m->mothurOut(toString(i+1)+"\n"); 		}
 			
 			if (m->getControl_pressed()) {  break;  }
 		}
 		
 		//report progress
-		if (!m->getControl_pressed()) {   if((numReads) % 10000 != 0){	m->mothurOut(toString(numReads)); m->mothurOutEndLine();		}  }
+		if (!m->getControl_pressed()) {   if((numReads) % 10000 != 0){	m->mothurOut(toString(numReads)+"\n"); 		}  }
 		
 		inSFF.close();
 		
@@ -1994,7 +1907,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
         }
         
 		if (allBlank) {
-			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a split the sff file."); m->mothurOutEndLine();
+			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a split the sff file.\n"); 
 			split = 1;
 			return false;
 		}

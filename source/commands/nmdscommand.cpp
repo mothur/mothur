@@ -316,8 +316,8 @@ vector< vector<double> > NMDSCommand::nmdsCalc(vector< vector<double> >& matrix,
 		
 		//calc euclid distances
 		vector< vector<double> > euclid = linearCalc.calculateEuclidianDistance(newConfig);
-		if (m->getControl_pressed()) { return newConfig; }		
-		
+		if (m->getControl_pressed()) { return newConfig; }
+        
 		double stress2 = calculateStress(matrix, euclid);
 		stress1 = stress2 + 1.0 + epsilon;
 		
@@ -330,9 +330,9 @@ vector< vector<double> > NMDSCommand::nmdsCalc(vector< vector<double> >& matrix,
 			if (m->getControl_pressed()) { return newConfig; }
 			
 			vector< vector<double> > b; b.resize(euclid.size());
-			for (int i = 0; i < b.size(); i++) { b[i].resize(euclid[i].size(), 0.0); }
+			for (int i = 0; i < b.size(); i++) { b[i].resize(euclid[i].size(), 0); }
 			
-			vector<double> columnSums; columnSums.resize(euclid.size(), 0.0);
+			vector<double> columnSums; columnSums.resize(euclid.size(), 0);
 			for (int i = 0; i < euclid.size(); i++) {
 				for (int j = 0; j < euclid[i].size(); j++) {
 					//eliminate divide by zero error
@@ -342,6 +342,8 @@ vector< vector<double> > NMDSCommand::nmdsCalc(vector< vector<double> >& matrix,
 						b[i][j] *= -1.0;
 					}
 				}
+                
+                
 			}
 			
 			//put in diagonal sums
@@ -377,7 +379,7 @@ vector< vector<double> > NMDSCommand::generateStartingConfiguration(int numNames
 	try {
 		vector< vector<double> > axes;  axes.resize(dimension);
 		for (int i = 0; i < axes.size(); i++) {  axes[i].resize(numNames); }
-		Utils util;
+		
 		//generate random number between -1 and 1, precision 6
 		for (int i = 0; i < axes.size(); i++) {
 			for (int j = 0; j < axes[i].size(); j++) {
@@ -477,9 +479,7 @@ double NMDSCommand::calculateStress(vector< vector<double> >& matrix, vector< ve
 		}
 		
 		//normalize stress
-		if (!util.isEqual(rawStress, 0.0) && !util.isEqual(denom, 0.0)) {
-			normStress = sqrt((rawStress / denom));
-		}
+		if (!util.isEqual(rawStress, 0) && !util.isEqual(denom, 0)) { normStress = sqrt((rawStress / denom)); }
 
 		return normStress;
 	}

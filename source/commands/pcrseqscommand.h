@@ -46,7 +46,7 @@ private:
     int writeAccnos(set<string>, string);
     Sequence readEcoli();
 	long long createProcesses(string, string, string, set<string>&);
-    int adjustDots(string goodFasta, map<string, vector<int> > locations, int pstart, int pend, int numFPrimers, int numRPrimers);
+    int adjustDots(string goodFasta, map<string, vector<int> > locations, int pstart, int pend, bool, bool);
 };
 
 /**************************************************************************************************/

@@ -1,9 +1,9 @@
 
 USEREADLINE ?= yes
 USEBOOST ?= yes
-USEHDF% ?= yes
+USEHDF5 ?= yes
 LOGFILE_NAME ?= yes
-VERSION = "\"1.41.0\""
+VERSION = "\"1.41.3\""
 
 # Optimize to level 3:
     CXXFLAGS += -O3 -std=c++11

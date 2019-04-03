@@ -47,31 +47,59 @@ vector<string> AlignCommand::setParameters(){
 //**********************************************************************************************************************
 string AlignCommand::getHelpString(){	
 	try {
-		string helpString = "";
-		helpString += "The align.seqs command reads a file containing sequences and creates an alignment file and a report file.";
-		helpString += "The align.seqs command parameters are reference, fasta, search, ksize, align, match, mismatch, gapopen, gapextend and processors.";
-		helpString += "The reference and fasta parameters are required. You may leave fasta blank if you have a valid fasta file. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta.";
-		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.";
-		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.";
-		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.";
-		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.";
-		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.";
-		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -5.0.";
-		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.";
-		helpString += "The flip parameter is used to specify whether or not you want mothur to try the reverse complement if a sequence falls below the threshold.  The default is false.";
-		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.";
-		helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported. Default=t";
-		helpString += "The default for the threshold parameter is 0.50, meaning at least 50% of the bases must remain or the sequence is reported as potentially reversed.";
-		helpString += "The align.seqs command should be in the following format:";
-		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty)";
-		helpString += "Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)";
-		
+		string helpString = "\n";
+		helpString += "The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n";
+		helpString += "The align.seqs command parameters are " + getCommandParameters() + ".\n";
+		helpString += "The reference and fasta parameters are required. You may leave fasta blank if you have a valid fasta file.\n";
+		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix, kmer and blast. The default is kmer.\n";
+		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar reference to a given sequence.  The default is 8.\n";
+		helpString += "The match parameter allows you to specify the bonus for having the same base. Default=1.0.\n";
+		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases. Default=-1.0.\n";
+		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. Default=-5.0.\n";
+		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment. Default=-2.0.\n";
+        helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.";
+		helpString += " By default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining.\n";
+		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.\n";
+		helpString += "The align.seqs command should be in the following format: ";
+		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourUnalignedFastaFile)\n";
+		helpString += "Example: align.seqs(fasta=water.fasta, template=silva.v4.fasta)\n\n";
+        
+        getCommonQuestions();
+
 		return helpString;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AlignCommand", "getHelpString");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+string AlignCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string issue = "...template is not aligned, aborting. What do I do?"; issues.push_back(issue);
+        string ianswer = "\tMothur requires the reference file to be aligned to generate aligned sequences. You can download mothur's aligned silva references here, https://mothur.org/wiki/Silva_reference_files. For ITS sequences, see 'how to' below.\n"; ianswers.push_back(ianswer);
+        
+        issue = "...xxx of your sequences generated alignments that eliminated too many bases... What does this mean?"; issues.push_back(issue);
+        ianswer = "\tBy default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining.\n"; ianswers.push_back(ianswer);
+        
+        
+        string howto = "How do I 'align' ITS sequences?"; howtos.push_back(howto);
+        string hanswer = "\tYou really can't do an alignment because there isn't positional homology. You can use the pre.cluster and pairwise.seqs commands to generate a distance matrix from unaligned sequences.\n"; hanswers.push_back(hanswer);
+        
+        howto = "How do I create a custom reference for the region I am studying?"; howtos.push_back(howto);
+        hanswer = "\tYou can tailor your reference using this method: http://blog.mothur.org/2016/07/07/Customization-for-your-region/.\n"; hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AlignCommand", "getCommonQuestions");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 string AlignCommand::getOutputPattern(string type) {
@@ -151,46 +179,28 @@ AlignCommand::AlignCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("fasta");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+                }
 			}
 
             templateFileName = validParameter.validFile(parameters, "reference");
             if (templateFileName == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required for the align.seqs command, aborting.\n"); abort = true;
             }else if (templateFileName == "not open") { abort = true; }
             
-			candidateFileName = validParameter.valid(parameters, "fasta");
-			if (candidateFileName == "not found") { 
-				//if there is a current fasta file, use it
-				string filename = current->getFastaFile();
-				if (filename != "") { candidateFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the candidate parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { 
-				util.splitAtDash(candidateFileName, candidateFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < candidateFileNames.size(); i++) {
-					//candidateFileNames[i] = util.getFullPathName(candidateFileNames[i]);
-					
-					bool ignore = false;
-					if (candidateFileNames[i] == "current") { 
-						candidateFileNames[i] = current->getFastaFile();
-						if (candidateFileNames[i] != "") {  m->mothurOut("Using " + candidateFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
-						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
-							//erase from file list
-							candidateFileNames.erase(candidateFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-					if (!ignore) {
-                        if (util.checkLocations(candidateFileNames[i], current->getLocations())) { current->setFastaFile(candidateFileNames[i]); }
-                        else { candidateFileNames.erase(candidateFileNames.begin()+i); i--; } //erase from file list
-                    }
-				}
-				
-				//make sure there is at least one valid file left
-				if (candidateFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
+            fastafile = validParameter.validFile(parameters, "fasta");
+            if (fastafile == "not found") {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
+                else { 	m->mothurOut("[ERROR]: You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
+            }
+            else if (fastafile == "not open") { abort = true; }
+            else { current->setFastaFile(fastafile); }
+
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -245,41 +255,42 @@ int AlignCommand::execute(){
 
 		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, util.getRandomNumber(), true);
 		
-		for (int s = 0; s < candidateFileNames.size(); s++) {
-			if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
-			
-			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
-			
-			if (outputDir == "") {  outputDir += util.hasPath(candidateFileNames[s]); }
-            map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(candidateFileNames[s]));
-			string alignFileName = getOutputFileName("fasta", variables);  
-			string reportFileName = getOutputFileName("alignreport", variables);
-			string accnosFileName = getOutputFileName("accnos", variables);
-            
-			bool hasAccnos = true;
-            vector<long long> numFlipped;
-            numFlipped.push_back(0); //numflipped because reverse was better
-            numFlipped.push_back(0); //total number of sequences with over 50% of bases removed
-			
-            long long numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s], numFlipped);
-				
-			if (m->getControl_pressed()) { util.mothurRemove(accnosFileName); util.mothurRemove(alignFileName); util.mothurRemove(reportFileName); outputTypes.clear();  return 0; }
-			
-			//delete accnos file if its blank else report to user
-			if (util.isBlank(accnosFileName)) {  util.mothurRemove(accnosFileName);  hasAccnos = false; }
-			else { 
-				m->mothurOut("[WARNING]: " + toString(numFlipped[1]) + " of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
-				if (!flip) {
-					m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well. flip=t");
-				}else{  m->mothurOut("\n[NOTE]: " + toString(numFlipped[0]) + " of your sequences were reversed to produce a better alignment.");  }
-				m->mothurOutEndLine();
-			}
-
-			outputNames.push_back(alignFileName); outputTypes["fasta"].push_back(alignFileName);
-			outputNames.push_back(reportFileName); outputTypes["alignreport"].push_back(reportFileName);
-			if (hasAccnos)	{	outputNames.push_back(accnosFileName);	outputTypes["accnos"].push_back(accnosFileName);  }
-		}
+        if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
+        
+        time_t start = time(NULL);
+        m->mothurOut("\nAligning sequences from " + fastafile + " ...\n" );
+        
+        if (outputDir == "") {  outputDir += util.hasPath(fastafile); }
+        map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        string alignFileName = getOutputFileName("fasta", variables);
+        string reportFileName = getOutputFileName("alignreport", variables);
+        string accnosFileName = getOutputFileName("accnos", variables);
+        
+        bool hasAccnos = true;
+        vector<long long> numFlipped;
+        numFlipped.push_back(0); //numflipped because reverse was better
+        numFlipped.push_back(0); //total number of sequences with over 50% of bases removed
+        
+        long long numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, fastafile, numFlipped);
+        
+        if (m->getControl_pressed()) { util.mothurRemove(accnosFileName); util.mothurRemove(alignFileName); util.mothurRemove(reportFileName); outputTypes.clear();  return 0; }
+        
+        //delete accnos file if its blank else report to user
+        if (util.isBlank(accnosFileName)) {  util.mothurRemove(accnosFileName);  hasAccnos = false; }
+        else {
+            m->mothurOut("[WARNING]: " + toString(numFlipped[1]) + " of your sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+            if (!flip) {
+                m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well. flip=t");
+            }else{  m->mothurOut("\n[NOTE]: " + toString(numFlipped[0]) + " of your sequences were reversed to produce a better alignment.");  }
+            m->mothurOutEndLine();
+        }
+        
+        outputNames.push_back(alignFileName); outputTypes["fasta"].push_back(alignFileName);
+        outputNames.push_back(reportFileName); outputTypes["alignreport"].push_back(reportFileName);
+        if (hasAccnos)	{	outputNames.push_back(accnosFileName);	outputTypes["accnos"].push_back(accnosFileName);  }
 		
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to align " + toString(numFastaSeqs) + " sequences.\n");
+        
 		//set align file as new current fastafile
 		string currentFasta = "";
 		itTypes = outputTypes.find("fasta");
@@ -566,6 +577,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             delete data[i];
             delete workerThreads[i];
         }
+        synchronizedOutputAlignFile->close(); synchronizedOutputReportFile->close(); synchronizedOutputAccnosFile->close();
         delete threadAlignWriter; delete threadAccnosWriter; delete threadReportWriter;
         delete dataBundle;
         

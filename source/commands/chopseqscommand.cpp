@@ -690,8 +690,8 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
             delete data[i];
             delete workerThreads[i];
         }
-        delete threadOutputWriter;
-        delete threadAccnosWriter;
+        synchronizedOutputFile->close(); synchronizedAccnosFile->close();
+        delete threadOutputWriter; delete threadAccnosWriter;
         delete dataBundle;
         return wroteAccnos;
     }

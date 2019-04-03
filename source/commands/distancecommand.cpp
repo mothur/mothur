@@ -673,7 +673,7 @@ void DistanceCommand::createProcesses(string filename) {
             delete data[i];
             delete workerThreads[i];
         }
-        if (output == "column")     { delete threadWriter; }
+        if (output == "column")     { synchronizedOutputFile->close(); delete threadWriter; }
         delete dataBundle;
         
         time(&end);

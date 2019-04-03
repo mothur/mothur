@@ -45,7 +45,7 @@ TreeReader::TreeReader(string tf, string gf, string nf) : treefile(tf),  groupfi
         Treenames = util.parseTreeFile(treefile); //fills treenames
         countfile = "";
         ct = new CountTable();
-        if (namefile != "") { ct->createTable(namefile, groupfile, true); }
+        if (namefile != "") { ct->createTable(namefile, groupfile, nullVector, true); }
         else {
             set<string> nameMap;
             map<string, string> groupMap;

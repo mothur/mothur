@@ -202,7 +202,7 @@ int AlignTree::getMinRiskIndexAlign(string& sequence, vector<int>& taxaIndices, 
             G[i] = tree[taxaIndices[i]]->getSimToConsensus(sequence);
         }
         
-        double minRisk = 1e6;
+        double minRisk = MOTHURMAX;
         int minRiskIndex = 0;
         
         for(int i=0;i<numProbs;i++){

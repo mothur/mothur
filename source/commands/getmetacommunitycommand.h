@@ -79,7 +79,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, allLines, subsample;
+    bool abort, allLines, subsample, withReplacement;
     string outputDir;
     vector<string> outputNames;
     string sharedfile, method, calc;

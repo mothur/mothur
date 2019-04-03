@@ -547,10 +547,10 @@ int GetSeqsCommand::readFasta(){
 		in.close();	
 		out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
 		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName); 
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your fasta file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your fasta file.\n");
 		
 		return 0;
 
@@ -571,7 +571,6 @@ int GetSeqsCommand::readQual(){
 		string outputFileName = getOutputFileName("qfile", variables);
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
-		
 		
 		ifstream in;
 		util.openInputFile(qualfile, in);
@@ -656,56 +655,18 @@ int GetSeqsCommand::readCount(){
         variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(countfile, in);
-		
-		bool wroteSomething = false;
-		int selectedCount = 0;
-		
-        string headers = util.getline(in); util.gobble(in);
-        out << headers << endl;
-        string test = headers; vector<string> pieces = util.splitWhiteSpace(test);
+        CountTable ct; ct.readTable(countfile, true, false, names);
         
-        string name, rest; int thisTotal; rest = "";
-        set<string> uniqueNames;
-        while (!in.eof()) {
-            
-            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
-            
-            in >> name; util.gobble(in); 
-            in >> thisTotal; util.gobble(in);
-            if (pieces.size() > 2) {  rest = util.getline(in); util.gobble(in);  }
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
-            
-            if (names.count(name) != 0) {
-                if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
-                    uniqueNames.insert(name);
-
-                    out << name << '\t' << thisTotal << '\t' << rest << endl;
-                    wroteSomething = true;
-                    selectedCount+= thisTotal;
-                }else {
-                    m->mothurOut("[WARNING]: " + name + " is in your count file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
-                }
-            }
-        }
-        in.close();
-		out.close();
+        bool wroteSomething = false;
+        int selectedCount = ct.getNumSeqs();
+        if (selectedCount != 0) { wroteSomething = true; }
         
-        //check for groups that have been eliminated
-        CountTable ct;
-        if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName, true, false);
-            ct.printTable(outputFileName);
-        }
+        ct.printTable(outputFileName);
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) {  m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");   }
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your count file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your count file.\n");
         
 		return 0;
 	}
@@ -841,7 +802,7 @@ int GetSeqsCommand::readName(){
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return 0; }
 
 			in >> firstCol;			util.gobble(in);
-			in >> secondCol;
+			in >> secondCol;        util.gobble(in);
 			
 			string hold = "";
 			if (dups) { hold = secondCol; }
@@ -919,7 +880,6 @@ int GetSeqsCommand::readName(){
                     }
                 }
 			}
-			util.gobble(in);
 		}
 		in.close();
 		out.close();

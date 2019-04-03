@@ -24,6 +24,7 @@ vector<string> GetMetaCommunityCommand::setParameters(){
         CommandParameter pminpartitions("minpartitions", "Number", "", "5", "", "", "","",false,false,true); parameters.push_back(pminpartitions);
         CommandParameter pmaxpartitions("maxpartitions", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pmaxpartitions);
         CommandParameter poptimizegap("optimizegap", "Number", "", "3", "", "", "","",false,false,true); parameters.push_back(poptimizegap);
+        CommandParameter pwithreplacement("withreplacement", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pwithreplacement);
    		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -42,13 +43,14 @@ vector<string> GetMetaCommunityCommand::setParameters(){
 string GetMetaCommunityCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The get.communitytype command parameters are shared, method, label, groups, minpartitions, maxpartitions, optimizegap and processors. The shared file is required. \n";
+		helpString += "The get.communitytype command parameters are shared, method, label, groups, minpartitions, maxpartitions, optimizegap, subsample, withreplacement. The shared file is required. \n";
         helpString += "The label parameter is used to analyze specific labels in your input. labels are separated by dashes.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your shared file you would like analyzed.  Group names are separated by dashes.\n";
         helpString += "The method parameter allows you to select the method you would like to use.  Options are dmm, kmeans and pam. Default=dmm.\n";
         helpString += "The calc parameter allows you to select the calculator you would like to use to calculate the distance matrix used by the pam and kmeans method. By default the rjsd calculator is used.\n";
         helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample while calculating the distance matrix for the pam and kmeans method.\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group while calculating the distance matrix for the pam and kmeans methods.\n";
+        helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
 		helpString += "The minpartitions parameter is used to .... Default=5.\n";
         helpString += "The maxpartitions parameter is used to .... Default=10.\n";
         helpString += "The optimizegap parameter is used to .... Default=3.\n";
@@ -148,8 +150,8 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
 			else if (sharedfile == "not found") {
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile();
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -181,7 +183,7 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
 			if (method == "not found") { method = "dmm"; }
 			
 			if ((method == "dmm") || (method == "kmeans") || (method == "pam")) { }
-			else { m->mothurOut("[ERROR]: " + method + " is not a valid method.  Valid algorithms are dmm, kmeans and pam."); m->mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("[ERROR]: " + method + " is not a valid method.  Valid algorithms are dmm, kmeans and pam.\n");  abort = true; }
             
             calc = validParameter.valid(parameters, "calc");
 			if (calc == "not found") { calc = "rjsd";  }
@@ -207,6 +209,9 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
             }
             
             if (subsample == false) { iters = 0; }
+            
+            temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
+            withReplacement = util.isTrue(temp);
 		}
 		
 	}
@@ -239,7 +244,7 @@ int GetMetaCommunityCommand::execute(){
                 Groups = lookup->getNamesGroups();
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");  m->setControl_pressed(true);  return 0; }
         }
 
         
@@ -331,7 +336,7 @@ int GetMetaCommunityCommand::createProcesses(SharedRAbundVectors*& thislookup){
 		string outputFileName = getOutputFileName("fit", variables);
         outputNames.push_back(outputFileName); outputTypes["fit"].push_back(outputFileName);
                 
-		//divide the partitions between the processors
+		//force 1 processor
 		vector< vector<int> > dividedPartitions;
         vector< vector<string> > rels, matrix;
         vector<string> doneFlags;
@@ -818,7 +823,10 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if (subsample && (thisIter != 0)) { sample.getSample(thisItersLookup, subsampleSize);  }
+            if (subsample && (thisIter != 0)) {
+                if (withReplacement)    { sample.getSampleWithReplacement(thisItersLookup, subsampleSize);  }
+                else                    { sample.getSample(thisItersLookup, subsampleSize);                 }
+            }
             
             driver(thisItersLookup, calcDists, matrixCalculator);
             

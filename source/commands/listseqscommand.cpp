@@ -274,18 +274,9 @@ int ListSeqsCommand::execute(){
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
 		string outputFileName = getOutputFileName("accnos", variables);
 
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
+        util.printAccnos(outputFileName, names);
+        
 		outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
-		
-		//output to .accnos file
-		for (int i = 0; i < names.size(); i++) {
-			
-			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); util.mothurRemove(outputFileName); return 0; }
-			
-			out << names[i] << endl;
-		}
-		out.close();
 		
 		if (m->getControl_pressed()) { outputTypes.clear();  util.mothurRemove(outputFileName); return 0; }
 		

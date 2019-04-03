@@ -22,6 +22,7 @@ vector<string> MatrixOutputCommand::setParameters(){
         CommandParameter pmode("mode", "Multiple", "average-median", "average", "", "", "","",false,false); parameters.push_back(pmode);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+        CommandParameter pwithreplacement("withreplacement", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pwithreplacement);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -45,6 +46,7 @@ string MatrixOutputCommand::getHelpString(){
 		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n";
         helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
+        helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
 		helpString += "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n";
 		helpString += "The output parameter allows you to specify format of your distance matrix. Options are lt, column and square. The default is lt.\n";
         helpString += "The mode parameter allows you to specify if you want the average or the median values reported when subsampling. Options are average, and median. The default is average.\n";
@@ -196,6 +198,9 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
             
             if (subsample == false) { iters = 0; }
             
+            temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
+            withReplacement = util.isTrue(temp);
+            
         }
 	}
 	catch(exception& e) {
@@ -325,7 +330,7 @@ int MatrixOutputCommand::execute(){
 	}
 }
 /***********************************************************/
-void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
+void MatrixOutputCommand::printDists(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
     try {
         
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -509,7 +514,10 @@ int process(distSharedData* params){
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) { sample.getSample(thisItersLookup, params->subsampleSize); }
+            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) {
+                if (params->withReplacement)    {  sample.getSampleWithReplacement(thisItersLookup, params->subsampleSize);     }
+                else                            {  sample.getSample(thisItersLookup, params->subsampleSize);                    }
+            }
             
             vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
             vector<string> thisItersGroupNames = params->thisLookup->getNamesGroups();
@@ -582,7 +590,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
             
             //make copy of lookup so we don't get access violations
             SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
-            distSharedData* dataBundle = new distSharedData(lines[i+1], false, subsample, subsampleSize, Estimators, newLookup);
+            distSharedData* dataBundle = new distSharedData(lines[i+1], false, subsample, subsampleSize, withReplacement, Estimators, newLookup);
             
             data.push_back(dataBundle);
             
@@ -591,7 +599,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         
         //make copy of lookup so we don't get access violations
         SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
-        distSharedData* dataBundle = new distSharedData(lines[0], true, subsample, subsampleSize, Estimators, newLookup);
+        distSharedData* dataBundle = new distSharedData(lines[0], true, subsample, subsampleSize, withReplacement, Estimators, newLookup);
         process(dataBundle);
         delete newLookup;
         
@@ -612,7 +620,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
             ofstream outDist; util.openOutputFile(distFileName, outDist);
             outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
             
-            printSims(outDist, dataBundle->matrices[i], groupNames); outDist.close();
+            printDists(outDist, dataBundle->matrices[i], groupNames); outDist.close();
         }
 
         vector< vector< vector<seqDist> > > calcDistsTotals = dataBundle->calcDistsTotals;
@@ -674,7 +682,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
                 util.openOutputFile(distFileName, outAve);
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
                 
-                printSims(outAve, matrix, groupNames);
+                printDists(outAve, matrix, groupNames);
                 
                 outAve.close();
                 
@@ -685,7 +693,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
                 util.openOutputFile(distFileName, outSTD);
                 outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
                 
-                printSims(outSTD, stdmatrix, thisLookup->getNamesGroups());
+                printDists(outSTD, stdmatrix, thisLookup->getNamesGroups());
                 
                 outSTD.close();
             }

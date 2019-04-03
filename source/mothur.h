@@ -104,6 +104,25 @@ using namespace std;
 #define PATH_SEPARATOR "/"
 #define EXECUTABLE_EXT ""
 #define NON_WINDOWS
+
+#define RESET   "\033[0m"
+#define BLACK   "\033[30m"      /* Black */
+#define RED     "\033[31m"      /* Red */
+#define GREEN   "\033[32m"      /* Green */
+#define YELLOW  "\033[33m"      /* Yellow */
+#define BLUE    "\033[34m"      /* Blue */
+#define MAGENTA "\033[35m"      /* Magenta */
+#define CYAN    "\033[36m"      /* Cyan */
+#define WHITE   "\033[37m"      /* White */
+#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+
 #undef WINDOWS
 
 #else
@@ -113,6 +132,8 @@ using namespace std;
 #undef NON_WINDOWS
 
 #endif
+
+#define MOTHURMAX 1e6
 
 typedef unsigned long ull;
 typedef unsigned short intDist;
@@ -149,14 +170,24 @@ struct diffPair {
 	}
 };
 
-struct item {
-    string name;
-    string group;
+struct countTableItem {
+    int abund;
+    int group;
     
-    item() {}
-    item(string n, string g) : name(n), group(g) {}
+    countTableItem() { abund = 0; group = -1; }
+    countTableItem(int a, int g) : abund(a), group(g) {}
+    ~countTableItem() {}
+};
+
+struct item {
+    int name;
+    int group;
+    
+    item() { name = -1; group = -1; }
+    item(int n, int g) : name(n), group(g) {}
     ~item() {}
 };
+
 
 struct weightedSeq {
     long long name;
@@ -192,6 +223,18 @@ struct colDist {
     int row;
     float dist;
     colDist(int r, int c, double d) : row(r), col(c), dist(d) {}
+};
+/************************************************************/
+struct seqPNode {
+    int numIdentical;
+    string name;
+    string sequence;
+    vector<int> clusteredIndexes; //indexes of merge nodes. Can use this later to construct names
+    int diffs;
+    
+    seqPNode() { diffs = 0; numIdentical = 0; name = ""; sequence = "";  }
+    seqPNode(string na, string seq, int n, vector<int> nm) : numIdentical(n), name(na), sequence(seq), clusteredIndexes(nm) { diffs = 0; }
+    ~seqPNode() {}
 };
 /**********************************************************/
 struct CommonHeader {
@@ -334,8 +377,12 @@ struct spearmanRank {
 	spearmanRank(string n, float s) : name(n), score(s) {}
 };
 //***********************************************************************
+inline bool compareGroups(countTableItem left, countTableItem right){
+	return (left.group > right.group);
+}
+//***********************************************************************
 inline bool compareIndexes(PDistCell left, PDistCell right){
-	return (left.index > right.index);	
+    return (left.index > right.index);
 }
 //********************************************************************************************************************
 inline bool compareSpearman(spearmanRank left, spearmanRank right){

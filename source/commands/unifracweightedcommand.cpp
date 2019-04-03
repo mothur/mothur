@@ -23,6 +23,7 @@ vector<string> UnifracWeightedCommand::setParameters(){
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+        CommandParameter pwithreplacement("withreplacement", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pwithreplacement);
         CommandParameter pconsensus("consensus", "Boolean", "", "F", "", "", "","tree",false,false); parameters.push_back(pconsensus);
         CommandParameter prandom("random", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prandom);
 		CommandParameter pdistance("distance", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false); parameters.push_back(pdistance);
@@ -52,6 +53,7 @@ string UnifracWeightedCommand::getHelpString(){
 		helpString += "The root parameter allows you to include the entire root in your calculations. The default is false, meaning stop at the root for this comparision instead of the root of the entire tree.\n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group. The subsample parameter may only be used with a group file.\n";
+        helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
         helpString += "The consensus parameter allows you to indicate you would like trees built from distance matrices created with the results, as well as a consensus tree built from these trees. Default=F.\n";
         helpString += "The unifrac.weighted command should be in the following format: unifrac.weighted(groups=yourGroups, iters=yourIters).\n";
 		helpString += "Example unifrac.weighted(groups=A-B-C, iters=500).\n";
@@ -244,6 +246,9 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
             if (!subsample) { subsampleIters = 0;   }
             else { subsampleIters = iters;          }
             
+            temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
+            withReplacement = util.isTrue(temp);
+            
             temp = validParameter.valid(parameters, "consensus");					if (temp == "not found") { temp = "F"; }
 			consensus = util.isTrue(temp);
             
@@ -298,13 +303,8 @@ int UnifracWeightedCommand::execute() {
         //set or check size
         if (subsample) {
             //user has not set size, set size = smallest samples size
-            if (subsampleSize == -1) { 
-                vector<string> temp; temp.push_back(Groups[0]);
-                subsampleSize = ct->getGroupCount(Groups[0]); //num in first group
-                for (int i = 1; i < Groups.size(); i++) {
-                    int thisSize = ct->getGroupCount(Groups[i]);
-                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
-                }
+            if (subsampleSize == -1) {
+                subsampleSize = ct->getNumSeqsSmallestGroup();
                 m->mothurOut("\nSetting subsample size to " + toString(subsampleSize) + ".\n\n");
             }else { //eliminate any too small groups
                 vector<string> newGroups = Groups;
@@ -353,7 +353,10 @@ int UnifracWeightedCommand::execute() {
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 CountTable* newCt = new CountTable();
                 int sampleTime = time(NULL);
-                Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);
+                
+                Tree* subSampleTree;
+                if (withReplacement)    { subSampleTree = sample.getSampleWithReplacement(T[i], ct, newCt, subsampleSize, Groups);  }
+                else                    { subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);                 }
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
                 

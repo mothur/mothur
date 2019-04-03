@@ -299,7 +299,7 @@ void FlowData::printFlows(OutputWriter* out, string scrapCode){
     try{
         string output = seqName + '|' + scrapCode + ' ' + toString(endFlow) + ' ';
         
-        for(int i=0;i<numFlows;i++){ output += flowData[i] + ' '; } output += "\n";
+        for(int i=0;i<numFlows;i++){ output += toString(flowData[i]) + ' '; } output += "\n";
         
         out->write(output);
     }

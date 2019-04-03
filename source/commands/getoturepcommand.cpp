@@ -104,7 +104,7 @@ string GetOTURepCommand::getOutputPattern(string type) {
         
         if (type == "fasta") {  pattern = "[filename],[tag],rep.fasta-[filename],[tag],[group],rep.fasta"; } 
         else if (type == "name") {  pattern = "[filename],[tag],rep.names-[filename],[tag],[group],rep.names"; } 
-        else if (type == "count") {  pattern = "[filename],[tag],rep.count_table-[filename],[tag],[group],rep.count_table"; }
+        else if (type == "count") {  pattern = "[filename],count_table-[filename],[tag],rep.count_table-[filename],[tag],[group],rep.count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -355,7 +355,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				if ((groupfile == "") && (!hasGroups)) {
-					m->mothurOut("You must provide a groupfile to use groups."); m->mothurOutEndLine();
+					m->mothurOut("You must provide a groupfile to use groups.\n");
 					abort = true;
 				}else { 
 					util.splitAtDash(groups, Groups);
@@ -396,32 +396,25 @@ int GetOTURepCommand::execute(){
         
         if (method == "distance") {
             if ((namefile != "") && (groupfile != "")) { //create count file for simplicity
-                current->setMothurCalling(true);
-                m->mothurOut("/******************************************/\n");
-                string inputString = "name=" + namefile + ", group=" + groupfile;
                 
-                m->mothurOut("/nRunning command: count.seqs(" + inputString + ")\n");
-                current->setMothurCalling(true);
+                CountTable ct; ct.createTable(namefile, groupfile, nullVector);
                 
-                Command* countSeqsCommand = new CountSeqsCommand(inputString);
-                countSeqsCommand->execute();
+                if (outputDir == "") { outputDir = util.hasPath(namefile); }
+                map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(namefile));
+                countfile = getOutputFileName("count", variables);
                 
-                countfile = countSeqsCommand->getOutputFiles()["count"][0];
-                namefile = ""; groupfile = "";
-                
-                delete countSeqsCommand;
+                ct.printCompressedTable(countfile);
                 
                 current->setCountFile(countfile);
-                ct.readTable(countfile, true, false);
                 if (ct.hasGroupInfo()) { hasGroups = true; }
                 
-                ofstream out;
-                util.openOutputFile("temp.accnos", out); vector<string> uniqueNames = ct.getNamesOfSeqs();
-                for (int i = 0; i < uniqueNames.size(); i++) { out << uniqueNames[i] << endl; } out.close();
+                vector<string> uniqueNames = ct.getNamesOfSeqs();
+                util.printAccnos("temp.accnos", uniqueNames);
                 
-                inputString = "list=" + listfile + ", accnos=temp.accnos";
+                string inputString = "list=" + listfile + ", accnos=temp.accnos";
                 
-                m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("\nRunning command: get.seqs(" + inputString + ")\n");
                 current->setMothurCalling(true);
                 
                 Command* getSeqsCommand = new GetSeqsCommand(inputString);
@@ -793,12 +786,14 @@ int GetOTURepCommand::process(ListVector* processList) {
 			}
 		}
 		
-        map<string, long long> matrixNameIndexes = matrix->getNameIndexMap(); //maps unique names to index in matrix
+        map<string, long long> matrixNameIndexes;
+        if (method != "abundance") {  matrix->getNameIndexMap(); } //maps unique names to index in matrix
         
 		//for each bin in the list vector
         vector<string> binLabels = processList->getLabels();
 		for (int i = 0; i < processList->size(); i++) {
         
+            
 			if (m->getControl_pressed()) { out.close(); if (Groups.size() == 0) { newNamesOutput.close(); } return 0; }
 			
 			string temp = processList->get(i);

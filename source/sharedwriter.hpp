@@ -17,12 +17,13 @@ class SynchronizedOutputFile {
 public:
     SynchronizedOutputFile (const string& p)                : path(p) { util.openOutputFile(p, out);        }
     SynchronizedOutputFile (const string& p, bool append)   : path(p) { util.openOutputFileAppend(p, out);  }
-    ~SynchronizedOutputFile() { out.close(); }
+    ~SynchronizedOutputFile() { if (out.is_open()) { out.close(); } } //if we forgot to close()
     
     void write (const string& dataToWrite) {
         std::lock_guard<std::mutex> lock((writerMutex)); // Ensure that only one thread can execute at a time
         out << dataToWrite;
     }
+    void close() { if (out.is_open()) { out.close(); } }
     
     void setFixedShowPoint()    {  out.setf(ios::fixed, ios::showpoint);    }
     void setPrecision(int p)    {  out << setprecision(p);                  }

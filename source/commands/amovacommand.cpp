@@ -38,21 +38,39 @@ vector<string> AmovaCommand::setParameters(){
 string AmovaCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "Referenced: Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.";
-		helpString += "The amova command outputs a .amova file.";
-		helpString += "The amova command parameters are phylip, iters, sets and alpha.  The phylip and design parameters are required, unless you have valid current files.";
-		helpString += "The design parameter allows you to assign your samples to groups when you are running amova. It is required.";
-		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the sample name and the second column is the group the sample belongs to.";
-        helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
-		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000.";
-		helpString += "The amova command should be in the following format: amova(phylip=file.dist, design=file.design).";
+		helpString += "Referenced: Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.\n";
+		helpString += "The amova command outputs a .amova file.\n";
+		helpString += "The amova command parameters are " + getCommandParameters() + ". The phylip and design parameters are required, unless you have valid current files.\n";
+		helpString += "The design parameter allows you to assign your samples to groups when you are running amova. It is required.\n";
+        helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. The default is all sets in the design file.\n";
+		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000.\n";
+		helpString += "The amova command should be in the following format: amova(phylip=file.dist, design=file.design).\n";
 		
+        getCommonQuestions();
+        
 		return helpString;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AmovaCommand", "getHelpString");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+string AmovaCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string issue = "...XXX is not in your design file, please correct."; issues.push_back(issue);
+        string ianswer = "\tMothur expects the design file to be 2 column with a header line. The first column should contain the names of the samples in the distance matrix. The second column should contain the treatment each sample is assigned to. \n"; ianswers.push_back(ianswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AmovaCommand", "getCommonQuestions");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 string AmovaCommand::getOutputPattern(string type) {
@@ -149,8 +167,8 @@ AmovaCommand::AmovaCommand(string option) {
 			else if (designFileName == "not found") {
 				//if there is a current design file, use it
 				designFileName = current->getDesignFile(); 
-				if (designFileName != "") { m->mothurOut("Using " + designFileName + " as input file for the design parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }				
+				if (designFileName != "") { m->mothurOut("Using " + designFileName + " as input file for the design parameter.\n");  }
+				else { 	m->mothurOut("You have no current design file and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designFileName); }	
 
 			string temp = validParameter.valid(parameters, "iters");
@@ -197,7 +215,7 @@ int AmovaCommand::execute(){
                 string group = designMap->get(sampleNames[i]);
                 
                 if (group == "not found") {
-                    m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
+                    m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct.\n");  m->setControl_pressed(true);
                 }else if (!util.inUsersGroups(group, Sets)){  //not in set we want remove it
                     //remove from all other rows
                     for(int j=0;j<distanceMatrix.size();j++){ distanceMatrix[j].erase(distanceMatrix[j].begin()+i); }
@@ -220,7 +238,7 @@ int AmovaCommand::execute(){
 			string group = designMap->get(sampleNames[i]);
 			
 			if (group == "not found") {
-				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
+				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct.\n");  m->setControl_pressed(true);
 			}else { origGroupSampleMap[group].push_back(i); }
 			
 		}

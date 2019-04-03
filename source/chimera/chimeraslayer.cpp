@@ -363,10 +363,9 @@ ChimeraSlayer::~ChimeraSlayer() {
 }
 //***************************************************************************************************************
 void ChimeraSlayer::printHeader(ostream& out) {
-	m->mothurOutEndLine();
-	m->mothurOut("Only reporting sequence supported by " + toString(minBS) + "% of bootstrapped results.");
-	m->mothurOutEndLine();
 	
+	m->mothurOut("\nOnly reporting sequence supported by " + toString(minBS) + "% of bootstrapped results.\n");
+
 	out << "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
 }
 //***************************************************************************************************************
@@ -384,7 +383,7 @@ Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			
 			if (chimeraFlag == "yes") {	
 				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
-					m->mothurOut(querySeq.getName() + "\tyes"); m->mothurOutEndLine();
+					m->mothurOutJustToScreen(querySeq.getName() + "\tyes\n");
 					outAcc << querySeq.getName() << endl;
 					
 					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }
@@ -453,7 +452,7 @@ Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftPi
 				if (leftPiece.flag == "yes") { if ((leftPiece.results[0].bsa >= minBS) || (leftPiece.results[0].bsb >= minBS))	{ leftChimeric = true;	} }
 				
 				if (rightChimeric || leftChimeric) {
-					m->mothurOut(querySeq.getName() + "\tyes"); m->mothurOutEndLine();
+					m->mothurOutJustToScreen(querySeq.getName() + "\tyes\n");
 					outAcc << querySeq.getName() << endl;
 					
 					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }

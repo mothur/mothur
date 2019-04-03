@@ -70,7 +70,6 @@
 #include "makegroupcommand.h"
 #include "chopseqscommand.h"
 #include "clearcutcommand.h"
-#include "catchallcommand.h"
 #include "splitabundcommand.h"
 #include "clustersplitcommand.h"
 #include "classifyotucommand.h"
@@ -171,6 +170,77 @@ HelpCommand::HelpCommand(string option)  {
     
 }
 //**********************************************************************************************************************
+string HelpCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+    
+        string question = "How do I site mothur?"; questions.push_back(question);
+        string qanswer = "\tSchloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n"; qanswers.push_back(qanswer);
+        
+        question = "Do you have an example analysis?"; questions.push_back(question);
+        qanswer = "\tYes, https://mothur.org/wiki/454_SOP and https://mothur.org/wiki/MiSeq_SOP highlight some of the things you can do with mothur.\n"; qanswers.push_back(qanswer);
+        
+        question = "Do you offer workshops?"; questions.push_back(question);
+        qanswer = "\tYes! Please see our https://mothur.org/wiki/Workshops page for more information.\n"; qanswers.push_back(qanswer);
+        
+        question = "What are mothur's file types?"; questions.push_back(question);
+        qanswer = "\tMothur uses and creates many file types. Including fasta, name, group, design, count, list, rabund, sabund, shared, relabund, oligos, taxonomy, constaxonomy, phylip, column, flow, qfile, file, biom and tree. You can find out more about these formats here: https://www.mothur.org/wiki/File_Types.\n"; qanswers.push_back(qanswer);
+        
+        question = "Is there a list of all of mothur's commands?"; questions.push_back(question);
+        qanswer = "\tYes! You can find it here, http://www.mothur.org/wiki/Category:Commands.\n"; qanswers.push_back(qanswer);
+        
+        question = "Why does the cutoff change when I cluster with average neighbor?"; questions.push_back(question);
+        qanswer = "\tThis is a product of using the average neighbor algorithm with a sparse distance matrix. When you run cluster, the algorithm looks for pairs of sequences to merge in the rows and columns that are getting merged together. Let's say you set the cutoff to 0.05. If one cell has a distance of 0.03 and the cell it is getting merged with has a distance above 0.05 then the cutoff is reset to 0.03, because it's not possible to merge at a higher level and keep all the data. All of the sequences are still there from multiple phyla. Incidentally, although we always see this, it is a bigger problem for people that include sequences that do not fully overlap.\n"; qanswers.push_back(qanswer);
+        
+
+        
+        string issue = "Mothur can't find my input files. What wrong?"; issues.push_back(issue);
+        string ianswer = "\tBy default, mothur will then look for the input files in the directory where mothur's executable is located. Mothur will also search the input, output and temporary default locations. You can set these locations using the set.dir command: set.dir(input=/users/myuser/desktop/mothurdata). Alternatively you can provide complete file names, or move the input files to mothur's executable location.\n"; ianswers.push_back(ianswer);
+        
+        issue = "I installed the latest version, but I am still running an older version. Why?"; issues.push_back(issue);
+        ianswer = "\tWe often see this issue when you have an older version of mothur installed in your path. You can find out where by opening a terminal window and running: \n\n\tyourusername$ which mothur\n\tpath_to_old_version\n\tfor example: yourusername$ which mothur\n\t/usr/local/bin\n\n\tWhen you find the location of the older version, you can delete it or move it out of your path with the following:\n\n\tyourusername$ mv path_to_old_version/mothur new_location\n\tfor example: yourusername$ mv /usr/local/bin/mothur /Users/yourusername/desktop/old_version_mothur\n"; ianswers.push_back(ianswer);
+        
+        issue = "File Mismatches - 'yourSequence is in fileA but not in fileB, please correct.'"; issues.push_back(issue);
+        ianswer = "\tThe most common reason this occurs is because you forgot to include a name or count file on a command, or accidentally included the wrong one due to a typo. Mothur has a 'current' option, which allows you to set file parameters to 'current'. For example, if fasta=current mothur will use the last fasta file given or created. The current option was designed to help avoid typo mistakes due to mothur's long filenames. Another reason this might occur is a process failing when you are using multiple processors. If a process dies, a file can be incomplete which would cause a mismatch error downstream.\n"; ianswers.push_back(ianswer);
+        
+        issue = "I don't have enough RAM or processing power. What are my options?"; issues.push_back(issue);
+        ianswer = "\tIf you are using multiple processors, try running the command with processors=1, the more processors you use the more memory is required.\n\tAlternatively, you can use AWS to run your analysis. Here are instructions: https://mothur.org/wiki/Mothur_AMI.\n"; ianswers.push_back(ianswer);
+        
+        issue = "Mothur crashes when I read my distance file. What's wrong?"; issues.push_back(issue);
+        ianswer = "\tThere are two common causes for this, file size and format.\n\n\tFileSize:\tThe cluster command loads your distance matrix into RAM, and your distance file is most likely too large to fit in RAM. There are two options to help with this. The first is to use a cutoff. By using a cutoff mothur will only load distances that are below the cutoff. If that is still not enough, there is a command called cluster.split, http://www.mothur.org/wiki/cluster.split. Cluster.split divides the dataset by taxonomic assignment and generates matrices for each grouping, and then clusters the smaller pieces separately. You may also be able to reduce the size of the original distance matrix by using the commands outline in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP\n\n\tWrong Format:\tThis error can be caused by trying to read a column formatted distance matrix using the phylip parameter. By default, the dist.seqs command generates a column formatted distance matrix. To make a phylip formatted matrix set the dist.seqs command parameter output to lt.\n"; ianswers.push_back(ianswer);
+        
+        issue = "Why do I have such a large distance matrix?"; issues.push_back(issue);
+        ianswer = "\tThis is most often caused by poor overlap of your reads. When reads have poor overlap, it greatly increases your error rate. Also, sequences that should cluster together don't because the errors appear to be genetic differences when in fact they are not. The quality of the data you are processing can not be overstressed. Error filled reads produce error filled results!\n\n\tCheck out Pat's blog: http://blog.mothur.org/2014/09/11/Why-such-a-large-distance-matrix/\n\n\tNOTE: To take a step back, if you look through our MiSeq SOP, you’ll see that we go to great pains to only work with the unique sequences to limit the number of sequences we have to align, screen for chimeras, classify, etc. We all know that 20 million reads will never make it through the pipeline without setting your computer on fire. Returning to the question at hand, you can imagine that if the reads do not fully overlap then any error in the 5’ end of the first read will be uncorrected by the 3’ end of the second read. If we assume for now that the errors are random, then every error will generate a new unique sequence. Granted, this happens less than 1% of the time, but multiply that by 20 million reads at whatever length you choose and you’ve got a big number. Viola, a bunch of unique reads and a ginormous distance matrix.\n"; ianswers.push_back(ianswer);
+        
+        issue = "Mothur reports a 'bad_alloc' error in the shhh.flows command. What's wrong?"; issues.push_back(issue);
+        ianswer = "\tThis error indicates your computer is running out of memory. The shhh.flows command is very memory intensive. This error is most commonly caused by trying to process a dataset too large, using multiple processors, or failing to run trim.flows before shhh.flows. If you are using multiple processors, try running the command with processors=1, the more processors you use the more memory is required. Running trim.flows with an oligos file, and then shhh.flows with the file option may also resolve the issue. If for some reason you are unable to run shhh.flows with your data, a good alternative is to use the trim.seqs command using a 50-bp sliding window and to trim the sequence when the average quality score over that window drops below 35. Our results suggest that the sequencing error rates by this method are very good, but not quite as good as by shhh.flows and that the resulting sequences tend to be a bit shorter.\n"; ianswers.push_back(ianswer);
+        
+        
+        string howto = "How do I make a tree?"; howtos.push_back(howto);
+        string hanswer = "\tMothur has two commands that create trees: clearcut and tree.shared.\n\n\tThe clearcut commands creates a phylogenetic tree that represents how sequences relate. The clearcut program written by Initiative for Bioinformatics and Evolutionary Studies (IBEST) at the University of Idaho. For more information about clearcut please refer to http://bioinformatics.hungry.com/clearcut/\n\n\tThe tree.shared command will generate a newick-formatted tree file that describes the dissimilarity (1-similarity) among multiple groups. Groups are clustered using the UPGMA algorithm using the distance between communities as calculated using any of the calculators describing the similarity in community membership or structure.\n"; hanswers.push_back(hanswer);
+        
+        howto = "How do I know 'who' is in an OTU in a shared file?"; howtos.push_back(howto);
+        hanswer = "\tYou can run the get.otulist command on the list file you used to generate the shared file. You want to be sure you are comparing the same distances. ie final.opti_mcc.0.03.otulist would relate to the 0.03 distance in your shared file. Also, if you subsample your data set and want to compare things, be sure to subsample the list and group file and then create the shared file to make sure you are working with the same sequences.\n\n\tsub.sample(list=yourListFile, count=yourCountFile, persample=t)\n\tmake.shared(list=yourSubsampledListFile, group=yourSubsampledCountFile, label=0.03)\n\tget.otulist(list=yourSubsampledListFile, label=0.03)\n"; hanswers.push_back(hanswer);
+        
+        howto = "How do I know 'who' is in the OTUs represented in the venn picture?"; howtos.push_back(howto);
+        hanswer = "\tYou can use the get.sharedseqs command. Be sure to pay close attention to the 'unique' and 'shared' parameters.\n"; hanswers.push_back(hanswer);
+        
+        howto = "How do I select certain sequences or groups of sequences?"; howtos.push_back(howto);
+        hanswer = "\tMothur has several 'get' and 'remove' commands: get.seqs, get.lineage, get.groups, get.dists, get.otus, remove.seqs, remove.lineage, remove.dists, remove.otus and remove.groups.\n"; hanswers.push_back(hanswer);
+        
+        howto = "How do I visualize my results from mothur?"; howtos.push_back(howto);
+        hanswer = "\tTo visual your data with R follow this tutorial http://www.riffomonas.org/minimalR/06_line_plots.html.\n"; hanswers.push_back(hanswer);
+
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "HelpCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 int HelpCommand::execute(){
 	try {
         if (commandName != "") {
@@ -242,7 +312,6 @@ int HelpCommand::execute(){
                 else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
                 else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
                 else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
-                else if(commandName == "catchall")				{	command = new CatchAllCommand(optionString);				}
                 else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}
                 else if(commandName == "cluster.split")			{	command = new ClusterSplitCommand(optionString);			}
                 else if(commandName == "classify.otu")			{	command = new ClassifyOtuCommand(optionString);				}
@@ -327,15 +396,28 @@ int HelpCommand::execute(){
                 delete command;
                 
             }else {
-                m->mothurOut("[ERROR]: " + commandName + " is not a valid command."); m->mothurOutEndLine();
+                m->mothurOut("[ERROR]: " + commandName + " is not a valid command.\n");
                 validCommands->printCommands(cout);
             }
         }else {
-            validCommands->printCommands(cout);
-            m->mothurOut("For more information about a specific command type 'commandName(help)' i.e. 'cluster(help)'"); m->mothurOutEndLine();
+            //validCommands->printCommands(cout);
+            validCommands->printCommandsCategories(cout);
+#if defined NON_WINDOWS
+            cout << BOLDMAGENTA << "\nFor more information about a specific command type 'commandName(help)' i.e. 'cluster(help)'\n"; cout << RESET << endl;
+            m->mothurOutJustToLog("\nFor more information about a specific command type 'commandName(help)' i.e. 'cluster(help)'\n");
+#else
+            m->mothurOut("\nFor more information about a specific command type 'commandName(help)' i.e. 'cluster(help)'\n");
+#endif
+            getCommonQuestions();
         }
 		
-        m->mothurOutEndLine(); m->mothurOut("For further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki, or contact Pat Schloss at mothur.bugs@gmail.com.\n");
+#if defined NON_WINDOWS
+        cout << BOLDMAGENTA << "\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki, or contact Pat Schloss at mothur.bugs@gmail.com.\n"; cout << RESET << endl;
+        m->mothurOutJustToLog("\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki, or contact Pat Schloss at mothur.bugs@gmail.com.\n");
+#else
+        m->mothurOut("\nFor further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki, or contact Pat Schloss at mothur.bugs@gmail.com.\n");
+#endif
+        
 	
 		return 0;
 	}
