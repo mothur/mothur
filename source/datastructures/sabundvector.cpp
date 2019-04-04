@@ -161,7 +161,7 @@ void SAbundVector::clear(){
 void SAbundVector::print(ostream& output){
 	try {
 		output << label << '\t' << maxRank;
-	
+        
 		for(int i=1;i<=maxRank;i++){
 			output << '\t' << data[i];
 		}

@@ -154,6 +154,7 @@
 #include "mergecountcommand.hpp"
 #include "clusterfitcommand.hpp"
 #include "mergeotuscommand.hpp"
+#include "diversityestimatorcommand.hpp"
 
 
 /*******************************************************/
@@ -325,6 +326,7 @@ CommandFactory::CommandFactory(){
     commands["merge.count"]         = "merge.count";
     commands["cluster.fit"]         = "cluster.fit";
     commands["merge.otus"]         = "merge.otus";
+    commands["estimator.single"]    = "estimator.single";
 
 
 }
@@ -574,6 +576,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "rename.file")           {	command = new RenameFileCommand(optionString);              }
         else if(commandName == "cluster.fit")           {	command = new ClusterFitCommand(optionString);              }
         else if(commandName == "merge.otus")            {	command = new MergeOTUsCommand(optionString);               }
+        else if(commandName == "estimator.single")      {	command = new EstimatorSingleCommand(optionString);         }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -750,6 +753,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "rename.file")           {	pipecommand = new RenameFileCommand(optionString);              }
         else if(commandName == "cluster.fit")           {	pipecommand = new ClusterFitCommand(optionString);              }
         else if(commandName == "merge.otus")            {	pipecommand = new MergeOTUsCommand(optionString);               }
+        else if(commandName == "estimator.single")      {	pipecommand = new EstimatorSingleCommand(optionString);         }
 		else											{	pipecommand = new NoCommand(optionString);						}
         
 
@@ -912,6 +916,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "rename.file")           {	shellcommand = new RenameFileCommand();             }
         else if(commandName == "cluster.fit")           {	shellcommand = new ClusterFitCommand();             }
         else if(commandName == "merge.otus")            {	shellcommand = new MergeOTUsCommand();              }
+        else if(commandName == "estimator.single")      {	shellcommand = new EstimatorSingleCommand();        }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

@@ -299,8 +299,8 @@ NewCommand::NewCommand(string option)  {
             string label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
             
             //if your command has a namefile as an option, you may want ot check to see if there is a current namefile

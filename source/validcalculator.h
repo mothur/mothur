@@ -28,6 +28,7 @@ class ValidCalculators {
 		void printCitations(vector<string>);
 		
 	private:
+        map<string, string> estimators;
 		map<string, string> single;
 		map<string, string> shared;
 		map<string, string> rarefaction;
@@ -57,7 +58,8 @@ class ValidCalculators {
 		void initialBoot();
 		void initialDistance();
 		void initialHeat();
-		
+        void initialEstimators();
+    
 		MothurOut* m;
 };
 

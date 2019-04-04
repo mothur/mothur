@@ -133,7 +133,7 @@ GetOTURepCommand::GetOTURepCommand(){
 GetOTURepCommand::GetOTURepCommand(string option)  {
 	try{
 		abort = false; calledHelp = false;   
-		allLines = 1;
+		allLines = true;
 				
 		//allow user to run help
 		if (option == "help") { 

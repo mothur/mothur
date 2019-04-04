@@ -81,6 +81,7 @@
 #include "shannonrange.h"
 
 
+
 /********************************************************************/
 ValidCalculators::ValidCalculators() {
 	try {
@@ -99,6 +100,7 @@ ValidCalculators::ValidCalculators() {
 		initialDistance();
 		initialMatrix();
 		initialHeat();
+        initialEstimators();
 		
 		for(it = single.begin(); it != single.end(); it++) { allCalcs.insert(it->first); } 
 		for(it = shared.begin(); it != shared.end(); it++) { allCalcs.insert(it->first); } 
@@ -112,7 +114,8 @@ ValidCalculators::ValidCalculators() {
 		for(it = matrix.begin(); it != matrix.end(); it++) { allCalcs.insert(it->first); } 
 		for(it = heat.begin(); it != heat.end(); it++) { allCalcs.insert(it->first); } 
 		for(it = boot.begin(); it != boot.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = distance.begin(); it != distance.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = distance.begin(); it != distance.end(); it++) { allCalcs.insert(it->first); }
+        for(it = estimators.begin(); it != estimators.end(); it++) { allCalcs.insert(it->first); }
 		
 	}
 	catch(exception& e) {
@@ -239,6 +242,17 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 				m->mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a shared parameter
+        }else if (parameter == "estimator") {
+            //is it valid
+            if ((estimators.find(calculator)) != (estimators.end())) {
+                return true;
+            }else {
+                m->mothurOut(calculator +  " is not a valid estimator for the estimator.single command and will be disregarded.  Valid estimators are ");
+                for (it = estimators.begin(); it != estimators.end(); it++) {
+                    m->mothurOut(it->first + ", ");
+                }
+                m->mothurOutEndLine();
+                return false; }
 		}else if (parameter == "shared") {
 			//is it valid
 			if ((shared.find(calculator)) != (shared.end())) {
@@ -268,7 +282,7 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((summary.find(calculator)) != (summary.end())) {
 				return true;
 			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the summary.single command and will be disregarded. Valid estimators are ");
 				for (it = summary.begin(); it != summary.end(); it++) {
 					m->mothurOut(it->first + ", ");
 				}
@@ -383,7 +397,18 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 		exit(1);
 	}
 }
+/********************************************************************/
 
+void ValidCalculators::initialEstimators() {
+    try {
+        estimators["erarefaction"]	= "erarefaction";
+        estimators["default"]	    = "default";
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidCalculator", "initialSharedRarefact");
+        exit(1);
+    }
+}
 /********************************************************************/
 void ValidCalculators::initialSingle() {
 	try {	

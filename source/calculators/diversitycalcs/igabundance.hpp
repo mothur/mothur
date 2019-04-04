@@ -1,23 +1,24 @@
 //
-//  erarefaction.hpp
+//  igabundance.hpp
 //  Mothur
 //
 //  Created by Sarah Westcott on 4/3/19.
 //  Copyright © 2019 Schloss Lab. All rights reserved.
 //
 
-#ifndef erarefaction_hpp
-#define erarefaction_hpp
+#ifndef igabundance_hpp
+#define igabundance_hpp
 
 #include "mothurout.h"
 #include "sabundvector.hpp"
 
+
 /***********************************************************************/
 
-class ERarefaction   {
+class IGAbundance   {
     
 public:
-    ERarefaction(){ m = MothurOut::getInstance(); }
+    IGAbundance(){ m = MothurOut::getInstance(); }
     double getValues(SAbundVector* rank, int n);
     
     
@@ -30,6 +31,4 @@ private:
 
 
 
-
-
-#endif /* erarefaction_hpp */
+#endif /* igabundance_hpp */

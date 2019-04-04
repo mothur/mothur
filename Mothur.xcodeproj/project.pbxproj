@@ -371,6 +371,10 @@
 		483C952E188F0CAD0035E7B7 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		484976DF22552E0B00F3A291 /* erarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976DD22552E0B00F3A291 /* erarefaction.cpp */; };
 		484976E022552E0B00F3A291 /* erarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976DD22552E0B00F3A291 /* erarefaction.cpp */; };
+		484976E32255412400F3A291 /* igabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E12255412400F3A291 /* igabundance.cpp */; };
+		484976E42255412400F3A291 /* igabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E12255412400F3A291 /* igabundance.cpp */; };
+		484976E72256799100F3A291 /* diversityestimatorcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E52256799100F3A291 /* diversityestimatorcommand.cpp */; };
+		484976E82256799100F3A291 /* diversityestimatorcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E52256799100F3A291 /* diversityestimatorcommand.cpp */; };
 		48576EA11D05DBC600BBC9C0 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48576EA51D05E8F600BBC9C0 /* testoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */; };
@@ -902,6 +906,10 @@
 		4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testtrimoligos.hpp; path = TestMothur/testtrimoligos.hpp; sourceTree = SOURCE_ROOT; };
 		484976DD22552E0B00F3A291 /* erarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = erarefaction.cpp; path = source/calculators/diversitycalcs/erarefaction.cpp; sourceTree = SOURCE_ROOT; };
 		484976DE22552E0B00F3A291 /* erarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = erarefaction.hpp; path = source/calculators/diversitycalcs/erarefaction.hpp; sourceTree = SOURCE_ROOT; };
+		484976E12255412400F3A291 /* igabundance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = igabundance.cpp; path = source/calculators/diversitycalcs/igabundance.cpp; sourceTree = SOURCE_ROOT; };
+		484976E22255412400F3A291 /* igabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = igabundance.hpp; path = source/calculators/diversitycalcs/igabundance.hpp; sourceTree = "<group>"; };
+		484976E52256799100F3A291 /* diversityestimatorcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityestimatorcommand.cpp; path = source/commands/diversityestimatorcommand.cpp; sourceTree = "<group>"; };
+		484976E62256799100F3A291 /* diversityestimatorcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityestimatorcommand.hpp; path = source/commands/diversityestimatorcommand.hpp; sourceTree = "<group>"; };
 		484F21691BA1C5F8001C1B5F /* makefile-internal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "makefile-internal"; sourceTree = SOURCE_ROOT; };
 		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = TestMothur/testcontainers/testoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = TestMothur/testcontainers/testoptimatrix.h; sourceTree = SOURCE_ROOT; };
@@ -2010,6 +2018,8 @@
 			children = (
 				484976DD22552E0B00F3A291 /* erarefaction.cpp */,
 				484976DE22552E0B00F3A291 /* erarefaction.hpp */,
+				484976E12255412400F3A291 /* igabundance.cpp */,
+				484976E22255412400F3A291 /* igabundance.hpp */,
 			);
 			name = diversitycalcs;
 			sourceTree = "<group>";
@@ -2400,6 +2410,8 @@
 				A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */,
 				A7E9B6CC12D37EC400DA6239 /* distancecommand.h */,
 				A7E9B6CB12D37EC400DA6239 /* distancecommand.cpp */,
+				484976E52256799100F3A291 /* diversityestimatorcommand.cpp */,
+				484976E62256799100F3A291 /* diversityestimatorcommand.hpp */,
 				A7E9B6E412D37EC400DA6239 /* filterseqscommand.h */,
 				A7E9B6E312D37EC400DA6239 /* filterseqscommand.cpp */,
 				A79EEF8816971D640006DEC1 /* filtersharedcommand.h */,
@@ -3122,6 +3134,7 @@
 				48E543ED1E8F15C800FF6AB8 /* optimatrix.cpp in Sources */,
 				481FB5911AC1B71B0076CFF3 /* amovacommand.cpp in Sources */,
 				4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */,
+				484976E42255412400F3A291 /* igabundance.cpp in Sources */,
 				4803D5AA211C9867001C63B5 /* testintegrationalignseqs.cpp in Sources */,
 				48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */,
 				481FB58A1AC1B6FF0076CFF3 /* myPerseus.cpp in Sources */,
@@ -3332,6 +3345,7 @@
 				481FB5711AC1B6D40076CFF3 /* shen.cpp in Sources */,
 				4803D5B0211CD839001C63B5 /* testsharedrabundfloatvector.cpp in Sources */,
 				481FB6501AC1B8100076CFF3 /* dlibshuff.cpp in Sources */,
+				484976E82256799100F3A291 /* diversityestimatorcommand.cpp in Sources */,
 				481FB64D1AC1B7F40076CFF3 /* treemap.cpp in Sources */,
 				481FB67F1AC1B8960076CFF3 /* singlelinkage.cpp in Sources */,
 				481FB5641AC1B6A40076CFF3 /* sharedkulczynskicody.cpp in Sources */,
@@ -3650,6 +3664,7 @@
 				48E544591E9C2E6500FF6AB8 /* fp.cpp in Sources */,
 				A7E9B98A12D37EC400DA6239 /* validparameter.cpp in Sources */,
 				A7E9B98B12D37EC400DA6239 /* venn.cpp in Sources */,
+				484976E32255412400F3A291 /* igabundance.cpp in Sources */,
 				A7E9B98C12D37EC400DA6239 /* venncommand.cpp in Sources */,
 				A7E9B98D12D37EC400DA6239 /* weighted.cpp in Sources */,
 				A7E9B98E12D37EC400DA6239 /* weightedlinkage.cpp in Sources */,
@@ -3666,6 +3681,7 @@
 				A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */,
 				A75790591301749D00A30DAB /* homovacommand.cpp in Sources */,
 				481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */,
+				484976E72256799100F3A291 /* diversityestimatorcommand.cpp in Sources */,
 				A7FA10021302E097003860FE /* mantelcommand.cpp in Sources */,
 				A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */,
 				A71CB160130B04A2001E7287 /* anosimcommand.cpp in Sources */,
@@ -3786,8 +3802,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
-				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					/usr/local/gsl/lib,
+				);
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					/usr/local/lib/,
+					/usr/local/gsl/lib,
+				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lreadline",
@@ -3797,6 +3819,7 @@
 					"-lhdf5",
 					"-lboost_iostreams",
 					"-lz",
+					"-lgsl",
 				);
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
@@ -3827,7 +3850,10 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_VALUE = YES;
-				LIBRARY_SEARCH_PATHS = /usr/local/lib/;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/,
+					/usr/local/gsl/lib,
+				);
 				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
@@ -3838,6 +3864,7 @@
 					"-lhdf5",
 					"-lboost_iostreams",
 					"-lz",
+					"-lgsl",
 				);
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
@@ -3894,7 +3921,10 @@
 				);
 				INSTALL_PATH = TARGET_BUILD_DIR;
 				LIBRARY_SEARCH_PATHS = "";
-				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					/usr/local/lib/,
+					/usr/local/gsl/lib,
+				);
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
@@ -3912,10 +3942,11 @@
 					"-lhdf5_cpp",
 					"-lhdf5",
 					"-l",
+					"-lgsl",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include";
+				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include /usr/local/gsl/include";
 			};
 			name = Debug;
 		};
@@ -3966,7 +3997,10 @@
 				);
 				INSTALL_PATH = TARGET_BUILD_DIR;
 				LIBRARY_SEARCH_PATHS = "";
-				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
+					/usr/local/lib/,
+					/usr/local/gsl/lib,
+				);
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -3983,10 +4017,11 @@
 					"-lhdf5_cpp",
 					"-lhdf5",
 					"-l",
+					"-lgsl",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include";
+				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include /usr/local/gsl/include";
 			};
 			name = Release;
 		};

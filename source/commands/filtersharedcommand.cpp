@@ -99,7 +99,7 @@ FilterSharedCommand::FilterSharedCommand(){
 FilterSharedCommand::FilterSharedCommand(string option) {
 	try {
 		abort = false; calledHelp = false;   
-		allLines = 1;
+		allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -162,8 +162,8 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
 			
 			groups = validParameter.valid(parameters, "groups");			

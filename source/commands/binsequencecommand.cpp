@@ -85,7 +85,7 @@ BinSeqCommand::BinSeqCommand(){
 BinSeqCommand::BinSeqCommand(string option) {
 	try {
 		abort = false; calledHelp = false;   
-		allLines = 1;
+		allLines = true;
 		labels.clear();
 		
 		//allow user to run help
@@ -190,8 +190,8 @@ BinSeqCommand::BinSeqCommand(string option) {
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
 			
 			string namesfile = validParameter.validFile(parameters, "name");

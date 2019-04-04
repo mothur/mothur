@@ -175,8 +175,8 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
             string label = validParameter.valid(parameters, "label");
 			if (label == "not found") { label = ""; }
 			else {
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
             
             method = validParameter.valid(parameters, "method");

@@ -10,15 +10,13 @@
 
 /***********************************************************************/
 
-EstOutput ERarefaction::getValues(SAbundVector* rank){
+double ERarefaction::getValues(SAbundVector* rank, int n){
     try {
-        data = 0;
-        
         int maxRank = rank->getMaxRank();
         int sampled = rank->getNumSeqs(); //nl
         int numOTUs = rank->getNumBins(); //ns
         
-        double dDenom = gsl_sf_lnchoose(sampled, 1);
+        double dDenom = gsl_sf_lnchoose(sampled, n);
         double dSum = 0.0;
         
         for(int i = 1; i < maxRank; i++){
@@ -26,22 +24,24 @@ EstOutput ERarefaction::getValues(SAbundVector* rank){
             if (m->getControl_pressed()) { break; }
             
             int abund = rank->get(i);
+            
             if (abund != 0) {
                 int thisRank = i; //nA
-                if(sampled - thisRank >= 1){
+                
+                if(sampled - thisRank >= n){
                     
-                    double dNumer = gsl_sf_lnchoose(sampled - thisRank, 1);
-                    
+                    double dNumer = gsl_sf_lnchoose(sampled - thisRank, n);
+                   
                     dSum += ((double) abund)*exp(dNumer - dDenom);
                 }
             }
         }
         
-        data = ((double) numOTUs) - dSum;
+        double result = ((double) numOTUs) - dSum;
 
-        if (isnan(data) || isinf(data)) { data = 0; }
+        if (isnan(result) || isinf(result)) { result = 0; }
         
-        return data;
+        return result;
     }
     catch(exception& e) {
         m->errorOut(e, "ERarefaction", "getValues");
