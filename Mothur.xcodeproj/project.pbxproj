@@ -3792,7 +3792,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.0\\\"\"",
@@ -3841,7 +3841,7 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.0\\\"\"",
@@ -3934,6 +3934,7 @@
 					"-DUSE_READLINE",
 					"$(OTHER_CFLAGS)",
 					"-DUSE_HDF5",
+					"-DUSE_GSL",
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",
@@ -4009,6 +4010,7 @@
 					"-DUSE_BOOST",
 					"$(OTHER_CFLAGS)",
 					"-DUSE_HDF5",
+					"-DUSE_GSL",
 				);
 				OTHER_LDFLAGS = (
 					"-lreadline",

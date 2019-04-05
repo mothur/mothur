@@ -16,8 +16,9 @@ double ERarefaction::getValues(SAbundVector* rank, int n){
         int sampled = rank->getNumSeqs(); //nl
         int numOTUs = rank->getNumBins(); //ns
         
-        double dDenom = gsl_sf_lnchoose(sampled, n);
         double dSum = 0.0;
+#ifdef USE_GSL
+        double dDenom = gsl_sf_lnchoose(sampled, n);
         
         for(int i = 1; i < maxRank; i++){
             
@@ -36,7 +37,7 @@ double ERarefaction::getValues(SAbundVector* rank, int n){
                 }
             }
         }
-        
+#endif
         double result = ((double) numOTUs) - dSum;
 
         if (isnan(result) || isinf(result)) { result = 0; }

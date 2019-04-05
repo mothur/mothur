@@ -193,7 +193,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
                             sabundfile = current->getSabundFile();
                             if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter.\n");  }
                             else {
-                                m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command.\n");
+                                m->mothurOut("[ERROR]: No valid current files. You must provide a list, sabund, rabund or shared file before you can use the estimator.single command.\n");
                                 abort = true;
                             }
                         }
@@ -244,6 +244,15 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             
             temp = validParameter.valid(parameters, "size");			if (temp == "not found") { temp = "0"; }
             util.mothurConvert(temp, size); */
+            
+            #ifdef USE_GSL
+            #else
+            
+            m->mothurOut("[ERROR]: You did not build mothur with the GNU Scientific Library which is required before you can use the estimator.single command. Aborting.\n");
+            abort = true;
+            
+            
+            #endif
         }
         
     }
@@ -362,7 +371,7 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund) {
     }
 }
 //**********************************************************************************************************************
-int EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund) {
+string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund) {
     try {
         variables["[distance]"] = sabund->getLabel();
         string outputFileName = getOutputFileName("erarefaction", variables);
@@ -391,6 +400,8 @@ int EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund) {
         out << numSeqs << '\t' << result << endl;
         
         out.close();
+        
+        return outputFileName;
         
     }
     catch(exception& e) {

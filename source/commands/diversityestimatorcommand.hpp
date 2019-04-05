@@ -44,7 +44,7 @@ private:
     vector<string> parseSharedFile(string);
     
     int process(SAbundVector*&);
-    int runErarefaction(SAbundVector*&);
+    string runErarefaction(SAbundVector*&);
     
 };
 

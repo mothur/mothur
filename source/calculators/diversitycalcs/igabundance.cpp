@@ -25,7 +25,7 @@ double f2X(double x, double dA, double dB, double dNDash)
     return -dRet;
 }
 /***********************************************************************/
-
+#ifdef USE_GSL
 double sd(int n, double dAlpha, double dBeta)
 {
     double dGamma = -0.5;
@@ -112,6 +112,7 @@ double logLikelihood(int n, double dAlpha, double dBeta)
     
     return dRet - dLogFacN;
 }
+#endif
 /***********************************************************************/
 
 double IGAbundance::getValues(SAbundVector* rank, int n) {
