@@ -127,11 +127,10 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 					if (fastaFileNames[i] == "current") { 
 						fastaFileNames[i] = current->getFastaFile(); 
 						if (fastaFileNames[i] != "") {  
-							m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); 
-							filename += util.getRootName(util.getSimpleName(fastaFileNames[i]));
+							m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current.\n");
 						}
 						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							m->mothurOut("You have no current fastafile, ignoring current.\n"); ignore=true;
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
 							i--;
@@ -139,6 +138,7 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 					}
 					
                     if (!ignore) {
+                        filename = util.getRootName(util.getSimpleName(fastaFileNames[i]));
                         if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
                         else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
                     }
