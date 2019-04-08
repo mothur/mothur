@@ -323,6 +323,32 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                 }else {  vsearchLocation = vsearchCommand; }
                 
                 vsearchLocation = util.getFullPathName(vsearchLocation);
+                
+                if (!abort) { //check vsearch version
+                    string versionTestCommand = vsearchLocation + " -version > ./commandScreen.output 2>&1";
+                    system(versionTestCommand.c_str());
+                    
+                    ifstream in;
+                    string versionOutput = "./commandScreen.output";
+                    util.openInputFile(versionOutput, in, "no error");
+                    
+                    string output = util.getline(in); in.close();
+
+                    vector<string> outputs = util.splitWhiteSpace(output);
+                    
+                    if (outputs.size() >= 2) {
+                        string version = outputs[1];
+                        
+                        int pos = version.find_first_of('_');
+                        if (pos != string::npos) { version = version.substr(0, pos); }
+                        
+                        if (version != "v2.11.1") {
+                            m->mothurOut("[ERROR]: vsearch version found = " + version + ". Mothur requires version v2.11.1 which is distributed with mothur's executable or available on github https://github.com/torognes/vsearch/releases/tag/v2.11.1, please correct. \n");  abort = true;
+                        }
+                    }
+                    
+                    util.mothurRemove(versionOutput);
+                }
             }
             
             if (!abort) {
