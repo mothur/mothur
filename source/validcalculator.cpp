@@ -402,6 +402,7 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 void ValidCalculators::initialEstimators() {
     try {
         estimators["erarefaction"]	= "erarefaction";
+        estimators["metroig"]	= "metroig";
         estimators["default"]	    = "default";
     }
     catch(exception& e) {

@@ -999,7 +999,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
         
         
         for (int i = 0; i < dataFiles.size(); i++) {
-            string group = "";
+            string group = file2Group[i];
             string thisFileName1, thisFileName2, findex, rindex;
             thisFileName1 = dataFiles[i][0]; thisFileName2 = dataFiles[i][1]; findex = dataFiles[i][2]; rindex = dataFiles[i][3];
             

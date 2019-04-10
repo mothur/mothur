@@ -8,6 +8,7 @@
 
 #include "diversityestimatorcommand.hpp"
 #include "erarefaction.hpp"
+#include "metroig.hpp"
 
 //**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::setParameters(){
@@ -19,9 +20,11 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
         CommandParameter pcalc("calc", "Multiple", "erarefaction", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
-        //CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
-        //CommandParameter palpha("alpha", "Multiple", "0-1-2", "1", "", "", "","",false,false,true); parameters.push_back(palpha);
-        //CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psize);
+        CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
+        CommandParameter palpha("sigmaalpha", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
+        CommandParameter pbeta("sigmabeta", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
+        CommandParameter psigmas("sigmas", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pbeta);
+        CommandParameter piters("iters", "Number", "", "250000", "", "", "","",false,false); parameters.push_back(piters);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -43,10 +46,13 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "The estimator.single command parameters are list, sabund, rabund, shared, label.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
         helpString += "The estimator.single command should be in the following format: \n";
         helpString += "estimator.single(list=yourListFile, calc=yourEstimators).\n";
-        helpString += "Example estimator.single(list=final.opti_mcc.list, calc=sobs-chao-ace-jack).\n";
+        helpString += "Example estimator.single(list=final.opti_mcc.list, calc=erarefaction).\n";
         helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
         helpString += "The default values for freq is 100, and calc is erarefaction.\n";
-        //helpString += "The alpha parameter is used to set the alpha value for the shannonrange calculator.\n";
+        helpString += "The sigmaalpha parameter is used to set the std. dev. of alpha prop. distn for MetroIG. Default = 0.10. n";
+        helpString += "The sigmabeta parameter is used to set the std. dev. of beta prop. distn for MetroIG. Default = 0.10. n";
+         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG. Default = 100. n";
+        helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 250000.\n";
         helpString += validCalculator.printCalc("single");
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
         
@@ -233,17 +239,18 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             string temp;
             temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
             util.mothurConvert(temp, freq);
-            /*
-            temp = validParameter.valid(parameters, "alpha");		if (temp == "not found") { temp = "1"; }
-            util.mothurConvert(temp, alpha);
             
-            if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2.\n"); abort=true; }
+            temp = validParameter.valid(parameters, "sigmaalpha");		if (temp == "not found") { temp = "0.1"; }
+            util.mothurConvert(temp, sigmaAlpha);
             
-            temp = validParameter.valid(parameters, "abund");		if (temp == "not found") { temp = "10"; }
-            util.mothurConvert(temp, abund);
+            temp = validParameter.valid(parameters, "sigmabeta");		if (temp == "not found") { temp = "0.1"; }
+            util.mothurConvert(temp, sigmaBeta);
             
-            temp = validParameter.valid(parameters, "size");			if (temp == "not found") { temp = "0"; }
-            util.mothurConvert(temp, size); */
+            temp = validParameter.valid(parameters, "sigmas");		if (temp == "not found") { temp = "100.0"; }
+            util.mothurConvert(temp, sigmaS);
+            
+            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "250000"; }
+            util.mothurConvert(temp, iters);
             
             #ifdef USE_GSL
             #else
@@ -362,7 +369,8 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund) {
     try {
         
         for (int i = 0; i < Estimators.size(); i++) {
-            if (Estimators[i] == "erarefaction") { runErarefaction(sabund); }
+            if (Estimators[i] == "erarefaction")    { runErarefaction(sabund); }
+            if (Estimators[i] == "metroig")         { runMetroIG(sabund); }
         }
     }
     catch(exception& e) {
@@ -406,6 +414,32 @@ string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund) {
     }
     catch(exception& e) {
         m->errorOut(e, "EstimatorSingleCommand", "runErarefaction");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
+string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund) {
+    try {
+        variables["[distance]"] = sabund->getLabel();
+        string outputFileStub = variables["filename"] + variables["[distance]"];
+        //outputNames.push_back(outputFileName); outputTypes["metroig"].push_back(outputFileName);
+        
+        //ofstream out; util.openOutputFile(outputFileName, out); //format output
+        //out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        //out << "NumSampled\tERarefaction\n";
+        
+        MetroIG metroIG(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);
+        
+        double result = metroIG.getValues(sabund);
+        
+        
+        return outputFileStub;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runMetroIG");
         exit(1);
     }
 }

@@ -35,7 +35,8 @@ private:
     
     bool abort, allLines;
     string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
-    float freq;
+    double freq, sigmaAlpha, sigmaBeta, sigmaS;
+    int iters;
     vector<string> outputNames;
     set<string> labels; //holds labels to be used
     vector<string>  Estimators, groups;
@@ -45,6 +46,7 @@ private:
     
     int process(SAbundVector*&);
     string runErarefaction(SAbundVector*&);
+    string runMetroIG(SAbundVector*&);
     
 };
 
