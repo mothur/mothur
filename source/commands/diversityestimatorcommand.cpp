@@ -381,7 +381,7 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
 string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund, string fileRoot) {
     try {
         map<string, string> variables;
-        variables["filename"] = fileRoot;
+        variables["[filename]"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
         string outputFileName = getOutputFileName("erarefaction", variables);
         outputNames.push_back(outputFileName); outputTypes["erarefaction"].push_back(outputFileName);
@@ -423,9 +423,9 @@ string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund, string fil
 string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund, string fileRoot) {
     try {
         map<string, string> variables;
-        variables["filename"] = fileRoot;
+        variables["[filename]"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
-        string outputFileStub = variables["filename"] + variables["[distance]"];
+        string outputFileStub = variables["[filename]"] + variables["[distance]"];
         
         MetroIG metroIG(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);
         

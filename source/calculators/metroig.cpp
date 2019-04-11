@@ -176,9 +176,7 @@ double nLogLikelihood(const gsl_vector * x, void * params)
         int    nA    = ptData->aanAbund[i][0];
         
         dLogP = logLikelihood(nA, dAlpha, dBeta);
-        
         dLogL += ((double) ptData->aanAbund[i][1])*dLogP;
-        
         dLogL -= gsl_sf_lnfact(ptData->aanAbund[i][1]);
         
     }
@@ -268,13 +266,13 @@ void loadAbundance(t_Data *ptData, SAbundVector* rank)
     int nNA = 0; int  nL = 0, nJ = 0;
     int maxRank = rank->getMaxRank();
     
-    for(int i = 1; i < maxRank; i++){ if (rank->get(i) != 0) { nNA++; } }
+    for(int i = 1; i <= maxRank; i++){ if (rank->get(i) != 0) { nNA++; } }
 
     int **aanAbund = NULL;
     aanAbund = (int **) malloc(nNA*sizeof(int*));
     
     int count = 0;
-    for(int i = 1; i < maxRank; i++){
+    for(int i = 1; i <= maxRank; i++){
         
         if (rank->get(i) != 0) {
             aanAbund[count] = (int *) malloc(sizeof(int)*2);
@@ -319,7 +317,8 @@ void outputResults(gsl_vector *ptX, t_Data *ptData)
     
     dL = nLogLikelihood(ptX, ptData);
     
-    printf("\nML simplex: a = %.2f b = %.2f S = %.2f NLL = %.2f\n",dAlpha, dBeta, dS, dL);
+    MothurOut* m;  m = MothurOut::getInstance();
+    m->mothurOut("\nML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
 }
 /***********************************************************************/
 void getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* pnSDash, int nS, t_Params *ptParams)
@@ -457,10 +456,12 @@ void* metropolis (void * pvInitMetro)
 void writeThread(t_MetroInit *ptMetroInit)
 {
     gsl_vector *ptX = ptMetroInit->ptX;
-    printf("%d: a = %.2f b = %.2f S = %.2f\n", ptMetroInit->nThread,
-           gsl_vector_get(ptX, 0),
-           gsl_vector_get(ptX, 1),
-           gsl_vector_get(ptX, 2));
+    MothurOut* m;  m = MothurOut::getInstance();
+    m->mothurOut(toString(ptMetroInit->nThread) + ": a = " + toString(gsl_vector_get(ptX, 0)) +  " b = " + toString(gsl_vector_get(ptX, 1)) +  " S = " + toString(gsl_vector_get(ptX, 2)) + "\n");
+    //printf("%d: a = %.2f b = %.2f S = %.2f\n", ptMetroInit->nThread,
+           //gsl_vector_get(ptX, 0),
+          // gsl_vector_get(ptX, 1),
+           //gsl_vector_get(ptX, 2));
 }
 /***********************************************************************/
 void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
@@ -472,8 +473,11 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     *ptX3 = gsl_vector_alloc(3);
     t_MetroInit atMetroInit[3];
     
-    printf("\nMCMC iter = %d sigmaA = %.2f sigmaB = %.2f sigmaS = %.2f\n",
-           ptParams->nIter, ptParams->dSigmaA, ptParams->dSigmaB, ptParams->dSigmaS);
+    MothurOut* m;  m = MothurOut::getInstance();
+    m->mothurOut("\nMCMC iter = " + toString(ptParams->nIter) + " sigmaA = " + toString(ptParams->dSigmaA) +  " sigmaB = " + toString(ptParams->dSigmaB) +  " sigmaS = " + toString(ptParams->dSigmaS) + "\n");
+    
+    //printf("\nMCMC iter = %d sigmaA = %.2f sigmaB = %.2f sigmaS = %.2f\n",
+           //ptParams->nIter, ptParams->dSigmaA, ptParams->dSigmaB, ptParams->dSigmaS);
     
     gsl_vector_memcpy(ptX1, ptX);
     
@@ -521,15 +525,9 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     pthread_join(thread2, NULL);
     pthread_join(thread3, NULL);
     
-    
-    printf("%d: accept. ratio %d/%d = %f\n", atMetroInit[0].nThread,
-           atMetroInit[0].nAccepted, ptParams->nIter,((double) atMetroInit[0].nAccepted)/((double) ptParams->nIter));
-    
-    printf("%d: accept. ratio %d/%d = %f\n", atMetroInit[1].nThread,
-           atMetroInit[1].nAccepted, ptParams->nIter,((double) atMetroInit[1].nAccepted)/((double) ptParams->nIter));
-    
-    printf("%d: accept. ratio %d/%d = %f\n", atMetroInit[2].nThread,
-           atMetroInit[2].nAccepted, ptParams->nIter, ((double) atMetroInit[2].nAccepted)/((double) ptParams->nIter));
+    m->mothurOut(toString(atMetroInit[0].nThread) +": accept. ratio " + toString(atMetroInit[0].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[0].nAccepted)/((double) ptParams->nIter)) +  "\n");
+    m->mothurOut(toString(atMetroInit[1].nThread) +": accept. ratio " + toString(atMetroInit[1].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[1].nAccepted)/((double) ptParams->nIter)) +  "\n");
+    m->mothurOut(toString(atMetroInit[2].nThread) +": accept. ratio " + toString(atMetroInit[2].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[2].nAccepted)/((double) ptParams->nIter)) +  "\n");
     
     gsl_vector_free(ptX1); gsl_vector_free(ptX2); gsl_vector_free(ptX3);
 }
@@ -540,7 +538,7 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
     try {
         
         int  i = 0, nNA     = 0;
-        t_Params tParams; tParams.nIter = nIters; tParams.dSigmaA = sigmaA; tParams.dSigmaB = sigmaB; tParams.dSigmaS = sigmaS; tParams.szOutFileStub = outFileStub;
+        t_Params tParams; tParams.nIter = nIters; tParams.dSigmaA = sigmaA; tParams.dSigmaB = sigmaB; tParams.dSigmaS = sigmaS; tParams.szOutFileStub = outFileStub; tParams.lSeed = m->getRandomSeed();
         t_Data   tData;
 #ifdef USE_GSL
         loadAbundance(&tData, rank);
@@ -561,7 +559,9 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         gsl_vector_set(ptX, 1, INIT_B);
         gsl_vector_set(ptX, 2, numOTUs*2);
         
-        printf("D = %d L = %d Chao = %f\n",numOTUs, sampled, chao(&tData));
+        //printf("D = %d L = %d Chao = %f\n",numOTUs, sampled, chao(&tData));
+        double chaoResult = chao(&tData);
+        m->mothurOut("D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
         
         minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood);
         

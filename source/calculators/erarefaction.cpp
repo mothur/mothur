@@ -20,7 +20,7 @@ double ERarefaction::getValues(SAbundVector* rank, int n){
 #ifdef USE_GSL
         double dDenom = gsl_sf_lnchoose(sampled, n);
         
-        for(int i = 1; i < maxRank; i++){
+        for(int i = 1; i <= maxRank; i++){
             
             if (m->getControl_pressed()) { break; }
             
