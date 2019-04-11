@@ -40,13 +40,12 @@ private:
     vector<string> outputNames;
     set<string> labels; //holds labels to be used
     vector<string>  Estimators, groups;
-    map<string, string> variables;
     
     vector<string> parseSharedFile(string);
     
-    int process(SAbundVector*&);
-    string runErarefaction(SAbundVector*&);
-    string runMetroIG(SAbundVector*&);
+    int process(SAbundVector*&, string);
+    string runErarefaction(SAbundVector*&, string);
+    string runMetroIG(SAbundVector*&, string);
     
 };
 

@@ -381,6 +381,8 @@
 		484976E42255412400F3A291 /* igabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E12255412400F3A291 /* igabundance.cpp */; };
 		484976E72256799100F3A291 /* diversityestimatorcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E52256799100F3A291 /* diversityestimatorcommand.cpp */; };
 		484976E82256799100F3A291 /* diversityestimatorcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E52256799100F3A291 /* diversityestimatorcommand.cpp */; };
+		4853365E225F7926003CC483 /* libgslcblas.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4853365D225F7926003CC483 /* libgslcblas.a */; };
+		48533660225F7929003CC483 /* libgsl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4853365F225F7929003CC483 /* libgsl.a */; };
 		48576EA11D05DBC600BBC9C0 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48576EA51D05E8F600BBC9C0 /* testoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */; };
@@ -923,6 +925,8 @@
 		484976E52256799100F3A291 /* diversityestimatorcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityestimatorcommand.cpp; path = source/commands/diversityestimatorcommand.cpp; sourceTree = "<group>"; };
 		484976E62256799100F3A291 /* diversityestimatorcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityestimatorcommand.hpp; path = source/commands/diversityestimatorcommand.hpp; sourceTree = "<group>"; };
 		484F21691BA1C5F8001C1B5F /* makefile-internal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "makefile-internal"; sourceTree = SOURCE_ROOT; };
+		4853365D225F7926003CC483 /* libgslcblas.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgslcblas.a; path = ../../../../usr/local/gsl/lib/libgslcblas.a; sourceTree = "<group>"; };
+		4853365F225F7929003CC483 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = ../../../../usr/local/gsl/lib/libgsl.a; sourceTree = "<group>"; };
 		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = TestMothur/testcontainers/testoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = TestMothur/testcontainers/testoptimatrix.h; sourceTree = SOURCE_ROOT; };
 		48576EA61D05F59300BBC9C0 /* distpdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = distpdataset.cpp; path = TestMothur/distpdataset.cpp; sourceTree = SOURCE_ROOT; };
@@ -1767,6 +1771,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4853365E225F7926003CC483 /* libgslcblas.a in Frameworks */,
+				48533660225F7929003CC483 /* libgsl.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2056,6 +2062,8 @@
 		489ECDA2215EB30A0036D42C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4853365F225F7929003CC483 /* libgsl.a */,
+				4853365D225F7926003CC483 /* libgslcblas.a */,
 				48E5EAF6219515C000D86887 /* libhdf5.la */,
 				48E5EAF4219515A700D86887 /* libhdf5_hl.la */,
 				48E5EAF22195156700D86887 /* libhdf5_cpp.la */,
@@ -3843,7 +3851,6 @@
 					"-lhdf5",
 					"-lboost_iostreams",
 					"-lz",
-					"-lgsl",
 				);
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
@@ -3888,7 +3895,6 @@
 					"-lhdf5",
 					"-lboost_iostreams",
 					"-lz",
-					"-lgsl",
 				);
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
@@ -3968,7 +3974,6 @@
 					"-lhdf5",
 					"-lcblas",
 					"-l",
-					"-lgsl",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
@@ -4045,7 +4050,6 @@
 					"-lhdf5",
 					"-lcblas",
 					"-l",
-					"-lgsl",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;

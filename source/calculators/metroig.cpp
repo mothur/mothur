@@ -39,6 +39,21 @@ static int  verbose  = FALSE;
 
 #ifdef USE_GSL
 /***********************************************************************/
+double chao(t_Data *ptData)
+{
+    double n1 = 0.0, n2 = 0.0;
+    int **aanAbund = ptData->aanAbund;
+    
+    if(aanAbund[0][0] == 1 && aanAbund[1][0] == 2){
+        n1 = (double) aanAbund[0][1]; n2 = (double) aanAbund[1][1];
+        
+        return ((double) ptData->nL) + 0.5*((n1*n1)/n2);
+    }
+    else{
+        return -1.0;
+    }
+}
+/***********************************************************************/
 double fX(double x, double dA, double dB, double dNDash)
 {
     double dTemp1 = (dA*(x - dB)*(x - dB))/x;
@@ -521,7 +536,7 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
 
 #endif
 /***********************************************************************/
-double MetroIG::getValues(SAbundVector* rank){
+vector<string> MetroIG::getValues(SAbundVector* rank){
     try {
         
         int  i = 0, nNA     = 0;
@@ -546,9 +561,7 @@ double MetroIG::getValues(SAbundVector* rank){
         gsl_vector_set(ptX, 1, INIT_B);
         gsl_vector_set(ptX, 2, numOTUs*2);
         
-        Chao1 chao; EstOutput results = chao.getValues(rank);
-        
-        printf("D = %d L = %d Chao = %f\n",numOTUs, sampled, results[0]);
+        printf("D = %d L = %d Chao = %f\n",numOTUs, sampled, chao(&tData));
         
         minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood);
         
@@ -561,11 +574,13 @@ double MetroIG::getValues(SAbundVector* rank){
       
         freeAbundance(&tData);
 #endif    
-        double result = 0;
         
-        if (isnan(result) || isinf(result)) { result = 0; }
+        vector<string> outputs;
+        outputs.push_back(outFileStub + "_0.sample");
+        outputs.push_back(outFileStub + "_1.sample");
+        outputs.push_back(outFileStub + "_2.sample");
         
-        return result;
+        return outputs;
     }
     catch(exception& e) {
         m->errorOut(e, "MetroIG", "getValues");

@@ -11,7 +11,7 @@
 
 #include "mothurout.h"
 #include "sabundvector.hpp"
-#include "chao1.h"
+
 
 typedef struct s_Params
 {
@@ -63,7 +63,7 @@ class MetroIG   {
 public:
     MetroIG(double sigA, double sigB, double sigS, int n, string stub) : sigmaA(sigA), sigmaB(sigB), sigmaS(sigS), nIters(n), outFileStub(stub) { m = MothurOut::getInstance(); }
     
-    double getValues(SAbundVector* rank);
+    vector<string> getValues(SAbundVector* rank);
     
     
 private:

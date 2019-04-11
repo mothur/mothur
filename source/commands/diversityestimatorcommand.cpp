@@ -276,7 +276,7 @@ int EstimatorSingleCommand::execute(){
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         vector<string> inputFileNames;
-        if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
+        if (format != "sharedfile") { inputFileNames.push_back(inputfile);  }
         else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
         
         for (int p = 0; p < inputFileNames.size(); p++) {
@@ -285,7 +285,6 @@ int EstimatorSingleCommand::execute(){
             
             if (outputDir == "") { outputDir += util.hasPath(inputFileNames[p]); }
             string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
-            variables["[filename]"] = fileNameRoot;
             
             if (inputFileNames.size() > 1) { m->mothurOut("\nProcessing group " + groups[p] + "\n\n"); }
             
@@ -305,7 +304,7 @@ int EstimatorSingleCommand::execute(){
                     
                     m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
                     
-                    process(sabund);
+                    process(sabund, fileNameRoot);
                 }
                 //you have a label the user want that is smaller than this label and the last label has not already been processed
                 if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
@@ -316,7 +315,7 @@ int EstimatorSingleCommand::execute(){
                     
                     m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
                     
-                    process(sabund);
+                    process(sabund, fileNameRoot);
                     
                     //restore real lastlabel to save below
                     sabund->setLabel(saveLabel);
@@ -347,7 +346,7 @@ int EstimatorSingleCommand::execute(){
                 
                 m->mothurOut(sabund->getLabel() + "\n");
                 
-                process(sabund); delete sabund;
+                process(sabund, fileNameRoot); delete sabund;
             }
         }
         
@@ -365,12 +364,12 @@ int EstimatorSingleCommand::execute(){
     }
 }
 //**********************************************************************************************************************
-int EstimatorSingleCommand::process(SAbundVector*& sabund) {
+int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
     try {
         
         for (int i = 0; i < Estimators.size(); i++) {
-            if (Estimators[i] == "erarefaction")    { runErarefaction(sabund); }
-            if (Estimators[i] == "metroig")         { runMetroIG(sabund); }
+            if (Estimators[i] == "erarefaction")    { runErarefaction(sabund, fileRoot); }
+            if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot); }
         }
     }
     catch(exception& e) {
@@ -379,8 +378,10 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund) {
     }
 }
 //**********************************************************************************************************************
-string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund) {
+string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund, string fileRoot) {
     try {
+        map<string, string> variables;
+        variables["filename"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
         string outputFileName = getOutputFileName("erarefaction", variables);
         outputNames.push_back(outputFileName); outputTypes["erarefaction"].push_back(outputFileName);
@@ -419,21 +420,18 @@ string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund) {
 }
 
 //**********************************************************************************************************************
-string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund) {
+string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund, string fileRoot) {
     try {
+        map<string, string> variables;
+        variables["filename"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
         string outputFileStub = variables["filename"] + variables["[distance]"];
-        //outputNames.push_back(outputFileName); outputTypes["metroig"].push_back(outputFileName);
-        
-        //ofstream out; util.openOutputFile(outputFileName, out); //format output
-        //out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-        
-        //out << "NumSampled\tERarefaction\n";
         
         MetroIG metroIG(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);
         
-        double result = metroIG.getValues(sabund);
+        vector<string> resultFiles = metroIG.getValues(sabund);
         
+        for (int i = 0; i < resultFiles.size(); i++) { outputNames.push_back(resultFiles[i]); outputTypes["metroig"].push_back(resultFiles[i]); }
         
         return outputFileStub;
         
