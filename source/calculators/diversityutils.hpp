@@ -1,25 +1,24 @@
 //
-//  igabundance.hpp
+//  diversityutils.hpp
 //  Mothur
 //
-//  Created by Sarah Westcott on 4/3/19.
+//  Created by Sarah Westcott on 4/11/19.
 //  Copyright © 2019 Schloss Lab. All rights reserved.
 //
 
-#ifndef igabundance_hpp
-#define igabundance_hpp
+#ifndef diversityutils_hpp
+#define diversityutils_hpp
 
 #include "mothurout.h"
-#include "sabundvector.hpp"
-
+#include "utils.hpp"
 
 /***********************************************************************/
 
-class IGAbundance   {
+class DiversityUtils   {
     
 public:
-    IGAbundance(){ m = MothurOut::getInstance(); }
-    double getValues(SAbundVector* rank);
+    DiversityUtils(){ m = MothurOut::getInstance(); }
+    
     
     
 private:
@@ -31,4 +30,4 @@ private:
 
 
 
-#endif /* igabundance_hpp */
+#endif /* diversityutils_hpp */

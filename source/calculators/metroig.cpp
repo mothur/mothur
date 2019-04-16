@@ -30,12 +30,6 @@
 #define DEF_ITER   250000
 #define SLICE      10
 #define PRECISION  1.0e-10
-#define TRUE  1
-#define FALSE 0
-
-//static int  nLines   = 11;
-
-static int  verbose  = FALSE;
 
 #ifdef USE_GSL
 /***********************************************************************/
@@ -164,7 +158,7 @@ double nLogLikelihood(const gsl_vector * x, void * params)
     int    nS = (int) floor(gsl_vector_get(x, 2));
     t_Data *ptData = (t_Data *) params;
     int    i       = 0;
-    double dLogNot0 = 0.0, dLogL   = 0.0;
+    double dLogL   = 0.0;
     double dLog0 = 0.0, dLog1 = 0.0, dLog2 = 0.0, dLog3 = 0.0;
     
     if(dAlpha <= 0.0 || dBeta <= 0.0){
@@ -236,16 +230,6 @@ int minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const 
             for(i = 0; i < nP; i++){
                 gsl_vector_set(ptX, i, gsl_vector_get(s->x, i));
             }
-            
-            if(verbose) printf("converged to minimum at\n");
-        }
-        
-        if(verbose){
-            printf ("%5d ", iter);
-            
-            for (i = 0; i < nP; i++) printf("%10.3e ", gsl_vector_get(s->x, i));
-            
-            printf("f() = %7.3f size = %.3f\n", s->fval, size);
         }
     }
     while(status == GSL_CONTINUE && iter < MAX_SIMPLEX_ITER);
@@ -331,8 +315,6 @@ void getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* p
     gsl_vector_set(ptXDash, 0, gsl_vector_get(ptX,0) + dDeltaA);
     gsl_vector_set(ptXDash, 1, gsl_vector_get(ptX,1) + dDeltaB);
     
-    //printf("%e %e %e\n",dDeltaA,dDeltaB,dDeltaG);
-    
     nSDash = nS + (int) floor(dDeltaS);
     if(nSDash < 1){
         nSDash = 1;
@@ -344,7 +326,7 @@ double negLogLikelihood(double dAlpha, double dBeta, int nS, void * params)
 {
     t_Data *ptData = (t_Data *) params;
     int    i       = 0;
-    double dLogNot0 = 0.0, dLogL   = 0.0;
+    double dLogL   = 0.0;
     double dLog0 = 0.0, dLog1 = 0.0, dLog2 = 0.0, dLog3 = 0.0;
     
     if(dAlpha <= 0.0 || dBeta <= 0.0){
@@ -388,7 +370,7 @@ void* metropolis (void * pvInitMetro)
     char *szSampleFile = (char *) malloc(MAX_LINE_LENGTH*sizeof(char));
     const gsl_rng_type *T;
     gsl_rng            *ptGSLRNG;
-    FILE    *sfp = NULL;
+    //FILE    *sfp = NULL;
     int nS = 0, nSDash = 0, nIter = 0;
     double dRand = 0.0, dNLL = 0.0;
     void   *pvRet = NULL;
@@ -401,12 +383,9 @@ void* metropolis (void * pvInitMetro)
     
     dNLL = negLogLikelihood(gsl_vector_get(ptX,0), gsl_vector_get(ptX,1), nS,(void*) ptData);
     
-    sprintf(szSampleFile,"%s_%d%s", ptParams->szOutFileStub.c_str(), ptMetroInit->nThread, SAMPLE_FILE_SUFFIX);
+    string filename = ptParams->szOutFileStub + "_" + toString(ptMetroInit->nThread) + SAMPLE_FILE_SUFFIX;
     
-    sfp = fopen(szSampleFile, "w");
-    if(!sfp){
-        exit(EXIT_FAILURE);
-    }
+    ofstream out; Utils util; util.openOutputFile(filename, out);
     
     /*seed random number generator*/
     gsl_rng_set(ptGSLRNG, ptMetroInit->lSeed);
@@ -418,8 +397,7 @@ void* metropolis (void * pvInitMetro)
         getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS, ptParams);
         
         dNLLDash = negLogLikelihood(gsl_vector_get(ptXDash,0), gsl_vector_get(ptXDash,1), nSDash, (void*) ptData);
-        //printf("X' %e %e %e %d %f\n", gsl_vector_get(ptXDash,0), gsl_vector_get(ptXDash,1), gsl_vector_get(ptXDash,2), nSDash, dNLLDash);
-        //printf("X %e %e %e %d %f\n", gsl_vector_get(ptX,0), gsl_vector_get(ptX,1), gsl_vector_get(ptX,2), nS, dNLL);
+        
         dA = exp(dNLL - dNLLDash);
         if(dA > 1.0){
             dA = 1.0;
@@ -435,14 +413,13 @@ void* metropolis (void * pvInitMetro)
         }
         
         if(nIter % SLICE == 0){
-            fprintf(sfp, "%d,%e,%e,%d,%f\n",nIter,gsl_vector_get(ptX, 0), gsl_vector_get(ptX, 1), nS, dNLL);
-            fflush(sfp);
+            out << nIter << "," << gsl_vector_get(ptX, 0) << "," << gsl_vector_get(ptX, 1) << "," << nS << "," << dNLL << endl;
         }
         
         nIter++;
     }
     
-    fclose(sfp);
+    out.close();
     
     /*free up allocated memory*/
     gsl_vector_free(ptXDash);
@@ -458,10 +435,7 @@ void writeThread(t_MetroInit *ptMetroInit)
     gsl_vector *ptX = ptMetroInit->ptX;
     MothurOut* m;  m = MothurOut::getInstance();
     m->mothurOut(toString(ptMetroInit->nThread) + ": a = " + toString(gsl_vector_get(ptX, 0)) +  " b = " + toString(gsl_vector_get(ptX, 1)) +  " S = " + toString(gsl_vector_get(ptX, 2)) + "\n");
-    //printf("%d: a = %.2f b = %.2f S = %.2f\n", ptMetroInit->nThread,
-           //gsl_vector_get(ptX, 0),
-          // gsl_vector_get(ptX, 1),
-           //gsl_vector_get(ptX, 2));
+    
 }
 /***********************************************************************/
 void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
@@ -475,9 +449,6 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     
     MothurOut* m;  m = MothurOut::getInstance();
     m->mothurOut("\nMCMC iter = " + toString(ptParams->nIter) + " sigmaA = " + toString(ptParams->dSigmaA) +  " sigmaB = " + toString(ptParams->dSigmaB) +  " sigmaS = " + toString(ptParams->dSigmaS) + "\n");
-    
-    //printf("\nMCMC iter = %d sigmaA = %.2f sigmaB = %.2f sigmaS = %.2f\n",
-           //ptParams->nIter, ptParams->dSigmaA, ptParams->dSigmaB, ptParams->dSigmaS);
     
     gsl_vector_memcpy(ptX1, ptX);
     
@@ -536,17 +507,14 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
 /***********************************************************************/
 vector<string> MetroIG::getValues(SAbundVector* rank){
     try {
-        
-        int  i = 0, nNA     = 0;
+    
         t_Params tParams; tParams.nIter = nIters; tParams.dSigmaA = sigmaA; tParams.dSigmaB = sigmaB; tParams.dSigmaS = sigmaS; tParams.szOutFileStub = outFileStub; tParams.lSeed = m->getRandomSeed();
         t_Data   tData;
 #ifdef USE_GSL
         loadAbundance(&tData, rank);
 
         gsl_vector* ptX = gsl_vector_alloc(3); /*parameter estimates*/
-        t_MetroInit atMetroInit[3];
         
-        int maxRank = rank->getMaxRank();
         int sampled = rank->getNumSeqs(); //nj
         int numOTUs = rank->getNumBins(); //nl
 
@@ -559,9 +527,8 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         gsl_vector_set(ptX, 1, INIT_B);
         gsl_vector_set(ptX, 2, numOTUs*2);
         
-        //printf("D = %d L = %d Chao = %f\n",numOTUs, sampled, chao(&tData));
         double chaoResult = chao(&tData);
-        m->mothurOut("D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
+        m->mothurOut("\nD = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
         
         minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood);
         

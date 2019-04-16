@@ -10,7 +10,7 @@
 
 /***********************************************************************/
 
-double IGAbundance::getValues(SAbundVector* rank, int n) {
+double IGAbundance::getValues(SAbundVector* rank) {
     try {
         double results = 0;
         
