@@ -3929,10 +3929,14 @@ bool Utils::mothurConvert(string item, float& num){
         if (isNumeric1(item)) {
             convert(item, num);
         }else {
-            num = 0;
-            error = true;
-            m->mothurOut("[ERROR]: cannot convert " + item + " to a float.\n");
-            m->setControl_pressed(true);
+            try {
+                num = atof(item.c_str());
+            }catch(exception& e) {
+                num = 0;
+                error = true;
+                m->mothurOut("[ERROR]: cannot convert " + item + " to a float.\n");
+                m->setControl_pressed(true);
+            }
         }
 
         return error;
@@ -3950,10 +3954,14 @@ bool Utils::mothurConvert(string item, double& num){
         if (isNumeric1(item)) {
             convert(item, num);
         }else {
-            num = 0;
-            error = true;
-            m->mothurOut("[ERROR]: cannot convert " + item + " to a double.\n");
-            m->setControl_pressed(true);
+            try {
+                num = atof(item.c_str());
+            }catch(exception& e) {
+                num = 0;
+                error = true;
+                m->mothurOut("[ERROR]: cannot convert " + item + " to a double.\n");
+                m->setControl_pressed(true);
+            }
         }
 
         return error;
