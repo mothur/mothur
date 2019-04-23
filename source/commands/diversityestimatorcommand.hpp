@@ -13,15 +13,7 @@
 #include "inputdata.h"
 #include "validcalculator.h"
 
-//******************************************************
-struct mcmcSample {
-    double alpha, beta;
-    int ns;
-    
-    mcmcSample() {}
-    mcmcSample(double a, double b, int n) : alpha(a), beta(b), ns(n) {}
-    
-};
+
 //******************************************************
 
 class EstimatorSingleCommand : public Command {

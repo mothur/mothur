@@ -10,7 +10,7 @@
 
 /***********************************************************************/
 
-double IGAbundance::getValues(SAbundVector* rank) {
+double IGAbundance::getValues(SAbundVector* rank, map<int, mcmcSample>& sampling) {
     try {
         double results = 0;
         

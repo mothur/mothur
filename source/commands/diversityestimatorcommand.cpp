@@ -400,9 +400,14 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
     try {
         
         for (int i = 0; i < Estimators.size(); i++) {
-            if (Estimators[i] == "erarefaction")    { runErarefaction(sabund, fileRoot); }
-            if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot); }
+            
+            if (m->getControl_pressed()) { break; }
+            
+            if (Estimators[i] == "erarefaction")    { runErarefaction(sabund, fileRoot);    }
+            if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot);         }
         }
+        
+        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "EstimatorSingleCommand", "process");
@@ -521,8 +526,41 @@ vector<string> EstimatorSingleCommand::parseSharedFile(string filename) {
 //**********************************************************************************************************************
 int EstimatorSingleCommand::fillSampling() {
     try {
+        sampling.clear();
         
+        ifstream in;
+        util.openInputFile(samplefile, in);
         
+        while (!in.eof()) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            string line = util.getline(in); util.gobble(in);
+            
+            vector<string> pieces; util.splitAtComma(line, pieces);
+            
+            if (pieces.size() == 5) {
+                
+                int sampleSize, ns;
+                util.mothurConvert(pieces[0], sampleSize);
+                util.mothurConvert(pieces[3], ns);
+                
+                double alpha, beta;
+                util.mothurConvert(pieces[1], alpha);
+                util.mothurConvert(pieces[2], beta);
+                
+                mcmcSample entry(alpha, beta, ns);
+                sampling[sampleSize] = entry;
+                
+            }else {
+                m->mothurOut("\n[WARNING]: Unexpected format in sampling file, ignoring. Expecting something like: '0,7.419861e-01,4.695223e+00,5773,337.552846' for each line.\n\n");
+                sampling.clear(); break;
+            }
+            
+        }
+        in.close();
+        
+        return ((int)sampling.size());
     }
     catch(exception& e) {
         m->errorOut(e, "EstimatorSingleCommand", "fillSampling");

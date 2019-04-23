@@ -19,7 +19,7 @@ class IGAbundance   {
     
 public:
     IGAbundance(){ m = MothurOut::getInstance(); }
-    double getValues(SAbundVector* rank);
+    double getValues(SAbundVector* rank, map<int, mcmcSample>& sampling);
     bool requiresSample() { return true; }
     
 private:

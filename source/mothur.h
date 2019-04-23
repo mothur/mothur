@@ -153,6 +153,16 @@ typedef unsigned long ull;
 typedef unsigned short intDist;
 const vector<string> nullVector; //used to pass blank vector
 
+//******************************************************
+struct mcmcSample {
+    double alpha, beta;
+    int ns;
+    
+    mcmcSample() {}
+    mcmcSample(double a, double b, int n) : alpha(a), beta(b), ns(n) {}
+    
+};
+
 struct IntNode {
 	int lvalue;
 	int rvalue;
