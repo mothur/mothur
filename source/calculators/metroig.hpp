@@ -39,6 +39,7 @@ typedef struct s_Data
     int nJ;
 }t_Data;
 
+
 #ifdef USE_GSL
 typedef struct s_MetroInit
 {
@@ -65,6 +66,8 @@ public:
     
     vector<string> getValues(SAbundVector* rank);
     
+    bool requiresSample() { return false; }
+    
     
 private:
     
@@ -73,6 +76,7 @@ private:
     double sigmaA, sigmaB, sigmaS;
     int nIters;
     string outFileStub;
+    
     
 };
 

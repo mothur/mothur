@@ -13,6 +13,17 @@
 #include "inputdata.h"
 #include "validcalculator.h"
 
+//******************************************************
+struct mcmcSample {
+    double alpha, beta;
+    int ns;
+    
+    mcmcSample() {}
+    mcmcSample(double a, double b, int n) : alpha(a), beta(b), ns(n) {}
+    
+};
+//******************************************************
+
 class EstimatorSingleCommand : public Command {
 public:
     EstimatorSingleCommand(string);
@@ -34,20 +45,22 @@ public:
 private:
     
     bool abort, allLines;
-    string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
+    string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile, samplefile;
     double freq, sigmaAlpha, sigmaBeta, sigmaS;
     int iters;
     vector<string> outputNames;
     set<string> labels; //holds labels to be used
     vector<string>  Estimators, groups;
+    map<int, mcmcSample> sampling;
     
     vector<string> parseSharedFile(string);
+    int fillSampling();
     
     int process(SAbundVector*&, string);
     string runErarefaction(SAbundVector*&, string);
     string runMetroIG(SAbundVector*&, string);
     
 };
-
+//*******************************************************
 
 #endif /* diversityestimatorcommand_hpp */

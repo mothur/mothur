@@ -16,15 +16,16 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(plist);
         CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(prabund);
         CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(psabund);
+        CommandParameter psample("sample", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(psample);
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaalpha", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmabeta", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
-        CommandParameter psigmas("sigmas", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pbeta);
-        CommandParameter piters("iters", "Number", "", "250000", "", "", "","",false,false); parameters.push_back(piters);
+        CommandParameter psigmas("sigmas", "Number", "", "100", "", "", "","",false,false); parameters.push_back(psigmas);
+        CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -43,16 +44,17 @@ string EstimatorSingleCommand::getHelpString(){
     try {
         string helpString = "";
         ValidCalculators validCalculator;
-        helpString += "The estimator.single command parameters are list, sabund, rabund, shared, label.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
+        helpString += "The estimator.single command parameters are " + getCommandParameters() + ".\n";
         helpString += "The estimator.single command should be in the following format: \n";
         helpString += "estimator.single(list=yourListFile, calc=yourEstimators).\n";
         helpString += "Example estimator.single(list=final.opti_mcc.list, calc=erarefaction).\n";
         helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
+        helpString += "The sample file is used to provide mcmc sampling to the following calculators: ...............\n";
         helpString += "The default values for freq is 100, and calc is erarefaction.\n";
         helpString += "The sigmaalpha parameter is used to set the std. dev. of alpha prop. distn for MetroIG. Default = 0.10. n";
         helpString += "The sigmabeta parameter is used to set the std. dev. of beta prop. distn for MetroIG. Default = 0.10. n";
          helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG. Default = 100. n";
-        helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 250000.\n";
+        helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
         helpString += validCalculator.printCalc("single");
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
         
@@ -156,6 +158,14 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["list"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("sample");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["sample"] = inputDir + it->second;		}
+                }
             }
             
             //check for required parameters
@@ -178,6 +188,12 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             if (sharedfile == "not open") { sharedfile = ""; abort = true; }
             else if (sharedfile == "not found") { sharedfile = ""; }
             else {  format = "sharedfile"; inputfile = sharedfile; current->setSharedFile(sharedfile); }
+            
+            bool hasSample = false;
+            samplefile = validParameter.validFile(parameters, "sample");
+            if (samplefile == "not open") { samplefile = ""; abort = true; }
+            else if (samplefile == "not found") { samplefile = ""; }
+            else { hasSample = true; }
             
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -230,12 +246,26 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
                 for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
             }
             
+            set<string> estimatorsThatRequireSampleFile;
+            estimatorsThatRequireSampleFile.insert("igabundance");
+            
             //remove any typo calcs
             vector<string> validEstimates;
-            for (int i=0; i<Estimators.size(); i++) { if (validCalculator.isValidCalculator("estimator", Estimators[i]) ) { validEstimates.push_back(Estimators[i]); } }
+            for (int i=0; i<Estimators.size(); i++) {
+                if (validCalculator.isValidCalculator("estimator", Estimators[i]) ) {
+                    
+                    bool ignore = false;
+                    if (!hasSample) { //if you didn't provide a mcmc sample file, but are trying to run a calc that needs it, then ignore
+                        if (estimatorsThatRequireSampleFile.count(Estimators[i]) != 0) { ignore = true; }
+                    }
+                    
+                    if (!ignore) { validEstimates.push_back(Estimators[i]); }
+                    else { m->mothurOut("[WARNING]: " + Estimators[i] + " requires a mcmc sampling file and you have not provided one, ignoring estimator. You can produce a sampling file using the metroig calculator.\n"); }
+                }
+            }
             Estimators = validEstimates;
+            if (Estimators.size() == 0) { abort = true; m->mothurOut("[ERROR]: no valid estimators, aborting.\n"); }
 
-            
             string temp;
             temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
             util.mothurConvert(temp, freq);
@@ -249,7 +279,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             temp = validParameter.valid(parameters, "sigmas");		if (temp == "not found") { temp = "100.0"; }
             util.mothurConvert(temp, sigmaS);
             
-            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "250000"; }
+            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; }
             util.mothurConvert(temp, iters);
             
             #ifdef USE_GSL
@@ -274,6 +304,8 @@ int EstimatorSingleCommand::execute(){
     try {
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        
+        if (samplefile != "") { fillSampling(); }
         
         vector<string> inputFileNames;
         if (format != "sharedfile") { inputFileNames.push_back(inputfile);  }
@@ -486,5 +518,17 @@ vector<string> EstimatorSingleCommand::parseSharedFile(string filename) {
         exit(1);
     }
 }
+//**********************************************************************************************************************
+int EstimatorSingleCommand::fillSampling() {
+    try {
+        
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "fillSampling");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 

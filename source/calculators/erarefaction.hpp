@@ -19,6 +19,7 @@ class ERarefaction   {
 public:
     ERarefaction(){ m = MothurOut::getInstance(); }
     double getValues(SAbundVector* rank, int n);
+    bool requiresSample() { return false; }
     
     
 private:

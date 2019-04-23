@@ -446,6 +446,7 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     *ptX2 = gsl_vector_alloc(3),
     *ptX3 = gsl_vector_alloc(3);
     t_MetroInit atMetroInit[3];
+   
     
     MothurOut* m;  m = MothurOut::getInstance();
     m->mothurOut("\nMCMC iter = " + toString(ptParams->nIter) + " sigmaA = " + toString(ptParams->dSigmaA) +  " sigmaB = " + toString(ptParams->dSigmaB) +  " sigmaS = " + toString(ptParams->dSigmaS) + "\n");
@@ -471,6 +472,7 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     atMetroInit[0].lSeed    = ptParams->lSeed;
     atMetroInit[0].nAccepted = 0;
     
+    
     atMetroInit[1].ptParams = ptParams;
     atMetroInit[1].ptData   = ptData;
     atMetroInit[1].ptX      = ptX2;
@@ -478,12 +480,14 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     atMetroInit[1].lSeed    = ptParams->lSeed + 1;
     atMetroInit[1].nAccepted = 0;
     
+    
     atMetroInit[2].ptParams = ptParams;
     atMetroInit[2].ptData   = ptData;
     atMetroInit[2].ptX      = ptX3;
     atMetroInit[2].nThread  = 2;
     atMetroInit[2].lSeed    = ptParams->lSeed + 2;
     atMetroInit[2].nAccepted = 0;
+    
     
     writeThread(&atMetroInit[0]);
     writeThread(&atMetroInit[1]);
@@ -496,11 +500,15 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     pthread_join(thread2, NULL);
     pthread_join(thread3, NULL);
     
+    
     m->mothurOut(toString(atMetroInit[0].nThread) +": accept. ratio " + toString(atMetroInit[0].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[0].nAccepted)/((double) ptParams->nIter)) +  "\n");
     m->mothurOut(toString(atMetroInit[1].nThread) +": accept. ratio " + toString(atMetroInit[1].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[1].nAccepted)/((double) ptParams->nIter)) +  "\n");
     m->mothurOut(toString(atMetroInit[2].nThread) +": accept. ratio " + toString(atMetroInit[2].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[2].nAccepted)/((double) ptParams->nIter)) +  "\n");
     
     gsl_vector_free(ptX1); gsl_vector_free(ptX2); gsl_vector_free(ptX3);
+    
+    
+    
 }
 
 #endif
@@ -534,7 +542,9 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         
         outputResults(ptX, &tData);
         
-        if(tParams.nIter > 0){ mcmc(&tParams, &tData, ptX); }
+        if(tParams.nIter > 0){
+           mcmc(&tParams, &tData, ptX);
+        }
         
         /*free up allocated memory*/
         gsl_vector_free(ptX);
