@@ -11,20 +11,26 @@
 
 #include "mothurout.h"
 #include "sabundvector.hpp"
-
+#include "diversityutils.hpp"
 
 /***********************************************************************/
 
 class IGAbundance   {
     
 public:
-    IGAbundance(){ m = MothurOut::getInstance(); }
-    double getValues(SAbundVector* rank, map<int, mcmcSample>& sampling);
+    
+    IGAbundance() { m = MothurOut::getInstance(); }
+    
+    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
+    
     bool requiresSample() { return true; }
     
 private:
     Utils util;
     MothurOut* m;
+    
+    DiversityUtils dutils;
+    
 };
 
 /***********************************************************************/

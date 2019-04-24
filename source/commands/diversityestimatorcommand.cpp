@@ -9,6 +9,7 @@
 #include "diversityestimatorcommand.hpp"
 #include "erarefaction.hpp"
 #include "metroig.hpp"
+#include "igabundance.hpp"
 
 //**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::setParameters(){
@@ -20,11 +21,13 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-igabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaalpha", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmabeta", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
         CommandParameter psigmas("sigmas", "Number", "", "100", "", "", "","",false,false); parameters.push_back(psigmas);
+        CommandParameter pburn("burn", "Number", "", "2000000", "", "", "","",false,false); parameters.push_back(pburn);
+        CommandParameter psamplenum("burnsample", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(psamplenum);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -71,6 +74,7 @@ string EstimatorSingleCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "erarefaction")             {  pattern =  "[filename],[distance],erarefaction";            }
+        else if (type == "igabundance")                  {  pattern =  "[filename],[distance],igabundance";             }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -87,6 +91,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         setParameters();
         vector<string> tempOutNames;
         outputTypes["erarefaction"] = tempOutNames;
+        outputTypes["igabundance"] = tempOutNames;
         
     }
     catch(exception& e) {
@@ -121,6 +126,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             //initialize outputTypes
             vector<string> tempOutNames;
             outputTypes["erarefaction"] = tempOutNames;
+            outputTypes["igabundance"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -247,7 +253,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             }
             
             set<string> estimatorsThatRequireSampleFile;
-            estimatorsThatRequireSampleFile.insert("igabundance");
+            estimatorsThatRequireSampleFile.insert("igabund");
             
             //remove any typo calcs
             vector<string> validEstimates;
@@ -281,6 +287,12 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             
             temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; }
             util.mothurConvert(temp, iters);
+            
+            temp = validParameter.valid(parameters, "burn");		if (temp == "not found") { temp = "2000000"; }
+            util.mothurConvert(temp, burn);
+            
+            temp = validParameter.valid(parameters, "burnsample");		if (temp == "not found") { temp = "1000"; }
+            util.mothurConvert(temp, burnSample);
             
             #ifdef USE_GSL
             #else
@@ -405,6 +417,7 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             
             if (Estimators[i] == "erarefaction")    { runErarefaction(sabund, fileRoot);    }
             if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot);         }
+            if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
         }
         
         return 0;
@@ -479,6 +492,37 @@ string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund, string fileRoot
     }
 }
 //**********************************************************************************************************************
+int EstimatorSingleCommand::runIGAbund(SAbundVector*& sabund, string fileRoot) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = fileRoot;
+        variables["[distance]"] = sabund->getLabel();
+        string outputFileName = getOutputFileName("igabundance", variables);
+        outputNames.push_back(outputFileName); outputTypes["igabundance"].push_back(outputFileName);
+        
+        ofstream out; util.openOutputFile(outputFileName, out); //format output
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        IGAbundance igAbund;
+        
+        vector<double> results = igAbund.getValues(sabund, sampling);
+        
+        for (int i = 0; i < results.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            out << i+1 << '\t' << results[i] << endl;
+        }
+        out.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runIGAbund");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::parseSharedFile(string filename) {
     try {
         vector<string> filenames;
@@ -543,14 +587,18 @@ int EstimatorSingleCommand::fillSampling() {
                 
                 int sampleSize, ns;
                 util.mothurConvert(pieces[0], sampleSize);
-                util.mothurConvert(pieces[3], ns);
                 
-                double alpha, beta;
-                util.mothurConvert(pieces[1], alpha);
-                util.mothurConvert(pieces[2], beta);
+                if ((sampleSize > burn) && (sampleSize % burnSample == 0)) {
                 
-                mcmcSample entry(alpha, beta, ns);
-                sampling[sampleSize] = entry;
+                    util.mothurConvert(pieces[3], ns);
+                    
+                    double alpha, beta;
+                    util.mothurConvert(pieces[1], alpha);
+                    util.mothurConvert(pieces[2], beta);
+                    
+                    mcmcSample entry(alpha, beta, ns);
+                    sampling.push_back(entry);
+                }
                 
             }else {
                 m->mothurOut("\n[WARNING]: Unexpected format in sampling file, ignoring. Expecting something like: '0,7.419861e-01,4.695223e+00,5773,337.552846' for each line.\n\n");

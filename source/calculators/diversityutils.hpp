@@ -19,7 +19,11 @@ class DiversityUtils   {
 public:
     DiversityUtils(){ m = MothurOut::getInstance(); }
     
-    
+    double logLikelihood(int n, double dAlpha, double dBeta);
+    int bessel(double* pdResult, int n, double dAlpha, double dBeta);
+    double sd(int n, double dAlpha, double dBeta);
+    double f2X(double x, double dA, double dB, double dNDash);
+    double fX(double x, double dA, double dB, double dNDash);
     
 private:
     Utils util;

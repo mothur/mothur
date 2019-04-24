@@ -11,6 +11,7 @@
 
 #include "mothurout.h"
 #include "sabundvector.hpp"
+#include "diversityutils.hpp"
 
 
 typedef struct s_Params
@@ -59,7 +60,7 @@ typedef struct s_MetroInit
 #endif
 /***********************************************************************/
 
-class MetroIG   {
+class MetroIG  {
     
 public:
     MetroIG(double sigA, double sigB, double sigS, int n, string stub) : sigmaA(sigA), sigmaB(sigB), sigmaS(sigS), nIters(n), outFileStub(stub) { m = MothurOut::getInstance(); }
@@ -73,6 +74,8 @@ private:
     
     Utils util;
     MothurOut* m;
+    DiversityUtils dutils;
+    
     double sigmaA, sigmaB, sigmaS;
     int nIters;
     string outFileStub;

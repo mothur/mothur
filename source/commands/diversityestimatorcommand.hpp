@@ -39,11 +39,11 @@ private:
     bool abort, allLines;
     string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile, samplefile;
     double freq, sigmaAlpha, sigmaBeta, sigmaS;
-    int iters;
+    int iters, burn, burnSample;
     vector<string> outputNames;
     set<string> labels; //holds labels to be used
     vector<string>  Estimators, groups;
-    map<int, mcmcSample> sampling;
+    vector<mcmcSample> sampling;
     
     vector<string> parseSharedFile(string);
     int fillSampling();
@@ -51,6 +51,7 @@ private:
     int process(SAbundVector*&, string);
     string runErarefaction(SAbundVector*&, string);
     string runMetroIG(SAbundVector*&, string);
+    int runIGAbund(SAbundVector*&, string);
     
 };
 //*******************************************************

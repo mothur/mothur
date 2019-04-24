@@ -403,6 +403,7 @@ void ValidCalculators::initialEstimators() {
     try {
         estimators["erarefaction"]	= "erarefaction";
         estimators["metroig"]	= "metroig";
+        estimators["igabund"]	= "igabund";
         estimators["default"]	    = "default";
     }
     catch(exception& e) {
