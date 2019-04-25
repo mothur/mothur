@@ -142,51 +142,6 @@ int minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const 
     
     return status;
 }
-
-/***********************************************************************/
-void loadAbundance(t_Data *ptData, SAbundVector* rank)
-{
-    int nNA = 0; int  nL = 0, nJ = 0;
-    int maxRank = rank->getMaxRank();
-    
-    for(int i = 1; i <= maxRank; i++){ if (rank->get(i) != 0) { nNA++; } }
-
-    int **aanAbund = NULL;
-    aanAbund = (int **) malloc(nNA*sizeof(int*));
-    
-    int count = 0;
-    for(int i = 1; i <= maxRank; i++){
-        
-        if (rank->get(i) != 0) {
-            aanAbund[count] = (int *) malloc(sizeof(int)*2);
-            
-            int nA = i;
-            int nC = rank->get(i);
-            
-            nL += nC;
-            nJ += nC*nA;
-            
-            aanAbund[count][0]  = nA;
-            aanAbund[count][1]  = nC;
-            
-            count++;
-        }
-        
-    }
-    
-    ptData->nJ          = nJ;
-    ptData->nL          = nL;
-    ptData->aanAbund    = aanAbund;
-    ptData->nNA         = nNA;
-}
-/***********************************************************************/
-void freeAbundance(t_Data *ptData)
-{
-    for(int i = 0; i < ptData->nNA; i++){
-        free(ptData->aanAbund[i]);
-    }
-    free(ptData->aanAbund);
-}
 /***********************************************************************/
 void outputResults(gsl_vector *ptX, t_Data *ptData)
 {
@@ -331,14 +286,6 @@ void* metropolis (void * pvInitMetro)
 }
 
 /***********************************************************************/
-void writeThread(t_MetroInit *ptMetroInit)
-{
-    gsl_vector *ptX = ptMetroInit->ptX;
-    MothurOut* m;  m = MothurOut::getInstance();
-    m->mothurOut(toString(ptMetroInit->nThread) + ": a = " + toString(gsl_vector_get(ptX, 0)) +  " b = " + toString(gsl_vector_get(ptX, 1)) +  " S = " + toString(gsl_vector_get(ptX, 2)) + "\n");
-    
-}
-/***********************************************************************/
 void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
 {
     pthread_t thread1, thread2, thread3;
@@ -373,6 +320,9 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     atMetroInit[0].lSeed    = ptParams->lSeed;
     atMetroInit[0].nAccepted = 0;
     
+    //write thread 0
+    m->mothurOut(toString(atMetroInit[0].nThread) + ": a = " + toString(gsl_vector_get(ptX1, 0)) +  " b = " + toString(gsl_vector_get(ptX1, 1)) +  " S = " + toString(gsl_vector_get(ptX1, 2)) + "\n");
+
     
     atMetroInit[1].ptParams = ptParams;
     atMetroInit[1].ptData   = ptData;
@@ -380,6 +330,9 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     atMetroInit[1].nThread  = 1;
     atMetroInit[1].lSeed    = ptParams->lSeed + 1;
     atMetroInit[1].nAccepted = 0;
+    
+    //write thread 1
+    m->mothurOut(toString(atMetroInit[1].nThread) + ": a = " + toString(gsl_vector_get(ptX2, 0)) +  " b = " + toString(gsl_vector_get(ptX2, 1)) +  " S = " + toString(gsl_vector_get(ptX2, 2)) + "\n");
     
     
     atMetroInit[2].ptParams = ptParams;
@@ -389,10 +342,9 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     atMetroInit[2].lSeed    = ptParams->lSeed + 2;
     atMetroInit[2].nAccepted = 0;
     
-    
-    writeThread(&atMetroInit[0]);
-    writeThread(&atMetroInit[1]);
-    writeThread(&atMetroInit[2]);
+    //write thread 2
+    m->mothurOut(toString(atMetroInit[2].nThread) + ": a = " + toString(gsl_vector_get(ptX3, 0)) +  " b = " + toString(gsl_vector_get(ptX3, 1)) +  " S = " + toString(gsl_vector_get(ptX3, 2)) + "\n");
+
     
     iret1 = pthread_create(&thread1, NULL, metropolis, (void*) &atMetroInit[0]);
     iret2 = pthread_create(&thread2, NULL, metropolis, (void*) &atMetroInit[1]);
@@ -407,12 +359,56 @@ void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
     m->mothurOut(toString(atMetroInit[2].nThread) +": accept. ratio " + toString(atMetroInit[2].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[2].nAccepted)/((double) ptParams->nIter)) +  "\n");
     
     gsl_vector_free(ptX1); gsl_vector_free(ptX2); gsl_vector_free(ptX3);
-    
-    
-    
 }
 
 #endif
+/***********************************************************************/
+void MetroIG::loadAbundance(t_Data *ptData, SAbundVector* rank)
+{
+    int nNA = 0; int  nL = 0, nJ = 0;
+    int maxRank = rank->getMaxRank();
+    
+    for(int i = 1; i <= maxRank; i++){ if (rank->get(i) != 0) { nNA++; } }
+    
+    int **aanAbund = NULL;
+    aanAbund = (int **) malloc(nNA*sizeof(int*));
+    
+    int count = 0;
+    for(int i = 1; i <= maxRank; i++){
+        
+        if (rank->get(i) != 0) {
+            aanAbund[count] = (int *) malloc(sizeof(int)*2);
+            
+            int nA = i;
+            int nC = rank->get(i);
+            
+            nL += nC;
+            nJ += nC*nA;
+            
+            aanAbund[count][0]  = nA;
+            aanAbund[count][1]  = nC;
+            
+            count++;
+        }
+        
+    }
+    
+    ptData->nJ          = nJ;
+    ptData->nL          = nL;
+    ptData->aanAbund    = aanAbund;
+    ptData->nNA         = nNA;
+}
+
+
+/***********************************************************************/
+void MetroIG::freeAbundance(t_Data *ptData)
+{
+    for(int i = 0; i < ptData->nNA; i++){
+        free(ptData->aanAbund[i]);
+    }
+    free(ptData->aanAbund);
+}
+
 /***********************************************************************/
 vector<string> MetroIG::getValues(SAbundVector* rank){
     try {

@@ -383,7 +383,6 @@
 		484976E82256799100F3A291 /* diversityestimatorcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E52256799100F3A291 /* diversityestimatorcommand.cpp */; };
 		4853365E225F7926003CC483 /* libgslcblas.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4853365D225F7926003CC483 /* libgslcblas.a */; };
 		48533660225F7929003CC483 /* libgsl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4853365F225F7929003CC483 /* libgsl.a */; };
-		48533663225FCADF003CC483 /* diversityutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48533661225FCADF003CC483 /* diversityutils.cpp */; };
 		48576EA11D05DBC600BBC9C0 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48576EA51D05E8F600BBC9C0 /* testoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */; };
@@ -486,6 +485,7 @@
 		48E544791E9D3CE400FF6AB8 /* npv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E544761E9D3CE400FF6AB8 /* npv.cpp */; };
 		48E5447C1E9D3F0400FF6AB8 /* fdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */; };
 		48E5447D1E9D3F0400FF6AB8 /* fdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */; };
+		48E8C5542271FD0800B59972 /* diversityutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C5532271FD0800B59972 /* diversityutils.cpp */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
@@ -928,7 +928,6 @@
 		484F21691BA1C5F8001C1B5F /* makefile-internal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "makefile-internal"; sourceTree = SOURCE_ROOT; };
 		4853365D225F7926003CC483 /* libgslcblas.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgslcblas.a; path = ../../../../usr/local/gsl/lib/libgslcblas.a; sourceTree = "<group>"; };
 		4853365F225F7929003CC483 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = ../../../../usr/local/gsl/lib/libgsl.a; sourceTree = "<group>"; };
-		48533661225FCADF003CC483 /* diversityutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityutils.cpp; path = source/calculators/diversityutils.cpp; sourceTree = SOURCE_ROOT; };
 		48533662225FCADF003CC483 /* diversityutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityutils.hpp; path = source/calculators/diversityutils.hpp; sourceTree = SOURCE_ROOT; };
 		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = TestMothur/testcontainers/testoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = TestMothur/testcontainers/testoptimatrix.h; sourceTree = SOURCE_ROOT; };
@@ -1059,6 +1058,7 @@
 		48E5EAF22195156700D86887 /* libhdf5_cpp.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5_cpp.la; path = "../hdf5-1.10.3/c++/src/libhdf5_cpp.la"; sourceTree = "<group>"; };
 		48E5EAF4219515A700D86887 /* libhdf5_hl.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5_hl.la; path = "../hdf5-1.10.3/hl/src/libhdf5_hl.la"; sourceTree = "<group>"; };
 		48E5EAF6219515C000D86887 /* libhdf5.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5.la; path = "../hdf5-1.10.3/src/libhdf5.la"; sourceTree = "<group>"; };
+		48E8C5532271FD0800B59972 /* diversityutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityutils.cpp; path = source/calculators/diversityutils.cpp; sourceTree = "<group>"; };
 		48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chimeravsearchcommand.cpp; path = source/commands/chimeravsearchcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chimeravsearchcommand.h; path = source/commands/chimeravsearchcommand.h; sourceTree = SOURCE_ROOT; };
 		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
@@ -2041,8 +2041,8 @@
 				483A9BB1225CDC9C006102DF /* FileUtils.h */,
 				483A9BB2225CDC9C006102DF /* MatrixUtils.c */,
 				483A9BB3225CDC9C006102DF /* MatrixUtils.h */,
-				48533661225FCADF003CC483 /* diversityutils.cpp */,
 				48533662225FCADF003CC483 /* diversityutils.hpp */,
+				48E8C5532271FD0800B59972 /* diversityutils.cpp */,
 				484976DD22552E0B00F3A291 /* erarefaction.cpp */,
 				484976DE22552E0B00F3A291 /* erarefaction.hpp */,
 				484976E12255412400F3A291 /* igabundance.cpp */,
@@ -3486,7 +3486,7 @@
 				A7E9B8C412D37EC400DA6239 /* fastamap.cpp in Sources */,
 				48BDDA751ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */,
 				A7E9B8C512D37EC400DA6239 /* fileoutput.cpp in Sources */,
-				48533663225FCADF003CC483 /* diversityutils.cpp in Sources */,
+				48E8C5542271FD0800B59972 /* diversityutils.cpp in Sources */,
 				A7E9B8C612D37EC400DA6239 /* filterseqscommand.cpp in Sources */,
 				A7E9B8C812D37EC400DA6239 /* flowdata.cpp in Sources */,
 				48910D431D5243E500F60EDB /* mergecountcommand.cpp in Sources */,

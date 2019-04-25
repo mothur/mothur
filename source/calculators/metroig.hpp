@@ -80,6 +80,9 @@ private:
     int nIters;
     string outFileStub;
     
+    void loadAbundance(t_Data *ptData, SAbundVector* rank);
+    void freeAbundance(t_Data *ptData);
+    
     
 };
 
