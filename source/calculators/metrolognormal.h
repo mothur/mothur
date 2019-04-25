@@ -11,7 +11,6 @@
 
 #include "mothurout.h"
 
-
 typedef struct s_Params
 {
     long lSeed;
@@ -63,7 +62,7 @@ typedef struct s_MetroInit
 class MetroLogNormal  {
     
 public:
-    MetroLogNormal(double sigA, double sigB, double sigS, int n, string stub) : sigmaA(sigA), sigmaB(sigB), sigmaS(sigS), nIters(n), outFileStub(stub) { m = MothurOut::getInstance(); }
+    MetroLogNormal(double sigx, double sigy, double sigS, int n, string stub) : sigmaX(sigx), sigmaY(sigy), sigmaS(sigS), nIters(n), outFileStub(stub) { m = MothurOut::getInstance(); }
     
     vector<string> getValues(SAbundVector* rank);
     
@@ -76,7 +75,7 @@ private:
     MothurOut* m;
     DiversityUtils dutils;
     
-    double sigmaA, sigmaB, sigmaS;
+    double sigmaX, sigmaY, sigmaS;
     int nIters;
     string outFileStub;
     

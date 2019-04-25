@@ -21,6 +21,8 @@ vector<double> IGAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sa
         
         if (nSamples == 0) {  return results; }
         
+#ifdef USE_GSL
+        
         for(int i = 0; i < sampling.size(); i++) {
             
             if (m->getControl_pressed()) { break; }
@@ -43,6 +45,8 @@ vector<double> IGAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sa
             
             if (isnan(results[i-1]) || isinf(results[i-1])) { results[i-1] = 0.0; }
         }
+        
+#endif
         
         return results;
     }
