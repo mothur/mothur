@@ -370,10 +370,6 @@
 		4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */; };
 		483A9BAE225BBE55006102DF /* metroig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 483A9BAC225BBE55006102DF /* metroig.cpp */; };
 		483A9BAF225BBE55006102DF /* metroig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 483A9BAC225BBE55006102DF /* metroig.cpp */; };
-		483A9BB4225CDC9C006102DF /* FileUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 483A9BB0225CDC9C006102DF /* FileUtils.c */; };
-		483A9BB5225CDC9C006102DF /* FileUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 483A9BB0225CDC9C006102DF /* FileUtils.c */; };
-		483A9BB6225CDC9C006102DF /* MatrixUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 483A9BB2225CDC9C006102DF /* MatrixUtils.c */; };
-		483A9BB7225CDC9C006102DF /* MatrixUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 483A9BB2225CDC9C006102DF /* MatrixUtils.c */; };
 		483C952E188F0CAD0035E7B7 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		484976DF22552E0B00F3A291 /* erarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976DD22552E0B00F3A291 /* erarefaction.cpp */; };
 		484976E022552E0B00F3A291 /* erarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976DD22552E0B00F3A291 /* erarefaction.cpp */; };
@@ -486,6 +482,7 @@
 		48E5447C1E9D3F0400FF6AB8 /* fdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */; };
 		48E5447D1E9D3F0400FF6AB8 /* fdr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */; };
 		48E8C5542271FD0800B59972 /* diversityutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C5532271FD0800B59972 /* diversityutils.cpp */; };
+		48E8C557227201D800B59972 /* metrolognormal.c in Sources */ = {isa = PBXBuildFile; fileRef = 48E8C555227201D800B59972 /* metrolognormal.c */; };
 		48E981CF189C38FB0042BE9D /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
@@ -913,10 +910,6 @@
 		4829D9661B8387D0002EEED4 /* testbiominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testbiominfocommand.h; path = TestMothur/testbiominfocommand.h; sourceTree = SOURCE_ROOT; };
 		483A9BAC225BBE55006102DF /* metroig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metroig.cpp; path = source/calculators/metroig.cpp; sourceTree = SOURCE_ROOT; };
 		483A9BAD225BBE55006102DF /* metroig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metroig.hpp; path = source/calculators/metroig.hpp; sourceTree = "<group>"; };
-		483A9BB0225CDC9C006102DF /* FileUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = FileUtils.c; path = source/calculators/FileUtils.c; sourceTree = "<group>"; };
-		483A9BB1225CDC9C006102DF /* FileUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileUtils.h; path = source/calculators/FileUtils.h; sourceTree = "<group>"; };
-		483A9BB2225CDC9C006102DF /* MatrixUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MatrixUtils.c; path = source/calculators/MatrixUtils.c; sourceTree = "<group>"; };
-		483A9BB3225CDC9C006102DF /* MatrixUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MatrixUtils.h; path = source/calculators/MatrixUtils.h; sourceTree = "<group>"; };
 		4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testtrimoligos.cpp; path = TestMothur/testtrimoligos.cpp; sourceTree = SOURCE_ROOT; };
 		4846AD891D3810DD00DE9913 /* testtrimoligos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testtrimoligos.hpp; path = TestMothur/testtrimoligos.hpp; sourceTree = SOURCE_ROOT; };
 		484976DD22552E0B00F3A291 /* erarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = erarefaction.cpp; path = source/calculators/erarefaction.cpp; sourceTree = SOURCE_ROOT; };
@@ -1059,6 +1052,8 @@
 		48E5EAF4219515A700D86887 /* libhdf5_hl.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5_hl.la; path = "../hdf5-1.10.3/hl/src/libhdf5_hl.la"; sourceTree = "<group>"; };
 		48E5EAF6219515C000D86887 /* libhdf5.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5.la; path = "../hdf5-1.10.3/src/libhdf5.la"; sourceTree = "<group>"; };
 		48E8C5532271FD0800B59972 /* diversityutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityutils.cpp; path = source/calculators/diversityutils.cpp; sourceTree = "<group>"; };
+		48E8C555227201D800B59972 /* metrolognormal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = metrolognormal.c; path = source/calculators/metrolognormal.c; sourceTree = SOURCE_ROOT; };
+		48E8C556227201D800B59972 /* metrolognormal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = metrolognormal.h; path = source/calculators/metrolognormal.h; sourceTree = SOURCE_ROOT; };
 		48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chimeravsearchcommand.cpp; path = source/commands/chimeravsearchcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chimeravsearchcommand.h; path = source/commands/chimeravsearchcommand.h; sourceTree = SOURCE_ROOT; };
 		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
@@ -2037,16 +2032,14 @@
 		484976DC22552BEA00F3A291 /* diversitycalcs */ = {
 			isa = PBXGroup;
 			children = (
-				483A9BB0225CDC9C006102DF /* FileUtils.c */,
-				483A9BB1225CDC9C006102DF /* FileUtils.h */,
-				483A9BB2225CDC9C006102DF /* MatrixUtils.c */,
-				483A9BB3225CDC9C006102DF /* MatrixUtils.h */,
 				48533662225FCADF003CC483 /* diversityutils.hpp */,
 				48E8C5532271FD0800B59972 /* diversityutils.cpp */,
 				484976DD22552E0B00F3A291 /* erarefaction.cpp */,
 				484976DE22552E0B00F3A291 /* erarefaction.hpp */,
 				484976E12255412400F3A291 /* igabundance.cpp */,
 				484976E22255412400F3A291 /* igabundance.hpp */,
+				48E8C555227201D800B59972 /* metrolognormal.c */,
+				48E8C556227201D800B59972 /* metrolognormal.h */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 			);
@@ -3324,7 +3317,6 @@
 				481FB5DA1AC1B75C0076CFF3 /* makegroupcommand.cpp in Sources */,
 				488841621CC515A000C5E972 /* (null) in Sources */,
 				481FB5691AC1B6B50076CFF3 /* sharedrjsd.cpp in Sources */,
-				483A9BB5225CDC9C006102DF /* FileUtils.c in Sources */,
 				481FB6801AC1B8960076CFF3 /* slibshuff.cpp in Sources */,
 				481FB67B1AC1B88F0076CFF3 /* readphylipvector.cpp in Sources */,
 				481FB64C1AC1B7F40076CFF3 /* tree.cpp in Sources */,
@@ -3392,7 +3384,6 @@
 				481FB5841AC1B6FF0076CFF3 /* mothurchimera.cpp in Sources */,
 				481FB6121AC1B7AC0076CFF3 /* splitgroupscommand.cpp in Sources */,
 				489AF692210619170028155E /* sharedrabundfloatvector.cpp in Sources */,
-				483A9BB7225CDC9C006102DF /* MatrixUtils.c in Sources */,
 				481FB6921AC1BAA60076CFF3 /* taxonomyequalizer.cpp in Sources */,
 				481FB68A1AC1BA9E0076CFF3 /* alignnode.cpp in Sources */,
 				481FB58B1AC1B6FF0076CFF3 /* pintail.cpp in Sources */,
@@ -3456,11 +3447,11 @@
 				A7E9B8A712D37EC400DA6239 /* clusterclassic.cpp in Sources */,
 				A7E9B8A812D37EC400DA6239 /* clustercommand.cpp in Sources */,
 				A7E9B8A912D37EC400DA6239 /* clusterdoturcommand.cpp in Sources */,
+				48E8C557227201D800B59972 /* metrolognormal.c in Sources */,
 				A7E9B8AA12D37EC400DA6239 /* clusterfragmentscommand.cpp in Sources */,
 				48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */,
 				A7E9B8AB12D37EC400DA6239 /* clustersplitcommand.cpp in Sources */,
 				48E5446C1E9D3A8C00FF6AB8 /* f1score.cpp in Sources */,
-				483A9BB4225CDC9C006102DF /* FileUtils.c in Sources */,
 				A7E9B8AC12D37EC400DA6239 /* cmdargs.cpp in Sources */,
 				A7E9B8AD12D37EC400DA6239 /* collect.cpp in Sources */,
 				A7E9B8AE12D37EC400DA6239 /* collectcommand.cpp in Sources */,
@@ -3561,7 +3552,6 @@
 				A7E9B90712D37EC400DA6239 /* noalign.cpp in Sources */,
 				A7E9B90812D37EC400DA6239 /* nocommands.cpp in Sources */,
 				A7E9B90912D37EC400DA6239 /* normalizesharedcommand.cpp in Sources */,
-				483A9BB6225CDC9C006102DF /* MatrixUtils.c in Sources */,
 				A7E9B90A12D37EC400DA6239 /* npshannon.cpp in Sources */,
 				A7E9B90B12D37EC400DA6239 /* odum.cpp in Sources */,
 				A7E9B90C12D37EC400DA6239 /* optionparser.cpp in Sources */,

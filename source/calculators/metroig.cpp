@@ -8,10 +8,6 @@
 
 #include "metroig.hpp"
 
-/*User includes*/
-#include "FileUtils.h"
-#include "MatrixUtils.h"
-
 /*constants for simplex minimisation*/
 #define PENALTY           1.0e20
 

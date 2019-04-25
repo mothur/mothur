@@ -26,6 +26,9 @@ double DiversityUtils::f2X(double x, double dA, double dB, double dNDash)
     
     return -dRet;
 }
+
+
+#ifdef USE_GSL
 /***********************************************************************/
 
 double DiversityUtils::sd(int n, double dAlpha, double dBeta)
@@ -117,4 +120,8 @@ double DiversityUtils::logLikelihood(int n, double dAlpha, double dBeta)
     return dRet - dLogFacN;
 }
 /***********************************************************************/
+#endif
+
+
+
 
