@@ -10,51 +10,7 @@
 #define metrolognormal_h
 
 #include "mothurout.h"
-
-typedef struct s_Params
-{
-    long lSeed;
-    
-    char *szInputFile;
-    
-    char *szOutFileStub;
-    
-    double dSigmaX;
-    
-    double dSigmaY;
-    
-    double dSigmaS;
-    
-    int nIter;
-} t_Params;
-
-typedef struct s_Data
-{
-    int nNA;
-    
-    int **aanAbund;
-    
-    int nL;
-    
-    int nJ;
-}t_Data;
-
-typedef struct s_MetroInit
-{
-    t_Params *ptParams;
-    
-    t_Data   *ptData;
-    
-    gsl_vector* ptX;
-    
-    int nAccepted;
-    
-    long lSeed;
-    
-    int nThread;
-    
-} t_MetroInit;
-
+#include "diversityutils.hpp"
 
 //MetroLogNormal - fits a compound Poisson Log-Normal distn to a sample
 /***********************************************************************/

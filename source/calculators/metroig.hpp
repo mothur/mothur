@@ -13,51 +13,6 @@
 #include "sabundvector.hpp"
 #include "diversityutils.hpp"
 
-
-typedef struct s_Params
-{
-    long lSeed;
-    
-    string szOutFileStub;
-    
-    double dSigmaA;
-    
-    double dSigmaB;
-    
-    double dSigmaS;
-    
-    int nIter;
-} t_Params;
-
-typedef struct s_Data
-{
-    int nNA;
-    
-    int **aanAbund;
-    
-    int nL;
-    
-    int nJ;
-}t_Data;
-
-
-#ifdef USE_GSL
-typedef struct s_MetroInit
-{
-    t_Params *ptParams;
-    
-    t_Data   *ptData;
-    
-    gsl_vector* ptX;
-    
-    int nAccepted;
-    
-    long lSeed;
-    
-    int nThread;
-    
-} t_MetroInit;
-#endif
 /***********************************************************************/
 
 class MetroIG  {
@@ -79,10 +34,6 @@ private:
     double sigmaA, sigmaB, sigmaS;
     int nIters;
     string outFileStub;
-    
-    void loadAbundance(t_Data *ptData, SAbundVector* rank);
-    void freeAbundance(t_Data *ptData);
-    
     
 };
 
