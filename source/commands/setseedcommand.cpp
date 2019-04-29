@@ -63,13 +63,13 @@ SetSeedCommand::SetSeedCommand(string option)  {
             
             bool seed = false;
             string temp = validParameter.valid(parameters, "seed");
-            if (temp == "not found") { random = 0;  m->mothurOut("[ERROR]: You must provide a seed value or set seed to clear."); m->mothurOutEndLine(); abort = true;}
+            if (temp == "not found") { random = 0;  m->mothurOut("[ERROR]: You must provide a seed value or set seed to clear.\n");  abort = true;}
             else if (temp == "clear") {
                 random = time(NULL);
                 seed = true;
             }else {
                 if (util.isInteger(temp)) { util.mothurConvert(temp, random); seed = true; }
-                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.dir command."); m->mothurOutEndLine(); abort = true; }
+                else { m->mothurOut("[ERROR]: Seed must be an integer for the set.dir command.\n"); abort = true; }
             }
         }
     }
