@@ -156,8 +156,9 @@ int main(int argc, char *argv[]){
 			m->appendLogBuffer("Type 'quit()' to exit program\n\n");
 		}
 		
-		m->setRandomSeed( (unsigned)time( NULL ) );
-		
+        m->setRandomSeed(19760620);
+        m->appendLogBuffer("[NOTE]: Setting random seed to 19760620.\n\n");
+        
 		Engine* mothur = NULL;
 		bool bail = 0;
 		string input;

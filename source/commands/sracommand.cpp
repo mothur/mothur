@@ -1032,6 +1032,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
                 if ((thisFileName2 != "none") && (thisFileName2 != "NONE" )) {  if (!using3NONE) { libLayout = "paired"; } else { m->mothurOut("[ERROR]: You cannot have a 3 column file with paired and unpaired files at the same time. Aborting. \n"); m->setControl_pressed(true); } }
                 else {  thisFileName2 = ""; libLayout = "single"; using3NONE = true; }
                 
+                string group = file2Group[i];
                 string thisname = thisFileName1 + " " + thisFileName2;
                 if (using3NONE) { thisname = thisFileName1;  }
                 map<string, vector<string> >::iterator it = files.find(group);
