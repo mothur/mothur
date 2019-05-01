@@ -51,6 +51,7 @@ private:
     int process(SAbundVector*&, string);
     string runErarefaction(SAbundVector*&, string);
     string runMetroIG(SAbundVector*&, string);
+    string runMetroLogNormal(SAbundVector*&, string);
     int runIGAbund(SAbundVector*&, string);
     
 };

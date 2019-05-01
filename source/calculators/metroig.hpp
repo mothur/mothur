@@ -9,8 +9,6 @@
 #ifndef metroig_hpp
 #define metroig_hpp
 
-#include "mothurout.h"
-#include "sabundvector.hpp"
 #include "diversityutils.hpp"
 
 /***********************************************************************/
@@ -29,18 +27,17 @@ private:
     
     Utils util;
     MothurOut* m;
-    DiversityUtils dutils;
     
     double sigmaA, sigmaB, sigmaS;
     int nIters;
     string outFileStub;
     
+    
+    
 };
 
 /***********************************************************************/
 
-
-
-
-
 #endif /* metroig_hpp */
+
+

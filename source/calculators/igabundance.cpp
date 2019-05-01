@@ -23,6 +23,8 @@ vector<double> IGAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sa
         
 #ifdef USE_GSL
         
+        DiversityUtils dutils;
+        
         for(int i = 0; i < sampling.size(); i++) {
             
             if (m->getControl_pressed()) { break; }

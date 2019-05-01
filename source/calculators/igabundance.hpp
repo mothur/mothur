@@ -9,9 +9,10 @@
 #ifndef igabundance_hpp
 #define igabundance_hpp
 
+#include "diversityutils.hpp"
 #include "mothurout.h"
 #include "sabundvector.hpp"
-#include "diversityutils.hpp"
+
 
 /***********************************************************************/
 
@@ -28,8 +29,6 @@ public:
 private:
     Utils util;
     MothurOut* m;
-    
-    DiversityUtils dutils;
     
 };
 

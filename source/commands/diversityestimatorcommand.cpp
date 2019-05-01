@@ -9,6 +9,7 @@
 #include "diversityestimatorcommand.hpp"
 #include "erarefaction.hpp"
 #include "metroig.hpp"
+#include "metrolognormal.hpp"
 #include "igabundance.hpp"
 
 //**********************************************************************************************************************
@@ -21,7 +22,7 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-igabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-igabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaalpha", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmabeta", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
@@ -417,6 +418,7 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             
             if (Estimators[i] == "erarefaction")    { runErarefaction(sabund, fileRoot);    }
             if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot);         }
+            if (Estimators[i] == "metroln")         { runMetroLogNormal(sabund, fileRoot);  }
             if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
         }
         
@@ -491,6 +493,29 @@ string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund, string fileRoot
         exit(1);
     }
 }
+//**********************************************************************************************************************
+string EstimatorSingleCommand::runMetroLogNormal(SAbundVector*& sabund, string fileRoot) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = fileRoot;
+        variables["[distance]"] = sabund->getLabel();
+        string outputFileStub = variables["[filename]"] + variables["[distance]"];
+        
+        MetroLogNormal metroLN(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);
+        
+        vector<string> resultFiles = metroLN.getValues(sabund);
+        
+        for (int i = 0; i < resultFiles.size(); i++) { outputNames.push_back(resultFiles[i]); outputTypes["metroln"].push_back(resultFiles[i]); }
+        
+        return outputFileStub;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runMetroIG");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 int EstimatorSingleCommand::runIGAbund(SAbundVector*& sabund, string fileRoot) {
     try {

@@ -163,6 +163,52 @@ struct mcmcSample {
     mcmcSample(double a, double b, int n) : alpha(a), beta(b), ns(n) {}
     
 };
+typedef struct s_Params
+{
+    long lSeed;
+    
+    string szOutFileStub;
+    
+    double dSigmaX;
+    
+    double dSigmaY;
+    
+    double dSigmaS;
+    
+    int nIter;
+} t_Params;
+
+typedef struct s_Data
+{
+    int nNA;
+    
+    int **aanAbund;
+    
+    int nL;
+    
+    int nJ;
+}t_Data;
+
+#ifdef USE_GSL
+typedef struct s_MetroInit
+{
+    t_Params *ptParams;
+    
+    t_Data   *ptData;
+    
+    gsl_vector* ptX;
+    
+    int nAccepted;
+    
+    long lSeed;
+    
+    int nThread;
+    
+} t_MetroInit;
+
+#endif
+
+//******************************************************
 
 struct IntNode {
 	int lvalue;

@@ -390,6 +390,8 @@ int ChimeraPintailCommand::lookForShortcutFiles(string baseName){
                 }
             }
         }
+        
+        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "ChimeraPintailCommand", "lookForShortcutFiles");
