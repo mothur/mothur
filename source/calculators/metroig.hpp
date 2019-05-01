@@ -32,7 +32,12 @@ private:
     int nIters;
     string outFileStub;
     
+#ifdef USE_GSL
     
+    void outputResults(gsl_vector *ptX, t_Data *ptData);
+    
+#endif
+
     
 };
 

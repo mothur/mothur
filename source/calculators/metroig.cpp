@@ -11,14 +11,7 @@
 /*constants for simplex minimisation*/
 #define PENALTY           1.0e20
 
-#define INIT_A            1.0
-#define INIT_B            5.0
-#define INIT_SIMPLEX_SIZE 0.1
 #define INIT_S_SS         0.1
-#define MIN_SIMPLEX_SIZE  1.0e-2
-#define MAX_SIMPLEX_ITER  100000
-#define MAX_LINE_LENGTH   1024
-#define SAMPLE_FILE_SUFFIX ".sample"
 
 #define DEF_SIGMA     0.1
 #define DEF_SIGMA_S   100.0
@@ -68,77 +61,6 @@ double nLogLikelihood0(const gsl_vector * x, void * params)
     
     /*return*/
     return -dLogL;
-}
-/***********************************************************************/
-int minimiseSimplex0(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const gsl_vector*, void* params))
-{
-    const gsl_multimin_fminimizer_type *T =
-    gsl_multimin_fminimizer_nmsimplex;
-    gsl_multimin_fminimizer *s = NULL;
-    gsl_vector *ss;
-    gsl_multimin_function minex_func;
-    size_t iter = 0;
-    int i = 0, status;
-    double size;
-    
-    /* Initial vertex size vector */
-    ss = gsl_vector_alloc (nP);
-    
-    /* Set all step sizes to default constant */
-    gsl_vector_set_all(ss, INIT_SIMPLEX_SIZE);
-    
-    gsl_vector_set(ss,nP - 1,INIT_S_SS*gsl_vector_get(ptX,0));
-    
-    /* Initialize method and iterate */
-    minex_func.f = f;
-    minex_func.n = nP;
-    minex_func.params = pvData;
-    
-    s = gsl_multimin_fminimizer_alloc (T, nP);
-    gsl_multimin_fminimizer_set(s, &minex_func, ptX, ss);
-    
-    do{
-        iter++;
-        status = gsl_multimin_fminimizer_iterate(s);
-        
-        if(status)
-            break;
-        
-        size = gsl_multimin_fminimizer_size(s);
-        status = gsl_multimin_test_size(size, MIN_SIMPLEX_SIZE);
-        
-        if(status == GSL_SUCCESS){
-            for(i = 0; i < nP; i++){
-                gsl_vector_set(ptX, i, gsl_vector_get(s->x, i));
-            }
-        }
-    }
-    while(status == GSL_CONTINUE && iter < MAX_SIMPLEX_ITER);
-    
-    for(i = 0; i < nP; i++){
-        gsl_vector_set(ptX, i, gsl_vector_get(s->x, i));
-    }
-    
-    gsl_vector_free(ss);
-    gsl_multimin_fminimizer_free (s);
-    
-    return status;
-}
-/***********************************************************************/
-void outputResults0(gsl_vector *ptX, t_Data *ptData)
-{
-    double dAlpha = 0.0, dBeta = 0.0, dS = 0.0, dL = 0.0;
-    
-    dAlpha = gsl_vector_get(ptX, 0);
-    
-    dBeta  = gsl_vector_get(ptX, 1);
-    
-    dS = gsl_vector_get(ptX, 2);
-    
-    dL = nLogLikelihood0(ptX, ptData);
-    
-    MothurOut* m;  m = MothurOut::getInstance();
-    m->mothurOut("\nML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
 }
 /***********************************************************************/
 void getProposal0(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* pnSDash, int nS, t_Params *ptParams)
@@ -205,7 +127,7 @@ void* metropolis0 (void * pvInitMetro)
     t_Data      *ptData       = ptMetroInit->ptData;
     t_Params    *ptParams     = ptMetroInit->ptParams;
     gsl_vector  *ptXDash      = gsl_vector_alloc(3); /*proposal*/
-    char *szSampleFile = (char *) malloc(MAX_LINE_LENGTH*sizeof(char));
+    char *szSampleFile = (char *) malloc(1024*sizeof(char));
     const gsl_rng_type *T;
     gsl_rng            *ptGSLRNG;
     //FILE    *sfp = NULL;
@@ -221,7 +143,7 @@ void* metropolis0 (void * pvInitMetro)
     
     dNLL = negLogLikelihood0(gsl_vector_get(ptX,0), gsl_vector_get(ptX,1), nS,(void*) ptData);
     
-    string filename = ptParams->szOutFileStub + "_" + toString(ptMetroInit->nThread) + SAMPLE_FILE_SUFFIX;
+    string filename = ptParams->szOutFileStub + "_" + toString(ptMetroInit->nThread) + ".sample";
     
     ofstream out; Utils util; util.openOutputFile(filename, out);
     
@@ -266,83 +188,21 @@ void* metropolis0 (void * pvInitMetro)
     
     return pvRet;
 }
-
 /***********************************************************************/
-void mcmc0(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX)
+void MetroIG::outputResults(gsl_vector *ptX, t_Data *ptData)
 {
-    pthread_t thread1, thread2, thread3;
-    int       iret1  , iret2  , iret3;
-    gsl_vector *ptX1 = gsl_vector_alloc(3),
-    *ptX2 = gsl_vector_alloc(3),
-    *ptX3 = gsl_vector_alloc(3);
-    t_MetroInit atMetroInit[3];
+    double dAlpha = 0.0, dBeta = 0.0, dS = 0.0, dL = 0.0;
     
+    dAlpha = gsl_vector_get(ptX, 0);
     
-    MothurOut* m;  m = MothurOut::getInstance();
-    m->mothurOut("\nMCMC iter = " + toString(ptParams->nIter) + " sigmaA = " + toString(ptParams->dSigmaX) +  " sigmaB = " + toString(ptParams->dSigmaY) +  " sigmaS = " + toString(ptParams->dSigmaS) + "\n");
+    dBeta  = gsl_vector_get(ptX, 1);
     
-    gsl_vector_memcpy(ptX1, ptX);
+    dS = gsl_vector_get(ptX, 2);
     
-    gsl_vector_set(ptX2, 0, gsl_vector_get(ptX,0) + 2.0*ptParams->dSigmaX);
-    gsl_vector_set(ptX2, 1, gsl_vector_get(ptX,1) + 2.0*ptParams->dSigmaY);
-    gsl_vector_set(ptX2, 2, gsl_vector_get(ptX,2) + 2.0*ptParams->dSigmaS);
+    dL = nLogLikelihood0(ptX, ptData);
     
-    gsl_vector_set(ptX3, 0, gsl_vector_get(ptX,0) - 2.0*ptParams->dSigmaX);
-    gsl_vector_set(ptX3, 1, gsl_vector_get(ptX,1) - 2.0*ptParams->dSigmaY);
-    if(gsl_vector_get(ptX,2) - 2.0*ptParams->dSigmaS > (double) ptData->nL){
-        gsl_vector_set(ptX3, 2, gsl_vector_get(ptX,2) - 2.0*ptParams->dSigmaS);
-    }
-    else{
-        gsl_vector_set(ptX3, 2, (double) ptData->nL);
-    }
-    atMetroInit[0].ptParams = ptParams;
-    atMetroInit[0].ptData   = ptData;
-    atMetroInit[0].ptX      = ptX1;
-    atMetroInit[0].nThread  = 0;
-    atMetroInit[0].lSeed    = ptParams->lSeed;
-    atMetroInit[0].nAccepted = 0;
-    
-    //write thread 0
-    m->mothurOut(toString(atMetroInit[0].nThread) + ": a = " + toString(gsl_vector_get(ptX1, 0)) +  " b = " + toString(gsl_vector_get(ptX1, 1)) +  " S = " + toString(gsl_vector_get(ptX1, 2)) + "\n");
-    
-    
-    atMetroInit[1].ptParams = ptParams;
-    atMetroInit[1].ptData   = ptData;
-    atMetroInit[1].ptX      = ptX2;
-    atMetroInit[1].nThread  = 1;
-    atMetroInit[1].lSeed    = ptParams->lSeed + 1;
-    atMetroInit[1].nAccepted = 0;
-    
-    //write thread 1
-    m->mothurOut(toString(atMetroInit[1].nThread) + ": a = " + toString(gsl_vector_get(ptX2, 0)) +  " b = " + toString(gsl_vector_get(ptX2, 1)) +  " S = " + toString(gsl_vector_get(ptX2, 2)) + "\n");
-    
-    
-    atMetroInit[2].ptParams = ptParams;
-    atMetroInit[2].ptData   = ptData;
-    atMetroInit[2].ptX      = ptX3;
-    atMetroInit[2].nThread  = 2;
-    atMetroInit[2].lSeed    = ptParams->lSeed + 2;
-    atMetroInit[2].nAccepted = 0;
-    
-    //write thread 2
-    m->mothurOut(toString(atMetroInit[2].nThread) + ": a = " + toString(gsl_vector_get(ptX3, 0)) +  " b = " + toString(gsl_vector_get(ptX3, 1)) +  " S = " + toString(gsl_vector_get(ptX3, 2)) + "\n");
-    
-    
-    iret1 = pthread_create(&thread1, NULL, metropolis0, (void*) &atMetroInit[0]);
-    iret2 = pthread_create(&thread2, NULL, metropolis0, (void*) &atMetroInit[1]);
-    iret3 = pthread_create(&thread3, NULL, metropolis0, (void*) &atMetroInit[2]);
-    pthread_join(thread1, NULL);
-    pthread_join(thread2, NULL);
-    pthread_join(thread3, NULL);
-    
-    
-    m->mothurOut(toString(atMetroInit[0].nThread) +": accept. ratio " + toString(atMetroInit[0].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[0].nAccepted)/((double) ptParams->nIter)) +  "\n");
-    m->mothurOut(toString(atMetroInit[1].nThread) +": accept. ratio " + toString(atMetroInit[1].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[1].nAccepted)/((double) ptParams->nIter)) +  "\n");
-    m->mothurOut(toString(atMetroInit[2].nThread) +": accept. ratio " + toString(atMetroInit[2].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[2].nAccepted)/((double) ptParams->nIter)) +  "\n");
-    
-    gsl_vector_free(ptX1); gsl_vector_free(ptX2); gsl_vector_free(ptX3);
+    m->mothurOut("\nMetroIG - ML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
 }
-
 #endif
 
 /***********************************************************************/
@@ -367,20 +227,18 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         gsl_set_error_handler_off();
         
         /*set initial estimates for parameters*/
-        gsl_vector_set(ptX, 0, INIT_A);
-        gsl_vector_set(ptX, 1, INIT_B);
+        gsl_vector_set(ptX, 0, 1.0);
+        gsl_vector_set(ptX, 1, 5.0);
         gsl_vector_set(ptX, 2, numOTUs*2);
         
         double chaoResult = dutils.chao(&tData);
-        m->mothurOut("\nD = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
+        m->mothurOut("\nMetroIG - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
         
-        minimiseSimplex0(ptX, 3, (void*) &tData, &nLogLikelihood0);
+        dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood0, 0.1, "metroig");
         
-        outputResults0(ptX, &tData);
+        outputResults(ptX, &tData);
         
-        if(tParams.nIter > 0){
-            mcmc0(&tParams, &tData, ptX);
-        }
+        if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis0); }
         
         /*free up allocated memory*/
         gsl_vector_free(ptX);

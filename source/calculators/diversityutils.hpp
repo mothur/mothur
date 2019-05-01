@@ -13,6 +13,8 @@
 #include "utils.hpp"
 #include "sabundvector.hpp"
 
+#define MIN_SIMPLEX_SIZE  1.0e-2
+#define MAX_SIMPLEX_ITER  100000
 
 /***********************************************************************/
 
@@ -26,6 +28,8 @@ public:
     double logLikelihood(int n, double dAlpha, double dBeta);
     int bessel(double* pdResult, int n, double dAlpha, double dBeta);
     double sd(int n, double dAlpha, double dBeta);
+    int minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const gsl_vector*, void* params), double, string);
+    void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));
     
     #endif
     

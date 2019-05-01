@@ -272,6 +272,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             }
             Estimators = validEstimates;
             if (Estimators.size() == 0) { abort = true; m->mothurOut("[ERROR]: no valid estimators, aborting.\n"); }
+            else {  sort(Estimators.begin(), Estimators.end()); }
 
             string temp;
             temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
@@ -477,7 +478,8 @@ string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund, string fileRoot
         map<string, string> variables;
         variables["[filename]"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
-        string outputFileStub = variables["[filename]"] + variables["[distance]"];
+        variables["[tag]"] = ".metroig";
+        string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
         
         MetroIG metroIG(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);
         
@@ -499,8 +501,9 @@ string EstimatorSingleCommand::runMetroLogNormal(SAbundVector*& sabund, string f
         map<string, string> variables;
         variables["[filename]"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
-        string outputFileStub = variables["[filename]"] + variables["[distance]"];
-        
+        variables["[tag]"] = ".metroln";
+        string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
+
         MetroLogNormal metroLN(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);
         
         vector<string> resultFiles = metroLN.getValues(sabund);
