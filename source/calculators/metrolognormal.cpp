@@ -39,6 +39,7 @@ double derivExponent(double x, void *pvParams)
     
     return dRet;
 }
+#ifdef USE_GSL
 /***********************************************************************/
 double logLikelihoodRampal(int n, double dMDash, double dV)
 {
@@ -225,25 +226,6 @@ double negLogLikelihood1(double dMDash, double dV, int nS, void * params)
     return -dLogL;
 }
 /***********************************************************************/
-void getProposal1(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX,
-                 int* pnSDash, int nS, t_MetroInit *ptMetroInit)
-{
-    t_Params *ptParams = ptMetroInit->ptParams;
-    double    dDelta1 = gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaX);
-    double    dDelta2 = gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaY);
-    double    dDeltaS = gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaS);
-    int       nSDash = 0;
-    
-    gsl_vector_set(ptXDash, 0, gsl_vector_get(ptX,0) + dDelta1);
-    gsl_vector_set(ptXDash, 1, gsl_vector_get(ptX,1) + dDelta2);
-    
-    nSDash = nS + (int) floor(dDeltaS);
-    if(nSDash < 1){
-        nSDash = 1;
-    }
-    (*pnSDash) = nSDash;
-}
-/***********************************************************************/
 void* metropolis1 (void * pvInitMetro)
 {
     t_MetroInit *ptMetroInit  = (t_MetroInit *) pvInitMetro;
@@ -280,11 +262,13 @@ void* metropolis1 (void * pvInitMetro)
     /*seed random number generator*/
     gsl_rng_set(ptGSLRNG, ptMetroInit->lSeed);
     
+    DiversityUtils dutils;
+    
     /*now perform simple Metropolis algorithm*/
     while(nIter < ptParams->nIter){
         double dA = 0.0, dNLLDash = 0.0;
         
-        getProposal1(ptGSLRNG, ptXDash, ptX, &nSDash, nS,ptMetroInit);
+        dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS,ptParams);
         
         dXDash =  gsl_vector_get(ptXDash,0); dVDash = gsl_vector_get(ptXDash,1);
         dMDash =  dXDash - 0.5*dVDash;
@@ -322,21 +306,7 @@ void* metropolis1 (void * pvInitMetro)
     
     return pvRet;
 }
-/***********************************************************************/
-void MetroLogNormal::outputResults(gsl_vector *ptX, t_Data *ptData)
-{
-    double dMDash = 0.0, dV = 0.0, dS = 0.0, dL = 0.0;
-    
-    dMDash = gsl_vector_get(ptX, 0);
-    
-    dV     = gsl_vector_get(ptX, 1);
-    
-    dS     = gsl_vector_get(ptX, 2);
-    
-    dL = nLogLikelihood1(ptX, ptData);
-    
-    m->mothurOut("\nMetroLogNormal - ML simplex: M = " + toString(dMDash) +  " V = " + toString(dV) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
-}
+#endif
 /***********************************************************************/
 vector<string> MetroLogNormal::getValues(SAbundVector* rank){
     try {
@@ -361,8 +331,8 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
         int sampled = rank->getNumSeqs(); //nj
         int numOTUs = rank->getNumBins(); //nl
 
-        gsl_vector_set(ptX, 0, INIT_M_DASH);
-        gsl_vector_set(ptX, 1, INIT_V);
+        gsl_vector_set(ptX, 0, 1.0); //INIT_M_DASH
+        gsl_vector_set(ptX, 1, 1.0); //INIT_V
         gsl_vector_set(ptX, 2, numOTUs*2);
 
         double chaoResult = dutils.chao(&tData);
@@ -370,7 +340,7 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
 
         dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood1, 1.0, "metroln");
 
-        outputResults(ptX, &tData);
+        dutils.outputResults(ptX, &tData, &nLogLikelihood1, "metroln");
 
         if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis1); }
        

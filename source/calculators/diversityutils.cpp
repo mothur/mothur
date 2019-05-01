@@ -173,6 +173,23 @@ double DiversityUtils::logLikelihood(int n, double dAlpha, double dBeta)
 }
 /***********************************************************************/
 
+void DiversityUtils::outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(const gsl_vector*, void* params), string method)
+{
+    double dAlpha = 0.0, dBeta = 0.0, dS = 0.0, dL = 0.0;
+    
+    dAlpha = gsl_vector_get(ptX, 0);
+    
+    dBeta  = gsl_vector_get(ptX, 1);
+    
+    dS = gsl_vector_get(ptX, 2);
+    
+    dL = f(ptX, ptData);
+    
+    if (method == "metroig")        { m->mothurOut("\nMetroIG - ML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");            }
+    else if (method == "metroln")   { m->mothurOut("\nMetroLogNormal - ML simplex: M = " + toString(dAlpha) +  " V = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");     }
+    
+}
+/***********************************************************************/
 int DiversityUtils::minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const gsl_vector*, void* params), double initSimplexSize, string method)
 {
     const gsl_multimin_fminimizer_type *T =
@@ -230,6 +247,24 @@ int DiversityUtils::minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, do
     
     return status;
 }
+/***********************************************************************/
+void DiversityUtils::getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* pnSDash, int nS, t_Params *ptParams)
+{
+    double dDeltaS =  gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaS);
+    double dDeltaA =  gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaX);
+    double dDeltaB =  gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaY);
+    int    nSDash = 0;
+    
+    gsl_vector_set(ptXDash, 0, gsl_vector_get(ptX,0) + dDeltaA);
+    gsl_vector_set(ptXDash, 1, gsl_vector_get(ptX,1) + dDeltaB);
+    
+    nSDash = nS + (int) floor(dDeltaS);
+    if(nSDash < 1){
+        nSDash = 1;
+    }
+    (*pnSDash) = nSDash;
+}
+
 /***********************************************************************/
 void DiversityUtils::mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro))
 {

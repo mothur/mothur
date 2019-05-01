@@ -30,6 +30,8 @@ public:
     double sd(int n, double dAlpha, double dBeta);
     int minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const gsl_vector*, void* params), double, string);
     void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));
+    void outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(const gsl_vector*, void* params), string);
+    void getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* pnSDash, int nS, t_Params *ptParams);
     
     #endif
     

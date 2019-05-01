@@ -10,15 +10,8 @@
 
 /*constants for simplex minimisation*/
 #define PENALTY           1.0e20
-
-#define INIT_S_SS         0.1
-
-#define DEF_SIGMA     0.1
-#define DEF_SIGMA_S   100.0
-
-#define DEF_ITER   250000
 #define SLICE      10
-#define PRECISION  1.0e-10
+
 
 #ifdef USE_GSL
 
@@ -61,23 +54,6 @@ double nLogLikelihood0(const gsl_vector * x, void * params)
     
     /*return*/
     return -dLogL;
-}
-/***********************************************************************/
-void getProposal0(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* pnSDash, int nS, t_Params *ptParams)
-{
-    double dDeltaS =  gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaS);
-    double dDeltaA =  gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaX);
-    double dDeltaB =  gsl_ran_gaussian(ptGSLRNG, ptParams->dSigmaY);
-    int    nSDash = 0;
-    
-    gsl_vector_set(ptXDash, 0, gsl_vector_get(ptX,0) + dDeltaA);
-    gsl_vector_set(ptXDash, 1, gsl_vector_get(ptX,1) + dDeltaB);
-    
-    nSDash = nS + (int) floor(dDeltaS);
-    if(nSDash < 1){
-        nSDash = 1;
-    }
-    (*pnSDash) = nSDash;
 }
 /***********************************************************************/
 double negLogLikelihood0(double dAlpha, double dBeta, int nS, void * params)
@@ -150,11 +126,13 @@ void* metropolis0 (void * pvInitMetro)
     /*seed random number generator*/
     gsl_rng_set(ptGSLRNG, ptMetroInit->lSeed);
     
+    DiversityUtils dutils;
+    
     /*now perform simple Metropolis algorithm*/
     while(nIter < ptParams->nIter){
         double dA = 0.0, dNLLDash = 0.0;
         
-        getProposal0(ptGSLRNG, ptXDash, ptX, &nSDash, nS, ptParams);
+        dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS, ptParams);
         
         dNLLDash = negLogLikelihood0(gsl_vector_get(ptXDash,0), gsl_vector_get(ptXDash,1), nSDash, (void*) ptData);
         
@@ -187,21 +165,6 @@ void* metropolis0 (void * pvInitMetro)
     gsl_rng_free(ptGSLRNG);
     
     return pvRet;
-}
-/***********************************************************************/
-void MetroIG::outputResults(gsl_vector *ptX, t_Data *ptData)
-{
-    double dAlpha = 0.0, dBeta = 0.0, dS = 0.0, dL = 0.0;
-    
-    dAlpha = gsl_vector_get(ptX, 0);
-    
-    dBeta  = gsl_vector_get(ptX, 1);
-    
-    dS = gsl_vector_get(ptX, 2);
-    
-    dL = nLogLikelihood0(ptX, ptData);
-    
-    m->mothurOut("\nMetroIG - ML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
 }
 #endif
 
@@ -236,7 +199,7 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         
         dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood0, 0.1, "metroig");
         
-        outputResults(ptX, &tData);
+        dutils.outputResults(ptX, &tData, &nLogLikelihood0, "metroig");
         
         if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis0); }
         

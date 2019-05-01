@@ -189,6 +189,15 @@ typedef struct s_Data
     int nJ;
 }t_Data;
 
+typedef struct s_LNParams
+{
+    double dMDash;
+    
+    double dV;
+    
+    int    n;
+} t_LNParams;
+
 #ifdef USE_GSL
 typedef struct s_MetroInit
 {
