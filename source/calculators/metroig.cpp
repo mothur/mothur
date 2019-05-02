@@ -9,8 +9,6 @@
 #include "metroig.hpp"
 
 /*constants for simplex minimisation*/
-#define PENALTY           1.0e20
-#define SLICE      10
 
 
 #ifdef USE_GSL
@@ -30,7 +28,7 @@ double nLogLikelihood0(const gsl_vector * x, void * params)
         return PENALTY;
     }
     
-    DiversityUtils dutils;
+    DiversityUtils dutils("metroig");
     
     for(i = 0; i < ptData->nNA; i++){
         double dLogP = 0.0;
@@ -67,7 +65,7 @@ double negLogLikelihood0(double dAlpha, double dBeta, int nS, void * params)
         return PENALTY;
     }
     
-    DiversityUtils dutils;
+    DiversityUtils dutils("metroig");
     
     for(i = 0; i < ptData->nNA; i++){
         double dLogP = 0.0;
@@ -122,11 +120,12 @@ void* metropolis0 (void * pvInitMetro)
     string filename = ptParams->szOutFileStub + "_" + toString(ptMetroInit->nThread) + ".sample";
     
     ofstream out; Utils util; util.openOutputFile(filename, out);
+    out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
     
     /*seed random number generator*/
     gsl_rng_set(ptGSLRNG, ptMetroInit->lSeed);
     
-    DiversityUtils dutils;
+    DiversityUtils dutils("metroig");
     
     /*now perform simple Metropolis algorithm*/
     while(nIter < ptParams->nIter){
@@ -176,7 +175,7 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         t_Data   tData;
 #ifdef USE_GSL
         
-        DiversityUtils dutils;
+        DiversityUtils dutils("metroig");
         
         dutils.loadAbundance(&tData, rank);
         
@@ -197,9 +196,9 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         double chaoResult = dutils.chao(&tData);
         m->mothurOut("\nMetroIG - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
         
-        dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood0, 0.1, "metroig");
+        dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood0, 0.1, 1.0e-2, 100000);
         
-        dutils.outputResults(ptX, &tData, &nLogLikelihood0, "metroig");
+        dutils.outputResults(ptX, &tData, &nLogLikelihood0);
         
         if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis0); }
         

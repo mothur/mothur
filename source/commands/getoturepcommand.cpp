@@ -391,7 +391,7 @@ int GetOTURepCommand::execute(){
 	try {
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		int error;
+		
 		list = NULL;
         
         if (method == "distance") {

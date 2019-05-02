@@ -169,14 +169,17 @@ typedef struct s_Params
     
     string szOutFileStub;
     
-    double dSigmaX;
+    double dSigmaX; //dSigmaM, dSigmaA
     
-    double dSigmaY;
+    double dSigmaY;  //dSigmaV, dSigmaB
+    
+    double dSigmaN;
     
     double dSigmaS;
     
     int nIter;
 } t_Params;
+
 
 typedef struct s_Data
 {
@@ -197,6 +200,18 @@ typedef struct s_LNParams
     
     int    n;
 } t_LNParams;
+
+typedef struct s_LSParams
+{
+    double dMDash;
+    
+    double dV;
+    
+    double dNu;
+    
+    int n;
+    
+} t_LSParams;
 
 #ifdef USE_GSL
 typedef struct s_MetroInit

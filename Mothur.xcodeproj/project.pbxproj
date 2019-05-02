@@ -18,6 +18,8 @@
 		4803D5B921271B47001C63B5 /* 454sop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B721271B47001C63B5 /* 454sop.cpp */; };
 		48098ED6219DE7A500031FA4 /* testsubsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48098ED4219DE7A500031FA4 /* testsubsample.cpp */; };
 		4809EC95227B3A5B00B4D0E5 /* metrolognormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E7E0A12278A21B00B74910 /* metrolognormal.cpp */; };
+		4809EC98227B405700B4D0E5 /* metrologstudent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC96227B405700B4D0E5 /* metrologstudent.cpp */; };
+		4809EC99227B405700B4D0E5 /* metrologstudent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC96227B405700B4D0E5 /* metrologstudent.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -890,6 +892,8 @@
 		48098ED4219DE7A500031FA4 /* testsubsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testsubsample.cpp; sourceTree = "<group>"; };
 		48098ED5219DE7A500031FA4 /* testsubsample.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testsubsample.hpp; sourceTree = "<group>"; };
 		4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrolognormal.hpp; path = source/calculators/metrolognormal.hpp; sourceTree = SOURCE_ROOT; };
+		4809EC96227B405700B4D0E5 /* metrologstudent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metrologstudent.cpp; path = source/calculators/metrologstudent.cpp; sourceTree = SOURCE_ROOT; };
+		4809EC9A227B5D2500B4D0E5 /* metrologstudent.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrologstudent.hpp; path = source/calculators/metrologstudent.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -2043,6 +2047,8 @@
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
 				48E7E0A12278A21B00B74910 /* metrolognormal.cpp */,
+				4809EC96227B405700B4D0E5 /* metrologstudent.cpp */,
+				4809EC9A227B5D2500B4D0E5 /* metrologstudent.hpp */,
 			);
 			name = diversitycalcs;
 			sourceTree = "<group>";
@@ -3258,6 +3264,7 @@
 				481FB6371AC1B7EA0076CFF3 /* nameassignment.cpp in Sources */,
 				489AF694210619410028155E /* optirefmatrix.cpp in Sources */,
 				481FB5D21AC1B75C0076CFF3 /* libshuffcommand.cpp in Sources */,
+				4809EC99227B405700B4D0E5 /* metrologstudent.cpp in Sources */,
 				481FB5561AC1B6520076CFF3 /* shannon.cpp in Sources */,
 				481FB6591AC1B8100076CFF3 /* linearalgebra.cpp in Sources */,
 				481FB5411AC1B6070076CFF3 /* coverage.cpp in Sources */,
@@ -3796,6 +3803,7 @@
 				A7132EB3184E792700AAA402 /* communitytype.cpp in Sources */,
 				A7D395C4184FA3A200A350D7 /* kmeans.cpp in Sources */,
 				A7222D731856277C0055A993 /* sharedjsd.cpp in Sources */,
+				4809EC98227B405700B4D0E5 /* metrologstudent.cpp in Sources */,
 				A7B093C018579F0400843CD1 /* pam.cpp in Sources */,
 				48E544781E9D3CE400FF6AB8 /* npv.cpp in Sources */,
 				A7A09B1018773C0E00FAA081 /* shannonrange.cpp in Sources */,

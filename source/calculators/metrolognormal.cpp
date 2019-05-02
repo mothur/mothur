@@ -8,16 +8,11 @@
 
 #include "metrolognormal.hpp"
 
-#define HI_PRECISION 1.0e-12
-#define LO_PRECISION 1.0e-7
-
 /*constants for calculated compound Poisson lognormal*/
-#define V_MULT          25.0
-#define MAX_QUAD        100
-#define MAX_QUAD_DERIV  100
+
 
 /***********************************************************************/
-double f1(double x, void *pvParams)
+double f1_0(double x, void *pvParams)
 {
     t_LNParams *ptLNParams = (t_LNParams *) pvParams;
     double dMDash = ptLNParams->dMDash, dV = ptLNParams->dV;
@@ -25,17 +20,6 @@ double f1(double x, void *pvParams)
     double dTemp = (x - dMDash);
     double dExp  = x*((double) n) - exp(x) - 0.5*((dTemp*dTemp)/dV);
     double dRet  = exp(dExp);
-    
-    return dRet;
-}
-/***********************************************************************/
-double derivExponent(double x, void *pvParams)
-{
-    t_LNParams *ptLNParams = (t_LNParams *) pvParams;
-    double dMDash = ptLNParams->dMDash, dV = ptLNParams->dV, n = ptLNParams->n;
-    double dTemp = (x - dMDash)/dV, dRet = 0.0;
-    
-    dRet = ((double) n) - exp(x) - dTemp;
     
     return dRet;
 }
@@ -55,41 +39,6 @@ double logLikelihoodRampal(int n, double dMDash, double dV)
     return dLogLik;
 }
 /***********************************************************************/
-int solveF(double x_lo, double x_hi, double (*f)(double, void*),
-           void* params, double tol, double *xsolve)
-{
-    int status, iter = 0, max_iter = 100;
-    const gsl_root_fsolver_type *T;
-    gsl_root_fsolver *s;
-    double r = 0;
-    gsl_function F;
-    
-    F.function = f;
-    F.params = params;
-    
-    //printf("%f %f %d %f %f\n",ptLNParams->dMDash, ptLNParams->dV, ptLNParams->n, x_lo, x_hi);
-    T = gsl_root_fsolver_brent;
-    s = gsl_root_fsolver_alloc (T);
-    gsl_root_fsolver_set (s, &F, x_lo, x_hi);
-    
-    do{
-        iter++;
-        status = gsl_root_fsolver_iterate (s);
-        r = gsl_root_fsolver_root (s);
-        x_lo = gsl_root_fsolver_x_lower (s);
-        x_hi = gsl_root_fsolver_x_upper (s);
-        
-        status = gsl_root_test_interval (x_lo, x_hi, 0, tol);
-    }
-    while (status == GSL_CONTINUE && iter < max_iter);
-    
-    (*xsolve) = gsl_root_fsolver_root (s);
-    gsl_root_fsolver_free (s);
-    
-    return status;
-}
-
-/***********************************************************************/
 double logLikelihoodQuad(int n, double dMDash, double dV)
 {
     gsl_integration_workspace *ptGSLWS =
@@ -102,7 +51,9 @@ double logLikelihoodQuad(int n, double dMDash, double dV)
     
     tLNParams.n = n; tLNParams.dMDash = dMDash; tLNParams.dV = dV;
     
-    tGSLF.function = &f1;
+    DiversityUtils dutils("metroln");
+    
+    tGSLF.function = f1_0;
     tGSLF.params   = (void *) &tLNParams;
     
     dLogFac1 = log(2.0*M_PI*dV);
@@ -121,7 +72,7 @@ double logLikelihoodQuad(int n, double dMDash, double dV)
         double dVar   = 0.0;
         
         if(fabs(dUpper) > 1.0e-7){
-            solveF(0.0, dUpper, derivExponent, (void *) &tLNParams, 1.0e-5, &dMax);
+            dutils.solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax);
         }
         
         dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
@@ -135,7 +86,7 @@ double logLikelihoodQuad(int n, double dMDash, double dV)
         double dVar   = 0.0;
         
         if(fabs(dUpper - dLower) > 1.0e-7){
-            solveF(dLower, dUpper, derivExponent, (void *) &tLNParams, 1.0e-5, &dMax);
+            dutils.solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax);
         }
         else{
             dMax = 0.5*(dLower + dUpper);
@@ -168,7 +119,7 @@ double nLogLikelihood1(const gsl_vector * x, void * params)
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
-        if(nA < MAX_QUAD){
+        if(nA < 100){
             dLogP = logLikelihoodQuad(nA, dMDash, dV);
         }
         else{
@@ -200,7 +151,7 @@ double negLogLikelihood1(double dMDash, double dV, int nS, void * params)
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
-        if(nA < MAX_QUAD){
+        if(nA < 100){
             dLogP = logLikelihoodQuad(nA, dMDash, dV);
         }
         else{
@@ -258,11 +209,12 @@ void* metropolis1 (void * pvInitMetro)
     string filename = ptParams->szOutFileStub + "_" + toString(ptMetroInit->nThread) + ".sample";
     
     ofstream out; Utils util; util.openOutputFile(filename, out);
+    out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
     
     /*seed random number generator*/
     gsl_rng_set(ptGSLRNG, ptMetroInit->lSeed);
     
-    DiversityUtils dutils;
+    DiversityUtils dutils("metroln");
     
     /*now perform simple Metropolis algorithm*/
     while(nIter < ptParams->nIter){
@@ -316,7 +268,7 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
         
 #ifdef USE_GSL
         
-        DiversityUtils dutils;
+        DiversityUtils dutils("metroln");
         
         dutils.loadAbundance(&tData, rank);
 
@@ -338,9 +290,9 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
         double chaoResult = dutils.chao(&tData);
         m->mothurOut("\nMetroLogNormal - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
 
-        dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood1, 1.0, "metroln");
+        dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood1, 1.0, 1.0e-2, 100000);
 
-        dutils.outputResults(ptX, &tData, &nLogLikelihood1, "metroln");
+        dutils.outputResults(ptX, &tData, &nLogLikelihood1);
 
         if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis1); }
        

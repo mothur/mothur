@@ -1620,7 +1620,7 @@ int CountTable::remove(string seqName) {
             map<int, string> reverse;
             for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 !=indexNameMap.end(); it2++) { reverse[it2->second] = it2->first;  }
             
-            int thisIndex = 0; int newIndex = 0;
+            int newIndex = 0;
             map<string, int> newIndexNameMap;
             for (int i = 0; i < counts.size(); i++) {
                 if (i == seqIndexIntoCounts) { }//you are the seq we are trying to remove

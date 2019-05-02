@@ -23,7 +23,7 @@ vector<double> IGAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sa
         
 #ifdef USE_GSL
         
-        DiversityUtils dutils;
+        DiversityUtils dutils("igabund");
         
         for(int i = 0; i < sampling.size(); i++) {
             

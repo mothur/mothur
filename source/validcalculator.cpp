@@ -401,14 +401,16 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 
 void ValidCalculators::initialEstimators() {
     try {
+        
         estimators["erarefaction"]	= "erarefaction";
         estimators["metroig"]	= "metroig";
         estimators["metroln"]	= "metroln";
+        estimators["metrols"]	= "metrols";
         estimators["igabund"]	= "igabund";
         estimators["default"]	    = "default";
     }
     catch(exception& e) {
-        m->errorOut(e, "ValidCalculator", "initialSharedRarefact");
+        m->errorOut(e, "ValidCalculator", "initialEstimators");
         exit(1);
     }
 }
