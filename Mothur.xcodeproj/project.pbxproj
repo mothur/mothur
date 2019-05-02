@@ -888,6 +888,7 @@
 		4803D5B821271B47001C63B5 /* 454sop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = 454sop.hpp; path = TestMothur/IntegrationTests/454sop.hpp; sourceTree = SOURCE_ROOT; };
 		48098ED4219DE7A500031FA4 /* testsubsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testsubsample.cpp; sourceTree = "<group>"; };
 		48098ED5219DE7A500031FA4 /* testsubsample.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testsubsample.hpp; sourceTree = "<group>"; };
+		4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrolognormal.hpp; path = source/calculators/metrolognormal.hpp; sourceTree = "<group>"; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -1051,7 +1052,6 @@
 		48E5EAF4219515A700D86887 /* libhdf5_hl.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5_hl.la; path = "../hdf5-1.10.3/hl/src/libhdf5_hl.la"; sourceTree = "<group>"; };
 		48E5EAF6219515C000D86887 /* libhdf5.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5.la; path = "../hdf5-1.10.3/src/libhdf5.la"; sourceTree = "<group>"; };
 		48E7E0A12278A21B00B74910 /* metrolognormal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metrolognormal.cpp; path = source/calculators/metrolognormal.cpp; sourceTree = SOURCE_ROOT; };
-		48E7E0A22278A21B00B74910 /* metrolognormal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrolognormal.hpp; path = source/calculators/metrolognormal.hpp; sourceTree = SOURCE_ROOT; };
 		48E7E0A42278AD4800B74910 /* diversityutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityutils.cpp; path = source/calculators/diversityutils.cpp; sourceTree = "<group>"; };
 		48E7E0A52278AD4800B74910 /* diversityutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityutils.hpp; path = source/calculators/diversityutils.hpp; sourceTree = "<group>"; };
 		48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chimeravsearchcommand.cpp; path = source/commands/chimeravsearchcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -2040,8 +2040,8 @@
 				484976E22255412400F3A291 /* igabundance.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
+				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
 				48E7E0A12278A21B00B74910 /* metrolognormal.cpp */,
-				48E7E0A22278A21B00B74910 /* metrolognormal.hpp */,
 			);
 			name = diversitycalcs;
 			sourceTree = "<group>";
