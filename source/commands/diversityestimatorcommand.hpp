@@ -53,6 +53,7 @@ private:
     string runMetroIG(SAbundVector*&, string);
     string runMetroLogNormal(SAbundVector*&, string);
     string runMetroLogStudent(SAbundVector*&, string);
+    string runMetroSichel(SAbundVector*&, string);
     int runIGAbund(SAbundVector*&, string);
     
 };

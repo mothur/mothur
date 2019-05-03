@@ -11,6 +11,7 @@
 #include "metroig.hpp"
 #include "metrolognormal.hpp"
 #include "metrologstudent.hpp"
+#include "metrosichel.hpp"
 #include "igabundance.hpp"
 
 //**********************************************************************************************************************
@@ -23,7 +24,7 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-igabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
@@ -57,10 +58,10 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
         helpString += "The sample file is used to provide mcmc sampling to the following calculators: ...............\n";
         helpString += "The default values for freq is 100, and calc is erarefaction.\n";
-        helpString += "The sigmaa parameter is used to set the std. dev. of alpha / X / mean prop. distn for MetroIG / MetroLogNormal / MetroLogStudent, respectively. Default = 0.10. n";
-        helpString += "The sigmab parameter is used to set the std. dev. of beta / Y / V prop. distn for MetroIG / MetroLogNormal / MetroLogStudent, respectively. Default = 0.10. n";
-        helpString += "The sigman parameter is used to set the std. dev. of N prop. distn for MetroLogStudent. Default = 0.10. n";
-         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent. Default = 100. n";
+        helpString += "The sigmaa parameter is used to set the std. dev. of alpha / X / mean prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
+        helpString += "The sigmab parameter is used to set the std. dev. of beta / Y / V prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
+        helpString += "The sigman parameter is used to set the std. dev. of N / Gamma prop. distn for MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
+         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
         helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
         helpString += validCalculator.printCalc("single");
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
@@ -99,6 +100,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         outputTypes["metroig"] = tempOutNames;
         outputTypes["metroln"] = tempOutNames;
         outputTypes["metrols"] = tempOutNames;
+        outputTypes["metrosichel"] = tempOutNames;
         
     }
     catch(exception& e) {
@@ -137,6 +139,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             outputTypes["metroig"] = tempOutNames;
             outputTypes["metroln"] = tempOutNames;
             outputTypes["metrols"] = tempOutNames;
+            outputTypes["metrosichel"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -429,11 +432,12 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             
             if (m->getControl_pressed()) { break; }
             
-            if (Estimators[i] == "erarefaction")    { runErarefaction(sabund, fileRoot);    }
-            if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot);         }
-            if (Estimators[i] == "metroln")         { runMetroLogNormal(sabund, fileRoot);  }
-            if (Estimators[i] == "metrols")         { runMetroLogStudent(sabund, fileRoot); }
-            if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
+            if (Estimators[i] == "erarefaction")         { runErarefaction(sabund, fileRoot);    }
+            else if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot);         }
+            else if (Estimators[i] == "metroln")         { runMetroLogNormal(sabund, fileRoot);  }
+            else if (Estimators[i] == "metrols")         { runMetroLogStudent(sabund, fileRoot); }
+            else if (Estimators[i] == "metrosichel")     { runMetroSichel(sabund, fileRoot);     }
+            else if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
         }
         
         return 0;
@@ -527,7 +531,7 @@ string EstimatorSingleCommand::runMetroLogNormal(SAbundVector*& sabund, string f
         
     }
     catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runMetroIG");
+        m->errorOut(e, "EstimatorSingleCommand", "runMetroLogNormal");
         exit(1);
     }
 }
@@ -550,7 +554,30 @@ string EstimatorSingleCommand::runMetroLogStudent(SAbundVector*& sabund, string 
         
     }
     catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runMetroIG");
+        m->errorOut(e, "EstimatorSingleCommand", "runMetroLogStudent");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string EstimatorSingleCommand::runMetroSichel(SAbundVector*& sabund, string fileRoot) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = fileRoot;
+        variables["[distance]"] = sabund->getLabel();
+        variables["[tag]"] = ".metrosichel";
+        string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
+        
+        MetroSichel metroSichel(sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub);
+        
+        vector<string> resultFiles = metroSichel.getValues(sabund);
+        
+        for (int i = 0; i < resultFiles.size(); i++) { outputNames.push_back(resultFiles[i]); outputTypes["metrosichel"].push_back(resultFiles[i]); }
+        
+        return outputFileStub;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runMetroSichel");
         exit(1);
     }
 }

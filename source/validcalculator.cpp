@@ -406,6 +406,7 @@ void ValidCalculators::initialEstimators() {
         estimators["metroig"]	= "metroig";
         estimators["metroln"]	= "metroln";
         estimators["metrols"]	= "metrols";
+        estimators["metrosichel"]	= "metrosichel";
         estimators["igabund"]	= "igabund";
         estimators["default"]	    = "default";
     }

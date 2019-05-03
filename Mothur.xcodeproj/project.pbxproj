@@ -20,6 +20,8 @@
 		4809EC95227B3A5B00B4D0E5 /* metrolognormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E7E0A12278A21B00B74910 /* metrolognormal.cpp */; };
 		4809EC98227B405700B4D0E5 /* metrologstudent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC96227B405700B4D0E5 /* metrologstudent.cpp */; };
 		4809EC99227B405700B4D0E5 /* metrologstudent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC96227B405700B4D0E5 /* metrologstudent.cpp */; };
+		4809EC9D227C9B3100B4D0E5 /* metrosichel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9B227C9B3100B4D0E5 /* metrosichel.cpp */; };
+		4809EC9E227C9B3100B4D0E5 /* metrosichel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9B227C9B3100B4D0E5 /* metrosichel.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -894,6 +896,8 @@
 		4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrolognormal.hpp; path = source/calculators/metrolognormal.hpp; sourceTree = SOURCE_ROOT; };
 		4809EC96227B405700B4D0E5 /* metrologstudent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metrologstudent.cpp; path = source/calculators/metrologstudent.cpp; sourceTree = SOURCE_ROOT; };
 		4809EC9A227B5D2500B4D0E5 /* metrologstudent.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrologstudent.hpp; path = source/calculators/metrologstudent.hpp; sourceTree = SOURCE_ROOT; };
+		4809EC9B227C9B3100B4D0E5 /* metrosichel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metrosichel.cpp; path = source/calculators/metrosichel.cpp; sourceTree = SOURCE_ROOT; };
+		4809EC9C227C9B3100B4D0E5 /* metrosichel.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrosichel.hpp; path = source/calculators/metrosichel.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -2049,6 +2053,8 @@
 				48E7E0A12278A21B00B74910 /* metrolognormal.cpp */,
 				4809EC96227B405700B4D0E5 /* metrologstudent.cpp */,
 				4809EC9A227B5D2500B4D0E5 /* metrologstudent.hpp */,
+				4809EC9B227C9B3100B4D0E5 /* metrosichel.cpp */,
+				4809EC9C227C9B3100B4D0E5 /* metrosichel.hpp */,
 			);
 			name = diversitycalcs;
 			sourceTree = "<group>";
@@ -3358,6 +3364,7 @@
 				481FB5D91AC1B75C0076CFF3 /* makefastqcommand.cpp in Sources */,
 				481FB5A21AC1B71B0076CFF3 /* clearcutcommand.cpp in Sources */,
 				48D6E9681CA42389008DF76B /* testvsearchfileparser.cpp in Sources */,
+				4809EC9E227C9B3100B4D0E5 /* metrosichel.cpp in Sources */,
 				481FB5851AC1B6FF0076CFF3 /* chimeracheckrdp.cpp in Sources */,
 				481FB55C1AC1B6660076CFF3 /* sharedbraycurtis.cpp in Sources */,
 				481FB5BE1AC1B74F0076CFF3 /* getmetacommunitycommand.cpp in Sources */,
@@ -3504,6 +3511,7 @@
 				A7E9B8D612D37EC400DA6239 /* getrelabundcommand.cpp in Sources */,
 				A7E9B8D712D37EC400DA6239 /* getsabundcommand.cpp in Sources */,
 				A7E9B8D812D37EC400DA6239 /* getseqscommand.cpp in Sources */,
+				4809EC9D227C9B3100B4D0E5 /* metrosichel.cpp in Sources */,
 				A7E9B8D912D37EC400DA6239 /* getsharedotucommand.cpp in Sources */,
 				48E544701E9D3B2D00FF6AB8 /* accuracy.cpp in Sources */,
 				A7E9B8DB12D37EC400DA6239 /* goodscoverage.cpp in Sources */,
