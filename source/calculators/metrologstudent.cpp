@@ -37,6 +37,7 @@ double logStirlingsGamma(double dZ)
 {
     return 0.5*log(2.0*M_PI) + (dZ - 0.5)*log(dZ) - dZ;
 }
+#ifdef USE_GSL
 /***********************************************************************/
 double logLikelihoodQuad(int n, double dMDash, double dV, double dNu)
 {
@@ -358,6 +359,7 @@ void* metropolis2 (void * pvInitMetro)
     
     return pvRet;
 }
+#endif
 /***********************************************************************/
 vector<string> MetroLogStudent::getValues(SAbundVector* rank){
     try {
