@@ -56,39 +56,6 @@ double derivExponent(double x, void *pvParams)
     
     return dRet;
 }
-/***********************************************************************/
-int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve)
-{
-    int status, iter = 0, max_iter = 100;
-    const gsl_root_fsolver_type *T;
-    gsl_root_fsolver *s;
-    double r = 0;
-    gsl_function F;
-    
-    F.function = derivExponent;
-    F.params = params;
-    
-    //printf("%f %f %d %f %f\n",ptLNParams->dMDash, ptLNParams->dV, ptLNParams->n, x_lo, x_hi);
-    T = gsl_root_fsolver_brent;
-    s = gsl_root_fsolver_alloc (T);
-    gsl_root_fsolver_set (s, &F, x_lo, x_hi);
-    
-    do{
-        iter++;
-        status = gsl_root_fsolver_iterate (s);
-        r = gsl_root_fsolver_root (s);
-        x_lo = gsl_root_fsolver_x_lower (s);
-        x_hi = gsl_root_fsolver_x_upper (s);
-        
-        status = gsl_root_test_interval (x_lo, x_hi, 0, tol);
-    }
-    while (status == GSL_CONTINUE && iter < max_iter);
-    
-    (*xsolve) = gsl_root_fsolver_root (s);
-    gsl_root_fsolver_free (s);
-    
-    return status;
-}
 
 /***********************************************************************/
 double DiversityUtils::chao(t_Data *ptData)
@@ -129,8 +96,42 @@ double DiversityUtils::f2X(double x, double dA, double dB, double dNDash)
     
     return -dRet;
 }
-/***********************************************************************/
+
  #ifdef USE_GSL
+/***********************************************************************/
+int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve)
+{
+    int status, iter = 0, max_iter = 100;
+    const gsl_root_fsolver_type *T;
+    gsl_root_fsolver *s;
+    double r = 0;
+    gsl_function F;
+    
+    F.function = derivExponent;
+    F.params = params;
+    
+    //printf("%f %f %d %f %f\n",ptLNParams->dMDash, ptLNParams->dV, ptLNParams->n, x_lo, x_hi);
+    T = gsl_root_fsolver_brent;
+    s = gsl_root_fsolver_alloc (T);
+    gsl_root_fsolver_set (s, &F, x_lo, x_hi);
+    
+    do{
+        iter++;
+        status = gsl_root_fsolver_iterate (s);
+        r = gsl_root_fsolver_root (s);
+        x_lo = gsl_root_fsolver_x_lower (s);
+        x_hi = gsl_root_fsolver_x_upper (s);
+        
+        status = gsl_root_test_interval (x_lo, x_hi, 0, tol);
+    }
+    while (status == GSL_CONTINUE && iter < max_iter);
+    
+    (*xsolve) = gsl_root_fsolver_root (s);
+    gsl_root_fsolver_free (s);
+    
+    return status;
+}
+/***********************************************************************/
 double DiversityUtils::sd(int n, double dAlpha, double dBeta)
 {
     double dGamma = -0.5;
