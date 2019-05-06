@@ -266,8 +266,8 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 			
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n"); abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }
 			else { current->setFastaFile(fastafile); }
@@ -302,11 +302,11 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
             else { current->setSummaryFile(summaryfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n"); abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
 			alignreport = validParameter.validFile(parameters, "alignreport");
@@ -406,12 +406,9 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				if (validOptimizers.count(optimize[i]) == 0) { 
 					m->mothurOut(optimize[i] + " is not a valid optimizer with your input files. Valid options are "); 
                     string valid = "";
-                    for (set<string>::iterator it = validOptimizers.begin(); it != validOptimizers.end(); it++) {
-                        valid += (*it) + ", ";
-                    }
+                    for (set<string>::iterator it = validOptimizers.begin(); it != validOptimizers.end(); it++) { valid += (*it) + ", "; }
                     if (valid.length() != 0) {  valid = valid.substr(0, valid.length()-2); }
-                    m->mothurOut(valid + ".");
-                    m->mothurOutEndLine();
+                    m->mothurOut(valid + ".\n");
 					optimize.erase(optimize.begin()+i);
 					i--;
 				}
@@ -552,10 +549,9 @@ int ScreenSeqsCommand::execute(){
         }
 		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]);  } return 0; }
 
-        m->mothurOut("\nOutput File Names: \n"); 
-		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
-		m->mothurOutEndLine();
-		m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names:\n");
+		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i] +"\n");  }
+        m->mothurOut("\n\n");
 		
 		//set fasta file as new current fastafile
 		string currentName = "";
@@ -594,8 +590,7 @@ int ScreenSeqsCommand::execute(){
             if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
         }
 
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
-		m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
 
 		return 0;
 	}
@@ -970,12 +965,12 @@ int ScreenSeqsCommand::getSummaryReport(){
         double mincriteriaPercentile = (100 - criteria);
         
         for (int i = 0; i < optimize.size(); i++) {
-            if (optimize[i] == "start") { startPos = sum.getStart(criteriaPercentile); m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
-            else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "minlength") {  minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->setControl_pressed(true); } }
-            else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
+            if (optimize[i] == "start") { startPos = sum.getStart(criteriaPercentile); m->mothurOut("Optimizing start to " + toString(startPos) + ".\n"); }
+            else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + ".\n"); }
+            else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + ".\n");  }
+            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + ".\n");  }
+            else if (optimize[i] == "minlength") {  minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + ".\n");  if (minLength < 0) { m->setControl_pressed(true); } }
+            else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + ".\n"); }
         }
         
         return 0;
@@ -996,11 +991,11 @@ int ScreenSeqsCommand::optimizeContigs(){
         double mincriteriaPercentile = (100 - criteria);
 
         for (int i = 0; i < optimize.size(); i++) {
-            if (optimize[i] == "ostart") { oStart = sum.getOStart(criteriaPercentile); m->mothurOut("Optimizing ostart to " + toString(oStart) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "oend") {  endPos = sum.getOEnd(mincriteriaPercentile); m->mothurOut("Optimizing oend to " + toString(oEnd) + "."); m->mothurOutEndLine();}
-            else if (optimize[i] == "mismatches") { mismatches = sum.getMisMatches(criteriaPercentile); m->mothurOut("Optimizing mismatches to " + toString(mismatches) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "minoverlap") {  minOverlap = sum.getOLength(mincriteriaPercentile); m->mothurOut("Optimizing minoverlap to " + toString(minOverlap) + "."); m->mothurOutEndLine(); }
+            if (optimize[i] == "ostart") { oStart = sum.getOStart(criteriaPercentile); m->mothurOut("Optimizing ostart to " + toString(oStart) + ".\n"); }
+            else if (optimize[i] == "oend") {  endPos = sum.getOEnd(mincriteriaPercentile); m->mothurOut("Optimizing oend to " + toString(oEnd) + ".\n"); }
+            else if (optimize[i] == "mismatches") { mismatches = sum.getMisMatches(criteriaPercentile); m->mothurOut("Optimizing mismatches to " + toString(mismatches) + ".\n"); }
+            else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + ".\n"); }
+            else if (optimize[i] == "minoverlap") {  minOverlap = sum.getOLength(mincriteriaPercentile); m->mothurOut("Optimizing minoverlap to " + toString(minOverlap) + ".\n"); }
         }
         
 		return 0;
@@ -1020,9 +1015,9 @@ int ScreenSeqsCommand::optimizeAlign(){
         double mincriteriaPercentile = (100 - criteria);
         
         for (int i = 0; i < optimize.size(); i++) {
-            if (optimize[i] == "minsim") {  minSim = sum.getSims(mincriteriaPercentile);  m->mothurOut("Optimizing minsim to " + toString(minSim) + "."); m->mothurOutEndLine();}
-            else if (optimize[i] == "minscore") {  minScore = sum.getScores(mincriteriaPercentile);  m->mothurOut("Optimizing minscore to " + toString(minScore) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "maxinsert") { maxInsert = sum.getNumInserts(mincriteriaPercentile); m->mothurOut("Optimizing maxinsert to " + toString(maxInsert) + "."); m->mothurOutEndLine(); }
+            if (optimize[i] == "minsim") {  minSim = sum.getSims(mincriteriaPercentile);  m->mothurOut("Optimizing minsim to " + toString(minSim) + ".\n"); }
+            else if (optimize[i] == "minscore") {  minScore = sum.getScores(mincriteriaPercentile);  m->mothurOut("Optimizing minscore to " + toString(minScore) + ".\n");  }
+            else if (optimize[i] == "maxinsert") { maxInsert = sum.getNumInserts(mincriteriaPercentile); m->mothurOut("Optimizing maxinsert to " + toString(maxInsert) + ".\n");  }
         }
         
 		return 0;
@@ -1043,13 +1038,13 @@ int ScreenSeqsCommand::getSummary(){
         double mincriteriaPercentile = (100 - criteria);
         
         for (int i = 0; i < optimize.size(); i++) {
-            if (optimize[i] == "start") { startPos = sum.getStart(criteriaPercentile); m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
-            else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "minlength") { minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); if (minLength < 0) { m->setControl_pressed(true); } }
-            else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
-            else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + "."); m->mothurOutEndLine(); }
+            if (optimize[i] == "start") { startPos = sum.getStart(criteriaPercentile); m->mothurOut("Optimizing start to " + toString(startPos) + ".\n"); }
+            else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + ".\n"); }
+            else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + ".\n");  }
+            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + ".\n"); }
+            else if (optimize[i] == "minlength") { minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + ".\n"); if (minLength < 0) { m->setControl_pressed(true); } }
+            else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + ".\n");  }
+            else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + ".\n"); }
         }
 
 		return 0;
