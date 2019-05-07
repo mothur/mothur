@@ -36,9 +36,9 @@ public:
     
 private:
     
-    bool abort, allLines;
+    bool abort, allLines, burnSampleSet, burnSet;
     string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile, samplefile;
-    double freq, sigmaAlpha, sigmaBeta, sigmaS, sigmaN;
+    double freq, sigmaAlpha, sigmaBeta, sigmaS, sigmaN, coverage;
     int iters, burn, burnSample;
     vector<string> outputNames;
     set<string> labels; //holds labels to be used
@@ -46,7 +46,7 @@ private:
     vector<mcmcSample> sampling;
     
     vector<string> parseSharedFile(string);
-    int fillSampling();
+    int fillSampling(int, int);
     
     int process(SAbundVector*&, string);
     string runErarefaction(SAbundVector*&, string);
@@ -55,6 +55,7 @@ private:
     string runMetroLogStudent(SAbundVector*&, string);
     string runMetroSichel(SAbundVector*&, string);
     int runIGAbund(SAbundVector*&, string);
+    string runIGRarefaction(SAbundVector*& sabund, string fileRoot);
     
 };
 //*******************************************************

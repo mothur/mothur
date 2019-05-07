@@ -97,6 +97,21 @@ double DiversityUtils::f2X(double x, double dA, double dB, double dNDash)
     return -dRet;
 }
  #ifdef USE_GSL
+
+/***********************************************************************/
+double fMu(double x, void* pvParams)
+{
+    t_IGParams* ptIGParams = (t_IGParams *) pvParams;
+    
+    DiversityUtils dutils("igrarefaction");
+
+    double dAlphaDD = ptIGParams->dAlpha*sqrt(x);
+    double dBetaDD  = ptIGParams->dBeta*x;
+    double dLogP0   = dutils.logLikelihood(0, dAlphaDD, dBetaDD);
+    
+    return (1.0 - exp(dLogP0)) - ptIGParams->dC;
+}
+
 /***********************************************************************/
 int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve)
 {
@@ -107,6 +122,7 @@ int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, d
     gsl_function F;
     
     F.function = derivExponent;
+    if (method == "igrarefaction") { F.function = fMu;  }
     F.params = params;
     
     //printf("%f %f %d %f %f\n",ptLNParams->dMDash, ptLNParams->dV, ptLNParams->n, x_lo, x_hi);

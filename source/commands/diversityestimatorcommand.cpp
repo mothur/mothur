@@ -13,6 +13,7 @@
 #include "metrologstudent.hpp"
 #include "metrosichel.hpp"
 #include "igabundance.hpp"
+#include "igrarefaction.hpp"
 
 //**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::setParameters(){
@@ -24,13 +25,14 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
         CommandParameter psigman("sigman", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(psigman);
         CommandParameter psigmas("sigmas", "Number", "", "100", "", "", "","",false,false); parameters.push_back(psigmas);
         CommandParameter pburn("burn", "Number", "", "2000000", "", "", "","",false,false); parameters.push_back(pburn);
+        CommandParameter pcoverage("coverage", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pcoverage);
         CommandParameter psamplenum("burnsample", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(psamplenum);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -61,8 +63,11 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "The sigmaa parameter is used to set the std. dev. of alpha / X / mean prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigmab parameter is used to set the std. dev. of beta / Y / V prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigman parameter is used to set the std. dev. of N / Gamma prop. distn for MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
-         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
+        helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
+        helpString += "The coverage parameter allows you to the desired coverage.  It is required for the igrarefaction calculator.\n";
         helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
+        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbunace / IGRarefaction, respectively.\n";
+        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbunace / IGRarefaction, respectively.\n";
         helpString += validCalculator.printCalc("single");
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
         
@@ -80,6 +85,7 @@ string EstimatorSingleCommand::getOutputPattern(string type) {
         
         if (type == "erarefaction")             {  pattern =  "[filename],[distance],erarefaction";            }
         else if (type == "igabundance")                  {  pattern =  "[filename],[distance],igabundance";             }
+        else if (type == "igrarefaction")                  {  pattern =  "[filename],[distance],igrarefaction";             }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -96,6 +102,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         setParameters();
         vector<string> tempOutNames;
         outputTypes["erarefaction"] = tempOutNames;
+        outputTypes["igrarefaction"] = tempOutNames;
         outputTypes["igabundance"] = tempOutNames;
         outputTypes["metroig"] = tempOutNames;
         outputTypes["metroln"] = tempOutNames;
@@ -140,6 +147,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             outputTypes["metroln"] = tempOutNames;
             outputTypes["metrols"] = tempOutNames;
             outputTypes["metrosichel"] = tempOutNames;
+            outputTypes["igrarefaction"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -267,6 +275,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             
             set<string> estimatorsThatRequireSampleFile;
             estimatorsThatRequireSampleFile.insert("igabund");
+            estimatorsThatRequireSampleFile.insert("igrarefaction");
             
             //remove any typo calcs
             vector<string> validEstimates;
@@ -279,7 +288,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
                     }
                     
                     if (!ignore) { validEstimates.push_back(Estimators[i]); }
-                    else { m->mothurOut("[WARNING]: " + Estimators[i] + " requires a mcmc sampling file and you have not provided one, ignoring estimator. You can produce a sampling file using the metroig calculator.\n"); }
+                    else { m->mothurOut("[WARNING]: " + Estimators[i] + " requires a mcmc sampling file and you have not provided one, ignoring estimator. You can produce a sampling file using the metroig, metroln, metrols or metrosichel calculator.\n"); }
                 }
             }
             Estimators = validEstimates;
@@ -305,11 +314,32 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; }
             util.mothurConvert(temp, iters);
             
-            temp = validParameter.valid(parameters, "burn");		if (temp == "not found") { temp = "2000000"; }
+            burnSet = false;
+            temp = validParameter.valid(parameters, "burn");		if (temp == "not found") { temp = "2000000"; }else { burnSet = true; }
             util.mothurConvert(temp, burn);
             
-            temp = validParameter.valid(parameters, "burnsample");		if (temp == "not found") { temp = "1000"; }
+            if (burnSet) { //user did not set the parameter
+                if ((util.inUsersGroups("igrarefaction", Estimators)) && (util.inUsersGroups("igabund", Estimators))) {
+                    m->mothurOut("[WARNING]: You set the burn parameter, and the igrarefaction and igabund calulators have different default values. IGAbund burnsample default is 2000000, but IGRarefactions default is 100000. Are you sure you meant to set them to the same value? If so, ignore this warning.\n");
+                }
+            }
+            
+            temp = validParameter.valid(parameters, "coverage");		if (temp == "not found") { temp = "-1"; }
+            util.mothurConvert(temp, coverage);
+            
+            if ((util.isEqual(coverage, -1)) && (util.inUsersGroups("igrarefaction", Estimators))) {
+                m->mothurOut("[ERROR]: You must set the coverage parameter to run the igrarefaction estimator. Aborting.\n"); abort=true;
+            }
+            
+            burnSampleSet = false;
+            temp = validParameter.valid(parameters, "burnsample");		if (temp == "not found") { temp = "1000"; }else { burnSampleSet = true; }
             util.mothurConvert(temp, burnSample);
+            
+            if (burnSampleSet) { //user did not set the parameter
+                if ((util.inUsersGroups("igrarefaction", Estimators)) && (util.inUsersGroups("igabund", Estimators))) {
+                    m->mothurOut("[WARNING]: You set the burnsample parameter, and the igrarefaction and igabund calulators have different default values. IGAbund burnsample default is 1000, but IGRarefactions default is 100. Are you sure you meant to set them to the same value? If so, ignore this warning.\n");
+                }
+            }
             
             #ifdef USE_GSL
             #else
@@ -333,8 +363,6 @@ int EstimatorSingleCommand::execute(){
     try {
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
-        
-        if (samplefile != "") { fillSampling(); }
         
         vector<string> inputFileNames;
         if (format != "sharedfile") { inputFileNames.push_back(inputfile);  }
@@ -438,6 +466,7 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             else if (Estimators[i] == "metrols")         { runMetroLogStudent(sabund, fileRoot); }
             else if (Estimators[i] == "metrosichel")     { runMetroSichel(sabund, fileRoot);     }
             else if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
+            else if (Estimators[i] == "igrarefaction")   { runIGRarefaction(sabund, fileRoot);   }
         }
         
         return 0;
@@ -488,7 +517,47 @@ string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund, string fil
         exit(1);
     }
 }
-
+//**********************************************************************************************************************
+string EstimatorSingleCommand::runIGRarefaction(SAbundVector*& sabund, string fileRoot) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = fileRoot;
+        variables["[distance]"] = sabund->getLabel();
+        string outputFileName = getOutputFileName("igrarefaction", variables);
+        outputNames.push_back(outputFileName); outputTypes["igrarefaction"].push_back(outputFileName);
+        
+        ofstream out; util.openOutputFile(outputFileName, out); //format output
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        out << "IGRarefaction_Lower\tIGRarefaction_Median\tIGRarefaction_Upper\n";
+        
+        IGRarefaction igRare(coverage);
+        
+        if (samplefile != "") {
+            int burnValue = burn;
+            if (!burnSet) { burnValue = 100000; }
+            
+            int burnSampleValue = burnSample;
+            if (!burnSampleSet) { burnSampleValue = 100; }
+            
+            fillSampling(burnValue, burnSampleValue);
+        }
+        
+        vector<double> results = igRare.getValues(sabund, sampling);
+        
+        for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  }
+        out << endl;
+        
+        out.close();
+        
+        return outputFileName;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runIGRarefaction");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund, string fileRoot) {
     try {
@@ -593,6 +662,16 @@ int EstimatorSingleCommand::runIGAbund(SAbundVector*& sabund, string fileRoot) {
         ofstream out; util.openOutputFile(outputFileName, out); //format output
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
         
+        if (samplefile != "") {
+            int burnValue = burn;
+            if (!burnSet) { burnValue = 200000; }
+            
+            int burnSampleValue = burnSample;
+            if (!burnSampleSet) { burnSampleValue = 1000; }
+            
+            fillSampling(burnValue, burnSampleValue);
+        }
+        
         IGAbundance igAbund;
         
         vector<double> results = igAbund.getValues(sabund, sampling);
@@ -658,7 +737,7 @@ vector<string> EstimatorSingleCommand::parseSharedFile(string filename) {
     }
 }
 //**********************************************************************************************************************
-int EstimatorSingleCommand::fillSampling() {
+int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue) {
     try {
         sampling.clear();
         
@@ -678,7 +757,7 @@ int EstimatorSingleCommand::fillSampling() {
                 int sampleSize, ns;
                 util.mothurConvert(pieces[0], sampleSize);
                 
-                if ((sampleSize > burn) && (sampleSize % burnSample == 0)) {
+                if ((sampleSize > burnValue) && (sampleSize % burnSampleValue == 0)) {
                 
                     util.mothurConvert(pieces[3], ns);
                     

@@ -213,6 +213,20 @@ typedef struct s_LSParams
     
 } t_LSParams;
 
+typedef struct s_IGParams
+{
+    int    nS;      /*number of species in community*/
+    
+    double dAlpha;
+    
+    double dBeta;
+    
+    double dC;
+    
+    int n;
+    
+} t_IGParams;
+
 #ifdef USE_GSL
 typedef struct s_MetroInit
 {

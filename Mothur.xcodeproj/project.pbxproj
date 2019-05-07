@@ -22,6 +22,8 @@
 		4809EC99227B405700B4D0E5 /* metrologstudent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC96227B405700B4D0E5 /* metrologstudent.cpp */; };
 		4809EC9D227C9B3100B4D0E5 /* metrosichel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9B227C9B3100B4D0E5 /* metrosichel.cpp */; };
 		4809EC9E227C9B3100B4D0E5 /* metrosichel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9B227C9B3100B4D0E5 /* metrosichel.cpp */; };
+		4809ECA12280898E00B4D0E5 /* igrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9F2280898E00B4D0E5 /* igrarefaction.cpp */; };
+		4809ECA22280898E00B4D0E5 /* igrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9F2280898E00B4D0E5 /* igrarefaction.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -898,6 +900,8 @@
 		4809EC9A227B5D2500B4D0E5 /* metrologstudent.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrologstudent.hpp; path = source/calculators/metrologstudent.hpp; sourceTree = SOURCE_ROOT; };
 		4809EC9B227C9B3100B4D0E5 /* metrosichel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metrosichel.cpp; path = source/calculators/metrosichel.cpp; sourceTree = SOURCE_ROOT; };
 		4809EC9C227C9B3100B4D0E5 /* metrosichel.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrosichel.hpp; path = source/calculators/metrosichel.hpp; sourceTree = SOURCE_ROOT; };
+		4809EC9F2280898E00B4D0E5 /* igrarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = igrarefaction.cpp; path = source/calculators/igrarefaction.cpp; sourceTree = SOURCE_ROOT; };
+		4809ECA02280898E00B4D0E5 /* igrarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = igrarefaction.hpp; path = source/calculators/igrarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -2047,6 +2051,8 @@
 				48E7E0A52278AD4800B74910 /* diversityutils.hpp */,
 				484976E12255412400F3A291 /* igabundance.cpp */,
 				484976E22255412400F3A291 /* igabundance.hpp */,
+				4809EC9F2280898E00B4D0E5 /* igrarefaction.cpp */,
+				4809ECA02280898E00B4D0E5 /* igrarefaction.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3304,6 +3310,7 @@
 				481FB58F1AC1B71B0076CFF3 /* newcommandtemplate.cpp in Sources */,
 				48098ED6219DE7A500031FA4 /* testsubsample.cpp in Sources */,
 				481FB6741AC1B88F0076CFF3 /* formatcolumn.cpp in Sources */,
+				4809ECA22280898E00B4D0E5 /* igrarefaction.cpp in Sources */,
 				481FB5571AC1B6550076CFF3 /* shannoneven.cpp in Sources */,
 				481FB5D11AC1B75C0076CFF3 /* lefsecommand.cpp in Sources */,
 				481FB6561AC1B8100076CFF3 /* heatmapsim.cpp in Sources */,
@@ -3636,6 +3643,7 @@
 				A7E9B94B12D37EC400DA6239 /* sharedjackknife.cpp in Sources */,
 				A7E9B94C12D37EC400DA6239 /* sharedjclass.cpp in Sources */,
 				A7E9B94D12D37EC400DA6239 /* sharedjest.cpp in Sources */,
+				4809ECA12280898E00B4D0E5 /* igrarefaction.cpp in Sources */,
 				48E544741E9D3C1200FF6AB8 /* ppv.cpp in Sources */,
 				A7E9B94E12D37EC400DA6239 /* sharedkstest.cpp in Sources */,
 				A7E9B94F12D37EC400DA6239 /* sharedkulczynski.cpp in Sources */,
@@ -3838,7 +3846,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.0\\\"\"",
@@ -3886,7 +3894,7 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.0\\\"\"",
@@ -3942,7 +3950,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.0\\\"\"",
@@ -4017,7 +4025,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.42.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",

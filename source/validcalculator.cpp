@@ -408,6 +408,7 @@ void ValidCalculators::initialEstimators() {
         estimators["metrols"]	= "metrols";
         estimators["metrosichel"]	= "metrosichel";
         estimators["igabund"]	= "igabund";
+        estimators["igrarefaction"]	= "igrarefaction";
         estimators["default"]	    = "default";
     }
     catch(exception& e) {
