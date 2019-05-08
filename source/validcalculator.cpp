@@ -54,7 +54,6 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-//#include "sharedjackknife.h"
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
@@ -96,26 +95,24 @@ ValidCalculators::ValidCalculators() {
 		initialVennSingle();
 		initialVennShared();
 		initialTreeGroups();
-		initialBoot();
 		initialDistance();
 		initialMatrix();
 		initialHeat();
         initialEstimators();
 		
-		for(it = single.begin(); it != single.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = shared.begin(); it != shared.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = rarefaction.begin(); it != rarefaction.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = summary.begin(); it != summary.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = sharedsummary.begin(); it != sharedsummary.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = vennsingle.begin(); it != vennsingle.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = vennshared.begin(); it != vennshared.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = treegroup.begin(); it != treegroup.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = matrix.begin(); it != matrix.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = heat.begin(); it != heat.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = boot.begin(); it != boot.end(); it++) { allCalcs.insert(it->first); } 
-		for(it = distance.begin(); it != distance.end(); it++) { allCalcs.insert(it->first); }
-        for(it = estimators.begin(); it != estimators.end(); it++) { allCalcs.insert(it->first); }
+		for(it = single.begin(); it != single.end(); it++) { allCalcs.insert(*it); }
+		for(it = shared.begin(); it != shared.end(); it++) { allCalcs.insert(*it); }
+		for(it = rarefaction.begin(); it != rarefaction.end(); it++) { allCalcs.insert(*it); }
+		for(it = summary.begin(); it != summary.end(); it++) { allCalcs.insert(*it); }
+		for(it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) { allCalcs.insert(*it); }
+		for(it = sharedsummary.begin(); it != sharedsummary.end(); it++) { allCalcs.insert(*it); }
+		for(it = vennsingle.begin(); it != vennsingle.end(); it++) { allCalcs.insert(*it); }
+		for(it = vennshared.begin(); it != vennshared.end(); it++) { allCalcs.insert(*it); }
+		for(it = treegroup.begin(); it != treegroup.end(); it++) { allCalcs.insert(*it); }
+		for(it = matrix.begin(); it != matrix.end(); it++) { allCalcs.insert(*it); }
+		for(it = heat.begin(); it != heat.end(); it++) { allCalcs.insert(*it); }
+		for(it = distance.begin(); it != distance.end(); it++) { allCalcs.insert(*it); }
+        for(it = estimators.begin(); it != estimators.end(); it++) { allCalcs.insert(*it); }
 		
 	}
 	catch(exception& e) {
@@ -228,166 +225,104 @@ void ValidCalculators::printCitations(vector<string> Estimators) {
 /********************************************************************/
 
 bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
-	try {	
+	try {
+        Utils util;
 		//are you looking for a calculator for a single parameter
 		if (parameter == "single") {
 			//is it valid
-			if ((single.find(calculator)) != (single.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the collect.single command and will be disregarded. Valid estimators are ");
-				for (it = single.begin(); it != single.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+			if ((single.find(calculator)) != (single.end())) { return true; }
+            else {
+				m->mothurOut(calculator + " is not a valid estimator for the collect.single command and will be disregarded. Valid estimators are " + util.getStringFromSet(single, ",") + ".\n");
+                return false;
+            }
 		//are you looking for a calculator for a shared parameter
         }else if (parameter == "estimator") {
             //is it valid
-            if ((estimators.find(calculator)) != (estimators.end())) {
-                return true;
-            }else {
-                m->mothurOut(calculator +  " is not a valid estimator for the estimator.single command and will be disregarded.  Valid estimators are ");
-                for (it = estimators.begin(); it != estimators.end(); it++) {
-                    m->mothurOut(it->first + ", ");
-                }
-                m->mothurOutEndLine();
-                return false; }
+            if ((estimators.find(calculator)) != (estimators.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the estimator.single command and will be disregarded. Valid estimators are " + util.getStringFromSet(estimators, ",") + ".\n");
+                return false;
+            }
 		}else if (parameter == "shared") {
 			//is it valid
-			if ((shared.find(calculator)) != (shared.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator +  " is not a valid estimator for the collect.shared command and will be disregarded.  Valid estimators are ");
-				for (it = shared.begin(); it != shared.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            if ((shared.find(calculator)) != (shared.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the collect.shared command and will be disregarded. Valid estimators are " + util.getStringFromSet(shared, ",") + ".\n");
+                return false;
+            }
 		//are you looking for a calculator for a rarefaction parameter
 		}else if (parameter == "rarefaction") {
 			//is it valid
-			if ((rarefaction.find(calculator)) != (rarefaction.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the rarefaction.single command and will be disregarded. Valid estimators are ");
-				for (it = rarefaction.begin(); it != rarefaction.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            if ((rarefaction.find(calculator)) != (rarefaction.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the rarefaction.single command and will be disregarded. Valid estimators are " + util.getStringFromSet(rarefaction, ",") + ".\n");
+                return false;
+            }
 		//are you looking for a calculator for a summary parameter
 		}else if (parameter == "summary") {
 			//is it valid
-			if ((summary.find(calculator)) != (summary.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the summary.single command and will be disregarded. Valid estimators are ");
-				for (it = summary.begin(); it != summary.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            if ((summary.find(calculator)) != (summary.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the summary.single command and will be disregarded. Valid estimators are " + util.getStringFromSet(summary, ",") + ".\n");
+                return false;
+            }
 		//are you looking for a calculator for a sharedsummary parameter
 		}else if (parameter == "sharedsummary") {
-			//is it valid
-			if ((sharedsummary.find(calculator)) != (sharedsummary.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator +  " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ");
-				for (it = sharedsummary.begin(); it != sharedsummary.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            //is it valid
+            if ((sharedsummary.find(calculator)) != (sharedsummary.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are " + util.getStringFromSet(sharedsummary, ",") + ".\n");
+                return false;
+            }
 		}else if (parameter == "sharedrarefaction") {
-			//is it valid
-			if ((sharedrarefaction.find(calculator)) != (sharedrarefaction.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the rarefaction.shared command and will be disregarded. Valid estimator is ");
-				for (it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            //is it valid
+            if ((sharedrarefaction.find(calculator)) != (sharedrarefaction.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the rarefaction.shared command and will be disregarded. Valid estimators are " + util.getStringFromSet(sharedrarefaction, ",") + ".\n");
+                return false;
+            }
 		}else if (parameter == "vennsingle") {
-			//is it valid
-			if ((vennsingle.find(calculator)) != (vennsingle.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the venn command in single mode and will be disregarded. Valid estimators are ");
-				for (it = vennsingle.begin(); it != vennsingle.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            //is it valid
+            if ((vennsingle.find(calculator)) != (vennsingle.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the venn command and will be disregarded. Valid estimators are " + util.getStringFromSet(vennsingle, ",") + ".\n");
+                return false;
+            }
 		}else if (parameter == "vennshared") {
-			//is it valid
-			if ((vennshared.find(calculator)) != (vennshared.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the venn command in shared mode and will be disregarded. Valid estimators are ");
-				for (it = vennshared.begin(); it != vennshared.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            //is it valid
+            if ((vennshared.find(calculator)) != (vennshared.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the venn command in shared mode and will be disregarded. Valid estimators are " + util.getStringFromSet(vennshared, ",") + ".\n");
+                return false;
+            }
 		}else if (parameter == "treegroup") {
-			//is it valid
-			if ((treegroup.find(calculator)) != (treegroup.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the tree.shared command and will be disregarded. Valid estimators are ");
-				for (it = treegroup.begin(); it != treegroup.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            //is it valid
+            if ((treegroup.find(calculator)) != (treegroup.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the tree.shared command and will be disregarded. Valid estimators are " + util.getStringFromSet(treegroup, ",") + ".\n");
+                return false;
+            }
 		}else if (parameter == "matrix") {
-			//is it valid
-			if ((matrix.find(calculator)) != (matrix.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator +  " is not a valid estimator for the matrix.output command and will be disregarded. Valid estimators are ");
-				for (it = matrix.begin(); it != matrix.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            //is it valid
+            if ((matrix.find(calculator)) != (matrix.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the dist.shared command and will be disregarded. Valid estimators are " + util.getStringFromSet(matrix, ",") + ".\n");
+                return false;
+            }
 		}else if (parameter == "heat") {
-			//is it valid
-			if ((heat.find(calculator)) != (heat.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the heatmap.sim command and will be disregarded. Valid estimators are ");
-				for (it = heat.begin(); it != heat.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
-		}else if (parameter == "boot") {
-			//is it valid
-			if ((boot.find(calculator)) != (boot.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator + " is not a valid estimator for the bootstrap.shared command and will be disregarded. Valid estimators are ");
-				for (it = boot.begin(); it != boot.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            //is it valid
+            if ((heat.find(calculator)) != (heat.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the heatmap.sim command and will be disregarded. Valid estimators are " + util.getStringFromSet(heat, ",") + ".\n");
+                return false;
+            }
 		}else if (parameter == "distance") {
-			//is it valid
-			if ((distance.find(calculator)) != (distance.end())) {
-				return true;
-			}else { 
-				m->mothurOut(calculator +  " is not a valid estimator for the distance command and will be disregarded. Valid calculators are ");
-				for (it = distance.begin(); it != distance.end(); it++) {
-					m->mothurOut(it->first + ", ");
-				}
-				m->mothurOutEndLine();
-				return false; }
+            //is it valid
+            if ((distance.find(calculator)) != (distance.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the distance command and will be disregarded. Valid estimators are " + util.getStringFromSet(distance, ",") + ".\n");
+                return false;
+            }
 		//not a valid parameter
 		}else { return false; }
 		
@@ -402,14 +337,15 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 void ValidCalculators::initialEstimators() {
     try {
         
-        estimators["erarefaction"]	= "erarefaction";
-        estimators["metroig"]	= "metroig";
-        estimators["metroln"]	= "metroln";
-        estimators["metrols"]	= "metrols";
-        estimators["metrosichel"]	= "metrosichel";
-        estimators["igabund"]	= "igabund";
-        estimators["igrarefaction"]	= "igrarefaction";
-        estimators["default"]	    = "default";
+        estimators.insert("erarefaction");
+        estimators.insert("metroig");
+        estimators.insert("metroln");
+        estimators.insert("metrols");
+        estimators.insert("metrosichel");
+        estimators.insert("igabund");
+        estimators.insert("lnabund");
+        estimators.insert("igrarefaction");
+        estimators.insert("default");
     }
     catch(exception& e) {
         m->errorOut(e, "ValidCalculator", "initialEstimators");
@@ -419,33 +355,33 @@ void ValidCalculators::initialEstimators() {
 /********************************************************************/
 void ValidCalculators::initialSingle() {
 	try {	
-		single["sobs"]	        = "sobs";
-		single["chao"]		    = "chao";
-		single["ace"]		    = "ace";
-		single["jack"]		    = "jack";
-		single["shannon"]	    = "shannon";
-		single["npshannon"]    	= "npshannon";
-		single["shannoneven"]	= "shannoneven";
-        single["shannonrange"]	= "shannonrange";
-		single["smithwilson"]	= "smithwilson";
-		single["heip"]			= "heip";
-		single["simpson"]	    = "simpson";
-		single["simpsoneven"]   = "simpsoneven";
-		single["invsimpson"]	= "invsimpson";
-		single["bergerparker"]  = "bergerparker";
-		single["bootstrap"]    	= "bootstrap";
-		single["geometric"]     = "geometric";
-		single["logseries"]		= "logseries";
-		single["qstat"]         = "qstat";
-		single["bstick"]        = "bstick";
-		single["goodscoverage"] = "goodscoverage";
-		single["nseqs"]			= "nseqs";
-		single["coverage"]		= "coverage";
-		single["efron"]         = "efron";
-		single["boneh"]         = "boneh";
-		single["solow"]         = "solow";
-		single["shen"]          = "shen";
-		single["default"]	    = "default";
+		single.insert("sobs");
+		single.insert("chao");
+		single.insert("ace");
+		single.insert("jack");
+		single.insert("shannon");
+		single.insert("npshannon");
+		single.insert("shannoneven");
+        single.insert("shannonrange");
+		single.insert("smithwilson");
+		single.insert("heip");
+		single.insert("simpson");
+		single.insert("simpsoneven");
+		single.insert("invsimpson");
+		single.insert("bergerparker");
+		single.insert("bootstrap");
+		single.insert("geometric");
+		single.insert("logseries");
+		single.insert("qstat");
+		single.insert("bstick");
+		single.insert("goodscoverage");
+		single.insert("nseqs");
+		single.insert("coverage");
+		single.insert("efron");
+		single.insert("boneh");
+		single.insert("solow");
+		single.insert("shen");
+		single.insert("default");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialSingle");
@@ -456,48 +392,48 @@ void ValidCalculators::initialSingle() {
 /********************************************************************/
 void ValidCalculators::initialShared() {
 	try {	
-		shared["sharedsobs"]			= "sharedsobs";
-		shared["sharedchao"]			= "sharedchao";
-		shared["sharedace"]				= "sharedace";
-		shared["jabund"]				= "jabund";
-		shared["sorabund"]				= "sorabund";
-		shared["jclass"]				= "jclass";
-		shared["sorclass"]				= "sorclass";
-		shared["jest"]					= "jest";
-		shared["sorest"]				= "sorest";
-		shared["thetayc"]				= "thetayc";
-		shared["thetan"]				= "thetan";
-		shared["kstest"]				= "kstest";
-		shared["whittaker"]			    = "whittaker";
-		shared["sharednseqs"]			= "sharednseqs";
-		shared["ochiai"]				= "ochiai";
-		shared["anderberg"]				= "anderberg";
-		shared["kulczynski"]			= "kulczynski";
-		shared["kulczynskicody"]		= "kulczynskicody";
-		shared["lennon"]				= "lennon";
-		shared["morisitahorn"]			= "morisitahorn";
-		shared["braycurtis"]			= "braycurtis";
-		shared["odum"]					= "odum";
-		shared["canberra"]				= "canberra";
-		shared["structeuclidean"]		= "structeuclidean";
-		shared["structchord"]			= "structchord";
-		shared["hellinger"]				= "hellinger";
-		shared["manhattan"]				= "manhattan";
-		shared["structpearson"]			= "structpearson";
-		shared["soergel"]				= "soergel";
-		shared["spearman"]				= "spearman";
-		shared["structkulczynski"]		= "structkulczynski";
-		shared["structchi2"]			= "structchi2";
-		shared["speciesprofile"]		= "speciesprofile";
-		shared["hamming"]				= "hamming";
-		shared["gower"]					= "gower";
-		shared["memchi2"]				= "memchi2";
-		shared["memchord"]				= "memchord";
-		shared["memeuclidean"]			= "memeuclidean";
-		shared["mempearson"]			= "mempearson";
-        shared["jsd"]                   = "jsd";
-        shared["rjsd"]                  = "rjsd";
-		shared["default"]	            = "default";
+		shared.insert("sharedsobs");
+		shared.insert("sharedchao");
+		shared.insert("sharedace");
+		shared.insert("jabund");
+		shared.insert("sorabund");
+		shared.insert("jclass");
+		shared.insert("sorclass");
+		shared.insert("jest");
+		shared.insert("sorest");
+		shared.insert("thetayc");
+		shared.insert("thetan");
+		shared.insert("kstest");
+		shared.insert("whittaker");
+		shared.insert("sharednseqs");
+		shared.insert("ochiai");
+		shared.insert("anderberg");
+		shared.insert("kulczynski");
+		shared.insert("kulczynskicody");
+		shared.insert("lennon");
+		shared.insert("morisitahorn");
+		shared.insert("braycurtis");
+		shared.insert("odum");
+		shared.insert("canberra");
+		shared.insert("structeuclidean");
+		shared.insert("structchord");
+		shared.insert("hellinger");
+		shared.insert("manhattan");
+		shared.insert("structpearson");
+		shared.insert("soergel");
+		shared.insert("spearman");
+		shared.insert("structkulczynski");
+		shared.insert("structchi2");
+		shared.insert("speciesprofile");
+		shared.insert("hamming");
+		shared.insert("gower");
+		shared.insert("memchi2");
+		shared.insert("memchord");
+		shared.insert("memeuclidean");
+		shared.insert("mempearson");
+        shared.insert("jsd");
+        shared.insert("rjsd");
+		shared.insert("default");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialShared");
@@ -508,23 +444,23 @@ void ValidCalculators::initialShared() {
 /********************************************************************/
 void ValidCalculators::initialRarefaction() {
 	try {	
-		rarefaction["sobs"]			= "sobs";
-		rarefaction["chao"]			= "chao";
-		rarefaction["ace"]			= "ace";
-		rarefaction["jack"]			= "jack";
-		rarefaction["shannon"]		= "shannon";
-		rarefaction["smithwilson"]	= "smithwilson";
-		rarefaction["heip"]			= "heip";
-		rarefaction["npshannon"]	= "npshannon";
-		rarefaction["shannoneven"]	= "shannoneven";
-        rarefaction["shannonrange"]	= "shannonrange";
-		rarefaction["simpson"]		= "simpson";
-		rarefaction["invsimpson"]	= "invsimpson";
-		rarefaction["simpsoneven"]	= "simpsoneven";
-		rarefaction["bootstrap"]	= "bootstrap";
-		rarefaction["nseqs"]		= "nseqs";
-		rarefaction["coverage"]		= "coverage";
-		rarefaction["default"]	    = "default";
+		rarefaction.insert("sobs");
+		rarefaction.insert("chao");
+		rarefaction.insert("ace");
+		rarefaction.insert("jack");
+		rarefaction.insert("shannon");
+		rarefaction.insert("smithwilson");
+		rarefaction.insert("heip");
+		rarefaction.insert("npshannon");
+		rarefaction.insert("shannoneven");
+        rarefaction.insert("shannonrange");
+		rarefaction.insert("simpson");
+		rarefaction.insert("invsimpson");
+		rarefaction.insert("simpsoneven");
+		rarefaction.insert("bootstrap");
+		rarefaction.insert("nseqs");
+		rarefaction.insert("coverage");
+		rarefaction.insert("default");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialRarefaction");
@@ -536,33 +472,33 @@ void ValidCalculators::initialRarefaction() {
 
 void ValidCalculators::initialSummary() {
 	try {	
-		summary["sobs"]			= "sobs";
-		summary["chao"]			= "chao";
-		summary["ace"]			= "ace";
-		summary["jack"]			= "jack";
-		summary["shannon"]		= "shannon";
-		summary["heip"]			= "heip";
-		summary["shannoneven"]	= "shannoneven";
-		summary["smithwilson"]	= "smithwilson";
-		summary["invsimpson"]	= "invsimpson";
-		summary["npshannon"]	= "npshannon";
-        summary["shannonrange"]	= "shannonrange";
-		summary["simpson"]		= "simpson";
-		summary["simpsoneven"]	= "simpsoneven";
-		summary["bergerparker"] = "bergerparker";
-		summary["geometric"]    = "geometric";
-		summary["bootstrap"]	= "bootstrap";
-		summary["logseries"]    = "logseries";
-		summary["qstat"]        = "qstat";
-		summary["bstick"]       = "bstick";
-		summary["nseqs"]		= "nseqs";
-		summary["goodscoverage"]= "goodscoverage";
-		summary["coverage"]		= "coverage";
-		summary["efron"]        = "efron";
-		summary["boneh"]        = "boneh";
-		summary["solow"]        = "solow";
-		summary["shen"]         = "shen";
-		summary["default"]	    = "default";
+		summary.insert("sobs");
+		summary.insert("chao");
+		summary.insert("ace");
+		summary.insert("jack");
+		summary.insert("shannon");
+		summary.insert("heip");
+		summary.insert("shannoneven");
+		summary.insert("smithwilson");
+		summary.insert("invsimpson");
+		summary.insert("npshannon");
+        summary.insert("shannonrange");
+		summary.insert("simpson");
+		summary.insert("simpsoneven");
+		summary.insert("bergerparker");
+		summary.insert("geometric");
+		summary.insert("bootstrap");
+		summary.insert("logseries");
+		summary.insert("qstat");
+		summary.insert("bstick");
+		summary.insert("nseqs");
+		summary.insert("goodscoverage");
+		summary.insert("coverage");
+		summary.insert("efron");
+		summary.insert("boneh");
+		summary.insert("solow");
+		summary.insert("shen");
+		summary.insert("default");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialSummary");
@@ -573,48 +509,48 @@ void ValidCalculators::initialSummary() {
 /********************************************************************/
 void ValidCalculators::initialSharedSummary() {
 	try {	
-		sharedsummary["sharedsobs"]				= "sharedsobs";
-		sharedsummary["sharedchao"]				= "sharedchao";
-		sharedsummary["sharedace"]				= "sharedace";
-		sharedsummary["jabund"]					= "jabund";
-		sharedsummary["sorabund"]				= "sorabund";
-		sharedsummary["jclass"]					= "jclass";
-		sharedsummary["sorclass"]				= "sorclass";
-		sharedsummary["jest"]					= "jest";
-		sharedsummary["sorest"]					= "sorest";
-		sharedsummary["thetayc"]				= "thetayc";
-		sharedsummary["thetan"]					= "thetan";
-		sharedsummary["kstest"]					= "kstest";
-		sharedsummary["whittaker"]				= "whittaker";
-		sharedsummary["sharednseqs"]			= "sharednseqs";
-		sharedsummary["ochiai"]					= "ochiai";
-		sharedsummary["anderberg"]				= "anderberg";
-		sharedsummary["kulczynski"]				= "kulczynski";
-		sharedsummary["kulczynskicody"]			= "kulczynskicody";
-		sharedsummary["lennon"]					= "lennon";
-		sharedsummary["morisitahorn"]			= "morisitahorn";
-		sharedsummary["braycurtis"]				= "braycurtis";
-		sharedsummary["odum"]					= "odum";
-		sharedsummary["canberra"]				= "canberra";
-		sharedsummary["structeuclidean"]		= "structeuclidean";
-		sharedsummary["structchord"]			= "structchord";
-		sharedsummary["hellinger"]				= "hellinger";
-		sharedsummary["manhattan"]				= "manhattan";
-		sharedsummary["structpearson"]			= "structpearson";
-		sharedsummary["structkulczynski"]		= "structkulczynski";
-		sharedsummary["structchi2"]				= "structchi2";
-		sharedsummary["soergel"]				= "soergel";
-		sharedsummary["spearman"]				= "spearman";
-		sharedsummary["speciesprofile"]			= "speciesprofile";
-		sharedsummary["hamming"]				= "hamming";
-		sharedsummary["gower"]					= "gower";
-		sharedsummary["memchi2"]				= "memchi2";
-		sharedsummary["memchord"]				= "memchord";
-		sharedsummary["memeuclidean"]			= "memeuclidean";
-		sharedsummary["mempearson"]				= "mempearson";
-        sharedsummary["jsd"]                    = "jsd";
-        sharedsummary["rjsd"]                   = "rjsd";
-		sharedsummary["default"]				= "default";
+		sharedsummary.insert("sharedsobs");
+		sharedsummary.insert("sharedchao");
+		sharedsummary.insert("sharedace");
+		sharedsummary.insert("jabund");
+		sharedsummary.insert("sorabund");
+		sharedsummary.insert("jclass");
+		sharedsummary.insert("sorclass");
+		sharedsummary.insert("jest");
+		sharedsummary.insert("sorest");
+		sharedsummary.insert("thetayc");
+		sharedsummary.insert("thetan");
+		sharedsummary.insert("kstest");
+		sharedsummary.insert("whittaker");
+		sharedsummary.insert("sharednseqs");
+		sharedsummary.insert("ochiai");
+		sharedsummary.insert("anderberg");
+		sharedsummary.insert("kulczynski");
+		sharedsummary.insert("kulczynskicody");
+		sharedsummary.insert("lennon");
+		sharedsummary.insert("morisitahorn");
+		sharedsummary.insert("braycurtis");
+		sharedsummary.insert("odum");
+		sharedsummary.insert("canberra");
+		sharedsummary.insert("structeuclidean");
+		sharedsummary.insert("structchord");
+		sharedsummary.insert("hellinger");
+		sharedsummary.insert("manhattan");
+		sharedsummary.insert("structpearson");
+		sharedsummary.insert("structkulczynski");
+		sharedsummary.insert("structchi2");
+		sharedsummary.insert("soergel");
+		sharedsummary.insert("spearman");
+		sharedsummary.insert("speciesprofile");
+		sharedsummary.insert("hamming");
+		sharedsummary.insert("gower");
+		sharedsummary.insert("memchi2");
+		sharedsummary.insert("memchord");
+		sharedsummary.insert("memeuclidean");
+		sharedsummary.insert("mempearson");
+        sharedsummary.insert("jsd");
+        sharedsummary.insert("rjsd");
+		sharedsummary.insert("default");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialSharedSummary");
@@ -627,9 +563,9 @@ void ValidCalculators::initialSharedSummary() {
 
 void ValidCalculators::initialSharedRarefact() {
 	try {	
-		sharedrarefaction["sharedobserved"]	= "sharedobserved";
-		sharedrarefaction["sharednseqs"]	= "sharednseqs";
-		sharedrarefaction["default"]	    = "default";
+		sharedrarefaction.insert("sharedobserved");
+		sharedrarefaction.insert("sharednseqs");
+		sharedrarefaction.insert("default");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialSharedRarefact");
@@ -641,11 +577,11 @@ void ValidCalculators::initialSharedRarefact() {
 /********************************************************************/
 void ValidCalculators::initialVennSingle() {
 	try {
-		vennsingle["sobs"]	        = "sobs";
-		vennsingle["chao"]		    = "chao";
-		vennsingle["ace"]			= "ace";
-		vennsingle["jack"]		    = "jack";
-		vennsingle["default"]		= "default";
+		vennsingle.insert("sobs");
+		vennsingle.insert("chao");
+		vennsingle.insert("ace");
+		vennsingle.insert("jack");
+		vennsingle.insert("default");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialVennSingle");
@@ -656,10 +592,10 @@ void ValidCalculators::initialVennSingle() {
 /********************************************************************/
 void ValidCalculators::initialVennShared() {
 	try {
-		vennshared["sharedsobs"]	= "sharedsobs";
-		vennshared["sharedchao"]	= "sharedchao";
-		vennshared["sharedace"]		= "sharedace";
-		vennshared["default"]		= "default";
+		vennshared.insert("sharedsobs");
+		vennshared.insert("sharedchao");
+		vennshared.insert("sharedace");
+		vennshared.insert("default");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialVennShared");
@@ -670,47 +606,47 @@ void ValidCalculators::initialVennShared() {
 /********************************************************************/
 void ValidCalculators::initialTreeGroups() {
 	try {	
-		treegroup["sharedsobs"]				= "sharedsobs";
-		treegroup["sharedchao"]				= "sharedchao";
-		treegroup["sharedace"]				= "sharedace";
-		treegroup["jabund"]					= "jabund";
-		treegroup["sorabund"]				= "sorabund";
-		treegroup["jclass"]					= "jclass";
-		treegroup["sorclass"]				= "sorclass";
-		treegroup["jest"]					= "jest";
-		treegroup["sorest"]					= "sorest";
-		treegroup["thetayc"]				= "thetayc";
-		treegroup["thetan"]					= "thetan";
-		treegroup["kstest"]					= "kstest";
-		treegroup["whittaker"]				= "whittaker";
-		treegroup["sharednseqs"]			= "sharednseqs";
-		treegroup["ochiai"]					= "ochiai";
-		treegroup["anderberg"]				= "anderberg";
-		treegroup["kulczynski"]				= "kulczynski";
-		treegroup["kulczynskicody"]			= "kulczynskicody";
-		treegroup["lennon"]					= "lennon";
-		treegroup["morisitahorn"]			= "morisitahorn";
-		treegroup["braycurtis"]				= "braycurtis";
-		treegroup["odum"]					= "odum";
-		treegroup["canberra"]				= "canberra";
-		treegroup["structeuclidean"]		= "structeuclidean";
-		treegroup["structchord"]			= "structchord";
-		treegroup["hellinger"]				= "hellinger";
-		treegroup["manhattan"]				= "manhattan";
-		treegroup["structpearson"]			= "structpearson";
-		treegroup["structkulczynski"]		= "structkulczynski";
-		treegroup["structchi2"]				= "structchi2";
-		treegroup["soergel"]				= "soergel";
-		treegroup["spearman"]				= "spearman";
-		treegroup["speciesprofile"]			= "speciesprofile";
-		treegroup["hamming"]				= "hamming";
-		treegroup["gower"]					= "gower";
-		treegroup["memchi2"]				= "memchi2";
-		treegroup["memchord"]				= "memchord";
-        treegroup["jsd"]                    = "jsd";
-        treegroup["rjsd"]                   = "rjsd";
-		treegroup["memeuclidean"]			= "memeuclidean";
-		treegroup["mempearson"]				= "mempearson";
+		treegroup.insert("sharedsobs");
+		treegroup.insert("sharedchao");
+		treegroup.insert("sharedace");
+		treegroup.insert("jabund");
+		treegroup.insert("sorabund");
+		treegroup.insert("jclass");
+		treegroup.insert("sorclass");
+		treegroup.insert("jest");
+		treegroup.insert("sorest");
+		treegroup.insert("thetayc");
+		treegroup.insert("thetan");
+		treegroup.insert("kstest");
+		treegroup.insert("whittaker");
+		treegroup.insert("sharednseqs");
+		treegroup.insert("ochiai");
+		treegroup.insert("anderberg");
+		treegroup.insert("kulczynski");
+		treegroup.insert("kulczynskicody");
+		treegroup.insert("lennon");
+		treegroup.insert("morisitahorn");
+		treegroup.insert("braycurtis");
+		treegroup.insert("odum");
+		treegroup.insert("canberra");
+		treegroup.insert("structeuclidean");
+		treegroup.insert("structchord");
+		treegroup.insert("hellinger");
+		treegroup.insert("manhattan");
+		treegroup.insert("structpearson");
+		treegroup.insert("structkulczynski");
+		treegroup.insert("structchi2");
+		treegroup.insert("soergel");
+		treegroup.insert("spearman");
+		treegroup.insert("speciesprofile");
+		treegroup.insert("hamming");
+		treegroup.insert("gower");
+		treegroup.insert("memchi2");
+		treegroup.insert("memchord");
+        treegroup.insert("jsd");
+        treegroup.insert("rjsd");
+		treegroup.insert("memeuclidean");
+		treegroup.insert("mempearson");
 		
 	}
 	catch(exception& e) {
@@ -721,16 +657,16 @@ void ValidCalculators::initialTreeGroups() {
 /********************************************************************/
 void ValidCalculators::initialHeat() {
 	try {	
-		heat["jabund"]				= "jabund";
-		heat["sorabund"]			= "sorabund";
-		heat["jclass"]				= "jclass";
-		heat["sorclass"]			= "sorclass";
-		heat["jest"]				= "jest";
-		heat["sorest"]				= "sorest";
-		heat["thetayc"]				= "thetayc";
-		heat["thetan"]				= "thetan";
-		heat["morisitahorn"]		= "morisitahorn";
-		heat["braycurtis"]			= "braycurtis";
+		heat.insert("jabund");
+		heat.insert("sorabund");
+		heat.insert("jclass");
+		heat.insert("sorclass");
+		heat.insert("jest");
+		heat.insert("sorest");
+		heat.insert("thetayc");
+		heat.insert("thetan");
+		heat.insert("morisitahorn");
+		heat.insert("braycurtis");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialHeat");
@@ -741,47 +677,47 @@ void ValidCalculators::initialHeat() {
 /********************************************************************/
 void ValidCalculators::initialMatrix() {
 	try {	
-		matrix["sharedsobs"]				= "sharedsobs";
-		matrix["sharedchao"]				= "sharedchao";
-		matrix["sharedace"]				= "sharedace";
-		matrix["jabund"]					= "jabund";
-		matrix["sorabund"]				= "sorabund";
-		matrix["jclass"]					= "jclass";
-		matrix["sorclass"]				= "sorclass";
-		matrix["jest"]					= "jest";
-		matrix["sorest"]					= "sorest";
-		matrix["thetayc"]				= "thetayc";
-		matrix["thetan"]					= "thetan";
-		matrix["kstest"]					= "kstest";
-		matrix["whittaker"]				= "whittaker";
-		matrix["sharednseqs"]			= "sharednseqs";
-		matrix["ochiai"]					= "ochiai";
-		matrix["anderberg"]				= "anderberg";
-		matrix["kulczynski"]				= "kulczynski";
-		matrix["kulczynskicody"]			= "kulczynskicody";
-		matrix["lennon"]					= "lennon";
-		matrix["morisitahorn"]			= "morisitahorn";
-		matrix["braycurtis"]				= "braycurtis";
-		matrix["odum"]					= "odum";
-		matrix["canberra"]				= "canberra";
-		matrix["structeuclidean"]		= "structeuclidean";
-		matrix["structchord"]			= "structchord";
-		matrix["hellinger"]				= "hellinger";
-		matrix["manhattan"]				= "manhattan";
-		matrix["structpearson"]			= "structpearson";
-		matrix["structkulczynski"]		= "structkulczynski";
-		matrix["structchi2"]				= "structchi2";
-		matrix["soergel"]				= "soergel";
-		matrix["spearman"]				= "spearman";
-		matrix["speciesprofile"]		= "speciesprofile";
-		matrix["hamming"]				= "hamming";
-		matrix["gower"]					= "gower";
-		matrix["memchi2"]				= "memchi2";
-		matrix["memchord"]				= "memchord";
-		matrix["memeuclidean"]			= "memeuclidean";
-		matrix["mempearson"]			= "mempearson";
-        matrix["rjsd"]                   = "rjsd";
-        matrix["jsd"]                   = "jsd";
+		matrix.insert("sharedsobs");
+		matrix.insert("sharedchao");
+		matrix.insert("sharedace");
+		matrix.insert("jabund");
+		matrix.insert("sorabund");
+		matrix.insert("jclass");
+		matrix.insert("sorclass");
+		matrix.insert("jest");
+		matrix.insert("sorest");
+		matrix.insert("thetayc");
+		matrix.insert("thetan");
+		matrix.insert("kstest");
+		matrix.insert("whittaker");
+		matrix.insert("sharednseqs");
+		matrix.insert("ochiai");
+		matrix.insert("anderberg");
+		matrix.insert("kulczynski");
+		matrix.insert("kulczynskicody");
+		matrix.insert("lennon");
+		matrix.insert("morisitahorn");
+		matrix.insert("braycurtis");
+		matrix.insert("odum");
+		matrix.insert("canberra");
+		matrix.insert("structeuclidean");
+		matrix.insert("structchord");
+		matrix.insert("hellinger");
+		matrix.insert("manhattan");
+		matrix.insert("structpearson");
+		matrix.insert("structkulczynski");
+		matrix.insert("structchi2");
+		matrix.insert("soergel");
+		matrix.insert("spearman");
+		matrix.insert("speciesprofile");
+		matrix.insert("hamming");
+		matrix.insert("gower");
+		matrix.insert("memchi2");
+		matrix.insert("memchord");
+		matrix.insert("memeuclidean");
+		matrix.insert("mempearson");
+        matrix.insert("rjsd");
+        matrix.insert("jsd");
 		
 	}
 	catch(exception& e) {
@@ -789,32 +725,12 @@ void ValidCalculators::initialMatrix() {
 		exit(1);
 	}
 }
-
-/********************************************************************/
-void ValidCalculators::initialBoot() {
-	try {	
-		boot["jabund"]				= "jabund";
-		boot["sorabund"]			= "sorabund";
-		boot["jclass"]				= "jclass";
-		boot["sorclass"]			= "orclass";
-		boot["jest"]				= "jest";
-		boot["sorest"]				= "sorest";
-		boot["thetayc"]				= "thetayc";
-		boot["thetan"]				= "thetan";
-		boot["morisitahorn"]		= "morisitahorn";
-		boot["braycurtis"]			= "braycurtis";
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ValidCalculator", "initialBoot");
-		exit(1);
-	}
-}
 /********************************************************************/
 void ValidCalculators::initialDistance() {
 	try {	
-		distance["nogaps"]		= "nogaps";
-		distance["eachgap"]		= "eachgap";
-		distance["onegap"]		= "onegap";
+		distance.insert("nogaps");
+		distance.insert("eachgap");
+		distance.insert("onegap");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialDistance");
@@ -825,68 +741,8 @@ void ValidCalculators::initialDistance() {
 /********************************************************************/
 void ValidCalculators::printCalc(string parameter, ostream& out) {
 	try{
-		out << "The available estimators for calc are ";
-		//are you looking for a calculator for a single parameter
-		if (parameter == "single") {
-			for (it = single.begin(); it != single.end(); it++) {
-				out << it->first << ", ";
-			}
-		//are you looking for a calculator for a shared parameter
-		}else if (parameter == "shared") {
-			for (it = shared.begin(); it != shared.end(); it++) {
-				out << it->first << ", ";
-			}
-		//are you looking for a calculator for a rarefaction parameter
-		}else if (parameter == "rarefaction") {
-			for (it = rarefaction.begin(); it != rarefaction.end(); it++) {
-				out << it->first << ", ";
-			}
-		//are you looking for a calculator for a summary parameter
-		}else if (parameter == "summary") {
-			for (it = summary.begin(); it != summary.end(); it++) {
-				out << it->first << ", ";
-			}
-		//are you looking for a calculator for a sharedsummary parameter
-		}else if (parameter == "sharedsummary") {
-			for (it = sharedsummary.begin(); it != sharedsummary.end(); it++) {
-				out << it->first << ", ";
-			}
-		}else if (parameter == "sharedrarefaction") {
-			for (it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) {
-				out << it->first << ", ";
-			}
-		}else if (parameter == "vennsingle") {
-			for (it = vennsingle.begin(); it != vennsingle.end(); it++) {
-				out << it->first << ", ";
-			}
-		}else if (parameter == "vennshared") {
-			for (it = vennshared.begin(); it != vennshared.end(); it++) {
-				out << it->first << ", ";
-			}
-		}else if (parameter == "treegroup") {
-			for (it = treegroup.begin(); it != treegroup.end(); it++) {
-				out << it->first << ", ";
-			}
-		}else if (parameter == "matrix") {
-			for (it = matrix.begin(); it != matrix.end(); it++) {
-				out << it->first << ", ";
-			}
-		}else if (parameter == "heat") {
-			for (it = heat.begin(); it != heat.end(); it++) {
-				out << it->first << ", ";
-			}
-		}else if (parameter == "boot") {
-			for (it = boot.begin(); it != boot.end(); it++) {
-				out << it->first << ", ";
-			}
-		}else if (parameter == "distance") {
-			for (it = distance.begin(); it != distance.end(); it++) {
-				out << it->first << ", ";
-			}
-		}
-
-		out << endl;
-	}
+        out << printCalc(parameter);
+    }
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "printCalc");
 		exit(1);
@@ -895,68 +751,22 @@ void ValidCalculators::printCalc(string parameter, ostream& out) {
 /********************************************************************/
 string ValidCalculators::printCalc(string parameter) {
 	try{
+        Utils util;
+        
 		string output = "The available estimators for calc are ";
-		//are you looking for a calculator for a single parameter
-		if (parameter == "single") {
-			for (it = single.begin(); it != single.end(); it++) {
-				output += it->first + ", ";
-			}
-			//are you looking for a calculator for a shared parameter
-		}else if (parameter == "shared") {
-			for (it = shared.begin(); it != shared.end(); it++) {
-				output += it->first + ", ";
-			}
-			//are you looking for a calculator for a rarefaction parameter
-		}else if (parameter == "rarefaction") {
-			for (it = rarefaction.begin(); it != rarefaction.end(); it++) {
-				output += it->first + ", ";
-			}
-			//are you looking for a calculator for a summary parameter
-		}else if (parameter == "summary") {
-			for (it = summary.begin(); it != summary.end(); it++) {
-				output += it->first + ", ";
-			}
-			//are you looking for a calculator for a sharedsummary parameter
-		}else if (parameter == "sharedsummary") {
-			for (it = sharedsummary.begin(); it != sharedsummary.end(); it++) {
-				output += it->first + ", ";
-			}
-		}else if (parameter == "sharedrarefaction") {
-			for (it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) {
-				output += it->first + ", ";
-			}
-		}else if (parameter == "vennsingle") {
-			for (it = vennsingle.begin(); it != vennsingle.end(); it++) {
-				output += it->first + ", ";
-			}
-		}else if (parameter == "vennshared") {
-			for (it = vennshared.begin(); it != vennshared.end(); it++) {
-				output += it->first + ", ";
-			}
-		}else if (parameter == "treegroup") {
-			for (it = treegroup.begin(); it != treegroup.end(); it++) {
-				output += it->first + ", ";
-			}
-		}else if (parameter == "matrix") {
-			for (it = matrix.begin(); it != matrix.end(); it++) {
-				output += it->first + ", ";
-			}
-		}else if (parameter == "heat") {
-			for (it = heat.begin(); it != heat.end(); it++) {
-				output += it->first + ", ";
-			}
-		}else if (parameter == "boot") {
-			for (it = boot.begin(); it != boot.end(); it++) {
-				output += it->first + ", ";
-			}
-		}else if (parameter == "distance") {
-			for (it = distance.begin(); it != distance.end(); it++) {
-				output += it->first + ", ";
-			}
-		}
 		
-		//rip off comma
-		output = output.substr(0, output.length()-1);
+        if (parameter == "single")                  {  output += util.getStringFromSet(single, ", ");               }
+        else if (parameter == "shared")             {  output += util.getStringFromSet(shared, ", ");               }
+        else if (parameter == "rarefaction")        {  output += util.getStringFromSet(rarefaction, ", ");          }
+        else if (parameter == "summary")            {  output += util.getStringFromSet(summary, ", ");              }
+        else if (parameter == "sharedsummary")      {  output += util.getStringFromSet(sharedsummary, ", ");        }
+        else if (parameter == "sharedrarefaction")  {  output += util.getStringFromSet(sharedrarefaction, ", ");    }
+        else if (parameter == "vennsingle")         {  output += util.getStringFromSet(vennsingle, ", ");           }
+        else if (parameter == "vennshared")         {  output += util.getStringFromSet(vennshared, ", ");           }
+        else if (parameter == "treegroup")          {  output += util.getStringFromSet(treegroup, ", ");            }
+        else if (parameter == "matrix")             {  output += util.getStringFromSet(matrix, ", ");               }
+        else if (parameter == "heat")               {  output += util.getStringFromSet(heat, ", ");                 }
+        else if (parameter == "distance")           {  output += util.getStringFromSet(distance, ", ");             }
 		output += "\n";
 		
 		return output;

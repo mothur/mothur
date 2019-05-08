@@ -10,8 +10,8 @@
  *
  */
 
-#include "mothur.h"
 #include "mothurout.h"
+#include "utils.hpp"
 
 //This class contains a list of all valid calculators in Mothur.  
 //It has a function which will tell you if your calculator is valid for the given parameter.
@@ -28,21 +28,20 @@ class ValidCalculators {
 		void printCitations(vector<string>);
 		
 	private:
-        map<string, string> estimators;
-		map<string, string> single;
-		map<string, string> shared;
-		map<string, string> rarefaction;
-		map<string, string> summary;
-		map<string, string> sharedrarefaction;
-		map<string, string> sharedsummary;
-		map<string, string> vennsingle;
-		map<string, string> vennshared;
-		map<string, string> treegroup;
-		map<string, string> matrix;
-		map<string, string> heat;
-		map<string, string> boot;
-		map<string, string> distance;
-		map<string, string>::iterator it;
+        set<string> estimators;
+		set<string> single;
+		set<string> shared;
+		set<string> rarefaction;
+		set<string> summary;
+		set<string> sharedrarefaction;
+		set<string> sharedsummary;
+		set<string> vennsingle;
+		set<string> vennshared;
+		set<string> treegroup;
+		set<string> matrix;
+		set<string> heat;
+		set<string> distance;
+		set<string>::iterator it;
 		set<string> allCalcs;
 		
 		void initialSingle();
@@ -55,7 +54,6 @@ class ValidCalculators {
 		void initialVennShared();
 		void initialTreeGroups();
 		void initialMatrix();
-		void initialBoot();
 		void initialDistance();
 		void initialHeat();
         void initialEstimators();
