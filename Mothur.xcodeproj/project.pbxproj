@@ -24,6 +24,8 @@
 		4809EC9E227C9B3100B4D0E5 /* metrosichel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9B227C9B3100B4D0E5 /* metrosichel.cpp */; };
 		4809ECA12280898E00B4D0E5 /* igrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9F2280898E00B4D0E5 /* igrarefaction.cpp */; };
 		4809ECA22280898E00B4D0E5 /* igrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC9F2280898E00B4D0E5 /* igrarefaction.cpp */; };
+		4809ECA522831A5E00B4D0E5 /* lnabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809ECA322831A5E00B4D0E5 /* lnabundance.cpp */; };
+		4809ECA622831A5E00B4D0E5 /* lnabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809ECA322831A5E00B4D0E5 /* lnabundance.cpp */; };
 		480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */; };
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
@@ -902,6 +904,8 @@
 		4809EC9C227C9B3100B4D0E5 /* metrosichel.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrosichel.hpp; path = source/calculators/metrosichel.hpp; sourceTree = SOURCE_ROOT; };
 		4809EC9F2280898E00B4D0E5 /* igrarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = igrarefaction.cpp; path = source/calculators/igrarefaction.cpp; sourceTree = SOURCE_ROOT; };
 		4809ECA02280898E00B4D0E5 /* igrarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = igrarefaction.hpp; path = source/calculators/igrarefaction.hpp; sourceTree = SOURCE_ROOT; };
+		4809ECA322831A5E00B4D0E5 /* lnabundance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lnabundance.cpp; path = source/calculators/lnabundance.cpp; sourceTree = SOURCE_ROOT; };
+		4809ECA422831A5E00B4D0E5 /* lnabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lnabundance.hpp; path = source/calculators/lnabundance.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E281EA681D100BF9C77 /* testclustercalcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testclustercalcs.cpp; path = TestMothur/testclustercalcs.cpp; sourceTree = SOURCE_ROOT; };
 		480D1E291EA681D100BF9C77 /* testclustercalcs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testclustercalcs.hpp; path = TestMothur/testclustercalcs.hpp; sourceTree = SOURCE_ROOT; };
 		480D1E2D1EA685C500BF9C77 /* fakemcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fakemcc.hpp; path = TestMothur/fakes/fakemcc.hpp; sourceTree = SOURCE_ROOT; };
@@ -2053,6 +2057,8 @@
 				484976E22255412400F3A291 /* igabundance.hpp */,
 				4809EC9F2280898E00B4D0E5 /* igrarefaction.cpp */,
 				4809ECA02280898E00B4D0E5 /* igrarefaction.hpp */,
+				4809ECA322831A5E00B4D0E5 /* lnabundance.cpp */,
+				4809ECA422831A5E00B4D0E5 /* lnabundance.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3323,6 +3329,7 @@
 				481FB6621AC1B8450076CFF3 /* noalign.cpp in Sources */,
 				481FB5E31AC1B77E0076CFF3 /* mgclustercommand.cpp in Sources */,
 				481FB5491AC1B6220076CFF3 /* invsimpson.cpp in Sources */,
+				4809ECA622831A5E00B4D0E5 /* lnabundance.cpp in Sources */,
 				48576EA51D05E8F600BBC9C0 /* testoptimatrix.cpp in Sources */,
 				481FB5821AC1B6FF0076CFF3 /* bellerophon.cpp in Sources */,
 				481FB6731AC1B8820076CFF3 /* seqnoise.cpp in Sources */,
@@ -3799,6 +3806,7 @@
 				A74C06E916A9C0A9008390A3 /* primerdesigncommand.cpp in Sources */,
 				48576EA11D05DBC600BBC9C0 /* averagelinkage.cpp in Sources */,
 				A7128B1D16B7002A00723BE4 /* getdistscommand.cpp in Sources */,
+				4809ECA522831A5E00B4D0E5 /* lnabundance.cpp in Sources */,
 				A7B0231516B8244C006BA09E /* removedistscommand.cpp in Sources */,
 				A799314B16CBD0CD0017E888 /* mergetaxsummarycommand.cpp in Sources */,
 				A7548FAD17142EBC00B1F05A /* getmetacommunitycommand.cpp in Sources */,

@@ -56,6 +56,7 @@ private:
     string runMetroSichel(SAbundVector*&, string);
     int runIGAbund(SAbundVector*&, string);
     string runIGRarefaction(SAbundVector*& sabund, string fileRoot);
+    int runLNAbund(SAbundVector*& sabund, string fileRoot);
     
 };
 //*******************************************************

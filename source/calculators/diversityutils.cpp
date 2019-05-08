@@ -7,6 +7,29 @@
 //
 
 #include "diversityutils.hpp"
+/***********************************************************************/
+double f1(double x, void *pvParams)
+{
+    t_LNParams *ptLNParams = (t_LNParams *) pvParams;
+    double dMDash = ptLNParams->dMDash, dV = ptLNParams->dV, n = ptLNParams->n;
+    double dTemp = (x - dMDash);
+    double dExp  = x*((double) n) - exp(x) - 0.5*((dTemp*dTemp)/dV);
+    double dRet  = exp(dExp);
+    
+    return dRet;
+}
+
+/***********************************************************************/
+double derivExponent(double x, void *pvParams)
+{
+    t_LNParams *ptLNParams = (t_LNParams *) pvParams;
+    double dMDash = ptLNParams->dMDash, dV = ptLNParams->dV, n = ptLNParams->n;
+    double dTemp = (x - dMDash)/dV, dRet = 0.0;
+    
+    dRet = ((double) n) - exp(x) - dTemp;
+    
+    return dRet;
+}
 
 /***********************************************************************/
 void DiversityUtils::loadAbundance(t_Data *ptData, SAbundVector* rank)
@@ -44,19 +67,6 @@ void DiversityUtils::loadAbundance(t_Data *ptData, SAbundVector* rank)
     ptData->aanAbund    = aanAbund;
     ptData->nNA         = nNA;
 }
-
-/***********************************************************************/
-double derivExponent(double x, void *pvParams)
-{
-    t_LNParams *ptLNParams = (t_LNParams *) pvParams;
-    double dMDash = ptLNParams->dMDash, dV = ptLNParams->dV, n = ptLNParams->n;
-    double dTemp = (x - dMDash)/dV, dRet = 0.0;
-    
-    dRet = ((double) n) - exp(x) - dTemp;
-    
-    return dRet;
-}
-
 /***********************************************************************/
 double DiversityUtils::chao(t_Data *ptData)
 {
@@ -97,19 +107,95 @@ double DiversityUtils::f2X(double x, double dA, double dB, double dNDash)
     return -dRet;
 }
  #ifdef USE_GSL
-
 /***********************************************************************/
 double fMu(double x, void* pvParams)
 {
     t_IGParams* ptIGParams = (t_IGParams *) pvParams;
     
     DiversityUtils dutils("igrarefaction");
-
+    
     double dAlphaDD = ptIGParams->dAlpha*sqrt(x);
     double dBetaDD  = ptIGParams->dBeta*x;
     double dLogP0   = dutils.logLikelihood(0, dAlphaDD, dBetaDD);
     
     return (1.0 - exp(dLogP0)) - ptIGParams->dC;
+}
+/***********************************************************************/
+double DiversityUtils::logLikelihoodRampal(int n, double dMDash, double dV)
+{
+    double dN = (double) n;
+    double dLogLik = 0.0, dTemp = gsl_pow_int(log(dN) - dMDash,2), dTemp3 = gsl_pow_int(log(dN) - dMDash,3);
+    
+    dLogLik = -0.5*log(2.0*M_PI*dV) - log(dN) - (dTemp/(2.0*dV));
+    
+    dLogLik += log(1.0 + 1.0/(2.0*dN*dV)*(dTemp/dV + log(dN) - dMDash - 1.0)
+                   + 1.0/(6.0*dN*dN*dV*dV*dV)*(3.0*dV*dV - (3.0*dV - 2.0*dV*dV)*(dMDash - log(dN))
+                                               - 3.0*dV*dTemp + dTemp3));
+    
+    return dLogLik;
+}
+/***********************************************************************/
+double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
+{
+    gsl_integration_workspace *ptGSLWS =
+    gsl_integration_workspace_alloc(1000);
+    double dLogFac1   = 0.0, dLogFacN  = 0.0;
+    double dResult = 0.0, dError = 0.0, dPrecision = 0.0;
+    gsl_function tGSLF;
+    t_LNParams tLNParams;
+    double dEst = dMDash + ((double)n)*dV, dA = 0.0, dB = 0.0;
+    
+    tLNParams.n = n; tLNParams.dMDash = dMDash; tLNParams.dV = dV;
+    
+    tGSLF.function = f1;
+    tGSLF.params   = (void *) &tLNParams;
+    
+    dLogFac1 = log(2.0*M_PI*dV);
+    
+    if(n < 50){
+        dLogFacN = gsl_sf_fact(n);
+        dLogFacN = log(dLogFacN);
+    }
+    else{
+        dLogFacN = gsl_sf_lngamma(((double) n) + 1.0);
+    }
+    
+    if(dEst > dV){
+        double dMax = 0.0;
+        double dUpper = (((double) n) + (dMDash/dV) - 1.0)/(1.0 + 1.0/dV);
+        double dVar   = 0.0;
+        
+        if (method == "metroln") { if(fabs(dUpper) > 1.0e-7){  solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); } }
+        else {  solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax);  } //lnabund
+        
+        dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
+        
+        dA = dMax - V_MULT*dVar; dB = dMax + V_MULT*dVar;
+    }
+    else{
+        double dMax = 0.0;
+        double dLower = dEst - dV;
+        double dUpper = (((double) n) + (dMDash/dV) - 1.0)/(1.0 + 1.0/dV);
+        double dVar   = 0.0;
+        
+        if (method == "metroln") {
+            if(fabs(dUpper - dLower) > 1.0e-7){ solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); }
+            else{ dMax = 0.5*(dLower + dUpper); }
+        }else {  solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); } //lnabund
+        
+        dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
+        
+        dA = dMax - V_MULT*dVar; dB = dMax + V_MULT*dVar;
+    }
+    
+    if(n < 10)  {  dPrecision = HI_PRECISION;   }
+    else        {  dPrecision = LO_PRECISION;   }
+    
+    gsl_integration_qag(&tGSLF, dA, dB, dPrecision, 0.0, 1000, GSL_INTEG_GAUSS61, ptGSLWS, &dResult, &dError);
+    
+    gsl_integration_workspace_free(ptGSLWS);
+    
+    return log(dResult) - dLogFacN -0.5*dLogFac1;
 }
 
 /***********************************************************************/

@@ -1,23 +1,23 @@
 //
-//  igabundance.hpp
+//  lnabundace.hpp
 //  Mothur
 //
-//  Created by Sarah Westcott on 4/3/19.
+//  Created by Sarah Westcott on 5/8/19.
 //  Copyright © 2019 Schloss Lab. All rights reserved.
 //
 
-#ifndef igabundance_hpp
-#define igabundance_hpp
+#ifndef lnabundace_hpp
+#define lnabundace_hpp
 
 #include "diversityutils.hpp"
 
 /***********************************************************************/
 
-class IGAbundance   {
+class LNAbundance   {
     
 public:
     
-    IGAbundance() { m = MothurOut::getInstance(); }
+    LNAbundance() { m = MothurOut::getInstance(); }
     
     vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
     
@@ -33,4 +33,4 @@ private:
 
 
 
-#endif /* igabundance_hpp */
+#endif /* lnabundace_hpp */

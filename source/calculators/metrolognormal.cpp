@@ -11,100 +11,7 @@
 /*constants for calculated compound Poisson lognormal*/
 
 
-/***********************************************************************/
-double f1_0(double x, void *pvParams)
-{
-    t_LNParams *ptLNParams = (t_LNParams *) pvParams;
-    double dMDash = ptLNParams->dMDash, dV = ptLNParams->dV;
-    int n = ptLNParams->n;
-    double dTemp = (x - dMDash);
-    double dExp  = x*((double) n) - exp(x) - 0.5*((dTemp*dTemp)/dV);
-    double dRet  = exp(dExp);
-    
-    return dRet;
-}
 #ifdef USE_GSL
-/***********************************************************************/
-double logLikelihoodRampal(int n, double dMDash, double dV)
-{
-    double dN = (double) n;
-    double dLogLik = 0.0, dTemp = gsl_pow_int(log(dN) - dMDash,2), dTemp3 = gsl_pow_int(log(dN) - dMDash,3);
-    
-    dLogLik = -0.5*log(2.0*M_PI*dV) - log(dN) - (dTemp/(2.0*dV));
-    
-    dLogLik += log(1.0 + 1.0/(2.0*dN*dV)*(dTemp/dV + log(dN) - dMDash - 1.0)
-                   + 1.0/(6.0*dN*dN*dV*dV*dV)*(3.0*dV*dV - (3.0*dV - 2.0*dV*dV)*(dMDash - log(dN))
-                                               - 3.0*dV*dTemp + dTemp3));
-    
-    return dLogLik;
-}
-/***********************************************************************/
-double logLikelihoodQuad(int n, double dMDash, double dV)
-{
-    gsl_integration_workspace *ptGSLWS =
-    gsl_integration_workspace_alloc(1000);
-    double dLogFac1   = 0.0, dLogFacN  = 0.0;
-    double dResult = 0.0, dError = 0.0, dPrecision = 0.0;
-    gsl_function tGSLF;
-    t_LNParams tLNParams;
-    double dEst = dMDash + ((double)n)*dV, dA = 0.0, dB = 0.0;
-    
-    tLNParams.n = n; tLNParams.dMDash = dMDash; tLNParams.dV = dV;
-    
-    DiversityUtils dutils("metroln");
-    
-    tGSLF.function = f1_0;
-    tGSLF.params   = (void *) &tLNParams;
-    
-    dLogFac1 = log(2.0*M_PI*dV);
-    
-    if(n < 50){
-        dLogFacN = gsl_sf_fact(n);
-        dLogFacN = log(dLogFacN);
-    }
-    else{
-        dLogFacN = gsl_sf_lngamma(((double) n) + 1.0);
-    }
-    
-    if(dEst > dV){
-        double dMax = 0.0;
-        double dUpper = (((double) n) + (dMDash/dV) - 1.0)/(1.0 + 1.0/dV);
-        double dVar   = 0.0;
-        
-        if(fabs(dUpper) > 1.0e-7){
-            dutils.solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax);
-        }
-        
-        dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
-        
-        dA = dMax - V_MULT*dVar; dB = dMax + V_MULT*dVar;
-    }
-    else{
-        double dMax = 0.0;
-        double dLower = dEst - dV;
-        double dUpper = (((double) n) + (dMDash/dV) - 1.0)/(1.0 + 1.0/dV);
-        double dVar   = 0.0;
-        
-        if(fabs(dUpper - dLower) > 1.0e-7){
-            dutils.solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax);
-        }
-        else{
-            dMax = 0.5*(dLower + dUpper);
-        }
-        dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
-        
-        dA = dMax - V_MULT*dVar; dB = dMax + V_MULT*dVar;
-    }
-    
-    if(n < 10)  {  dPrecision = HI_PRECISION;   }
-    else        {  dPrecision = LO_PRECISION;   }
-    
-    gsl_integration_qag(&tGSLF, dA, dB, dPrecision, 0.0, 1000, GSL_INTEG_GAUSS61, ptGSLWS, &dResult, &dError);
-    
-    gsl_integration_workspace_free(ptGSLWS);
-    
-    return log(dResult) - dLogFacN -0.5*dLogFac1;
-}
 /***********************************************************************/
 double nLogLikelihood1(const gsl_vector * x, void * params)
 {
@@ -114,16 +21,17 @@ double nLogLikelihood1(const gsl_vector * x, void * params)
     int    i       = 0;
     double dLogL   = 0.0;
     
+    DiversityUtils dutils("metroln");
     
     for(i = 0; i < ptData->nNA; i++){
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
         if(nA < 100){
-            dLogP = logLikelihoodQuad(nA, dMDash, dV);
+            dLogP = dutils.logLikelihoodQuad(nA, dMDash, dV);
         }
         else{
-            dLogP = logLikelihoodRampal(nA, dMDash, dV);
+            dLogP = dutils.logLikelihoodRampal(nA, dMDash, dV);
         }
         
         dLogL += ((double) ptData->aanAbund[i][1])*dLogP;
@@ -131,7 +39,7 @@ double nLogLikelihood1(const gsl_vector * x, void * params)
         dLogL -= gsl_sf_lnfact(ptData->aanAbund[i][1]);
     }
     
-    dLogL += (nS - ptData->nL)*logLikelihoodQuad(0, dMDash, dV);
+    dLogL += (nS - ptData->nL)*dutils.logLikelihoodQuad(0, dMDash, dV);
     
     dLogL -= gsl_sf_lnfact(nS - ptData->nL);
     
@@ -147,15 +55,17 @@ double negLogLikelihood1(double dMDash, double dV, int nS, void * params)
     int    i       = 0;
     double dLog0 = 0.0, dLogL   = 0.0;
     
+    DiversityUtils dutils("metroln");
+    
     for(i = 0; i < ptData->nNA; i++){
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
         if(nA < 100){
-            dLogP = logLikelihoodQuad(nA, dMDash, dV);
+            dLogP = dutils.logLikelihoodQuad(nA, dMDash, dV);
         }
         else{
-            dLogP = logLikelihoodRampal(nA, dMDash, dV);
+            dLogP = dutils.logLikelihoodRampal(nA, dMDash, dV);
         }
         
         dLogL += ((double) ptData->aanAbund[i][1])*dLogP;
@@ -163,7 +73,7 @@ double negLogLikelihood1(double dMDash, double dV, int nS, void * params)
         dLogL -= gsl_sf_lnfact(ptData->aanAbund[i][1]);
     }
     
-    dLog0     = logLikelihoodQuad(0, dMDash, dV);
+    dLog0     = dutils.logLikelihoodQuad(0, dMDash, dV);
     
     if(nS > ptData->nL){
         dLogL += (nS - ptData->nL)*dLog0;

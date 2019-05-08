@@ -17,6 +17,7 @@ int compare_doubles(const void* a, const void* b)
     else if( *arg1 == *arg2 ) return 0;
     else return 1;
 }
+#ifdef USE_GSL
 /***********************************************************************/
 double IGRarefaction::calcMu(t_IGParams *ptIGParams)
 {
@@ -30,6 +31,7 @@ double IGRarefaction::calcMu(t_IGParams *ptIGParams)
     
     return dMu;
 }
+#endif
 /***********************************************************************/
 vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
     try {

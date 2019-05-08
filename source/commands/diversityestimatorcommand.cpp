@@ -14,6 +14,7 @@
 #include "metrosichel.hpp"
 #include "igabundance.hpp"
 #include "igrarefaction.hpp"
+#include "lnabundance.hpp"
 
 //**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::setParameters(){
@@ -25,7 +26,7 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction-lnabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
@@ -83,9 +84,10 @@ string EstimatorSingleCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "erarefaction")             {  pattern =  "[filename],[distance],erarefaction";            }
-        else if (type == "igabundance")                  {  pattern =  "[filename],[distance],igabundance";             }
-        else if (type == "igrarefaction")                  {  pattern =  "[filename],[distance],igrarefaction";             }
+        if (type == "erarefaction")             {  pattern =  "[filename],[distance],erarefaction";        }
+        else if (type == "igabund")             {  pattern =  "[filename],[distance],igabund";             }
+        else if (type == "lnabund")             {  pattern =  "[filename],[distance],lnabund";             }
+        else if (type == "igrarefaction")       {  pattern =  "[filename],[distance],igrarefaction";       }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -103,7 +105,8 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         vector<string> tempOutNames;
         outputTypes["erarefaction"] = tempOutNames;
         outputTypes["igrarefaction"] = tempOutNames;
-        outputTypes["igabundance"] = tempOutNames;
+        outputTypes["igabund"] = tempOutNames;
+        outputTypes["lnabund"] = tempOutNames;
         outputTypes["metroig"] = tempOutNames;
         outputTypes["metroln"] = tempOutNames;
         outputTypes["metrols"] = tempOutNames;
@@ -142,7 +145,8 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             //initialize outputTypes
             vector<string> tempOutNames;
             outputTypes["erarefaction"] = tempOutNames;
-            outputTypes["igabundance"] = tempOutNames;
+            outputTypes["igabund"] = tempOutNames;
+            outputTypes["lnabund"] = tempOutNames;
             outputTypes["metroig"] = tempOutNames;
             outputTypes["metroln"] = tempOutNames;
             outputTypes["metrols"] = tempOutNames;
@@ -276,6 +280,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             set<string> estimatorsThatRequireSampleFile;
             estimatorsThatRequireSampleFile.insert("igabund");
             estimatorsThatRequireSampleFile.insert("igrarefaction");
+            estimatorsThatRequireSampleFile.insert("lnabund");
             
             //remove any typo calcs
             vector<string> validEstimates;
@@ -467,6 +472,7 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             else if (Estimators[i] == "metrosichel")     { runMetroSichel(sabund, fileRoot);     }
             else if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
             else if (Estimators[i] == "igrarefaction")   { runIGRarefaction(sabund, fileRoot);   }
+            else if (Estimators[i] == "lnabund")         { runLNAbund(sabund, fileRoot);         }
         }
         
         return 0;
@@ -656,8 +662,8 @@ int EstimatorSingleCommand::runIGAbund(SAbundVector*& sabund, string fileRoot) {
         map<string, string> variables;
         variables["[filename]"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
-        string outputFileName = getOutputFileName("igabundance", variables);
-        outputNames.push_back(outputFileName); outputTypes["igabundance"].push_back(outputFileName);
+        string outputFileName = getOutputFileName("igabund", variables);
+        outputNames.push_back(outputFileName); outputTypes["igabund"].push_back(outputFileName);
         
         ofstream out; util.openOutputFile(outputFileName, out); //format output
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -688,6 +694,47 @@ int EstimatorSingleCommand::runIGAbund(SAbundVector*& sabund, string fileRoot) {
     }
     catch(exception& e) {
         m->errorOut(e, "EstimatorSingleCommand", "runIGAbund");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int EstimatorSingleCommand::runLNAbund(SAbundVector*& sabund, string fileRoot) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = fileRoot;
+        variables["[distance]"] = sabund->getLabel();
+        string outputFileName = getOutputFileName("lnabund", variables);
+        outputNames.push_back(outputFileName); outputTypes["lnabund"].push_back(outputFileName);
+        
+        ofstream out; util.openOutputFile(outputFileName, out); //format output
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        if (samplefile != "") {
+            int burnValue = burn;
+            if (!burnSet) { burnValue = 200000; }
+            
+            int burnSampleValue = burnSample;
+            if (!burnSampleSet) { burnSampleValue = 1000; }
+            
+            fillSampling(burnValue, burnSampleValue);
+        }
+        
+        LNAbundance lnAbund;
+        
+        vector<double> results = lnAbund.getValues(sabund, sampling);
+        
+        for (int i = 0; i < results.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            out << i+1 << '\t' << results[i] << endl;
+        }
+        out.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runLNAbund");
         exit(1);
     }
 }
