@@ -230,7 +230,10 @@ int SharedRAbundVectors::push_back(SharedRAbundVector* thisLookup){
     try {
         
         if (numBins == 0) {  numBins = thisLookup->getNumBins();  }
-        else if (numBins != thisLookup->getNumBins()) { m->mothurOut("[ERROR]: Number of bins does not match. Expected " + toString(numBins) + " found " + toString(thisLookup->getNumBins()) + ".\n"); m->setControl_pressed(true); return 0; }
+        else if (numBins != thisLookup->getNumBins()) {
+            m->mothurOut("[ERROR]: Number of bins does not match. Expected " + toString(numBins) + " found " + toString(thisLookup->getNumBins()) + ".\n");
+            m->setControl_pressed(true); return 0;
+        }
         
         lookup.push_back(thisLookup);
         sort(lookup.begin(), lookup.end(), compareRAbunds);
@@ -412,6 +415,44 @@ int SharedRAbundVectors::removeOTU(int bin){
     }
 }
 /***********************************************************************/
+int SharedRAbundVectors::removeOTUs(vector<int> bins, bool sorted){
+    try {
+        if (bins.size() == 0) { return 0; }
+        
+        if (!sorted) { sort(bins.begin(), bins.end()); }
+        
+        int totalOTUAbund = 0;
+        for (int i = 0; i < lookup.size(); i ++) {
+            totalOTUAbund += lookup[i]->remove(bins);
+        }
+        
+        vector<string> newLabels; int binIndex = 0;
+        for (int i = 0; i < currentLabels.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            if (i != bins[binIndex]) {
+                newLabels.push_back(currentLabels[i]);
+            }else if (i == bins[binIndex]) {
+                binIndex++;
+            
+                if (binIndex > bins.size()) { //removed all bins
+                    newLabels.insert(newLabels.end(), currentLabels.begin()+i, currentLabels.end()); //add rest of good bins
+                    break;
+                }
+            }
+        }
+        
+        currentLabels = newLabels;
+        numBins = currentLabels.size();
+        
+        return totalOTUAbund;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVectors", "removeOTUs");
+        exit(1);
+    }
+}
+/***********************************************************************/
 vector<string> SharedRAbundVectors::getNamesGroups(){
     try {
         vector<string> names; names.clear();
@@ -474,9 +515,10 @@ int SharedRAbundVectors::removeGroups(int minSize, bool silent){
         bool remove = false;
         for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             if ((*it)->getNumSeqs() < minSize) {
-                if (!silent) { m->mothurOut((*it)->getGroup() + " contains " + toString((*it)->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine(); }
+                if (!silent) { m->mothurOut((*it)->getGroup() + " contains " + toString((*it)->getNumSeqs()) + ". Eliminating.\n");  }
                 delete (*it); (*it) = NULL;
                 it = lookup.erase(it);
+                remove = true;
             }else {
                 Groups.push_back((*it)->getGroup());
                 ++it;
@@ -519,6 +561,9 @@ vector<SharedRAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
             if (m->getControl_pressed()) { return newLookup; }
             SharedRAbundVector* temp = new SharedRAbundVector(*lookup[i]);
             newLookup.push_back(temp);
+            if (temp->getNumBins() != numBins) {
+                cout << temp->getGroup() << '\t' << temp->getNumBins() << '\t' << lookup[i]->getNumBins() << '\t' << numBins << endl;
+            }
         }
         
         return newLookup;
@@ -603,15 +648,16 @@ SAbundVector SharedRAbundVectors::getSAbundVector(){
 void SharedRAbundVectors::eliminateZeroOTUS() {
     try {
         if (lookup.size() > 1) {
-            for (int i = 0; i < lookup[0]->getNumBins();) {
+            vector<int> otusToRemove;
+            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
                 if (m->getControl_pressed()) { break; }
                 
                 int total = getOTUTotal(i);
                 
                 //if they are not all zero add this bin
-                if (total == 0) { removeOTU(i);  }
-                else { i++;  }
+                if (total == 0) {  otusToRemove.push_back(i); } //sorted order
             }
+            removeOTUs(otusToRemove, true); //sorted
         }
     }
     catch(exception& e) {

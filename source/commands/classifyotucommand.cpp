@@ -109,7 +109,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(){
 ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 	try{
 		abort = false; calledHelp = false;   
-		allLines = 1;
+		allLines = true;
 		labels.clear();
 				
 		//allow user to run help
@@ -232,10 +232,10 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; allLines = 1;  }
+			if (label == "not found") { label = ""; allLines = true;  }
 			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
             
 			basis = validParameter.valid(parameters, "basis");

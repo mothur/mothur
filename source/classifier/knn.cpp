@@ -79,7 +79,7 @@ string Knn::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped) {
 			tax = "unknown;";
 		}else{
 			tax = findCommonTaxonomy(closestNames);
-			if (tax == "") { m->mothurOut("There are no common levels for sequence " + seq->getName() + ". "); m->mothurOutEndLine(); tax = "unknown;"; }
+			if (tax == "") { m->mothurOut("There are no common levels for sequence " + seq->getName() + ".\n"); tax = "unknown;"; }
 		}
 		
 		simpleTax = tax;
@@ -96,16 +96,14 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
         string conTax;
 		
 		//create a tree containing sequences from this bin
-		PhyloTree* p = new PhyloTree();
+		PhyloTree p;
 		
-		for (int i = 0; i < closest.size(); i++) {
-			p->addSeqToTree(closest[i], taxonomy[closest[i]]);
-		}
+		for (int i = 0; i < closest.size(); i++) { p.addSeqToTree(closest[i], taxonomy[closest[i]]); }
 		
 		//build tree
-		p->assignHeirarchyIDs(0);
+		p.assignHeirarchyIDs(0);
 		
-		TaxNode currentNode = p->get(0);
+		TaxNode currentNode = p.get(0);
 		
 		//at each level
 		while (currentNode.children.size() != 0) { //you still have more to explore
@@ -116,11 +114,11 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
 			//go through children
 			for (map<string, int>::iterator itChild = currentNode.children.begin(); itChild != currentNode.children.end(); itChild++) {
 				
-				TaxNode temp = p->get(itChild->second);
+				TaxNode temp = p.get(itChild->second);
 				
 				//select child with largest accessions - most seqs assigned to it
 				if (temp.accessions.size() > bestChildSize) {
-					bestChild = p->get(itChild->second);
+					bestChild = p.get(itChild->second);
 					bestChildSize = temp.accessions.size();
 				}
 				
@@ -135,8 +133,6 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
 			//move down a level
 			currentNode = bestChild;
 		}
-		
-		delete p;	
 		
 		return conTax;
 	}

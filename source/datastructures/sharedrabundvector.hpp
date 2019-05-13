@@ -73,6 +73,7 @@ public:
     int size();
     void clear();
     int remove(int);
+    int remove(vector<int>);
     
     void print(ostream&); //nonsorted
     

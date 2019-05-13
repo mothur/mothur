@@ -454,16 +454,18 @@ int RemoveOtuLabelsCommand::readShared(){
 
         bool wroteSomething = false;
         int numRemoved = 0;
-        for (int i = 0; i < lookup->getNumBins();) {
+        vector<int> binsToRemove;
+        for (int i = 0; i < lookup->getNumBins(); i++) {
             
             if (m->getControl_pressed()) { delete lookup; return 0; }
             
             //is this otu on the list
             if (otulabels.count(util.getSimpleLabel(lookup->getOTUNames()[i])) == 0) {
                 wroteSomething = true;
-                ++i;
-            }else { numRemoved++; lookup->removeOTU(i); }
+            }else { numRemoved++; binsToRemove.push_back(i); }
         }
+        
+        lookup->removeOTUs(binsToRemove, true);
 
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }

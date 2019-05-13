@@ -112,7 +112,7 @@ vector< vector<string> > FileFile::read(string f, string mode){
                     file2Group[files.size()] = group;
                     if (((findex != "") || (rindex != ""))) { hasIndex = true; }
                     
-                    if (mode == "contigs") { setGZ(forward, reverse, findex, rindex, allGZ, allPlainTxt); }
+                    if ((mode == "contigs") || (mode == "sra")) { setGZ(forward, reverse, findex, rindex, allGZ, allPlainTxt); }
                     
                     vector<string> pair;
                     pair.push_back(forward); pair.push_back(reverse); pair.push_back(findex); pair.push_back(rindex);
@@ -122,7 +122,7 @@ vector< vector<string> > FileFile::read(string f, string mode){
         }
         in.close();
         
-        if (mode == "contigs") { if (allGZ) { gz = true; } else { gz = false; } }
+        if ((mode == "contigs") || (mode == "sra")){ if (allGZ) { gz = true; } else { gz = false; } }
         
         if (files.size() == 0) { m->setControl_pressed(true); }
         

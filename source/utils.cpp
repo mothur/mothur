@@ -3335,27 +3335,15 @@ set<string> Utils::readAccnos(string accnosfile){
         if (!ableToOpen) {  m->mothurOut("[ERROR]: Could not open " + accnosfile + "\n"); return names; }
         string name;
 
-        string rest = "";
-        char buffer[4096];
-
-        unsigned long long count = 0;
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
 
-            in.read(buffer, 4096);
-            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
-
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]);
-                names.insert(pieces[i]);
-                count++;
-            }
+            in >> name; gobble(in);
+            
+            checkName(name);
+            names.insert(name);
         }
         in.close();
-
-        if (rest != "") {
-            vector<string> pieces = splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  count++; }
-        }
 
         return names;
     }
@@ -3365,7 +3353,7 @@ set<string> Utils::readAccnos(string accnosfile){
     }
 }
 //**********************************************************************************************************************
-int Utils::printAccnos(string accnosfile, vector<string>& names){
+void Utils::printAccnos(string accnosfile, vector<string>& names){
     try {
         ofstream out; openOutputFile(accnosfile, out);
         
@@ -3384,7 +3372,7 @@ int Utils::printAccnos(string accnosfile, vector<string>& names){
     }
 }
 //**********************************************************************************************************************
-int Utils::printAccnos(string accnosfile, set<string>& names){
+void Utils::printAccnos(string accnosfile, set<string>& names){
     try {
         ofstream out; openOutputFile(accnosfile, out);
         
@@ -3929,10 +3917,14 @@ bool Utils::mothurConvert(string item, float& num){
         if (isNumeric1(item)) {
             convert(item, num);
         }else {
-            num = 0;
-            error = true;
-            m->mothurOut("[ERROR]: cannot convert " + item + " to a float.\n");
-            m->setControl_pressed(true);
+            try {
+                num = atof(item.c_str());
+            }catch(exception& e) {
+                num = 0;
+                error = true;
+                m->mothurOut("[ERROR]: cannot convert " + item + " to a float.\n");
+                m->setControl_pressed(true);
+            }
         }
 
         return error;
@@ -3950,10 +3942,14 @@ bool Utils::mothurConvert(string item, double& num){
         if (isNumeric1(item)) {
             convert(item, num);
         }else {
-            num = 0;
-            error = true;
-            m->mothurOut("[ERROR]: cannot convert " + item + " to a double.\n");
-            m->setControl_pressed(true);
+            try {
+                num = atof(item.c_str());
+            }catch(exception& e) {
+                num = 0;
+                error = true;
+                m->mothurOut("[ERROR]: cannot convert " + item + " to a double.\n");
+                m->setControl_pressed(true);
+            }
         }
 
         return error;

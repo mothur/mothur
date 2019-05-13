@@ -681,8 +681,6 @@ int process(string group, string newMapFile, preClusterData* params){
                     
                     if (params->m->getControl_pressed()) { out.close(); return 0; }
                     
-                    int mismatches = params->length;
-                    
                     if(originalCount[i] > originalCount[j] * params->delta){
                         int mismatches = calcMisMatches(params->alignSeqs[i]->sequence, params->alignSeqs[j]->sequence, params);
                         

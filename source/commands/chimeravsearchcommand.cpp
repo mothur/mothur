@@ -332,21 +332,30 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                     string versionOutput = "./commandScreen.output";
                     util.openInputFile(versionOutput, in, "no error");
                     
-                    string output = util.getline(in); in.close();
-
-                    vector<string> outputs = util.splitWhiteSpace(output);
-                    
-                    if (outputs.size() >= 2) {
-                        string version = outputs[1];
+                    while (!in.eof()) {
+                        string output = util.getline(in); util.gobble(in);
                         
-                        int pos = version.find_first_of('_');
-                        if (pos != string::npos) { version = version.substr(0, pos); }
+                        vector<string> outputs = util.splitWhiteSpace(output);
                         
-                        if (version != "v2.11.1") {
-                            m->mothurOut("[ERROR]: vsearch version found = " + version + ". Mothur requires version v2.11.1 which is distributed with mothur's executable or available on github https://github.com/torognes/vsearch/releases/tag/v2.11.1, please correct. \n");  abort = true;
+                        if (outputs.size() != 0) {
+                            
+                            if (outputs[0] == "vsearch") {
+                                if (outputs.size() >= 2) {
+                                    string version = outputs[1];
+                                    
+                                    int pos = version.find_first_of('_');
+                                    if (pos != string::npos) { version = version.substr(0, pos); }
+                                    
+                                    if (version != "v2.13.3") {
+                                        m->mothurOut("[ERROR]: vsearch version found = " + version + ". Mothur requires version v2.13.3 which is distributed with mothur's executable or available on github https://github.com/torognes/vsearch/releases/tag/v2.13.3, please correct. \n");  abort = true;
+                                    }else {
+                                        m->mothurOut("Using vsearch version " + version + ".\n");
+                                    }
+                                }
+                            }
                         }
                     }
-                    
+                    in.close();
                     util.mothurRemove(versionOutput);
                 }
             }

@@ -176,6 +176,45 @@ int SharedRAbundVector::remove(int bin){
     }
 }
 /***********************************************************************/
+
+int SharedRAbundVector::remove(vector<int> bins){
+    try {
+        if (bins.size() == 0) { return 0; }
+        
+        int numRemoved = 0;
+        vector<int> newData; int binIndex = 0;
+        for (int i = 0; i < data.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            if (i != bins[binIndex]) {
+                newData.push_back(data[i]);
+            }else if (i == bins[binIndex]) {
+                binIndex++;
+                numRemoved += data[i];
+                if (binIndex > bins.size()) { //removed all bins
+                    newData.insert(newData.end(), data.begin()+i, data.end()); //add rest of good bins
+                    break;
+                }
+            }
+        }
+        
+        data = newData;
+        numBins = data.size();
+        
+        vector<int>::iterator it = max_element(data.begin(), data.end());
+        maxRank = *it;
+        
+        numSeqs -= numRemoved;
+        
+        return numRemoved;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVector", "remove");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
 void SharedRAbundVector::resize(int size){
     data.resize(size);
     

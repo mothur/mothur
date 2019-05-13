@@ -91,7 +91,7 @@ SharedCommand::SharedCommand(){
 SharedCommand::SharedCommand(string option)  {
 	try {
         abort = false; calledHelp = false; pickedGroups=false;
-		allLines = 1;
+		allLines = true;
 
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -253,8 +253,8 @@ SharedCommand::SharedCommand(string option)  {
 			 string label = validParameter.valid(parameters, "label");
 			 if (label == "not found") { label = ""; }
 			 else {
-				 if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				 else { allLines = 1;  }
+				 if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				 else { allLines = true;  }
 			 }
             
             if ((listfile == "") && (biomfile == "") && (countfile != "")) { //building a shared file from a count file, require label

@@ -181,10 +181,10 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			util.mothurConvert(temp, cutoff); 
 			
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; allLines = 1; }
+			if (label == "not found") { label = ""; allLines = true; }
 			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
 			
             if (countfile == "") {

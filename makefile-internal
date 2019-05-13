@@ -2,8 +2,9 @@
 USEREADLINE ?= yes
 USEBOOST ?= yes
 USEHDF5 ?= yes
+USEGSL ?= yes
 LOGFILE_NAME ?= yes
-VERSION = "\"1.41.3\""
+VERSION = "\"1.42.0\""
 
 # Optimize to level 3:
     CXXFLAGS += -O3 -std=c++11
@@ -69,6 +70,17 @@ ifeq  ($(strip $(USEHDF5)),yes)
     CXXFLAGS += -DUSE_HDF5 -I ${HDF5_INCLUDE_DIR}
 endif
 
+#User specified GSL library
+ifeq  ($(strip $(USEGSL)),yes)
+    GSL_LIBRARY_DIR ?= "\"/usr/local/gsl/lib\""
+    GSL_INCLUDE_DIR ?= "\"/usr/local/gsl/include\""
+
+    LDFLAGS += -L ${GSL_LIBRARY_DIR}
+    LIBS += ${GSL_LIBRARY_DIR}/libgsl.a
+
+    CXXFLAGS += -DUSE_GSL -I ${GSL_INCLUDE_DIR}
+
+endif
 
 #
 # INCLUDE directories for mothur

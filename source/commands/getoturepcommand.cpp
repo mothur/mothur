@@ -133,7 +133,7 @@ GetOTURepCommand::GetOTURepCommand(){
 GetOTURepCommand::GetOTURepCommand(string option)  {
 	try{
 		abort = false; calledHelp = false;   
-		allLines = 1;
+		allLines = true;
 				
 		//allow user to run help
 		if (option == "help") { 
@@ -391,7 +391,7 @@ int GetOTURepCommand::execute(){
 	try {
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		int error;
+		
 		list = NULL;
         
         if (method == "distance") {

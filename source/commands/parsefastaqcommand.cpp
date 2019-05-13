@@ -887,7 +887,6 @@ int ParseFastaQCommand::findGroup(Sequence& currSeq, QualityScores& currQual, st
 int ParseFastaQCommand::findGroup(Sequence seq, string& group, string groupMode) {
 	try {
         string trashCode = "";
-        int primer = 0;
         
         group = groupMap->getGroup(seq.getName());
         if (group == "not found") {     trashCode += "g";   } //scrap for group
