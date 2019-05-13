@@ -18,7 +18,7 @@ double f1_0(double x, void *pvParams)
     return dRet;
 }
 
-
+#ifdef USE_GSL
 double logLikelihoodRampal2(int n, double dMDash, double dV)
 {
     double dN = (double) n;
@@ -143,7 +143,7 @@ double logLikelihoodQuad2(int n, double dMDash, double dV)
     
     return log(dResult) - dLogFacN -0.5*dLogFac1;
 }
-
+#endif
 /***********************************************************************/
 
 vector<double> LNAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sampling) {
