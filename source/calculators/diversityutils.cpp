@@ -142,12 +142,11 @@ double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
     double dLogFac1   = 0.0, dLogFacN  = 0.0;
     double dResult = 0.0, dError = 0.0, dPrecision = 0.0;
     gsl_function tGSLF;
-    t_LNParams tLNParams;
     double dEst = dMDash + ((double)n)*dV, dA = 0.0, dB = 0.0;
     
-    tLNParams.n = n; tLNParams.dMDash = dMDash; tLNParams.dV = dV;
+    t_LNParams tLNParams; tLNParams.n = n; tLNParams.dMDash = dMDash; tLNParams.dV = dV;
     
-    tGSLF.function = f1;
+    tGSLF.function = &f1;
     tGSLF.params   = (void *) &tLNParams;
     
     dLogFac1 = log(2.0*M_PI*dV);
@@ -191,6 +190,8 @@ double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
     if(n < 10)  {  dPrecision = HI_PRECISION;   }
     else        {  dPrecision = LO_PRECISION;   }
     
+    printf("dA = %f dB = %f dPrecision = %f\n", dA, dB, dPrecision);
+    
     gsl_integration_qag(&tGSLF, dA, dB, dPrecision, 0.0, 1000, GSL_INTEG_GAUSS61, ptGSLWS, &dResult, &dError);
     
     gsl_integration_workspace_free(ptGSLWS);
@@ -207,8 +208,8 @@ int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, d
     double r = 0;
     gsl_function F;
     
-    F.function = derivExponent;
-    if (method == "igrarefaction") { F.function = fMu;  }
+    F.function = &derivExponent;
+    if (method == "igrarefaction") { F.function = &fMu;  }
     F.params = params;
     
     //printf("%f %f %d %f %f\n",ptLNParams->dMDash, ptLNParams->dV, ptLNParams->n, x_lo, x_hi);

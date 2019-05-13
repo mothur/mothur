@@ -17,7 +17,7 @@ double nLogLikelihood3(const gsl_vector * x, void * params)
     int    nS = (int) floor(gsl_vector_get(x, 3));
     t_Data *ptData = (t_Data *) params;
     int    i       = 0;
-    double dLogNot0 = 0.0, dLogL   = 0.0;
+    double dLogL   = 0.0;
     double dLog0 = 0.0, dLog1 = 0.0, dLog2 = 0.0, dLog3 = 0.0;
     
     if(dAlpha <= 0.0 || dBeta <= 0.0){
