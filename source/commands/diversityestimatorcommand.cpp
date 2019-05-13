@@ -26,7 +26,7 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction-lnabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc); //lnabund
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
@@ -106,7 +106,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         outputTypes["erarefaction"] = tempOutNames;
         outputTypes["igrarefaction"] = tempOutNames;
         outputTypes["igabund"] = tempOutNames;
-        outputTypes["lnabund"] = tempOutNames;
+        //outputTypes["lnabund"] = tempOutNames;
         outputTypes["metroig"] = tempOutNames;
         outputTypes["metroln"] = tempOutNames;
         outputTypes["metrols"] = tempOutNames;
@@ -146,7 +146,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             vector<string> tempOutNames;
             outputTypes["erarefaction"] = tempOutNames;
             outputTypes["igabund"] = tempOutNames;
-            outputTypes["lnabund"] = tempOutNames;
+            //outputTypes["lnabund"] = tempOutNames;
             outputTypes["metroig"] = tempOutNames;
             outputTypes["metroln"] = tempOutNames;
             outputTypes["metrols"] = tempOutNames;
@@ -280,7 +280,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             set<string> estimatorsThatRequireSampleFile;
             estimatorsThatRequireSampleFile.insert("igabund");
             estimatorsThatRequireSampleFile.insert("igrarefaction");
-            estimatorsThatRequireSampleFile.insert("lnabund");
+            //estimatorsThatRequireSampleFile.insert("lnabund");
             
             //remove any typo calcs
             vector<string> validEstimates;
@@ -472,7 +472,7 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             else if (Estimators[i] == "metrosichel")     { runMetroSichel(sabund, fileRoot);     }
             else if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
             else if (Estimators[i] == "igrarefaction")   { runIGRarefaction(sabund, fileRoot);   }
-            else if (Estimators[i] == "lnabund")         { runLNAbund(sabund, fileRoot);         }
+            //else if (Estimators[i] == "lnabund")         { runLNAbund(sabund, fileRoot);         }
         }
         
         return 0;
