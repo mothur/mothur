@@ -157,7 +157,6 @@ vector<double> LNAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sa
         
         if (nSamples == 0) {  return results; }
         
-        printf("M_PI = %f\n",M_PI);
         
 #ifdef USE_GSL
         
