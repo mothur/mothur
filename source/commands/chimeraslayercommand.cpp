@@ -982,7 +982,6 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string thisfastafile, strin
 		map<string, int> nameAbund;
         vector<seqPriorityNode> nameVector;
         
-        int error = 0;
         if (hasCount) {
             CountTable ct;
             ct.readTable(thisdupsfile, false, false);

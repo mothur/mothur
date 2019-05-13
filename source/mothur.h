@@ -63,8 +63,22 @@
 #include <thread>
 #include <mutex>
 
-
-
+/*GSL includes*/
+#ifdef USE_GSL
+    #include <gsl/gsl_vector.h>
+    #include <gsl/gsl_matrix.h>
+    #include <gsl/gsl_rng.h>
+    #include <gsl/gsl_randist.h>
+    #include <gsl/gsl_math.h>
+    #include <gsl/gsl_sf.h>
+    #include <gsl/gsl_integration.h>
+    #include <gsl/gsl_errno.h>
+    #include <gsl/gsl_roots.h>
+    #include <gsl/gsl_statistics_double.h>
+    #include <gsl/gsl_fft_complex.h>
+    #include <gsl/gsl_complex_math.h>
+    #include <gsl/gsl_multimin.h>
+#endif
 /***********************************************************************/
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -135,9 +149,104 @@ using namespace std;
 
 #define MOTHURMAX 1e6
 
+
 typedef unsigned long ull;
 typedef unsigned short intDist;
 const vector<string> nullVector; //used to pass blank vector
+
+//******************************************************
+struct mcmcSample {
+    double alpha, beta;
+    int ns;
+    
+    mcmcSample() {}
+    mcmcSample(double a, double b, int n) : alpha(a), beta(b), ns(n) {}
+    
+};
+typedef struct s_Params
+{
+    long lSeed;
+    
+    string szOutFileStub;
+    
+    double dSigmaX; //dSigmaM, dSigmaA
+    
+    double dSigmaY;  //dSigmaV, dSigmaB
+    
+    double dSigmaN;
+    
+    double dSigmaS;
+    
+    int nIter;
+} t_Params;
+
+
+typedef struct s_Data
+{
+    int nNA;
+    
+    int **aanAbund;
+    
+    int nL;
+    
+    int nJ;
+}t_Data;
+
+typedef struct s_LNParams
+{
+    double dMDash;
+    
+    double dV;
+    
+    int    n;
+} t_LNParams;
+
+typedef struct s_LSParams
+{
+    double dMDash;
+    
+    double dV;
+    
+    double dNu;
+    
+    int n;
+    
+} t_LSParams;
+
+typedef struct s_IGParams
+{
+    int    nS;      /*number of species in community*/
+    
+    double dAlpha;
+    
+    double dBeta;
+    
+    double dC;
+    
+    int n;
+    
+} t_IGParams;
+
+#ifdef USE_GSL
+typedef struct s_MetroInit
+{
+    t_Params *ptParams;
+    
+    t_Data   *ptData;
+    
+    gsl_vector* ptX;
+    
+    int nAccepted;
+    
+    long lSeed;
+    
+    int nThread;
+    
+} t_MetroInit;
+
+#endif
+
+//******************************************************
 
 struct IntNode {
 	int lvalue;

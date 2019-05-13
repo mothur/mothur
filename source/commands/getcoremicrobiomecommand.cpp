@@ -84,7 +84,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(){
 //**********************************************************************************************************************
 GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   allLines = 1;
+		abort = false; calledHelp = false;   allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -169,8 +169,8 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
             string label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
             
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "fraction"; }

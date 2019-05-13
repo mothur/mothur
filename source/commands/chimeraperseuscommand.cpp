@@ -667,8 +667,7 @@ void driverGroups(perseusGroupsData* params){
         for (map<string, vector<string> >::iterator it = group2Files.begin(); it != group2Files.end(); it++) {
             long start = time(NULL);	 if (params->m->getControl_pressed()) {  break; }
             
-            int error;
-            long long thisGroupsSeqs = 0;
+            
             string thisGroup = it->first;
             
             map<string, int> nameMap;

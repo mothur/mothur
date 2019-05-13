@@ -163,8 +163,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		generateWordPairDiffArr();
         if (m->getDebug()) { m->mothurOut("[DEBUG]: done generateWordPairDiffArr\n"); }
 			
-		m->mothurOut("DONE."); m->mothurOutEndLine();
-		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities. "); m->mothurOutEndLine();
+		m->mothurOut("DONE.\n");
+		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities.\n"); 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "Bayesian");

@@ -562,29 +562,37 @@ int ClusterSplitCommand::execute(){
                     string filename = printFile(singletonName, distName);
                     
                     m->mothurOutEndLine();
-                    m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-                    m->mothurOutEndLine(); m->mothurOut(filename); m->mothurOutEndLine();
+                    m->mothurOut("Output File Names:\n\n"); m->mothurOut(filename); m->mothurOutEndLine();
                     for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
                     m->mothurOutEndLine();
 
                     return 0;
                 }
                 deleteFiles = true;
-
             }
 		//****************** break up files between processes and cluster each file set ******************************//
 		
         listFileNames = createProcesses(distName, labels);
+        
+        if (deleteFiles) {
+            //delete the temp files now that we are done
+            for (int i = 0; i < distName.size(); i++) {
+                string thisNamefile = distName[i].begin()->second;
+                string thisDistFile = distName[i].begin()->first;
+                util.mothurRemove(thisNamefile);
+                util.mothurRemove(thisDistFile);
+            }
+        }
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < listFileNames.size(); i++) { util.mothurRemove(listFileNames[i]); } return 0; }
 		
 		if (!util.isEqual(saveCutoff, cutoff)) { m->mothurOut("\nCutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
 		
-		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster\n");
 		
 		//****************** merge list file and create rabund and sabund files ******************************//
 		estart = time(NULL);
-		m->mothurOut("Merging the clustered files..."); m->mothurOutEndLine();
+		m->mothurOut("Merging the clustered files...\n");
 
 		ListVector* listSingle;
 		map<double, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
@@ -598,7 +606,7 @@ int ClusterSplitCommand::execute(){
         //delete after all are complete incase a crash happens
         if (!deleteFiles) { for (int i = 0; i < distName.size(); i++) {	util.mothurRemove(distName[i].begin()->first); util.mothurRemove(distName[i].begin()->second); 	} }
 		
-		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to merge."); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to merge.\n");
         
         if ((method == "opti") && (runsensSpec)) { runSensSpec();  }
         
@@ -897,8 +905,7 @@ struct clusterData {
         useCount = false;
         numSingletons = 0;
     }
-    void setOptiOptions(int numSingles, string metn, double stabMet, string init, int mxi ) {
-        numSingletons = numSingles;
+    void setOptiOptions(string metn, double stabMet, string init, int mxi ) {
         metricName = metn;
         stableMetric = stabMet;
         maxIters = mxi;
@@ -1064,7 +1071,7 @@ string runOptiCluster(string thisDistFile, string thisNamefile, double& smallest
         else if (params->metricName == "fdr")        { metric = new FDR();              }
         else if (params->metricName == "fpfn")       { metric = new FPFN();             }
         
-        OptiCluster cluster(&matrix, metric, params->numSingletons);
+        OptiCluster cluster(&matrix, metric, 0);
         params->tag = cluster.getTag();
         
         params->m->mothurOut("\nClustering " + thisDistFile + "\n");
@@ -1524,7 +1531,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[i+1], cutoffNotSet, cutoff, precision, length, method, outputDir, vsearchLocation);
-            dataBundle->setOptiOptions(numSingletons, metricName, stableMetric, initialize, maxIters);
+            dataBundle->setOptiOptions(metricName, stableMetric, initialize, maxIters);
             dataBundle->setNamesCount(namefile, countfile);
             data.push_back(dataBundle);
             
@@ -1533,7 +1540,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         
         clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[0], cutoffNotSet, cutoff, precision, length, method, outputDir, vsearchLocation);
-        dataBundle->setOptiOptions(numSingletons, metricName, stableMetric, initialize, maxIters);
+        dataBundle->setOptiOptions(metricName, stableMetric, initialize, maxIters);
         dataBundle->setNamesCount(namefile, countfile);
         cluster(dataBundle);
         listFiles = dataBundle->listFileNames;
@@ -1555,16 +1562,6 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         delete dataBundle;
         deleteFiles = true;
         
-        if (deleteFiles) {
-            //delete the temp files now that we are done
-            for (int i = 0; i < distName.size(); i++) {
-                string thisNamefile = distName[i].begin()->second;
-                string thisDistFile = distName[i].begin()->first;
-                util.mothurRemove(thisNamefile);
-                util.mothurRemove(thisDistFile);
-            }
-        }
-
         return listFiles;
 	}
 	catch(exception& e) {

@@ -334,15 +334,15 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			util.mothurConvert(temp, iters); 
             
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "detail"; }
-			if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
+			if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail.\n"); output = "detail"; }
             
 			if ((method == "wang") && (search != "kmer"))  { 
-				m->mothurOut("The wang method requires the kmer search. " + search + " will be disregarded, and kmer will be used." ); m->mothurOutEndLine();
+				m->mothurOut("The wang method requires the kmer search. " + search + " will be disregarded, and kmer will be used.\n" );
 				search = "kmer";
 			}
             
             if ((method == "zap") && ((search != "kmer") && (search != "align")))  { 
-				m->mothurOut("The zap method requires the kmer or align search. " + search + " will be disregarded, and kmer will be used." ); m->mothurOutEndLine();
+				m->mothurOut("The zap method requires the kmer or align search. " + search + " will be disregarded, and kmer will be used.\n" );
 				search = "kmer";
 			}
 			

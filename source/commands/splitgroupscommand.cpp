@@ -549,7 +549,7 @@ int SplitGroupCommand::splitFastq(){
         
         string fastqfileRoot = outputDir + util.getRootName(util.getSimpleName(fastqfile));
         
-        ifstream in; int numFlows = 0;
+        ifstream in; 
         util.openInputFile(fastqfile, in);
         
         map<string, fastqOutput> parsedFastqData;

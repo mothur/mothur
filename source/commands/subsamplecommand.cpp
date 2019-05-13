@@ -123,7 +123,7 @@ SubSampleCommand::SubSampleCommand(){
 SubSampleCommand::SubSampleCommand(string option) {
 	try {
 		abort = false; calledHelp = false;   
-		allLines = 1;
+		allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -328,8 +328,8 @@ SubSampleCommand::SubSampleCommand(string option) {
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
 			
 			groups = validParameter.valid(parameters, "groups");			
@@ -848,7 +848,7 @@ int SubSampleCommand::getSubSampleShared() {
         
         if (constaxonomyfile != "") { //you have a constaxonomy file and have not set the labels parameter. Either your sharedfile has one label or we only want to use one since the constaxonomy file is related to one label
             if (labels.size() == 0) {
-                labels.insert(lastLabel); allLines = 0;
+                labels.insert(lastLabel); allLines = false;
                 m->mothurOut("\n[WARNING]: The constaxonomy file represents a single label in your shared file. You did not set the label parameter, so mothur is assuming you want to use label " + lastLabel + ". If this is not correct file mismatches can occur.\n\n");
             }
         }
@@ -1021,7 +1021,7 @@ int SubSampleCommand::getSubSampleList() {
         
         if (constaxonomyfile != "") { //you have a constaxonomy file and have not set the labels parameter. Either your list file has one label or we only want to use one since the constaxonomy file is related to one label
             if (labels.size() == 0) {
-                labels.insert(lastLabel); allLines = 0;
+                labels.insert(lastLabel); allLines = false;
                 m->mothurOut("\n[WARNING]: The constaxonomy file represents a single label in your list file. You did not set the label parameter, so mothur is assuming you want to use label " + lastLabel + ". If this is not correct file mismatches can occur.\n\n");
             }
         }

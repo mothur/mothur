@@ -55,6 +55,7 @@ public:
     float getMaxRank();
     
     float remove(int);
+    float remove(vector<int>);
     void set(int, float);
     float get(int);
     vector<float> get() { return data; }

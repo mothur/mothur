@@ -80,7 +80,7 @@ ParseListCommand::ParseListCommand(){
 ParseListCommand::ParseListCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
-		allLines = 1;
+		allLines = true;
 			
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -186,10 +186,10 @@ ParseListCommand::ParseListCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = "";  allLines = 1; }
+			if (label == "not found") { label = "";  allLines = true; }
 			else { 
-				if(label != "all") {  util.splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
+				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
+				else { allLines = true;  }
 			}
 		}
 

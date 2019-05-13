@@ -264,7 +264,7 @@ int ClusterDoturCommand::execute(){
 		oldList = *list;
         bool printHeaders = true;
 		
-        int estart = time(NULL); int loop = 0;
+        int estart = time(NULL); 
 	
 		while ((cluster->getSmallDist() <= cutoff) && (cluster->getNSeqs() > 1)){
 			if (m->getControl_pressed()) { delete cluster; delete list; delete rabund; if(countfile == "") {rabundFile.close(); sabundFile.close();  util.mothurRemove((fileroot+ tag + ".rabund")); util.mothurRemove((fileroot+ tag + ".sabund")); }

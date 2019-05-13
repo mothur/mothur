@@ -133,7 +133,7 @@ int KmerTree::addTaxonomyToTree(string seqName, string taxonomy, vector<int>& se
             if (m->getControl_pressed()) { break; }
             if(taxonomy[i] == ';'){						//	looking for semicolons...
                 
-                if (taxonName == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                if (taxonName == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;\n");  m->setControl_pressed(true); }
                 
                 int newIndex = tree[treePosition]->getChildIndex(taxonName);//	look to see if your current node already
                 //	   has a child with the new taxonName

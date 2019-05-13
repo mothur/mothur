@@ -131,8 +131,8 @@ public:
     set<string> readAccnos(string);
     int readAccnos(string, vector<string>&);
     int readAccnos(string, vector<string>&, string);
-    int printAccnos(string, set<string>&);
-    int printAccnos(string, vector<string>&);
+    void printAccnos(string, set<string>&);
+    void printAccnos(string, vector<string>&);
     vector<consTax> readConsTax(string);
     int readConsTax(string, map<int, consTax2>&);
     void readNames(string, map<string, long long>&);

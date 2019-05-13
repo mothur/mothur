@@ -39,6 +39,7 @@ public:
     float getOTUTotal(int bin);
     vector<float> getOTU(int bin);
     float removeOTU(int bin);
+    float removeOTUs(vector<int>, bool sorted=false); //bins to remove, sorted or not
     float get(int bin, string group);
     void set(int bin, float binSize, string group);
     void setOTUNames(vector<string> names);

@@ -45,7 +45,7 @@ class MothurOut {
         bool getQuietMode()                             { return quietMode;                             }
         void setQuietMode(bool t)                       { quietMode = t;                                }
         int getNumErrors()                              { return numErrors;                             }
-        void resetCommandErrors()                        { numCommandErrors = 0; numCommandWarnings = 0;}
+        void resetCommandErrors()                       { numCommandErrors = 0; numCommandWarnings = 0; }
         string getLogFileName()                         { return logFileName;                           }
 		void setLogFileName(string f, bool append);
     
@@ -62,9 +62,7 @@ class MothurOut {
         void setRandomSeed(unsigned s)                  { seed = s;                         }
         unsigned getRandomSeed()                        { return seed;                      }
         bool getControl_pressed()                       { return control_pressed;           }
-        void setControl_pressed(bool t)                 {
-            control_pressed = t;
-        }
+        void setControl_pressed(bool t)                 { control_pressed = t;              }
         bool getChangedSeqNames()                       { return changedSeqNames;           }
         void setChangedSeqNames(bool t)                 { changedSeqNames = t;              }
         bool getExecuting()                             { return executing;                 }

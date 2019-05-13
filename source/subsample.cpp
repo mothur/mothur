@@ -85,8 +85,6 @@ Tree* SubSample::getSampleWithReplacement(Tree* T, CountTable* ct, CountTable* n
             if (util.inUsersGroups(Groups[i], mGroups)) {
                 if (m->getControl_pressed()) { break; }
                 
-                int thisSize = ct->getGroupCount(Groups[i]);
-                
                 vector<string> names = ct->getNamesOfSeqs(Groups[i]);
                 vector<int> random;
                 for (int j = 0; j < names.size(); j++) {
@@ -294,7 +292,6 @@ vector<string> SubSample::getSampleWithReplacement(vector<SharedRAbundVector*>& 
         
         int numBins = rabunds[0]->getNumBins();
         for (int i = 0; i < rabunds.size(); i++) {
-            int thisSize = rabunds[i]->getNumSeqs();
 
             vector<int> order;
             for (int j = 0; j < rabunds[i]->size(); j++) {

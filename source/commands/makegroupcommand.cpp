@@ -203,9 +203,9 @@ int MakeGroupCommand::execute(){
 		
 		out.close();
 		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: " + filename); m->mothurOutEndLine(); outputNames.push_back(filename); outputTypes["group"].push_back(filename); 
-		m->mothurOutEndLine();
+		
+		m->mothurOut("\nOutput File Names: " + filename + "\n\n");
+        outputNames.push_back(filename); outputTypes["group"].push_back(filename);
 		
 		//set group file as new current groupfile
 		string currentName = "";

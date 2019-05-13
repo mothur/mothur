@@ -128,7 +128,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
     try {
         abort = false;
         calledHelp = false;
-        allLines = 1;
+        allLines = true;
 
         //allow user to run help
         if (option == "help") {
@@ -257,10 +257,10 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             else {
                 if (label != "all") {
                     util.splitAtDash(label, labels);
-                    allLines = 0;
+                    allLines = false;
                 }
                 else {
-                    allLines = 1;
+                    allLines = true;
                 }
             }
 
