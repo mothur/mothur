@@ -138,8 +138,8 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			if (sharedfile == "not found") { 			
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else { current->setSharedFile(sharedfile); }
 			
@@ -159,10 +159,10 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			}
 			
 			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "lt"; }
-			if ((output != "lt") && (output != "square") && (output != "column")) { m->mothurOut(output + " is not a valid output form. Options are lt, column and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
+			if ((output != "lt") && (output != "square") && (output != "column")) { m->mothurOut(output + " is not a valid output form. Options are lt, column and square. I will use lt.\n"); output = "lt"; }
             
             mode = validParameter.valid(parameters, "mode");		if(mode == "not found"){	mode = "average"; }
-			if ((mode != "average") && (mode != "median")) { m->mothurOut(mode + " is not a valid mode. Options are average and medina. I will use average."); m->mothurOutEndLine(); output = "average"; }
+			if ((mode != "average") && (mode != "median")) { m->mothurOut(mode + " is not a valid mode. Options are average and medina. I will use average.\n");  output = "average"; }
 			
 			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
@@ -196,7 +196,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
                 else { subsample = false; }
             }
             
-            if (subsample == false) { iters = 0; }
+            if (subsample == false) { iters = 1; }
             
             temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
             withReplacement = util.isTrue(temp);
@@ -229,17 +229,18 @@ int MatrixOutputCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 					
-        if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); delete lookup; return 0;}
+        if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");  delete lookup; return 0;}
         
         if (subsample) { 
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
                 subsampleSize = lookup->getNumSeqsSmallestGroup();
+                m->mothurOut("\nSetting sample size to " + toString(subsampleSize) + ".\n\n");
             }else {
                 lookup->removeGroups(subsampleSize);
                 Groups = lookup->getNamesGroups();
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->setControl_pressed(true);  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n"); m->setControl_pressed(true);  return 0; }
         }
 		numGroups = lookup->size();
         
@@ -287,10 +288,10 @@ int MatrixOutputCommand::execute(){
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			m->mothurOut("Your file does not include the label " + *it);  
 			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + ".\n");
 				needToRun = true;
 			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + ".\n");
 			}
 		}
 		
@@ -315,12 +316,11 @@ int MatrixOutputCommand::execute(){
 		string currentName = "";
 		itTypes = outputTypes.find("phylip");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; if (!subsample) { current->setPhylipFile(currentName); } }
+			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName);  }
 		}
 		
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
-
 
 		return 0;
 	}
@@ -503,18 +503,17 @@ int process(distSharedData* params){
         }
         
         //if the users entered no valid calculators don't execute command
-        if (matrixCalculators.size() == 0) { params->m->mothurOut("No valid calculators."); params->m->mothurOutEndLine();  return 0; }
+        if (matrixCalculators.size() == 0) { params->m->mothurOut("No valid calculators.\n");  return 0; }
         params->Estimators.clear();
         for (int i=0; i<matrixCalculators.size(); i++) { params->Estimators.push_back(matrixCalculators[i]->getName()); }
         
         vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
         SubSample sample;
         for (int thisIter = 0; thisIter < params->numIters; thisIter++) {
-            
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) {
+            if (params->subsample) {
                 if (params->withReplacement)    {  sample.getSampleWithReplacement(thisItersLookup, params->subsampleSize);     }
                 else                            {  sample.getSample(thisItersLookup, params->subsampleSize);                    }
             }
@@ -525,7 +524,7 @@ int process(distSharedData* params){
             driver(thisItersRabunds, calcDists, matrixCalculators, params->m);
             
             for (int i = 0; i < thisItersRabunds.size(); i++) { delete thisItersRabunds[i]; }
-            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ){
+            if (params->subsample){
                 if((thisIter+1) % 100 == 0){	params->m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
                 params->calcDistsTotals.push_back(calcDists);
                 for (int i = 0; i < calcDists.size(); i++) {
@@ -572,12 +571,12 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         vector<string> groupNames = thisLookup->getNamesGroups();
         
         vector<int> lines;
-        if (processors > (iters+1)) { processors = iters+1; }
+        if (processors > (iters)) { processors = iters; }
         
         //figure out how many sequences you have to process
-        int numItersPerProcessor = (iters+1) / processors;
+        int numItersPerProcessor = (iters) / processors;
         for (int i = 0; i < processors; i++) {
-            if(i == (processors - 1)){	numItersPerProcessor = (iters+1) - i * numItersPerProcessor; 	}
+            if(i == (processors - 1)){	numItersPerProcessor = (iters) - i * numItersPerProcessor; 	}
             lines.push_back(numItersPerProcessor);
         }
         
@@ -605,24 +604,25 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         
         Estimators.clear(); Estimators = dataBundle->Estimators;
         
-        map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
-        variables["[distance]"] = thisLookup->getLabel();
-        variables["[tag2]"] = "";
-        variables["[outputtag]"] = output;
-        
-        /// fix to print out matrices for each calc - only main does this
-        for (int i = 0; i < Estimators.size(); i++) {
-            variables["[calc]"] = Estimators[i];
-            string distFileName = getOutputFileName("phylip",variables);
-            outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+        if (!subsample) {
+            map<string, string> variables;
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+            variables["[distance]"] = thisLookup->getLabel();
+            variables["[tag2]"] = "";
+            variables["[outputtag]"] = output;
             
-            ofstream outDist; util.openOutputFile(distFileName, outDist);
-            outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
-            
-            printDists(outDist, dataBundle->matrices[i], groupNames); outDist.close();
+            /// fix to print out matrices for each calc - only main does this
+            for (int i = 0; i < Estimators.size(); i++) {
+                variables["[calc]"] = Estimators[i];
+                string distFileName = getOutputFileName("phylip",variables);
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                
+                ofstream outDist; util.openOutputFile(distFileName, outDist);
+                outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+                
+                printDists(outDist, dataBundle->matrices[i], groupNames); outDist.close();
+            }
         }
-
         vector< vector< vector<seqDist> > > calcDistsTotals = dataBundle->calcDistsTotals;
         
         for (int i = 0; i < processors-1; i++) {
@@ -637,8 +637,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         }
         delete dataBundle;
     
-        //main thread finds averages
-        if (iters != 0) {
+        if (subsample) {
             //we need to find the average distance and standard deviation for each groups distance
             vector< vector<seqDist>  > calcAverages = util.getAverages(calcDistsTotals, mode);
             

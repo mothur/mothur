@@ -384,7 +384,8 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
         
         bool filteredSomething = false;
         int numRemoved = 0;
-        for (int i = 0; i < sharedLookup->getNumBins();) {
+        vector<int> binsToRemove;
+        for (int i = 0; i < sharedLookup->getNumBins(); i++) {
             
             if (m->getControl_pressed()) { return 0; }
             
@@ -442,9 +443,8 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
             }
             
             //did this OTU pass the filter criteria
-            if (okay) {
-                ++i;
-            }else { //if not, do we want to save the counts
+            if (!okay) {
+                
                 filteredSomething = true;
                 if (makeRare) {
                     for (int j = 0; j < numGroups; j++) {
@@ -452,11 +452,13 @@ int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
                     }
                 }
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: removing OTU " + sharedLookup->getOTUName(i) + "\n"); }
-                sharedLookup->removeOTU(i);
+                binsToRemove.push_back(i);
                 numRemoved++;
             }
             
         }
+        
+        sharedLookup->removeOTUs(binsToRemove, true);
         
         //if we are saving the counts add a "rare" OTU if anything was filtered
         if (makeRare) { if (filteredSomething) { sharedLookup->push_back(rareCounts, "OTURare1"); } }

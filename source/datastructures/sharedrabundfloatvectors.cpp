@@ -336,6 +336,45 @@ float SharedRAbundFloatVectors::removeOTU(int bin){
     }
 }
 /***********************************************************************/
+float SharedRAbundFloatVectors::removeOTUs(vector<int> bins, bool sorted){
+    try {
+        if (bins.size() == 0) { return 0; }
+        
+        if (!sorted) { sort(bins.begin(), bins.end()); }
+        
+        float totalOTUAbund = 0;
+        for (int i = 0; i < lookup.size(); i ++) {
+            totalOTUAbund += lookup[i]->remove(bins);
+        }
+        
+        vector<string> newLabels; int binIndex = 0;
+        for (int i = 0; i < currentLabels.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            if (i != bins[binIndex]) {
+                newLabels.push_back(currentLabels[i]);
+            }else if (i == bins[binIndex]) {
+                binIndex++;
+                
+                if (binIndex > bins.size()) { //removed all bins
+                    newLabels.insert(newLabels.end(), currentLabels.begin()+i, currentLabels.end()); //add rest of good bins
+                    break;
+                }
+            }
+        }
+        
+        currentLabels = newLabels;
+        numBins = currentLabels.size();
+        
+        return totalOTUAbund;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundFloatVectors", "removeOTUs");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
 void SharedRAbundFloatVectors::setOTUNames(vector<string> names){
     try {
         currentLabels.clear();
@@ -517,15 +556,16 @@ int SharedRAbundFloatVectors::removeGroups(int minSize, bool silent){
 void SharedRAbundFloatVectors::eliminateZeroOTUS() {
     try {
         if (lookup.size() > 1) {
-            for (int i = 0; i < lookup[0]->getNumBins();) {
+            vector<int> otusToRemove;
+            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
                 if (m->getControl_pressed()) { break; }
                 
                 float total = getOTUTotal(i);
                 
                 //if they are not all zero add this bin
-                if (util.isEqual(total, 0)) { removeOTU(i); }
-                else { ++i;  }
+                if (total == 0) {  otusToRemove.push_back(i); } //sorted order
             }
+            removeOTUs(otusToRemove, true); //sorted
         }
     }
     catch(exception& e) {
