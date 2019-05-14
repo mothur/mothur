@@ -16,6 +16,7 @@
 #include "igrarefaction.hpp"
 #include "lnabundance.hpp"
 #include "lnrarefaction.hpp"
+#include "lnshift.hpp"
 
 //**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::setParameters(){
@@ -27,7 +28,7 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction-lnrarefaction", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc); //lnabund
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction-lnrarefaction-lnabund-lnshift", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc); //lnabund
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
@@ -68,8 +69,8 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
         helpString += "The coverage parameter allows you to the desired coverage.  It is required for the igrarefaction calculator.\n";
         helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
-        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbunace / IGRarefaction, LNRarefaction, respectively.\n";
-        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbunace / IGRarefaction, LNRarefaction, respectively.\n";
+        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbundance, LNShift / IGRarefaction, LNRarefaction, respectively.\n";
+        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbundance, LNShift / IGRarefaction, LNRarefaction, respectively.\n";
         helpString += validCalculator.printCalc("single");
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
         
@@ -83,15 +84,7 @@ string EstimatorSingleCommand::getHelpString(){
 //**********************************************************************************************************************
 string EstimatorSingleCommand::getOutputPattern(string type) {
     try {
-        string pattern = "";
-        
-        if (type == "erarefaction")             {  pattern =  "[filename],[distance],erarefaction";        }
-        else if (type == "igabund")             {  pattern =  "[filename],[distance],igabund";             }
-        else if (type == "lnabund")             {  pattern =  "[filename],[distance],lnabund";             }
-        else if (type == "igrarefaction")       {  pattern =  "[filename],[distance],igrarefaction";       }
-        else if (type == "lnrarefaction")       {  pattern =  "[filename],[distance],lnrarefaction";       }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
-        
+        string pattern = "[filename],[distance]," + type;
         return pattern;
     }
     catch(exception& e) {
@@ -108,8 +101,9 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         outputTypes["erarefaction"] = tempOutNames;
         outputTypes["igrarefaction"] = tempOutNames;
         outputTypes["igabund"] = tempOutNames;
-        //outputTypes["lnabund"] = tempOutNames;
+        outputTypes["lnabund"] = tempOutNames;
         outputTypes["lnrarefaction"] = tempOutNames;
+        outputTypes["lnshift"] = tempOutNames;
         outputTypes["metroig"] = tempOutNames;
         outputTypes["metroln"] = tempOutNames;
         outputTypes["metrols"] = tempOutNames;
@@ -149,13 +143,14 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             vector<string> tempOutNames;
             outputTypes["erarefaction"] = tempOutNames;
             outputTypes["igabund"] = tempOutNames;
-            //outputTypes["lnabund"] = tempOutNames;
+            outputTypes["lnabund"] = tempOutNames;
             outputTypes["metroig"] = tempOutNames;
             outputTypes["metroln"] = tempOutNames;
             outputTypes["metrols"] = tempOutNames;
             outputTypes["metrosichel"] = tempOutNames;
             outputTypes["igrarefaction"] = tempOutNames;
             outputTypes["lnrarefaction"] = tempOutNames;
+            outputTypes["lnshift"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -477,8 +472,9 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             else if (Estimators[i] == "metrosichel")     { runMetroSichel(sabund, fileRoot);     }
             else if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
             else if (Estimators[i] == "igrarefaction")   { runIGRarefaction(sabund, fileRoot);   }
-            //else if (Estimators[i] == "lnabund")         { runLNAbund(sabund, fileRoot);         }
+            else if (Estimators[i] == "lnabund")         { runLNAbund(sabund, fileRoot);         }
             else if (Estimators[i] == "lnrarefaction")   { runLNRarefaction(sabund, fileRoot);   }
+            else if (Estimators[i] == "lnshift")         { runLNShift(sabund, fileRoot);         }
         }
         
         return 0;
@@ -751,8 +747,8 @@ int EstimatorSingleCommand::runLNAbund(SAbundVector*& sabund, string fileRoot) {
         map<string, string> variables;
         variables["[filename]"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
-        string outputFileName = getOutputFileName("lnabund", variables);
-        outputNames.push_back(outputFileName); outputTypes["lnabund"].push_back(outputFileName);
+        string outputFileName = getOutputFileName("igabund", variables);
+        outputNames.push_back(outputFileName); outputTypes["igabund"].push_back(outputFileName);
         
         ofstream out; util.openOutputFile(outputFileName, out); //format output
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -767,9 +763,50 @@ int EstimatorSingleCommand::runLNAbund(SAbundVector*& sabund, string fileRoot) {
             fillSampling(burnValue, burnSampleValue);
         }
         
-        LNAbundance lnAbund;
+        IGAbundance igAbund;
         
-        vector<double> results = lnAbund.getValues(sabund, sampling);
+        vector<double> results = igAbund.getValues(sabund, sampling);
+        
+        for (int i = 0; i < results.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            out << i+1 << '\t' << results[i] << endl;
+        }
+        out.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runLNAbund");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int EstimatorSingleCommand::runLNShift(SAbundVector*& sabund, string fileRoot) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = fileRoot;
+        variables["[distance]"] = sabund->getLabel();
+        string outputFileName = getOutputFileName("lnshift", variables);
+        outputNames.push_back(outputFileName); outputTypes["lnshift"].push_back(outputFileName);
+        
+        ofstream out; util.openOutputFile(outputFileName, out); //format output
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        if (samplefile != "") {
+            int burnValue = burn;
+            if (!burnSet) { burnValue = 200000; }
+            
+            int burnSampleValue = burnSample;
+            if (!burnSampleSet) { burnSampleValue = 1000; }
+            
+            fillSampling(burnValue, burnSampleValue);
+        }
+        
+        LNShift lnShift;
+        
+        vector<double> results = lnShift.getValues(sabund, sampling);
         
         for (int i = 0; i < results.size(); i++) {
             if (m->getControl_pressed()) { break; }

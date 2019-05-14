@@ -34,6 +34,8 @@
 		4810D5B4217A1D3800C668E8 /* libhdf5_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA7215EB4980036D42C /* libhdf5_cpp.a */; };
 		4810D5B7218208CC00C668E8 /* testcounttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4810D5B5218208CC00C668E8 /* testcounttable.cpp */; };
 		4815BEB12289E13500677EE2 /* lnrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEAF2289E13500677EE2 /* lnrarefaction.cpp */; };
+		4815BEB4228B371E00677EE2 /* lnshift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB2228B371E00677EE2 /* lnshift.cpp */; };
+		4815BEB5228B371E00677EE2 /* lnshift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB2228B371E00677EE2 /* lnshift.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -918,6 +920,8 @@
 		4810D5B6218208CC00C668E8 /* testcounttable.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testcounttable.hpp; path = testcontainers/testcounttable.hpp; sourceTree = "<group>"; };
 		4815BEAF2289E13500677EE2 /* lnrarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lnrarefaction.cpp; path = source/calculators/lnrarefaction.cpp; sourceTree = SOURCE_ROOT; };
 		4815BEB02289E13500677EE2 /* lnrarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lnrarefaction.hpp; path = source/calculators/lnrarefaction.hpp; sourceTree = SOURCE_ROOT; };
+		4815BEB2228B371E00677EE2 /* lnshift.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lnshift.cpp; path = source/calculators/lnshift.cpp; sourceTree = SOURCE_ROOT; };
+		4815BEB3228B371E00677EE2 /* lnshift.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lnshift.hpp; path = source/calculators/lnshift.hpp; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2064,6 +2068,8 @@
 				4809ECA422831A5E00B4D0E5 /* lnabundance.hpp */,
 				4815BEAF2289E13500677EE2 /* lnrarefaction.cpp */,
 				4815BEB02289E13500677EE2 /* lnrarefaction.hpp */,
+				4815BEB2228B371E00677EE2 /* lnshift.cpp */,
+				4815BEB3228B371E00677EE2 /* lnshift.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3191,6 +3197,7 @@
 				484976E42255412400F3A291 /* igabundance.cpp in Sources */,
 				4803D5AA211C9867001C63B5 /* testintegrationalignseqs.cpp in Sources */,
 				48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */,
+				4815BEB5228B371E00677EE2 /* lnshift.cpp in Sources */,
 				481FB58A1AC1B6FF0076CFF3 /* myPerseus.cpp in Sources */,
 				487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */,
 				481FB63E1AC1B7EA0076CFF3 /* sabundvector.cpp in Sources */,
@@ -3799,6 +3806,7 @@
 				A77E1938161B201E00DB1A2A /* randomforest.cpp in Sources */,
 				835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */,
 				48E5444D1E9C2C8F00FF6AB8 /* tptn.cpp in Sources */,
+				4815BEB4228B371E00677EE2 /* lnshift.cpp in Sources */,
 				A77E193B161B289600DB1A2A /* rftreenode.cpp in Sources */,
 				A721AB6A161C570F009860A1 /* alignnode.cpp in Sources */,
 				A721AB6B161C570F009860A1 /* aligntree.cpp in Sources */,

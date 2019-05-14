@@ -57,6 +57,7 @@ private:
     int runIGAbund(SAbundVector*&, string);
     string runIGRarefaction(SAbundVector*& sabund, string fileRoot);
     int runLNAbund(SAbundVector*& sabund, string fileRoot);
+    int runLNShift(SAbundVector*& sabund, string fileRoot);
     string runLNRarefaction(SAbundVector*& sabund, string fileRoot);
     
 };

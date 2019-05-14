@@ -153,7 +153,7 @@ double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
         double dVar   = 0.0;
         
         if (method == "metroln") { if(fabs(dUpper) > 1.0e-7){  solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); } }
-        else {  solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax);  } //lnabund
+        else {  solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax);  } //lnabund, lnshift
         
         dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
         
@@ -168,7 +168,7 @@ double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
         if (method == "metroln") {
             if(fabs(dUpper - dLower) > 1.0e-7){ solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); }
             else{ dMax = 0.5*(dLower + dUpper); }
-        }else {  solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); } //lnabund
+        }else {  solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); } //lnabund, lnshift
         
         dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
         
@@ -177,8 +177,6 @@ double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
     
     if(n < 10)  {  dPrecision = HI_PRECISION;   }
     else        {  dPrecision = LO_PRECISION;   }
-    
-    printf("dA = %f dB = %f dPrecision = %f\n", dA, dB, dPrecision);
     
     gsl_integration_qag(&tGSLF, dA, dB, dPrecision, 0.0, 1000, GSL_INTEG_GAUSS61, ptGSLWS, &dResult, &dError);
     

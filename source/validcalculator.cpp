@@ -343,9 +343,10 @@ void ValidCalculators::initialEstimators() {
         estimators.insert("metrols");
         estimators.insert("metrosichel");
         estimators.insert("igabund");
-        //estimators.insert("lnabund");
+        estimators.insert("lnabund");
         estimators.insert("igrarefaction");
         estimators.insert("lnrarefaction");
+        estimators.insert("lnshift");
         estimators.insert("default");
     }
     catch(exception& e) {

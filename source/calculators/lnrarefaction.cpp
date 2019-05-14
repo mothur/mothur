@@ -28,6 +28,7 @@ double f1_lnrarefaction(double x, void *pvParams)
     
     return dRet;
 }
+#ifdef USE_GSL
 /***********************************************************************/
 double logLikelihoodQuad(int n, double dMDash, double dV)
 {
@@ -145,6 +146,7 @@ double calcMu_lnrarefaction(t_IGParams *ptLNParams)
     
     return exp(dLogMu);
 }
+#endif
 /***********************************************************************/
 vector<double> LNRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
     try {
