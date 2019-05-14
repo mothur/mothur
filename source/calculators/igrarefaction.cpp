@@ -17,6 +17,7 @@ inline int compare_doubles1(const void* a, const void* b)
     else if( *arg1 == *arg2 ) return 0;
     else return 1;
 }
+#ifdef USE_GSL
 /***********************************************************************/
 double fMu_igrarefaction(double x, void* pvParams)
 {
@@ -74,6 +75,7 @@ int solveF_igrarefaction(double x_lo, double x_hi, void* params, double tol, dou
   
      return dMu;
  }
+#endif
 /***********************************************************************/
 vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
     try {
