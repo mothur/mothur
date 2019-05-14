@@ -93,9 +93,6 @@ double logLikelihoodQuad2(int n, double dMDash, double dV)
     
     dLogFac1 = log(2.0*M_PI*dV);
     
-    
-    //DiversityUtils dutils("lnabund");
-    
     if(n < 50){
         dLogFacN = gsl_sf_fact(n);
         dLogFacN = log(dLogFacN);
@@ -156,8 +153,6 @@ vector<double> LNAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sa
         int nSamples = sampling.size();
         
         if (nSamples == 0) {  return results; }
-        
-        printf("M_PI = %f\n",M_PI);
         
 #ifdef USE_GSL
         

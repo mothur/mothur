@@ -1,39 +1,33 @@
 //
-//  igrarefaction.hpp
+//  lnrarefaction.hpp
 //  Mothur
 //
-//  Created by Sarah Westcott on 5/6/19.
+//  Created by Sarah Westcott on 5/13/19.
 //  Copyright © 2019 Schloss Lab. All rights reserved.
 //
 
-#ifndef igrarefaction_hpp
-#define igrarefaction_hpp
+#ifndef lnrarefaction_hpp
+#define lnrarefaction_hpp
 
 #include "diversityutils.hpp"
 
-
-//IGRarefaction
 /***********************************************************************/
 
-class IGRarefaction  {
+class LNRarefaction   {
     
 public:
     
-    IGRarefaction(double c) : coverage(c) { m = MothurOut::getInstance(); }
-    ~IGRarefaction() {}
+    LNRarefaction(double c) : coverage(c) { m = MothurOut::getInstance(); }
     
     vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
     
     bool requiresSample() { return true; }
     
-    
 private:
-    
     Utils util;
     MothurOut* m;
     
     double coverage;
-    
     
 };
 
@@ -41,4 +35,4 @@ private:
 
 
 
-#endif /* igrarefaction_hpp */
+#endif /* lnrarefaction_hpp */

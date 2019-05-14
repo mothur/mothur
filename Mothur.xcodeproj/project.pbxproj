@@ -33,6 +33,7 @@
 		4810D5B3217A1D2F00C668E8 /* libhdf5.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA5215EB4750036D42C /* libhdf5.a */; };
 		4810D5B4217A1D3800C668E8 /* libhdf5_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA7215EB4980036D42C /* libhdf5_cpp.a */; };
 		4810D5B7218208CC00C668E8 /* testcounttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4810D5B5218208CC00C668E8 /* testcounttable.cpp */; };
+		4815BEB12289E13500677EE2 /* lnrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEAF2289E13500677EE2 /* lnrarefaction.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -915,6 +916,8 @@
 		480E8DB01CAB12ED00A0D137 /* testfastqread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testfastqread.h; path = TestMothur/testcontainers/testfastqread.h; sourceTree = SOURCE_ROOT; };
 		4810D5B5218208CC00C668E8 /* testcounttable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testcounttable.cpp; path = testcontainers/testcounttable.cpp; sourceTree = "<group>"; };
 		4810D5B6218208CC00C668E8 /* testcounttable.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testcounttable.hpp; path = testcontainers/testcounttable.hpp; sourceTree = "<group>"; };
+		4815BEAF2289E13500677EE2 /* lnrarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lnrarefaction.cpp; path = source/calculators/lnrarefaction.cpp; sourceTree = SOURCE_ROOT; };
+		4815BEB02289E13500677EE2 /* lnrarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lnrarefaction.hpp; path = source/calculators/lnrarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2059,6 +2062,8 @@
 				4809ECA02280898E00B4D0E5 /* igrarefaction.hpp */,
 				4809ECA322831A5E00B4D0E5 /* lnabundance.cpp */,
 				4809ECA422831A5E00B4D0E5 /* lnabundance.hpp */,
+				4815BEAF2289E13500677EE2 /* lnrarefaction.cpp */,
+				4815BEB02289E13500677EE2 /* lnrarefaction.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3494,6 +3499,7 @@
 				A7E9B8B812D37EC400DA6239 /* decalc.cpp in Sources */,
 				A7E9B8B912D37EC400DA6239 /* deconvolutecommand.cpp in Sources */,
 				A7E9B8BA12D37EC400DA6239 /* degapseqscommand.cpp in Sources */,
+				4815BEB12289E13500677EE2 /* lnrarefaction.cpp in Sources */,
 				A7E9B8BB12D37EC400DA6239 /* deuniqueseqscommand.cpp in Sources */,
 				A7E9B8BC12D37EC400DA6239 /* distancecommand.cpp in Sources */,
 				A7E9B8BD12D37EC400DA6239 /* distancedb.cpp in Sources */,
@@ -3854,7 +3860,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.0\\\"\"",
@@ -3902,7 +3908,7 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.0\\\"\"",
@@ -3958,7 +3964,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.0\\\"\"",
@@ -4033,7 +4039,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.42.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",

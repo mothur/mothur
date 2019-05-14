@@ -44,6 +44,7 @@ public:
     double logLikelihoodRampal(int n, double dMDash, double dV);
     double logLikelihoodQuad(int n, double dMDash, double dV);
     
+    
     #endif
     
     double f2X(double x, double dA, double dB, double dNDash);

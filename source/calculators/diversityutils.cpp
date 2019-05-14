@@ -7,6 +7,7 @@
 //
 
 #include "diversityutils.hpp"
+
 /***********************************************************************/
 double f1(double x, void *pvParams)
 {
@@ -30,7 +31,6 @@ double derivExponent(double x, void *pvParams)
     
     return dRet;
 }
-
 /***********************************************************************/
 void DiversityUtils::loadAbundance(t_Data *ptData, SAbundVector* rank)
 {
@@ -107,19 +107,7 @@ double DiversityUtils::f2X(double x, double dA, double dB, double dNDash)
     return -dRet;
 }
  #ifdef USE_GSL
-/***********************************************************************/
-double fMu(double x, void* pvParams)
-{
-    t_IGParams* ptIGParams = (t_IGParams *) pvParams;
-    
-    DiversityUtils dutils("igrarefaction");
-    
-    double dAlphaDD = ptIGParams->dAlpha*sqrt(x);
-    double dBetaDD  = ptIGParams->dBeta*x;
-    double dLogP0   = dutils.logLikelihood(0, dAlphaDD, dBetaDD);
-    
-    return (1.0 - exp(dLogP0)) - ptIGParams->dC;
-}
+
 /***********************************************************************/
 double DiversityUtils::logLikelihoodRampal(int n, double dMDash, double dV)
 {
@@ -198,8 +186,7 @@ double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
     
     return log(dResult) - dLogFacN -0.5*dLogFac1;
 }
-
-/***********************************************************************/
+//***********************************************************************/
 int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve)
 {
     int status, iter = 0, max_iter = 100;
@@ -209,7 +196,6 @@ int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, d
     gsl_function F;
     
     F.function = &derivExponent;
-    if (method == "igrarefaction") { F.function = &fMu;  }
     F.params = params;
     
     //printf("%f %f %d %f %f\n",ptLNParams->dMDash, ptLNParams->dV, ptLNParams->n, x_lo, x_hi);
