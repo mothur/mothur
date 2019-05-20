@@ -1341,7 +1341,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<uchimeData*> data;
         
         long long num = 0;

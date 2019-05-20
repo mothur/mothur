@@ -46,7 +46,7 @@ private:
     vector<mcmcSample> sampling;
     
     vector<string> parseSharedFile(string);
-    int fillSampling(int, int);
+    int fillSampling(int, int, bool filldNu=false);
     
     int process(SAbundVector*&, string);
     string runErarefaction(SAbundVector*&, string);
@@ -59,6 +59,7 @@ private:
     int runLNAbund(SAbundVector*& sabund, string fileRoot);
     int runLNShift(SAbundVector*& sabund, string fileRoot);
     string runLNRarefaction(SAbundVector*& sabund, string fileRoot);
+    int runLSAbund(SAbundVector*& sabund, string fileRoot);
     
 };
 //*******************************************************

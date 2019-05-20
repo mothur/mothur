@@ -31,9 +31,9 @@ public:
     #ifdef USE_GSL
     
     double logLikelihood(int n, double dAlpha, double dBeta);
+    double logLikelihood(int n, double dAlpha, double dBeta, double);
     int bessel(double* pdResult, int n, double dAlpha, double dBeta);
     double sd(int n, double dAlpha, double dBeta);
-    double logLikelihood(int n, double dAlpha, double dBeta, double);
     int bessel(double* pdResult, int n, double dAlpha, double dBeta, double);
     double sd(int n, double dAlpha, double dBeta, double);
     int minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const gsl_vector*, void* params), double, double, double);
@@ -43,6 +43,9 @@ public:
     int solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve);
     double logLikelihoodRampal(int n, double dMDash, double dV);
     double logLikelihoodQuad(int n, double dMDash, double dV);
+    double logLikelihoodRampal(int n, double dMDash, double dV, double dNu);
+    double logLikelihoodQuad(int n, double dMDash, double dV, double dNu);
+
     
     
     #endif
@@ -50,6 +53,7 @@ public:
     double f2X(double x, double dA, double dB, double dNDash);
     double fX(double x, double dA, double dB, double dNDash);
     double chao(t_Data *ptData);
+    double logStirlingsGamma(double dZ);
     
     void loadAbundance(t_Data *ptData, SAbundVector* rank);
     void freeAbundance(t_Data *ptData);

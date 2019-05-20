@@ -89,7 +89,6 @@ vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         dutils.loadAbundance(&tData, rank);
         
         int sampled = rank->getNumSeqs(); //nj
-        int numOTUs = rank->getNumBins(); //nl
         int nSamples = sampling.size();
         
         double*     adMu = NULL;

@@ -347,6 +347,7 @@ void ValidCalculators::initialEstimators() {
         estimators.insert("igrarefaction");
         estimators.insert("lnrarefaction");
         estimators.insert("lnshift");
+        estimators.insert("lsabund");
         estimators.insert("default");
     }
     catch(exception& e) {

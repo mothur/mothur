@@ -688,7 +688,7 @@ int PhyloDiversityCommand::createProcesses(Tree* t, CountTable* ct, map< string,
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<phylodivData*> data;
         
         //Lauch worker threads

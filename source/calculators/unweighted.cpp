@@ -236,7 +236,7 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<unweightedData*> data;
         vector<string> Treenames; Treenames = t->getTreeNames();
         
@@ -397,7 +397,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeN
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<unweightedData*> data;
         vector<string> Treenames; Treenames = t->getTreeNames();
         //Lauch worker threads

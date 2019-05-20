@@ -960,7 +960,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
         vector< map<sharedIndexes, sharedIndexes> > randomize = randomizeGroupings(groupingsSize, groupings.size());
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<indicatorFloatData*> data;
         
         //divide iters between processors
@@ -1047,7 +1047,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
         vector< map<sharedIndexes, sharedIndexes> > randomize = randomizeGroupings(groupingsSize, groupings.size());
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<indicatorData*> data;
         
         //divide iters between processors

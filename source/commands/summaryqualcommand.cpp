@@ -357,7 +357,7 @@ long long SummaryQualCommand::createProcessesCreateSummary(vector<int>& position
 #endif
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<seqSumQualData*> data;
         //string f, unsigned long long st, unsigned long long en, bool n, map<string, int> nam
         //Lauch worker threads

@@ -453,7 +453,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             temp = validParameter.valid(parameters, "dist");  if (temp == "not found") { temp = "F"; }
             makeDist = util.isTrue(temp);
-            if (method == "opti") { makeDist = true; }
+            if (method == "opti") { makeDist = runsensSpec;  }
+            
             if (((phylipfile != "") || (columnfile != "")) && (method == "opti")) { makeDist = false; }
             
             if (((phylipfile != "") || (columnfile != "")) && makeDist) { m->mothurOut("[ERROR]: You already provided a distance matrix. Mothur will ignore the dist parameter.\n"); makeDist = false; }
@@ -1548,7 +1549,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<clusterData*> data;
         
         //Lauch worker threads

@@ -1153,7 +1153,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 #endif
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<sumScreenData*> data;
         
         long long num = 0;

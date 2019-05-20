@@ -36,6 +36,8 @@
 		4815BEB12289E13500677EE2 /* lnrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEAF2289E13500677EE2 /* lnrarefaction.cpp */; };
 		4815BEB4228B371E00677EE2 /* lnshift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB2228B371E00677EE2 /* lnshift.cpp */; };
 		4815BEB5228B371E00677EE2 /* lnshift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB2228B371E00677EE2 /* lnshift.cpp */; };
+		4815BEB8228DD18400677EE2 /* lsabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB6228DD18400677EE2 /* lsabundance.cpp */; };
+		4815BEB9228DD18400677EE2 /* lsabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB6228DD18400677EE2 /* lsabundance.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -922,6 +924,8 @@
 		4815BEB02289E13500677EE2 /* lnrarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lnrarefaction.hpp; path = source/calculators/lnrarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		4815BEB2228B371E00677EE2 /* lnshift.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lnshift.cpp; path = source/calculators/lnshift.cpp; sourceTree = SOURCE_ROOT; };
 		4815BEB3228B371E00677EE2 /* lnshift.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lnshift.hpp; path = source/calculators/lnshift.hpp; sourceTree = SOURCE_ROOT; };
+		4815BEB6228DD18400677EE2 /* lsabundance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lsabundance.cpp; path = source/calculators/lsabundance.cpp; sourceTree = SOURCE_ROOT; };
+		4815BEB7228DD18400677EE2 /* lsabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lsabundance.hpp; path = source/calculators/lsabundance.hpp; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2070,6 +2074,8 @@
 				4815BEB02289E13500677EE2 /* lnrarefaction.hpp */,
 				4815BEB2228B371E00677EE2 /* lnshift.cpp */,
 				4815BEB3228B371E00677EE2 /* lnshift.hpp */,
+				4815BEB6228DD18400677EE2 /* lsabundance.cpp */,
+				4815BEB7228DD18400677EE2 /* lsabundance.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3113,6 +3119,7 @@
 				481FB56F1AC1B6C70076CFF3 /* sharedthetan.cpp in Sources */,
 				481FB5B21AC1B7300076CFF3 /* deuniqueseqscommand.cpp in Sources */,
 				481FB6331AC1B7EA0076CFF3 /* kmer.cpp in Sources */,
+				4815BEB9228DD18400677EE2 /* lsabundance.cpp in Sources */,
 				481FB5BC1AC1B74F0076CFF3 /* getgroupscommand.cpp in Sources */,
 				481FB5891AC1B6FF0076CFF3 /* maligner.cpp in Sources */,
 				481FB5CC1AC1B74F0076CFF3 /* heatmapsimcommand.cpp in Sources */,
@@ -3826,6 +3833,7 @@
 				A7548FAD17142EBC00B1F05A /* getmetacommunitycommand.cpp in Sources */,
 				A7548FB0171440ED00B1F05A /* qFinderDMM.cpp in Sources */,
 				A77B7185173D2240002163C2 /* sparcccommand.cpp in Sources */,
+				4815BEB8228DD18400677EE2 /* lsabundance.cpp in Sources */,
 				A77B7188173D4042002163C2 /* randomnumber.cpp in Sources */,
 				485B0E0E1F27C40500CA5F57 /* sharedrabundfloatvector.cpp in Sources */,
 				48E7E0A32278A21B00B74910 /* metrolognormal.cpp in Sources */,

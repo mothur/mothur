@@ -348,7 +348,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
 #endif
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<seqSumData*> data;
 
         //Lauch worker threads
@@ -561,7 +561,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
 #endif
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<seqSumData*> data;
 
         //Lauch worker threads
@@ -754,7 +754,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
 #endif
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<seqSumData*> data;
 
         //Lauch worker threads
@@ -949,7 +949,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
         }
 #endif
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<seqSumData*> data;
 
         //Lauch worker threads

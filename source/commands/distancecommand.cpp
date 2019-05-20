@@ -576,7 +576,7 @@ void DistanceCommand::createProcesses(string filename) {
         time(&start);
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<distanceData*> data;
         
         unsigned long long numDists = 0;
@@ -633,7 +633,7 @@ void DistanceCommand::createProcesses(string filename) {
             dataBundle->setVariables(lines[i+1].start, lines[i+1].end, cutoff, alignDB, oldFastaDB, Estimators[0], numNewFasta, countends);
             data.push_back(dataBundle);
             
-            thread* thisThread = NULL;
+            std::thread* thisThread = NULL;
             if (output == "column")     {
                 if (fitCalc)    { thisThread = new thread(driverFitCalc, dataBundle);   }
                 else            {  thisThread = new thread(driverColumn, dataBundle);   }

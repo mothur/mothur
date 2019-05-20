@@ -667,7 +667,7 @@ void driverPDesign(primerDesignData* params){
 set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<double>& minTms, vector<double>& maxTms, set<string>& primers, vector<Sequence>& conSeqs, int binIndex, vector<string>& binLabels) {
 	try {
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<primerDesignData*> data;
 		
 		//sanity check
@@ -891,7 +891,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
 #endif
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<primerCountsData*> data;
 
         //Lauch worker threads

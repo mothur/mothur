@@ -17,6 +17,7 @@
 #include "lnabundance.hpp"
 #include "lnrarefaction.hpp"
 #include "lnshift.hpp"
+#include "lsabundance.hpp"
 
 //**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::setParameters(){
@@ -28,7 +29,7 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction-lnrarefaction-lnabund-lnshift", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc); //lnabund
+        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction-lnrarefaction-lnabund-lnshift-lsabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc); //lnabund
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
@@ -69,8 +70,8 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
         helpString += "The coverage parameter allows you to the desired coverage.  It is required for the igrarefaction calculator.\n";
         helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
-        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbundance, LNShift / IGRarefaction, LNRarefaction, respectively.\n";
-        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbundance, LNShift / IGRarefaction, LNRarefaction, respectively.\n";
+        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, respectively.\n";
+        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, respectively.\n";
         helpString += validCalculator.printCalc("single");
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
         
@@ -104,6 +105,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         outputTypes["lnabund"] = tempOutNames;
         outputTypes["lnrarefaction"] = tempOutNames;
         outputTypes["lnshift"] = tempOutNames;
+        outputTypes["lsabund"] = tempOutNames;
         outputTypes["metroig"] = tempOutNames;
         outputTypes["metroln"] = tempOutNames;
         outputTypes["metrols"] = tempOutNames;
@@ -151,6 +153,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             outputTypes["igrarefaction"] = tempOutNames;
             outputTypes["lnrarefaction"] = tempOutNames;
             outputTypes["lnshift"] = tempOutNames;
+            outputTypes["lsabund"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -279,8 +282,10 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             set<string> estimatorsThatRequireSampleFile;
             estimatorsThatRequireSampleFile.insert("igabund");
             estimatorsThatRequireSampleFile.insert("igrarefaction");
-            //estimatorsThatRequireSampleFile.insert("lnabund");
+            estimatorsThatRequireSampleFile.insert("lnabund");
             estimatorsThatRequireSampleFile.insert("lnrarefaction");
+            estimatorsThatRequireSampleFile.insert("lnshift");
+            estimatorsThatRequireSampleFile.insert("lsabund");
             
             //remove any typo calcs
             vector<string> validEstimates;
@@ -322,6 +327,11 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             burnSet = false;
             temp = validParameter.valid(parameters, "burn");		if (temp == "not found") { temp = "2000000"; }else { burnSet = true; }
             util.mothurConvert(temp, burn);
+            
+            
+            
+            //check estimators needed below - use the needs sampling data function
+            
             
             if (burnSet) { //user did not set the parameter
                 if ((util.inUsersGroups("lnrarefaction", Estimators)) && (util.inUsersGroups("igrarefaction", Estimators)) && (util.inUsersGroups("igabund", Estimators))) {
@@ -475,6 +485,7 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             else if (Estimators[i] == "lnabund")         { runLNAbund(sabund, fileRoot);         }
             else if (Estimators[i] == "lnrarefaction")   { runLNRarefaction(sabund, fileRoot);   }
             else if (Estimators[i] == "lnshift")         { runLNShift(sabund, fileRoot);         }
+            else if (Estimators[i] == "lsabund")         { runLSAbund(sabund, fileRoot);         }
         }
         
         return 0;
@@ -742,6 +753,47 @@ int EstimatorSingleCommand::runIGAbund(SAbundVector*& sabund, string fileRoot) {
     }
 }
 //**********************************************************************************************************************
+int EstimatorSingleCommand::runLSAbund(SAbundVector*& sabund, string fileRoot) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = fileRoot;
+        variables["[distance]"] = sabund->getLabel();
+        string outputFileName = getOutputFileName("lsabund", variables);
+        outputNames.push_back(outputFileName); outputTypes["lsabund"].push_back(outputFileName);
+        
+        ofstream out; util.openOutputFile(outputFileName, out); //format output
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        if (samplefile != "") {
+            int burnValue = burn;
+            if (!burnSet) { burnValue = 200000; }
+            
+            int burnSampleValue = burnSample;
+            if (!burnSampleSet) { burnSampleValue = 1000; }
+            
+            fillSampling(burnValue, burnSampleValue, true);
+        }
+        
+        LSAbundance lsAbund;
+        
+        vector<double> results = lsAbund.getValues(sabund, sampling);
+        
+        for (int i = 0; i < results.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            out << i+1 << '\t' << results[i] << endl;
+        }
+        out.close();
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runLSAbund");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 int EstimatorSingleCommand::runLNAbund(SAbundVector*& sabund, string fileRoot) {
     try {
         map<string, string> variables;
@@ -869,9 +921,12 @@ vector<string> EstimatorSingleCommand::parseSharedFile(string filename) {
     }
 }
 //**********************************************************************************************************************
-int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue) {
+int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue, bool filldNu) {
     try {
         sampling.clear();
+        
+        int numPiecesExpected = 5;
+        if (filldNu) { numPiecesExpected = 6; }
         
         ifstream in;
         util.openInputFile(samplefile, in);
@@ -884,25 +939,29 @@ int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue) {
             
             vector<string> pieces; util.splitAtComma(line, pieces);
             
-            if (pieces.size() == 5) {
+            if (pieces.size() == numPiecesExpected) {
                 
                 int sampleSize, ns;
                 util.mothurConvert(pieces[0], sampleSize);
                 
                 if ((sampleSize > burnValue) && (sampleSize % burnSampleValue == 0)) {
-                
-                    util.mothurConvert(pieces[3], ns);
                     
-                    double alpha, beta;
+                    double alpha = 0, beta = 0, dNu = 0;
+                    if (!filldNu) {  util.mothurConvert(pieces[3], ns);  }
+                    else {
+                        util.mothurConvert(pieces[3], dNu);
+                        util.mothurConvert(pieces[4], ns);
+                    }
+                    
                     util.mothurConvert(pieces[1], alpha);
                     util.mothurConvert(pieces[2], beta);
                     
-                    mcmcSample entry(alpha, beta, ns);
+                    mcmcSample entry(alpha, beta, dNu, ns);
                     sampling.push_back(entry);
                 }
                 
             }else {
-                m->mothurOut("\n[WARNING]: Unexpected format in sampling file, ignoring. Expecting something like: '0,7.419861e-01,4.695223e+00,5773,337.552846' for each line.\n\n");
+                m->mothurOut("\n[WARNING]: Unexpected format in sampling file, ignoring. Expected " + toString(numPiecesExpected) + " values separated by commas, found " + toString(pieces.size()) + ". Expecting something like: '0,7.419861e-01,4.695223e+00,5773,337.552846' or 0,-1.787922,6.348652,4784302.925302,8806,331.214377 for each line.\n\n");
                 sampling.clear(); break;
             }
             
@@ -916,6 +975,5 @@ int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue) {
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
 

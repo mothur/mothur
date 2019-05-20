@@ -1339,7 +1339,7 @@ void PreClusterCommand::createProcessesGroups(string newNName, string newMFile) 
     }
 
     //create array of worker threads
-    vector<thread*> workerThreads;
+    vector<std::thread*> workerThreads;
     vector<preClusterData*> data;
       
     auto synchronizedNameFile = std::make_shared<SynchronizedOutputFile>(newNName);

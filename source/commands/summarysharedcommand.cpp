@@ -699,7 +699,7 @@ void driverSummaryShared(summarySharedData* params) {
 int SummarySharedCommand::runCalcs(SharedRAbundVectors*& thisItersLookup, string sumFileName, string sumAllFile, vector< vector<seqDist>  >& calcDists) {
     try{
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<summarySharedData*> data;
         
         //Lauch worker threads

@@ -410,7 +410,7 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
         long long num = 0;
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<filterRunData*> data;
     
         time_t start, end;
@@ -587,7 +587,7 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         bool doVertical = util.isTrue(vertical);
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<filterData*> data;
         
         time_t start, end;

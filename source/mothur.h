@@ -156,11 +156,12 @@ const vector<string> nullVector; //used to pass blank vector
 
 //******************************************************
 struct mcmcSample {
-    double alpha, beta;
+    double alpha, beta; //dmDash, dV
+    double dNu;
     int ns;
     
     mcmcSample() {}
-    mcmcSample(double a, double b, int n) : alpha(a), beta(b), ns(n) {}
+    mcmcSample(double a, double b, double d, int n) : alpha(a), beta(b), dNu(d), ns(n) {}
     
 };
 typedef struct s_Params

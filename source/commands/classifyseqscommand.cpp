@@ -633,7 +633,7 @@ void driverClassifier(classifyData* params){
 int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string accnos, string filename) {
 	try {
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<classifyData*> data;
         
         long long num = 0;
