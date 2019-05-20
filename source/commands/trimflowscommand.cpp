@@ -808,7 +808,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
                                          primerNameVector, barcodeNameVector, reorient, signal, noise, maxHomoP, flowOrder, maxFlows, minFlows, numFlows);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverCreateTrim, dataBundle));
+            workerThreads.push_back(new std::thread(driverCreateTrim, dataBundle));
         }
         
         OutputWriter* threadTrimWriter = new OutputWriter(synchronizedOutputTrimFile);

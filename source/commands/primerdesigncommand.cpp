@@ -694,7 +694,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
             
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverPDesign, dataBundle));
+            workerThreads.push_back(new std::thread(driverPDesign, dataBundle));
         }
         
         OutputWriter* threadSummaryWriter = new OutputWriter(synchronizedOutputSummaryFile);
@@ -901,7 +901,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
             primerCountsData* dataBundle = new primerCountsData(fastafile, nameMap, lines[i+1].start, lines[i+1].end, seq2Bin, numBins);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverGetCounts, dataBundle));
+            workerThreads.push_back(new std::thread(driverGetCounts, dataBundle));
         }
         
         primerCountsData* dataBundle = new primerCountsData(fastafile, nameMap, lines[0].start, lines[0].end, seq2Bin, numBins);

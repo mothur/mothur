@@ -365,7 +365,7 @@ long long SummaryQualCommand::createProcessesCreateSummary(vector<int>& position
             seqSumQualData* dataBundle = new seqSumQualData(filename, lines[i+1].start, lines[i+1].end, hasNameMap, nameMap);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverCreateSummary, dataBundle));
+            workerThreads.push_back(new std::thread(driverCreateSummary, dataBundle));
         }
         
         seqSumQualData* dataBundle = new seqSumQualData(filename, lines[0].start, lines[0].end, hasNameMap, nameMap);

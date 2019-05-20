@@ -126,7 +126,7 @@ EstOutput Parsimony::createProcesses(Tree* t, CountTable* ct) {
             parsData* dataBundle = new parsData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverPars, dataBundle));
+            workerThreads.push_back(new std::thread(driverPars, dataBundle));
         }
         
         parsData* dataBundle = new parsData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct);

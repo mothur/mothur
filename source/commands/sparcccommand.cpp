@@ -477,7 +477,7 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
             sparccData* dataBundle = new sparccData(sharedVector, origCorrMatrix, numSamplings, maxIterations, lines[i+1], normalizeMethod);
             data.push_back(dataBundle);
 
-            workerThreads.push_back(new thread(driverSparcc, dataBundle));
+            workerThreads.push_back(new std::thread(driverSparcc, dataBundle));
         }
 
         int numOTUs = sharedVector[0].size();

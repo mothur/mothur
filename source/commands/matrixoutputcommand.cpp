@@ -593,7 +593,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
             
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(process, dataBundle));
+            workerThreads.push_back(new std::thread(process, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations

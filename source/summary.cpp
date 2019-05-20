@@ -361,7 +361,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
             seqSumData* dataBundle = new seqSumData(fastafile, outputName, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
 
-            workerThreads.push_back(new thread(driverSummarize, dataBundle));
+            workerThreads.push_back(new std::thread(driverSummarize, dataBundle));
         }
 
         seqSumData* dataBundle = new seqSumData(fastafile, output, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
@@ -569,7 +569,7 @@ long long Summary::summarizeFastaSummary(string summaryfile) {
             seqSumData* dataBundle = new seqSumData(summaryfile, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
 
-            workerThreads.push_back(new thread(driverFastaSummarySummarize, dataBundle));
+            workerThreads.push_back(new std::thread(driverFastaSummarySummarize, dataBundle));
         }
 
         seqSumData* dataBundle = new seqSumData(summaryfile, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
@@ -763,7 +763,7 @@ long long Summary::summarizeContigsSummary(string summaryfile) {
             seqSumData* dataBundle = new seqSumData(summaryfile, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
 
-            workerThreads.push_back(new thread(driverContigsSummarySummarize, dataBundle));
+            workerThreads.push_back(new std::thread(driverContigsSummarySummarize, dataBundle));
         }
 
         seqSumData* dataBundle = new seqSumData(summaryfile, lines[0].start, lines[0].end, hasNameOrCount, nameMap);
@@ -958,7 +958,7 @@ long long Summary::summarizeAlignSummary(string summaryfile) {
             seqSumData* dataBundle = new seqSumData(summaryfile, lines[i+1].start, lines[i+1].end, hasNameOrCount, nameMap);
             data.push_back(dataBundle);
 
-            workerThreads.push_back(new thread(driverAlignSummarySummarize, dataBundle));
+            workerThreads.push_back(new std::thread(driverAlignSummarySummarize, dataBundle));
         }
 
         seqSumData* dataBundle = new seqSumData(summaryfile, lines[0].start, lines[0].end, hasNameOrCount, nameMap);

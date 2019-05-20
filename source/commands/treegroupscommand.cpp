@@ -816,7 +816,7 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
             treeSharedData* dataBundle = new treeSharedData(lines[i+1], false, subsample, withReplacement, subsampleSize, Estimators, newLookup);
             
             data.push_back(dataBundle);
-            workerThreads.push_back(new thread(process, dataBundle));
+            workerThreads.push_back(new std::thread(process, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations

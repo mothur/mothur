@@ -709,7 +709,7 @@ int SummarySharedCommand::runCalcs(SharedRAbundVectors*& thisItersLookup, string
             summarySharedData* dataBundle = new summarySharedData(sumFileName+extension, sumAllFile+extension, m, lines[i+1].start, lines[i+1].end, Estimators, thisItersLookup, false, mult);
             
             data.push_back(dataBundle);
-            workerThreads.push_back(new thread(driverSummaryShared, dataBundle));
+            workerThreads.push_back(new std::thread(driverSummaryShared, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations

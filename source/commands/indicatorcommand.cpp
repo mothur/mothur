@@ -994,7 +994,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
             
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverValuesFloat, dataBundle));
+            workerThreads.push_back(new std::thread(driverValuesFloat, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations
@@ -1081,7 +1081,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
            
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverValues, dataBundle));
+            workerThreads.push_back(new std::thread(driverValues, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations

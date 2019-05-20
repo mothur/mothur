@@ -633,7 +633,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(string newFName, string ne
             shhhseqsData* dataBundle = new shhhseqsData(outputDir, fastafile, namefile, groupfile, newFName, newNName, newMName, dividedGroupNames[i+1], sigma, extension);
             data.push_back(dataBundle);
             
-            std::thread* thisThread = new thread(driverShhSeqsGroups, dataBundle);
+            std::thread* thisThread = new std::thread(driverShhSeqsGroups, dataBundle);
             workerThreads.push_back(thisThread);
         }
         

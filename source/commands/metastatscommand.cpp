@@ -442,7 +442,7 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
             metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, outputNames, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
             data.push_back(dataBundle);
             
-            std::thread* thisThread = new thread(driver, dataBundle);
+            std::thread* thisThread = new std::thread(driver, dataBundle);
             workerThreads.push_back(thisThread);
         }
 

@@ -376,7 +376,7 @@ EstOutput Weighted::createProcesses(Tree* t, CountTable* ct) {
             weightedData* dataBundle = new weightedData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount, includeRoot);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverWeighted, dataBundle));
+            workerThreads.push_back(new std::thread(driverWeighted, dataBundle));
         }
         CountTable* copyCount = new CountTable();
         copyCount->copy(ct);

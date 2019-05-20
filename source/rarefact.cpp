@@ -112,7 +112,7 @@ int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
             
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(singleDriver, dataBundle));
+            workerThreads.push_back(new std::thread(singleDriver, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations
@@ -251,7 +251,7 @@ int Rarefact::getSharedCurve(float percentFreq = 0.01, int nIters = 1000){
             
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(sharedDriver, dataBundle));
+            workerThreads.push_back(new std::thread(sharedDriver, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations

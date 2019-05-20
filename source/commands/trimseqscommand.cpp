@@ -978,7 +978,7 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
                                            minLength, maxAmbig, maxHomoP, maxLength, flip, reorient);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverTrim, dataBundle));
+            workerThreads.push_back(new std::thread(driverTrim, dataBundle));
         }
         
         OutputWriter* threadFastaTrimWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
