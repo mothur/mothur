@@ -523,7 +523,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
 #endif
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<alignStruct*> data;
         
         long long num = 0;

@@ -100,7 +100,7 @@ int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<singleRarefactData*> data;
         
         //Lauch worker threads
@@ -238,7 +238,7 @@ int Rarefact::getSharedCurve(float percentFreq = 0.01, int nIters = 1000){
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<sharedRarefactData*> data;
         
         //Lauch worker threads

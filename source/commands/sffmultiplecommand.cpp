@@ -759,7 +759,7 @@ long long SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<st
 		}
 		
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<sffMultipleData*> data;
         
         //Lauch worker threads

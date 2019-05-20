@@ -2064,7 +2064,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         else if ((delim == '>') && (qualOrIndexFiles.size() != 0))  { hasQuality = true; }
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<contigsData*> data;
 
         auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(outputFasta);
@@ -2227,7 +2227,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
 
         if(oligosfile != "")  {   createOligosGroup = getOligos(pairedPrimers, rpairedPrimers, pairedBarcodes, rpairedBarcodes, barcodeNames, primerNames);    }
 
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<groupContigsData*> data;
 
         //divide files between processors

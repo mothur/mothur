@@ -468,7 +468,7 @@ vector<vector<float> > SparccCommand::createProcesses(vector<vector<float> >& sh
         }
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<sparccData*> data;
 
         //Lauch worker threads

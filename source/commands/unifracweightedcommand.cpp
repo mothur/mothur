@@ -748,7 +748,7 @@ vector<double> UnifracWeightedCommand::createProcesses(Tree* t, CountTable* ct, 
             remainingPairs = remainingPairs - numPairs;
         }
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<weightedRandomData*> data;
         
         //Lauch worker threads

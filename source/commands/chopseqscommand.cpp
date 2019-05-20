@@ -619,7 +619,7 @@ void driverChop(chopData* params) {
 bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string outAccnos, string fastafileTemp) {
     try {
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<chopData*> data;
         vector<linePair> lines;
         

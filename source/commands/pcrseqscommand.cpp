@@ -829,7 +829,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
 #endif
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<pcrData*> data;
         
         auto synchronizedGoodFastaFile = make_shared<SynchronizedOutputFile>(goodFileName);

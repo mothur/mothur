@@ -784,7 +784,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 #endif
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<trimFlowData*> data;
         
         ofstream outTrim, outScrap;

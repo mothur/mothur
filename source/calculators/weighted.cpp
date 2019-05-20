@@ -363,7 +363,7 @@ EstOutput Weighted::createProcesses(Tree* t, CountTable* ct) {
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<weightedData*> data;
         vector<string> Treenames; Treenames = t->getTreeNames();
         //Lauch worker threads

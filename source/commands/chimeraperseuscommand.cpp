@@ -785,7 +785,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string coun
         }
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<perseusGroupsData*> data;
         
         long long num = 0;

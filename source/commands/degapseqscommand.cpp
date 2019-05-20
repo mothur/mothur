@@ -250,7 +250,7 @@ void driverDegap(degapData* params){
 long long DegapSeqsCommand::createProcesses(string filename, string outputFileName){
     try{
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<degapData*> data;
         vector<linePair> lines;
         

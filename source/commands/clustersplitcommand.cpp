@@ -1525,7 +1525,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<clusterData*> data;
         
         //Lauch worker threads

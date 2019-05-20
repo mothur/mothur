@@ -113,7 +113,7 @@ EstOutput Parsimony::createProcesses(Tree* t, CountTable* ct) {
         }
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<parsData*> data;
         
         //Lauch worker threads

@@ -950,7 +950,7 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<trimData*> data;
         
         //fills lines and qlines

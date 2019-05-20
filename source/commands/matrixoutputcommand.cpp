@@ -581,7 +581,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<distSharedData*> data;
         
         //Lauch worker threads
