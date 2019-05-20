@@ -1535,7 +1535,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
             dataBundle->setNamesCount(namefile, countfile);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(cluster, dataBundle));
+            workerThreads.push_back(new std::thread(cluster, dataBundle));
         }
         
         

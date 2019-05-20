@@ -283,7 +283,7 @@ long long DegapSeqsCommand::createProcesses(string filename, string outputFileNa
             degapData* dataBundle = new degapData(filename, lines[i+1].start, lines[i+1].end, threadWriter);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverDegap, dataBundle));
+            workerThreads.push_back(new std::thread(driverDegap, dataBundle));
         }
         
         OutputWriter* threadWriter = new OutputWriter(synchronizedFile);

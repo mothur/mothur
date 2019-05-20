@@ -1356,7 +1356,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
             uchimeData* dataBundle = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastafile, dupsFileName,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverGroups, dataBundle));
+            workerThreads.push_back(new std::thread(driverGroups, dataBundle));
         }
         
         vector<string> thisGroups;

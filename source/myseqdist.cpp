@@ -317,7 +317,7 @@ int correctDist::createProcess(string distanceFileName){
             correctData* dataBundle = new correctData(distanceFileName+extension, sequences, lines[i+1].start, lines[i+1].end);
             data.push_back(dataBundle);
             
-            std::thread* thisThread = new thread(driverCorrect, dataBundle);
+            std::thread* thisThread = new std::thread(driverCorrect, dataBundle);
             workerThreads.push_back(thisThread);
         }
         

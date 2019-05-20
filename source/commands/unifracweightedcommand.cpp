@@ -761,7 +761,7 @@ vector<double> UnifracWeightedCommand::createProcesses(Tree* t, CountTable* ct, 
             
             weightedRandomData* dataBundle = new weightedRandomData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, Groups, randomizedTreeNodes);
             data.push_back(dataBundle);
-            workerThreads.push_back(new thread(driverWeightedRandom, dataBundle));
+            workerThreads.push_back(new std::thread(driverWeightedRandom, dataBundle));
         }
         
         weightedRandomData* dataBundle = new weightedRandomData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot, Groups, randomizedTreeNodes);

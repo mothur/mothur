@@ -765,11 +765,11 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
             
             std::thread* thisThread = NULL;
             if (output == "column")     {
-                if (fitCalc)    { thisThread = new thread(driverFitCalc, dataBundle);   }
-                else            {  thisThread = new thread(driverColumn, dataBundle);   }
+                if (fitCalc)    { thisThread = new std::thread(driverFitCalc, dataBundle);   }
+                else            {  thisThread = new std::thread(driverColumn, dataBundle);   }
             }
-            else if (output == "lt")    { thisThread = new thread(driverLt, dataBundle);            }
-            else                        { thisThread = new thread(driverSquare, dataBundle);        }
+            else if (output == "lt")    { thisThread = new std::thread(driverLt, dataBundle);            }
+            else                        { thisThread = new std::thread(driverSquare, dataBundle);        }
             workerThreads.push_back(thisThread);
         }
 

@@ -712,7 +712,7 @@ int PhyloDiversityCommand::createProcesses(Tree* t, CountTable* ct, map< string,
             
             data.push_back(dataBundle);
 
-            workerThreads.push_back(new thread(driverPhylo, dataBundle));
+            workerThreads.push_back(new std::thread(driverPhylo, dataBundle));
         }
         
         vector< vector<int> > thisRandomLeaf;

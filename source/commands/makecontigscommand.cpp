@@ -2090,7 +2090,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, group);
             data.push_back(dataBundle);
 
-            workerThreads.push_back(new thread(driverContigs, dataBundle));
+            workerThreads.push_back(new std::thread(driverContigs, dataBundle));
         }
 
         OutputWriter* threadMisMatchWriter = new OutputWriter(synchronizedMisMatchFile);
@@ -2267,7 +2267,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             groupContigsData* groupDataBundle = new groupContigsData(fileInputs, startEndIndexes[i+1].start, startEndIndexes[i+1].end, dataBundle, file2Groups);
             data.push_back(groupDataBundle);
 
-            workerThreads.push_back(new thread(driverContigsGroups, groupDataBundle));
+            workerThreads.push_back(new std::thread(driverContigsGroups, groupDataBundle));
         }
 
         OutputWriter* threadMisMatchWriter = new OutputWriter(synchronizedMisMatchFile);

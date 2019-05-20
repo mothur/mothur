@@ -550,7 +550,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
                                                         align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
             data.push_back(dataBundle);
 
-            workerThreads.push_back(new thread(alignDriver, dataBundle));
+            workerThreads.push_back(new std::thread(alignDriver, dataBundle));
          }
         
         OutputWriter* threadAlignWriter = new OutputWriter(synchronizedOutputAlignFile);
