@@ -216,7 +216,7 @@ typedef struct s_LSParams
     
 } t_LSParams;
 
-typedef struct s_IGParams
+typedef struct s_IGParams //s_SIParams
 {
     int    nS;      /*number of species in community*/
     
@@ -224,7 +224,7 @@ typedef struct s_IGParams
     
     double dBeta;
     
-    double dC;
+    double dC; //dGamma
     
     int n;
     

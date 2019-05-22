@@ -349,6 +349,7 @@ void ValidCalculators::initialEstimators() {
         estimators.insert("lnshift");
         estimators.insert("lsabund");
         estimators.insert("lsrarefact");
+        estimators.insert("siabund");
         estimators.insert("default");
     }
     catch(exception& e) {

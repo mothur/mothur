@@ -41,6 +41,8 @@
 		4815BEBC2293189600677EE2 /* lsrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBA2293189600677EE2 /* lsrarefaction.cpp */; };
 		4815BEBD2293189600677EE2 /* lsrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBA2293189600677EE2 /* lsrarefaction.cpp */; };
 		4815BEBE2295A02800677EE2 /* diversityutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E7E0A42278AD4800B74910 /* diversityutils.cpp */; };
+		4815BEC12295CE6800677EE2 /* siabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBF2295CE6800677EE2 /* siabundance.cpp */; };
+		4815BEC22295CE6800677EE2 /* siabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBF2295CE6800677EE2 /* siabundance.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -931,6 +933,8 @@
 		4815BEB7228DD18400677EE2 /* lsabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lsabundance.hpp; path = source/calculators/lsabundance.hpp; sourceTree = SOURCE_ROOT; };
 		4815BEBA2293189600677EE2 /* lsrarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lsrarefaction.cpp; path = source/calculators/lsrarefaction.cpp; sourceTree = SOURCE_ROOT; };
 		4815BEBB2293189600677EE2 /* lsrarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lsrarefaction.hpp; path = source/calculators/lsrarefaction.hpp; sourceTree = SOURCE_ROOT; };
+		4815BEBF2295CE6800677EE2 /* siabundance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = siabundance.cpp; path = source/calculators/siabundance.cpp; sourceTree = SOURCE_ROOT; };
+		4815BEC02295CE6800677EE2 /* siabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = siabundance.hpp; path = source/calculators/siabundance.hpp; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2083,6 +2087,8 @@
 				4815BEB7228DD18400677EE2 /* lsabundance.hpp */,
 				4815BEBA2293189600677EE2 /* lsrarefaction.cpp */,
 				4815BEBB2293189600677EE2 /* lsrarefaction.hpp */,
+				4815BEBF2295CE6800677EE2 /* siabundance.cpp */,
+				4815BEC02295CE6800677EE2 /* siabundance.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3143,6 +3149,7 @@
 				481FB5431AC1B6110076CFF3 /* geom.cpp in Sources */,
 				481FB5761AC1B6EA0076CFF3 /* solow.cpp in Sources */,
 				481FB5421AC1B60D0076CFF3 /* efron.cpp in Sources */,
+				4815BEC22295CE6800677EE2 /* siabundance.cpp in Sources */,
 				481FB5461AC1B6190076CFF3 /* hamming.cpp in Sources */,
 				481FB6891AC1BA760076CFF3 /* phylosummary.cpp in Sources */,
 				481FB6881AC1B8B80076CFF3 /* weightedlinkage.cpp in Sources */,
@@ -3557,6 +3564,7 @@
 				4809EC9D227C9B3100B4D0E5 /* metrosichel.cpp in Sources */,
 				A7E9B8D912D37EC400DA6239 /* getsharedotucommand.cpp in Sources */,
 				48E544701E9D3B2D00FF6AB8 /* accuracy.cpp in Sources */,
+				4815BEC12295CE6800677EE2 /* siabundance.cpp in Sources */,
 				A7E9B8DB12D37EC400DA6239 /* goodscoverage.cpp in Sources */,
 				A7E9B8DC12D37EC400DA6239 /* gotohoverlap.cpp in Sources */,
 				A7E9B8DD12D37EC400DA6239 /* gower.cpp in Sources */,
