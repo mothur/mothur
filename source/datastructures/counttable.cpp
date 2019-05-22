@@ -886,13 +886,23 @@ vector<string> CountTable::printCompressedTable(string file, vector<string> grou
         
         if (total != 0) {
             if (hasGroups) {
-                out << "#Compressed Format: groupIndex,abundance. For example 1,6 would mean the read has an abundance of 6 for group 1." << endl;
-                out << "#";
+                
                 
                 map<int, string> reverse;
                 for (map<string, int>::iterator it = indexGroupMap.begin(); it !=indexGroupMap.end(); it++) {
                     reverse[it->second] = it->first;
                 }
+                
+                map<int, string>::iterator it = reverse.begin();
+                string group1Name = it->second;
+                if (pickedGroups) { //find selected groups indicies
+                    for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
+                        if (util.inUsersGroups(it->second, groupsToPrint)) { group1Name = it->second; break; }
+                    }
+                }
+                
+                out << "#Compressed Format: groupIndex,abundance. For example 1,6 would mean the read has an abundance of 6 for group " + group1Name + "." << endl;
+                out << "#";
                 
                 for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
                     if (pickedGroups) { //find selected groups indicies
