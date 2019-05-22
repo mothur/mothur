@@ -146,6 +146,67 @@ double DiversityUtils::logLikelihoodRampal(int n, double dMDash, double dV)
     return dLogLik;
 }
 /***********************************************************************/
+double fMu_igrarefaction(double x, void* pvParams)
+{
+    t_IGParams* ptIGParams = (t_IGParams *) pvParams;
+    // double tx = x / 1667.0;
+    
+    DiversityUtils dutils("igrarefaction");
+    
+    double dAlphaDD = ptIGParams->dAlpha*sqrt(x);
+    double dBetaDD  = ptIGParams->dBeta*x;
+    double dLogP0   = dutils.logLikelihood(0, dAlphaDD, dBetaDD);
+    
+    // printf("dAlpha %f dBeta %f x %f dAlphaDD %f  dBetaDD %f dLofP0 %f", ptIGParams->dAlpha, ptIGParams->dBeta, x, dAlphaDD, dBetaDD, dLogP0);
+    
+    return (1.0 - exp(dLogP0)) - ptIGParams->dC;
+}
+/***********************************************************************/
+double fMu_lsrarefaction(double x, void* pvParams)
+{
+    
+    DiversityUtils dutils("lsrarefaction");
+    
+    t_LSParams* ptLSParams = (t_LSParams *) pvParams;
+    double dMDD            = ptLSParams->dMDash + x;
+    double dLogP0          = dutils.logLikelihoodQuad(0, dMDD, ptLSParams->dV, ptLSParams->dNu);
+    
+    return (1.0 - exp(dLogP0)) - ptLSParams->dC;
+}
+/***********************************************************************/
+double fMu_lnrarefaction(double x, void* pvParams)
+{
+    t_IGParams* ptIGParams = (t_IGParams *) pvParams;
+    
+    DiversityUtils dutils("lnrarefaction");
+    
+    double dMDD = ptIGParams->dAlpha + x;
+    double dLogP0 = dutils.logLikelihoodQuad(0, dMDD, ptIGParams->dBeta);
+    
+    return (1.0 - exp(dLogP0)) - ptIGParams->dC;
+}
+/***********************************************************************/
+double DiversityUtils::calcMu(void *pvParams)
+{
+    double dLogMu = 0.0;
+    
+    if (method == "lnrarefaction") {
+        t_IGParams* ptIGParams = (t_IGParams *) pvParams;
+        solveF(0, 1.0e7, ptIGParams, 1.0e-7, &dLogMu);
+        return exp(dLogMu);
+    }else if (method == "igrarefaction") {
+        t_IGParams* ptIGParams = (t_IGParams *) pvParams;
+        solveF(1.0, 1.0e10, ptIGParams, 1.0e-7, &dLogMu);
+        return dLogMu;
+    }else if (method == "lsrarefaction") {
+        t_LSParams *ptLSParams = (t_LSParams *) pvParams;
+        solveF(0, 1.0e7, ptLSParams, 1.0e-7, &dLogMu);
+        return exp(dLogMu);
+    }
+    
+    return dLogMu;
+}
+/***********************************************************************/
 double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
 {
     gsl_integration_workspace *ptGSLWS =
@@ -177,7 +238,7 @@ double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
         double dVar   = 0.0;
         
         if ((method == "metroln") || (method == "metrols")) { if(fabs(dUpper) > 1.0e-7){  solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); } }
-        else {  solveF(0.0, dUpper, (void *) &tLNParams, 1.0e-5, &dMax);  } //lnabund, lnshift
+        else {  solveF(0.0, dUpper, derivExponent, (void *) &tLNParams, 1.0e-5, &dMax);  } //lnabund, lnshift, lnrarefact
         
         dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
         
@@ -192,7 +253,7 @@ double DiversityUtils::logLikelihoodQuad(int n, double dMDash, double dV)
         if ((method == "metroln") || (method == "metrols")) {
             if(fabs(dUpper - dLower) > 1.0e-7){ solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); }
             else{ dMax = 0.5*(dLower + dUpper); }
-        }else {  solveF(dLower, dUpper, (void *) &tLNParams, 1.0e-5, &dMax); } //lnabund, lnshift
+        }else {  solveF(dLower, dUpper, derivExponent, (void *) &tLNParams, 1.0e-5, &dMax); } //lnabund, lnshift, lnrarefact
         
         dVar = sqrt(1.0/((1.0/dV) + exp(dMax)));
         
@@ -288,6 +349,39 @@ double DiversityUtils::logLikelihoodRampal(int n, double dMDash, double dV, doub
     return -dGamma*log(dF) + log(dTemp) + dLogFac1 - 0.5*log(dV);
 }
 //***********************************************************************/
+int DiversityUtils::solveF(double x_lo, double x_hi, double (*f)(double, void*),
+           void* params, double tol, double *xsolve)
+{
+    int status, iter = 0, max_iter = 100;
+    const gsl_root_fsolver_type *T;
+    gsl_root_fsolver *s;
+    double r = 0;
+    gsl_function F;
+    
+    F.function = f;
+    F.params = params;
+    
+    T = gsl_root_fsolver_brent;
+    s = gsl_root_fsolver_alloc (T);
+    gsl_root_fsolver_set (s, &F, x_lo, x_hi);
+    
+    do{
+        iter++;
+        status = gsl_root_fsolver_iterate (s);
+        r = gsl_root_fsolver_root (s);
+        x_lo = gsl_root_fsolver_x_lower (s);
+        x_hi = gsl_root_fsolver_x_upper (s);
+        
+        status = gsl_root_test_interval (x_lo, x_hi, 0, tol);
+    }
+    while (status == GSL_CONTINUE && iter < max_iter);
+    
+    (*xsolve) = gsl_root_fsolver_root (s);
+    gsl_root_fsolver_free (s);
+    
+    return status;
+}
+//***********************************************************************/
 int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve)
 {
     int status, iter = 0, max_iter = 100;
@@ -297,9 +391,11 @@ int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, d
     gsl_function F;
     
     F.function = &derivExponent;
+    if (method == "igrarefaction") {  F.function = &fMu_igrarefaction; }
+    else if (method == "lnrarefaction") {  F.function = &fMu_lnrarefaction; }
+    else if (method == "lsrarefaction") {  F.function = &fMu_lsrarefaction; }
     F.params = params;
     
-    //printf("%f %f %d %f %f\n",ptLNParams->dMDash, ptLNParams->dV, ptLNParams->n, x_lo, x_hi);
     T = gsl_root_fsolver_brent;
     s = gsl_root_fsolver_alloc (T);
     gsl_root_fsolver_set (s, &F, x_lo, x_hi);

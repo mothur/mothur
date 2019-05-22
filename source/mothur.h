@@ -210,6 +210,8 @@ typedef struct s_LSParams
     
     double dNu;
     
+    double dC;
+    
     int n;
     
 } t_LSParams;

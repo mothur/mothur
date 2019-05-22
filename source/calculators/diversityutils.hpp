@@ -41,11 +41,12 @@ public:
     void outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(const gsl_vector*, void* params));
     void getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* pnSDash, int nS, t_Params *ptParams);
     int solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve);
+    int solveF(double x_lo, double x_hi, double (*f)(double, void*), void* params, double tol, double *xsolve);
     double logLikelihoodRampal(int n, double dMDash, double dV);
     double logLikelihoodQuad(int n, double dMDash, double dV);
     double logLikelihoodRampal(int n, double dMDash, double dV, double dNu);
     double logLikelihoodQuad(int n, double dMDash, double dV, double dNu);
-
+    double calcMu(void *ptLNParams);
     
     
     #endif

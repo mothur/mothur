@@ -38,6 +38,9 @@
 		4815BEB5228B371E00677EE2 /* lnshift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB2228B371E00677EE2 /* lnshift.cpp */; };
 		4815BEB8228DD18400677EE2 /* lsabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB6228DD18400677EE2 /* lsabundance.cpp */; };
 		4815BEB9228DD18400677EE2 /* lsabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB6228DD18400677EE2 /* lsabundance.cpp */; };
+		4815BEBC2293189600677EE2 /* lsrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBA2293189600677EE2 /* lsrarefaction.cpp */; };
+		4815BEBD2293189600677EE2 /* lsrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBA2293189600677EE2 /* lsrarefaction.cpp */; };
+		4815BEBE2295A02800677EE2 /* diversityutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E7E0A42278AD4800B74910 /* diversityutils.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -926,6 +929,8 @@
 		4815BEB3228B371E00677EE2 /* lnshift.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lnshift.hpp; path = source/calculators/lnshift.hpp; sourceTree = SOURCE_ROOT; };
 		4815BEB6228DD18400677EE2 /* lsabundance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lsabundance.cpp; path = source/calculators/lsabundance.cpp; sourceTree = SOURCE_ROOT; };
 		4815BEB7228DD18400677EE2 /* lsabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lsabundance.hpp; path = source/calculators/lsabundance.hpp; sourceTree = SOURCE_ROOT; };
+		4815BEBA2293189600677EE2 /* lsrarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lsrarefaction.cpp; path = source/calculators/lsrarefaction.cpp; sourceTree = SOURCE_ROOT; };
+		4815BEBB2293189600677EE2 /* lsrarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lsrarefaction.hpp; path = source/calculators/lsrarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2076,6 +2081,8 @@
 				4815BEB3228B371E00677EE2 /* lnshift.hpp */,
 				4815BEB6228DD18400677EE2 /* lsabundance.cpp */,
 				4815BEB7228DD18400677EE2 /* lsabundance.hpp */,
+				4815BEBA2293189600677EE2 /* lsrarefaction.cpp */,
+				4815BEBB2293189600677EE2 /* lsrarefaction.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3045,6 +3052,7 @@
 				481FB5801AC1B6EA0076CFF3 /* weighted.cpp in Sources */,
 				481FB54F1AC1B63A0076CFF3 /* memeuclidean.cpp in Sources */,
 				48910D511D58E26C00F60EDB /* testopticluster.cpp in Sources */,
+				4815BEBE2295A02800677EE2 /* diversityutils.cpp in Sources */,
 				481FB5611AC1B69B0076CFF3 /* sharedjsd.cpp in Sources */,
 				481FB5AF1AC1B7300076CFF3 /* createdatabasecommand.cpp in Sources */,
 				481FB5731AC1B6EA0076CFF3 /* simpsoneven.cpp in Sources */,
@@ -3436,6 +3444,7 @@
 				481FB6921AC1BAA60076CFF3 /* taxonomyequalizer.cpp in Sources */,
 				481FB68A1AC1BA9E0076CFF3 /* alignnode.cpp in Sources */,
 				481FB58B1AC1B6FF0076CFF3 /* pintail.cpp in Sources */,
+				4815BEBD2293189600677EE2 /* lsrarefaction.cpp in Sources */,
 				48D6E96B1CA4262A008DF76B /* dataset.cpp in Sources */,
 				481FB6041AC1B7970076CFF3 /* sensspeccommand.cpp in Sources */,
 				481FB6491AC1B7F40076CFF3 /* suffixdb.cpp in Sources */,
@@ -3646,6 +3655,7 @@
 				A7E9B93812D37EC400DA6239 /* sabundvector.cpp in Sources */,
 				A7E9B93912D37EC400DA6239 /* screenseqscommand.cpp in Sources */,
 				A7E9B93A12D37EC400DA6239 /* secondarystructurecommand.cpp in Sources */,
+				4815BEBC2293189600677EE2 /* lsrarefaction.cpp in Sources */,
 				A7E9B93B12D37EC400DA6239 /* sensspeccommand.cpp in Sources */,
 				A7E9B93C12D37EC400DA6239 /* seqerrorcommand.cpp in Sources */,
 				48FB99CC20A4AD7D00FF9F6E /* optiblastmatrix.cpp in Sources */,

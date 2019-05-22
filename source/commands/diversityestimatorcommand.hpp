@@ -59,6 +59,7 @@ private:
     int runLNAbund(SAbundVector*& sabund, string fileRoot);
     int runLNShift(SAbundVector*& sabund, string fileRoot);
     string runLNRarefaction(SAbundVector*& sabund, string fileRoot);
+    string runLSRarefaction(SAbundVector*& sabund, string fileRoot);
     int runLSAbund(SAbundVector*& sabund, string fileRoot);
     
 };

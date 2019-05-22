@@ -18,6 +18,7 @@
 #include "lnrarefaction.hpp"
 #include "lnshift.hpp"
 #include "lsabundance.hpp"
+#include "lsrarefaction.hpp"
 
 //**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::setParameters(){
@@ -29,7 +30,7 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction-lnrarefaction-lnabund-lnshift-lsabund", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc); //lnabund
+        CommandParameter pcalc("calc", "Multiple", "erarefact-metroig-metroln-metrols-metrosichel-igabund-igrarefact-lnrarefact-lnabund-lnshift-lsabund-lsrarefact", "erarefact", "", "", "","",true,false,true); parameters.push_back(pcalc); //lnabund
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
@@ -68,10 +69,10 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "The sigmab parameter is used to set the std. dev. of beta / Y / V prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigman parameter is used to set the std. dev. of N / Gamma prop. distn for MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
-        helpString += "The coverage parameter allows you to the desired coverage.  It is required for the igrarefaction calculator.\n";
+        helpString += "The coverage parameter allows you to the desired coverage.  It is required for the ... calculators.\n";
         helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
-        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, respectively.\n";
-        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, respectively.\n";
+        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, LSRarefaction respectively.\n";
+        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, LSRarefaction respectively.\n";
         helpString += validCalculator.printCalc("single");
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
         
@@ -106,6 +107,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         outputTypes["lnrarefaction"] = tempOutNames;
         outputTypes["lnshift"] = tempOutNames;
         outputTypes["lsabund"] = tempOutNames;
+        outputTypes["lsrarefaction"] = tempOutNames;
         outputTypes["metroig"] = tempOutNames;
         outputTypes["metroln"] = tempOutNames;
         outputTypes["metrols"] = tempOutNames;
@@ -154,6 +156,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             outputTypes["lnrarefaction"] = tempOutNames;
             outputTypes["lnshift"] = tempOutNames;
             outputTypes["lsabund"] = tempOutNames;
+            outputTypes["lsrarefaction"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -281,11 +284,12 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             
             set<string> estimatorsThatRequireSampleFile;
             estimatorsThatRequireSampleFile.insert("igabund");
-            estimatorsThatRequireSampleFile.insert("igrarefaction");
+            estimatorsThatRequireSampleFile.insert("igrarefact");
             estimatorsThatRequireSampleFile.insert("lnabund");
-            estimatorsThatRequireSampleFile.insert("lnrarefaction");
+            estimatorsThatRequireSampleFile.insert("lnrarefact");
             estimatorsThatRequireSampleFile.insert("lnshift");
             estimatorsThatRequireSampleFile.insert("lsabund");
+            estimatorsThatRequireSampleFile.insert("lsrarefact");
             
             //remove any typo calcs
             vector<string> validEstimates;
@@ -334,7 +338,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             
             
             if (burnSet) { //user did not set the parameter
-                if ((util.inUsersGroups("lnrarefaction", Estimators)) && (util.inUsersGroups("igrarefaction", Estimators)) && (util.inUsersGroups("igabund", Estimators))) {
+                if ((util.inUsersGroups("lnrarefact", Estimators)) && (util.inUsersGroups("igrarefact", Estimators)) && (util.inUsersGroups("lsrarefact", Estimators))&& (util.inUsersGroups("igabund", Estimators))) {
                     m->mothurOut("[WARNING]: You set the burn parameter, and the igrarefaction and igabund calulators have different default values. IGAbund burnsample default is 2000000, but IGRarefaction and LNRarection's default is 100000. Are you sure you meant to set them to the same value? If so, ignore this warning.\n");
                 }
             }
@@ -342,8 +346,8 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             temp = validParameter.valid(parameters, "coverage");		if (temp == "not found") { temp = "-1"; }
             util.mothurConvert(temp, coverage);
             
-            if ((util.isEqual(coverage, -1)) && ((util.inUsersGroups("igrarefaction", Estimators)) || (util.inUsersGroups("lnrarefaction", Estimators)))) {
-                m->mothurOut("[ERROR]: You must set the coverage parameter to run the igrarefaction or lnrarefaction estimator. Aborting.\n"); abort=true;
+            if ((util.isEqual(coverage, -1)) && ((util.inUsersGroups("igrarefact", Estimators)) || (util.inUsersGroups("lnrarefact", Estimators)) || (util.inUsersGroups("lsrarefact", Estimators)))) {
+                m->mothurOut("[ERROR]: You must set the coverage parameter to run the igrarefact, lsrarefact or lnrarefact estimator. Aborting.\n"); abort=true;
             }
             
             burnSampleSet = false;
@@ -351,7 +355,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             util.mothurConvert(temp, burnSample);
             
             if (burnSampleSet) { //user did not set the parameter
-                if ((util.inUsersGroups("lnrarefaction", Estimators)) && (util.inUsersGroups("igrarefaction", Estimators)) && (util.inUsersGroups("igabund", Estimators))) {
+                if ((util.inUsersGroups("lnrarefaction", Estimators)) && (util.inUsersGroups("igrarefaction", Estimators)) && (util.inUsersGroups("lsrarefact", Estimators)) && (util.inUsersGroups("igabund", Estimators))) {
                     m->mothurOut("[WARNING]: You set the burnsample parameter, and the igrarefaction and igabund calulators have different default values. IGAbund burnsample default is 1000, but IGRarefaction and LNRarection's default is 100. Are you sure you meant to set them to the same value? If so, ignore this warning.\n");
                 }
             }
@@ -475,17 +479,18 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
             
             if (m->getControl_pressed()) { break; }
             
-            if (Estimators[i] == "erarefaction")         { runErarefaction(sabund, fileRoot);    }
+            if (Estimators[i] == "erarefact")            { runErarefaction(sabund, fileRoot);    }
             else if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot);         }
             else if (Estimators[i] == "metroln")         { runMetroLogNormal(sabund, fileRoot);  }
             else if (Estimators[i] == "metrols")         { runMetroLogStudent(sabund, fileRoot); }
             else if (Estimators[i] == "metrosichel")     { runMetroSichel(sabund, fileRoot);     }
             else if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
-            else if (Estimators[i] == "igrarefaction")   { runIGRarefaction(sabund, fileRoot);   }
+            else if (Estimators[i] == "igrarefact")      { runIGRarefaction(sabund, fileRoot);   }
             else if (Estimators[i] == "lnabund")         { runLNAbund(sabund, fileRoot);         }
-            else if (Estimators[i] == "lnrarefaction")   { runLNRarefaction(sabund, fileRoot);   }
+            else if (Estimators[i] == "lnrarefact")      { runLNRarefaction(sabund, fileRoot);   }
             else if (Estimators[i] == "lnshift")         { runLNShift(sabund, fileRoot);         }
             else if (Estimators[i] == "lsabund")         { runLSAbund(sabund, fileRoot);         }
+            else if (Estimators[i] == "lsrarefact")      { runLSRarefaction(sabund, fileRoot);   }
         }
         
         return 0;
@@ -589,7 +594,7 @@ string EstimatorSingleCommand::runLNRarefaction(SAbundVector*& sabund, string fi
         ofstream out; util.openOutputFile(outputFileName, out); //format output
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
         
-        out << "LNRarefaction_Lower\tILNRarefaction_Median\tLNRarefaction_Upper\n";
+        out << "LNRarefaction_Lower\tLNRarefaction_Median\tLNRarefaction_Upper\n";
         
         LNRarefaction lnRare(coverage);
         
@@ -618,6 +623,48 @@ string EstimatorSingleCommand::runLNRarefaction(SAbundVector*& sabund, string fi
         exit(1);
     }
 }
+//**********************************************************************************************************************
+string EstimatorSingleCommand::runLSRarefaction(SAbundVector*& sabund, string fileRoot) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = fileRoot;
+        variables["[distance]"] = sabund->getLabel();
+        string outputFileName = getOutputFileName("lsrarefaction", variables);
+        outputNames.push_back(outputFileName); outputTypes["lsrarefaction"].push_back(outputFileName);
+        
+        ofstream out; util.openOutputFile(outputFileName, out); //format output
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        out << "LSRarefaction_Lower\tLSRarefaction_Median\tLSRarefaction_Upper\n";
+        
+        LSRarefaction lsRare(coverage);
+        
+        if (samplefile != "") {
+            int burnValue = burn;
+            if (!burnSet) { burnValue = 100000; }
+            
+            int burnSampleValue = burnSample;
+            if (!burnSampleSet) { burnSampleValue = 100; }
+            
+            fillSampling(burnValue, burnSampleValue, true);
+        }
+        
+        vector<double> results = lsRare.getValues(sabund, sampling);
+        
+        for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  }
+        out << endl;
+        
+        out.close();
+        
+        return outputFileName;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runLSRarefaction");
+        exit(1);
+    }
+}
+
 
 //**********************************************************************************************************************
 string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund, string fileRoot) {

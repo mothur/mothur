@@ -337,17 +337,18 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 void ValidCalculators::initialEstimators() {
     try {
         
-        estimators.insert("erarefaction");
+        estimators.insert("erarefact");
         estimators.insert("metroig");
         estimators.insert("metroln");
         estimators.insert("metrols");
         estimators.insert("metrosichel");
         estimators.insert("igabund");
         estimators.insert("lnabund");
-        estimators.insert("igrarefaction");
-        estimators.insert("lnrarefaction");
+        estimators.insert("igrarefact");
+        estimators.insert("lnrarefact");
         estimators.insert("lnshift");
         estimators.insert("lsabund");
+        estimators.insert("lsrarefact");
         estimators.insert("default");
     }
     catch(exception& e) {
