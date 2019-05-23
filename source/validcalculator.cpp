@@ -351,6 +351,7 @@ void ValidCalculators::initialEstimators() {
         estimators.insert("lsrarefact");
         estimators.insert("siabund");
         estimators.insert("sirarefact");
+        estimators.insert("sishift");
         estimators.insert("default");
     }
     catch(exception& e) {

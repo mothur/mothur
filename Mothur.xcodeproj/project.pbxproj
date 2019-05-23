@@ -45,6 +45,8 @@
 		4815BEC22295CE6800677EE2 /* siabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBF2295CE6800677EE2 /* siabundance.cpp */; };
 		4815BEC52296F19500677EE2 /* sirarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC32296F19500677EE2 /* sirarefaction.cpp */; };
 		4815BEC62296F19500677EE2 /* sirarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC32296F19500677EE2 /* sirarefaction.cpp */; };
+		4815BEC922970FA700677EE2 /* sishift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC722970FA700677EE2 /* sishift.cpp */; };
+		4815BECA22970FA700677EE2 /* sishift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC722970FA700677EE2 /* sishift.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -939,6 +941,8 @@
 		4815BEC02295CE6800677EE2 /* siabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = siabundance.hpp; path = source/calculators/siabundance.hpp; sourceTree = SOURCE_ROOT; };
 		4815BEC32296F19500677EE2 /* sirarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sirarefaction.cpp; path = source/calculators/sirarefaction.cpp; sourceTree = SOURCE_ROOT; };
 		4815BEC42296F19500677EE2 /* sirarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sirarefaction.hpp; path = source/calculators/sirarefaction.hpp; sourceTree = SOURCE_ROOT; };
+		4815BEC722970FA700677EE2 /* sishift.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sishift.cpp; path = source/calculators/sishift.cpp; sourceTree = SOURCE_ROOT; };
+		4815BEC822970FA700677EE2 /* sishift.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sishift.hpp; path = source/calculators/sishift.hpp; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2095,6 +2099,8 @@
 				4815BEC02295CE6800677EE2 /* siabundance.hpp */,
 				4815BEC32296F19500677EE2 /* sirarefaction.cpp */,
 				4815BEC42296F19500677EE2 /* sirarefaction.hpp */,
+				4815BEC722970FA700677EE2 /* sishift.cpp */,
+				4815BEC822970FA700677EE2 /* sishift.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3160,6 +3166,7 @@
 				481FB5461AC1B6190076CFF3 /* hamming.cpp in Sources */,
 				481FB6891AC1BA760076CFF3 /* phylosummary.cpp in Sources */,
 				481FB6881AC1B8B80076CFF3 /* weightedlinkage.cpp in Sources */,
+				4815BECA22970FA700677EE2 /* sishift.cpp in Sources */,
 				489AF68F2106188E0028155E /* sensspeccalc.cpp in Sources */,
 				480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */,
 				481FB61E1AC1B7AC0076CFF3 /* unifracweightedcommand.cpp in Sources */,
@@ -3782,6 +3789,7 @@
 				A71FE12C12EDF72400963CA7 /* mergegroupscommand.cpp in Sources */,
 				7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */,
 				48E544551E9C2DF500FF6AB8 /* tn.cpp in Sources */,
+				4815BEC922970FA700677EE2 /* sishift.cpp in Sources */,
 				A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */,
 				A75790591301749D00A30DAB /* homovacommand.cpp in Sources */,
 				481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */,
