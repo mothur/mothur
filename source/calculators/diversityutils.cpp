@@ -146,6 +146,18 @@ double DiversityUtils::logLikelihoodRampal(int n, double dMDash, double dV)
     return dLogLik;
 }
 /***********************************************************************/
+double fMu_sirarefaction(double x, void* pvParams)
+{
+    DiversityUtils dutils("sirarefaction");
+    
+    t_LSParams* ptSIParams = (t_LSParams *) pvParams;
+    double dAlphaDD = ptSIParams->dMDash*sqrt(x);
+    double dBetaDD  = ptSIParams->dV*x;
+    double dLogP0   = dutils.logLikelihood(0, dAlphaDD, dBetaDD, ptSIParams->dNu);
+    
+    return (1.0 - exp(dLogP0)) - ptSIParams->dC;
+}
+/***********************************************************************/
 double fMu_igrarefaction(double x, void* pvParams)
 {
     t_IGParams* ptIGParams = (t_IGParams *) pvParams;
@@ -194,7 +206,7 @@ double DiversityUtils::calcMu(void *pvParams)
         t_IGParams* ptIGParams = (t_IGParams *) pvParams;
         solveF(0, 1.0e7, ptIGParams, 1.0e-7, &dLogMu);
         return exp(dLogMu);
-    }else if (method == "igrarefaction") {
+    }else if ((method == "igrarefaction") || (method == "sirarefaction")) {
         t_IGParams* ptIGParams = (t_IGParams *) pvParams;
         solveF(1.0, 1.0e10, ptIGParams, 1.0e-7, &dLogMu);
         return dLogMu;
@@ -394,6 +406,7 @@ int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, d
     if (method == "igrarefaction") {  F.function = &fMu_igrarefaction; }
     else if (method == "lnrarefaction") {  F.function = &fMu_lnrarefaction; }
     else if (method == "lsrarefaction") {  F.function = &fMu_lsrarefaction; }
+    else if (method == "sirarefaction") {  F.function = &fMu_sirarefaction; }
     F.params = params;
     
     T = gsl_root_fsolver_brent;

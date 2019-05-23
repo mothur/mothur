@@ -43,6 +43,8 @@
 		4815BEBE2295A02800677EE2 /* diversityutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E7E0A42278AD4800B74910 /* diversityutils.cpp */; };
 		4815BEC12295CE6800677EE2 /* siabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBF2295CE6800677EE2 /* siabundance.cpp */; };
 		4815BEC22295CE6800677EE2 /* siabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEBF2295CE6800677EE2 /* siabundance.cpp */; };
+		4815BEC52296F19500677EE2 /* sirarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC32296F19500677EE2 /* sirarefaction.cpp */; };
+		4815BEC62296F19500677EE2 /* sirarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC32296F19500677EE2 /* sirarefaction.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
@@ -935,6 +937,8 @@
 		4815BEBB2293189600677EE2 /* lsrarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lsrarefaction.hpp; path = source/calculators/lsrarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		4815BEBF2295CE6800677EE2 /* siabundance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = siabundance.cpp; path = source/calculators/siabundance.cpp; sourceTree = SOURCE_ROOT; };
 		4815BEC02295CE6800677EE2 /* siabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = siabundance.hpp; path = source/calculators/siabundance.hpp; sourceTree = SOURCE_ROOT; };
+		4815BEC32296F19500677EE2 /* sirarefaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sirarefaction.cpp; path = source/calculators/sirarefaction.cpp; sourceTree = SOURCE_ROOT; };
+		4815BEC42296F19500677EE2 /* sirarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sirarefaction.hpp; path = source/calculators/sirarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2089,6 +2093,8 @@
 				4815BEBB2293189600677EE2 /* lsrarefaction.hpp */,
 				4815BEBF2295CE6800677EE2 /* siabundance.cpp */,
 				4815BEC02295CE6800677EE2 /* siabundance.hpp */,
+				4815BEC32296F19500677EE2 /* sirarefaction.cpp */,
+				4815BEC42296F19500677EE2 /* sirarefaction.hpp */,
 				483A9BAC225BBE55006102DF /* metroig.cpp */,
 				483A9BAD225BBE55006102DF /* metroig.hpp */,
 				4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */,
@@ -3139,6 +3145,7 @@
 				481FB5CC1AC1B74F0076CFF3 /* heatmapsimcommand.cpp in Sources */,
 				481FB54C1AC1B62D0076CFF3 /* manhattan.cpp in Sources */,
 				481FB5E41AC1B77E0076CFF3 /* mimarksattributescommand.cpp in Sources */,
+				4815BEC62296F19500677EE2 /* sirarefaction.cpp in Sources */,
 				481FB5C11AC1B74F0076CFF3 /* getlistcountcommand.cpp in Sources */,
 				481FB57C1AC1B6EA0076CFF3 /* structkulczynski.cpp in Sources */,
 				481FB5BF1AC1B74F0076CFF3 /* getmimarkspackagecommand.cpp in Sources */,
@@ -3686,6 +3693,7 @@
 				A7E9B94912D37EC400DA6239 /* sharedcommand.cpp in Sources */,
 				A7E9B94A12D37EC400DA6239 /* sharedjabund.cpp in Sources */,
 				A7E9B94B12D37EC400DA6239 /* sharedjackknife.cpp in Sources */,
+				4815BEC52296F19500677EE2 /* sirarefaction.cpp in Sources */,
 				A7E9B94C12D37EC400DA6239 /* sharedjclass.cpp in Sources */,
 				A7E9B94D12D37EC400DA6239 /* sharedjest.cpp in Sources */,
 				4809ECA12280898E00B4D0E5 /* igrarefaction.cpp in Sources */,

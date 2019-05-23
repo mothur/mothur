@@ -1,14 +1,15 @@
 //
-//  lsrarefaction.cpp
+//  sirarefaction.cpp
 //  Mothur
 //
-//  Created by Sarah Westcott on 5/20/19.
+//  Created by Sarah Westcott on 5/23/19.
 //  Copyright © 2019 Schloss Lab. All rights reserved.
 //
 
-#include "lsrarefaction.hpp"
+#include "sirarefaction.hpp"
+
 /***********************************************************************/
-int compare_doubles2(const void* a, const void* b)
+int compare_doubles3(const void* a, const void* b)
 {
     double* arg1 = (double *) a;
     double* arg2 = (double *) b;
@@ -17,14 +18,14 @@ int compare_doubles2(const void* a, const void* b)
     else return 1;
 }
 /***********************************************************************/
-vector<double> LSRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
+vector<double> SIRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
     try {
         t_Data   tData;
         vector<double> results;
         
 #ifdef USE_GSL
         
-        DiversityUtils dutils("lsrarefaction");
+        DiversityUtils dutils("sirarefaction");
         
         dutils.loadAbundance(&tData, rank);
         
@@ -54,7 +55,7 @@ vector<double> LSRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         
         for(int i = 0; i < nSamples; i++){ adMu[i] = ((double) sampled)*dutils.calcMu(&atLSParams[i]); }
         
-        qsort(adMu, nSamples, sizeof(double), compare_doubles2);
+        qsort(adMu, nSamples, sizeof(double), compare_doubles3);
         
         dLower  = gsl_stats_quantile_from_sorted_data(adMu, 1, nSamples, 0.025);
         dMedian = gsl_stats_quantile_from_sorted_data(adMu, 1, nSamples, 0.5);
@@ -64,11 +65,9 @@ vector<double> LSRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         if (isnan(dMedian) || isinf(dMedian))   { dMedian = 0;  }
         if (isnan(dUpper) || isinf(dUpper))     { dUpper = 0;   }
         
-        m->mothurOut("\nLSRarefaction - d_Lower = " + toString(dLower) + " d_Median = " + toString(dMedian) + " d_Upper = " + toString(dUpper) + "\n\n");
+        m->mothurOut("\nSIRarefaction - d_Lower = " + toString(dLower) + " d_Median = " + toString(dMedian) + " d_Upper = " + toString(dUpper) + "\n\n");
         
         results.push_back(dLower); results.push_back(dMedian); results.push_back(dUpper);
-        
-        //printf("%.2e:%.2e:%.2e ", dLower, dMedian, dUpper);
         
         free(adMu);
         
@@ -78,10 +77,8 @@ vector<double> LSRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         return results;
     }
     catch(exception& e) {
-        m->errorOut(e, "LSRarefaction", "getValues");
+        m->errorOut(e, "SIRarefaction", "getValues");
         exit(1);
     }
 }
 /***********************************************************************/
-
-

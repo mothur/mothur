@@ -62,6 +62,7 @@ private:
     string runLSRarefaction(SAbundVector*& sabund, string fileRoot);
     int runLSAbund(SAbundVector*& sabund, string fileRoot);
     string runSIAbundance(SAbundVector*& sabund, string fileRoot);
+    string runSIRarefaction(SAbundVector*& sabund, string fileRoot);
     
 };
 //*******************************************************
