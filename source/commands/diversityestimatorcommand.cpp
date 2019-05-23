@@ -571,7 +571,7 @@ string EstimatorSingleCommand::runIGRarefaction(SAbundVector*& sabund, string fi
             fillSampling(burnValue, burnSampleValue);
         }
         
-        vector<double> results = igRare.getValues(sabund, sampling);
+        vector<double> results = igRare.getValues(sabund->getNumSeqs(), sampling);
         
         for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  }
         out << endl;
@@ -612,7 +612,7 @@ string EstimatorSingleCommand::runLNRarefaction(SAbundVector*& sabund, string fi
             fillSampling(burnValue, burnSampleValue);
         }
         
-        vector<double> results = lnRare.getValues(sabund, sampling);
+        vector<double> results = lnRare.getValues(sabund->getNumSeqs(), sampling);
         
         for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  }
         out << endl;
@@ -653,7 +653,7 @@ string EstimatorSingleCommand::runLSRarefaction(SAbundVector*& sabund, string fi
             fillSampling(burnValue, burnSampleValue, true);
         }
         
-        vector<double> results = lsRare.getValues(sabund, sampling);
+        vector<double> results = lsRare.getValues(sabund->getNumSeqs(), sampling);
         
         for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  }
         out << endl;
@@ -694,7 +694,7 @@ string EstimatorSingleCommand::runSIRarefaction(SAbundVector*& sabund, string fi
             fillSampling(burnValue, burnSampleValue, true);
         }
         
-        vector<double> results = siRare.getValues(sabund, sampling);
+        vector<double> results = siRare.getValues(sabund->getNumSeqs(), sampling);
         
         for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  }
         out << endl;
@@ -733,7 +733,7 @@ string EstimatorSingleCommand::runSIAbundance(SAbundVector*& sabund, string file
             fillSampling(burnValue, burnSampleValue, true);
         }
         
-        vector<double> results = siabund.getValues(sabund, sampling);
+        vector<double> results = siabund.getValues(sabund->getMaxRank(), sampling);
         
         for (int i = 0; i < results.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -774,7 +774,7 @@ string EstimatorSingleCommand::runSIShift(SAbundVector*& sabund, string fileRoot
             fillSampling(burnValue, burnSampleValue, true);
         }
         
-        vector<double> results = sishift.getValues(sabund, sampling);
+        vector<double> results = sishift.getValues(sabund->getNumSeqs(), sampling);
         
         for (int i = 0; i < results.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -907,7 +907,7 @@ int EstimatorSingleCommand::runIGAbund(SAbundVector*& sabund, string fileRoot) {
         
         IGAbundance igAbund;
         
-        vector<double> results = igAbund.getValues(sabund, sampling);
+        vector<double> results = igAbund.getValues(sabund->getMaxRank(), sampling);
         
         for (int i = 0; i < results.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -948,7 +948,7 @@ int EstimatorSingleCommand::runLSAbund(SAbundVector*& sabund, string fileRoot) {
         
         LSAbundance lsAbund;
         
-        vector<double> results = lsAbund.getValues(sabund, sampling);
+        vector<double> results = lsAbund.getValues(sabund->getMaxRank(), sampling);
         
         for (int i = 0; i < results.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -987,9 +987,9 @@ int EstimatorSingleCommand::runLNAbund(SAbundVector*& sabund, string fileRoot) {
             fillSampling(burnValue, burnSampleValue);
         }
         
-        IGAbundance igAbund;
+        LNAbundance lnAbund;
         
-        vector<double> results = igAbund.getValues(sabund, sampling);
+        vector<double> results = lnAbund.getValues(sabund->getMaxRank(), sampling);
         
         for (int i = 0; i < results.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -1030,7 +1030,7 @@ int EstimatorSingleCommand::runLNShift(SAbundVector*& sabund, string fileRoot) {
         
         LNShift lnShift;
         
-        vector<double> results = lnShift.getValues(sabund, sampling);
+        vector<double> results = lnShift.getValues(sabund->getNumSeqs(), sampling);
         
         for (int i = 0; i < results.size(); i++) {
             if (m->getControl_pressed()) { break; }

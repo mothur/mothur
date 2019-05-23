@@ -9,11 +9,12 @@
 #include "siabundance.hpp"
 
 /***********************************************************************/
+SIAbundance::SIAbundance() : DiversityCalculator(true) {}
+/***********************************************************************/
 
-vector<double> SIAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sampling) {
+vector<double> SIAbundance::getValues(int nMax, vector<mcmcSample>& sampling) { //int nMax = rank->getMaxRank();
     try {
         
-        int nMax = rank->getMaxRank();
         nMax = floor(pow(2.0,ceil(log((double) nMax)/log(2.0)) + 2.0) + 1.0e-7);
         
         vector<double> results; results.resize(nMax, 0.0);

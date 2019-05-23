@@ -10,22 +10,22 @@
 #define lnabundace_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class LNAbundance   {
+class LNAbundance : public DiversityCalculator  {
     
 public:
     
-    LNAbundance() { m = MothurOut::getInstance(); }
+    LNAbundance();
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
+    vector<double> getValues(int mr, vector<mcmcSample>& sampling);
     
-    bool requiresSample() { return true; }
     
 private:
-    Utils util;
-    MothurOut* m;
+    
+    
     
 };
 

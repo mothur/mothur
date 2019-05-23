@@ -10,22 +10,20 @@
 #define lsrarefaction_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class LSRarefaction   {
+class LSRarefaction  : public DiversityCalculator  {
     
 public:
     
-    LSRarefaction(double c) : coverage(c) { m = MothurOut::getInstance(); }
+    LSRarefaction(double c);
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
+    vector<double> getValues(int ns, vector<mcmcSample>& sampling);
     
-    bool requiresSample() { return true; }
     
 private:
-    Utils util;
-    MothurOut* m;
     
     double coverage;
     

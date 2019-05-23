@@ -943,6 +943,7 @@
 		4815BEC42296F19500677EE2 /* sirarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sirarefaction.hpp; path = source/calculators/sirarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		4815BEC722970FA700677EE2 /* sishift.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sishift.cpp; path = source/calculators/sishift.cpp; sourceTree = SOURCE_ROOT; };
 		4815BEC822970FA700677EE2 /* sishift.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sishift.hpp; path = source/calculators/sishift.hpp; sourceTree = SOURCE_ROOT; };
+		4815BECB229717E100677EE2 /* diversitycalc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = diversitycalc.h; path = source/calculators/diversitycalc.h; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2728,6 +2729,7 @@
 				A7E9B66F12D37EC400DA6239 /* calculator.h */,
 				A7E9B6E212D37EC400DA6239 /* filters.h */,
 				A7E9B86112D37EC400DA6239 /* treecalculator.h */,
+				4815BECB229717E100677EE2 /* diversitycalc.h */,
 				484976DC22552BEA00F3A291 /* diversitycalcs */,
 				48E544691E9D17E000FF6AB8 /* clearcutcalcs */,
 				48E544671E9D14C500FF6AB8 /* distcalcs */,

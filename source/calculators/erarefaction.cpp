@@ -9,6 +9,8 @@
 #include "erarefaction.hpp"
 
 /***********************************************************************/
+ERarefaction::ERarefaction() : DiversityCalculator(true) {}
+/***********************************************************************/
 
 double ERarefaction::getValues(SAbundVector* rank, int n){
     try {

@@ -10,22 +10,22 @@
 #define sishift_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
+
 
 /***********************************************************************/
 
-class SIShift   {
+class SIShift : public DiversityCalculator  {
     
 public:
     
-    SIShift() { m = MothurOut::getInstance(); }
+    SIShift();
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
+    vector<double> getValues(int ns, vector<mcmcSample>& sampling);
     
-    bool requiresSample() { return true; }
     
 private:
-    Utils util;
-    MothurOut* m;
+    
     
 };
 

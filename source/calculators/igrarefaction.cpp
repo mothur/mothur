@@ -9,6 +9,8 @@
 #include "igrarefaction.hpp"
 
 /***********************************************************************/
+IGRarefaction::IGRarefaction(double c) : coverage(c), DiversityCalculator(true) {}
+/***********************************************************************/
 inline int compare_doubles1(const void* a, const void* b)
 {
     double* arg1 = (double *) a;
@@ -18,20 +20,15 @@ inline int compare_doubles1(const void* a, const void* b)
     else return 1;
 }
 /***********************************************************************/
-vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
+vector<double> IGRarefaction::getValues(int numSeqs, vector<mcmcSample>& sampling){  //numSeqs = rank->getNumSeqs(); //nj
     try {
-        t_Data   tData;
         vector<double> results;
         
 #ifdef USE_GSL
         
         DiversityUtils dutils("igrarefaction");
         
-        dutils.loadAbundance(&tData, rank);
-        
-        int sampled = rank->getNumSeqs(); //nj
         int nSamples = sampling.size();
-        
         double*     adMu = NULL;
         double dLower = 0.0, dMedian = 0.0, dUpper = 0.0;
         
@@ -52,7 +49,7 @@ vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         
         adMu = (double *) malloc(sizeof(double)*nSamples);
         
-        for(int i = 0; i < nSamples; i++){ adMu[i] = ((double) sampled)*dutils.calcMu(&atIGParams[i]); }
+        for(int i = 0; i < nSamples; i++){ adMu[i] = ((double) numSeqs)*dutils.calcMu(&atIGParams[i]); }
         
         qsort(adMu, nSamples, sizeof(double), compare_doubles1);
         
@@ -69,8 +66,6 @@ vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         results.push_back(dLower); results.push_back(dMedian); results.push_back(dUpper);
         
         free(adMu);
-        
-        dutils.freeAbundance(&tData);
 #endif
         
         return results;

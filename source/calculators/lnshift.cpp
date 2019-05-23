@@ -9,8 +9,10 @@
 #include "lnshift.hpp"
 
 /***********************************************************************/
+LNShift::LNShift() : DiversityCalculator(true) {}
+/***********************************************************************/
 
-vector<double> LNShift::getValues(SAbundVector* rank, vector<mcmcSample>& sampling) {
+vector<double> LNShift::getValues(int numSeqs, vector<mcmcSample>& sampling) {
     try {
         
         int nMax = 100000; //nMax
@@ -26,7 +28,7 @@ vector<double> LNShift::getValues(SAbundVector* rank, vector<mcmcSample>& sampli
         
         gsl_set_error_handler_off();
         
-        double dShift = log(5.0e5/(double)rank->getNumSeqs());
+        double dShift = log(5.0e5/(double)numSeqs);
         
         for(int i = 0; i < sampling.size(); i++) {
             

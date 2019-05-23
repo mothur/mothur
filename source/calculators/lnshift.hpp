@@ -10,22 +10,20 @@
 #define lnshift_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class LNShift   {
+class LNShift : public DiversityCalculator  {
     
 public:
     
-    LNShift() { m = MothurOut::getInstance(); }
+    LNShift();
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
-    
-    bool requiresSample() { return true; }
+    vector<double> getValues(int ns, vector<mcmcSample>& sampling);
     
 private:
-    Utils util;
-    MothurOut* m;
+   
     
 };
 

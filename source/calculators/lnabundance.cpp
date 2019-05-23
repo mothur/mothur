@@ -9,11 +9,11 @@
 #include "lnabundance.hpp"
 
 /***********************************************************************/
+LNAbundance::LNAbundance() : DiversityCalculator(true) {}
+/***********************************************************************/
 
-vector<double> LNAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sampling) {
+vector<double> LNAbundance::getValues(int maxRank, vector<mcmcSample>& sampling) { //rank->getMaxRank(); //nMax
     try {
-        
-        int maxRank = rank->getMaxRank(); //nMax
         maxRank = floor(pow(2.0,ceil(log((double) maxRank)/log(2.0)) + 2.0) + 1.0e-7);
         
         vector<double> results; results.resize(maxRank, 0.0);

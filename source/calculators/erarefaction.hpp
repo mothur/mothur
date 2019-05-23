@@ -9,23 +9,21 @@
 #ifndef erarefaction_hpp
 #define erarefaction_hpp
 
-#include "mothurout.h"
-#include "sabundvector.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class ERarefaction   {
+class ERarefaction : public DiversityCalculator   {
     
 public:
     
-    ERarefaction(){ m = MothurOut::getInstance(); }
+    ERarefaction();
     double getValues(SAbundVector* rank, int n);
-    bool requiresSample() { return false; }
+    
     
     
 private:
-    Utils util;
-    MothurOut* m;
+    
 };
 
 /***********************************************************************/

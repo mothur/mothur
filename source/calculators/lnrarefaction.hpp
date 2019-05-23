@@ -10,22 +10,20 @@
 #define lnrarefaction_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class LNRarefaction   {
+class LNRarefaction : public DiversityCalculator   {
     
 public:
     
-    LNRarefaction(double c) : coverage(c) { m = MothurOut::getInstance(); }
+    LNRarefaction(double c);// : coverage(c) { m = MothurOut::getInstance(); }
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
+    vector<double> getValues(int ns, vector<mcmcSample>& sampling);
     
-    bool requiresSample() { return true; }
     
 private:
-    Utils util;
-    MothurOut* m;
     
     double coverage;
     

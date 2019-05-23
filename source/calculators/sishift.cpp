@@ -9,8 +9,10 @@
 #include "sishift.hpp"
 
 /***********************************************************************/
+SIShift::SIShift() : DiversityCalculator(true) {}
+/***********************************************************************/
 
-vector<double> SIShift::getValues(SAbundVector* rank, vector<mcmcSample>& sampling) {
+vector<double> SIShift::getValues(int numSeqs, vector<mcmcSample>& sampling) {
     try {
         
         int nMax = 1000; //nMax
@@ -27,7 +29,7 @@ vector<double> SIShift::getValues(SAbundVector* rank, vector<mcmcSample>& sampli
         
         gsl_set_error_handler_off();
         
-        double dShift = 5.0e5/(double) rank->getNumSeqs();
+        double dShift = 5.0e5/(double) numSeqs;
         
         for(int i = 0; i < nSamples; i++) {
             

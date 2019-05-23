@@ -8,13 +8,13 @@
 
 #include "lsabundance.hpp"
 
-
+/***********************************************************************/
+LSAbundance::LSAbundance() : DiversityCalculator(true) {}
 /***********************************************************************/
 
-vector<double> LSAbundance::getValues(SAbundVector* rank, vector<mcmcSample>& sampling) {
+vector<double> LSAbundance::getValues(int nMax, vector<mcmcSample>& sampling) { //int nMax = rank->getMaxRank();
     try {
         
-        int nMax = rank->getMaxRank();
         nMax = floor(pow(2.0,ceil(log((double) nMax)/log(2.0)) + 2.0) + 1.0e-7);
         
         vector<double> results; results.resize(nMax, 0.0);

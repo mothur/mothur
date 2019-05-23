@@ -10,22 +10,20 @@
 #define sirarefaction_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class SIRarefaction   {
+class SIRarefaction : public DiversityCalculator  {
     
 public:
     
-    SIRarefaction(double c) : coverage(c) { m = MothurOut::getInstance(); }
+    SIRarefaction(double c); // : coverage(c) { m = MothurOut::getInstance(); }
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
+    vector<double> getValues(int ns, vector<mcmcSample>& sampling);
     
-    bool requiresSample() { return true; }
     
 private:
-    Utils util;
-    MothurOut* m;
     
     double coverage;
     

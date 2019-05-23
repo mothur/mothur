@@ -10,18 +10,17 @@
 #define igabundance_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class IGAbundance   {
+class IGAbundance : public DiversityCalculator {
     
 public:
     
-    IGAbundance() { m = MothurOut::getInstance(); }
+    IGAbundance();
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
-    
-    bool requiresSample() { return true; }
+    vector<double> getValues(int mr, vector<mcmcSample>& sampling);
     
 private:
     Utils util;

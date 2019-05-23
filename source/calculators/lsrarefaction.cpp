@@ -7,6 +7,10 @@
 //
 
 #include "lsrarefaction.hpp"
+
+
+/***********************************************************************/
+LSRarefaction::LSRarefaction(double c) : coverage(c), DiversityCalculator(true) {}
 /***********************************************************************/
 int compare_doubles2(const void* a, const void* b)
 {
@@ -17,20 +21,15 @@ int compare_doubles2(const void* a, const void* b)
     else return 1;
 }
 /***********************************************************************/
-vector<double> LSRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
+vector<double> LSRarefaction::getValues(int numSeqs, vector<mcmcSample>& sampling){ //rank->getNumSeqs(); //nj
     try {
-        t_Data   tData;
         vector<double> results;
         
 #ifdef USE_GSL
         
         DiversityUtils dutils("lsrarefaction");
         
-        dutils.loadAbundance(&tData, rank);
-        
-        int sampled = rank->getNumSeqs(); //nj
         int nSamples = sampling.size();
-        
         double*     adMu = NULL;
         double dLower = 0.0, dMedian = 0.0, dUpper = 0.0;
         
@@ -52,7 +51,7 @@ vector<double> LSRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         
         adMu = (double *) malloc(sizeof(double)*nSamples);
         
-        for(int i = 0; i < nSamples; i++){ adMu[i] = ((double) sampled)*dutils.calcMu(&atLSParams[i]); }
+        for(int i = 0; i < nSamples; i++){ adMu[i] = ((double) numSeqs)*dutils.calcMu(&atLSParams[i]); }
         
         qsort(adMu, nSamples, sizeof(double), compare_doubles2);
         
@@ -72,7 +71,6 @@ vector<double> LSRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         
         free(adMu);
         
-        dutils.freeAbundance(&tData);
 #endif
         
         return results;

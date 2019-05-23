@@ -9,6 +9,8 @@
 #include "sirarefaction.hpp"
 
 /***********************************************************************/
+SIRarefaction::SIRarefaction(double c) : coverage(c), DiversityCalculator(true) {}
+/***********************************************************************/
 int compare_doubles3(const void* a, const void* b)
 {
     double* arg1 = (double *) a;
@@ -18,20 +20,16 @@ int compare_doubles3(const void* a, const void* b)
     else return 1;
 }
 /***********************************************************************/
-vector<double> SIRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
+vector<double> SIRarefaction::getValues(int numSeqs, vector<mcmcSample>& sampling){ //int sampled = rank->getNumSeqs(); //nj
     try {
-        t_Data   tData;
+        
         vector<double> results;
         
 #ifdef USE_GSL
         
         DiversityUtils dutils("sirarefaction");
         
-        dutils.loadAbundance(&tData, rank);
-        
-        int sampled = rank->getNumSeqs(); //nj
         int nSamples = sampling.size();
-        
         double*     adMu = NULL;
         double dLower = 0.0, dMedian = 0.0, dUpper = 0.0;
         
@@ -53,7 +51,7 @@ vector<double> SIRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         
         adMu = (double *) malloc(sizeof(double)*nSamples);
         
-        for(int i = 0; i < nSamples; i++){ adMu[i] = ((double) sampled)*dutils.calcMu(&atLSParams[i]); }
+        for(int i = 0; i < nSamples; i++){ adMu[i] = ((double) numSeqs)*dutils.calcMu(&atLSParams[i]); }
         
         qsort(adMu, nSamples, sizeof(double), compare_doubles3);
         
@@ -70,8 +68,6 @@ vector<double> SIRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         results.push_back(dLower); results.push_back(dMedian); results.push_back(dUpper);
         
         free(adMu);
-        
-        dutils.freeAbundance(&tData);
 #endif
         
         return results;

@@ -10,22 +10,20 @@
 #define siabundance_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class SIAbundance   {
+class SIAbundance : public DiversityCalculator  {
     
 public:
     
-    SIAbundance() { m = MothurOut::getInstance(); }
+    SIAbundance();
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
-    
-    bool requiresSample() { return true; }
+    vector<double> getValues(int mr, vector<mcmcSample>& sampling);
     
 private:
-    Utils util;
-    MothurOut* m;
+    
     
 };
 
