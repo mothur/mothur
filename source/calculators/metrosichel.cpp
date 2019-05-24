@@ -8,6 +8,12 @@
 
 #include "metrosichel.hpp"
 
+/***********************************************************************/
+MetroSichel::MetroSichel(double siga, double sigb, double sigg, double sigS, int n, string st) : sigmaA(siga), sigmaB(sigb), sigmaG(sigg), sigmaS(sigS), nIters(n), outFileStub(st), DiversityCalculator(false) {}
+/***********************************************************************/
+
+
+
 #ifdef USE_GSL
 /***********************************************************************/
 double nLogLikelihood3(const gsl_vector * x, void * params)

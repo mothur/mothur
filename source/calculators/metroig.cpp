@@ -10,11 +10,12 @@
 
 /*constants for simplex minimisation*/
 
+/***********************************************************************/
+MetroIG::MetroIG(double sigA, double sigB, double sigS, int n, string stub) : sigmaA(sigA), sigmaB(sigB), sigmaS(sigS), nIters(n), outFileStub(stub), DiversityCalculator(false) {}
+/***********************************************************************/
 
 #ifdef USE_GSL
 
-
-/***********************************************************************/
 double nLogLikelihood0(const gsl_vector * x, void * params)
 {
     double dAlpha  = gsl_vector_get(x,0), dBeta = gsl_vector_get(x,1);

@@ -10,6 +10,10 @@
 
 /*constants for calculated compound Poisson lognormal*/
 
+/***********************************************************************/
+MetroLogNormal::MetroLogNormal(double sigx, double sigy, double sigS, int n, string st) : sigmaX(sigx), sigmaY(sigy), sigmaS(sigS), nIters(n), outFileStub(st), DiversityCalculator(false) {}
+/***********************************************************************/
+
 
 #ifdef USE_GSL
 /***********************************************************************/

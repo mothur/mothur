@@ -8,6 +8,10 @@
 
 #include "metrologstudent.hpp"
 
+/***********************************************************************/
+MetroLogStudent::MetroLogStudent(double sigm, double sigv, double sign, double sigS, int n, string st) : sigmaM(sigm), sigmaV(sigv), sigmaN(sign), sigmaS(sigS), nIters(n), outFileStub(st), DiversityCalculator(false) {}
+/***********************************************************************/
+
 
 #ifdef USE_GSL
 /***********************************************************************/

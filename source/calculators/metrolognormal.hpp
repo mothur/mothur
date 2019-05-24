@@ -10,27 +10,23 @@
 #define metrolognormal_h
 
 #include "diversityutils.hpp"
-
+#include "diversitycalc.h"
 
 //MetroLogNormal - fits a compound Poisson Log-Normal distn to a sample
 /***********************************************************************/
 
-class MetroLogNormal  {
+class MetroLogNormal : public DiversityCalculator {
     
 public:
     
-    MetroLogNormal(double sigx, double sigy, double sigS, int n, string st) : sigmaX(sigx), sigmaY(sigy), sigmaS(sigS), nIters(n), outFileStub(st) { m = MothurOut::getInstance(); }
+    MetroLogNormal(double sigx, double sigy, double sigS, int n, string st); 
     ~MetroLogNormal() {}
     
     vector<string> getValues(SAbundVector* rank);
     
-    bool requiresSample() { return false; }
-    
+    string getTag() { return "ln"; }
     
 private:
-    
-    Utils util;
-    MothurOut* m;
     
     double sigmaX, sigmaY, sigmaS;
     int nIters;

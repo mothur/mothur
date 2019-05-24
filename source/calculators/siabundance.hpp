@@ -22,6 +22,8 @@ public:
     
     vector<double> getValues(int mr, vector<mcmcSample>& sampling);
     
+    string getTag() { return "si"; }
+    
 private:
     
     

@@ -21,6 +21,7 @@ public:
     DiversityCalculator(bool rs){ m = MothurOut::getInstance();  requiresSamples = rs; }
     virtual ~DiversityCalculator(){};
     
+    virtual string getTag() = 0;
     virtual bool requiresSample() { return requiresSamples; }
     
 protected:

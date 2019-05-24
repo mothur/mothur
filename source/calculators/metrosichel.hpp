@@ -10,27 +10,24 @@
 #define metrosichel_hpp
 
 #include "diversityutils.hpp"
-
+#include "diversitycalc.h"
 
 //MetroSichel - Fits the compound Poisson Sichel dist
 /***********************************************************************/
 
-class MetroSichel  {
+class MetroSichel : public DiversityCalculator {
     
 public:
     
-    MetroSichel(double siga, double sigb, double sigg, double sigS, int n, string st) : sigmaA(siga), sigmaB(sigb), sigmaG(sigg), sigmaS(sigS), nIters(n), outFileStub(st) { m = MothurOut::getInstance(); }
+    MetroSichel(double siga, double sigb, double sigg, double sigS, int n, string st);
     ~MetroSichel() {}
     
     vector<string> getValues(SAbundVector* rank);
     
-    bool requiresSample() { return false; }
+    string getTag() { return "si"; }
     
     
 private:
-    
-    Utils util;
-    MothurOut* m;
     
     double sigmaA, sigmaB, sigmaG, sigmaS;
     int nIters;

@@ -20,7 +20,7 @@ public:
     ERarefaction();
     double getValues(SAbundVector* rank, int n);
     
-    
+    string getTag() { return "e"; }
     
 private:
     
