@@ -23,12 +23,17 @@ public:
     
     virtual string getTag() = 0;
     virtual bool requiresSample() { return requiresSamples; }
+    virtual vector<double> getValues(int, vector<mcmcSample>&)  { return results;   }
+    virtual vector<string> getValues(SAbundVector* rank)        { return outputs;   }
+    virtual int getValues(SAbundVector* rank, vector<double>& ) { return 0;         }
     
 protected:
     Utils util;
     MothurOut* m;
     
     bool requiresSamples;
+    vector<double> results;
+    vector<string> outputs;
     
     
 };

@@ -23,7 +23,6 @@ int compare_doubles3(const void* a, const void* b)
 vector<double> SIRarefaction::getValues(int numSeqs, vector<mcmcSample>& sampling){ //int sampled = rank->getNumSeqs(); //nj
     try {
         
-        vector<double> results;
         
 #ifdef USE_GSL
         

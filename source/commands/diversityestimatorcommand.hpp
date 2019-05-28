@@ -42,28 +42,20 @@ private:
     int iters, burn, burnSample;
     vector<string> outputNames;
     set<string> labels; //holds labels to be used
-    vector<string>  Estimators, groups;
-    vector<mcmcSample> sampling;
+    vector<string> groups, rarefactCalcs, abundCalcs, smallBurn;
+    map<string, vector<mcmcSample> > sampling;
+    map<string, vector<mcmcSample> > ::iterator it;
+    set<string> samplingCalcs;
     
-    vector<string> parseSharedFile(string);
     int fillSampling(int, int, bool filldNu=false);
+    int processSingleSample();
+    int processSharedFile();
+    int processShared(SharedRAbundVectors*& shared, vector<ofstream>& out, string fileRoot);
+    int processSingle(SAbundVector*&, string, vector<ofstream>&, string);
     
-    int process(SAbundVector*&, string);
-    string runErarefaction(SAbundVector*&, string);
-    string runMetroIG(SAbundVector*&, string);
-    string runMetroLogNormal(SAbundVector*&, string);
-    string runMetroLogStudent(SAbundVector*&, string);
-    string runMetroSichel(SAbundVector*&, string);
-    int runIGAbund(SAbundVector*&, string);
-    string runIGRarefaction(SAbundVector*& sabund, string fileRoot);
-    int runLNAbund(SAbundVector*& sabund, string fileRoot);
-    int runLNShift(SAbundVector*& sabund, string fileRoot);
-    string runLNRarefaction(SAbundVector*& sabund, string fileRoot);
-    string runLSRarefaction(SAbundVector*& sabund, string fileRoot);
-    int runLSAbund(SAbundVector*& sabund, string fileRoot);
-    string runSIAbundance(SAbundVector*& sabund, string fileRoot);
-    string runSIRarefaction(SAbundVector*& sabund, string fileRoot);
-    string runSIShift(SAbundVector*& sabund, string fileRoot);
+    int runRarefactCalcs(int numSeqs, string groupName, ofstream& out);
+    vector<string> runSamplingCalcs(SAbundVector*&, string);
+    vector<double> runAbundCalcs(SAbundVector*&, string groupName);
     
 };
 //*******************************************************

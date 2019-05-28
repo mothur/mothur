@@ -18,7 +18,7 @@ vector<double> SIShift::getValues(int numSeqs, vector<mcmcSample>& sampling) {
         int nMax = 1000; //nMax
         nMax = floor(pow(2.0,ceil(log((double) nMax)/log(2.0)) + 2.0) + 1.0e-7);
         
-        vector<double> results; results.resize(nMax, 0.0);
+        results.resize(nMax, 0.0);
         int nSamples = (int)sampling.size();
         
         if (nSamples == 0) {  return results; }

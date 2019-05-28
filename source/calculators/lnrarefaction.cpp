@@ -22,7 +22,6 @@ inline int compare_doubles(const void* a, const void* b)
 /***********************************************************************/
 vector<double> LNRarefaction::getValues(int numSeqs, vector<mcmcSample>& sampling){ //rank->getNumSeqs(); //nj
     try {
-        vector<double> results;
         
 #ifdef USE_GSL
         

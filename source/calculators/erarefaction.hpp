@@ -17,13 +17,14 @@ class ERarefaction : public DiversityCalculator   {
     
 public:
     
-    ERarefaction();
-    double getValues(SAbundVector* rank, int n);
+    ERarefaction(int inc);
+    int getValues(SAbundVector* rank, vector<double>&);
     
     string getTag() { return "e"; }
     
 private:
     
+    int increment;
 };
 
 /***********************************************************************/

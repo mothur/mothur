@@ -17,7 +17,7 @@ vector<double> LNShift::getValues(int numSeqs, vector<mcmcSample>& sampling) {
         
         int nMax = 100000; //nMax
         
-        vector<double> results; results.resize(nMax, 0.0);
+        results.resize(nMax, 0.0);
         int nSamples = sampling.size();
         
         if (nSamples == 0) {  return results; }

@@ -215,7 +215,6 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
         dutils.freeAbundance(&tData);
 #endif
         
-        vector<string> outputs;
         outputs.push_back(outFileStub + "_0.sample");
         outputs.push_back(outFileStub + "_1.sample");
         outputs.push_back(outFileStub + "_2.sample");

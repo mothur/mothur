@@ -22,7 +22,6 @@ inline int compare_doubles1(const void* a, const void* b)
 /***********************************************************************/
 vector<double> IGRarefaction::getValues(int numSeqs, vector<mcmcSample>& sampling){  //numSeqs = rank->getNumSeqs(); //nj
     try {
-        vector<double> results;
         
 #ifdef USE_GSL
         

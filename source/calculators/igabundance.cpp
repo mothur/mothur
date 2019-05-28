@@ -16,7 +16,7 @@ vector<double> IGAbundance::getValues(int maxRank, vector<mcmcSample>& sampling)
     try {
         maxRank = floor(pow(2.0,ceil(log((double) maxRank)/log(2.0)) + 2.0) + 1.0e-7); //nMax
         
-        vector<double> results; results.resize(maxRank, 0.0);
+        results.resize(maxRank, 0.0);
         int nSamples = sampling.size();
         
         if (nSamples == 0) {  return results; }

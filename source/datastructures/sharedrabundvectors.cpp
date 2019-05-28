@@ -640,7 +640,18 @@ SAbundVector SharedRAbundVectors::getSAbundVector(){
         return rav.getSAbundVector();
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedRAbundVector", "getSharedRAbundVectors");
+        m->errorOut(e, "SharedRAbundVector", "getSAbundVector");
+        exit(1);
+    }
+}
+/***********************************************************************/
+SAbundVector SharedRAbundVectors::getSAbundVector(string group){
+    try {
+        RAbundVector rav = getRAbundVector(group);
+        return rav.getSAbundVector();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVector", "getSAbundVector");
         exit(1);
     }
 }
