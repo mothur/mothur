@@ -37,7 +37,7 @@ public:
     int bessel(double* pdResult, int n, double dAlpha, double dBeta, double);
     double sd(int n, double dAlpha, double dBeta, double);
     int minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const gsl_vector*, void* params), double, double, double);
-    void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));
+    vector<double> mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));
     void outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(const gsl_vector*, void* params));
     void getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* pnSDash, int nS, t_Params *ptParams);
     int solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve);
@@ -59,11 +59,12 @@ public:
     void loadAbundance(t_Data *ptData, SAbundVector* rank);
     void freeAbundance(t_Data *ptData);
     
+    MothurOut* m;
     
 private:
     
     Utils util;
-    MothurOut* m;
+    
     string method;
     
 };

@@ -11,7 +11,7 @@
 /*constants for simplex minimisation*/
 
 /***********************************************************************/
-MetroIG::MetroIG(double sigA, double sigB, double sigS, int n, string stub) : sigmaA(sigA), sigmaB(sigB), sigmaS(sigS), nIters(n), outFileStub(stub), DiversityCalculator(false) {}
+MetroIG::MetroIG(int fi, double sigA, double sigB, double sigS, int n, string stub) : sigmaA(sigA), sigmaB(sigB), sigmaS(sigS), nIters(n), fitIters(fi), outFileStub(stub), DiversityCalculator(false) {}
 /***********************************************************************/
 
 #ifdef USE_GSL
@@ -32,6 +32,9 @@ double nLogLikelihood0(const gsl_vector * x, void * params)
     DiversityUtils dutils("metroig");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -69,6 +72,9 @@ double negLogLikelihood0(double dAlpha, double dBeta, int nS, void * params)
     DiversityUtils dutils("metroig");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -131,6 +137,8 @@ void* metropolis0 (void * pvInitMetro)
     /*now perform simple Metropolis algorithm*/
     while(nIter < ptParams->nIter){
         double dA = 0.0, dNLLDash = 0.0;
+        
+        if (dutils.m->getControl_pressed()) { break; }
         
         dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS, ptParams);
         
@@ -201,7 +209,30 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         
         dutils.outputResults(ptX, &tData, &nLogLikelihood0);
         
-        if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis0); }
+        if(tParams.nIter > 0){
+    
+            vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis0);
+            
+            if (fitIters != 0) {
+                int numTries = 1;
+                while ( ((acceptanceRates[0] < 0.455) || (acceptanceRates[0] > 0.555)) && (numTries < fitIters)) {
+                    if (m->getControl_pressed()) { break; }
+                    
+                    m->mothurOut("\nFit try: " + toString(numTries) + "\n");
+                    
+                    if (acceptanceRates[0] < 0.455) {
+                        double factor = 10.0 * fabs(0.5 - acceptanceRates[0]);
+                        tParams.dSigmaX /= factor; tParams.dSigmaY /= factor; tParams.dSigmaN /= factor;
+                    }else if (acceptanceRates[0] > 0.555) {
+                        double factor = 5.0 * abs(0.5 - acceptanceRates[0]);
+                        tParams.dSigmaX *= factor; tParams.dSigmaY *= factor; tParams.dSigmaN *= factor;
+                    }
+                    acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis0);
+                    numTries++;
+                }
+            }
+
+        }
         
         /*free up allocated memory*/
         gsl_vector_free(ptX);

@@ -39,7 +39,7 @@ private:
     bool abort, allLines, burnSampleSet, burnSet;
     string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile, samplefile;
     double freq, sigmaAlpha, sigmaBeta, sigmaS, sigmaN, coverage;
-    int iters, burn, burnSample;
+    int iters, burn, burnSample, fitIters;
     vector<string> outputNames;
     set<string> labels; //holds labels to be used
     vector<string> groups, rarefactCalcs, abundCalcs, smallBurn;

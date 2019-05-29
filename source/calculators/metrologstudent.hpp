@@ -19,7 +19,7 @@ class MetroLogStudent : public DiversityCalculator {
     
 public:
     
-    MetroLogStudent(double sigm, double sigv, double sign, double sigS, int n, string st);
+    MetroLogStudent(int fi, double sigm, double sigv, double sign, double sigS, int n, string st);
     ~MetroLogStudent() {}
     
     vector<string> getValues(SAbundVector* rank);
@@ -29,7 +29,7 @@ public:
 private:
     
     double sigmaM, sigmaV, sigmaN, sigmaS;
-    int nIters;
+    int nIters, fitIters;
     string outFileStub;
     
 };

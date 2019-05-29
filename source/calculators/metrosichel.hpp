@@ -19,7 +19,7 @@ class MetroSichel : public DiversityCalculator {
     
 public:
     
-    MetroSichel(double siga, double sigb, double sigg, double sigS, int n, string st);
+    MetroSichel(int af, double siga, double sigb, double sigg, double sigS, int n, string st);
     ~MetroSichel() {}
     
     vector<string> getValues(SAbundVector* rank);
@@ -30,7 +30,7 @@ public:
 private:
     
     double sigmaA, sigmaB, sigmaG, sigmaS;
-    int nIters;
+    int nIters, fitIters;
     string outFileStub;
     
 };

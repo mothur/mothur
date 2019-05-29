@@ -9,7 +9,7 @@
 #include "metrologstudent.hpp"
 
 /***********************************************************************/
-MetroLogStudent::MetroLogStudent(double sigm, double sigv, double sign, double sigS, int n, string st) : sigmaM(sigm), sigmaV(sigv), sigmaN(sign), sigmaS(sigS), nIters(n), outFileStub(st), DiversityCalculator(false) {}
+MetroLogStudent::MetroLogStudent(int fi, double sigm, double sigv, double sign, double sigS, int n, string st) : sigmaM(sigm), sigmaV(sigv), sigmaN(sign), sigmaS(sigS), nIters(n), outFileStub(st), fitIters(fi), DiversityCalculator(false) {}
 /***********************************************************************/
 
 
@@ -22,7 +22,7 @@ double nLogLikelihood2(const gsl_vector * x, void * params)
     int    nS = (int) floor(gsl_vector_get(x, 3));
     t_Data *ptData = (t_Data *) params;
     int    i       = 0;
-    double dLogNot0 = 0.0, dLogL   = 0.0;
+    double dLogL   = 0.0;
     double dLog0 = 0.0, dLog1 = 0.0, dLog2 = 0.0, dLog3 = 0.0;
     
     if(dV <= 0.0 || dNu < 1.0){
@@ -32,6 +32,9 @@ double nLogLikelihood2(const gsl_vector * x, void * params)
     DiversityUtils dutils("metrols");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -75,6 +78,9 @@ double negLogLikelihood(double dMDash, double dV, double dNu, int nS, void * par
     DiversityUtils dutils("metrols");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -139,6 +145,9 @@ void* metropolis2 (void * pvInitMetro)
     
     /*now perform simple Metropolis algorithm*/
     while(nIter < ptParams->nIter){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dA = 0.0, dNLLDash = 0.0;
         
         dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS, ptParams);
@@ -211,7 +220,29 @@ vector<string> MetroLogStudent::getValues(SAbundVector* rank){
         dutils.minimiseSimplex(ptX, 4, (void*) &tData, &nLogLikelihood2, 0.1, 1.0e-3, 100000);
         dutils.outputResults(ptX, &tData, &nLogLikelihood2);
         
-        if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis2); }
+        if(tParams.nIter > 0){
+            vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis2);
+            
+            if (fitIters != 0) {
+                int numTries = 1;
+                while ( ((acceptanceRates[0] < 0.455) || (acceptanceRates[0] > 0.555)) && (numTries < fitIters)) {
+                    if (m->getControl_pressed()) { break; }
+                    
+                    m->mothurOut("\nFit try: " + toString(numTries) + "\n");
+                    
+                    if (acceptanceRates[0] < 0.455) {
+                        double factor = 10.0 * fabs(0.5 - acceptanceRates[0]);
+                        tParams.dSigmaX /= factor; tParams.dSigmaY /= factor; tParams.dSigmaN /= factor;
+                    }else if (acceptanceRates[0] > 0.555) {
+                        double factor = 5.0 * abs(0.5 - acceptanceRates[0]);
+                        tParams.dSigmaX *= factor; tParams.dSigmaY *= factor; tParams.dSigmaN *= factor;
+                    }
+                    acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis2);
+                    numTries++;
+                }
+            }
+
+        }
         
         gsl_vector_free(ptX);
         

@@ -379,6 +379,9 @@ int DiversityUtils::solveF(double x_lo, double x_hi, double (*f)(double, void*),
     
     do{
         iter++;
+        
+        if (m->getControl_pressed()) { break; }
+        
         status = gsl_root_fsolver_iterate (s);
         r = gsl_root_fsolver_root (s);
         x_lo = gsl_root_fsolver_x_lower (s);
@@ -415,6 +418,9 @@ int DiversityUtils::solveF(double x_lo, double x_hi, void* params, double tol, d
     
     do{
         iter++;
+        
+        if (m->getControl_pressed()) { break; }
+        
         status = gsl_root_fsolver_iterate (s);
         r = gsl_root_fsolver_root (s);
         x_lo = gsl_root_fsolver_x_lower (s);
@@ -670,6 +676,9 @@ int DiversityUtils::minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, do
     
     do{
         iter++;
+        
+        if (m->getControl_pressed()) { break; }
+        
         status = gsl_multimin_fminimizer_iterate(s);
         
         if(status) { break; }
@@ -720,7 +729,7 @@ void DiversityUtils::getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vec
 }
 
 /***********************************************************************/
-void DiversityUtils::mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro))
+vector<double> DiversityUtils::mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro))
 {
     int ptXSize = 3;
     if ((method == "metrols") || (method == "metrosichel")) {  ptXSize = 4;  }
@@ -808,7 +817,14 @@ void DiversityUtils::mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, v
     m->mothurOut(toString(atMetroInit[1].nThread) +": accept. ratio " + toString(atMetroInit[1].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[1].nAccepted)/((double) ptParams->nIter)) +  "\n");
     m->mothurOut(toString(atMetroInit[2].nThread) +": accept. ratio " + toString(atMetroInit[2].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[2].nAccepted)/((double) ptParams->nIter)) +  "\n");
     
+    vector<double> results;
+    results.push_back(atMetroInit[0].nAccepted/((double) ptParams->nIter));
+    results.push_back(atMetroInit[1].nAccepted/((double) ptParams->nIter));
+    results.push_back(atMetroInit[2].nAccepted/((double) ptParams->nIter));
+    
     gsl_vector_free(ptX1); gsl_vector_free(ptX2); gsl_vector_free(ptX3);
+    
+    return results;
 }
 
 #endif

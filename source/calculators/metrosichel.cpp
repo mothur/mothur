@@ -9,7 +9,7 @@
 #include "metrosichel.hpp"
 
 /***********************************************************************/
-MetroSichel::MetroSichel(double siga, double sigb, double sigg, double sigS, int n, string st) : sigmaA(siga), sigmaB(sigb), sigmaG(sigg), sigmaS(sigS), nIters(n), outFileStub(st), DiversityCalculator(false) {}
+MetroSichel::MetroSichel(int af, double siga, double sigb, double sigg, double sigS, int n, string st) : sigmaA(siga), sigmaB(sigb), sigmaG(sigg), sigmaS(sigS), nIters(n), outFileStub(st), fitIters(af), DiversityCalculator(false) {}
 /***********************************************************************/
 
 
@@ -33,6 +33,9 @@ double nLogLikelihood3(const gsl_vector * x, void * params)
     DiversityUtils dutils("metrosichel");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -72,6 +75,9 @@ double negLogLikelihood3(double dAlpha, double dBeta, double dGamma, int nS, voi
     DiversityUtils dutils("metrosichel");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -133,6 +139,8 @@ void* metropolis3 (void * pvInitMetro)
     while(nIter < ptParams->nIter){
         double dA = 0.0, dNLLDash = 0.0;
         
+        if (dutils.m->getControl_pressed()) { break; }
+        
         dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS, ptParams);
         
         dNLLDash = negLogLikelihood3(gsl_vector_get(ptXDash,0), gsl_vector_get(ptXDash,1), gsl_vector_get(ptXDash,2), nSDash, (void*) ptData);
@@ -187,10 +195,8 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         gsl_vector* ptX = gsl_vector_alloc(4); /*parameter estimates*/
         
         gsl_rng_env_setup();
-        
         gsl_set_error_handler_off();
         
-        /*set initial estimates for parameters*/
         /*set initial estimates for parameters*/
         gsl_vector_set(ptX, 0, 0.1); //INIT_A
         gsl_vector_set(ptX, 1, 1.0); //INIT_B
@@ -203,7 +209,29 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         dutils.minimiseSimplex(ptX, 4, (void*) &tData, &nLogLikelihood3, 0.1, 1.0e-5, 100000);
         dutils.outputResults(ptX, &tData, &nLogLikelihood3);
         
-        if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis3); }
+        if(tParams.nIter > 0){
+            vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis3);
+            
+            if (fitIters != 0) {
+                int numTries = 1;
+        
+                while ( ((acceptanceRates[0] < 0.455) || (acceptanceRates[0] > 0.555)) && (numTries < fitIters)) {
+                    if (m->getControl_pressed()) { break; }
+                    
+                    m->mothurOut("\nFit try: " + toString(numTries) + "\n");
+                    
+                    if (acceptanceRates[0] < 0.455) {
+                        double factor = 10.0 * fabs(0.5 - acceptanceRates[0]);
+                        tParams.dSigmaX /= factor; tParams.dSigmaY /= factor; tParams.dSigmaN /= factor;
+                    }else if (acceptanceRates[0] > 0.555) {
+                        double factor = 5.0 * abs(0.5 - acceptanceRates[0]);
+                        tParams.dSigmaX *= factor; tParams.dSigmaY *= factor; tParams.dSigmaN *= factor;
+                    }
+                    acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis3);
+                    numTries++;
+                }
+            }
+        }
         
         gsl_vector_free(ptX);
         

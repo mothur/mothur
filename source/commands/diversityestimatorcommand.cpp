@@ -40,7 +40,8 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter psigman("sigman", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(psigman);
         CommandParameter psigmas("sigmas", "Number", "", "100", "", "", "","",false,false); parameters.push_back(psigmas);
         CommandParameter pburn("burn", "Number", "", "2000000", "", "", "","",false,false); parameters.push_back(pburn);
-        CommandParameter pcoverage("coverage", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pcoverage);
+        CommandParameter pcoverage("coverage", "Number", "", "0.8", "", "", "","",false,false); parameters.push_back(pcoverage);
+        CommandParameter pfit("fit", "Number", "", "20", "", "", "","",false,false); parameters.push_back(pfit);
         CommandParameter psamplenum("burnsample", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(psamplenum);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -72,10 +73,11 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "The sigmab parameter is used to set the std. dev. of beta / Y / V prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigman parameter is used to set the std. dev. of N / Gamma prop. distn for MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
-        helpString += "The coverage parameter allows you to the desired coverage.  It is required for the ... calculators.\n";
+        helpString += "The coverage parameter allows you to the desired coverage.  Default=0.8.\n";
         helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
         helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, LSRarefaction, SIAbundance, SIRarefaction, SIShift respectively.\n";
         helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, LSRarefaction, SIAbundance, SIRarefaction, SIShift respectively.\n";
+        helpString += "The fit parameter is used to indicate to mothur you want mothur to auto adjust the sampling data parameters. default=100, meaning try fitting 100 times. \n";
         helpString += validCalculator.printCalc("single");
         helpString += "Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
@@ -311,6 +313,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
                 bool ignore = false;
                 if (!hasSample) { //if you didn't provide a mcmc sample file, but are trying to run a calc that needs it, then ignore
                     if (samplingCalcs.count(calc) == 0) { ignore = true; }
+                    if (calc == "erarefact") { ignore = false; }
                 }
                 
                 if (ignore) { m->mothurOut("[WARNING]: " + calc + " requires a mcmc sampling file and you have not provided one, ignoring estimator. You can produce a sampling file using the ig (metroig), ln (metroln), ls (metrols) or si (metrosichel) calculators.\n"); calc = ""; }
@@ -337,6 +340,9 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; }
             util.mothurConvert(temp, iters);
             
+            temp = validParameter.valid(parameters, "fit");		if (temp == "not found") { temp = "100"; }
+            util.mothurConvert(temp, fitIters);
+            
             temp = validParameter.valid(parameters, "burn");
             if (temp == "not found") {
                 if (util.inUsersGroups(calc, smallBurn)) { temp = "100000"; }
@@ -351,7 +357,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             }
             util.mothurConvert(temp, burnSample);
             
-            temp = validParameter.valid(parameters, "coverage");		if (temp == "not found") { temp = "-1"; }
+            temp = validParameter.valid(parameters, "coverage");		if (temp == "not found") { temp = "0.8"; }
             util.mothurConvert(temp, coverage);
             
             if ((util.isEqual(coverage, -1)) && ((calc == "igrarefact") || (calc == "lnrarefact") || (calc == "lsrarefact") || (calc == "sirarefact"))) {
@@ -768,7 +774,7 @@ int EstimatorSingleCommand::runRarefactCalcs(int numSeqs, string groupName, ofst
         results = diversityCalc->getValues(numSeqs, sampling[groupName]);
         delete diversityCalc;
         
-        for (int i = 0; i < results.size(); i++) {  *out << results[i] << '\t';  } *out << endl;
+        for (int i = 0; i < results.size(); i++) { *out << results[i] << '\t'; } *out << endl;
         
         return 0;
         
@@ -790,10 +796,10 @@ vector<string> EstimatorSingleCommand::runSamplingCalcs(SAbundVector*& sabund, s
         string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
         
         DiversityCalculator* diversityCalc;
-        if (calc == "ig")       { diversityCalc = new MetroIG(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);                 }
-        else if (calc == "ln")  { diversityCalc = new MetroLogNormal(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);          }
-        else if (calc == "ls")  { diversityCalc = new MetroLogStudent(sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub); }
-        else if (calc == "si")  { diversityCalc = new MetroSichel(sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub);     }
+        if (calc == "ig")       { diversityCalc = new MetroIG(fitIters, sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);                 }
+        else if (calc == "ln")  { diversityCalc = new MetroLogNormal(fitIters, sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);          }
+        else if (calc == "ls")  { diversityCalc = new MetroLogStudent(fitIters, sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub); }
+        else if (calc == "si")  { diversityCalc = new MetroSichel(fitIters, sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub);     }
         
         resultFiles = diversityCalc->getValues(sabund);
         delete diversityCalc;
@@ -819,9 +825,11 @@ vector<double> EstimatorSingleCommand::runAbundCalcs(SAbundVector*& sabund, stri
         if ((calc == "igabund") || (calc == "lnshift") || (calc == "lnabund"))       { if (samplefile != "") { fillSampling(burn, burnSample); } }
         else if ((calc == "siabund") || (calc == "sishift") || (calc == "lsabund"))  { if (samplefile != "") { fillSampling(burn, burnSample, true); } }
         
-        it = sampling.find(groupName);
-        if (it != sampling.end()) { thisGroupSample = it->second; }
-        else { m->mothurOut("[ERROR]: Unable to find sampling info for group " + groupName + ", quitting.\n"); m->setControl_pressed(true); return results; }
+        if (calc != "erarefact") {
+            it = sampling.find(groupName);
+            if (it != sampling.end()) { thisGroupSample = it->second; }
+            else { m->mothurOut("[ERROR]: Unable to find sampling info for group " + groupName + ", quitting.\n"); m->setControl_pressed(true); return results; }
+        }
         
         //convert freq percentage to number
         int increment = 1; if (freq < 1.0) {  increment = numSeqs * freq;  } else { increment = freq;  }

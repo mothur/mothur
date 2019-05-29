@@ -17,7 +17,7 @@
 class MetroIG : public DiversityCalculator {
     
 public:
-    MetroIG(double sigA, double sigB, double sigS, int n, string stub); 
+    MetroIG(int fi, double sigA, double sigB, double sigS, int n, string stub);
     
     vector<string> getValues(SAbundVector* rank);
     
@@ -27,7 +27,7 @@ public:
 private:
     
     double sigmaA, sigmaB, sigmaS;
-    int nIters;
+    int nIters, fitIters;
     string outFileStub;
     
 };
