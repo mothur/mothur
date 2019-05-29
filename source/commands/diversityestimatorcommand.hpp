@@ -50,10 +50,10 @@ private:
     int fillSampling(int, int, bool filldNu=false);
     int processSingleSample();
     int processSharedFile();
-    int processShared(SharedRAbundVectors*& shared, vector<ofstream>& out, string fileRoot);
-    int processSingle(SAbundVector*&, string, vector<ofstream>&, string);
+    int processShared(SharedRAbundVectors*& shared, vector<ofstream*>& out, string fileRoot);
+    int processSingle(SAbundVector*&, string, vector<ofstream*>&, string);
     
-    int runRarefactCalcs(int numSeqs, string groupName, ofstream& out);
+    int runRarefactCalcs(int numSeqs, string groupName, ofstream*& out);
     vector<string> runSamplingCalcs(SAbundVector*&, string);
     vector<double> runAbundCalcs(SAbundVector*&, string groupName);
     

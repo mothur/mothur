@@ -338,10 +338,10 @@ void ValidCalculators::initialEstimators() {
     try {
         
         estimators.insert("erarefact");
-        estimators.insert("metroig");
-        estimators.insert("metroln");
-        estimators.insert("metrols");
-        estimators.insert("metrosichel");
+        estimators.insert("ig");
+        estimators.insert("ln");
+        estimators.insert("ls");
+        estimators.insert("si");
         estimators.insert("igabund");
         estimators.insert("lnabund");
         estimators.insert("igrarefact");

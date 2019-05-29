@@ -198,7 +198,7 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         gsl_vector_set(ptX, 3, numOTUs*2);
         
         double chaoResult = dutils.chao(&tData);
-        m->mothurOut("\nMetroLogStudent - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
+        m->mothurOut("\nMetroSichel - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
         
         dutils.minimiseSimplex(ptX, 4, (void*) &tData, &nLogLikelihood3, 0.1, 1.0e-5, 100000);
         dutils.outputResults(ptX, &tData, &nLogLikelihood3);
