@@ -209,38 +209,118 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         dutils.minimiseSimplex(ptX, 4, (void*) &tData, &nLogLikelihood3, 0.1, 1.0e-5, 100000);
         dutils.outputResults(ptX, &tData, &nLogLikelihood3);
         
+        int bestSample = 0;
+        
         if(tParams.nIter > 0){
+            
             vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis3);
             
             if (fitIters != 0) {
+                
+                acceptRatioPos defaultRatio = dutils.findBest(acceptanceRates);
+                
                 int numTries = 1;
-        
-                while ( ((acceptanceRates[0] < 0.455) || (acceptanceRates[0] > 0.555)) && (numTries < fitIters)) {
+                map<double, acceptRatioPos> sigmaToAccept; //sigma value -> acceptance ratio
+                map<acceptRatioPos, double> acceptToSigma; //acceptance ratio -> sigma value
+                
+                acceptRatioPos temp; //1.0 and pos 0 be default
+                sigmaToAccept[(sigmaA/10.0)] = temp; //0.01
+                sigmaToAccept[(sigmaA/100.0)] = temp; //0.001
+                
+                double newSigmaA = sigmaA/2.0;
+                sigmaToAccept[newSigmaA] = temp; //0.05
+                newSigmaA /= 2.0;
+                sigmaToAccept[newSigmaA] = temp; //0.025
+                sigmaA /= 200.0;
+                sigmaToAccept[newSigmaA] = temp; //0.0005
+                
+                for (map<double, acceptRatioPos>::iterator it = sigmaToAccept.begin(); it != sigmaToAccept.end(); it++) {
+                    if (m->getControl_pressed()) { break; }
+                    
+                    tParams.dSigmaX = it->first; tParams.dSigmaY = it->first; tParams.dSigmaN = it->first;
+                    
+                    acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis3);
+                    
+                    it->second = dutils.findBest(acceptanceRates);
+                    
+                    acceptToSigma[it->second] = it->first;
+                    
+                    if (it->second.acceptRatio <= 0.05) { break; }
+                }
+                
+                sigmaToAccept[sigmaA] = defaultRatio; //0.1
+                acceptToSigma[defaultRatio] = sigmaA;
+                
+                //adjust around closest value
+                acceptRatioPos thisBest = acceptToSigma.begin()->first;
+                sigmaA = acceptToSigma.begin()->second;
+                
+                double factor = sigmaA / 2.0;
+                
+                while ((thisBest.acceptRatio > 0.05) && (numTries < fitIters)) {
                     if (m->getControl_pressed()) { break; }
                     
                     m->mothurOut("\nFit try: " + toString(numTries) + "\n");
                     
-                    if (acceptanceRates[0] < 0.455) {
-                        double factor = 10.0 * fabs(0.5 - acceptanceRates[0]);
-                        tParams.dSigmaX /= factor; tParams.dSigmaY /= factor; tParams.dSigmaN /= factor;
-                    }else if (acceptanceRates[0] > 0.555) {
-                        double factor = 5.0 * abs(0.5 - acceptanceRates[0]);
-                        tParams.dSigmaX *= factor; tParams.dSigmaY *= factor; tParams.dSigmaN *= factor;
+                    if (thisBest.acceptRatio < 0.45) {
+                        
+                        tParams.dSigmaX -= factor; tParams.dSigmaY -= factor; tParams.dSigmaN -= factor;
+                        
+                    }else if (thisBest.acceptRatio > 0.55) {
+                        
+                        tParams.dSigmaX += factor; tParams.dSigmaY += factor; tParams.dSigmaN += factor;
+                        
                     }
+                    
+                    map<double, acceptRatioPos>::iterator it = sigmaToAccept.find(tParams.dSigmaX);
+                    
+                    if (it != sigmaToAccept.end()) { //we already tried this value, take average of 2 best tries
+                        map<acceptRatioPos, double>::iterator it2 = acceptToSigma.begin();
+                        double average = it2->second;
+                        
+                        it2++;
+                        average += it2->second;
+                        average /= 2.0;
+                        
+                        tParams.dSigmaX = average; tParams.dSigmaY = average; tParams.dSigmaN = average;
+                    }
+                    
                     acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis3);
+                    
+                    thisBest = dutils.findBest(acceptanceRates);
+                    
+                    acceptToSigma[thisBest] = tParams.dSigmaX;
+                    sigmaToAccept[tParams.dSigmaX] = thisBest;
+                    
                     numTries++;
                 }
+                
+                if (numTries == fitIters) {
+                    sigmaA = acceptToSigma.begin()->second;
+                    tParams.dSigmaX = sigmaA; tParams.dSigmaY = sigmaA; tParams.dSigmaN = sigmaA;
+                    
+                    acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis3);
+                    
+                    thisBest = dutils.findBest(acceptanceRates);
+                }
+                
+                bestSample = thisBest.pos;
             }
+            
         }
         
+        
+        /*free up allocated memory*/
         gsl_vector_free(ptX);
         
         dutils.freeAbundance(&tData);
+        
 #endif
         
-        outputs.push_back(outFileStub + "_0.sample");
-        outputs.push_back(outFileStub + "_1.sample");
-        outputs.push_back(outFileStub + "_2.sample");
+        outputs.push_back(outFileStub + "_" + toString(bestSample) + ".sample");
+        if (bestSample == 0) {  outputs.push_back(outFileStub + "_1.sample"); outputs.push_back(outFileStub + "_2.sample");  }
+        else if (bestSample == 1) {  outputs.push_back(outFileStub + "_0.sample"); outputs.push_back(outFileStub + "_2.sample");  }
+        else if (bestSample == 2) {  outputs.push_back(outFileStub + "_0.sample"); outputs.push_back(outFileStub + "_1.sample");  }
         
         return outputs;
     }

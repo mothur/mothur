@@ -309,17 +309,22 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                 vsearchCommand = util.getFullPathName(vsearchCommand);
                 bool ableToOpen = util.openInputFile(vsearchCommand, in, "no error"); in.close();
                 if(!ableToOpen) {
-                    m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-                    //check to see if vsearch is in the path??
                     
-                    ifstream in2;
-                    string programName = "vsearch"; programName += EXECUTABLE_EXT;
-                    string uLocation = util.findProgramPath(programName);
-                    uLocation += programName;
-                    ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
-                    
-                    if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  abort = true; }
-                    else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
+                    if (util.checkLocations(vsearchCommand, current->getLocations())) { vsearchLocation = vsearchCommand; }
+                    else {
+                        
+                        m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
+                        //check to see if vsearch is in the path??
+                        
+                        ifstream in2;
+                        string programName = "vsearch"; programName += EXECUTABLE_EXT;
+                        string uLocation = util.findProgramPath(programName);
+                        uLocation += programName;
+                        ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
+                        
+                        if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  abort = true; }
+                        else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
+                    }
                 }else {  vsearchLocation = vsearchCommand; }
                 
                 vsearchLocation = util.getFullPathName(vsearchLocation);
@@ -825,7 +830,7 @@ string ChimeraVsearchCommand::getCountFile(string& inputFile){
         current->setMothurCalling(false);
         m->mothurOut("/******************************************/\n");
         
-        countFile = filenames["name"][0];
+        countFile = filenames["count"][0];
         inputFile = filenames["fasta"][0];
         
         return countFile;

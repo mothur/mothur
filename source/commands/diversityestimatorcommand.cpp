@@ -289,17 +289,17 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             samplingCalcs.insert("ls");
             samplingCalcs.insert("si");
             
-            rarefactCalcs.push_back("igrarefact");
-            rarefactCalcs.push_back("lsrarefact");
-            rarefactCalcs.push_back("lnrarefact");
-            rarefactCalcs.push_back("sirarefact");
+            rarefactCalcs.push_back("igrarefact"); calcToSamplingCalc["igrarefact"] = "ig";
+            rarefactCalcs.push_back("lsrarefact"); calcToSamplingCalc["lsrarefact"] = "ls";
+            rarefactCalcs.push_back("lnrarefact"); calcToSamplingCalc["lnrarefact"] = "ln";
+            rarefactCalcs.push_back("sirarefact"); calcToSamplingCalc["sirarefact"] = "si";
             
-            abundCalcs.push_back("igabund");
-            abundCalcs.push_back("lnabund");
-            abundCalcs.push_back("lsabund");
-            abundCalcs.push_back("siabund");
-            abundCalcs.push_back("sishift");
-            abundCalcs.push_back("lnshift");
+            abundCalcs.push_back("igabund"); calcToSamplingCalc["igabund"] = "ig";
+            abundCalcs.push_back("lnabund"); calcToSamplingCalc["lnabund"] = "ln";
+            abundCalcs.push_back("lsabund"); calcToSamplingCalc["lsabund"] = "ls";
+            abundCalcs.push_back("siabund"); calcToSamplingCalc["siabund"] = "si";
+            abundCalcs.push_back("sishift"); calcToSamplingCalc["sishift"] = "si";
+            abundCalcs.push_back("lnshift"); calcToSamplingCalc["lnshift"] = "ln";
             abundCalcs.push_back("erarefact");
             
             smallBurn.push_back("erarefact");
@@ -316,7 +316,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
                     if (calc == "erarefact") { ignore = false; }
                 }
                 
-                if (ignore) { m->mothurOut("[WARNING]: " + calc + " requires a mcmc sampling file and you have not provided one, ignoring estimator. You can produce a sampling file using the ig (metroig), ln (metroln), ls (metrols) or si (metrosichel) calculators.\n"); calc = ""; }
+                if (ignore) { m->mothurOut("\n[WARNING]: " + calc + " requires a mcmc sampling file and you have not provided one. You can produce a sampling file using the ig (metroig), ln (metroln), ls (metrols) or si (metrosichel) calculators. I will create the sampling file for you using the " + calcToSamplingCalc[calc] + " calculator.\n"); createSampling = true; }
             }
            
             if (calc == "") { abort = true; m->mothurOut("[ERROR]: no valid estimators, aborting.\n"); }
@@ -337,10 +337,11 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             temp = validParameter.valid(parameters, "sigmas");		if (temp == "not found") { temp = "100.0"; }
             util.mothurConvert(temp, sigmaS);
             
-            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; }
+            itersSet = true;
+            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; itersSet = false; }
             util.mothurConvert(temp, iters);
             
-            temp = validParameter.valid(parameters, "fit");		if (temp == "not found") { temp = "100"; }
+            temp = validParameter.valid(parameters, "fit");		if (temp == "not found") { temp = "10"; }
             util.mothurConvert(temp, fitIters);
             
             temp = validParameter.valid(parameters, "burn");
@@ -387,6 +388,24 @@ int EstimatorSingleCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
+        if (createSampling) {
+            string savedCalc = calc;
+            int savedIters = iters;
+            
+            calc = calcToSamplingCalc[savedCalc];
+            if (!itersSet) { iters = 250000; }
+            
+            if (format != "sharedfile") { processSingleSample(); } //handles multiple label values
+            else { processSharedFile(); } //handles multiple label values and multiple samples
+            
+            vector<string> samplingFiles = outputTypes["calc"];
+            
+            if (samplingFiles.size() != 0) {
+                samplefile = samplingFiles[0];
+                calc = savedCalc;
+                iters = savedIters;
+            }else { return 0; }
+        }
         
         if (format != "sharedfile") { processSingleSample(); } //handles multiple label values
         else { processSharedFile(); } //handles multiple label values and multiple samples

@@ -13,7 +13,29 @@
 #include "sabundvector.hpp"
 #include "utils.hpp"
 
+
+
+
 /***********************************************************************/
+struct acceptRatioPos  {
+    double acceptRatio;
+    int pos;
+    
+    acceptRatioPos() { pos = 0; acceptRatio = 1.0; }
+    acceptRatioPos(double ac, int po) : acceptRatio(ac), pos(po) {}
+    ~acceptRatioPos() {}
+};
+
+/***********************************************************************/
+
+inline bool operator< (const acceptRatioPos& lhs, const acceptRatioPos& rhs){ return rhs.acceptRatio > lhs.acceptRatio; }
+inline bool operator> (const acceptRatioPos& lhs, const acceptRatioPos& rhs){ return rhs.acceptRatio < lhs.acceptRatio; }
+inline bool operator<=(const acceptRatioPos& lhs, const acceptRatioPos& rhs){ return !(lhs.acceptRatio > rhs.acceptRatio); }
+inline bool operator>=(const acceptRatioPos& lhs, const acceptRatioPos& rhs){ return !(lhs.acceptRatio < rhs.acceptRatio); }
+
+
+/***********************************************************************/
+
 
 class DiversityCalculator {
     

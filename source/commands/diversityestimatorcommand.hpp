@@ -36,7 +36,7 @@ public:
     
 private:
     
-    bool abort, allLines, burnSampleSet, burnSet;
+    bool abort, allLines, burnSampleSet, burnSet, createSampling, itersSet;
     string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile, samplefile;
     double freq, sigmaAlpha, sigmaBeta, sigmaS, sigmaN, coverage;
     int iters, burn, burnSample, fitIters;
@@ -46,6 +46,8 @@ private:
     map<string, vector<mcmcSample> > sampling;
     map<string, vector<mcmcSample> > ::iterator it;
     set<string> samplingCalcs;
+    map<string, string> calcToSamplingCalc;
+    map<string, string> ::iterator itCalcSample;
     
     int fillSampling(int, int, bool filldNu=false);
     int processSingleSample();

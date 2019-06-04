@@ -17,9 +17,8 @@
 #define SLICE      10
 
 
-#include "mothurout.h"
-#include "utils.hpp"
-#include "sabundvector.hpp"
+#include "diversitycalc.h"
+
 
 /***********************************************************************/
 
@@ -58,6 +57,7 @@ public:
     
     void loadAbundance(t_Data *ptData, SAbundVector* rank);
     void freeAbundance(t_Data *ptData);
+    acceptRatioPos findBest(vector<double> accept);
     
     MothurOut* m;
     

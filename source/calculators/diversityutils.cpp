@@ -828,6 +828,31 @@ vector<double> DiversityUtils::mcmc(t_Params *ptParams, t_Data *ptData, gsl_vect
 }
 
 #endif
+
+/***********************************************************************/
+acceptRatioPos DiversityUtils::findBest(vector<double> acceptanceRates){
+    try {
+        
+        double defaultSigmaAcc = fabs(0.5 - acceptanceRates[0]);  //"0" version
+        acceptRatioPos defaultRatio(defaultSigmaAcc, 0);
+        
+        if (defaultRatio.acceptRatio > fabs(0.5 - acceptanceRates[1])) {  //is the "1" version better?
+            defaultRatio.acceptRatio = fabs(0.5 - acceptanceRates[1]);
+            defaultRatio.pos = 1;
+        }
+        if (defaultRatio.acceptRatio > fabs(0.5 - acceptanceRates[2])) {  //is the "2" version better?
+            defaultRatio.acceptRatio = fabs(0.5 - acceptanceRates[2]);
+            defaultRatio.pos = 2;
+        }
+        
+        return defaultRatio;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DiversityUtils", "findBest");
+        exit(1);
+    }
+}
+
 /***********************************************************************/
 
 
