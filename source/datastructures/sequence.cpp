@@ -616,7 +616,7 @@ int Sequence::getNumNs(){
 //********************************************************************************************************************
 void Sequence::printSequence(OutputWriter* out){
     string seqOutput = ">";
-    seqOutput += name + '\t' + comment + '\n';
+    seqOutput += name + comment + '\n';
     seqOutput += aligned + '\n';
     out->write(seqOutput);
 }
