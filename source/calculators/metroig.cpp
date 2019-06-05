@@ -181,6 +181,10 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         
         t_Params tParams; tParams.nIter = nIters; tParams.dSigmaX = sigmaA; tParams.dSigmaY = sigmaB; tParams.dSigmaS = sigmaS; tParams.szOutFileStub = outFileStub; tParams.lSeed = m->getRandomSeed();
         t_Data   tData;
+        
+        
+        int bestSample = 0;
+        
 #ifdef USE_GSL
         
         DiversityUtils dutils("metroig");
@@ -207,8 +211,6 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood0, 0.1, 1.0e-2, 100000);
         
         dutils.outputResults(ptX, &tData, &nLogLikelihood0);
-        
-        int bestSample = 0;
         
         if(tParams.nIter > 0){
     

@@ -183,6 +183,8 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         t_Params tParams; tParams.nIter = nIters; tParams.dSigmaX = sigmaA; tParams.dSigmaY = sigmaB; tParams.dSigmaN = sigmaG; tParams.dSigmaS = sigmaS; tParams.szOutFileStub = outFileStub; tParams.lSeed = m->getRandomSeed();
         t_Data   tData;
         
+        int bestSample = 0;
+        
 #ifdef USE_GSL
         
         DiversityUtils dutils("metrosichel");
@@ -209,7 +211,6 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         dutils.minimiseSimplex(ptX, 4, (void*) &tData, &nLogLikelihood3, 0.1, 1.0e-5, 100000);
         dutils.outputResults(ptX, &tData, &nLogLikelihood3);
         
-        int bestSample = 0;
         
         if(tParams.nIter > 0){
             

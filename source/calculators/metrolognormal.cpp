@@ -188,6 +188,8 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
         t_Params tParams; tParams.nIter = nIters; tParams.dSigmaX = sigmaX; tParams.dSigmaY = sigmaY; tParams.dSigmaS = sigmaS; tParams.szOutFileStub = outFileStub; tParams.lSeed = m->getRandomSeed();
         t_Data   tData;
         
+        int bestSample = 0;
+        
 #ifdef USE_GSL
         
         DiversityUtils dutils("metroln");
@@ -215,8 +217,6 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
         dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood1, 1.0, 1.0e-2, 100000);
 
         dutils.outputResults(ptX, &tData, &nLogLikelihood1);
-
-        int bestSample = 0;
         
         if(tParams.nIter > 0){
             

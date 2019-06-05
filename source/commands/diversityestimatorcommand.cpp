@@ -398,7 +398,7 @@ int EstimatorSingleCommand::execute(){
             if (format != "sharedfile") { processSingleSample(); } //handles multiple label values
             else { processSharedFile(); } //handles multiple label values and multiple samples
             
-            vector<string> samplingFiles = outputTypes["calc"];
+            vector<string> samplingFiles = outputTypes[calc];
             
             if (samplingFiles.size() != 0) {
                 samplefile = samplingFiles[0];
