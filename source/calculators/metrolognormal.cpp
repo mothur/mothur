@@ -19,166 +19,184 @@ MetroLogNormal::MetroLogNormal(int fi, double sigx, double sigy, double sigS, in
 /***********************************************************************/
 double nLogLikelihood1(const gsl_vector * x, void * params)
 {
-    double dMDash  = gsl_vector_get(x,0), dV = gsl_vector_get(x,1);
-    int    nS = (int) floor(gsl_vector_get(x, 2));
-    t_Data *ptData = (t_Data *) params;
-    int    i       = 0;
-    double dLogL   = 0.0;
-    
-    DiversityUtils dutils("metroln");
-    
-    for(i = 0; i < ptData->nNA; i++){
+    MothurOut* m = MothurOut::getInstance();
+    try {
+        double dMDash  = gsl_vector_get(x,0), dV = gsl_vector_get(x,1);
+        int    nS = (int) floor(gsl_vector_get(x, 2));
+        t_Data *ptData = (t_Data *) params;
+        int    i       = 0;
+        double dLogL   = 0.0;
         
-        if (dutils.m->getControl_pressed()) { break; }
+        DiversityUtils dutils("metroln");
         
-        double dLogP = 0.0;
-        int    nA    = ptData->aanAbund[i][0];
-        
-        if(nA < 100){
-            dLogP = dutils.logLikelihoodQuad(nA, dMDash, dV);
+        for(i = 0; i < ptData->nNA; i++){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            double dLogP = 0.0;
+            int    nA    = ptData->aanAbund[i][0];
+            
+            if(nA < 100){
+                dLogP = dutils.logLikelihoodQuad(nA, dMDash, dV);
+            }
+            else{
+                dLogP = dutils.logLikelihoodRampal(nA, dMDash, dV);
+            }
+            
+            dLogL += ((double) ptData->aanAbund[i][1])*dLogP;
+            
+            dLogL -= gsl_sf_lnfact(ptData->aanAbund[i][1]);
         }
-        else{
-            dLogP = dutils.logLikelihoodRampal(nA, dMDash, dV);
-        }
         
-        dLogL += ((double) ptData->aanAbund[i][1])*dLogP;
+        dLogL += (nS - ptData->nL)*dutils.logLikelihoodQuad(0, dMDash, dV);
         
-        dLogL -= gsl_sf_lnfact(ptData->aanAbund[i][1]);
+        dLogL -= gsl_sf_lnfact(nS - ptData->nL);
+        
+        dLogL += gsl_sf_lnfact(nS);
+        
+        /*return*/
+        return -dLogL;
+    }catch(exception& e) {
+        m->errorOut(e, "MetroLogNormal", "nLogLikelihood1");
+        exit(1);
     }
-    
-    dLogL += (nS - ptData->nL)*dutils.logLikelihoodQuad(0, dMDash, dV);
-    
-    dLogL -= gsl_sf_lnfact(nS - ptData->nL);
-    
-    dLogL += gsl_sf_lnfact(nS);
-   
-    /*return*/
-    return -dLogL;
 }
 /***********************************************************************/
 double negLogLikelihood1(double dMDash, double dV, int nS, void * params)
 {
-    t_Data *ptData = (t_Data *) params;
-    int    i       = 0;
-    double dLog0 = 0.0, dLogL   = 0.0;
-    
-    DiversityUtils dutils("metroln");
-    
-    for(i = 0; i < ptData->nNA; i++){
+    MothurOut* m = MothurOut::getInstance();
+    try {
+        t_Data *ptData = (t_Data *) params;
+        int    i       = 0;
+        double dLog0 = 0.0, dLogL   = 0.0;
         
-        if (dutils.m->getControl_pressed()) { break; }
+        DiversityUtils dutils("metroln");
         
-        double dLogP = 0.0;
-        int    nA    = ptData->aanAbund[i][0];
-        
-        if(nA < 100){
-            dLogP = dutils.logLikelihoodQuad(nA, dMDash, dV);
+        for(i = 0; i < ptData->nNA; i++){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            double dLogP = 0.0;
+            int    nA    = ptData->aanAbund[i][0];
+            
+            if(nA < 100){
+                dLogP = dutils.logLikelihoodQuad(nA, dMDash, dV);
+            }
+            else{
+                dLogP = dutils.logLikelihoodRampal(nA, dMDash, dV);
+            }
+            
+            dLogL += ((double) ptData->aanAbund[i][1])*dLogP;
+            
+            dLogL -= gsl_sf_lnfact(ptData->aanAbund[i][1]);
         }
-        else{
-            dLogP = dutils.logLikelihoodRampal(nA, dMDash, dV);
+        
+        dLog0     = dutils.logLikelihoodQuad(0, dMDash, dV);
+        
+        if(nS > ptData->nL){
+            dLogL += (nS - ptData->nL)*dLog0;
         }
         
-        dLogL += ((double) ptData->aanAbund[i][1])*dLogP;
+        dLogL -= gsl_sf_lnfact(nS - ptData->nL);
         
-        dLogL -= gsl_sf_lnfact(ptData->aanAbund[i][1]);
+        dLogL += gsl_sf_lnfact(nS);
+    
+        return -dLogL;
+        
+    }catch(exception& e) {
+        m->errorOut(e, "MetroLogNormal", "negLogLikelihood1");
+        exit(1);
     }
-    
-    dLog0     = dutils.logLikelihoodQuad(0, dMDash, dV);
-    
-    if(nS > ptData->nL){
-        dLogL += (nS - ptData->nL)*dLog0;
-    }
-    
-    dLogL -= gsl_sf_lnfact(nS - ptData->nL);
-    
-    dLogL += gsl_sf_lnfact(nS);
-    
-    /*return*/
-    return -dLogL;
 }
 /***********************************************************************/
-void* metropolis1 (void * pvInitMetro)
-{
-    t_MetroInit *ptMetroInit  = (t_MetroInit *) pvInitMetro;
-    gsl_vector  *ptX          = ptMetroInit->ptX;
-    t_Data      *ptData       = ptMetroInit->ptData;
-    t_Params    *ptParams     = ptMetroInit->ptParams;
-    gsl_vector  *ptXDash      = gsl_vector_alloc(3); /*proposal*/
-    
-    const gsl_rng_type *T;
-    gsl_rng            *ptGSLRNG;
-    
-    int nS = 0, nSDash = 0,nIter = 0;
-    double dRand = 0.0, dNLL = 0.0;
-    void   *pvRet = NULL;
-    double dM = 0.0, dV = 0.0;
-    double dMDash = 0.0, dVDash = 0.0;
-    double dXDash = 0.0, dX = 0.0;
-    
-    /*set up random number generator*/
-    T        = gsl_rng_default;
-    ptGSLRNG = gsl_rng_alloc (T);
-    
-    nS = (int) floor(gsl_vector_get(ptX,2));
-    
-    dNLL = negLogLikelihood1(gsl_vector_get(ptX,0), gsl_vector_get(ptX,1), nS,(void*) ptData);
-    
-    dM = gsl_vector_get(ptX,0); dV = gsl_vector_get(ptX,1);
-    gsl_vector_set(ptX,0,dM + 0.5*dV);
+void* metropolis1 (void * pvInitMetro) {
+    MothurOut* m = MothurOut::getInstance();
+    try {
+        t_MetroInit *ptMetroInit  = (t_MetroInit *) pvInitMetro;
+        gsl_vector  *ptX          = ptMetroInit->ptX;
+        t_Data      *ptData       = ptMetroInit->ptData;
+        t_Params    *ptParams     = ptMetroInit->ptParams;
+        gsl_vector  *ptXDash      = gsl_vector_alloc(3); /*proposal*/
         
-    string filename = ptParams->szOutFileStub + "_" + toString(ptMetroInit->nThread) + ".sample";
-    
-    ofstream out; Utils util; util.openOutputFile(filename, out);
-    out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-    
-    /*seed random number generator*/
-    gsl_rng_set(ptGSLRNG, ptMetroInit->lSeed);
-    
-    DiversityUtils dutils("metroln");
-    
-    /*now perform simple Metropolis algorithm*/
-    while(nIter < ptParams->nIter){
-        double dA = 0.0, dNLLDash = 0.0;
+        const gsl_rng_type *T;
+        gsl_rng            *ptGSLRNG;
         
-        if (dutils.m->getControl_pressed()) { break; }
+        int nS = 0, nSDash = 0,nIter = 0;
+        double dRand = 0.0, dNLL = 0.0;
+        void   *pvRet = NULL;
+        double dM = 0.0, dV = 0.0;
+        double dMDash = 0.0, dVDash = 0.0;
+        double dXDash = 0.0, dX = 0.0;
         
-        dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS,ptParams);
+        /*set up random number generator*/
+        T        = gsl_rng_default;
+        ptGSLRNG = gsl_rng_alloc (T);
         
-        dXDash =  gsl_vector_get(ptXDash,0); dVDash = gsl_vector_get(ptXDash,1);
-        dMDash =  dXDash - 0.5*dVDash;
-        dNLLDash = negLogLikelihood1(dMDash, dVDash, nSDash, (void*) ptData);
+        nS = (int) floor(gsl_vector_get(ptX,2));
         
-        dA = exp(dNLL - dNLLDash);
-        if(dA > 1.0){
-            dA = 1.0;
-        }
+        dNLL = negLogLikelihood1(gsl_vector_get(ptX,0), gsl_vector_get(ptX,1), nS,(void*) ptData);
         
-        dRand = gsl_rng_uniform(ptGSLRNG);
+        dM = gsl_vector_get(ptX,0); dV = gsl_vector_get(ptX,1);
+        gsl_vector_set(ptX,0,dM + 0.5*dV);
         
-        if(dRand < dA){
-            ptMetroInit->nAccepted++;
-            gsl_vector_memcpy(ptX, ptXDash);
-            nS = nSDash;
-            dNLL = dNLLDash;
-        }
+        string filename = ptParams->szOutFileStub + "_" + toString(ptMetroInit->nThread) + ".sample";
         
-        if(nIter % 10 == 0){
-            dX =  gsl_vector_get(ptX,0); dV = gsl_vector_get(ptX,1);
-            dM =  dX - 0.5*dV;
+        ofstream out; Utils util; util.openOutputFile(filename, out);
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        
+        /*seed random number generator*/
+        gsl_rng_set(ptGSLRNG, ptMetroInit->lSeed);
+        
+        DiversityUtils dutils("metroln");
+        
+        /*now perform simple Metropolis algorithm*/
+        while(nIter < ptParams->nIter){
+            double dA = 0.0, dNLLDash = 0.0;
             
-            out << nIter << "," << dM << "," << dV << "," << nS << "," << dNLL << endl;
+            if (m->getControl_pressed()) { break; }
             
+            dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS,ptParams);
+            
+            dXDash =  gsl_vector_get(ptXDash,0); dVDash = gsl_vector_get(ptXDash,1);
+            dMDash =  dXDash - 0.5*dVDash;
+            dNLLDash = negLogLikelihood1(dMDash, dVDash, nSDash, (void*) ptData);
+            
+            dA = exp(dNLL - dNLLDash);
+            if(dA > 1.0){
+                dA = 1.0;
+            }
+            
+            dRand = gsl_rng_uniform(ptGSLRNG);
+            
+            if(dRand < dA){
+                ptMetroInit->nAccepted++;
+                gsl_vector_memcpy(ptX, ptXDash);
+                nS = nSDash;
+                dNLL = dNLLDash;
+            }
+            
+            if(nIter % 10 == 0){
+                dX =  gsl_vector_get(ptX,0); dV = gsl_vector_get(ptX,1);
+                dM =  dX - 0.5*dV;
+                
+                out << nIter << "," << dM << "," << dV << "," << nS << "," << dNLL << endl;
+                
+            }
+            
+            nIter++;
         }
+        out.close();
         
-        nIter++;
+        /*free up allocated memory*/
+        gsl_vector_free(ptXDash);
+        gsl_rng_free(ptGSLRNG);
+        
+        return pvRet;
+
+    }catch(exception& e) {
+        m->errorOut(e, "MetroLogNormal", "metropolis1");
+        exit(1);
     }
-    out.close();
-    
-    /*free up allocated memory*/
-    gsl_vector_free(ptXDash);
-    gsl_rng_free(ptGSLRNG);
-    
-    return pvRet;
 }
 #endif
 /***********************************************************************/
