@@ -238,7 +238,7 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
         
         if(tParams.nIter > 0){
             
-            vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis1);
+            vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis1); //sigmaX 0.1
             
             if (fitIters != 0) {
                 
@@ -249,15 +249,24 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
                 map<acceptRatioPos, double> acceptToSigma; //acceptance ratio -> sigma value
                 
                 acceptRatioPos temp; //1.0 and pos 0 be default
-                sigmaToAccept[(sigmaX/10.0)] = temp; //0.01
-                sigmaToAccept[(sigmaX/100.0)] = temp; //0.001
-                
-                double newSigmaA = sigmaX/2.0;
-                sigmaToAccept[newSigmaA] = temp; //0.05
+                double newSigmaA = sigmaX/2.0;              //0.10
+                sigmaToAccept[newSigmaA] = temp;            //0.05
                 newSigmaA /= 2.0;
-                sigmaToAccept[newSigmaA] = temp; //0.025
-                sigmaX /= 200.0;
-                sigmaToAccept[newSigmaA] = temp; //0.0005
+                sigmaToAccept[newSigmaA] = temp;            //0.025
+                sigmaToAccept[(sigmaX/10.0)] = temp;        //0.01
+                sigmaToAccept[(sigmaX/100.0)] = temp;       //0.001
+                
+                
+                newSigmaA = sigmaX + (sigmaX/2.0);         //0.15
+                sigmaToAccept[newSigmaA] = temp;
+                newSigmaA = sigmaX + (sigmaX/10.0);         //0.11
+                sigmaToAccept[newSigmaA] = temp;
+                newSigmaA = sigmaX + (sigmaX/4.0);         //0.125
+                sigmaToAccept[newSigmaA] = temp;
+                newSigmaA = sigmaX + (3*sigmaX/4.0);        //0.175
+                sigmaToAccept[newSigmaA] = temp;
+                newSigmaA = sigmaX+sigmaX;                  //0.2
+                sigmaToAccept[newSigmaA] = temp;
                 
                 for (map<double, acceptRatioPos>::iterator it = sigmaToAccept.begin(); it != sigmaToAccept.end(); it++) {
                     if (m->getControl_pressed()) { break; }
@@ -280,7 +289,7 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
                 acceptRatioPos thisBest = acceptToSigma.begin()->first;
                 sigmaX = acceptToSigma.begin()->second;
                 
-                double factor = sigmaX / 2.0;
+                double factor = 0.05;
                 
                 while ((thisBest.acceptRatio > 0.05) && (numTries < fitIters)) {
                     if (m->getControl_pressed()) { break; }
@@ -289,11 +298,11 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
                     
                     if (thisBest.acceptRatio < 0.45) {
                         
-                        tParams.dSigmaX -= factor; tParams.dSigmaY -= factor; tParams.dSigmaN -= factor;
+                        tParams.dSigmaX = fabs(tParams.dSigmaX-factor); tParams.dSigmaY = fabs(tParams.dSigmaY-factor); tParams.dSigmaN = fabs(tParams.dSigmaN-factor);
                         
                     }else if (thisBest.acceptRatio > 0.55) {
                         
-                        tParams.dSigmaX += factor; tParams.dSigmaY += factor; tParams.dSigmaN += factor;
+                        tParams.dSigmaX = fabs(tParams.dSigmaX+factor); tParams.dSigmaY = fabs(tParams.dSigmaY+factor); tParams.dSigmaN = fabs(tParams.dSigmaN+factor);
                         
                     }
                     

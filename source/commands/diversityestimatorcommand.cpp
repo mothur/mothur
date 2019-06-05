@@ -782,7 +782,7 @@ int EstimatorSingleCommand::runRarefactCalcs(int numSeqs, string groupName, ofst
         
         it = sampling.find(groupName);
         if (it != sampling.end()) { thisGroupSample = it->second; }
-        else { m->mothurOut("[ERROR]: Unable to find sampling info for group " + groupName + ", quitting.\n"); m->setControl_pressed(true); return 0; }
+        else { m->mothurOut("[ERROR]: Unable to find sampling info for group " + groupName + ", quitting. Do you need to adjust the iters, burn or burnsample parameters?\n"); m->setControl_pressed(true); return 0; }
         
         DiversityCalculator* diversityCalc;
         if (calc == "igrarefact")       { diversityCalc = new IGRarefaction(coverage); }
@@ -847,7 +847,7 @@ vector<double> EstimatorSingleCommand::runAbundCalcs(SAbundVector*& sabund, stri
         if (calc != "erarefact") {
             it = sampling.find(groupName);
             if (it != sampling.end()) { thisGroupSample = it->second; }
-            else { m->mothurOut("[ERROR]: Unable to find sampling info for group " + groupName + ", quitting.\n"); m->setControl_pressed(true); return results; }
+            else { m->mothurOut("[ERROR]: Unable to find sampling info for group " + groupName + ", quitting. Do you need to adjust the iters, burn or burnsample parameters?\n"); m->setControl_pressed(true); return results; }
         }
         
         //convert freq percentage to number
