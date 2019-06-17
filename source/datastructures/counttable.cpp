@@ -961,14 +961,17 @@ vector<string> CountTable::printCompressedTable(string file, vector<string> grou
     }
 }
 /************************************************************/
-//returns index of countTableItem for group passed in. If group is not present in seq, returns -1
-int CountTable::find(int seq, int group) {
+//returns index of countTableItem for group passed in. If group is not present in seq, returns index of next group or -1
+int CountTable::find(int seq, int group, bool returnNext) {
     try {
+        
         int index = -1;
         
         for (int i = 0; i < counts[seq].size(); i++) {
             if (counts[seq][i].group >= group) { //found it or done looking
+                
                 if (counts[seq][i].group == group) { index = i; }
+                else { if (returnNext) {  index = i*-1;  } }
                 break;
             }
         }
@@ -978,8 +981,7 @@ int CountTable::find(int seq, int group) {
         m->errorOut(e, "CountTable", "find");
         exit(1);
     }
-}
-/************************************************************/
+}/************************************************************/
 //returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
 int CountTable::getAbund(int seq, int group) {
     try {
@@ -1372,9 +1374,10 @@ int CountTable::removeGroup(string groupName) {
         if (hasGroups) {
             //save for later in case removing a group means we need to remove a seq.
             map<int, string> reverse;
-            for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
-
-            map<string, int>::iterator it = indexGroupMap.find(groupName);
+            map<string, int>::iterator it;
+            for (it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+            
+            it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
                 m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else {
@@ -1390,16 +1393,16 @@ int CountTable::removeGroup(string groupName) {
                 indexGroupMap.erase(groupName);
                 groups = newGroups;
                 totalGroups.erase(totalGroups.begin()+indexOfGroupToRemove);
-
+                
                 int thisIndex = 0;
                 map<string, int> newIndexNameMap;
                 for (int i = 0; i < counts.size(); i++) {
                     
                     if (m->getControl_pressed()) { break; }
                     
-                    int indexOfGroup = find(i, indexOfGroupToRemove);
+                    int indexOfGroup = find(i, indexOfGroupToRemove, true); //return -1 or next possible sample
                     
-                    if (indexOfGroup != -1) { //you have an abundance for this group
+                    if (indexOfGroup > 0) { //you have an abundance for this group
                         int num = counts[i][indexOfGroup].abund;
                         counts[i].erase(counts[i].begin()+indexOfGroup);
                         totals[i] -= num;
@@ -1409,24 +1412,28 @@ int CountTable::removeGroup(string groupName) {
                             totals.erase(totals.begin()+i);
                             uniques--;
                             i--;
-                        }else { //remove name from table if no seqs left
-                            newIndexNameMap[reverse[thisIndex]] = i;
-                        }
-                    }////you don't have this group, nothing to remove
+                        }else { newIndexNameMap[reverse[thisIndex]] = i; }
+                    }else { //you don't have this group, nothing to remove
+                        indexOfGroup *= -1;
+                        newIndexNameMap[reverse[thisIndex]] = i;
+                    }
+                    
+                    for (int j = indexOfGroup; j < counts[i].size(); j++) { counts[i][j].group -= 1; }
+                    
                     thisIndex++;
                 }
                 indexNameMap = newIndexNameMap;
-
+                
                 if (groups.size() == 0) { hasGroups = false; }
             }
         }else { m->mothurOut("[ERROR]: your count table does not contain group information, can not remove group " + groupName + ".\n"); m->setControl_pressed(true); }
-
+        
         return 0;
     }
-	catch(exception& e) {
-		m->errorOut(e, "CountTable", "removeGroup");
-		exit(1);
-	}
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "removeGroup");
+        exit(1);
+    }
 }
 /***********************************************************************/
 int CountTable::removeGroup(int minSize){
