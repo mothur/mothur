@@ -97,7 +97,7 @@ class CountTable {
         int getNumGroups() { return (int)groups.size(); }
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
         bool setNamesOfGroups(vector<string>);
-        int addGroup(string);
+        int addGroup(string); //*****only use with empty table******//
         int removeGroup(string); //pass in group name
         int removeGroup(int minSize);  //removes any groups with numSeqs < minSize
 
@@ -146,7 +146,7 @@ class CountTable {
         map<string, int> indexNameMap; //maps seqName -> vector index in counts. seq1 -> 1 would mean seq1's counts are stored in counts[1].
         map<string, int> indexGroupMap;
     
-        int find(int seq, int group); //returns index of countTableItem for group passed in. If group is not present in seq, returns -1
+        int find(int seq, int group, bool returnNext=false); //returns index of countTableItem for group passed in. If group is not present in seq, returns -1
         int getAbund(int seq, int group); //returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
         vector<countTableItem> getItems(string); //returns group counts for a seq passed in, if no group info is in file vector is blank. sorted by group
         vector<int> expandAbunds(int index);
