@@ -31,10 +31,10 @@ public:
     #ifdef USE_GSL
     
     double logLikelihood(int n, double dAlpha, double dBeta);
-    int bessel(double* pdResult, int n, double dAlpha, double dBeta);
+    bool bessel(double* pdResult, int n, double dAlpha, double dBeta);
     double sd(int n, double dAlpha, double dBeta);
     double logLikelihood(int n, double dAlpha, double dBeta, double);
-    int bessel(double* pdResult, int n, double dAlpha, double dBeta, double);
+    bool bessel(double* pdResult, int n, double dAlpha, double dBeta, double);
     double sd(int n, double dAlpha, double dBeta, double);
     int minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const gsl_vector*, void* params), double, double, double);
     void mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));

@@ -254,7 +254,7 @@ double DiversityUtils::sd(int n, double dAlpha, double dBeta)
     return -2.0*dA*dBeta -log(2.0) -dLogK -dGamma*log(dBeta) + dNDash*dFX + 0.5*log(2.0*M_PI) - 0.5*log(d2FX);
 }
 /***********************************************************************/
-int DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta)
+bool DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta)
 {
     double dGamma  = -0.5;
     double dResult = 0.0;
@@ -286,7 +286,7 @@ int DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta)
         else{
             //printf("sd ");
             (*pdResult) = dResult;
-            return FALSE;
+            return false;
         }
     }
     
@@ -296,7 +296,7 @@ int DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta)
     
     dResult = dN*dTemp1 + dLogK2 + dLogK1;
     (*pdResult) = dResult;
-    return TRUE;
+    return true;
 }
 /***********************************************************************/
 double DiversityUtils::logLikelihood(int n, double dAlpha, double dBeta)
@@ -340,7 +340,7 @@ double DiversityUtils::sd(int n, double dAlpha, double dBeta, double dGamma)
     return -2.0*dA*dBeta -log(2.0) -dLogK -dGamma*log(dBeta) + dNDash*dFX + 0.5*log(2.0*M_PI) - 0.5*log(d2FX);
 }
 /***********************************************************************/
-int DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta, double dGamma)
+bool DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta, double dGamma)
 {
     double dResult = 0.0;
     double dOmega = 0.0, dGamma2 = 0.0;
@@ -371,7 +371,7 @@ int DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta,
         else{
             //printf("sd ");
             (*pdResult) = dResult;
-            return FALSE;
+            return false;
         }
     }
     
@@ -381,7 +381,7 @@ int DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta,
     
     dResult = dN*dTemp1 + dLogK2 + dLogK1;
     (*pdResult) = dResult;
-    return TRUE;
+    return true;
 }
 /***********************************************************************/
 double DiversityUtils::logLikelihood(int n, double dAlpha, double dBeta, double dGamma)
