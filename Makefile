@@ -35,7 +35,7 @@ HDF5_INCLUDE_DIR ?= "\"Enter_your_HDF5_include_path_here\""
 GSL_LIBRARY_DIR ?= "\"Enter_your_GSL_library_path_here\""
 GSL_INCLUDE_DIR ?= "\"Enter_your_GSL_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-VERSION = "\"1.42.1\""
+VERSION = "\"1.42.2\""
 
 
 # Set a static logfile name
