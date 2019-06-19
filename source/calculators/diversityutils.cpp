@@ -302,7 +302,7 @@ bool DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta
 double DiversityUtils::logLikelihood(int n, double dAlpha, double dBeta)
 {
     double dLogFacN = 0.0;
-    int status      = 0;
+    bool status = false;
     double dRet     = 0.0;
     
     if(n < 50){
@@ -314,9 +314,8 @@ double DiversityUtils::logLikelihood(int n, double dAlpha, double dBeta)
     }
     
     status = bessel(&dRet,n, dAlpha,dBeta);
-    if(status == FALSE){
-        dRet = sd(n, dAlpha,dBeta);
-    }
+    
+    if(!status){ dRet = sd(n, dAlpha,dBeta); }
     
     return dRet - dLogFacN;
 }
@@ -387,7 +386,7 @@ bool DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta
 double DiversityUtils::logLikelihood(int n, double dAlpha, double dBeta, double dGamma)
 {
     double dLogFacN = 0.0;
-    int status      = 0;
+    bool status      = false;
     double dRet     = 0.0;
     
     if(n < 50){
@@ -399,9 +398,8 @@ double DiversityUtils::logLikelihood(int n, double dAlpha, double dBeta, double 
     }
     
     status = bessel(&dRet,n, dAlpha,dBeta,dGamma);
-    if(status == FALSE){
-        dRet = sd(n, dAlpha,dBeta,dGamma);
-    }
+    
+    if(!status){ dRet = sd(n, dAlpha,dBeta,dGamma); }
     
     return dRet - dLogFacN;
 }
