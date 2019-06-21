@@ -395,14 +395,32 @@ int GetGroupsCommand::execute(){
             if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
                 m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
             }
-            CountTable ct;
-            ct.readTable(countfile, true, false);
+            CountTable ct; ct.readTable(countfile, true, false, Groups);
+            
             if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, aborting.\n"); return 0; }
-                
-            for (int i = 0; i < Groups.size(); i++) {
-                vector<string> thisGroupsSeqs = ct.getNamesOfSeqs(Groups[i]);
-                for (int j = 0; j < thisGroupsSeqs.size(); j++) { names.insert(thisGroupsSeqs[j]); }
+            
+            string thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+            map<string, string> variables;
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+            variables["[extension]"] = util.getExtension(countfile);
+            string outputFileName = getOutputFileName("count", variables);
+            
+            int selectedCount = ct.getNumSeqs();
+            
+            if (selectedCount == 0) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");   }
+            else {
+                ct.printTable(outputFileName);
+                outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
             }
+            
+            m->mothurOut("Selected " + toString(selectedCount) + " sequences from your count file.\n");
+
+                
+    //for (int i = 0; i < Groups.size(); i++) {
+                vector<string> thisGroupsSeqs = ct.getNamesOfSeqs();
+                for (int j = 0; j < thisGroupsSeqs.size(); j++) { names.insert(thisGroupsSeqs[j]); }
+            //}
         }
 		
 		if (m->getControl_pressed()) { return 0; }
@@ -411,7 +429,6 @@ int GetGroupsCommand::execute(){
 		if (namefile != "")			{		readName();		}
 		if (fastafile != "")		{		readFasta();	}
 		if (groupfile != "")		{		readGroup();	}
-        if (countfile != "")		{		readCount();	}
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
 		if (sharedfile != "")		{		readShared();	}
@@ -826,35 +843,6 @@ int GetGroupsCommand::readGroup(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetGroupsCommand", "readGroup");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int GetGroupsCommand::readCount(){
-	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
-        map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
-        variables["[extension]"] = util.getExtension(countfile);
-		string outputFileName = getOutputFileName("count", variables);
-
-        CountTable ct; ct.readTable(countfile, true, false, Groups); //reads only groups found in Groups
-				
-        int selectedCount = ct.getNumUniqueSeqs();
-        
-		if (selectedCount == 0) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");   }
-        else {
-            ct.printTable(outputFileName);
-            outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
-        }
-		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your count file.\n");
-        
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetGroupsCommand", "readCount");
 		exit(1);
 	}
 }

@@ -53,7 +53,6 @@ private:
 	int readFasta();
 	int readName();
 	int readGroup();
-    int readCount();
 	int readList();
 	int readTax();
 	int fillNames();
