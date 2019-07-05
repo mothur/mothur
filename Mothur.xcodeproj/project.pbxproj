@@ -237,7 +237,6 @@
 		481FB5E91AC1B77E0076CFF3 /* otuhierarchycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77912D37EC400DA6239 /* otuhierarchycommand.cpp */; };
 		481FB5EA1AC1B77E0076CFF3 /* pairwiseseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77D12D37EC400DA6239 /* pairwiseseqscommand.cpp */; };
 		481FB5EB1AC1B77E0076CFF3 /* parsefastaqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77F12D37EC400DA6239 /* parsefastaqcommand.cpp */; };
-		481FB5EC1AC1B77E0076CFF3 /* parselistscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78112D37EC400DA6239 /* parselistscommand.cpp */; };
 		481FB5ED1AC1B77E0076CFF3 /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78512D37EC400DA6239 /* parsimonycommand.cpp */; };
 		481FB5EE1AC1B77E0076CFF3 /* pcacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC486612D795D60055BC5C /* pcacommand.cpp */; };
 		481FB5EF1AC1B77E0076CFF3 /* pcoacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78712D37EC400DA6239 /* pcoacommand.cpp */; };
@@ -720,7 +719,6 @@
 		A7E9B90F12D37EC400DA6239 /* overlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77B12D37EC400DA6239 /* overlap.cpp */; };
 		A7E9B91012D37EC400DA6239 /* pairwiseseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77D12D37EC400DA6239 /* pairwiseseqscommand.cpp */; };
 		A7E9B91112D37EC400DA6239 /* parsefastaqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77F12D37EC400DA6239 /* parsefastaqcommand.cpp */; };
-		A7E9B91212D37EC400DA6239 /* parselistscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78112D37EC400DA6239 /* parselistscommand.cpp */; };
 		A7E9B91312D37EC400DA6239 /* parsimony.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78312D37EC400DA6239 /* parsimony.cpp */; };
 		A7E9B91412D37EC400DA6239 /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78512D37EC400DA6239 /* parsimonycommand.cpp */; };
 		A7E9B91512D37EC400DA6239 /* pcoacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78712D37EC400DA6239 /* pcoacommand.cpp */; };
@@ -1550,8 +1548,6 @@
 		A7E9B77E12D37EC400DA6239 /* pairwiseseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pairwiseseqscommand.h; path = source/commands/pairwiseseqscommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B77F12D37EC400DA6239 /* parsefastaqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsefastaqcommand.cpp; path = source/commands/parsefastaqcommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B78012D37EC400DA6239 /* parsefastaqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parsefastaqcommand.h; path = source/commands/parsefastaqcommand.h; sourceTree = SOURCE_ROOT; };
-		A7E9B78112D37EC400DA6239 /* parselistscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parselistscommand.cpp; path = source/commands/parselistscommand.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B78212D37EC400DA6239 /* parselistscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parselistscommand.h; path = source/commands/parselistscommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B78312D37EC400DA6239 /* parsimony.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsimony.cpp; path = source/calculators/parsimony.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B78412D37EC400DA6239 /* parsimony.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parsimony.h; path = source/calculators/parsimony.h; sourceTree = SOURCE_ROOT; };
 		A7E9B78512D37EC400DA6239 /* parsimonycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsimonycommand.cpp; path = source/commands/parsimonycommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -2614,8 +2610,6 @@
 				A7E9B77D12D37EC400DA6239 /* pairwiseseqscommand.cpp */,
 				A7E9B78012D37EC400DA6239 /* parsefastaqcommand.h */,
 				A7E9B77F12D37EC400DA6239 /* parsefastaqcommand.cpp */,
-				A7E9B78212D37EC400DA6239 /* parselistscommand.h */,
-				A7E9B78112D37EC400DA6239 /* parselistscommand.cpp */,
 				A7E9B78612D37EC400DA6239 /* parsimonycommand.h */,
 				A7E9B78512D37EC400DA6239 /* parsimonycommand.cpp */,
 				A7FC486512D795D60055BC5C /* pcacommand.h */,
@@ -3082,7 +3076,6 @@
 				481FB6511AC1B8100076CFF3 /* engine.cpp in Sources */,
 				481FB5381AC1B5E30076CFF3 /* clusterclassic.cpp in Sources */,
 				48C728721B6AB3B900D40830 /* testremovegroupscommand.cpp in Sources */,
-				481FB5EC1AC1B77E0076CFF3 /* parselistscommand.cpp in Sources */,
 				481FB5B61AC1B74F0076CFF3 /* filtersharedcommand.cpp in Sources */,
 				481FB5F81AC1B77E0076CFF3 /* rarefactsharedcommand.cpp in Sources */,
 				481FB62E1AC1B7EA0076CFF3 /* fastamap.cpp in Sources */,
@@ -3642,7 +3635,6 @@
 				A7E9B90F12D37EC400DA6239 /* overlap.cpp in Sources */,
 				A7E9B91012D37EC400DA6239 /* pairwiseseqscommand.cpp in Sources */,
 				A7E9B91112D37EC400DA6239 /* parsefastaqcommand.cpp in Sources */,
-				A7E9B91212D37EC400DA6239 /* parselistscommand.cpp in Sources */,
 				A7E9B91312D37EC400DA6239 /* parsimony.cpp in Sources */,
 				A7E9B91412D37EC400DA6239 /* parsimonycommand.cpp in Sources */,
 				A7E9B91512D37EC400DA6239 /* pcoacommand.cpp in Sources */,
