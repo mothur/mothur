@@ -979,7 +979,7 @@ vector<string> CountTable::printCompressedTable(string file, vector<string> grou
 int CountTable::find(int seq, int group, bool returnNext) {
     try {
         
-        if (!returnNext) { return find(seq, group); }
+        //if (!returnNext) { return find(seq, group); }
         int index = -1;
         
         for (int i = 0; i < counts[seq].size(); i++) {
@@ -1001,7 +1001,7 @@ int CountTable::find(int seq, int group, bool returnNext) {
 //returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
 int CountTable::getAbund(int seq, int group) {
     try {
-        int index = find(seq, group);
+        int index = find(seq, group, false);
         
         if (index != -1) { //this seq has a non zero abundance for this group
             return counts[seq][index].abund;
@@ -1321,7 +1321,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
                     }
                     m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                 }else {
-                    int indexOfGroup = find(it2->second, it->second);
+                    int indexOfGroup = find(it2->second, it->second, false);
                     int oldCount = 0;
                     
                     if (indexOfGroup == -1) { //create item for this group

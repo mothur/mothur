@@ -14,6 +14,7 @@
 //**********************************************************************************************************************
 vector<string> SplitGroupCommand::setParameters(){	
 	try {
+        CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","list",false,false,true); parameters.push_back(plist);
         CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","fasta",false,false,true); parameters.push_back(pflow);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,false,true); parameters.push_back(pfasta);
         CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none","fastq",false,false,true); parameters.push_back(pfastq);
@@ -62,7 +63,8 @@ string SplitGroupCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta")        {  pattern = "[filename],[group],fasta";        }
-        else if (type == "fastq")    {  pattern = "[filename],[group],fastq";         }
+        else if (type == "list")    {  pattern = "[filename],[group],list";         }
+        else if (type == "fastq")    {  pattern = "[filename],[group],fastq";       }
         else if (type == "flow")    {  pattern = "[filename],[group],flow";         }
         else if (type == "name")    {  pattern = "[filename],[group],names";        }
         else if (type == "count")   {  pattern = "[filename],[group],count_table";  }
@@ -89,6 +91,7 @@ SplitGroupCommand::SplitGroupCommand(){
 		outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SplitGroupCommand", "SplitGroupCommand");
@@ -126,6 +129,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			outputTypes["name"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
+            outputTypes["list"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.valid(parameters, "inputdir");		
@@ -179,6 +183,14 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("list");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {	parameters["list"] = inputDir + it->second;		}
+                }
 			}
 
 			
@@ -191,6 +203,11 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			if (fastafile == "not open") { abort = true; }
             else if (fastafile == "not found") {	fastafile = "";  }
             else { current->setFastaFile(fastafile); }
+            
+            listfile = validParameter.validFile(parameters, "list");
+            if (listfile == "not open") { abort = true; }
+            else if (listfile == "not found") {	listfile = "";  }
+            else { current->setListFile(listfile); }
             
             fastqfile = validParameter.validFile(parameters, "fastq");
             if (fastqfile == "not open") { abort = true; }
@@ -217,7 +234,11 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
                 else {
                     flowfile = current->getFlowFile();
                     if (flowfile != "") {  m->mothurOut("Using " + flowfile + " as input file for the flow parameter.\n");  }
-                    else { m->mothurOut("[ERROR]: You need to provide a fasta, fastq or flow file.\n");  abort = true; }
+                    else {
+                        listfile = current->getListFile();
+                        if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
+                        else { m->mothurOut("[ERROR]: You need to provide a fasta, list, fastq or flow file.\n");  abort = true; }
+                    }
                 }
             }
             
@@ -293,7 +314,7 @@ int SplitGroupCommand::execute(){
 		
         if (flowfile != "")         {  splitFlow();     }
         if (fastqfile != "")        {  splitFastq();    }
-        if (fastafile != "")        {
+        if ((fastafile != "") || (listfile != ""))       {
             if (countfile == "" )   {  runNameGroup();  }
             else                    {  runCount();      }
         }
@@ -341,7 +362,8 @@ int SplitGroupCommand::runNameGroup(){
 		vector<string> namesGroups = groupMap.getNamesOfGroups();
         if (Groups.size() == 0) { Groups = namesGroups; }
 		
-		string fastafileRoot = outputDir + util.getRootName(util.getSimpleName(fastafile));
+		string fastaFileRoot = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        string listFileRoot = outputDir + util.getRootName(util.getSimpleName(listfile));
 		string namefileRoot = outputDir + util.getRootName(util.getSimpleName(namefile));
         string groupfileRoot = outputDir + util.getRootName(util.getSimpleName(groupfile));
 		
@@ -349,11 +371,15 @@ int SplitGroupCommand::runNameGroup(){
 			
 			m->mothurOut("Processing group: " + Groups[i] + "\n"); 
 			
-            map<string, string> variables; 
-            variables["[filename]"] = fastafileRoot;
+            map<string, string> variables;
             variables["[group]"] = Groups[i];
-
+            
+            variables["[filename]"] = fastaFileRoot;
 			string newFasta = getOutputFileName("fasta",variables);
+            
+            variables["[filename]"] = listFileRoot;
+            string newList = getOutputFileName("list",variables);
+            
             variables["[filename]"] = namefileRoot;
 			string newName = getOutputFileName("name",variables);
             
@@ -375,10 +401,20 @@ int SplitGroupCommand::runNameGroup(){
             //use unique.seqs to create new name and fastafile
             string uniqueFasta = fastafile+Groups[i];
             string uniqueName = namefile+Groups[i];
-            util.copyFile(fastafile, uniqueFasta);
+            string uniqueList = fastafile+Groups[i];
+            
             util.copyFile(namefile, uniqueName);
             
-            string inputString = "dups=f, fasta=" + uniqueFasta + ", accnos=" + newGroup+".accnos" + ", name=" + uniqueName;
+            string inputString = "dups=f, accnos=" + newGroup+".accnos" + ", name=" + uniqueName;
+            if (fastafile != "") {
+                inputString += ", fasta=" + uniqueFasta;
+                util.copyFile(fastafile, uniqueFasta);
+            }
+            if (listfile != "")  {
+                inputString += ", list=" + uniqueList;
+                util.copyFile(listfile, uniqueList);
+            }
+            
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
             
@@ -389,15 +425,23 @@ int SplitGroupCommand::runNameGroup(){
             
             delete getCommand;
             
-            util.renameFile(filenames["fasta"][0], newFasta);
+            if (fastafile != "") {
+                util.renameFile(filenames["fasta"][0], newFasta);
+                outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
+                util.mothurRemove(uniqueFasta);
+            }
+            if (listfile != "") {
+                util.renameFile(filenames["list"][0], newList);
+                outputNames.push_back(newList); outputTypes["list"].push_back(newList);
+                util.mothurRemove(uniqueList);
+            }
+            
             util.renameFile(filenames["name"][0], newName);
-            outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
             outputNames.push_back(newName); outputTypes["name"].push_back(newName);
             
             m->mothurOut("/******************************************/\nDone.\n");
             
             util.mothurRemove(newGroup+".accnos");
-            util.mothurRemove(uniqueFasta);
             util.mothurRemove(uniqueName);
 			
 			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0; }
@@ -410,6 +454,95 @@ int SplitGroupCommand::runNameGroup(){
 		m->errorOut(e, "SplitGroupCommand", "runNameGroup");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int SplitGroupCommand::runCount(){
+    try {
+        
+        CountTable ct;
+        ct.readTable(countfile, true, false, Groups);
+        if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); m->setControl_pressed(true); }
+        
+        if (m->getControl_pressed()) { return 0; }
+        
+        Groups = ct.getNamesOfGroups();
+        
+        string fastaFileRoot = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        string listFileRoot = outputDir + util.getRootName(util.getSimpleName(listfile));
+        
+        for (int i=0; i<Groups.size(); i++) {
+           
+            map<string, string> variables;
+            variables["[group]"] = Groups[i];
+            
+            variables["[filename]"] = fastaFileRoot;
+            string newFasta = getOutputFileName("fasta",variables);
+            
+            variables["[filename]"] = listFileRoot;
+            string newList = getOutputFileName("list",variables);
+
+            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+            string newCount = getOutputFileName("count",variables);
+            outputNames.push_back(newCount); outputTypes["count"].push_back(newCount);
+            
+            vector<string> tempGroups; tempGroups.push_back(Groups[i]);
+            ct.printCompressedTable(newCount, tempGroups);
+            vector<string> namesOfSeqsInGroup = ct.getNamesOfSeqs(Groups[i]);
+            
+            ofstream outAccnos;
+            util.openOutputFile(newCount+".accnos", outAccnos);
+            for (long long j = 0; j < namesOfSeqsInGroup.size(); j++) { outAccnos << namesOfSeqsInGroup[j] << endl; }
+            outAccnos.close();
+            
+            //use unique.seqs to create new name and fastafile
+            string uniqueFasta = fastafile+Groups[i];
+            string uniqueList = listfile+Groups[i];
+            
+            string inputString = "dups=f, accnos=" + newCount+".accnos";
+            if (fastafile != "") {
+                inputString += ", fasta=" + uniqueFasta;
+                util.copyFile(fastafile, uniqueFasta);
+            }
+            if (listfile != "")  {
+                inputString += ", list=" + uniqueList;
+                util.copyFile(listfile, uniqueList);
+            }
+            
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
+            
+            Command* getCommand = new GetSeqsCommand(inputString);
+            getCommand->execute();
+            
+            map<string, vector<string> > filenames = getCommand->getOutputFiles();
+            
+            delete getCommand;
+            
+            if (fastafile != "") {
+                util.renameFile(filenames["fasta"][0], newFasta);
+                outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
+                util.mothurRemove(uniqueFasta);
+            }
+            if (listfile != "") {
+                util.renameFile(filenames["list"][0], newList);
+                outputNames.push_back(newList); outputTypes["list"].push_back(newList);
+                util.mothurRemove(uniqueList);
+            }
+        
+            m->mothurOut("/******************************************/\nDone.\n");
+            
+            util.mothurRemove(newCount+".accnos");
+            
+            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0; }
+        }
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitGroupCommand", "runCount");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 struct flowOutput {
@@ -626,70 +759,6 @@ int SplitGroupCommand::splitFastq(){
     }
 }
 //**********************************************************************************************************************
-int SplitGroupCommand::runCount(){
-	try {
-        
-        CountTable ct;
-        ct.readTable(countfile, true, false, Groups);
-        if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); m->setControl_pressed(true); }
-        
-        if (m->getControl_pressed()) { return 0; }
-        
-        Groups = ct.getNamesOfGroups();
-        
-        //fill filehandles with neccessary ofstreams
-        map<string, string> ffiles; //group -> filename
-        for (int i=0; i<Groups.size(); i++) {
-            ofstream ftemp, ctemp;
-            map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
-            variables["[group]"] = Groups[i];
-            string newFasta = getOutputFileName("fasta",variables);
-            outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
-            ffiles[Groups[i]] = newFasta;
-            util.openOutputFile(newFasta, ftemp); ftemp.close();
-            
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
-            string newCount = getOutputFileName("count",variables);
-            outputNames.push_back(newCount); outputTypes["count"].push_back(newCount);
-            //util.openOutputFile(newCount, ctemp);
-            //ctemp << "Representative_Sequence\ttotal\t" << Groups[i] << endl;
-            
-            //map<string, int> thisGroupsCounts = ct.getNameMap(Groups[i]);
-            //for (map<string, int>::iterator it = thisGroupsCounts.begin(); it != thisGroupsCounts.end(); it++) { ctemp << it->first << '\t' << it->second << '\t' << it->second << endl; }
-            //ctemp.close();
-            
-            vector<string> tempGroups; tempGroups.push_back(Groups[i]);
-            ct.printCompressedTable(newCount, tempGroups);
-        }
-        
-        ifstream in; 
-        util.openInputFile(fastafile, in);
-        
-        while (!in.eof()) {
-            Sequence seq(in); util.gobble(in);
-            
-            if (m->getControl_pressed()) { break; }
-            
-            if (ct.inTable(seq.getName())) {
-                vector<string> thisSeqsGroups = ct.getGroups(seq.getName());
-                for (int i = 0; i < thisSeqsGroups.size(); i++) {
-                    ofstream outf;
-                    util.openOutputFileAppend(ffiles[thisSeqsGroups[i]], outf);
-                    seq.printSequence(outf); outf.close();
-                }
-            }
-        }
-        in.close();
-        
-        return 0;
 
-    }
-	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "runCount");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 
