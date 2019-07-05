@@ -46,7 +46,7 @@ public:
     double logLikelihoodRampal(int n, double dMDash, double dV, double dNu);
     double logLikelihoodQuad(int n, double dMDash, double dV, double dNu);
     double calcMu(void *ptLNParams);
-    
+    int fitSigma(vector<double>, double, int fi, t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));
     
     #endif
     
@@ -57,7 +57,9 @@ public:
     
     void loadAbundance(t_Data *ptData, SAbundVector* rank);
     void freeAbundance(t_Data *ptData);
-    acceptRatioPos findBest(vector<double> accept);
+    
+    
+    
     
     MothurOut* m;
     
@@ -66,6 +68,10 @@ private:
     Utils util;
     
     string method;
+    
+    acceptRatioPos findBest(vector<double> accept);
+    
+    
     
 };
 

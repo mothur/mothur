@@ -810,6 +810,110 @@ void DiversityUtils::getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vec
     }
 }
 /***********************************************************************/
+int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int fitIters, t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro)){
+    try {
+        acceptRatioPos defaultRatio = findBest(acceptanceRates);
+        
+        int numTries = 1;
+        map<double, acceptRatioPos> sigmaToAccept; //sigma value -> acceptance ratio
+        map<acceptRatioPos, double> acceptToSigma; //acceptance ratio -> sigma value
+        
+        acceptRatioPos temp; //1.0 and pos 0 be default
+        sigmaToAccept[(sigmaA/10.0)] = temp;        //0.01
+        sigmaToAccept[(sigmaA/100.0)] = temp;       //0.001
+        sigmaToAccept[(sigmaA/1000.0)] = temp;       //0.0001
+        sigmaToAccept[(sigmaA/10000.0)] = temp;       //0.00001
+        
+        double newSigmaA = sigmaA + (sigmaA/2.0);         //0.15
+        sigmaToAccept[newSigmaA] = temp;
+        newSigmaA = sigmaA+sigmaA;                  //0.2
+        sigmaToAccept[newSigmaA] = temp;
+        newSigmaA = 5*sigmaA;                  //0.5
+        sigmaToAccept[newSigmaA] = temp;
+        
+        for (map<double, acceptRatioPos>::iterator it = sigmaToAccept.begin(); it != sigmaToAccept.end(); it++) {
+            if (m->getControl_pressed()) { break; }
+            
+            ptParams->dSigmaX = it->first; ptParams->dSigmaY = it->first; ptParams->dSigmaN = it->first;
+            
+            acceptanceRates = mcmc(ptParams, ptData, ptX, f);
+            
+            it->second = findBest(acceptanceRates);
+            
+            acceptToSigma[it->second] = it->first;
+            
+            if (it->second.acceptRatio <= 0.05) { break;  }
+        }
+        
+        sigmaToAccept[sigmaA] = defaultRatio; //0.1
+        acceptToSigma[defaultRatio] = sigmaA;
+        
+        //adjust around closest value
+        acceptRatioPos thisBest = acceptToSigma.begin()->first;
+        //for (map<acceptRatioPos, double>::iterator it = acceptToSigma.begin(); it != acceptToSigma.end(); it++) { cout << it->first.acceptRatio << '\t' << it->second << endl; }
+        sigmaA = acceptToSigma.begin()->second;
+        ptParams->dSigmaX = sigmaA; ptParams->dSigmaY = sigmaA; ptParams->dSigmaN = sigmaA;
+        
+        double factor = 0.05;
+        
+        while ((thisBest.acceptRatio > 0.05) && (numTries < fitIters)) {
+            if (m->getControl_pressed()) { break; }
+            
+            m->mothurOut("\nFit try: " + toString(numTries) + "\n");
+            //cout << tParams.dSigmaX << '\t' << tParams.dSigmaY << '\t' << tParams.dSigmaN << endl;
+            if (thisBest.acceptRatio < 0.45) {
+                
+                if ((ptParams->dSigmaX - factor) > 0.0) { ptParams->dSigmaX -= factor; ptParams->dSigmaY -= factor; ptParams->dSigmaN -= factor;  }
+                else {ptParams->dSigmaX /= 10.0; ptParams->dSigmaY /= 10.0; ptParams->dSigmaN /= 10.0;  }
+                
+            }else if (thisBest.acceptRatio > 0.55) {
+                
+                ptParams->dSigmaX += factor; ptParams->dSigmaY += factor; ptParams->dSigmaN += factor;
+            }
+            
+            map<double, acceptRatioPos>::iterator it = sigmaToAccept.find(ptParams->dSigmaX);
+            
+            if (it != sigmaToAccept.end()) { //we already tried this value, take average of 2 best tries
+                map<acceptRatioPos, double>::iterator it2 = acceptToSigma.begin();
+                double average = it2->second;
+                
+                it2++;
+                average += it2->second;
+                average /= 2.0;
+                //cout << "average best\n";
+                ptParams->dSigmaX = average; ptParams->dSigmaY = average; ptParams->dSigmaN = average;
+            }
+            //cout << tParams.dSigmaX << '\t' << tParams.dSigmaY << '\t' << tParams.dSigmaN << endl;
+            acceptanceRates = mcmc(ptParams, ptData, ptX, f);
+            
+            thisBest = findBest(acceptanceRates);
+            
+            acceptToSigma[thisBest] = ptParams->dSigmaX;
+            sigmaToAccept[ptParams->dSigmaX] = thisBest;
+            
+            numTries++;
+        }
+        
+        if (numTries == fitIters) {
+            sigmaA = acceptToSigma.begin()->second;
+            ptParams->dSigmaX = sigmaA; ptParams->dSigmaY = sigmaA; ptParams->dSigmaN = sigmaA;
+            
+            acceptanceRates = mcmc(ptParams, ptData, ptX, f);
+            
+            thisBest = findBest(acceptanceRates);
+        }
+        
+        if ((thisBest.acceptRatio > 0.05)) { m->mothurOut("\n[ERROR]: Unable to reach acceptable ratio, please review and set sigma parameters manually.\n"); m->setControl_pressed(true); }
+        
+        return thisBest.pos;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DiversityUtils", "fitSigma");
+        exit(1);
+    }
+}
+/***********************************************************************/
 vector<double> DiversityUtils::mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro)){
     try {
         int ptXSize = 3;

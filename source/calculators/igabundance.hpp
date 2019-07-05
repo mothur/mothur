@@ -26,7 +26,6 @@ public:
     
 private:
     Utils util;
-    MothurOut* m;
     
 };
 
