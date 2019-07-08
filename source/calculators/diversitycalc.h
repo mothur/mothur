@@ -19,10 +19,11 @@
 /***********************************************************************/
 struct acceptRatioPos  {
     double acceptRatio;
+    bool high;
     int pos;
     
-    acceptRatioPos() { pos = 0; acceptRatio = 1.0; }
-    acceptRatioPos(double ac, int po) : acceptRatio(ac), pos(po) {}
+    acceptRatioPos() { pos = 0; acceptRatio = 1.0; high = false; }
+    acceptRatioPos(double ac, int po, bool h) : acceptRatio(ac), pos(po), high(h) {}
     ~acceptRatioPos() {}
 };
 

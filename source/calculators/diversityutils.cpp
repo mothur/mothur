@@ -814,6 +814,8 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
     try {
         acceptRatioPos defaultRatio = findBest(acceptanceRates);
         
+        if (defaultRatio.acceptRatio <= 0.05) { return defaultRatio.pos;  }
+        
         int numTries = 1;
         map<double, acceptRatioPos> sigmaToAccept; //sigma value -> acceptance ratio
         map<acceptRatioPos, double> acceptToSigma; //acceptance ratio -> sigma value
@@ -831,6 +833,11 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
         newSigmaA = 5*sigmaA;                  //0.5
         sigmaToAccept[newSigmaA] = temp;
         
+        //adjust around closest "high" and closest "low" values
+        acceptRatioPos thisBestHigh, thisBestLow;
+        map<acceptRatioPos, double> acceptToSigmaHigh; //acceptance ratio -> sigma value
+        map<acceptRatioPos, double> acceptToSigmaLow; //acceptance ratio -> sigma value
+        
         for (map<double, acceptRatioPos>::iterator it = sigmaToAccept.begin(); it != sigmaToAccept.end(); it++) {
             if (m->getControl_pressed()) { break; }
             
@@ -840,57 +847,79 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             
             it->second = findBest(acceptanceRates);
             
+            if (it->second.high) { //high
+                if (it->second.acceptRatio < thisBestHigh.acceptRatio) {  thisBestHigh = it->second; }
+                acceptToSigmaHigh[it->second] = it->first;
+            }else { //low
+                if (it->second.acceptRatio < thisBestLow.acceptRatio) {  thisBestLow = it->second; }
+                acceptToSigmaLow[it->second] = it->first;
+            }
             acceptToSigma[it->second] = it->first;
+            
+            cout << it->first << '\t' << it->second.acceptRatio << '\t' << it->second.high << endl;
             
             if (it->second.acceptRatio <= 0.05) { break;  }
         }
         
         sigmaToAccept[sigmaA] = defaultRatio; //0.1
         acceptToSigma[defaultRatio] = sigmaA;
+        cout << thisBestHigh.acceptRatio << '\t' << thisBestLow.acceptRatio << endl;
         
-        //adjust around closest value
-        acceptRatioPos thisBest = acceptToSigma.begin()->first;
-        //for (map<acceptRatioPos, double>::iterator it = acceptToSigma.begin(); it != acceptToSigma.end(); it++) { cout << it->first.acceptRatio << '\t' << it->second << endl; }
-        sigmaA = acceptToSigma.begin()->second;
+        double factor = 0.0; bool badHigh = false; bool badLow = false; double badFactor = 0.0;
+        map<acceptRatioPos, double>::iterator itFind = acceptToSigma.find(thisBestHigh);
+        if (itFind != acceptToSigma.end()) {
+            if (thisBestHigh.acceptRatio > 0.25) { cout << "thisBestHigh above 75% acceptance, lets disregard\n\n";
+                badHigh = true; badFactor += itFind->second;
+            }else {
+                factor += itFind->second;
+                sigmaA = itFind->second;
+            }
+            cout << "high sigma = " << itFind->second << '\t' << factor << endl;
+            
+        }else { cout << "shouldn't be here....\n"; m->setControl_pressed(true);  }
+        itFind = acceptToSigma.find(thisBestLow);
+        if (itFind != acceptToSigma.end()) {
+            if (thisBestLow.acceptRatio > 0.25) { //below 25% acceptance, lets disregard
+                cout << "thisBestLow below 25% acceptance, lets disregard\n\n";
+                badLow = true; badFactor += itFind->second;
+            }else {
+                factor += itFind->second;
+                if (sigmaA > itFind->second) { sigmaA = itFind->second; }
+            }
+            
+            cout << "low sigma = " << itFind->second << endl;
+        }else { cout << "shouldn't be here....\n"; m->setControl_pressed(true);  }
+        
+        if (badHigh && badLow) { fitIters = 0; } //abort
+        else if (badHigh || badLow)  {
+            double increment = factor / (double)(fitIters);
+            sigmaA -= (increment*(fitIters/(double)2.0));
+        }else {
+            factor /= (double) fitIters;
+        }
+        cout << factor << '\t' << sigmaA << '\t' << thisBestLow.acceptRatio << endl;
         ptParams->dSigmaX = sigmaA; ptParams->dSigmaY = sigmaA; ptParams->dSigmaN = sigmaA;
-        
-        double factor = 0.05;
-        
-        while ((thisBest.acceptRatio > 0.05) && (numTries < fitIters)) {
+
+        while ((thisBestLow.acceptRatio > 0.05) && (numTries < fitIters)) {
             if (m->getControl_pressed()) { break; }
             
             m->mothurOut("\nFit try: " + toString(numTries) + "\n");
-            //cout << tParams.dSigmaX << '\t' << tParams.dSigmaY << '\t' << tParams.dSigmaN << endl;
-            if (thisBest.acceptRatio < 0.45) {
-                
-                if ((ptParams->dSigmaX - factor) > 0.0) { ptParams->dSigmaX -= factor; ptParams->dSigmaY -= factor; ptParams->dSigmaN -= factor;  }
-                else {ptParams->dSigmaX /= 10.0; ptParams->dSigmaY /= 10.0; ptParams->dSigmaN /= 10.0;  }
-                
-            }else if (thisBest.acceptRatio > 0.55) {
-                
-                ptParams->dSigmaX += factor; ptParams->dSigmaY += factor; ptParams->dSigmaN += factor;
-            }
+            
+            ptParams->dSigmaX += factor; ptParams->dSigmaY += factor; ptParams->dSigmaN += factor;
             
             map<double, acceptRatioPos>::iterator it = sigmaToAccept.find(ptParams->dSigmaX);
             
-            if (it != sigmaToAccept.end()) { //we already tried this value, take average of 2 best tries
-                map<acceptRatioPos, double>::iterator it2 = acceptToSigma.begin();
-                double average = it2->second;
-                
-                it2++;
-                average += it2->second;
-                average /= 2.0;
-                //cout << "average best\n";
-                ptParams->dSigmaX = average; ptParams->dSigmaY = average; ptParams->dSigmaN = average;
+            cout << factor << '\t' << ptParams->dSigmaX << '\t' << thisBestLow.high << endl;
+            
+            if (it == sigmaToAccept.end()) {
+                            //cout << tParams.dSigmaX << '\t' << tParams.dSigmaY << '\t' << tParams.dSigmaN << endl;
+                acceptanceRates = mcmc(ptParams, ptData, ptX, f);
+            
+                thisBestLow = findBest(acceptanceRates);
+            
+                acceptToSigma[thisBestLow] = ptParams->dSigmaX;
+                sigmaToAccept[ptParams->dSigmaX] = thisBestLow;
             }
-            //cout << tParams.dSigmaX << '\t' << tParams.dSigmaY << '\t' << tParams.dSigmaN << endl;
-            acceptanceRates = mcmc(ptParams, ptData, ptX, f);
-            
-            thisBest = findBest(acceptanceRates);
-            
-            acceptToSigma[thisBest] = ptParams->dSigmaX;
-            sigmaToAccept[ptParams->dSigmaX] = thisBest;
-            
             numTries++;
         }
         
@@ -900,12 +929,12 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             
             acceptanceRates = mcmc(ptParams, ptData, ptX, f);
             
-            thisBest = findBest(acceptanceRates);
+            thisBestLow = findBest(acceptanceRates);
         }
         
-        if ((thisBest.acceptRatio > 0.05)) { m->mothurOut("\n[ERROR]: Unable to reach acceptable ratio, please review and set sigma parameters manually.\n"); m->setControl_pressed(true); }
+        if ((thisBestLow.acceptRatio > 0.05)) { m->mothurOut("\n[ERROR]: Unable to reach acceptable ratio, please review and set sigma parameters manually.\n"); m->setControl_pressed(true); }
         
-        return thisBest.pos;
+        return thisBestLow.pos;
         
     }
     catch(exception& e) {
@@ -1024,15 +1053,22 @@ acceptRatioPos DiversityUtils::findBest(vector<double> acceptanceRates){
     try {
         
         double defaultSigmaAcc = fabs(0.5 - acceptanceRates[0]);  //"0" version
-        acceptRatioPos defaultRatio(defaultSigmaAcc, 0);
+        bool high = true;
+        if ((0.5 - acceptanceRates[0]) > 0.0) { high = false; }
+        acceptRatioPos defaultRatio(defaultSigmaAcc, 0, high);
+        
         
         if (defaultRatio.acceptRatio > fabs(0.5 - acceptanceRates[1])) {  //is the "1" version better?
             defaultRatio.acceptRatio = fabs(0.5 - acceptanceRates[1]);
             defaultRatio.pos = 1;
+            defaultRatio.high = true;
+            if ((0.5 - acceptanceRates[1]) > 0.0) { defaultRatio.high = false; }
         }
         if (defaultRatio.acceptRatio > fabs(0.5 - acceptanceRates[2])) {  //is the "2" version better?
             defaultRatio.acceptRatio = fabs(0.5 - acceptanceRates[2]);
             defaultRatio.pos = 2;
+            defaultRatio.high = true;
+            if ((0.5 - acceptanceRates[2]) > 0.0) { defaultRatio.high = false; }
         }
         
         return defaultRatio;
