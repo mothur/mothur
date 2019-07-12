@@ -830,8 +830,8 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
         sigmaToAccept[newSigmaA] = temp;
         newSigmaA = sigmaA+sigmaA;                  //0.2
         sigmaToAccept[newSigmaA] = temp;
-        newSigmaA = 5*sigmaA;                  //0.5
-        sigmaToAccept[newSigmaA] = temp;
+    //newSigmaA = 5*sigmaA;                  //0.5
+        //sigmaToAccept[newSigmaA] = temp;
         
         //adjust around closest "high" and closest "low" values
         acceptRatioPos thisBestHigh, thisBestLow;
@@ -856,50 +856,50 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             }
             acceptToSigma[it->second] = it->first;
             
-            cout << it->first << '\t' << it->second.acceptRatio << '\t' << it->second.high << endl;
-            
-            if (it->second.acceptRatio <= 0.05) { break;  }
+            if (it->second.acceptRatio <= 0.05) { return it->second.pos;  }
         }
         
         sigmaToAccept[sigmaA] = defaultRatio; //0.1
         acceptToSigma[defaultRatio] = sigmaA;
-        cout << thisBestHigh.acceptRatio << '\t' << thisBestLow.acceptRatio << endl;
         
         double factor = 0.0; bool badHigh = false; bool badLow = false; double badFactor = 0.0;
         map<acceptRatioPos, double>::iterator itFind = acceptToSigma.find(thisBestHigh);
         if (itFind != acceptToSigma.end()) {
-            if (thisBestHigh.acceptRatio > 0.25) { cout << "thisBestHigh above 75% acceptance, lets disregard\n\n";
+            if (thisBestHigh.acceptRatio > 0.25) {
                 badHigh = true; badFactor += itFind->second;
             }else {
                 factor += itFind->second;
                 sigmaA = itFind->second;
             }
-            cout << "high sigma = " << itFind->second << '\t' << factor << endl;
-            
-        }else { cout << "shouldn't be here....\n"; m->setControl_pressed(true);  }
+        }//else no high values
+        
+        
         itFind = acceptToSigma.find(thisBestLow);
         if (itFind != acceptToSigma.end()) {
             if (thisBestLow.acceptRatio > 0.25) { //below 25% acceptance, lets disregard
-                cout << "thisBestLow below 25% acceptance, lets disregard\n\n";
                 badLow = true; badFactor += itFind->second;
             }else {
                 factor += itFind->second;
-                if (sigmaA > itFind->second) { sigmaA = itFind->second; }
+                if (badHigh) { sigmaA = itFind->second; }
+                else { if (sigmaA > itFind->second) { sigmaA = itFind->second; } }
             }
-            
-            cout << "low sigma = " << itFind->second << endl;
-        }else { cout << "shouldn't be here....\n"; m->setControl_pressed(true);  }
+        }//no low values
         
-        if (badHigh && badLow) { fitIters = 0; } //abort
+        if (badHigh && badLow) {
+            double increment = badFactor / (double)(fitIters);
+            sigmaA = acceptToSigma.begin()->second; //sigma for best try
+            sigmaA -= (increment*(fitIters/(double)2.0));
+            factor = badFactor / (double)(fitIters);
+        }
         else if (badHigh || badLow)  {
             double increment = factor / (double)(fitIters);
             sigmaA -= (increment*(fitIters/(double)2.0));
         }else {
             factor /= (double) fitIters;
         }
-        cout << factor << '\t' << sigmaA << '\t' << thisBestLow.acceptRatio << endl;
-        ptParams->dSigmaX = sigmaA; ptParams->dSigmaY = sigmaA; ptParams->dSigmaN = sigmaA;
 
+        ptParams->dSigmaX = sigmaA; ptParams->dSigmaY = sigmaA; ptParams->dSigmaN = sigmaA;
+        
         while ((thisBestLow.acceptRatio > 0.05) && (numTries < fitIters)) {
             if (m->getControl_pressed()) { break; }
             
@@ -909,18 +909,15 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             
             map<double, acceptRatioPos>::iterator it = sigmaToAccept.find(ptParams->dSigmaX);
             
-            cout << factor << '\t' << ptParams->dSigmaX << '\t' << thisBestLow.high << endl;
-            
             if (it == sigmaToAccept.end()) {
-                            //cout << tParams.dSigmaX << '\t' << tParams.dSigmaY << '\t' << tParams.dSigmaN << endl;
                 acceptanceRates = mcmc(ptParams, ptData, ptX, f);
             
                 thisBestLow = findBest(acceptanceRates);
             
                 acceptToSigma[thisBestLow] = ptParams->dSigmaX;
                 sigmaToAccept[ptParams->dSigmaX] = thisBestLow;
+                numTries++;
             }
-            numTries++;
         }
         
         if (numTries == fitIters) {

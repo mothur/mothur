@@ -9,7 +9,7 @@
 #ifndef fn_hpp
 #define fn_hpp
 
-#include <calculator.h>
+#include "calculator.h"
 
 /***********************************************************************/
 

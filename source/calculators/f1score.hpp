@@ -9,7 +9,7 @@
 #ifndef f1score_hpp
 #define f1score_hpp
 
-#include <calculator.h>
+#include "calculator.h"
 
 /***********************************************************************/
 

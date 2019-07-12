@@ -9,7 +9,7 @@
 #ifndef accuracy_hpp
 #define accuracy_hpp
 
-#include <calculator.h>
+#include "calculator.h"
 
 /***********************************************************************/
 

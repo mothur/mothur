@@ -357,6 +357,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
                 else {  temp = "1000";  }
             }
             util.mothurConvert(temp, burnSample);
+            if (burnSample <= 0)  {  m->mothurOut("[ERROR]: Burn sample must be greater than 0. Aborting.\n"); abort=true; }
             
             temp = validParameter.valid(parameters, "coverage");		if (temp == "not found") { temp = "0.8"; }
             util.mothurConvert(temp, coverage);
