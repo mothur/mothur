@@ -1,0 +1,27 @@
+Ubuntu 18
+
+Install dependancies
+
+To use GSL:  		sudo apt-get install lib-gsl-dev
+To use Boost: 		sudo apt-get install libboost-all-dev
+To use Readline: 	sudo apt-get install libreadline-dev
+To use HDF5: 		sudo apt-get install libhdf5-dev
+
+Set locations in makefile
+
+OPTIMIZE ?= yes
+USEREADLINE ?= yes
+USEBOOST ?= yes
+USEHDF5 ?= yes
+USEGSL ?= yes
+LOGFILE_NAME ?= no
+BOOST_LIBRARY_DIR ?= "\"/usr/lib/x86_64-linux-gnu\""
+BOOST_INCLUDE_DIR ?= "\"/usr/include/\""
+HDF5_LIBRARY_DIR ?= "\"/usr/lib/x86_64-linux-gnu/hdf5/serial\""
+HDF5_INCLUDE_DIR ?= "\"/usr/include/hdf5/serial/\""
+GSL_LIBRARY_DIR ?= "\"/usr/lib/x86_64-linux-gnu\""
+GSL_INCLUDE_DIR ?= "\"/usr/include/\""
+
+make clean 
+make
+
