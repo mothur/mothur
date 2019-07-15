@@ -830,14 +830,16 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
         sigmaToAccept[newSigmaA] = temp;
         newSigmaA = sigmaA+sigmaA;                  //0.2
         sigmaToAccept[newSigmaA] = temp;
-    //newSigmaA = 5*sigmaA;                  //0.5
-        //sigmaToAccept[newSigmaA] = temp;
-        
+    
         //adjust around closest "high" and closest "low" values
         acceptRatioPos thisBestHigh, thisBestLow;
         map<acceptRatioPos, double> acceptToSigmaHigh; //acceptance ratio -> sigma value
         map<acceptRatioPos, double> acceptToSigmaLow; //acceptance ratio -> sigma value
         
+        //set iters to 1000, get close to value then run with nIters
+        int savedIters = ptParams->nIter;
+        ptParams->nIter = 1000;
+    
         for (map<double, acceptRatioPos>::iterator it = sigmaToAccept.begin(); it != sigmaToAccept.end(); it++) {
             if (m->getControl_pressed()) { break; }
             
@@ -856,13 +858,35 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             }
             acceptToSigma[it->second] = it->first;
             
-            if (it->second.acceptRatio <= 0.05) { return it->second.pos;  }
+            if (it->second.acceptRatio <= 0.05) {
+                //try with nIters to confirm
+                ptParams->nIter = savedIters;
+                
+                acceptanceRates = mcmc(ptParams, ptData, ptX, f);
+                
+                it->second = findBest(acceptanceRates);
+                
+                if (it->second.high) { //high
+                    if (it->second.acceptRatio < thisBestHigh.acceptRatio) {  thisBestHigh = it->second; }
+                    acceptToSigmaHigh[it->second] = it->first;
+                }else { //low
+                    if (it->second.acceptRatio < thisBestLow.acceptRatio) {  thisBestLow = it->second; }
+                    acceptToSigmaLow[it->second] = it->first;
+                }
+                acceptToSigma[it->second] = it->first;
+                
+                //if good value
+                if (it->second.acceptRatio <= 0.05) { return it->second.pos;  }
+                else {  ptParams->nIter = 1000;  }
+            }
         }
         
         sigmaToAccept[sigmaA] = defaultRatio; //0.1
         acceptToSigma[defaultRatio] = sigmaA;
         
         double factor = 0.0; bool badHigh = false; bool badLow = false; double badFactor = 0.0;
+        
+        //find best high and check
         map<acceptRatioPos, double>::iterator itFind = acceptToSigma.find(thisBestHigh);
         if (itFind != acceptToSigma.end()) {
             if (thisBestHigh.acceptRatio > 0.25) {
@@ -873,7 +897,7 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             }
         }//else no high values
         
-        
+        //find best low and check
         itFind = acceptToSigma.find(thisBestLow);
         if (itFind != acceptToSigma.end()) {
             if (thisBestLow.acceptRatio > 0.25) { //below 25% acceptance, lets disregard
@@ -899,6 +923,7 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
         }
 
         ptParams->dSigmaX = sigmaA; ptParams->dSigmaY = sigmaA; ptParams->dSigmaN = sigmaA;
+        ptParams->nIter = savedIters;
         
         while ((thisBestLow.acceptRatio > 0.05) && (numTries < fitIters)) {
             if (m->getControl_pressed()) { break; }

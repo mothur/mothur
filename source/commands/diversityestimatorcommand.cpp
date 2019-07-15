@@ -60,7 +60,7 @@ vector<string> EstimatorSingleCommand::setParameters(){
 //**********************************************************************************************************************
 string EstimatorSingleCommand::getHelpString(){
     try {
-        string helpString = "";
+        string helpString = "\n";
         ValidCalculators validCalculator;
         helpString += "The estimator.single command parameters are " + getCommandParameters() + ". You may only choose one calculator at a time.\n";
         helpString += "The estimator.single command should be in the following format: \n";
@@ -82,6 +82,8 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
         
+        getCommonQuestions();
+        
         return helpString;
     }
     catch(exception& e) {
@@ -89,6 +91,24 @@ string EstimatorSingleCommand::getHelpString(){
         exit(1);
     }
 }
+//**********************************************************************************************************************
+string EstimatorSingleCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string howto = "How do create the sampling files?"; howtos.push_back(howto);
+        string hanswer = "\tRun a short trial MCMC run of 1000 iterations with guessed std. dev.s for the proposal distributions say about 10% of the parameter values. Adjust the std. dev.s untill the acceptance ratios are about 0.5. Then perform a longer run of say 250,000 iterations (mothur's default). Three data files with posterior samples for three different sets of parameter values will be generated.\n"; hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 string EstimatorSingleCommand::getOutputPattern(string type) {
     try {

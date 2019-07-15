@@ -27,6 +27,7 @@ public:
     string getCommandCategory()		{ return "OTU-Based Approaches";		}
     
     string getHelpString();
+    string getCommonQuestions();
     string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/Estimator.single"; }
     string getDescription()		{ return "This command implements the diversity estimators from https://github.com/chrisquince/DiversityEstimates"; }
