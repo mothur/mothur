@@ -16,6 +16,7 @@ vector<string> SetCurrentCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pflow);
         CommandParameter pfile("file", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pfile);
+        CommandParameter psample("sample", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(psample);
         CommandParameter pbiom("biom", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pbiom);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pphylip);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcolumn);
@@ -60,7 +61,7 @@ string SetCurrentCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The set.current command allows you to set the current files saved by mothur.\n";
-		helpString += "The set.current command parameters are: current, clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, contigsreport, constaxonomy and taxonomy.\n";
+		helpString += "The set.current command parameters are: current, clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, contigsreport, constaxonomy, taxonomy and sample.\n";
         helpString += "The current parameter is used to input the output file from get.current.  This function is intended to allow you to input filenames from previous instances on mothur.  NOTE: If you have a current file set in the file *.current_files.summary file, and also set a value for that file type, the value set takes precedence.  For example, if you run set.current(current=current_files.summary, fasta=abrecovery.fasta) and your have fasta=final.fasta in the *.current_files.summary file the current fasta file will be set to abrecovery.fasta.\n";
 		helpString += "The clear parameter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
 		helpString += "The set.current command should be in the following format: \n";
@@ -349,6 +350,14 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
                     if (path == "") {	parameters["file"] = inputDir + it->second;		}
                 }
                 
+                it = parameters.find("sample");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {    parameters["sample"] = inputDir + it->second;        }
+                }
+                
                 it = parameters.find("current");
                 //user has given a template file
                 if(it != parameters.end()){
@@ -496,6 +505,11 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
             if (filefile == "not open") { m->mothurOut("Ignoring: " + parameters["file"]); m->mothurOutEndLine(); filefile = ""; }
             else if (filefile == "not found") {  filefile = "";  }
             if (filefile != "") { current->setFileFile(filefile); }
+            
+            samplefile = validParameter.validFile(parameters, "sample");
+            if (samplefile == "not open") { m->mothurOut("Ignoring: " + parameters["sample"]); m->mothurOutEndLine(); samplefile = ""; }
+            else if (samplefile == "not found") {  samplefile = "";  }
+            if (samplefile != "") { current->setSampleFile(samplefile); }
 
 			string temp = validParameter.valid(parameters, "processors");
 			if (temp == "not found"){	temp = current->getProcessors();	}
@@ -578,6 +592,8 @@ int SetCurrentCommand::execute(){
 					current->setSummaryFile("");
                 }else if (types[i] == "file") {
                     current->setFileFile("");
+                }else if (types[i] == "sample") {
+                    current->setSampleFile("");
 				}else if (types[i] == "processors") {
 					current->setProcessors("1");
 				}else if (types[i] == "all") {

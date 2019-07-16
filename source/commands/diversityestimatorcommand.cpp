@@ -141,6 +141,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         outputTypes["ln"] = tempOutNames;
         outputTypes["ls"] = tempOutNames;
         outputTypes["si"] = tempOutNames;
+        outputTypes["sample"] = tempOutNames;
         
     }
     catch(exception& e) {
@@ -189,6 +190,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             outputTypes["lsrarefact"] = tempOutNames;
             outputTypes["sirarefact"] = tempOutNames;
             outputTypes["sishift"] = tempOutNames;
+            outputTypes["sample"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -261,7 +263,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             samplefile = validParameter.validFile(parameters, "sample");
             if (samplefile == "not open") { samplefile = ""; abort = true; }
             else if (samplefile == "not found") { samplefile = ""; }
-            else { hasSample = true; }
+            else { hasSample = true; current->setSampleFile(samplefile);  }
             
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -423,6 +425,7 @@ int EstimatorSingleCommand::execute(){
             
             if (samplingFiles.size() != 0) {
                 samplefile = samplingFiles[0];
+                outputTypes["sample"].push_back(samplefile);
                 calc = savedCalc;
                 iters = savedIters;
             }else { return 0; }
@@ -432,6 +435,12 @@ int EstimatorSingleCommand::execute(){
         else { processSharedFile(); } //handles multiple label values and multiple samples
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
+        
+        //set column file as new current columnfile
+        itTypes = outputTypes.find("sample");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { string currentName = (itTypes->second)[0]; current->setSampleFile(currentName); }
+        }
         
         m->mothurOut("\nOutput File Names: \n"); 
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -460,14 +469,14 @@ int EstimatorSingleCommand::processSharedFile() {
         if (util.inUsersGroups(calc, samplingCalcs)) {  variables["[distance]"] = shared->getLabel() + ".0"; }
         string outputFileName = getOutputFileName(calc, variables);
         
-        vector<ofstream*> out; out.resize(3);
+        vector<ofstream*> out;
         outputNames.push_back(outputFileName); outputTypes[calc].push_back(outputFileName);
         
-        out[0] = new ofstream();
-        util.openOutputFile(outputFileName, *out[0]); //format output
-        out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
-        
         if (util.inUsersGroups(calc, samplingCalcs)) {
+            out.resize(3);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
             
             variables["[distance]"] = shared->getLabel() + ".1";
             string outputFileName1 = getOutputFileName(calc, variables);
@@ -482,17 +491,29 @@ int EstimatorSingleCommand::processSharedFile() {
             out[2] = new ofstream();
             util.openOutputFile(outputFileName2, *out[2]); //format output
             out[2]->setf(ios::fixed, ios::floatfield); out[2]->setf(ios::showpoint);
-        }
-        
-        if (util.inUsersGroups(calc, rarefactCalcs)) {  *out[0] << "label\tgroup\t" << calc << "_Lower\t" << calc << "_Median\t" << calc << "_Upper\n";  }
-        else if (util.inUsersGroups(calc, abundCalcs)) {  *out[0] << "label\tgroup\tnum\t" << calc << "\n";  }
-        else if (util.inUsersGroups(calc, samplingCalcs))  {
+            
             *out[0] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
             
             *out[1] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
             
             *out[2] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
+            
+        }else if (util.inUsersGroups(calc, rarefactCalcs)) {
+            out.resize(1);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+            *out[0] << "label\tgroup\t" << calc << "_Lower\t" << calc << "_Median\t" << calc << "_Upper\n";
+        }else if (util.inUsersGroups(calc, abundCalcs)) {
+            out.resize(1);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+            *out[0] << "label\tgroup\tnum\t" << calc << "\n";
         }
+        
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
@@ -577,14 +598,15 @@ int EstimatorSingleCommand::processSingleSample() {
         if (util.inUsersGroups(calc, samplingCalcs)) {  variables["[distance]"] = sabund->getLabel() + ".0"; }
         string outputFileName = getOutputFileName(calc, variables);
         
-        vector<ofstream*> out; out.resize(3);
+        vector<ofstream*> out;
         outputNames.push_back(outputFileName); outputTypes[calc].push_back(outputFileName);
         
-        out[0] = new ofstream();
-        util.openOutputFile(outputFileName, *out[0]); //format output
-        out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
-        
         if (util.inUsersGroups(calc, samplingCalcs)) {
+            
+            out.resize(3);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
             
             variables["[distance]"] = sabund->getLabel() + ".1";
             string outputFileName1 = getOutputFileName(calc, variables);
@@ -599,16 +621,26 @@ int EstimatorSingleCommand::processSingleSample() {
             out[2] = new ofstream();
             util.openOutputFile(outputFileName2, *out[2]); //format output
             out[2]->setf(ios::fixed, ios::floatfield); out[2]->setf(ios::showpoint);
-        }
-        
-        if (util.inUsersGroups(calc, rarefactCalcs)) {  *out[0] << "label\t" << calc << "_Lower\t" << calc << "_Median\t" << calc << "_Upper\n";  }
-        else if (util.inUsersGroups(calc, abundCalcs)) {  *out[0] << "label\tnum\t" << calc << "\n";  }
-        else if (util.inUsersGroups(calc, samplingCalcs))  {
+            
             *out[0] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
             
             *out[1] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
             
             *out[2] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
+        }else if (util.inUsersGroups(calc, rarefactCalcs)) {
+            out.resize(1);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+             *out[0] << "label\t" << calc << "_Lower\t" << calc << "_Median\t" << calc << "_Upper\n";
+        }else if (util.inUsersGroups(calc, abundCalcs)) {
+            out.resize(1);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+            *out[0] << "label\tnum\t" << calc << "\n";
         }
          
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -710,7 +742,7 @@ int EstimatorSingleCommand::processShared(SharedRAbundVectors*& shared, vector<o
             }else if (util.inUsersGroups(calc, rarefactCalcs)) {
                 
                 *out[0] << label << '\t'; if (groupNames[i] != "") { *out[0] << groupNames[i] << '\t'; }
-                runRarefactCalcs(sabund->getNumSeqs(), groupName, out[0]);
+                runRarefactCalcs(sabund->getNumSeqs(), groupName, *out[0]);
             
             }else if (util.inUsersGroups(calc, abundCalcs)) {
                 vector<double> results = runAbundCalcs(sabund, groupName);
@@ -763,7 +795,7 @@ int EstimatorSingleCommand::processSingle(SAbundVector*& sabund, string groupNam
         if (util.inUsersGroups(calc, rarefactCalcs)) {
             
             *out[0] << label << '\t';
-            runRarefactCalcs(sabund->getNumSeqs(), groupName, out[0]);
+            runRarefactCalcs(sabund->getNumSeqs(), groupName, *out[0]);
             
         }else if (util.inUsersGroups(calc, samplingCalcs)) {
             
@@ -793,7 +825,7 @@ int EstimatorSingleCommand::processSingle(SAbundVector*& sabund, string groupNam
     }
 }
 //**********************************************************************************************************************
-int EstimatorSingleCommand::runRarefactCalcs(int numSeqs, string groupName, ofstream*& out) {
+int EstimatorSingleCommand::runRarefactCalcs(int numSeqs, string groupName, ofstream& out) {
     try {
         vector<double> results;
         vector<mcmcSample> thisGroupSample;
@@ -814,7 +846,7 @@ int EstimatorSingleCommand::runRarefactCalcs(int numSeqs, string groupName, ofst
         results = diversityCalc->getValues(numSeqs, sampling[groupName]);
         delete diversityCalc;
         
-        for (int i = 0; i < results.size(); i++) { *out << results[i] << '\t'; } *out << endl;
+        for (int i = 0; i < results.size(); i++) { out << results[i] << '\t'; } out << endl;
         
         return 0;
         

@@ -176,6 +176,8 @@ int GetCurrentCommand::execute(){
 					current->setSummaryFile("");
                 }else if (types[i] == "file") {
                     current->setFileFile("");
+                }else if (types[i] == "file") {
+                    current->setSampleFile("");
 				}else if (types[i] == "processors") {
 					current->setProcessors("1");
 				}else if (types[i] == "all") {

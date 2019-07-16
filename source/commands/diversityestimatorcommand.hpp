@@ -56,7 +56,7 @@ private:
     int processShared(SharedRAbundVectors*& shared, vector<ofstream*>& out, string fileRoot);
     int processSingle(SAbundVector*&, string, vector<ofstream*>&, string);
     
-    int runRarefactCalcs(int numSeqs, string groupName, ofstream*& out);
+    int runRarefactCalcs(int numSeqs, string groupName, ofstream& out);
     vector<string> runSamplingCalcs(SAbundVector*&, string);
     vector<double> runAbundCalcs(SAbundVector*&, string groupName);
     

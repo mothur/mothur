@@ -40,7 +40,7 @@ private:
 	string clearTypes;
 	vector<string> types;
 	
-	string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, countfile, summaryfile, currentFile, outputDir;
+	string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, countfile, summaryfile, currentFile, outputDir, samplefile;
 	string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, filefile, constaxonomyfile, contigsreportfile;
 
     int readCurrentFiles();
