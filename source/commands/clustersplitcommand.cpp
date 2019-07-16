@@ -129,6 +129,29 @@ string ClusterSplitCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
+string ClusterSplitCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string issue = "Cluster.split crashes after merging individual list files. What do I do?"; issues.push_back(issue);
+        string ianswer = "\tAfter merging the split list files, mothur runs the sens.spec command on the entire dataset. The entire dataset's distance matrix may be too large to fit in memory, which causes the crash. You can skip this step by setting the runsensspec parameter to false. Skipping the sens.spec analysis does not effect the OTU assignment, and you can run the sens.spec analysis separately using the sens.spec command. \n"; ianswers.push_back(ianswer);
+        
+        issue = "Cluster.split crashes while reading the split distance matrices. What should I do?"; issues.push_back(issue);
+        ianswer = "\tThe command is crashing because the distance matrices are too large to fit into memory. Why do I have such a large distance matrix? This is most often caused by poor overlap of your reads. When reads have poor overlap, it greatly increases your error rate. Also, sequences that should cluster together don't because the errors appear to be genetic differences when in fact they are not. The quality of the data you are processing can not be overstressed. Error filled reads produce error filled results. To take a step back, if you look through our MiSeq SOP, you’ll see that we go to great pains to only work with the unique sequences to limit the number of sequences we have to align, screen for chimeras, classify, etc. We all know that 20 million reads will never make it through the pipeline without setting your computer on fire. Returning to the question at hand, you can imagine that if the reads do not fully overlap then any error in the 5’ end of the first read will be uncorrected by the 3’ end of the second read. If we assume for now that the errors are random, then every error will generate a new unique sequence. Granted, this happens less than 1% of the time, but multiply that by 20 million reads at whatever length you choose and you’ve got a big number. Viola, a bunch of unique reads and a ginormous distance matrix. \n"; ianswers.push_back(ianswer);
+        
+        string howto = "How do I cluster my sequences into OTUs at distance 0.03?"; howtos.push_back(howto);
+        string hanswer = "\tBy default the cluster.split command will use the opti method to cluster to 0.03. To find OTUs at a different distance set the cutoff parameter. ie. cutoff=0.01 will assemble OTUs for distance 0.01.\n"; hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 ClusterSplitCommand::ClusterSplitCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -430,7 +453,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             
             temp = validParameter.valid(parameters, "dist");  if (temp == "not found") { temp = "F"; }
             makeDist = util.isTrue(temp);
-            if (method == "opti") { makeDist = true; }
+            if (method == "opti") { makeDist = runsensSpec;  }
+            
             if (((phylipfile != "") || (columnfile != "")) && (method == "opti")) { makeDist = false; }
             
             if (((phylipfile != "") || (columnfile != "")) && makeDist) { m->mothurOut("[ERROR]: You already provided a distance matrix. Mothur will ignore the dist parameter.\n"); makeDist = false; }

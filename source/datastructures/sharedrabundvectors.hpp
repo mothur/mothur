@@ -67,6 +67,7 @@ public:
     RAbundVector getRAbundVector();
     RAbundVector getRAbundVector(string); //group you want the rabund for
     SAbundVector getSAbundVector();
+    SAbundVector getSAbundVector(string); //group you want the sabund for
     OrderVector getOrderVector(map<string,int>*) { m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->setControl_pressed(true); OrderVector o; return o; }
     SharedOrderVector getSharedOrderVector();
     vector<SharedRAbundVector*> getSharedRAbundVectors();

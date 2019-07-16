@@ -46,6 +46,7 @@ class CurrentFile {
 		string getSFFFile()			{ return sfffile;			}
 		string getQualFile()		{ return qualfile;			}
 		string getOligosFile()		{ return oligosfile;		}
+        string getSampleFile()      { return samplefile;        }
 		
 		void setListFile(string f)			{ listfile = util.getFullPathName(f);			}
         void setBiomFile(string f)			{ biomfile = util.getFullPathName(f);			}
@@ -74,6 +75,7 @@ class CurrentFile {
         void setConsTaxonomyFile(string f)  { constaxonomyfile = util.getFullPathName(f);	}
         void setProgramPath(string f)       {  mothurProgramPath = util.getFullPathName(f);	}
         void setFileFile(string f)          { filefile = util.getFullPathName(f);           }
+        void setSampleFile(string f)        { samplefile = util.getFullPathName(f);         }
     
         //current files - if you add a new type you must edit optionParser->getParameters, get.current and set.current commands and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes/hasCurrentFiles. add a get and set function.
         string getAccnosFile()		{ return accnosfile;		}
@@ -130,7 +132,7 @@ class CurrentFile {
         string releaseDate, version;
     
         string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile;
-        string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode;
+        string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode, samplefile;
     bool mothurCalling;
 		
 		static CurrentFile* instance;
@@ -180,6 +182,7 @@ class CurrentFile {
             accnosfile = "";
             taxonomyfile = "";
             constaxonomyfile = "";
+            samplefile = "";
             unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
             if (concurentThreadsSupported < 1) { concurentThreadsSupported = 1; } //in case thread errors
             processors = toString(concurentThreadsSupported);

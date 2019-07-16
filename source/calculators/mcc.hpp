@@ -9,7 +9,7 @@
 #ifndef mcc_hpp
 #define mcc_hpp
 
-#include <calculator.h>
+#include "calculator.h"
 
 /***********************************************************************/
 

@@ -633,8 +633,6 @@ int RemoveSeqsCommand::readCount(){
             if (m->getControl_pressed()) {  return 0; }
         }
         
-        if (ct.getNumSeqs() == 0) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");   return 0; }
-        
         ct.printTable(outputFileName);
         
         int removedCount = originalCount - ct.getNumSeqs();
@@ -642,6 +640,8 @@ int RemoveSeqsCommand::readCount(){
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file.\n");
+        
+        if (ct.getNumSeqs() == 0) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");  }
         
 		return 0;
 	}

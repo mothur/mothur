@@ -10,31 +10,25 @@
 #define igrarefaction_hpp
 
 #include "diversityutils.hpp"
-
+#include "diversitycalc.h"
 
 //IGRarefaction
 /***********************************************************************/
 
-class IGRarefaction  {
+class IGRarefaction : public DiversityCalculator {
     
 public:
     
-    IGRarefaction(double c) : coverage(c) { m = MothurOut::getInstance(); }
+    IGRarefaction(double c); 
     ~IGRarefaction() {}
     
-    vector<double> getValues(SAbundVector* rank, vector<mcmcSample>& sampling);
+    vector<double> getValues(int ns, vector<mcmcSample>& sampling);
     
-    bool requiresSample() { return true; }
-    
+    string getTag() { return "ig"; }
     
 private:
     
-    Utils util;
-    MothurOut* m;
-    
     double coverage;
-    
-    double calcMu(t_IGParams *ptIGParams);
     
     
 };

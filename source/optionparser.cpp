@@ -162,6 +162,8 @@ map<string, string> OptionParser::getParameters() {
                             it->second = current->getSummaryFile();
                     }else if (it->first == "file") {
                             it->second = current->getFileFile();
+                    }else if (it->first == "sample") {
+                            it->second = current->getSampleFile();
                     }else {
                         m->mothurOut("[ERROR]: mothur does not save a current file for " + it->first); m->mothurOutEndLine();
                     }

@@ -57,7 +57,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			}
 		}
 		if(!valid) {
-			m->mothurOut(parameter + " is not a valid parameter."); m->mothurOutEndLine();
+			m->mothurOut(parameter + " is not a valid parameter.\n");
 			m->mothurOut("The valid parameters are: ");
 			for(int i = 0; i < numParams-1; i++)
 				m->mothurOut(cParams.at(i) + ", ");

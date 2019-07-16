@@ -10,27 +10,27 @@
 #define metroig_hpp
 
 #include "diversityutils.hpp"
+#include "diversitycalc.h"
 
 /***********************************************************************/
 
-class MetroIG  {
+class MetroIG : public DiversityCalculator {
     
 public:
-    MetroIG(double sigA, double sigB, double sigS, int n, string stub) : sigmaA(sigA), sigmaB(sigB), sigmaS(sigS), nIters(n), outFileStub(stub) { m = MothurOut::getInstance(); }
+    MetroIG(int fi, double sigA, double sigB, double sigS, int n, string stub);
     
     vector<string> getValues(SAbundVector* rank);
     
-    bool requiresSample() { return false; }
+    string getTag() { return "ig"; }
     
     
 private:
     
-    Utils util;
-    MothurOut* m;
-    
     double sigmaA, sigmaB, sigmaS;
-    int nIters;
+    int nIters, fitIters;
     string outFileStub;
+    
+    
     
 };
 

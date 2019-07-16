@@ -8,6 +8,12 @@
 
 #include "metrosichel.hpp"
 
+/***********************************************************************/
+MetroSichel::MetroSichel(int af, double siga, double sigb, double sigg, double sigS, int n, string st) : sigmaA(siga), sigmaB(sigb), sigmaG(sigg), sigmaS(sigS), nIters(n), outFileStub(st), fitIters(af), DiversityCalculator(false) {}
+/***********************************************************************/
+
+
+
 #ifdef USE_GSL
 /***********************************************************************/
 double nLogLikelihood3(const gsl_vector * x, void * params)
@@ -27,6 +33,9 @@ double nLogLikelihood3(const gsl_vector * x, void * params)
     DiversityUtils dutils("metrosichel");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -66,6 +75,9 @@ double negLogLikelihood3(double dAlpha, double dBeta, double dGamma, int nS, voi
     DiversityUtils dutils("metrosichel");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -127,6 +139,8 @@ void* metropolis3 (void * pvInitMetro)
     while(nIter < ptParams->nIter){
         double dA = 0.0, dNLLDash = 0.0;
         
+        if (dutils.m->getControl_pressed()) { break; }
+        
         dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS, ptParams);
         
         dNLLDash = negLogLikelihood3(gsl_vector_get(ptXDash,0), gsl_vector_get(ptXDash,1), gsl_vector_get(ptXDash,2), nSDash, (void*) ptData);
@@ -169,6 +183,8 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         t_Params tParams; tParams.nIter = nIters; tParams.dSigmaX = sigmaA; tParams.dSigmaY = sigmaB; tParams.dSigmaN = sigmaG; tParams.dSigmaS = sigmaS; tParams.szOutFileStub = outFileStub; tParams.lSeed = m->getRandomSeed();
         t_Data   tData;
         
+        int bestSample = 0;
+        
 #ifdef USE_GSL
         
         DiversityUtils dutils("metrosichel");
@@ -181,10 +197,8 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         gsl_vector* ptX = gsl_vector_alloc(4); /*parameter estimates*/
         
         gsl_rng_env_setup();
-        
         gsl_set_error_handler_off();
         
-        /*set initial estimates for parameters*/
         /*set initial estimates for parameters*/
         gsl_vector_set(ptX, 0, 0.1); //INIT_A
         gsl_vector_set(ptX, 1, 1.0); //INIT_B
@@ -192,22 +206,31 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         gsl_vector_set(ptX, 3, numOTUs*2);
         
         double chaoResult = dutils.chao(&tData);
-        m->mothurOut("\nMetroLogStudent - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
+        m->mothurOut("\nMetroSichel - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
         
         dutils.minimiseSimplex(ptX, 4, (void*) &tData, &nLogLikelihood3, 0.1, 1.0e-5, 100000);
         dutils.outputResults(ptX, &tData, &nLogLikelihood3);
         
-        if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis3); }
         
+        if(tParams.nIter > 0){
+            
+            vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis3);
+            
+            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, sigmaA, fitIters, &tParams, &tData, ptX, &metropolis3); }
+        }
+        
+        
+        /*free up allocated memory*/
         gsl_vector_free(ptX);
         
         dutils.freeAbundance(&tData);
+        
 #endif
         
-        vector<string> outputs;
-        outputs.push_back(outFileStub + "_0.sample");
-        outputs.push_back(outFileStub + "_1.sample");
-        outputs.push_back(outFileStub + "_2.sample");
+        outputs.push_back(outFileStub + "_" + toString(bestSample) + ".sample");
+        if (bestSample == 0) {  outputs.push_back(outFileStub + "_1.sample"); outputs.push_back(outFileStub + "_2.sample");  }
+        else if (bestSample == 1) {  outputs.push_back(outFileStub + "_0.sample"); outputs.push_back(outFileStub + "_2.sample");  }
+        else if (bestSample == 2) {  outputs.push_back(outFileStub + "_0.sample"); outputs.push_back(outFileStub + "_1.sample");  }
         
         return outputs;
     }

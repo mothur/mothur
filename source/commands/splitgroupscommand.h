@@ -45,7 +45,7 @@ public:
 private:
 	vector<string> outputNames;
 		
-	string outputDir, namefile, groupfile, countfile, groups, fastafile, flowfile, fastqfile, format;
+	string outputDir, namefile, groupfile, countfile, groups, fastafile, flowfile, fastqfile, format, listfile;
 	vector<string> Groups;
 	bool abort;
     

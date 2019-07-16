@@ -10,11 +10,12 @@
 
 /*constants for simplex minimisation*/
 
+/***********************************************************************/
+MetroIG::MetroIG(int fi, double sigA, double sigB, double sigS, int n, string stub) : sigmaA(sigA), sigmaB(sigB), sigmaS(sigS), nIters(n), fitIters(fi), outFileStub(stub), DiversityCalculator(false) {}
+/***********************************************************************/
 
 #ifdef USE_GSL
 
-
-/***********************************************************************/
 double nLogLikelihood0(const gsl_vector * x, void * params)
 {
     double dAlpha  = gsl_vector_get(x,0), dBeta = gsl_vector_get(x,1);
@@ -31,6 +32,9 @@ double nLogLikelihood0(const gsl_vector * x, void * params)
     DiversityUtils dutils("metroig");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -68,6 +72,9 @@ double negLogLikelihood0(double dAlpha, double dBeta, int nS, void * params)
     DiversityUtils dutils("metroig");
     
     for(i = 0; i < ptData->nNA; i++){
+        
+        if (dutils.m->getControl_pressed()) { break; }
+        
         double dLogP = 0.0;
         int    nA    = ptData->aanAbund[i][0];
         
@@ -131,6 +138,8 @@ void* metropolis0 (void * pvInitMetro)
     while(nIter < ptParams->nIter){
         double dA = 0.0, dNLLDash = 0.0;
         
+        if (dutils.m->getControl_pressed()) { break; }
+        
         dutils.getProposal(ptGSLRNG, ptXDash, ptX, &nSDash, nS, ptParams);
         
         dNLLDash = negLogLikelihood0(gsl_vector_get(ptXDash,0), gsl_vector_get(ptXDash,1), nSDash, (void*) ptData);
@@ -166,13 +175,16 @@ void* metropolis0 (void * pvInitMetro)
     return pvRet;
 }
 #endif
-
 /***********************************************************************/
 vector<string> MetroIG::getValues(SAbundVector* rank){
     try {
         
         t_Params tParams; tParams.nIter = nIters; tParams.dSigmaX = sigmaA; tParams.dSigmaY = sigmaB; tParams.dSigmaS = sigmaS; tParams.szOutFileStub = outFileStub; tParams.lSeed = m->getRandomSeed();
         t_Data   tData;
+        
+        
+        int bestSample = 0;
+        
 #ifdef USE_GSL
         
         DiversityUtils dutils("metroig");
@@ -200,18 +212,25 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         
         dutils.outputResults(ptX, &tData, &nLogLikelihood0);
         
-        if(tParams.nIter > 0){ dutils.mcmc(&tParams, &tData, ptX, &metropolis0); }
+        if(tParams.nIter > 0){
+    
+            vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis0);
+            
+            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, sigmaA, fitIters, &tParams, &tData, ptX, &metropolis0); }
+        }
+        
         
         /*free up allocated memory*/
         gsl_vector_free(ptX);
         
         dutils.freeAbundance(&tData);
+        
 #endif
         
-        vector<string> outputs;
-        outputs.push_back(outFileStub + "_0.sample");
-        outputs.push_back(outFileStub + "_1.sample");
-        outputs.push_back(outFileStub + "_2.sample");
+        outputs.push_back(outFileStub + "_" + toString(bestSample) + ".sample");
+        if (bestSample == 0) {  outputs.push_back(outFileStub + "_1.sample"); outputs.push_back(outFileStub + "_2.sample");  }
+        else if (bestSample == 1) {  outputs.push_back(outFileStub + "_0.sample"); outputs.push_back(outFileStub + "_2.sample");  }
+        else if (bestSample == 2) {  outputs.push_back(outFileStub + "_0.sample"); outputs.push_back(outFileStub + "_1.sample");  }
         
         return outputs;
     }
