@@ -9,7 +9,7 @@
 #ifndef tn_hpp
 #define tn_hpp
 
-#include <calculator.h>
+#include "calculator.h"
 
 /***********************************************************************/
 

@@ -410,7 +410,7 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
         long long num = 0;
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<filterRunData*> data;
     
         time_t start, end;
@@ -425,7 +425,7 @@ long long FilterSeqsCommand::createProcessesRunFilter(string F, string filename,
             filterRunData* dataBundle = new filterRunData(filter, filename, threadWriter, lines[i+1].start, lines[i+1].end, alignmentLength);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverRunFilter, dataBundle));
+            workerThreads.push_back(new std::thread(driverRunFilter, dataBundle));
         }
         
         OutputWriter* threadWriter = new OutputWriter(synchronizedOutputFile);
@@ -587,7 +587,7 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
         bool doVertical = util.isTrue(vertical);
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<filterData*> data;
         
         time_t start, end;
@@ -597,7 +597,7 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
             filterData* dataBundle = new filterData(filename, lines[i+1].start, lines[i+1].end, alignmentLength, trump, doVertical, soft, hard, i+1);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverCreateFilter, dataBundle));
+            workerThreads.push_back(new std::thread(driverCreateFilter, dataBundle));
         }
         
         filterData* dataBundle = new filterData(filename, lines[0].start, lines[0].end, alignmentLength, trump, doVertical, soft, hard, 0);

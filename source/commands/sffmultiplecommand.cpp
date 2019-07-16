@@ -759,7 +759,7 @@ long long SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<st
 		}
 		
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<sffMultipleData*> data;
         
         //Lauch worker threads
@@ -771,7 +771,7 @@ long long SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<st
             dataBundle->setVariables(trim, large, allFiles, flip, keepforward, makeGroup, append, largeSize, bdiffs, tdiffs, pdiffs, sdiffs, ldiffs, maxFlows, minFlows, minLength, maxLength, maxHomoP, maxIters, keepFirst, removeLast, signal, noise, cutoff, sigma, flowOrder, lookupFileName, minDelta);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverSFFMultiple, dataBundle));
+            workerThreads.push_back(new std::thread(driverSFFMultiple, dataBundle));
         }
         
         sffMultipleData* dataBundle = new sffMultipleData(sffFiles, oligosFiles, fasta, name, group, lines[0].start, lines[0].end);

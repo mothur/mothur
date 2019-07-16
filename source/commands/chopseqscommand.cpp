@@ -619,7 +619,7 @@ void driverChop(chopData* params) {
 bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string outAccnos, string fastafileTemp) {
     try {
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<chopData*> data;
         vector<linePair> lines;
         
@@ -657,7 +657,7 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
             dataBundle->setVariables(keep, countGaps, numbases, Short, keepN);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverChop, dataBundle));
+            workerThreads.push_back(new std::thread(driverChop, dataBundle));
         }
         
         OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);

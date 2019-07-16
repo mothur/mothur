@@ -1006,6 +1006,28 @@ int Utils::appendFiles(string temp, string filename) {
     }
 }
 /**************************************************************************************************/
+void Utils::appendFiles(string filename, ofstream& out) {
+    try{
+        ifstream input;
+        bool ableToOpen = openInputFileBinary(filename, input, "no error");
+        
+        if (ableToOpen) { //you opened it
+            char buffer[4096];
+            while (!input.eof()) {
+                if (m->getControl_pressed()) { break; }
+                input.read(buffer, 4096);
+                out.write(buffer, input.gcount());
+            }
+            input.close();
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "appendFiles");
+        exit(1);
+    }
+}
+
+/**************************************************************************************************/
 int Utils::appendFilesFront(string temp, string filename) {
     try{
         ofstream output;
@@ -4541,6 +4563,19 @@ bool Utils::inUsersGroups(string groupname, vector<string> Groups) {
         exit(1);
     }
 }
+/**************************************************************************************************/
+
+bool Utils::inUsersGroups(string groupname, set<string> Groups) {
+    try {
+        if (Groups.count(groupname) != 0) { return true; } //found it
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "inUsersGroups");
+        exit(1);
+    }
+}
+
 /**************************************************************************************************/
 
 bool Utils::inUsersGroups(vector<int> set, vector< vector<int> > sets) {

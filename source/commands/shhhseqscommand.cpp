@@ -624,7 +624,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(string newFName, string ne
             remainingPairs = remainingPairs - numPairs;
         }
         
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<shhhseqsData*> data;
         for (int i = 0; i < processors-1; i++) {
             string extension = toString(i+1) + ".temp";
@@ -633,7 +633,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(string newFName, string ne
             shhhseqsData* dataBundle = new shhhseqsData(outputDir, fastafile, namefile, groupfile, newFName, newNName, newMName, dividedGroupNames[i+1], sigma, extension);
             data.push_back(dataBundle);
             
-            thread* thisThread = new thread(driverShhSeqsGroups, dataBundle);
+            std::thread* thisThread = new std::thread(driverShhSeqsGroups, dataBundle);
             workerThreads.push_back(thisThread);
         }
         

@@ -829,7 +829,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
 #endif
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<pcrData*> data;
         
         auto synchronizedGoodFastaFile = make_shared<SynchronizedOutputFile>(goodFileName);
@@ -843,7 +843,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
             pcrData* dataBundle = new pcrData(filename, oligosfile, threadFastaWriter, threadFastaScrapWriter, ecoliSeq, nomatch, keepprimer, keepdots, pdiffs, rdiffs, lines[i+1].start, lines[i+1].end, start, end);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverPcr, dataBundle));
+            workerThreads.push_back(new std::thread(driverPcr, dataBundle));
         }
         
         OutputWriter* threadFastaWriter = new OutputWriter(synchronizedGoodFastaFile);

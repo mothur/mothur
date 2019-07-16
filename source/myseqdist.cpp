@@ -308,7 +308,7 @@ int correctDist::createProcess(string distanceFileName){
         }
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<correctData*> data;
         
         //Lauch worker threads
@@ -317,7 +317,7 @@ int correctDist::createProcess(string distanceFileName){
             correctData* dataBundle = new correctData(distanceFileName+extension, sequences, lines[i+1].start, lines[i+1].end);
             data.push_back(dataBundle);
             
-            thread* thisThread = new thread(driverCorrect, dataBundle);
+            std::thread* thisThread = new std::thread(driverCorrect, dataBundle);
             workerThreads.push_back(thisThread);
         }
         

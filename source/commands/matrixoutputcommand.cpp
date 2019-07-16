@@ -220,6 +220,8 @@ int MatrixOutputCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 	
+        time_t start = time(NULL);
+        
 		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         vector<string> lookupGroups = lookup->getNamesGroups();
@@ -319,6 +321,8 @@ int MatrixOutputCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName);  }
 		}
 		
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to run dist.shared.\n");
+        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
@@ -513,15 +517,24 @@ int process(distSharedData* params){
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
+            time_t start = time(NULL);
+            
             if (params->subsample) {
                 if (params->withReplacement)    {  sample.getSampleWithReplacement(thisItersLookup, params->subsampleSize);     }
                 else                            {  sample.getSample(thisItersLookup, params->subsampleSize);                    }
             }
+            if (params->m->getDebug()) { params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to subsample the shared file.\n");  }
+            
+            //params->m->mothurOut(toString(thisIter) + " It took " + toString(time(NULL) - start) + " seconds to subsample the shared file.\n");
             
             vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
             vector<string> thisItersGroupNames = params->thisLookup->getNamesGroups();
-
+            
+            start = time(NULL);
             driver(thisItersRabunds, calcDists, matrixCalculators, params->m);
+            if (params->m->getDebug()) { params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to calc dist for shared file.\n");  }
+            
+            //params->m->mothurOut(toString(thisIter) + " It took " + toString(time(NULL) - start) + " seconds to calc dist for shared file.\n");
             
             for (int i = 0; i < thisItersRabunds.size(); i++) { delete thisItersRabunds[i]; }
             if (params->subsample){
@@ -581,7 +594,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<distSharedData*> data;
         
         //Lauch worker threads
@@ -593,7 +606,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
             
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(process, dataBundle));
+            workerThreads.push_back(new std::thread(process, dataBundle));
         }
         
         //make copy of lookup so we don't get access violations

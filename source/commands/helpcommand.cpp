@@ -58,7 +58,6 @@
 #include "pcoacommand.h"
 #include "otuhierarchycommand.h"
 #include "setdircommand.h"
-#include "parselistscommand.h"
 #include "chimeraccodecommand.h"
 #include "chimeracheckcommand.h"
 #include "chimeraslayercommand.h"
@@ -307,7 +306,6 @@ int HelpCommand::execute(){
                 else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);			}
                 else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
                 else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
-                else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);				}
                 else if(commandName == "phylo.diversity")		{	command = new PhyloDiversityCommand(optionString);			}
                 else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
                 else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}

@@ -785,7 +785,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string coun
         }
 
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<perseusGroupsData*> data;
         
         long long num = 0;
@@ -800,7 +800,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string coun
             perseusGroupsData* dataBundle = new perseusGroupsData(dups, hasCount, alpha, beta, cutoff, (outputFName+extension), fasta, dupsFile,  (accnos+extension), (countlisttemp+extension), thisGroups, (i+1));
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverGroups, dataBundle));
+            workerThreads.push_back(new std::thread(driverGroups, dataBundle));
         }
         
         vector<string> thisGroups;

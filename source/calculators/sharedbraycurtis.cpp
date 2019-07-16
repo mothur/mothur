@@ -16,7 +16,7 @@ EstOutput BrayCurtis::getValues(vector<SharedRAbundVector*> shared) {
 		data.resize(1,0);
 		
 		double sumSharedA, sumSharedB, sumSharedAB, tempA, tempB;
-		sumSharedA = 0; sumSharedB = 0; sumSharedAB = 0; 
+		sumSharedA = shared[0]->getNumSeqs(); sumSharedB = shared[1]->getNumSeqs(); sumSharedAB = 0;
 		
 		/*Xi, Yi = abundance of the ith shared OTU in A and B 
 		sumSharedA = the number of otus in A
@@ -28,9 +28,6 @@ EstOutput BrayCurtis::getValues(vector<SharedRAbundVector*> shared) {
 			//store in temps to avoid multiple repetitive function calls
 			tempA = shared[0]->get(i);
 			tempB = shared[1]->get(i);
-			
-			sumSharedA += tempA;
-			sumSharedB += tempB;
 				
 			//sum the min of tempA and tempB
 			if (tempA < tempB) { sumSharedAB += tempA; }

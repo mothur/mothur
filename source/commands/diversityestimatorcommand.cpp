@@ -15,6 +15,13 @@
 #include "igabundance.hpp"
 #include "igrarefaction.hpp"
 #include "lnabundance.hpp"
+#include "lnrarefaction.hpp"
+#include "lnshift.hpp"
+#include "lsabundance.hpp"
+#include "lsrarefaction.hpp"
+#include "siabundance.hpp"
+#include "sirarefaction.hpp"
+#include "sishift.hpp"
 
 //**********************************************************************************************************************
 vector<string> EstimatorSingleCommand::setParameters(){
@@ -26,14 +33,15 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-        CommandParameter pcalc("calc", "Multiple", "erarefaction-metroig-metroln-metrols-metrosichel-igabund-igrarefaction", "erarefaction", "", "", "","",true,false,true); parameters.push_back(pcalc); //lnabund
+        CommandParameter pcalc("calc", "Multiple", "erarefact-ig-ln-ls-si-igabund-igrarefact-lnrarefact-lnabund-lnshift-lsabund-lsrarefact-siabund-sirarefact-sishift", "ig", "", "", "","",false,false,true); parameters.push_back(pcalc); //lnabund
         CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
         CommandParameter psigman("sigman", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(psigman);
         CommandParameter psigmas("sigmas", "Number", "", "100", "", "", "","",false,false); parameters.push_back(psigmas);
         CommandParameter pburn("burn", "Number", "", "2000000", "", "", "","",false,false); parameters.push_back(pburn);
-        CommandParameter pcoverage("coverage", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pcoverage);
+        CommandParameter pcoverage("coverage", "Number", "", "0.8", "", "", "","",false,false); parameters.push_back(pcoverage);
+        CommandParameter pfit("fit", "Number", "", "20", "", "", "","",false,false); parameters.push_back(pfit);
         CommandParameter psamplenum("burnsample", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(psamplenum);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -52,9 +60,9 @@ vector<string> EstimatorSingleCommand::setParameters(){
 //**********************************************************************************************************************
 string EstimatorSingleCommand::getHelpString(){
     try {
-        string helpString = "";
+        string helpString = "\n";
         ValidCalculators validCalculator;
-        helpString += "The estimator.single command parameters are " + getCommandParameters() + ".\n";
+        helpString += "The estimator.single command parameters are " + getCommandParameters() + ". You may only choose one calculator at a time.\n";
         helpString += "The estimator.single command should be in the following format: \n";
         helpString += "estimator.single(list=yourListFile, calc=yourEstimators).\n";
         helpString += "Example estimator.single(list=final.opti_mcc.list, calc=erarefaction).\n";
@@ -65,12 +73,16 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "The sigmab parameter is used to set the std. dev. of beta / Y / V prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigman parameter is used to set the std. dev. of N / Gamma prop. distn for MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
-        helpString += "The coverage parameter allows you to the desired coverage.  It is required for the igrarefaction calculator.\n";
+        helpString += "The coverage parameter allows you to the desired coverage.  Default=0.8.\n";
         helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
-        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbunace / IGRarefaction, respectively.\n";
-        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbunace / IGRarefaction, respectively.\n";
+        helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, LSRarefaction, SIAbundance, SIRarefaction, SIShift respectively.\n";
+        helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, LSRarefaction, SIAbundance, SIRarefaction, SIShift respectively.\n";
+        helpString += "The fit parameter is used to indicate to mothur you want mothur to auto adjust the sampling data parameters. default=100, meaning try fitting 100 times. \n";
         helpString += validCalculator.printCalc("single");
+        helpString += "Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
+        
+        getCommonQuestions();
         
         return helpString;
     }
@@ -80,16 +92,27 @@ string EstimatorSingleCommand::getHelpString(){
     }
 }
 //**********************************************************************************************************************
+string EstimatorSingleCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string howto = "How do you create the sampling files?"; howtos.push_back(howto);
+        string hanswer = "\tRun a short trial MCMC run of 1000 iterations with guessed std. dev.s for the proposal distributions say about 10% of the parameter values. Adjust the std. dev.s untill the acceptance ratios are about 0.5. Then perform a longer run of say 250,000 iterations (mothur's default). Three data files with posterior samples for three different sets of parameter values will be generated.\n"; hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
 string EstimatorSingleCommand::getOutputPattern(string type) {
     try {
-        string pattern = "";
-        
-        if (type == "erarefaction")             {  pattern =  "[filename],[distance],erarefaction";        }
-        else if (type == "igabund")             {  pattern =  "[filename],[distance],igabund";             }
-        else if (type == "lnabund")             {  pattern =  "[filename],[distance],lnabund";             }
-        else if (type == "igrarefaction")       {  pattern =  "[filename],[distance],igrarefaction";       }
-        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
-        
+        string pattern = "[filename],[distance]," + type;
         return pattern;
     }
     catch(exception& e) {
@@ -103,14 +126,22 @@ EstimatorSingleCommand::EstimatorSingleCommand(){
         abort = true; calledHelp = true;
         setParameters();
         vector<string> tempOutNames;
-        outputTypes["erarefaction"] = tempOutNames;
-        outputTypes["igrarefaction"] = tempOutNames;
+        outputTypes["erarefact"] = tempOutNames;
+        outputTypes["igrarefact"] = tempOutNames;
         outputTypes["igabund"] = tempOutNames;
-        //outputTypes["lnabund"] = tempOutNames;
-        outputTypes["metroig"] = tempOutNames;
-        outputTypes["metroln"] = tempOutNames;
-        outputTypes["metrols"] = tempOutNames;
-        outputTypes["metrosichel"] = tempOutNames;
+        outputTypes["lnabund"] = tempOutNames;
+        outputTypes["lnrarefact"] = tempOutNames;
+        outputTypes["lnshift"] = tempOutNames;
+        outputTypes["lsabund"] = tempOutNames;
+        outputTypes["lsrarefact"] = tempOutNames;
+        outputTypes["siabund"] = tempOutNames;
+        outputTypes["sirarefact"] = tempOutNames;
+        outputTypes["sishift"] = tempOutNames;
+        outputTypes["ig"] = tempOutNames;
+        outputTypes["ln"] = tempOutNames;
+        outputTypes["ls"] = tempOutNames;
+        outputTypes["si"] = tempOutNames;
+        outputTypes["sample"] = tempOutNames;
         
     }
     catch(exception& e) {
@@ -144,14 +175,22 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             
             //initialize outputTypes
             vector<string> tempOutNames;
-            outputTypes["erarefaction"] = tempOutNames;
+            outputTypes["erarefact"] = tempOutNames;
             outputTypes["igabund"] = tempOutNames;
-            //outputTypes["lnabund"] = tempOutNames;
-            outputTypes["metroig"] = tempOutNames;
-            outputTypes["metroln"] = tempOutNames;
-            outputTypes["metrols"] = tempOutNames;
-            outputTypes["metrosichel"] = tempOutNames;
-            outputTypes["igrarefaction"] = tempOutNames;
+            outputTypes["lnabund"] = tempOutNames;
+            outputTypes["siabund"] = tempOutNames;
+            outputTypes["ig"] = tempOutNames;
+            outputTypes["ln"] = tempOutNames;
+            outputTypes["ls"] = tempOutNames;
+            outputTypes["si"] = tempOutNames;
+            outputTypes["igrarefact"] = tempOutNames;
+            outputTypes["lnrarefact"] = tempOutNames;
+            outputTypes["lnshift"] = tempOutNames;
+            outputTypes["lsabund"] = tempOutNames;
+            outputTypes["lsrarefact"] = tempOutNames;
+            outputTypes["sirarefact"] = tempOutNames;
+            outputTypes["sishift"] = tempOutNames;
+            outputTypes["sample"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -224,7 +263,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             samplefile = validParameter.validFile(parameters, "sample");
             if (samplefile == "not open") { samplefile = ""; abort = true; }
             else if (samplefile == "not found") { samplefile = ""; }
-            else { hasSample = true; }
+            else { hasSample = true; current->setSampleFile(samplefile);  }
             
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -265,40 +304,45 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             
             //NOTE: if you add new calc options, don't forget to add them to the parameter initialize in setParameters or the gui won't be able to use them
             ValidCalculators validCalculator;
-            calc = validParameter.valid(parameters, "calc");
-            if (calc == "not found") { calc = "erarefaction";  }
-            else {
-                if (calc == "default")  {  calc = "erarefaction";  }
-            }
-            util.splitAtDash(calc, Estimators);
-            if (util.inUsersGroups("citation", Estimators)) {
-                validCalculator.printCitations(Estimators);
-                //remove citation from list of calcs
-                for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
-            }
+            calc = validParameter.valid(parameters, "calc"); if (calc == "not found") { calc = "ig";  }
             
-            set<string> estimatorsThatRequireSampleFile;
-            estimatorsThatRequireSampleFile.insert("igabund");
-            estimatorsThatRequireSampleFile.insert("igrarefaction");
-            //estimatorsThatRequireSampleFile.insert("lnabund");
+            samplingCalcs.insert("ig");
+            samplingCalcs.insert("ln");
+            samplingCalcs.insert("ls");
+            samplingCalcs.insert("si");
             
+            rarefactCalcs.push_back("igrarefact"); calcToSamplingCalc["igrarefact"] = "ig";
+            rarefactCalcs.push_back("lsrarefact"); calcToSamplingCalc["lsrarefact"] = "ls";
+            rarefactCalcs.push_back("lnrarefact"); calcToSamplingCalc["lnrarefact"] = "ln";
+            rarefactCalcs.push_back("sirarefact"); calcToSamplingCalc["sirarefact"] = "si";
+            
+            abundCalcs.push_back("igabund"); calcToSamplingCalc["igabund"] = "ig";
+            abundCalcs.push_back("lnabund"); calcToSamplingCalc["lnabund"] = "ln";
+            abundCalcs.push_back("lsabund"); calcToSamplingCalc["lsabund"] = "ls";
+            abundCalcs.push_back("siabund"); calcToSamplingCalc["siabund"] = "si";
+            abundCalcs.push_back("sishift"); calcToSamplingCalc["sishift"] = "si";
+            abundCalcs.push_back("lnshift"); calcToSamplingCalc["lnshift"] = "ln";
+            abundCalcs.push_back("erarefact");
+            
+            smallBurn.push_back("erarefact");
+            smallBurn.push_back("siabund");
+            smallBurn.push_back("sishift");
+            smallBurn.insert(smallBurn.end(), rarefactCalcs.begin(), rarefactCalcs.end());
+
             //remove any typo calcs
-            vector<string> validEstimates;
-            for (int i=0; i<Estimators.size(); i++) {
-                if (validCalculator.isValidCalculator("estimator", Estimators[i]) ) {
-                    
-                    bool ignore = false;
-                    if (!hasSample) { //if you didn't provide a mcmc sample file, but are trying to run a calc that needs it, then ignore
-                        if (estimatorsThatRequireSampleFile.count(Estimators[i]) != 0) { ignore = true; }
-                    }
-                    
-                    if (!ignore) { validEstimates.push_back(Estimators[i]); }
-                    else { m->mothurOut("[WARNING]: " + Estimators[i] + " requires a mcmc sampling file and you have not provided one, ignoring estimator. You can produce a sampling file using the metroig, metroln, metrols or metrosichel calculator.\n"); }
+            createSampling = false;
+            if (validCalculator.isValidCalculator("estimator", calc) ) {
+                
+                bool ignore = false;
+                if (!hasSample) { //if you didn't provide a mcmc sample file, but are trying to run a calc that needs it, then ignore
+                    if (samplingCalcs.count(calc) == 0) { ignore = true; }
+                    if (calc == "erarefact") { ignore = false; }
                 }
+                
+                if (ignore) { m->mothurOut("\n[WARNING]: " + calc + " requires a mcmc sampling file and you have not provided one. You can produce a sampling file using the ig (metroig), ln (metroln), ls (metrols) or si (metrosichel) calculators. I will create the sampling file for you using the " + calcToSamplingCalc[calc] + " calculator.\n"); createSampling = true; }
             }
-            Estimators = validEstimates;
-            if (Estimators.size() == 0) { abort = true; m->mothurOut("[ERROR]: no valid estimators, aborting.\n"); }
-            else {  sort(Estimators.begin(), Estimators.end()); }
+           
+            if (calc == "") { abort = true; m->mothurOut("[ERROR]: no valid estimators, aborting.\n"); }
 
             string temp;
             temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
@@ -316,34 +360,33 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             temp = validParameter.valid(parameters, "sigmas");		if (temp == "not found") { temp = "100.0"; }
             util.mothurConvert(temp, sigmaS);
             
-            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; }
+            itersSet = true;
+            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; itersSet = false; }
             util.mothurConvert(temp, iters);
             
-            burnSet = false;
-            temp = validParameter.valid(parameters, "burn");		if (temp == "not found") { temp = "2000000"; }else { burnSet = true; }
+            temp = validParameter.valid(parameters, "fit");		if (temp == "not found") { temp = "10"; }
+            util.mothurConvert(temp, fitIters);
+            
+            temp = validParameter.valid(parameters, "burn");
+            if (temp == "not found") {
+                if (util.inUsersGroups(calc, smallBurn)) { temp = "100000"; }
+                else {  temp = "2000000";  }
+            }
             util.mothurConvert(temp, burn);
             
-            if (burnSet) { //user did not set the parameter
-                if ((util.inUsersGroups("igrarefaction", Estimators)) && (util.inUsersGroups("igabund", Estimators))) {
-                    m->mothurOut("[WARNING]: You set the burn parameter, and the igrarefaction and igabund calulators have different default values. IGAbund burnsample default is 2000000, but IGRarefactions default is 100000. Are you sure you meant to set them to the same value? If so, ignore this warning.\n");
-                }
+            temp = validParameter.valid(parameters, "burnsample");
+            if (temp == "not found") {
+                if (util.inUsersGroups(calc, smallBurn)) { temp = "100"; }
+                else {  temp = "1000";  }
             }
+            util.mothurConvert(temp, burnSample);
+            if (burnSample <= 0)  {  m->mothurOut("[ERROR]: Burn sample must be greater than 0. Aborting.\n"); abort=true; }
             
-            temp = validParameter.valid(parameters, "coverage");		if (temp == "not found") { temp = "-1"; }
+            temp = validParameter.valid(parameters, "coverage");		if (temp == "not found") { temp = "0.8"; }
             util.mothurConvert(temp, coverage);
             
-            if ((util.isEqual(coverage, -1)) && (util.inUsersGroups("igrarefaction", Estimators))) {
-                m->mothurOut("[ERROR]: You must set the coverage parameter to run the igrarefaction estimator. Aborting.\n"); abort=true;
-            }
-            
-            burnSampleSet = false;
-            temp = validParameter.valid(parameters, "burnsample");		if (temp == "not found") { temp = "1000"; }else { burnSampleSet = true; }
-            util.mothurConvert(temp, burnSample);
-            
-            if (burnSampleSet) { //user did not set the parameter
-                if ((util.inUsersGroups("igrarefaction", Estimators)) && (util.inUsersGroups("igabund", Estimators))) {
-                    m->mothurOut("[WARNING]: You set the burnsample parameter, and the igrarefaction and igabund calulators have different default values. IGAbund burnsample default is 1000, but IGRarefactions default is 100. Are you sure you meant to set them to the same value? If so, ignore this warning.\n");
-                }
+            if ((util.isEqual(coverage, -1)) && ((calc == "igrarefact") || (calc == "lnrarefact") || (calc == "lsrarefact") || (calc == "sirarefact"))) {
+                m->mothurOut("[ERROR]: You must set the coverage parameter to run the igrarefact, lsrarefact, lnrarefact or sirarefact estimator. Aborting.\n"); abort=true;
             }
             
             #ifdef USE_GSL
@@ -369,86 +412,39 @@ int EstimatorSingleCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        vector<string> inputFileNames;
-        if (format != "sharedfile") { inputFileNames.push_back(inputfile);  }
-        else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
-        
-        for (int p = 0; p < inputFileNames.size(); p++) {
+        if (createSampling) {
+            string savedCalc = calc;
+            int savedIters = iters;
             
-            if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}    return 0; }
+            calc = calcToSamplingCalc[savedCalc];
+            if (!itersSet) { iters = 250000; }
             
-            if (outputDir == "") { outputDir += util.hasPath(inputFileNames[p]); }
-            string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
+            if (format != "sharedfile") { processSingleSample(); } //handles multiple label values
+            else { processSharedFile(); } //handles multiple label values and multiple samples
             
-            if (inputFileNames.size() > 1) { m->mothurOut("\nProcessing group " + groups[p] + "\n\n"); }
+            vector<string> samplingFiles = outputTypes[calc];
             
-            InputData input(inputFileNames[p], format, nullVector);
-            SAbundVector* sabund = input.getSAbundVector();
-            string lastLabel = sabund->getLabel();
-            
-            //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-            set<string> processedLabels;
-            set<string> userLabels = labels;
-            
-            while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-                
-                if (m->getControl_pressed()) { delete sabund; break; }
-                
-                if(allLines == 1 || labels.count(sabund->getLabel()) == 1){
-                    
-                    m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
-                    
-                    process(sabund, fileNameRoot);
-                }
-                //you have a label the user want that is smaller than this label and the last label has not already been processed
-                if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = sabund->getLabel();
-                    
-                    delete sabund;
-                    sabund = (input.getSAbundVector(lastLabel));
-                    
-                    m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
-                    
-                    process(sabund, fileNameRoot);
-                    
-                    //restore real lastlabel to save below
-                    sabund->setLabel(saveLabel);
-                }
-                
-                lastLabel = sabund->getLabel();
-                
-                delete sabund;
-                sabund = input.getSAbundVector();
-            }
-            
-            
-            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0; }
-            
-            //output error messages about any remaining user labels
-            set<string>::iterator it;
-            bool needToRun = false;
-            for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-                m->mothurOut("Your file does not include the label " + *it); 
-                if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-                else                                        {  m->mothurOut(". Please refer to " + lastLabel + ".\n");              }
-            }
-            
-            //run last label if you need to
-            if (needToRun)  {
-                if (sabund != NULL) {	delete sabund;	}
-                sabund = input.getSAbundVector(lastLabel);
-                
-                m->mothurOut(sabund->getLabel() + "\n");
-                
-                process(sabund, fileNameRoot); delete sabund;
-            }
+            if (samplingFiles.size() != 0) {
+                samplefile = samplingFiles[0];
+                outputTypes["sample"].push_back(samplefile);
+                calc = savedCalc;
+                iters = savedIters;
+            }else { return 0; }
         }
+        
+        if (format != "sharedfile") { processSingleSample(); } //handles multiple label values
+        else { processSharedFile(); } //handles multiple label values and multiple samples
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
         
+        //set column file as new current columnfile
+        itTypes = outputTypes.find("sample");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { string currentName = (itTypes->second)[0]; current->setSampleFile(currentName); }
+        }
+        
         m->mothurOut("\nOutput File Names: \n"); 
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
-        
         
         return 0;
     }
@@ -458,21 +454,368 @@ int EstimatorSingleCommand::execute(){
     }
 }
 //**********************************************************************************************************************
-int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
+int EstimatorSingleCommand::processSharedFile() {
     try {
+        vector<string> Groups;
+        InputData input(inputfile, format, Groups);
+        SharedRAbundVectors* shared = input.getSharedRAbundVectors();
+        string lastLabel = shared->getLabel();
         
-        for (int i = 0; i < Estimators.size(); i++) {
+        if (outputDir == "") { outputDir += util.hasPath(inputfile); }
+        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        
+        map<string, string> variables;
+        variables["[filename]"] = fileNameRoot;
+        variables["[distance]"] = shared->getLabel();
+        if (util.inUsersGroups(calc, samplingCalcs)) {  variables["[distance]"] = shared->getLabel() + ".0"; }
+        string outputFileName = getOutputFileName(calc, variables);
+        
+        vector<ofstream*> out;
+        outputNames.push_back(outputFileName); outputTypes[calc].push_back(outputFileName);
+        
+        if (util.inUsersGroups(calc, samplingCalcs)) {
+            out.resize(3);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
             
-            if (m->getControl_pressed()) { break; }
+            variables["[distance]"] = shared->getLabel() + ".1";
+            string outputFileName1 = getOutputFileName(calc, variables);
+            outputNames.push_back(outputFileName1); outputTypes[calc].push_back(outputFileName1);
+            out[1] = new ofstream();
+            util.openOutputFile(outputFileName1, *out[1]); //format output
+            out[1]->setf(ios::fixed, ios::floatfield); out[1]->setf(ios::showpoint);
             
-            if (Estimators[i] == "erarefaction")         { runErarefaction(sabund, fileRoot);    }
-            else if (Estimators[i] == "metroig")         { runMetroIG(sabund, fileRoot);         }
-            else if (Estimators[i] == "metroln")         { runMetroLogNormal(sabund, fileRoot);  }
-            else if (Estimators[i] == "metrols")         { runMetroLogStudent(sabund, fileRoot); }
-            else if (Estimators[i] == "metrosichel")     { runMetroSichel(sabund, fileRoot);     }
-            else if (Estimators[i] == "igabund")         { runIGAbund(sabund, fileRoot);         }
-            else if (Estimators[i] == "igrarefaction")   { runIGRarefaction(sabund, fileRoot);   }
-            //else if (Estimators[i] == "lnabund")         { runLNAbund(sabund, fileRoot);         }
+            variables["[distance]"] = shared->getLabel() + ".2";
+            string outputFileName2 = getOutputFileName(calc, variables);
+            outputNames.push_back(outputFileName2); outputTypes[calc].push_back(outputFileName2);
+            out[2] = new ofstream();
+            util.openOutputFile(outputFileName2, *out[2]); //format output
+            out[2]->setf(ios::fixed, ios::floatfield); out[2]->setf(ios::showpoint);
+            
+            *out[0] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
+            
+            *out[1] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
+            
+            *out[2] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
+            
+        }else if (util.inUsersGroups(calc, rarefactCalcs)) {
+            out.resize(1);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+            *out[0] << "label\tgroup\t" << calc << "_Lower\t" << calc << "_Median\t" << calc << "_Upper\n";
+        }else if (util.inUsersGroups(calc, abundCalcs)) {
+            out.resize(1);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+            *out[0] << "label\tgroup\tnum\t" << calc << "\n";
+        }
+        
+        
+        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        
+        while((shared != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) { delete shared; break; }
+            
+            if(allLines == 1 || labels.count(shared->getLabel()) == 1){
+                
+                m->mothurOut(shared->getLabel() + "\n"); processedLabels.insert(shared->getLabel()); userLabels.erase(shared->getLabel());
+                
+                processShared(shared, out, fileNameRoot);
+            }
+            //you have a label the user want that is smaller than this label and the last label has not already been processed
+            if ((util.anyLabelsToProcess(shared->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = shared->getLabel();
+                
+                delete shared;
+                shared = (input.getSharedRAbundVectors(lastLabel));
+                
+                m->mothurOut(shared->getLabel() + "\n"); processedLabels.insert(shared->getLabel()); userLabels.erase(shared->getLabel());
+                
+                processShared(shared, out, fileNameRoot);
+                
+                //restore real lastlabel to save below
+                shared->setLabel(saveLabel);
+            }
+            
+            lastLabel = shared->getLabel();
+            
+            delete shared;
+            shared = input.getSharedRAbundVectors();
+        }
+        
+        
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+            else                                        {  m->mothurOut(". Please refer to " + lastLabel + ".\n");              }
+        }
+        
+        //run last label if you need to
+        if (needToRun)  {
+            if (shared != NULL) {	delete shared;	}
+            shared = input.getSharedRAbundVectors(lastLabel);
+            
+            m->mothurOut(shared->getLabel() + "\n");
+            
+            processShared(shared, out, fileNameRoot); delete shared;
+        }
+        
+        out[0]->close(); delete out[0];
+        if (util.inUsersGroups(calc, samplingCalcs)) { out[1]->close(); out[2]->close(); delete out[1]; delete out[2]; }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "processSharedFile");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int EstimatorSingleCommand::processSingleSample() {
+    try {
+        InputData input(inputfile, format, nullVector);
+        SAbundVector* sabund = input.getSAbundVector();
+        string lastLabel = sabund->getLabel();
+        
+        if (outputDir == "") { outputDir += util.hasPath(inputfile); }
+        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        
+        map<string, string> variables;
+        variables["[filename]"] = fileNameRoot;
+        variables["[distance]"] = sabund->getLabel();
+        if (util.inUsersGroups(calc, samplingCalcs)) {  variables["[distance]"] = sabund->getLabel() + ".0"; }
+        string outputFileName = getOutputFileName(calc, variables);
+        
+        vector<ofstream*> out;
+        outputNames.push_back(outputFileName); outputTypes[calc].push_back(outputFileName);
+        
+        if (util.inUsersGroups(calc, samplingCalcs)) {
+            
+            out.resize(3);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+            variables["[distance]"] = sabund->getLabel() + ".1";
+            string outputFileName1 = getOutputFileName(calc, variables);
+            outputNames.push_back(outputFileName1); outputTypes[calc].push_back(outputFileName1);
+            out[1] = new ofstream();
+            util.openOutputFile(outputFileName1, *out[1]); //format output
+            out[1]->setf(ios::fixed, ios::floatfield); out[1]->setf(ios::showpoint);
+            
+            variables["[distance]"] = sabund->getLabel() + ".2";
+            string outputFileName2 = getOutputFileName(calc, variables);
+            outputNames.push_back(outputFileName2); outputTypes[calc].push_back(outputFileName2);
+            out[2] = new ofstream();
+            util.openOutputFile(outputFileName2, *out[2]); //format output
+            out[2]->setf(ios::fixed, ios::floatfield); out[2]->setf(ios::showpoint);
+            
+            *out[0] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
+            
+            *out[1] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
+            
+            *out[2] << "#Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
+        }else if (util.inUsersGroups(calc, rarefactCalcs)) {
+            out.resize(1);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+             *out[0] << "label\t" << calc << "_Lower\t" << calc << "_Median\t" << calc << "_Upper\n";
+        }else if (util.inUsersGroups(calc, abundCalcs)) {
+            out.resize(1);
+            out[0] = new ofstream();
+            util.openOutputFile(outputFileName, *out[0]); //format output
+            out[0]->setf(ios::fixed, ios::floatfield); out[0]->setf(ios::showpoint);
+            
+            *out[0] << "label\tnum\t" << calc << "\n";
+        }
+         
+        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        
+        while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) { delete sabund; break; }
+            
+            if(allLines == 1 || labels.count(sabund->getLabel()) == 1){
+                
+                m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+                
+                processSingle(sabund, sabund->getLabel(), out, fileNameRoot);
+            }
+            //you have a label the user want that is smaller than this label and the last label has not already been processed
+            if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = sabund->getLabel();
+                
+                delete sabund;
+                sabund = (input.getSAbundVector(lastLabel));
+                
+                m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+                
+                processSingle(sabund, sabund->getLabel(), out, fileNameRoot);
+                
+                //restore real lastlabel to save below
+                sabund->setLabel(saveLabel);
+            }
+            
+            lastLabel = sabund->getLabel();
+            
+            delete sabund;
+            sabund = input.getSAbundVector();
+        }
+        
+        
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+            else                                        {  m->mothurOut(". Please refer to " + lastLabel + ".\n");              }
+        }
+        
+        //run last label if you need to
+        if (needToRun)  {
+            if (sabund != NULL) {	delete sabund;	}
+            sabund = input.getSAbundVector(lastLabel);
+            
+            m->mothurOut(sabund->getLabel() + "\n");
+            
+            processSingle(sabund, sabund->getLabel(), out, fileNameRoot); delete sabund;
+        }
+
+        out[0]->close(); delete out[0];
+        if (util.inUsersGroups(calc, samplingCalcs)) { out[1]->close(); out[2]->close(); delete out[1]; delete out[2]; }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "processSingleSample");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int EstimatorSingleCommand::processShared(SharedRAbundVectors*& shared, vector<ofstream*>& out, string fileRoot) {
+    try {
+        string outputFileName = "";
+        string label = shared->getLabel();
+        vector<string> groupNames = shared->getNamesGroups();
+        vector< vector<double> > abundResults;
+        int maxSize = 0;
+        
+        for (int i = 0; i < groupNames.size(); i++) {
+            
+            m->mothurOut("\nProcessing group " + groupNames[i] + "\n\n");
+            
+            string groupName = groupNames[i] + " " + label;
+            SAbundVector* sabund = new SAbundVector(shared->getSAbundVector(groupNames[i]));
+            
+            if (m->getControl_pressed()) { delete sabund; break; }
+            
+            if (util.inUsersGroups(calc, samplingCalcs)) {
+                
+                *out[0] << "#" << groupName << endl;
+                *out[1] << "#" << groupName << endl;
+                *out[2] << "#" << groupName << endl;
+                
+                vector<string> outputFileNames = runSamplingCalcs(sabund, fileRoot);
+                util.appendFiles(outputFileNames[0], *out[0]); util.mothurRemove(outputFileNames[0]);
+                util.appendFiles(outputFileNames[1], *out[1]); util.mothurRemove(outputFileNames[1]);
+                util.appendFiles(outputFileNames[2], *out[2]); util.mothurRemove(outputFileNames[2]);
+                
+            }else if (util.inUsersGroups(calc, rarefactCalcs)) {
+                
+                *out[0] << label << '\t'; if (groupNames[i] != "") { *out[0] << groupNames[i] << '\t'; }
+                runRarefactCalcs(sabund->getNumSeqs(), groupName, *out[0]);
+            
+            }else if (util.inUsersGroups(calc, abundCalcs)) {
+                vector<double> results = runAbundCalcs(sabund, groupName);
+                
+                abundResults.push_back(results);
+                
+                if (results.size() > maxSize) { maxSize = results.size(); }
+            }
+            
+            delete sabund;
+        }
+        
+        if (abundResults.size() != 0) {//ran an abund calc on several samples, combine results into one file
+            //find smallest largest size
+            
+            for (int i = 0; i < abundResults.size(); i++) {
+                if (abundResults[i].size() < maxSize) {
+                    abundResults[i].resize(maxSize, -1); //fill blanks with NA
+                }
+            }
+            
+            
+            for (int i = 0; i < maxSize; i++) {
+                
+                for (int j = 0; j < groupNames.size(); j++) {
+                    
+                    *out[0] << label << '\t' << groupNames[j] << '\t' << (i+1);
+                    
+                    if (abundResults[j][i] == -1) {  *out[0] << "\tNA" << endl;  }
+                    else {  *out[0] << '\t' << abundResults[j][i] << endl;  }
+                }
+            }
+            
+        }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "processShared");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
+int EstimatorSingleCommand::processSingle(SAbundVector*& sabund, string groupName, vector<ofstream*>& out, string fileRoot) {
+    try {
+        string label = sabund->getLabel();
+        vector<string> outputFileNames;
+        
+        if (util.inUsersGroups(calc, rarefactCalcs)) {
+            
+            *out[0] << label << '\t';
+            runRarefactCalcs(sabund->getNumSeqs(), groupName, *out[0]);
+            
+        }else if (util.inUsersGroups(calc, samplingCalcs)) {
+            
+            *out[0] << "#" << groupName << endl;
+            *out[1] << "#" << groupName << endl;
+            *out[2] << "#" << groupName << endl;
+            vector<string> outputFileNames = runSamplingCalcs(sabund, fileRoot);
+            util.appendFiles(outputFileNames[0], *out[0]); util.mothurRemove(outputFileNames[0]);
+            util.appendFiles(outputFileNames[1], *out[1]); util.mothurRemove(outputFileNames[1]);
+            util.appendFiles(outputFileNames[2], *out[2]); util.mothurRemove(outputFileNames[2]);
+            
+        }else if (util.inUsersGroups(calc, abundCalcs)) {
+            vector<double> results = runAbundCalcs(sabund, groupName);
+            
+            for (int i = 0; i < results.size(); i++) {
+                if (m->getControl_pressed()) { break; }
+                
+                *out[0] << label << '\t' << (i+1) << '\t' << results[i] << endl;
+            }
         }
         
         return 0;
@@ -483,313 +826,133 @@ int EstimatorSingleCommand::process(SAbundVector*& sabund, string fileRoot) {
     }
 }
 //**********************************************************************************************************************
-string EstimatorSingleCommand::runErarefaction(SAbundVector*& sabund, string fileRoot) {
+int EstimatorSingleCommand::runRarefactCalcs(int numSeqs, string groupName, ofstream& out) {
     try {
+        vector<double> results;
+        vector<mcmcSample> thisGroupSample;
+        
+        if ((calc == "igrarefact") || (calc == "lnrarefact"))       { if (samplefile != "") { fillSampling(burn, burnSample); } }
+        else if ((calc == "lsrarefact") || (calc == "sirarefact"))  { if (samplefile != "") { fillSampling(burn, burnSample, true); } }
+        
+        it = sampling.find(groupName);
+        if (it != sampling.end()) { thisGroupSample = it->second; }
+        else { m->mothurOut("[ERROR]: Unable to find sampling info for group " + groupName + ", quitting. Do you need to adjust the iters, burn or burnsample parameters?\n"); m->setControl_pressed(true); return 0; }
+        
+        DiversityCalculator* diversityCalc;
+        if (calc == "igrarefact")       { diversityCalc = new IGRarefaction(coverage); }
+        else if (calc == "lnrarefact")  { diversityCalc = new LNRarefaction(coverage); }
+        else if (calc == "lsrarefact")  { diversityCalc = new LSRarefaction(coverage); }
+        else if (calc == "sirarefact")  { diversityCalc = new SIRarefaction(coverage); }
+       
+        results = diversityCalc->getValues(numSeqs, sampling[groupName]);
+        delete diversityCalc;
+        
+        for (int i = 0; i < results.size(); i++) { out << results[i] << '\t'; } out << endl;
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runRarefactCalcs");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+vector<string> EstimatorSingleCommand::runSamplingCalcs(SAbundVector*& sabund, string fileRoot) {
+    try {
+        vector<string> resultFiles;
+        
         map<string, string> variables;
         variables["[filename]"] = fileRoot;
         variables["[distance]"] = sabund->getLabel();
-        string outputFileName = getOutputFileName("erarefaction", variables);
-        outputNames.push_back(outputFileName); outputTypes["erarefaction"].push_back(outputFileName);
+        variables["[tag]"] = calc;
+        string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
         
-        ofstream out; util.openOutputFile(outputFileName, out); //format output
-        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        DiversityCalculator* diversityCalc;
+        if (calc == "ig")       { diversityCalc = new MetroIG(fitIters, sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);                 }
+        else if (calc == "ln")  { diversityCalc = new MetroLogNormal(fitIters, sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);          }
+        else if (calc == "ls")  { diversityCalc = new MetroLogStudent(fitIters, sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub); }
+        else if (calc == "si")  { diversityCalc = new MetroSichel(fitIters, sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub);     }
         
-        out << "NumSampled\tERarefaction\n";
+        resultFiles = diversityCalc->getValues(sabund);
         
-        ERarefaction erare;
+        if (m->getControl_pressed()) {
+           m->mothurOut("\nHow do you create the sampling files?\n\nRun a short trial MCMC run of 1000 iterations with guessed std. dev.s for the proposal distributions say about 10% of the parameter values. Adjust the std. dev.s untill the acceptance ratios are about 0.5. Then perform a longer run of say 250,000 iterations (mothur's default). Three data files with posterior samples for three different sets of parameter values will be generated.\n\n");
+        }
+        delete diversityCalc;
         
+        return resultFiles;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "EstimatorSingleCommand", "runSamplingCalcs");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+vector<double> EstimatorSingleCommand::runAbundCalcs(SAbundVector*& sabund, string groupName) {
+    try {
+        
+        int maxRank = sabund->getMaxRank();
         int numSeqs = sabund->getNumSeqs();
+        
+        vector<double> results;
+        vector<mcmcSample> thisGroupSample;
+        
+        if ((calc == "igabund") || (calc == "lnshift") || (calc == "lnabund"))       { if (samplefile != "") { fillSampling(burn, burnSample); } }
+        else if ((calc == "siabund") || (calc == "sishift") || (calc == "lsabund"))  { if (samplefile != "") { fillSampling(burn, burnSample, true); } }
+        
+        if (calc != "erarefact") {
+            it = sampling.find(groupName);
+            if (it != sampling.end()) { thisGroupSample = it->second; }
+            else { m->mothurOut("[ERROR]: Unable to find sampling info for group " + groupName + ", quitting. Do you need to adjust the iters, burn or burnsample parameters?\n"); m->setControl_pressed(true); return results; }
+        }
         
         //convert freq percentage to number
         int increment = 1; if (freq < 1.0) {  increment = numSeqs * freq;  } else { increment = freq;  }
         
-        for (int i = 1; i < numSeqs; i++) {
-            if((i % increment) == 0){
-                double result = erare.getValues(sabund, i);
-                out << i << '\t' << result << endl;
-            }
+        DiversityCalculator* diversityCalc;
+        if (calc == "igabund")       { diversityCalc = new IGAbundance();           }
+        else if (calc == "lnshift")  { diversityCalc = new LNShift();               }
+        else if (calc == "lnabund")  { diversityCalc = new LNAbundance();           }
+        else if (calc == "siabund")  { diversityCalc = new SIAbundance();           }
+        else if (calc == "sishift")  { diversityCalc = new SIShift();               }
+        else if (calc == "lsabund")  { diversityCalc = new LSAbundance();           }
+        else if (calc == "erarefact"){ diversityCalc = new ERarefaction(increment); }
+        
+        if (calc == "erarefact") {
+            diversityCalc->getValues(sabund, results);
+        }
+        else if ((calc == "igabund") || (calc == "siabund") || (calc == "lnabund") || (calc == "lsabund"))       {
+            results = diversityCalc->getValues(maxRank, sampling[groupName]);
+        }
+        else { //sishift, lnshift
+            results = diversityCalc->getValues(numSeqs, sampling[groupName]);
         }
         
-        double result = erare.getValues(sabund, numSeqs);
-        out << numSeqs << '\t' << result << endl;
+        delete diversityCalc;
         
-        out.close();
-        
-        return outputFileName;
+        return results;
         
     }
     catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runErarefaction");
+        m->errorOut(e, "EstimatorSingleCommand", "runAbundCalcs");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-string EstimatorSingleCommand::runIGRarefaction(SAbundVector*& sabund, string fileRoot) {
-    try {
-        map<string, string> variables;
-        variables["[filename]"] = fileRoot;
-        variables["[distance]"] = sabund->getLabel();
-        string outputFileName = getOutputFileName("igrarefaction", variables);
-        outputNames.push_back(outputFileName); outputTypes["igrarefaction"].push_back(outputFileName);
-        
-        ofstream out; util.openOutputFile(outputFileName, out); //format output
-        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-        
-        out << "IGRarefaction_Lower\tIGRarefaction_Median\tIGRarefaction_Upper\n";
-        
-        IGRarefaction igRare(coverage);
-        
-        if (samplefile != "") {
-            int burnValue = burn;
-            if (!burnSet) { burnValue = 100000; }
-            
-            int burnSampleValue = burnSample;
-            if (!burnSampleSet) { burnSampleValue = 100; }
-            
-            fillSampling(burnValue, burnSampleValue);
-        }
-        
-        vector<double> results = igRare.getValues(sabund, sampling);
-        
-        for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  }
-        out << endl;
-        
-        out.close();
-        
-        return outputFileName;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runIGRarefaction");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-string EstimatorSingleCommand::runMetroIG(SAbundVector*& sabund, string fileRoot) {
-    try {
-        map<string, string> variables;
-        variables["[filename]"] = fileRoot;
-        variables["[distance]"] = sabund->getLabel();
-        variables["[tag]"] = ".metroig";
-        string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
-        
-        MetroIG metroIG(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);
-        
-        vector<string> resultFiles = metroIG.getValues(sabund);
-        
-        for (int i = 0; i < resultFiles.size(); i++) { outputNames.push_back(resultFiles[i]); outputTypes["metroig"].push_back(resultFiles[i]); }
-        
-        return outputFileStub;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runMetroIG");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-string EstimatorSingleCommand::runMetroLogNormal(SAbundVector*& sabund, string fileRoot) {
-    try {
-        map<string, string> variables;
-        variables["[filename]"] = fileRoot;
-        variables["[distance]"] = sabund->getLabel();
-        variables["[tag]"] = ".metroln";
-        string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
-
-        MetroLogNormal metroLN(sigmaAlpha, sigmaBeta, sigmaS, iters, outputFileStub);
-        
-        vector<string> resultFiles = metroLN.getValues(sabund);
-        
-        for (int i = 0; i < resultFiles.size(); i++) { outputNames.push_back(resultFiles[i]); outputTypes["metroln"].push_back(resultFiles[i]); }
-        
-        return outputFileStub;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runMetroLogNormal");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-string EstimatorSingleCommand::runMetroLogStudent(SAbundVector*& sabund, string fileRoot) {
-    try {
-        map<string, string> variables;
-        variables["[filename]"] = fileRoot;
-        variables["[distance]"] = sabund->getLabel();
-        variables["[tag]"] = ".metrols";
-        string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
-        
-        MetroLogStudent metroLS(sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub);
-        
-        vector<string> resultFiles = metroLS.getValues(sabund);
-        
-        for (int i = 0; i < resultFiles.size(); i++) { outputNames.push_back(resultFiles[i]); outputTypes["metrols"].push_back(resultFiles[i]); }
-        
-        return outputFileStub;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runMetroLogStudent");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-string EstimatorSingleCommand::runMetroSichel(SAbundVector*& sabund, string fileRoot) {
-    try {
-        map<string, string> variables;
-        variables["[filename]"] = fileRoot;
-        variables["[distance]"] = sabund->getLabel();
-        variables["[tag]"] = ".metrosichel";
-        string outputFileStub = variables["[filename]"] + variables["[distance]"] + variables["[tag]"];
-        
-        MetroSichel metroSichel(sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub);
-        
-        vector<string> resultFiles = metroSichel.getValues(sabund);
-        
-        for (int i = 0; i < resultFiles.size(); i++) { outputNames.push_back(resultFiles[i]); outputTypes["metrosichel"].push_back(resultFiles[i]); }
-        
-        return outputFileStub;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runMetroSichel");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-int EstimatorSingleCommand::runIGAbund(SAbundVector*& sabund, string fileRoot) {
-    try {
-        map<string, string> variables;
-        variables["[filename]"] = fileRoot;
-        variables["[distance]"] = sabund->getLabel();
-        string outputFileName = getOutputFileName("igabund", variables);
-        outputNames.push_back(outputFileName); outputTypes["igabund"].push_back(outputFileName);
-        
-        ofstream out; util.openOutputFile(outputFileName, out); //format output
-        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-        
-        if (samplefile != "") {
-            int burnValue = burn;
-            if (!burnSet) { burnValue = 200000; }
-            
-            int burnSampleValue = burnSample;
-            if (!burnSampleSet) { burnSampleValue = 1000; }
-            
-            fillSampling(burnValue, burnSampleValue);
-        }
-        
-        IGAbundance igAbund;
-        
-        vector<double> results = igAbund.getValues(sabund, sampling);
-        
-        for (int i = 0; i < results.size(); i++) {
-            if (m->getControl_pressed()) { break; }
-            
-            out << i+1 << '\t' << results[i] << endl;
-        }
-        out.close();
-        
-        return 0;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runIGAbund");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-int EstimatorSingleCommand::runLNAbund(SAbundVector*& sabund, string fileRoot) {
-    try {
-        map<string, string> variables;
-        variables["[filename]"] = fileRoot;
-        variables["[distance]"] = sabund->getLabel();
-        string outputFileName = getOutputFileName("lnabund", variables);
-        outputNames.push_back(outputFileName); outputTypes["lnabund"].push_back(outputFileName);
-        
-        ofstream out; util.openOutputFile(outputFileName, out); //format output
-        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-        
-        if (samplefile != "") {
-            int burnValue = burn;
-            if (!burnSet) { burnValue = 200000; }
-            
-            int burnSampleValue = burnSample;
-            if (!burnSampleSet) { burnSampleValue = 1000; }
-            
-            fillSampling(burnValue, burnSampleValue);
-        }
-        
-        LNAbundance lnAbund;
-        
-        vector<double> results = lnAbund.getValues(sabund, sampling);
-        
-        for (int i = 0; i < results.size(); i++) {
-            if (m->getControl_pressed()) { break; }
-            
-            out << i+1 << '\t' << results[i] << endl;
-        }
-        out.close();
-        
-        return 0;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "runLNAbund");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-vector<string> EstimatorSingleCommand::parseSharedFile(string filename) {
-    try {
-        vector<string> filenames;
-        
-        map<string, string> files;
-        map<string, string>::iterator it3;
-        
-        InputData input(filename, "sharedfile", groups);
-        SharedRAbundVectors* shared = input.getSharedRAbundVectors();
-        
-        string sharedFileRoot = util.getRootName(filename);
-        groups = shared->getNamesGroups();
-        
-        //clears file before we start to write to it below
-        for (int i=0; i<groups.size(); i++) {
-            ofstream temp;
-            string group = groups[i];
-            util.openOutputFile((sharedFileRoot + group + ".rabund"), temp);
-            temp.close();
-            filenames.push_back((sharedFileRoot + group + ".rabund"));
-            files[group] = (sharedFileRoot + group + ".rabund");
-        }
-        
-        while(shared != NULL) {
-            
-            vector<SharedRAbundVector*> lookup = shared->getSharedRAbundVectors();
-            for (int i = 0; i < lookup.size(); i++) {
-                ofstream temp;
-                string group = groups[i];
-                util.openOutputFileAppend(files[group], temp);
-                lookup[i]->getRAbundVector().print(temp);
-                temp.close();
-            }
-            
-            for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i]; } lookup[i] = NULL; }
-            shared = input.getSharedRAbundVectors();
-        }
-        return filenames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "parseSharedFile");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue) {
+int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue, bool filldNu) {
     try {
         sampling.clear();
         
+        int numPiecesExpected = 5;
+        if (filldNu) { numPiecesExpected = 6; }
+        
         ifstream in;
         util.openInputFile(samplefile, in);
+        
+        util.getline(in); util.gobble(in); //grab header
+        string groupName = "";
         
         while (!in.eof()) {
             
@@ -797,30 +960,41 @@ int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue) {
             
             string line = util.getline(in); util.gobble(in);
             
-            vector<string> pieces; util.splitAtComma(line, pieces);
+            if (line != "") {
+                
+                if (line[0] == '#') {
+                    groupName = line.substr(1); //looks like #groupName label ie. #F000D000 0.03
+                }else {
             
-            if (pieces.size() == 5) {
-                
-                int sampleSize, ns;
-                util.mothurConvert(pieces[0], sampleSize);
-                
-                if ((sampleSize > burnValue) && (sampleSize % burnSampleValue == 0)) {
-                
-                    util.mothurConvert(pieces[3], ns);
+                    vector<string> pieces; util.splitAtComma(line, pieces);
                     
-                    double alpha, beta;
-                    util.mothurConvert(pieces[1], alpha);
-                    util.mothurConvert(pieces[2], beta);
-                    
-                    mcmcSample entry(alpha, beta, ns);
-                    sampling.push_back(entry);
+                    if (pieces.size() == numPiecesExpected) {
+                        
+                        int sampleSize, ns;
+                        util.mothurConvert(pieces[0], sampleSize);
+                        
+                        if ((sampleSize > burnValue) && (sampleSize % burnSampleValue == 0)) {
+                            
+                            double alpha = 0, beta = 0, dNu = 0;
+                            if (!filldNu) {  util.mothurConvert(pieces[3], ns);  }
+                            else {
+                                util.mothurConvert(pieces[3], dNu);
+                                util.mothurConvert(pieces[4], ns);
+                            }
+                            
+                            util.mothurConvert(pieces[1], alpha);
+                            util.mothurConvert(pieces[2], beta);
+                            
+                            mcmcSample entry(alpha, beta, dNu, ns);
+                            sampling[groupName].push_back(entry);
+                        }
+                        
+                    }else {
+                        m->mothurOut("\n[WARNING]: Unexpected format in sampling file, ignoring. Expected " + toString(numPiecesExpected) + " values separated by commas, found " + toString(pieces.size()) + ". Expecting something like: '0,7.419861e-01,4.695223e+00,5773,337.552846' or 0,-1.787922,6.348652,4784302.925302,8806,331.214377 for each line.\n\n");
+                        sampling.clear(); break;
+                    }
                 }
-                
-            }else {
-                m->mothurOut("\n[WARNING]: Unexpected format in sampling file, ignoring. Expecting something like: '0,7.419861e-01,4.695223e+00,5773,337.552846' for each line.\n\n");
-                sampling.clear(); break;
             }
-            
         }
         in.close();
         
@@ -831,6 +1005,5 @@ int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue) {
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
 

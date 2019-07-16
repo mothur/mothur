@@ -27,6 +27,7 @@ public:
     string getCommandCategory()		{ return "OTU-Based Approaches";		}
     
     string getHelpString();
+    string getCommonQuestions();
     string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/Estimator.single"; }
     string getDescription()		{ return "This command implements the diversity estimators from https://github.com/chrisquince/DiversityEstimates"; }
@@ -36,27 +37,28 @@ public:
     
 private:
     
-    bool abort, allLines, burnSampleSet, burnSet;
+    bool abort, allLines, burnSampleSet, burnSet, createSampling, itersSet;
     string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile, samplefile;
     double freq, sigmaAlpha, sigmaBeta, sigmaS, sigmaN, coverage;
-    int iters, burn, burnSample;
+    int iters, burn, burnSample, fitIters;
     vector<string> outputNames;
     set<string> labels; //holds labels to be used
-    vector<string>  Estimators, groups;
-    vector<mcmcSample> sampling;
+    vector<string> groups, rarefactCalcs, abundCalcs, smallBurn;
+    map<string, vector<mcmcSample> > sampling;
+    map<string, vector<mcmcSample> > ::iterator it;
+    set<string> samplingCalcs;
+    map<string, string> calcToSamplingCalc;
+    map<string, string> ::iterator itCalcSample;
     
-    vector<string> parseSharedFile(string);
-    int fillSampling(int, int);
+    int fillSampling(int, int, bool filldNu=false);
+    int processSingleSample();
+    int processSharedFile();
+    int processShared(SharedRAbundVectors*& shared, vector<ofstream*>& out, string fileRoot);
+    int processSingle(SAbundVector*&, string, vector<ofstream*>&, string);
     
-    int process(SAbundVector*&, string);
-    string runErarefaction(SAbundVector*&, string);
-    string runMetroIG(SAbundVector*&, string);
-    string runMetroLogNormal(SAbundVector*&, string);
-    string runMetroLogStudent(SAbundVector*&, string);
-    string runMetroSichel(SAbundVector*&, string);
-    int runIGAbund(SAbundVector*&, string);
-    string runIGRarefaction(SAbundVector*& sabund, string fileRoot);
-    int runLNAbund(SAbundVector*& sabund, string fileRoot);
+    int runRarefactCalcs(int numSeqs, string groupName, ofstream& out);
+    vector<string> runSamplingCalcs(SAbundVector*&, string);
+    vector<double> runAbundCalcs(SAbundVector*&, string groupName);
     
 };
 //*******************************************************

@@ -9,7 +9,7 @@
 #ifndef tptn_hpp
 #define tptn_hpp
 
-#include <calculator.h>
+#include "calculator.h"
 
 /***********************************************************************/
 

@@ -633,7 +633,7 @@ void driverClassifier(classifyData* params){
 int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string accnos, string filename) {
 	try {
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<classifyData*> data;
         
         long long num = 0;
@@ -671,7 +671,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
             classifyData* dataBundle = new classifyData(threadAccnosWriter, probs, threadTaxWriter, threadTaxTWriter, filename, lines[i+1].start, lines[i+1].end, flip, classify);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverClassifier, dataBundle));
+            workerThreads.push_back(new std::thread(driverClassifier, dataBundle));
         }
         
         OutputWriter* threadTaxWriter = new OutputWriter(synchronizedTaxFile);

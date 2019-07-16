@@ -9,7 +9,7 @@
 #ifndef npv_hpp
 #define npv_hpp
 
-#include <calculator.h>
+#include "calculator.h"
 
 /***********************************************************************/
 

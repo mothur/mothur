@@ -70,6 +70,7 @@ public:
     bool anyLabelsToProcess(string, set<string>&, string);
     bool appendBinaryFiles(string, string);
     int appendFiles(string, string);
+    void appendFiles(string, ofstream&);
     int appendFilesFront(string, string);
     int appendFilesWithoutHeaders(string, string);
     vector<bool> allGZFiles(vector<string>&);
@@ -211,6 +212,7 @@ public:
     bool inUsersGroups(vector<string>, vector<string>); //returns true if any of the strings in first vector are in second vector
     bool inUsersGroups(vector<int>, vector< vector<int> >);
     bool inUsersGroups(string, vector<string>);
+    bool inUsersGroups(string, set<string>);
     bool inUsersGroups(int, vector<int>);
     bool isSubset(vector<string>, vector<string>); //bigSet, subset
     

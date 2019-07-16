@@ -9,7 +9,7 @@
 #ifndef sensitivity_hpp
 #define sensitivity_hpp
 
-#include <calculator.h>
+#include "calculator.h"
 
 /***********************************************************************/
 

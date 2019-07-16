@@ -9,7 +9,9 @@
 #include "igrarefaction.hpp"
 
 /***********************************************************************/
-int compare_doubles(const void* a, const void* b)
+IGRarefaction::IGRarefaction(double c) : coverage(c), DiversityCalculator(true) {}
+/***********************************************************************/
+inline int compare_doubles1(const void* a, const void* b)
 {
     double* arg1 = (double *) a;
     double* arg2 = (double *) b;
@@ -17,37 +19,15 @@ int compare_doubles(const void* a, const void* b)
     else if( *arg1 == *arg2 ) return 0;
     else return 1;
 }
-#ifdef USE_GSL
 /***********************************************************************/
-double IGRarefaction::calcMu(t_IGParams *ptIGParams)
-{
-    double dMu = 0.0;
-    
-    ptIGParams->dC = coverage;
-    
-    DiversityUtils dutils("igrarefaction");
-    
-    dutils.solveF(1.0, 1.0e10, ptIGParams, 1.0e-7, &dMu);
-    
-    return dMu;
-}
-#endif
-/***********************************************************************/
-vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& sampling){
+vector<double> IGRarefaction::getValues(int numSeqs, vector<mcmcSample>& sampling){  //numSeqs = rank->getNumSeqs(); //nj
     try {
-        t_Data   tData;
-        vector<double> results;
         
 #ifdef USE_GSL
         
         DiversityUtils dutils("igrarefaction");
         
-        dutils.loadAbundance(&tData, rank);
-        
-        int sampled = rank->getNumSeqs(); //nj
-        int numOTUs = rank->getNumBins(); //nl
         int nSamples = sampling.size();
-        
         double*     adMu = NULL;
         double dLower = 0.0, dMedian = 0.0, dUpper = 0.0;
         
@@ -63,18 +43,14 @@ vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
             atIGParams[i].dAlpha = sampling[i].alpha;
             atIGParams[i].dBeta = sampling[i].beta;
             atIGParams[i].nS = sampling[i].ns;
+            atIGParams[i].dC = coverage;
         }
         
         adMu = (double *) malloc(sizeof(double)*nSamples);
         
-        //printf("numSample = %d ",nSamples);
-        for(int i = 0; i < nSamples; i++){
-            adMu[i] = ((double) sampled)*calcMu(&atIGParams[i]);
-            //printf("%f\n", adMu[i]);
-            //fflush(stdout);
-        }
+        for(int i = 0; i < nSamples; i++){ adMu[i] = ((double) numSeqs)*dutils.calcMu(&atIGParams[i]); }
         
-        qsort(adMu, nSamples, sizeof(double), compare_doubles);
+        qsort(adMu, nSamples, sizeof(double), compare_doubles1);
         
         dLower  = gsl_stats_quantile_from_sorted_data(adMu, 1, nSamples, 0.025);
         dMedian = gsl_stats_quantile_from_sorted_data(adMu, 1, nSamples, 0.5);
@@ -89,8 +65,6 @@ vector<double> IGRarefaction::getValues(SAbundVector* rank, vector<mcmcSample>& 
         results.push_back(dLower); results.push_back(dMedian); results.push_back(dUpper);
         
         free(adMu);
-        
-        dutils.freeAbundance(&tData);
 #endif
         
         return results;

@@ -1,0 +1,16 @@
+#align.seqs
+# testAlign is stability.trim.contigs.good.unique.fasta from MiSeq_SOP
+# test different align method and seaches
+set.dir(input=./align.seqs, output=./align.seqs)
+set.logfile(name=alignseqs.logfile)
+align.seqs(fasta=testAlign.fasta, reference=../TestReferences/silva.v4.fasta)
+summary.seqs(fasta=current)
+align.seqs(fasta=testAlign.fasta, reference=../TestReferences/silva.v4.fasta, search=blast)
+summary.seqs(fasta=current)
+align.seqs(fasta=testAlign.fasta, reference=../TestReferences/silva.v4.fasta, align=needleman)
+summary.seqs(fasta=current)
+align.seqs(fasta=testAlign.fasta, reference=../TestReferences/silva.v4.fasta, align=gotoh)
+summary.seqs(fasta=current)
+quit()
+
+

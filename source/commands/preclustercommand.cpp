@@ -1339,7 +1339,7 @@ void PreClusterCommand::createProcessesGroups(string newNName, string newMFile) 
     }
 
     //create array of worker threads
-    vector<thread*> workerThreads;
+    vector<std::thread*> workerThreads;
     vector<preClusterData*> data;
       
     auto synchronizedNameFile = std::make_shared<SynchronizedOutputFile>(newNName);
@@ -1352,7 +1352,7 @@ void PreClusterCommand::createProcessesGroups(string newNName, string newMFile) 
       dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
       data.push_back(dataBundle);
 
-      workerThreads.push_back(new thread(driverGroups, dataBundle));
+      workerThreads.push_back(new std::thread(driverGroups, dataBundle));
     }
     OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
 

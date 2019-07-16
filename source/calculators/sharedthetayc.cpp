@@ -14,8 +14,8 @@ EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(3,0.0000);
 		
-		double Atotal = 0;
-		double Btotal = 0;
+		double Atotal = (double)shared[0]->getNumSeqs();
+		double Btotal = (double)shared[1]->getNumSeqs();
 		double thetaYC = 0;
 		double pi = 0;
 		double qi = 0;
@@ -27,13 +27,6 @@ EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 		double sumQcubed = 0;
 		double sumPQsq = 0;
 		double sumPsqQ = 0;
-		
-		//get the total values we need to calculate the theta denominator sums
-		for (int i = 0; i < shared[0]->getNumBins(); i++) {
-			//store in temps to avoid multiple repetitive function calls
-			Atotal += (double)shared[0]->get(i);
-			Btotal += (double)shared[1]->get(i);
-		}
 		
 		//calculate the theta denominator sums
 		for (int j = 0; j < shared[0]->getNumBins(); j++) {

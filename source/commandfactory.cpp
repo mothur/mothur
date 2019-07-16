@@ -57,7 +57,6 @@
 #include "pcoacommand.h"
 #include "otuhierarchycommand.h"
 #include "setdircommand.h"
-#include "parselistscommand.h"
 #include "chimeraccodecommand.h"
 #include "chimeracheckcommand.h"
 #include "chimeraslayercommand.h"
@@ -220,7 +219,6 @@ CommandFactory::CommandFactory(){
 	commands["otu.hierarchy"]		= "otu.hierarchy";
 	commands["set.dir"]				= "set.dir";
 	commands["merge.files"]			= "merge.files";
-	commands["parse.list"]			= "parse.list";
 	commands["set.logfile"]			= "set.logfile";
 	commands["phylo.diversity"]		= "phylo.diversity";
 	commands["make.group"]			= "make.group";
@@ -491,7 +489,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);			}
 		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
-		else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);				}
 		else if(commandName == "phylo.diversity")		{	command = new PhyloDiversityCommand(optionString);			}
 		else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
@@ -668,7 +665,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "otu.hierarchy")			{	pipecommand = new OtuHierarchyCommand(optionString);			}
 		else if(commandName == "set.dir")				{	pipecommand = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	pipecommand = new SetLogFileCommand(optionString);				}
-		else if(commandName == "parse.list")			{	pipecommand = new ParseListCommand(optionString);				}
 		else if(commandName == "phylo.diversity")		{	pipecommand = new PhyloDiversityCommand(optionString);			}
 		else if(commandName == "make.group")			{	pipecommand = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	pipecommand = new ChopSeqsCommand(optionString);				}
@@ -831,7 +827,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "otu.hierarchy")			{	shellcommand = new OtuHierarchyCommand();			}
 		else if(commandName == "set.dir")				{	shellcommand = new SetDirectoryCommand();			}
 		else if(commandName == "set.logfile")			{	shellcommand = new SetLogFileCommand();				}
-		else if(commandName == "parse.list")			{	shellcommand = new ParseListCommand();				}
 		else if(commandName == "phylo.diversity")		{	shellcommand = new PhyloDiversityCommand();			}
 		else if(commandName == "make.group")			{	shellcommand = new MakeGroupCommand();				}
 		else if(commandName == "chop.seqs")				{	shellcommand = new ChopSeqsCommand();				}

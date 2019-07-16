@@ -368,7 +368,7 @@ int RemoveLineageCommand::execute(){
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
                 runRemoveSeqs(accnosFileName);
-            }
+            }else{ m->mothurOut("\n*** No contaminants to remove ***\n"); }
             util.mothurRemove(accnosFileName);
         }else {
             string accnosFileName = readConsTax(); //writes accnos file with otuNames
@@ -376,15 +376,14 @@ int RemoveLineageCommand::execute(){
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
                 runRemoveOTUs(accnosFileName);
-            }
+            }else{ m->mothurOut("\n*** No contaminants to remove ***\n"); }
             util.mothurRemove(accnosFileName);
         }
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (outputNames.size() != 0) {
-			m->mothurOutEndLine();
-			m->mothurOut("Output File Names:\n"); 
+			m->mothurOut("\nOutput File Names:\n");
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 			
@@ -604,7 +603,7 @@ string RemoveLineageCommand::readTax(){
 		out.close();
         outAccnos.close();
 		
-		if (!wroteSomething) { m->mothurOut("Your taxonomy file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
+		if (!wroteSomething) { m->mothurOut("Your taxonomy file contains only sequences from " + taxons + ".\n");   }
 		outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
         
 		return accnosFileName;

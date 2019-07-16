@@ -706,7 +706,7 @@ int driverSquare(pairwiseData* params){
 void PairwiseSeqsCommand::createProcesses(string filename) {
 	try {
         vector<linePair> lines;
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<pairwiseData*> data;
         long long numSeqs = alignDB.getNumSeqs();
         
@@ -763,13 +763,13 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
             dataBundle->setVariables(align, Estimators[0], countends, output, alignDB, oldFastaDB, lines[i+1].start, lines[i+1].end, match, misMatch, gapOpen, gapExtend, longestBase, cutoff);
             data.push_back(dataBundle);
             
-            thread* thisThread = NULL;
+            std::thread* thisThread = NULL;
             if (output == "column")     {
-                if (fitCalc)    { thisThread = new thread(driverFitCalc, dataBundle);   }
-                else            {  thisThread = new thread(driverColumn, dataBundle);   }
+                if (fitCalc)    { thisThread = new std::thread(driverFitCalc, dataBundle);   }
+                else            {  thisThread = new std::thread(driverColumn, dataBundle);   }
             }
-            else if (output == "lt")    { thisThread = new thread(driverLt, dataBundle);            }
-            else                        { thisThread = new thread(driverSquare, dataBundle);        }
+            else if (output == "lt")    { thisThread = new std::thread(driverLt, dataBundle);            }
+            else                        { thisThread = new std::thread(driverSquare, dataBundle);        }
             workerThreads.push_back(thisThread);
         }
 

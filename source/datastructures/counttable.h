@@ -32,6 +32,22 @@
  GQY1XT001CJMDA	1667
  GQY1XT001CBVJB	3758
 
+ The sparse format saves space by storing only non zero sample counts. Samples are assigned a numeric value, and only samples with non zero counts are printed to the file. You can see from the table below that GQY1XT001CFHYQ has representation in all samples, with a total abundance of 467. GQY1XT001EI480 has representation in 3 samples: 1 (F003D000) , 8 (F003D146) and 9 (F003D148), with a total abundance of 10.
+ 
+ #Compressed Format: groupIndex,abundance. For example 1,6 would mean the read has an abundance of 6 for group F003D000.
+ #1,F003D000	2,F003D002	3,F003D004	4,F003D006	5,F003D008	6,F003D142	7,F003D144	8,F003D146	9,F003D148	10,F003D150
+ Representative_Sequence	total	F003D000	F003D002	F003D004	F003D006	F003D008	F003D142	F003D144	F003D146	F003D148	F003D150
+ GQY1XT001CFHYQ	467	1,325	2,40	3,22	4,30	5,24	6,6	7,7	8,3	9,7	10,3
+ GQY1XT001C44N8	3677	1,323	2,132	3,328	4,318	5,232	6,579	7,448	8,426	9,381	10,510
+ GQY1XT001C296C	4652	1,356	2,877	3,754	4,794	5,284	6,538	7,361	8,313	10,375
+ GQY1XT001ARCB1	2202	1,203	2,391	3,220	4,155	5,308	6,126	7,33	8,191	9,289	10,286
+ GQY1XT001CFWVZ	1967	1,193	2,152	3,191	4,300	5,228	6,179	7,172	8,161	9,111	10,280
+ ...
+ GQY1XT001EI480	10	1,8	8,1	9,1
+ GQY1XT001EDBEC	95	1,9	2,13	3,13	4,7	5,10	6,11	7,8	8,8	9,5	10,11
+ GQY1XT001D47YY	97	1,10	2,2	3,13	4,21	5,9	6,5	7,11	8,12	9,2	10,12
+ GQY1XT001CNUHI	19	1,17	2,1	7,1
+ ...
 
  */
 
@@ -81,7 +97,7 @@ class CountTable {
         int getNumGroups() { return (int)groups.size(); }
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
         bool setNamesOfGroups(vector<string>);
-        int addGroup(string);
+        int addGroup(string); //*****only use with empty table******//
         int removeGroup(string); //pass in group name
         int removeGroup(int minSize);  //removes any groups with numSeqs < minSize
 
@@ -130,7 +146,7 @@ class CountTable {
         map<string, int> indexNameMap; //maps seqName -> vector index in counts. seq1 -> 1 would mean seq1's counts are stored in counts[1].
         map<string, int> indexGroupMap;
     
-        int find(int seq, int group); //returns index of countTableItem for group passed in. If group is not present in seq, returns -1
+        int find(int seq, int group, bool returnNext); //returns index of countTableItem for group passed in. If group is not present in seq, returns -1
         int getAbund(int seq, int group); //returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
         vector<countTableItem> getItems(string); //returns group counts for a seq passed in, if no group info is in file vector is blank. sorted by group
         vector<int> expandAbunds(int index);

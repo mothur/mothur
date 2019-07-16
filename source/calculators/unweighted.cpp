@@ -236,7 +236,7 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<unweightedData*> data;
         vector<string> Treenames; Treenames = t->getTreeNames();
         
@@ -250,7 +250,7 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
             unweightedData* dataBundle = new unweightedData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount, includeRoot);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverUnweighted, dataBundle));
+            workerThreads.push_back(new std::thread(driverUnweighted, dataBundle));
         }
         
         CountTable* copyCount = new CountTable();
@@ -397,7 +397,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeN
         }
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<unweightedData*> data;
         vector<string> Treenames; Treenames = t->getTreeNames();
         //Lauch worker threads
@@ -410,7 +410,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeN
             unweightedData* dataBundle = new unweightedData(lines[i+1].start, lines[i+1].end, namesOfGroupCombos, copyTree, copyCount, includeRoot, randomTreeNodes);
             data.push_back(dataBundle);
             
-            workerThreads.push_back(new thread(driverRandomCalcs, dataBundle));
+            workerThreads.push_back(new std::thread(driverRandomCalcs, dataBundle));
         }
         
         unweightedData* dataBundle = new unweightedData(lines[0].start, lines[0].end, namesOfGroupCombos, t, ct, includeRoot, randomTreeNodes);

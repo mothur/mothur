@@ -156,11 +156,12 @@ const vector<string> nullVector; //used to pass blank vector
 
 //******************************************************
 struct mcmcSample {
-    double alpha, beta;
+    double alpha, beta; //dmDash, dV
+    double dNu;
     int ns;
     
     mcmcSample() {}
-    mcmcSample(double a, double b, int n) : alpha(a), beta(b), ns(n) {}
+    mcmcSample(double a, double b, double d, int n) : alpha(a), beta(b), dNu(d), ns(n) {}
     
 };
 typedef struct s_Params
@@ -209,11 +210,13 @@ typedef struct s_LSParams
     
     double dNu;
     
+    double dC;
+    
     int n;
     
 } t_LSParams;
 
-typedef struct s_IGParams
+typedef struct s_IGParams //s_SIParams
 {
     int    nS;      /*number of species in community*/
     
@@ -221,7 +224,7 @@ typedef struct s_IGParams
     
     double dBeta;
     
-    double dC;
+    double dC; //dGamma
     
     int n;
     

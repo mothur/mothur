@@ -1153,7 +1153,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 #endif
         
         //create array of worker threads
-        vector<thread*> workerThreads;
+        vector<std::thread*> workerThreads;
         vector<sumScreenData*> data;
         
         long long num = 0;
@@ -1173,7 +1173,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
             sumScreenData* dataBundle = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN, badSeqNames, filename, summaryfile, contigsreport, lines[i+1].start, lines[i+1].end,outputThreadWriter, accnosThreadWriter);
             
             data.push_back(dataBundle);
-            workerThreads.push_back(new thread(driverScreen, dataBundle));
+            workerThreads.push_back(new std::thread(driverScreen, dataBundle));
         }
         
         OutputWriter* outputThreadWriter = new OutputWriter(synchronizedOutputFile);

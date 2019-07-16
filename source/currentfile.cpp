@@ -40,6 +40,7 @@ set<string> CurrentFile::getCurrentTypes()  {
         types.insert("biom");
         types.insert("count");
         types.insert("processors");
+        types.insert("sample");
         
         return types;
     }
@@ -83,6 +84,7 @@ void CurrentFile::printCurrentFiles(string filename)  {
             if (processors != "1")		{  m->mothurOut("processors=" + processors, out); m->mothurOutEndLine(out);		}
             if (summaryfile != "")		{  m->mothurOut("summary=" + summaryfile, out); m->mothurOutEndLine(out);         }
             if (filefile != "")         {  m->mothurOut("file=" + filefile, out); m->mothurOutEndLine(out);               }
+            if (samplefile != "")       {  m->mothurOut("sample=" + samplefile, out); m->mothurOutEndLine(out);               }
             
             out.close();
             
@@ -114,6 +116,7 @@ void CurrentFile::printCurrentFiles(string filename)  {
             if (processors != "1")		{  m->mothurOut("processors=" + processors); m->mothurOutEndLine();		}
             if (summaryfile != "")		{  m->mothurOut("summary=" + summaryfile); m->mothurOutEndLine();         }
             if (filefile != "")         {  m->mothurOut("file=" + filefile); m->mothurOutEndLine();               }
+            if (samplefile != "")       {  m->mothurOut("sample=" + samplefile); m->mothurOutEndLine();               }
         }
         
     }
@@ -153,6 +156,7 @@ bool CurrentFile::hasCurrentFiles()  {
         if (countfile != "")        {  return true;			}
         if (summaryfile != "")      {  return true;			}
         if (filefile != "")         {  return true;			}
+        if (samplefile != "")       {  return true;         }
         if (processors != "1")		{  return true;			}
         
         return hasCurrent;
@@ -193,6 +197,7 @@ void CurrentFile::clearCurrentFiles()  {
         biomfile = "";
         countfile = "";
         summaryfile = "";
+        samplefile = "";
         unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
         if (concurentThreadsSupported < 1) { concurentThreadsSupported = 1; } //in case thread errors
         processors = toString(concurentThreadsSupported);
