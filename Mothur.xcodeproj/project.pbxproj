@@ -953,6 +953,7 @@
 		4827A4DB1CB3ED2100345170 /* fastqdataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fastqdataset.h; path = TestMothur/fastqdataset.h; sourceTree = SOURCE_ROOT; };
 		4829D9651B8387D0002EEED4 /* testbiominfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testbiominfocommand.cpp; path = TestMothur/testbiominfocommand.cpp; sourceTree = SOURCE_ROOT; };
 		4829D9661B8387D0002EEED4 /* testbiominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testbiominfocommand.h; path = TestMothur/testbiominfocommand.h; sourceTree = SOURCE_ROOT; };
+		4837E5D622DE1BC400D3234B /* TestBatches */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TestBatches; sourceTree = SOURCE_ROOT; };
 		483A9BAC225BBE55006102DF /* metroig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metroig.cpp; path = source/calculators/metroig.cpp; sourceTree = SOURCE_ROOT; };
 		483A9BAD225BBE55006102DF /* metroig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metroig.hpp; path = source/calculators/metroig.hpp; sourceTree = SOURCE_ROOT; };
 		4846AD881D3810DD00DE9913 /* testtrimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testtrimoligos.cpp; path = TestMothur/testtrimoligos.cpp; sourceTree = SOURCE_ROOT; };
@@ -1823,6 +1824,7 @@
 		08FB7794FE84155DC02AAC07 /* mothur */ = {
 			isa = PBXGroup;
 			children = (
+				4837E5D622DE1BC400D3234B /* TestBatches */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				481FB51A1AC0A63E0076CFF3 /* TestMothur */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
