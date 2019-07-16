@@ -144,10 +144,13 @@ using namespace std;
 #define EXECUTABLE_EXT ".exe"
 #define WINDOWS
 #undef NON_WINDOWS
+#define M_PI 3.14159265358979323846264338327950288
 
 #endif
 
 #define MOTHURMAX 1e6
+
+
 
 
 typedef unsigned long ull;

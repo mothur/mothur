@@ -3912,7 +3912,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.42.0\\\"\"",
+					"VERSION=\"\\\"1.42.3\\\"\"",
 					"LOGFILE_NAME=\"\\\"silent\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -3961,7 +3961,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.42.1\\\"\"",
+					"VERSION=\"\\\"1.42.3\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -4025,7 +4025,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.42.0\\\"\"",
+					"VERSION=\"\\\"1.42.3\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
@@ -4108,7 +4108,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.42.1\\\"\"",
+					"VERSION=\"\\\"1.42.3\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);

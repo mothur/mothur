@@ -30,6 +30,8 @@ public:
     #ifdef USE_GSL
     
     double logLikelihood(int n, double dAlpha, double dBeta);
+    bool bessel(double* pdResult, int n, double dAlpha, double dBeta);
+    double sd(int n, double dAlpha, double dBeta);
     double logLikelihood(int n, double dAlpha, double dBeta, double);
     bool bessel(double* pdResult, int n, double dAlpha, double dBeta);
     double sd(int n, double dAlpha, double dBeta);

@@ -409,21 +409,48 @@ int RemoveGroupsCommand::execute(){
             if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
                 m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
             }
+            vector<string> gNamesOfGroups;
             CountTable ct;
-            ct.readTable(countfile, true, false);
-            if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, aborting.\n"); return 0; }
             
-            vector<string> gNamesOfGroups = ct.getNamesOfGroups();
-            if (Groups.size() == 0) { Groups = gNamesOfGroups; }
-            vector<string> namesOfSeqs = ct.getNamesOfSeqs();
-            sort(Groups.begin(), Groups.end());
+            if (!ct.testGroups(countfile, gNamesOfGroups)) { m->mothurOut("[ERROR]: your count file does not contain group info, aborting.\n"); return 0; }
+            
+            if (Groups.size() == 0) { return 0; }
+            
+            ct.readTable(countfile, true, false);
+            int oldTotal = ct.getNumSeqs();
+            
+            vector<string> namesOfSeqs = ct.getNamesOfSeqs(); //all names
+            
+            for (int i = 0; i < Groups.size(); i++) { ct.removeGroup(Groups[i]); }
+            
+            vector<string> newSeqs = ct.getNamesOfSeqs(); //names of seqs left after removing groups
+            
+            set<string> goodNames = util.mothurConvert(newSeqs);
             
             for (int i = 0; i < namesOfSeqs.size(); i++) {
-                vector<string> thisSeqsGroups = ct.getGroups(namesOfSeqs[i]);
-                if (util.isSubset(Groups, thisSeqsGroups)) { //you only have seqs from these groups so remove you
-                    names.insert(namesOfSeqs[i]);
+                if (goodNames.count(namesOfSeqs[i]) == 0) { //you aren't on good list
+                    names.insert(namesOfSeqs[i]); //add to remove list
                 }
             }
+            
+            string thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+            map<string, string> variables;
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+            variables["[extension]"] = util.getExtension(countfile);
+            string outputFileName = getOutputFileName("count", variables);
+            
+            int selectedCount = ct.getNumSeqs();
+            
+            if (selectedCount == 0) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");   }
+            else {
+                ct.printTable(outputFileName);
+                outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
+            }
+            
+            int removedCount = oldTotal - selectedCount;
+            
+            m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file.\n");
         }
 
 				
@@ -433,7 +460,6 @@ int RemoveGroupsCommand::execute(){
 		if (namefile != "")			{		readName();		}
 		if (fastafile != "")		{		readFasta();	}
 		if (groupfile != "")		{		readGroup();	}
-        if (countfile != "")		{		readCount();	}
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
 		if (sharedfile != "")		{		readShared();	}
@@ -870,48 +896,6 @@ int RemoveGroupsCommand::readGroup(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveGroupsCommand::readCount(){
-	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
-		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
-        variables["[extension]"] = util.getExtension(countfile);
-		string outputFileName = getOutputFileName("count", variables);
-		
-        CountTable ct; ct.readTable(countfile, false, false);
-        int oldTotal = ct.getNumSeqs();
-        ct.clearTable();
-        
-        vector<string> groupsInFile;
-        ct.testGroups(countfile, groupsInFile);
-        
-        vector<string> groupsToKeep;
-        for (int i = 0; i < groupsInFile.size(); i++) {
-            if (!util.inUsersGroups(groupsInFile[i], Groups)) { groupsToKeep.push_back(groupsInFile[i]); }
-        }
-        ct.readTable(countfile, true, false, groupsToKeep); //reads only groups found in Groups
-        
-        int selectedCount = ct.getNumSeqs();
-        
-        if (selectedCount == 0) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");   }
-        else {
-            ct.printTable(outputFileName);
-            outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
-        }
-        
-        int removedCount = oldTotal - selectedCount;
-        
-		m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file.\n");
-        
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveGroupsCommand", "readCount");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 int RemoveGroupsCommand::readDesign(){
 	try {
 		string thisOutputDir = outputDir;
@@ -1230,6 +1214,7 @@ int RemoveGroupsCommand::readColumn(){
     }
 }
 //**********************************************************************************************************************
+//names to remove
 int RemoveGroupsCommand::fillNames(){
 	try {
 		vector<string> seqs = groupMap->getNamesSeqs();

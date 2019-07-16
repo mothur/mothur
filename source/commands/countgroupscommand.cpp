@@ -240,6 +240,7 @@ int CountGroupsCommand::execute(){
                 out << Groups[i] << '\t' << num << endl;
 			}
             out.close();
+            m->mothurOut("\nSize of smallest group: " + toString(groupMap.getNumSeqsSmallestGroup()) + ".\n");
             m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
         
@@ -270,6 +271,7 @@ int CountGroupsCommand::execute(){
 			}
             out.close();
             
+            m->mothurOut("\nSize of smallest group: " + toString(ct.getNumSeqsSmallestGroup()) + ".\n");
             m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
 		
@@ -294,12 +296,15 @@ int CountGroupsCommand::execute(){
 			for (int i = 0; i < groups.size(); i++) {
                 int num = lookup->getNumSeqs(groups[i]);
                 total += num;
-				m->mothurOut(groups[i] + " contains " + toString(num) + "."); m->mothurOutEndLine();
+				m->mothurOut(groups[i] + " contains " + toString(num) + ".\n"); 
                 out << groups[i] << '\t' << num << endl;
 			}
             out.close();
 			
-            m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
+            m->mothurOut("\nSize of smallest group: " + toString(lookup->getNumSeqsSmallestGroup()) + ".\n");
+            
+            delete lookup;
+            m->mothurOut("\nTotal seqs: " + toString(total) + ".\n");
 		}
 			
         m->mothurOut("\nOutput File Names: \n"); 

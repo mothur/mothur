@@ -4,7 +4,7 @@ USEBOOST ?= yes
 USEHDF5 ?= yes
 USEGSL ?= yes
 LOGFILE_NAME ?= yes
-VERSION = "\"1.42.1\""
+VERSION = "\"1.42.3\""
 
 # Optimize to level 3:
     CXXFLAGS += -O3 -std=c++11

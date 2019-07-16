@@ -617,7 +617,7 @@ int process(string group, string newMapFile, preClusterData* params){
                         
                         if (params->m->getControl_pressed()) { out.close(); return 0; }
                         
-                        if ((params->alignSeqs[i]->numIdentical != 0) && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet
+                        if ((params->alignSeqs[i]->numIdentical != 0) && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet //  
                             //are you within "diff" bases
                             int mismatch = calcMisMatches(params->alignSeqs[i]->sequence, params->alignSeqs[j]->sequence, params);
                             
@@ -1271,6 +1271,17 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         ifstream inNames;
         util.openInputFile(newname, inNames);
         
+        /*
+         newname looks like:
+         
+        groupName seqName seqCountForGroup
+         
+         FDF6  seq1  35
+         
+         seq1 has an abundance of 35 in group FDF6
+         
+         */
+        
         time_t start = time(NULL);
         long long count = 0;
         
@@ -1300,14 +1311,14 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.");
         start = time(NULL);
-        
+        //cout << newname << endl;
         ct.printTable(newcount);
         util.mothurRemove(newname);
         
         ofstream outAccnos; util.openOutputFile(newname, outAccnos);
         for (int i = 0; i < namesOfSeqs.size(); i++) { outAccnos << namesOfSeqs[i] << endl; }
         outAccnos.close();
-        
+
 		return newname;
 	}
 	catch(exception& e) {

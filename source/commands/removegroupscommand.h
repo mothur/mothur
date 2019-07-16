@@ -54,7 +54,6 @@ private:
 	int readShared();
 	int readName();
 	int readGroup();
-    int readCount();
 	int readList();
 	int readTax();
 	int fillNames();

@@ -21,6 +21,7 @@ vector<double> LNAbundance::getValues(int maxRank, vector<mcmcSample>& sampling)
         
         if (nSamples == 0) {  return results; }
         
+        
 #ifdef USE_GSL
         
         gsl_set_error_handler_off();
