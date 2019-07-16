@@ -914,11 +914,12 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             sigmaA = acceptToSigma.begin()->second; //sigma for best try
             sigmaA -= (increment*(fitIters/(double)2.0));
             factor = badFactor / (double)(fitIters);
-        }
-        else if (badHigh || badLow)  {
+        }else if (badHigh || badLow)  {
             double increment = factor / (double)(fitIters);
             sigmaA -= (increment*(fitIters/(double)2.0));
-        }else {
+        }else { //good high and low
+            double increment = factor / (double)(fitIters);
+            sigmaA -= (increment*(fitIters/(double)2.0));
             factor /= (double) fitIters;
         }
 

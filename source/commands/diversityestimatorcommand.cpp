@@ -96,7 +96,7 @@ string EstimatorSingleCommand::getCommonQuestions(){
     try {
         vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
         
-        string howto = "How do create the sampling files?"; howtos.push_back(howto);
+        string howto = "How do you create the sampling files?"; howtos.push_back(howto);
         string hanswer = "\tRun a short trial MCMC run of 1000 iterations with guessed std. dev.s for the proposal distributions say about 10% of the parameter values. Adjust the std. dev.s untill the acceptance ratios are about 0.5. Then perform a longer run of say 250,000 iterations (mothur's default). Three data files with posterior samples for three different sets of parameter values will be generated.\n"; hanswers.push_back(hanswer);
         
         string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
@@ -330,6 +330,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             smallBurn.insert(smallBurn.end(), rarefactCalcs.begin(), rarefactCalcs.end());
 
             //remove any typo calcs
+            createSampling = false;
             if (validCalculator.isValidCalculator("estimator", calc) ) {
                 
                 bool ignore = false;
@@ -874,6 +875,10 @@ vector<string> EstimatorSingleCommand::runSamplingCalcs(SAbundVector*& sabund, s
         else if (calc == "si")  { diversityCalc = new MetroSichel(fitIters, sigmaAlpha, sigmaBeta, sigmaN, sigmaS, iters, outputFileStub);     }
         
         resultFiles = diversityCalc->getValues(sabund);
+        
+        if (m->getControl_pressed()) {
+           m->mothurOut("\nHow do you create the sampling files?\n\nRun a short trial MCMC run of 1000 iterations with guessed std. dev.s for the proposal distributions say about 10% of the parameter values. Adjust the std. dev.s untill the acceptance ratios are about 0.5. Then perform a longer run of say 250,000 iterations (mothur's default). Three data files with posterior samples for three different sets of parameter values will be generated.\n\n");
+        }
         delete diversityCalc;
         
         return resultFiles;
