@@ -109,10 +109,11 @@ struct summarySharedData {
 	string sumFile, sumAllFile;
     int count;
     bool main, mult;
+    bool subsample;
     Utils util;
     
 	summarySharedData(){}
-	summarySharedData(string sf, string sfa, MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, SharedRAbundVectors*& lu, bool mai, bool mu) {
+	summarySharedData(string sf, string sfa, MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, SharedRAbundVectors*& lu, bool mai, bool mu, bool sub) {
 		sumFile = sf;
         sumAllFile = sfa;
 		m = mout;
@@ -123,6 +124,7 @@ struct summarySharedData {
         count=0;
         main = mai;
         mult = mu;
+        subsample = sub;
 	}
     ~summarySharedData() { for (int j = 0; j < thisLookup.size(); j++) { delete thisLookup[j]; } thisLookup.clear(); }
 };

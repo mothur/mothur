@@ -4049,6 +4049,7 @@
 				"LIBRARY_SEARCH_PATHS[arch=*]" = (
 					/usr/local/lib/,
 					/usr/local/gsl/lib,
+					/usr/local/lib,
 				);
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
@@ -4135,6 +4136,7 @@
 				"LIBRARY_SEARCH_PATHS[arch=*]" = (
 					/usr/local/lib/,
 					/usr/local/gsl/lib,
+					/usr/local/lib,
 				);
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
