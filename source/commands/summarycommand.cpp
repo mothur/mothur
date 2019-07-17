@@ -281,7 +281,7 @@ SummaryCommand::SummaryCommand(string option)  {
             
             if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2.\n");  abort=true; }
             
-            if (!subsample) { iters = 0; }
+            if (!subsample) { iters = 1; }
             else {
                 //if you did not set a samplesize and are not using a sharedfile
                 if ((subsampleSize == -1) && (format != "sharedfile"))  { m->mothurOut("[ERROR]: If you want to subsample with a list, rabund or sabund file, you must provide the sample size.  You can do this by setting subsample=yourSampleSize.\n");  abort=true; }
@@ -320,7 +320,6 @@ int SummaryCommand::execute(){
 			string fileNameRoot = getOutputFileName("summary",variables);
             variables["[tag]"] = "ave-std";
             string fileNameAve = getOutputFileName("summary",variables);
-            outputNames.push_back(fileNameRoot); outputTypes["summary"].push_back(fileNameRoot);
             
 			if (inputFileNames.size() > 1) {
 				m->mothurOut("\nProcessing group " + groups[p] + "\n\n");
@@ -395,9 +394,6 @@ int SummaryCommand::execute(){
 			if (sumCalculators.size() == 0) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 			
 			ofstream outputFileHandle;
-			util.openOutputFile(fileNameRoot, outputFileHandle);
-			outputFileHandle << "label";
-            
             ofstream outAve;
             if (subsample) {
                 util.openOutputFile(fileNameAve, outAve);
@@ -407,6 +403,10 @@ int SummaryCommand::execute(){
                 if (inputFileNames.size() > 1) {
                     groupIndex[fileNameAve] = groups[p];
                 }
+            }else {
+                util.openOutputFile(fileNameRoot, outputFileHandle);
+                outputFileHandle << "label";
+                outputNames.push_back(fileNameRoot); outputTypes["summary"].push_back(fileNameRoot);
             }
 		
 			InputData input(inputFileNames[p], format, nullVector);
@@ -415,28 +415,30 @@ int SummaryCommand::execute(){
 		
 			for(int i=0;i<sumCalculators.size();i++){
 				if(sumCalculators[i]->getCols() == 1){
-					outputFileHandle << '\t' << sumCalculators[i]->getName();
+					
                     if (subsample) { outAve << '\t' << sumCalculators[i]->getName();  }
+                    else { outputFileHandle << '\t' << sumCalculators[i]->getName();  }
 					numCols++;
 				}
 				else{
-					outputFileHandle << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci";
                     if (subsample) { outAve << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci";  }
+                    else { outputFileHandle << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci"; }
 					numCols += 3;
 				}
 			}
-			outputFileHandle << endl;
+			
             if (subsample) {  outAve << endl; }
+            else {  outputFileHandle << endl; }
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
-			if (m->getControl_pressed()) {  outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
+			if (m->getControl_pressed()) {  if (!subsample) { outputFileHandle.close(); } else { outAve.close(); } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
 			
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
+                if (m->getControl_pressed()) { if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
 				
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 					
@@ -446,7 +448,7 @@ int SummaryCommand::execute(){
 					
                     process(sabund, outputFileHandle, outAve);
                     
-                    if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
+                    if (m->getControl_pressed()) { if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }   for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
 					numLines++;
 				}
 				
@@ -462,7 +464,7 @@ int SummaryCommand::execute(){
 					
                     process(sabund, outputFileHandle, outAve);
                     
-                    if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
+                    if (m->getControl_pressed()) { if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
 					numLines++;
 					
 					//restore real lastlabel to save below
@@ -475,7 +477,7 @@ int SummaryCommand::execute(){
 				sabund = input.getSAbundVector();
 			}
 			
-			if (m->getControl_pressed()) {  outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
+			if (m->getControl_pressed()) {  if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }   for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -498,19 +500,21 @@ int SummaryCommand::execute(){
 				m->mothurOut(sabund->getLabel()+"\n");
                 process(sabund, outputFileHandle, outAve);
                 
-                if (m->getControl_pressed()) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  return 0;  }
+                if (m->getControl_pressed()) { if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  return 0;  }
 				numLines++;
 				delete sabund;
 			}
 			
-			outputFileHandle.close();
             if (subsample) { outAve.close(); }
+            else { outputFileHandle.close(); }
 			
 			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
 			 
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		}
 		
+        for (int p = 0; p < inputFileNames.size(); p++) { util.mothurRemove(inputFileNames[p]); }
+        
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }  return 0;  }
 		
 		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
@@ -535,15 +539,15 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
         //calculator -> data -> values
         vector< vector< vector<double> > >  results; results.resize(sumCalculators.size());
         
-        outputFileHandle << sabund->getLabel();
+        if (!subsample) {  outputFileHandle << sabund->getLabel(); }
         
         SubSample sample;
-        for (int thisIter = 0; thisIter < iters+1; thisIter++) {
+        for (int thisIter = 0; thisIter < iters; thisIter++) {
             
             SAbundVector* thisIterSabund = sabund;
             
             //we want the summary results for the whole dataset, then the subsampling
-            if ((thisIter > 0) && subsample) { //subsample sabund and run it
+            if (subsample) { //subsample sabund and run it
                 //copy sabund since getSample destroys it
                 RAbundVector rabund = sabund->getRAbundVector();
                 SAbundVector* newSabund = new SAbundVector();
@@ -560,7 +564,7 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
                
                 if (m->getControl_pressed()) {  return 0;  }
                 
-                if (thisIter == 0) {
+                if (!subsample) {
                     outputFileHandle << '\t';
                     sumCalculators[i]->print(outputFileHandle);
                 }else {
@@ -575,9 +579,9 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
             }
             
             //cleanup memory
-            if ((thisIter > 0) && subsample) { delete thisIterSabund; }
+            if (subsample) { delete thisIterSabund; }
         }
-        outputFileHandle << endl;
+        if (!subsample) { outputFileHandle << endl; }
      
         if (subsample) {
             outAve << sabund->getLabel() << '\t' << "ave";
