@@ -2,14 +2,14 @@
 # testClassify.fasta is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta from MiSeq_SOP
 # testClassify.count is , count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table from MiSeq_SOP
 # test different classification methods and seaches
-set.dir(input=./classify.seqs, output=./classify.seqs)
+set.dir(input=./TestFiles, output=./classify.seqs, tempdefault=./TestReferences)
 set.logfile(name=classifyseqs.logfile)
-classify.seqs(fasta=testClassify.fasta, reference=../TestReferences/trainset9_032012.pds.fasta, taxonomy=../TestReferences/trainset9_032012.pds.tax)
-classify.seqs(fasta=testClassify.fasta, reference=../TestReferences/trainset9_032012.pds.fasta, taxonomy=../TestReferences/trainset9_032012.pds.tax, relabund=t)
-classify.seqs(fasta=testClassify.fasta, reference=../TestReferences/trainset9_032012.pds.fasta, taxonomy=../TestReferences/trainset9_032012.pds.tax, probs=f)
-classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, reference=../TestReferences/trainset9_032012.pds.fasta, taxonomy=../TestReferences/trainset9_032012.pds.tax)
+classify.seqs(fasta=testClassify.fasta, reference=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax)
+classify.seqs(fasta=testClassify.fasta, reference=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax, relabund=t)
+classify.seqs(fasta=testClassify.fasta, reference=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax, probs=f)
+classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, reference=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax)
 #
 #knn
-classify.seqs(fasta=testClassify.fasta, template=../TestReferences/trainset9_032012.pds.fasta, taxonomy=../TestReferences/trainset9_032012.pds.tax, method=knn)
-classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, template=../TestReferences/trainset9_032012.pds.fasta, taxonomy=../TestReferences/trainset9_032012.pds.tax, method=knn, search=blast)
+classify.seqs(fasta=testClassify.fasta, template=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax, method=knn)
+classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, template=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax, method=knn, search=blast)
 quit()

@@ -1,6 +1,6 @@
 #biom.info
 # test different biom formats
-set.dir(input=./biom.info, output=./biom.info)
+set.dir(input=./TestFiles, output=./biom.info)
 set.logfile(name=biominfo.logfile)
 biom.info(biom=core_table_0_L5.biom)
 biom.info(biom=hdf5.biom, label=0.03, format=hdf5)
