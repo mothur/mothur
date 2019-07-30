@@ -116,7 +116,7 @@ mothur : $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 
 uchime:
-	cd source/uchime_src && ./mk && mv uchime ../../ && cd ..
+	cd source/uchime_src && export CXX=$(CXX) && ./mk && mv uchime ../../ && cd ..
 
 install : mothur uchime
 #if [ "${CURDIR}" = "$(PREFIX)" ]; then \

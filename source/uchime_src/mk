@@ -7,7 +7,7 @@ rm -f *.o mk.stdout mk.stderr tmp.stderr
 for CPPName in $CPPNames
 do
   echo $CPPName >&2
-  g++ $ENV_GCC_OPTS -c -D_FILE_OFFSET_BITS=64 -DNDEBUG=1 -DUCHIMES=1 $CPPName.cpp -o $CPPName.o  >> mk.stdout 2>> tmp.stderr
+  $CXX $ENV_GCC_OPTS -c -D_FILE_OFFSET_BITS=64 -DNDEBUG=1 -DUCHIMES=1 $CPPName.cpp -o $CPPName.o  >> mk.stdout 2>> tmp.stderr
   cat tmp.stderr
 	cat tmp.stderr >> mk.stderr
 	rm -f tmp.stderr
@@ -17,7 +17,7 @@ LINK_OPTS=
 #if [ `uname -s` == Linux ] ; then
 #    LINK_OPTS=-static
 #fi
-g++ $LINK_OPTS $ENV_LINK_OPTS -g -o uchime $ObjNames >> mk.stdout 2>> tmp.stderr
+ $CXX $LINK_OPTS $ENV_LINK_OPTS -g -o uchime $ObjNames >> mk.stdout 2>> tmp.stderr
 cat tmp.stderr
 cat tmp.stderr >> mk.stderr
 rm -f tmp.stderr
