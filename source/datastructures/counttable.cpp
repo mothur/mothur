@@ -597,7 +597,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
         }
         
         //if the file has groups, but we didn't read them
-        hasGroups = readGroups;
+        if (!readGroups) { hasGroups = false; }
 
         return 0;
     }
@@ -744,7 +744,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<
         }
         
         //if the file has groups, but we didn't read them
-        hasGroups = readGroups;
+         if (!readGroups) { hasGroups = false; }
         
         return 0;
     }
@@ -798,6 +798,12 @@ int CountTable::clearTable() {
 //zeroed reads are not printed
 vector<string> CountTable::printTable(string file) {
     try {
+        
+        //remove group if all reads are removed
+        for (int i = 0; i < totalGroups.size(); i++) {
+            if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+        }
+        
         if (isCompressed) { return printCompressedTable(file); }
         
         ofstream out;
@@ -841,6 +847,12 @@ vector<string> CountTable::printTable(string file) {
 //zeroed reads are not printed
 vector<string> CountTable::printTable(string file, bool compressedFormat) {
     try {
+        
+        //remove group if all reads are removed
+        for (int i = 0; i < totalGroups.size(); i++) {
+            if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+        }
+        
         if (compressedFormat) { return printCompressedTable(file); }
         
         ofstream out;
@@ -1084,6 +1096,11 @@ int CountTable::printGroupAbunds(ofstream& out, int index) {
 /************************************************************/
 vector<string> CountTable::printSortedTable(string file) {
     try {
+        //remove group if all reads are removed
+        for (int i = 0; i < totalGroups.size(); i++) {
+            if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+        }
+        
         ofstream out;
         util.openOutputFile(file, out);
         printHeaders(out);
@@ -1128,6 +1145,11 @@ vector<string> CountTable::getHardCodedHeaders() {
 /************************************************************/
 int CountTable::printHeaders(ofstream& out, vector<string> selectedGroups) {
     try {
+        //remove group if all reads are removed
+        for (int i = 0; i < totalGroups.size(); i++) {
+            if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+        }
+        
         bool pickedGroups = false;
         if (selectedGroups.size() != 0) { pickedGroups = true; }
         
@@ -1649,7 +1671,9 @@ int CountTable::remove(string seqName) {
             int seqIndexIntoCounts = it->second;
             uniques--;
             if (hasGroups){ //remove this sequences counts from group totals
-                for (int i = 0; i < counts[seqIndexIntoCounts].size(); i++) { totalGroups[counts[seqIndexIntoCounts][i].group] -= counts[seqIndexIntoCounts][i].abund; }
+                for (int i = 0; i < counts[seqIndexIntoCounts].size(); i++) {
+                    totalGroups[counts[seqIndexIntoCounts][i].group] -= counts[seqIndexIntoCounts][i].abund;
+                }
             }
             
             //save for later in case removing a group means we need to remove a seq.
@@ -1668,6 +1692,11 @@ int CountTable::remove(string seqName) {
             int thisTotal = totals[seqIndexIntoCounts];
             totals.erase(totals.begin()+seqIndexIntoCounts);
             total -= thisTotal;
+            
+            //remove group if all reads are removed
+            for (int i = 0; i < totalGroups.size(); i++) {
+                if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+            }
             
         }else {
             if (hasGroupInfo()) {
