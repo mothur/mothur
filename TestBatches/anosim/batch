@@ -1,0 +1,7 @@
+#anosim
+# testRarefied.dist is stability.opti_mcc.thetayc.0.03.lt.ave.dist from MiSeq_SOP
+set.dir(input=./TestFiles, output=./anosim, tempdefault=./TestReferences)
+set.logfile(name=anosim.logfile)
+anosim(phylip=testRarefied.dist, design=mouse.time.design)
+quit()
+

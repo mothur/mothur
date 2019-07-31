@@ -128,7 +128,7 @@ vector<string> MakeContigsCommand::setParameters(){
 string MakeContigsCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs new fasta. \n";
+		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs a fasta file. \n";
         helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
         helpString += "If a forward index or reverse index file is provided barcodes be trimmed, and a group file will be created. The oligos parameter is required if an index file is given.\n";
 		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, findex, rindex, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, maxee, allfiles and processors.\n";
@@ -152,7 +152,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
         helpString += "The insert parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score equal to or below the threshold we eliminate it. Default=20.\n";
-        helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+        helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is all available.\n";
         helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
 
         helpString += "The trimoverlap parameter allows you to trim the sequences to only the overlapping section. The default is F.\n";
