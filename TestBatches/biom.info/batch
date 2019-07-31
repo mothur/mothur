@@ -1,4 +1,5 @@
 #biom.info
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
 # test different biom formats
 set.dir(input=./TestFiles, output=./biom.info)
 set.logfile(name=biominfo.logfile)

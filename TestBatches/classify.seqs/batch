@@ -1,4 +1,5 @@
 #classify.seqs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
 # testClassify.fasta is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta from MiSeq_SOP
 # testClassify.count is , count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table from MiSeq_SOP
 # test different classification methods and seaches

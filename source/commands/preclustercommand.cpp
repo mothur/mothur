@@ -617,7 +617,7 @@ int process(string group, string newMapFile, preClusterData* params){
                         
                         if (params->m->getControl_pressed()) { out.close(); return 0; }
                         
-                        if ((params->alignSeqs[j]->numIdentical != 0) && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet //  
+                        if ((params->alignSeqs[j]->numIdentical != 0) && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet //
                             //are you within "diff" bases
                             int mismatch = calcMisMatches(params->alignSeqs[i]->sequence, params->alignSeqs[j]->sequence, params);
                             

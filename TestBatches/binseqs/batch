@@ -1,4 +1,5 @@
 #bin.seqs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
 #Test files -> final.fasta, final.names, final.count_table, final.groups from MiSeq_SOP
 set.dir(input=./TestFiles, output=./binseqs, tempdefault=./TestReferences)
 set.logfile(name=binseqs.logfile)
