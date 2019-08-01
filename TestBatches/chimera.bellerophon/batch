@@ -1,4 +1,5 @@
 #chimera.bellerophon
+# chimera.bellerophon is very slow, so this batch test will take a very long time. (~7000 secs / ~2 hours)
 # chimera.fasta is stability.trim.contigs.good.unique.good.filter.unique.precluster.fasta from MISeq_SOP
 # chimera.count is stability.trim.contigs.good.unique.good.filter.unique.precluster.count_table from MISeq_SOP
 # NOTE: download TestReferences and TestFiles and put in same location as mothur executable
