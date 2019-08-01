@@ -400,9 +400,7 @@ int CommunityTypeFinder::findkMeans(){
         
         //randomly assign samples into partitions
         zMatrix.resize(numPartitions);
-        for(int i=0;i<numPartitions;i++){
-            zMatrix[i].assign(numSamples, 0);
-        }
+        for(int i=0;i<numPartitions;i++){ zMatrix[i].assign(numSamples, 0); }
         
         //randomize samples
         vector<int> temp;

@@ -244,9 +244,32 @@ int GetMetaCommunityCommand::execute(){
                 Groups = lookup->getNamesGroups();
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");  m->setControl_pressed(true);  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n");  m->setControl_pressed(true);  return 0; }
         }
-
+       
+        //check minpartitions and maxpartitions to ensure
+        if (lookup->size() < maxpartitions) {
+            m->mothurOut("\n\n[NOTE]: This command is designed to be run with datasets containing > 50 samples.\n\n");
+            m->mothurOut("[WARNING]: You have not provided enough valid groups, for maxpartitions=" + toString(maxpartitions) + ". Reducing maxpartitions to " + toString(lookup->size()) + ".\n");
+            maxpartitions = lookup->size();
+            
+            if (minpartitions > lookup->size()) {
+                minpartitions = lookup->size();
+                m->mothurOut("[WARNING]: You have not provided enough valid groups, for minpartitions=" + toString(minpartitions) + ". Reducing minpartitions to " + toString(lookup->size()) + ".\n");
+            }
+            m->mothurOut("\n\n");
+        }else if (lookup->size() < minpartitions) {
+            m->mothurOut("[NOTE]: This command is designed to be run with datasets containing > 50 samples.\n");
+            minpartitions = lookup->size();
+            m->mothurOut("[WARNING]: You have not provided enough valid groups, for minpartitions=" + toString(minpartitions) + ". Reducing minpartitions to " + toString(lookup->size()) + ".\n");
+            
+            if (maxpartitions > lookup->size()) {
+                maxpartitions = lookup->size();
+                m->mothurOut("[WARNING]: You have not provided enough valid groups, for maxpartitions=" + toString(maxpartitions) + ". Reducing maxpartitions to " + toString(lookup->size()) + ".\n");
+            }
+            m->mothurOut("\n\n");
+        }
+            
         
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
