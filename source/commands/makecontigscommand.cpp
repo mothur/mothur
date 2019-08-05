@@ -768,8 +768,18 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
         #endif
         allGZ = false;
 #endif
-
-        if (allGZ)      { gz = true;    }
+        bool decompressionHelped = false;
+        if (allGZ)      {
+            gz = true;
+            //test to make sure you can read the gz files
+            bool readable = testGZReadable(fileInputs, qualOrIndexInputs, decompressionHelped);
+            
+            if (readable) {
+                if (decompressionHelped) { gz = false; }
+            }else {
+                m->mothurOut("[ERROR]: Unable to read compressed .gz files, please decompress and run make.contigs again. \n"); m->setControl_pressed(true); return 0;
+            }
+        }
         else            { gz = false;   }
 
         variables["[tag]"] = "trim";
@@ -792,9 +802,12 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
 
         m->mothurOut("Making contigs...\n");
         numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, group, pairedPrimers, rpairedPrimers, pairedBarcodes, rpairedBarcodes, barcodeNames, primerNames);
-
+        
+        if (decompressionHelped) { util.mothurRemove(fileInputs[0]); util.mothurRemove(fileInputs[1]); }
+        
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }
-
+        
+        
         if (file == "") {
             outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile); outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
             if (hasQual) {
@@ -1075,6 +1088,79 @@ int setNameType(string forwardFile, string reverseFile, char delim, int& offByOn
     }
     catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "setNameType");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+bool MakeContigsCommand::testGZReadable(vector<string>& fileInputs, vector<string>& indexInputs, bool& decompressionHelped) {
+    try {
+        
+        bool error = false; bool readable = true;
+        decompressionHelped = false;
+
+#ifdef USE_BOOST
+        boost::iostreams::filtering_istream inFF, inRF;
+        ifstream inForward, inReverse;
+        string forwardFile = fileInputs[0];
+        string reverseFile = fileInputs[1];
+        
+        Utils util;
+        util.openInputFileBinary(forwardFile, inForward, inFF);
+        util.openInputFileBinary(reverseFile, inReverse, inRF);
+        
+        FastqRead fread(inFF, error, format);
+        FastqRead rread(inRF, error, format);
+        inFF.pop(); inRF.pop();
+        
+        //error=true;
+        if (error) { //error reading fastq files, try unzipping
+            
+            string forwardOutput = util.hasPath(forwardFile) + "mothurTest_forward.fastq";
+            string reverseOutput = util.hasPath(reverseFile) + "mothurTest_reverse.fastq";
+            
+            string unzipCommand = "gunzip < " + forwardFile + " > " + forwardOutput;
+            system(unzipCommand.c_str());
+            unzipCommand = "gunzip < " + reverseFile + " > " + reverseOutput;
+            system(unzipCommand.c_str());
+            
+            ifstream inForward1, inReverse1;
+            util.openInputFile(forwardOutput, inForward1);
+            util.openInputFile(reverseOutput, inReverse1);
+            
+            FastqRead fread(inForward1, error, format);
+            FastqRead rread(inReverse1, error, format);
+            
+            if (!error) {
+                m->mothurOut("[WARNING]: mothur is unable to read your compressed fastq files. Decompressing files and continuing to process.\n\n");
+                fileInputs[0] = forwardOutput;
+                fileInputs[1] = reverseOutput;
+                
+                if (indexInputs.size() != 0) {
+                    if (indexInputs[0] != "NONE") {
+                        string forwardIndex = util.hasPath(indexInputs[0]) + "mothurTest_forward_index.fastq";
+                        string unzipCommand = "gunzip < " + indexInputs[0] + " > " + forwardIndex;
+                        system(unzipCommand.c_str());
+                        indexInputs[0] = forwardIndex;
+                    }
+                    if (indexInputs[0] != "NONE") {
+                        string reverseIndex = util.hasPath(indexInputs[1]) + "mothurTest_reverse_reverse.fastq";
+                        unzipCommand = "gunzip < " + indexInputs[1] + " > " + reverseIndex;
+                        system(unzipCommand.c_str());
+                        indexInputs[1] = reverseIndex;
+                    }
+                }
+                
+                decompressionHelped = true;
+            }
+            else { readable = false; }
+            
+        }
+#endif
+        
+        return readable;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "testGZReadable");
         exit(1);
     }
 }
