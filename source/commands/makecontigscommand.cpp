@@ -841,6 +841,7 @@ struct contigsData {
 
 
     contigsData(){}
+    ~contigsData(){}
     contigsData(OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, OutputWriter* mmf) {
         trimFileName = tn;
         scrapFileName = sn;

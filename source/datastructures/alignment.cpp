@@ -157,6 +157,7 @@ Alignment::~Alignment(){
 		for (int i = 0; i < alignment.size(); i++) {
 			for (int j = (alignment[i].size()-1); j >= 0; j--) {  alignment[i].pop_back();  }
 		}
+        alignment.clear();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Alignment", "~Alignment");
