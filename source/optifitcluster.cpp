@@ -21,8 +21,8 @@ OptiFitCluster::OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns, s
 /***********************************************************************/
 int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string> bls, string meth, bool denov) {
     try {
-        long long reftruePositives, reftrueNegatives, reffalsePositives, reffalseNegatives, numRefSeqs, numRefSingletons;
-        numRefSeqs = 0; numRefSingletons = 0; reftruePositives = 0; reffalsePositives = 0; reffalseNegatives = 0; reftrueNegatives = 0;
+        long long reftruePositives, reftrueNegatives, reffalsePositives, reffalseNegatives, numRefSeqs;
+        numRefSeqs = 0; reftruePositives = 0; reffalsePositives = 0; reffalseNegatives = 0; reftrueNegatives = 0;
         
         if (meth == "closed") { closed = true; }
         denovo = denov;

@@ -227,7 +227,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
                         
                         string oligo = it->first;
                         
-                        if (m->getControl_pressed()) { primerStart = 0; primerEnd = 0; return success; }
+                        if (m->getControl_pressed()) { delete alignment; primerStart = 0; primerEnd = 0; return success; }
                         
                         string rawChunk = rawSequence.substr(j, olength+pdiffs);
                         

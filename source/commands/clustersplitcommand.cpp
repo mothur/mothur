@@ -1274,9 +1274,9 @@ string runVsearchCluster(string thisDistFile, string thisNamefile, double& small
         string vsearchFastafile = ""; VsearchFileParser* vParse;
         if (params->useName)                    { vParse = new VsearchFileParser(thisDistFile, thisNamefile, "name");       }
         else if (params->useCount)              { vParse = new VsearchFileParser(thisDistFile, thisNamefile, "count");      }
-        else                                    { params->m->mothurOut("[ERROR]: Opps, should never get here. ClusterSplitCommand::runVsearchCluster() \n"); params->m->setControl_pressed(true); }
+        else                                    { params->m->mothurOut("[ERROR]: Opps, should never get here. ClusterSplitCommand::runVsearchCluster() \n"); params->m->setControl_pressed(true);  return ""; }
         
-        if (params->m->getControl_pressed()) {  return ""; }
+        if (params->m->getControl_pressed()) {  delete vParse; return ""; }
         
         vsearchFastafile = vParse->getVsearchFile();
         

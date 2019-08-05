@@ -274,7 +274,11 @@ int ParseFastaQCommand::execute(){
             
             inputFile = file;
             
-            if (m->getControl_pressed()) { return 0; }
+            if (m->getControl_pressed()) {
+                if (groupfile != "")        { delete groupMap;      }
+                if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
+                return 0;
+            }
             
             for (int i = 0; i < files.size(); i++) { //process each pair
                 
@@ -383,7 +387,7 @@ int ParseFastaQCommand::execute(){
         }
 
         if (groupfile != "")        { delete groupMap;      }
-        else if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
+        if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
         
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  outputTypes.clear(); outputNames.clear();  return 0; }

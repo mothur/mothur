@@ -436,13 +436,12 @@ int ChimeraVsearchCommand::execute(){
             
             //read namefile
             vector<seqPriorityNode> nameMapCount;
-            int error;
+            //int error;
             if (hasCount) {
                 CountTable ct; ct.readTable(countfile, true, false);
                 for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
                     int num = ct.getNumSeqs(it->first);
-                    if (num == 0) { error = 1; }
-                    else { seqPriorityNode temp(num, it->second, it->first); nameMapCount.push_back(temp); }
+                    if (num != 0) { seqPriorityNode temp(num, it->second, it->first); nameMapCount.push_back(temp); }
                 }
             }
             

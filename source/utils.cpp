@@ -2117,7 +2117,7 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, long long&
         num = positions.size()-1;
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
@@ -2171,7 +2171,7 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, unsigned l
         num = positions.size()-1;
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
@@ -2200,7 +2200,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         filename = getFullPathName(filename);
 
@@ -2279,7 +2279,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         filename = getFullPathName(filename);
 
@@ -2380,7 +2380,7 @@ vector<unsigned long long> Utils::divideFilePerLine(string filename, int& proc) 
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         filename = getFullPathName(filename);
 

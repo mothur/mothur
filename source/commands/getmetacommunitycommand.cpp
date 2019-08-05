@@ -903,7 +903,7 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(SharedRA
             }
         }
 
-        
+        delete matrixCalculator;
         return results;
     }
     catch(exception& e) {

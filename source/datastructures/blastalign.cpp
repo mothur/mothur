@@ -119,7 +119,7 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 	blastFile >> templateLength;				//	Get the template sequence length from flatfile
 		
 	while((d=blastFile.get()) != 'Q'){}			//	Suck up everything else until we get to the start of the alignment
-	int queryStart, sbjctStart, queryEnd, sbjctEnd;
+    int queryStart, sbjctStart, queryEnd, sbjctEnd; queryStart = 0; queryEnd=0;
 	string queryLabel, sbjctLabel, query, sbjct;
 
 	blastFile >> queryLabel;	queryLabel = 'Q' + queryLabel;
