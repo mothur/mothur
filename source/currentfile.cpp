@@ -52,6 +52,7 @@ set<string> CurrentFile::getCurrentTypes()  {
 /*********************************************************************************************/
 void CurrentFile::printCurrentFiles(string filename)  {
     try {
+        lock_guard<std::mutex> guard(currentProtector);
         
         if (filename != "") {
             ofstream out;
@@ -128,6 +129,8 @@ void CurrentFile::printCurrentFiles(string filename)  {
 /*********************************************************************************************/
 bool CurrentFile::hasCurrentFiles()  {
     try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
         bool hasCurrent = false;
         
         if (accnosfile != "")		{  return true;			}
@@ -171,6 +174,8 @@ bool CurrentFile::hasCurrentFiles()  {
 /*********************************************************************************************/
 void CurrentFile::clearCurrentFiles()  {
     try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
         phylipfile = "";
         filefile = "";
         columnfile = "";
@@ -210,6 +215,8 @@ void CurrentFile::clearCurrentFiles()  {
 /*********************************************************************************************/
 int CurrentFile::setProcessors(string p)  {
     try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
         if (!util.isInteger(p)) {
             unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
             if (concurentThreadsSupported < 1) { concurentThreadsSupported = 1; } //in case thread errors
@@ -228,6 +235,7 @@ int CurrentFile::setProcessors(string p)  {
 /*********************************************************************************************/
 void CurrentFile::setDefaultPath(string pathname)  {
     try {
+        lock_guard<std::mutex> guard(currentProtector);
         
         if (pathname != "") { //add / to name if needed
             string lastChar = pathname.substr(pathname.length()-1);
@@ -243,6 +251,7 @@ void CurrentFile::setDefaultPath(string pathname)  {
 /*********************************************************************************************/
 void CurrentFile::setTestFilePath(string pathname)  {
     try {
+        lock_guard<std::mutex> guard(currentProtector);
         
         if (pathname != "") {
             //add / to name if needed
@@ -261,6 +270,7 @@ void CurrentFile::setTestFilePath(string pathname)  {
 /*********************************************************************************************/
 void CurrentFile::setBlastPath(string pathname)  {
     try {
+        lock_guard<std::mutex> guard(currentProtector);
         
         if (pathname != "") {
             //add / to name if needed
