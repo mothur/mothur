@@ -31,6 +31,7 @@ Utils::Utils(){
         m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames();
         long long s = m->getRandomSeed();
         mersenne_twister_engine.seed(s); srand(s);
+        homePath = ""; currentWorkingDirectory = "";
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "mothurRandomShuffle");
@@ -440,16 +441,23 @@ string Utils::getFullPathName(string fileName){
             // ex. ../../../filename
             // cwd = /user/work/desktop
             //get current working directory
-            string cwd;
+            string cwd = currentWorkingDirectory;
+            
             if (path.find("~") != string::npos) { //go to home directory
-#if defined NON_WINDOWS
-                string homeDir;
-                char *homepath = NULL; homepath = getenv ("HOME");
-                if ( homepath != NULL) { homeDir = homepath; }
-                else { homeDir = "";  }
-#else
-                string homeDir = getenv ("HOMEPATH");
-#endif
+                string homeDir = homePath;
+                
+                if (homeDir == "") { //if we haven't found this already
+                    #if defined NON_WINDOWS
+
+                    char *homepath = NULL; homepath = getenv ("HOME");
+                    if ( homepath != NULL) { homeDir = homepath; }
+                    else { homeDir = "";  }
+    
+                    #else
+                    homeDir = getenv ("HOMEPATH");
+                    #endif
+                    homePath = homeDir; //set home directory path
+                }
                 newFileName = homeDir + fileName.substr(fileName.find("~")+1);
                 return newFileName;
             }else { //find path
@@ -457,10 +465,12 @@ string Utils::getFullPathName(string fileName){
                 if (path.rfind(pattern) == string::npos) { return fileName; } //already complete name
                 else { newFileName = fileName.substr(fileName.rfind(pattern)+2); } //save the complete part of the name
 
-                char *cwdpath = NULL; cwdpath = getcwd(NULL, 0); // or _getcwd
-                if (cwdpath != NULL)    { cwd = cwdpath;    }
-                else                    { cwd = "";         }
-
+                if (cwd == "") {
+                    char *cwdpath = NULL; cwdpath = getcwd(NULL, 0); // or _getcwd
+                    if (cwdpath != NULL)    { cwd = cwdpath;    }
+                    else                    { cwd = "";         }
+                    currentWorkingDirectory = cwd;
+                }
                 //rip off first '/'
                 string simpleCWD = cwd;
 #if defined NON_WINDOWS
