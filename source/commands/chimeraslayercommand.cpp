@@ -673,9 +673,10 @@ int ChimeraSlayerCommand::setUpForSelfReference(map<string, string>& fileGroup, 
                 fileGroup[fastafile] = "noGroup";
             }else { //using count file with groups
                 //Parse sequences by group
+                current->setMothurCalling(true);
                 SequenceCountParser parser(countfile, fastafile, nullVector);
                 vector<string> groups = parser.getNamesOfGroups();
-                
+                current->setMothurCalling(false);
                 for (int i = 0; i < groups.size(); i++) {
                     vector<string> thisGroupsFiles = parser.getFiles(groups[i]);
                     

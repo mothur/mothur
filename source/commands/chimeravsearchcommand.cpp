@@ -459,7 +459,9 @@ int ChimeraVsearchCommand::execute(){
             vector<string> groups;
             map<string, vector<string> > group2Files;
             if (hasCount) {
+                current->setMothurCalling(true);
                 SequenceCountParser cparser(countfile, fastafile, nullVector);
+                current->setMothurCalling(false);
                 groups = cparser.getNamesOfGroups();
                 group2Files = cparser.getFiles();
                 
