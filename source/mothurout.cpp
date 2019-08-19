@@ -33,12 +33,12 @@ void MothurOut::appendLogBuffer(string partialLog)  {
 void MothurOut::setLogFileName(string filename, bool append)  {
 	try {
         logFileName = filename;
+        silenceWarnings = false;
         Utils util;
         if ((filename == "silent")) { silenceLog = true; }
         else {
             if (out.is_open()) { closeLog(); }
             silenceLog = false;
-            silenceWarnings = false;
             if (append)     {
                 util.openOutputFileAppend(filename, out);
                 out << "\n\n************************************************************\n\n\n";
@@ -120,7 +120,7 @@ void MothurOut::mothurOut(string output) {
             numCommandErrors++;
             if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
         }
-        //bool savedSilenceLog = silenceLog;
+        bool savedSilenceLog = silenceLog;
         bool containsWarning = false;
         if (output.find("[WARNING]") != string::npos) {
             numWarnings++;
@@ -138,8 +138,9 @@ void MothurOut::mothurOut(string output) {
         if (!quietMode) {
             if (!silenceLog) {
                 if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
-                else { out << output; logger() << output; }
+                else { out << output;  }
             }
+            logger() << output;
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
@@ -147,7 +148,7 @@ void MothurOut::mothurOut(string output) {
                 logger() << output;
             }
         }
-        //silenceLog = savedSilenceLog;
+        silenceLog = savedSilenceLog;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -176,8 +177,7 @@ void MothurOut::mothurOutJustToScreen(string output) {
         }
         
         if (!quietMode) {
-            if (silenceWarnings && containsWarning) {}
-            else { logger() << output; }
+            logger() << output;
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
@@ -213,7 +213,7 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
             numCommandErrors++;
             if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
         }
-        //bool savedSilenceLog = silenceLog;
+        bool savedSilenceLog = silenceLog;
         bool containsWarning = false;
         if (output.find("[WARNING]") != string::npos) {
             numWarnings++;
@@ -231,8 +231,9 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
         if (!quietMode) {
             if (!silenceLog) {
                 if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
-                else { out << output; outputFile << output; logger() << output; }
+                else { out << output; outputFile << output;  }
             }
+            logger() << output;
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
@@ -242,7 +243,7 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
             }
             
         }
-        //silenceLog = savedSilenceLog;
+        silenceLog = savedSilenceLog;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -274,7 +275,7 @@ void MothurOut::mothurOutJustToLog(string output) {
             if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
         }
         
-        //bool savedSilenceLog = silenceLog;
+        bool savedSilenceLog = silenceLog;
         bool containsWarning = false;
         if (output.find("[WARNING]") != string::npos) {
             numWarnings++;
@@ -300,7 +301,7 @@ void MothurOut::mothurOutJustToLog(string output) {
                 if (!silenceLog) { out << output; }
             }
         }
-        //silenceLog = savedSilenceLog;
+        silenceLog = savedSilenceLog;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutJustToLog");
