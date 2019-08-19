@@ -30,7 +30,6 @@ public:
 	int getLongestBase()	{  return longest;  }
 	
 private:
-    std::mutex mutex;
 	int numSeqs, longest, threadID;
 	string method;
 	
