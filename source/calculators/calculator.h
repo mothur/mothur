@@ -64,7 +64,7 @@ public:
     ClusterMetric(string n){ m = MothurOut::getInstance();  name = n; }
     virtual ~ClusterMetric(){};
     
-    virtual double getValue(long long, long long, long long, long long) = 0; //tp, tn, fp, fn
+    virtual double getValue(double, double, double, double) = 0; //tp, tn, fp, fn
     
     virtual string getName()		{	return name;        }
     virtual string getCitation() = 0;

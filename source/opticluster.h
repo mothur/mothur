@@ -49,7 +49,7 @@ public:
     int initialize(double&, bool, string);  //randomize and place in "best" OTUs
     
     bool update(double&); //returns whether list changed and MCC
-    vector<double> getStats( long long&,  long long&,  long long&,  long long&);
+    vector<double> getStats( double&,  double&,  double&,  double&);
     ListVector* getList();
     
 protected:
@@ -62,10 +62,11 @@ protected:
     map<long long, string> binLabels; //for fitting - maps binNumber to existing reference label
     
     ClusterMetric* metric;
-    long long truePositives, trueNegatives, falsePositives, falseNegatives, numSeqs, insertLocation, numSingletons;
+    long long numSeqs, insertLocation, numSingletons;
+    double truePositives, trueNegatives, falsePositives, falseNegatives;
     
     long long findInsert();
-    vector<long long> getCloseFarCounts(long long seq, long long newBin);
+    vector<double> getCloseFarCounts(long long seq, long long newBin);
     vector<double> getFitStats( long long&,  long long&,  long long&,  long long&);
     
 };

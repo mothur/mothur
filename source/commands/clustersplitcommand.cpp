@@ -1138,7 +1138,7 @@ string runOptiCluster(string thisDistFile, string thisNamefile, double& smallest
             params->util.mothurRemove(thisNamefile);
         }
         
-        long long tp, tn, fp, fn;
+        double tp, tn, fp, fn;
         params->m->mothurOut("\ntp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
         params->m->mothurOut(toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");

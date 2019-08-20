@@ -9,7 +9,7 @@
 #include "specificity.hpp"
 
 /***********************************************************************/
-double Specificity::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double Specificity::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         long long n = fp + tn;
         double specificity = tn / (double) n;

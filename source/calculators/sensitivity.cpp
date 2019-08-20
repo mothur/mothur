@@ -9,7 +9,7 @@
 #include "sensitivity.hpp"
 
 /***********************************************************************/
-double Sensitivity::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double Sensitivity::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         
         long long p = tp + fn;

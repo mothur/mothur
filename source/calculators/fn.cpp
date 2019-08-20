@@ -9,7 +9,7 @@
 #include "fn.hpp"
 
 /***********************************************************************/
-double FN::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double FN::getValue(double tp,  double tn,  double fp,  double fn) {
     try {
         double fnmin = fn / (double)(tp + tn + fp + fn);
         

@@ -17,7 +17,7 @@ class F1Score : public ClusterMetric  {
     
 public:
     F1Score() : ClusterMetric("f1score") {};
-    double getValue( long long tp,  long long tn,  long long fp,  long long fn);
+    double getValue(double tp,  double tn,  double fp,  double fn);
     string getCitation() { return "http://www.mothur.org/wiki/F1Score"; }
     
 private:

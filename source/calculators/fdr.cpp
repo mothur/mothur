@@ -9,7 +9,7 @@
 #include "fdr.hpp"
 
 /***********************************************************************/
-double FDR::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double FDR::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         long long pPrime = tp + fp;
         double falseDiscoveryRate = fp / (double) pPrime;

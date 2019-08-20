@@ -9,15 +9,16 @@
 #include "mcc.hpp"
 
 /***********************************************************************/
-double MCC::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double MCC::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
+    
+        double p = tp + fn;
+        double n = fp + tn;
+        double pPrime = tp + fp;
+        double nPrime = tn + fn;
         
-        long long p = tp + fn;
-        long long n = fp + tn;
-        long long pPrime = tp + fp;
-        long long nPrime = tn + fn;
+        double matthewsCorrCoef = ((tp * tn) - (fp * fn)) / sqrt(p * n * pPrime * nPrime);
         
-        double matthewsCorrCoef = ((tp * tn) - (fp * fn)) / (double) sqrt(p * n * pPrime * nPrime);
         if(p == 0 || n == 0 || pPrime == 0 || nPrime == 0){	matthewsCorrCoef = 0;	}
         
         if (isnan(matthewsCorrCoef) || isinf(matthewsCorrCoef)) { matthewsCorrCoef = 0; }

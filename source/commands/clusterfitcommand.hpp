@@ -64,7 +64,7 @@ private:
     string calcDists();
     string runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts);
     string runSensSpec(string distFileName, string dupsFile, string dupsFormat, ClusterMetric*&, string);
-    void outputSteps(string outputName, bool& printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int, bool, int);
+    void outputSteps(string outputName, bool& printHeaders, double tp, double tn, double fp, double fn, vector<double> results, long long numBins, double fittp, double fittn, double fitfp, double fitfn, vector<double> fitresults, long long numFitBins, int, bool, int);
 };
 
 #endif /* clusterfitcommand_hpp */

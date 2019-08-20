@@ -9,7 +9,7 @@
 #include "tp.hpp"
 
 /***********************************************************************/
-double TP::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double TP::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         double tpmax = tp / (double)(tp + tn + fp + fn);
         

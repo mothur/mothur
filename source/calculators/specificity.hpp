@@ -17,7 +17,7 @@ class Specificity : public ClusterMetric  {
     
 public:
     Specificity() : ClusterMetric("spec") {};
-    double getValue( long long tp,  long long tn,  long long fp,  long long fn); //ignores tp, fn
+    double getValue(double tp,  double tn,  double fp,  double fn); //ignores tp, fn
     string getCitation() { return "http://www.mothur.org/wiki/Specificity"; }
     
 private:

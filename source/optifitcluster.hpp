@@ -44,8 +44,8 @@ public:
     long long getNumBins();
     long long getNumFitBins();
     
-    vector<double>  getStats( long long&,  long long&,  long long&,  long long&);  //combo stats
-    vector<double>  getFitStats( long long&,  long long&,  long long&,  long long&); //fitted seqs stats
+    vector<double>  getStats( double&, double&,  double&,  double&);  //combo stats
+    vector<double>  getFitStats( double&,  double&,  double&,  double&); //fitted seqs stats
     
     ListVector* getList();
     ListVector* getFittedList(string, bool);
@@ -64,12 +64,13 @@ protected:
     long long maxRefBinNumber;
     bool closed, denovo;
     
-    long long fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives, numFitSeqs, insertLocation, numFitSingletons; 
-    long long combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives, numComboSeqs, numComboSingletons;
+    double fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives, combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives;
+    long long  numFitSeqs, insertLocation, numFitSingletons;
+    long long  numComboSeqs, numComboSingletons;
     
     int findInsert();
-    vector<long long> getCloseFarCounts(long long seq, long long newBin);
-    vector<long long> getCloseFarFitCounts(long long seq, long long newBin);
+    vector<double> getCloseFarCounts(long long seq, long long newBin);
+    vector<double> getCloseFarFitCounts(long long seq, long long newBin);
     ListVector* clusterUnfitted(OptiData*, string);
     
 };
