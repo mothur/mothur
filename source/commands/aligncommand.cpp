@@ -261,7 +261,8 @@ int AlignCommand::execute(){
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: RAM used after reading template " + toString(after) + ". Difference of " + toString(after-before) + "\n\nNumber of templates that can fit in memory " + toString(numTemplatthatcanfitinMEM) + "\n"); }
         
-        if (numTemplatthatcanfitinMEM < processors) {  m->mothurOut("[WARNING]: You don't have enough RAM to run align.seqs with " + toString(processors) + " processors, reducing processors to " + toString(numTemplatthatcanfitinMEM) + ".\n"); processors = numTemplatthatcanfitinMEM; }
+        if ((numTemplatthatcanfitinMEM < 1) || (numTemplatthatcanfitinMEM > processors)) {}
+        else if (numTemplatthatcanfitinMEM < processors) {  m->mothurOut("[WARNING]: You don't have enough RAM to run align.seqs with " + toString(processors) + " processors, reducing processors to " + toString(numTemplatthatcanfitinMEM) + ".\n"); processors = numTemplatthatcanfitinMEM; }
         
         delete templateDB;
         if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
