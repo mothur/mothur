@@ -63,7 +63,6 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted, vec
 			numWanted = data.size();
 		}
 		
-        lock_guard<std::mutex> guard(mutex);
 		if (sequence.length() != templateSeqsLength) { templateSameLength = false; }
 		
 		if (templateSameLength && templateAligned) {
