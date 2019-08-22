@@ -67,7 +67,6 @@ protected:
 	MothurOut* m;
     CurrentFile* current;
 	int numSeqs, longest;
-    std::mutex mutex;
     Utils util;
 	
 	

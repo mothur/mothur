@@ -33,6 +33,7 @@ private:
 	string queryFileName;
 	string blastFileName;
 	string path;
+    std::mutex mutex;
 	
 	int count, threadID;
 	float gapOpen;
