@@ -47,7 +47,8 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 protected:
-	
+	AlignmentDB* templateDB;
+
 	long long createProcesses(string, string, string, string, vector<long long>&);
 	void appendReportFiles(string, string);
 		
