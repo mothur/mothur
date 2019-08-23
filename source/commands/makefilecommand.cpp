@@ -322,7 +322,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
                 }
                 
                 if (groupName != "") { groupName = groupName.substr(0, groupName.length()-1); }
-                
+               
                 //is this name unique
                 if (groups.count(groupName) == 0) {  groups.insert(groupName);  }
                 else { groupName = "Group_"+ toString(i); groups.insert(groupName); }
@@ -331,6 +331,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
             }
             
         }else { //separate by the user selected deliminator. default='_'
+            set<string> groups;
             for (int i = 0; i < paired.size(); i++) {
                 
                 string groupName = "Group_" + toString(i);
@@ -338,6 +339,19 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
                 int pos = filename.find(delim);
                 
                 if (pos != string::npos) { groupName = filename.substr(0, pos); }
+                
+                if (groups.count(groupName) == 0) {  groups.insert(groupName);  }
+                else {
+                    //look for another delim
+                    string tempFilename = filename.substr(pos+1); //grab rest of name
+                    pos = tempFilename.find(delim);
+                    if (pos != string::npos) {
+                        groupName += "_" + tempFilename.substr(0, pos);
+                        if (groups.count(groupName) != 0) {  groupName += "_"+ toString(i);  } //already have this name
+                    }
+                    else { groupName += "_"+ toString(i); }
+                    groups.insert(groupName);
+                }
                 
                 results[i].push_back(groupName); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
             }

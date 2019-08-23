@@ -381,7 +381,7 @@ int ShhhSeqsCommand::execute() {
 			
 			//reads fasta and name file and loads them in order
 			readData(correct, noise, sequences, uniqueNames, redundantNames, seqFreq);
-			if (m->getControl_pressed()) { return 0; }
+            if (m->getControl_pressed()) { delete correct; return 0; }
 			
 			//calc distances for cluster
 			string distFileName = outputDir + util.getRootName(util.getSimpleName(fastafile)) + "shhh.dist";

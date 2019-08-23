@@ -94,6 +94,7 @@ vector<string> MakeContigsCommand::setParameters(){
         CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","group",false,false,true); parameters.push_back(poligos);
         CommandParameter pfindex("findex", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(pfindex);
         CommandParameter prindex("rindex", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(prindex);
+        CommandParameter pqfile("qfile", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pqfile);
 				CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
 				CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
         CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
@@ -131,7 +132,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs a fasta file. \n";
         helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
         helpString += "If a forward index or reverse index file is provided barcodes be trimmed, and a group file will be created. The oligos parameter is required if an index file is given.\n";
-		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, findex, rindex, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, maxee, allfiles and processors.\n";
+		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, findex, rindex, qfile, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, maxee, allfiles and processors.\n";
 		helpString += "The ffastq and rfastq, file, or ffasta and rfasta parameters are required.\n";
         helpString += "The file parameter is 2, 3 or 4 column file containing the forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one.  Mothur will process each pair and create a combined fasta and report file with all the sequences.\n";
         helpString += "The ffastq and rfastq parameters are used to provide a forward fastq and reverse fastq file to process.  If you provide one, you must provide the other.\n";
@@ -139,6 +140,7 @@ string MakeContigsCommand::getHelpString(){
         helpString += "The fqfile and rqfile parameters are used to provide a forward quality and reverse quality files to process with the ffasta and rfasta parameters.  If you provide one, you must provide the other.\n";
 		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
         helpString += "The findex and rindex parameters are used to provide a forward index and reverse index files to process.  \n";
+        helpString += "The qfile parameter is used to indicate you want a quality file assembled. Default=f. NOTE: The assembled quality scores outputted by mothur cannot be used for downstream quality screening. The score calculations are modeled after pandseq's method. Here's a link to the explanation from their documentation, https://github.com/neufeld/pandaseq#the-scores-of-the-output-bases-seem-really-low-whats-wrong. \n";
         helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: kmer, gotoh and needleman. The default is needleman.\n";
         helpString += "The ksize parameter allows you to set the kmer size if you are doing align=kmer. Default=8.\n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
@@ -444,6 +446,9 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 
             temp = validParameter.valid(parameters, "trimoverlap");		if (temp == "not found") { temp = "F"; }
 			trimOverlap = util.isTrue(temp);
+            
+            temp = validParameter.valid(parameters, "qfile");        if (temp == "not found") { temp = "F"; }
+            makeQualFile = util.isTrue(temp);
 
 			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh") && (align != "kmer")) { m->mothurOut(align + " is not a valid alignment method. Options are kmer, needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
@@ -473,106 +478,7 @@ int MakeContigsCommand::execute(){
 	try {
         bool debugIndex = false;
         if (debugIndex) { //allows you to run the oligos and index file independantly to check for barcode issues. make.contigs(findex=yourIndexFile, bdiffs=1, oligos=yourOligosFile, checkorient=t). just used for user support
-            
-            map<int, oligosPair> pairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reorientedPairedPrimers;
-            vector<string> barcodeNames, primerNames;
-            
-            if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, reorientedPairedPrimers, pairedBarcodes, reorientedPairedBarcodes, barcodeNames, primerNames);    }
-            
-            int numPrimers = pairedPrimers.size();
-            TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes, true);
-            int numBarcodes = pairedBarcodes.size();
-            TrimOligos* rtrimOligos = NULL;
-            if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, reorientedPairedPrimers, reorientedPairedBarcodes, true); numBarcodes = reorientedPairedBarcodes.size();   numPrimers = reorientedPairedPrimers.size();  }
-
-            ifstream in;
-            util.openInputFile(findexfile, in);
-            
-            while (!in.eof()) {
-                if (m->getControl_pressed()) { break; }
-                
-                bool ignore = false;
-                FastqRead index(in, ignore, format); util.gobble(in);
-                
-                int success = 1;
-                string trashCode = "";
-                string commentString = "";
-                int currentSeqsDiffs = 0;
-                int barcodeIndex = 0;
-                
-                Sequence fSeq, rSeq;
-                QualityScores* fQual = NULL; QualityScores* rQual = NULL;
-                QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
-                Sequence findexBarcode("findex", index.getSeq());  Sequence rindexBarcode("rindex", "NONE");
-                Sequence savedFindex("findex", index.getSeq());  Sequence savedRIndex("rindex", "NONE");
-                
-                if(numBarcodes != 0){
-                    vector<int> results;
-                    
-                    results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
-                    
-                    success = results[0] + results[2];
-                    commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], bdiffs) + ") ";
-                    if(success > bdiffs)		{	trashCode += 'b';	}
-                    else{ currentSeqsDiffs += success;  }
-                }
-                
-                if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
-                    int thisSuccess = 0;
-                    string thisTrashCode = "";
-                    string thiscommentString = "";
-                    int thisCurrentSeqsDiffs = 0;
-                    
-                    int thisBarcodeIndex = 0;
-                    
-                    if(numBarcodes != 0){
-                        vector<int> results;
-                        
-                        results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
-                        
-                        thisSuccess = results[0] + results[2];
-                        thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
-                        if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
-                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
-                    }
-                    
-                    if (thisTrashCode == "") {
-                        trashCode = thisTrashCode;
-                        success = thisSuccess;
-                        currentSeqsDiffs = thisCurrentSeqsDiffs;
-                        commentString = thiscommentString;
-                        barcodeIndex = thisBarcodeIndex;
-                    }else { trashCode += "(" + thisTrashCode + ")";  }
-                }
-                
-                
-                if (trashCode == "") {
-                    string thisGroup = "";
-                    if(numBarcodes != 0){ thisGroup = barcodeNames[barcodeIndex]; }
-                    
-                    
-                    int pos = thisGroup.find("ignore");
-                    if (pos == string::npos) {
-                        if (thisGroup != "") {
-                            groupMap[index.getName()] = thisGroup;
-                            
-                            map<string, int>::iterator it = groupCounts.find(thisGroup);
-                            if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
-                            else { groupCounts[it->first] ++; }
-                        }
-                    }
-                }
-                
-                cout << index.getName() << '\t' << commentString << endl;
-            }
-            in.close();
-            
-            int total = 0;
-            if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
-            for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
-            if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
-            
-            exit(1);
+            debugFunction();
         }
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
@@ -681,7 +587,7 @@ int MakeContigsCommand::createGroupFile(string outputGroupFile, string resultFas
 //**********************************************************************************************************************
 unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaFile, string& outScrapFastaFile, string& outQualFile, string& outScrapQualFile, string& outMisMatchFile, string group) {
     try {
-        bool hasQual = false;
+        
         unsigned long long numReads = 0;
         string inputFile = "";
         vector<string> fileInputs;
@@ -696,7 +602,6 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
             fileInputs.push_back(ffastafile); fileInputs.push_back(rfastafile);
 
             if (fqualfile != "") {
-                hasQual = true;
                 qualOrIndexInputs.push_back(fqualfile); qualOrIndexInputs.push_back(rqualfile);
                 variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fqualfile));
                 variables["[tag]"] = "trim";
@@ -704,13 +609,12 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
                 variables["[tag]"] = "scrap";
                 outScrapQualFile = getOutputFileName("qfile",variables);
             }else {
-                outQualFile = ""; outScrapQualFile = "";
+                outQualFile = ""; outScrapQualFile = ""; makeQualFile = false;
             }
 
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
             delim = '>';
         }else { //ffastqfile
-            hasQual = true;
             inputFile = ffastqfile;
             if (outputDir == "") {  thisOutputDir = util.hasPath(inputFile); }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
@@ -718,7 +622,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
             outQualFile = getOutputFileName("qfile",variables);
             variables["[tag]"] = "scrap";
             outScrapQualFile = getOutputFileName("qfile",variables);
-
+            
             fileInputs.push_back(ffastqfile); fileInputs.push_back(rfastqfile);
             if ((findexfile != "") || (rindexfile != "")){
                 qualOrIndexInputs.push_back("NONE"); qualOrIndexInputs.push_back("NONE");
@@ -810,8 +714,12 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
         
         if (file == "") {
             outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile); outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
-            if (hasQual) {
+            if (makeQualFile) {
                  outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile); outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile); }
+            else {
+                if (outQualFile != "")      { util.mothurRemove(outQualFile);       }
+                if (outScrapQualFile != "") { util.mothurRemove(outScrapQualFile);  }
+            }
             outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
         }
         m->mothurOut("Done.\n");
@@ -834,7 +742,7 @@ struct contigsData {
     OutputWriter* misMatchesFile;
     string align, group, format;
     float match, misMatch, gapOpen, gapExtend;
-    bool gz, reorient, trimOverlap, createGroup;
+    bool gz, reorient, trimOverlap, createGroup, makeQualFile;
     char delim;
     int nameType, offByOneTrimLength, pdiffs, bdiffs, tdiffs, kmerSize, insert, deltaq, maxee;
     vector<string> inputFiles, qualOrIndexFiles, outputNames;
@@ -863,6 +771,8 @@ struct contigsData {
         misMatchesFile = mmf;
         m = MothurOut::getInstance();
         count = 0;
+        makeQualFile = true;
+        if (trimQFileName == NULL) { makeQualFile = false; }
     }
 
     contigsData(OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, OutputWriter* mmf, vector<string> ifn, vector<string> qif, linePair li, linePair lir, linePair qli, linePair qlir) {
@@ -879,6 +789,8 @@ struct contigsData {
         qlinesInput = qli;
         qlinesInputReverse = qlir;
         count = 0;
+        makeQualFile = true;
+        if (trimQFileName == NULL) { makeQualFile = false; }
     }
     void setVariables(bool isgz, char de, int nt, int offby, map<int, oligosPair> pbr, map<int, oligosPair> ppr, map<int, oligosPair> rpbr, map<int, oligosPair> rppr, vector<string> priNameVector, vector<string> barNameVector, bool ro, int pdf, int bdf, int tdf, string al, float ma, float misMa, float gapO, float gapE, int thr, int delt, double maxe, int km, string form, bool to, bool cfg, string gp) {
         gz = isgz;
@@ -1185,14 +1097,21 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(string& composi
         string compositeQualFile = getOutputFileName("qfile",cvars);
         cvars["[tag]"] = "scrap";
         string compositeScrapQualFile = getOutputFileName("qfile",cvars);
+        
         cvars["[tag]"] = "";
         compositeMisMatchFile = getOutputFileName("report",cvars);
 
         ofstream outCTFasta, outCTQual, outCSFasta, outCSQual, outCMisMatch;
         util.openOutputFile(compositeFastaFile, outCTFasta); outCTFasta.close(); outputNames.push_back(compositeFastaFile); outputTypes["fasta"].push_back(compositeFastaFile);
-        util.openOutputFile(compositeQualFile, outCTQual); outCTQual.close(); outputNames.push_back(compositeQualFile); outputTypes["qfile"].push_back(compositeQualFile);
+        
+        util.openOutputFile(compositeScrapQualFile, outCSQual); outCSQual.close();
+        util.openOutputFile(compositeQualFile, outCTQual); outCTQual.close();
+        if (makeQualFile) {
+            outputNames.push_back(compositeScrapQualFile); outputTypes["qfile"].push_back(compositeScrapQualFile);
+            outputNames.push_back(compositeQualFile); outputTypes["qfile"].push_back(compositeQualFile);
+        }
         util.openOutputFile(compositeScrapFastaFile, outCSFasta); outCSFasta.close(); outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
-        util.openOutputFile(compositeScrapQualFile, outCSQual); outCSQual.close(); outputNames.push_back(compositeScrapQualFile); outputTypes["qfile"].push_back(compositeScrapQualFile);
+        
         util.openOutputFile(compositeMisMatchFile, outCMisMatch); outCMisMatch.close(); outputNames.push_back(compositeMisMatchFile); outputTypes["report"].push_back(compositeMisMatchFile);
 
         if (gz) {
@@ -1215,13 +1134,16 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(string& composi
                 util.appendFiles(outMisMatchFile, compositeMisMatchFile); util.mothurRemove(outMisMatchFile);
                 util.appendFiles(outFastaFile, compositeFastaFile);  util.mothurRemove(outFastaFile);
                 util.appendFiles(outScrapFastaFile, compositeScrapFastaFile); util.mothurRemove(outScrapFastaFile);
-                util.appendFiles(outQualFile, compositeQualFile); util.mothurRemove(outQualFile);
-                util.appendFiles(outScrapQualFile, compositeScrapQualFile);  util.mothurRemove(outScrapQualFile);
-
+                if (makeQualFile) {
+                    util.appendFiles(outQualFile, compositeQualFile);
+                    util.appendFiles(outScrapQualFile, compositeScrapQualFile);
+                }
+                util.mothurRemove(outQualFile); util.mothurRemove(outScrapQualFile);
                 m->mothurOut("\nIt took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(thisNumReads) + " reads.\n\n");
             }
         }
-
+        if (!makeQualFile) { util.mothurRemove(compositeQualFile); util.mothurRemove(compositeScrapQualFile); }
+        
         return numReads;
     }
     catch(exception& e) {
@@ -2019,7 +1941,7 @@ void driverContigs(contigsData* params){
                         //output
                         string output = ">" + fSeq.getName() + '\t' + "ee=" + toString(expected_errors) + '\t' + commentString + "\n" + contig + "\n";
                         params->trimFileName->write(output);
-                        if (hasQuality) {
+                        if (hasQuality && params->makeQualFile) {
                             output = ">" + fSeq.getName() + '\t' + "ee=" + toString(expected_errors) + '\t' + commentString +"\n";
                             for (int i = 0; i < contigScores.size(); i++) { output += toString(contigScores[i]) + " "; }  output += "\n";
                             params->trimQFileName->write(output);
@@ -2035,7 +1957,7 @@ void driverContigs(contigsData* params){
                     string output = ">" + fSeq.getName() + " | " + trashCode + '\t' + "ee=" +  toString(expected_errors) + '\t' + commentString + "\n" + contig + "\n";
                     params->scrapFileName->write(output);
 
-                    if (hasQuality) {
+                    if (hasQuality && params->makeQualFile) {
                         output = ">" + fSeq.getName() + " | " + trashCode + '\t' + "ee=" + toString(expected_errors) + '\t' + commentString + "\n";
                         for (int i = 0; i < contigScores.size(); i++) { output += toString(contigScores[i]) + " "; }  output += "\n";
                         params->scrapQFileName->write(output);
@@ -2156,9 +2078,10 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 
         auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(outputFasta);
         auto synchronizedOutputFastaScrapFile = std::make_shared<SynchronizedOutputFile>(outputScrapFasta);
+        auto synchronizedMisMatchFile = std::make_shared<SynchronizedOutputFile>(outputMisMatches);
         auto synchronizedOutputQTrimFile = std::make_shared<SynchronizedOutputFile>(outputQual);
         auto synchronizedOutputQScrapFile = std::make_shared<SynchronizedOutputFile>(outputScrapQual);
-        auto synchronizedMisMatchFile = std::make_shared<SynchronizedOutputFile>(outputMisMatches);
+       
 
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
@@ -2167,7 +2090,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             OutputWriter* threadMismatchWriter = new OutputWriter(synchronizedMisMatchFile);
             OutputWriter* threadQTrimWriter = NULL;
             OutputWriter* threadQScrapWriter = NULL;
-            if (hasQuality) {
+            if (makeQualFile) {
                 threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
                 threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
             }
@@ -2185,7 +2108,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
         OutputWriter* threadQTrimWriter = NULL;
         OutputWriter* threadQScrapWriter = NULL;
-        if (hasQuality) {
+        if (makeQualFile) {
             threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
@@ -2210,7 +2133,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             delete data[i]->trimFileName;
             delete data[i]->scrapFileName;
             delete data[i]->misMatchesFile;
-            if (hasQuality) {
+            if (makeQualFile) {
                 delete data[i]->trimQFileName;
                 delete data[i]->scrapQFileName;
             }
@@ -2230,7 +2153,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         delete threadFastaTrimWriter;
         delete threadFastaScrapWriter;
         delete threadMisMatchWriter;
-        if (hasQuality) {
+        if (makeQualFile) {
             delete threadQTrimWriter;
             delete threadQScrapWriter;
         }
@@ -2330,7 +2253,6 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             remainingPairs = remainingPairs - numPairs;
         }
 
-        bool hasQuality = true;
         auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(compositeFastaFile);
         auto synchronizedOutputFastaScrapFile = std::make_shared<SynchronizedOutputFile>(compositeScrapFastaFile);
         auto synchronizedOutputQTrimFile = std::make_shared<SynchronizedOutputFile>(compositeQualFile);
@@ -2344,7 +2266,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             OutputWriter* threadMismatchWriter = new OutputWriter(synchronizedMisMatchFile);
             OutputWriter* threadQTrimWriter = NULL;
             OutputWriter* threadQScrapWriter = NULL;
-            if (hasQuality) {
+            if (makeQualFile) {
                 threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
                 threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
             }
@@ -2362,7 +2284,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
         OutputWriter* threadQTrimWriter = NULL;
         OutputWriter* threadQScrapWriter = NULL;
-        if (hasQuality) {
+        if (makeQualFile) {
             threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
@@ -2374,7 +2296,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         delete threadFastaTrimWriter;
         delete threadFastaScrapWriter;
         delete threadMisMatchWriter;
-        if (hasQuality) {
+        if (makeQualFile) {
             delete threadQTrimWriter;
             delete threadQScrapWriter;
         }
@@ -2395,7 +2317,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             delete data[i]->bundle->trimFileName;
             delete data[i]->bundle->scrapFileName;
             delete data[i]->bundle->misMatchesFile;
-            if (hasQuality) {
+            if (makeQualFile) {
                 delete data[i]->bundle->trimQFileName;
                 delete data[i]->bundle->scrapQFileName;
             }
@@ -2822,5 +2744,116 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
 		m->errorOut(e, "MakeContigsCommand", "getOligos");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void MakeContigsCommand::debugFunction() {
+    try{
+//allows you to run the oligos and index file independantly to check for barcode issues. make.contigs(findex=yourIndexFile, bdiffs=1, oligos=yourOligosFile, checkorient=t). just used for user support
+    
+    map<int, oligosPair> pairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reorientedPairedPrimers;
+    vector<string> barcodeNames, primerNames;
+    
+    if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, reorientedPairedPrimers, pairedBarcodes, reorientedPairedBarcodes, barcodeNames, primerNames);    }
+    
+    int numPrimers = pairedPrimers.size();
+    TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes, true);
+    int numBarcodes = pairedBarcodes.size();
+    TrimOligos* rtrimOligos = NULL;
+    if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, reorientedPairedPrimers, reorientedPairedBarcodes, true); numBarcodes = reorientedPairedBarcodes.size();   numPrimers = reorientedPairedPrimers.size();  }
+    
+    ifstream in;
+    util.openInputFile(findexfile, in);
+    
+    while (!in.eof()) {
+        if (m->getControl_pressed()) { break; }
+        
+        bool ignore = false;
+        FastqRead index(in, ignore, format); util.gobble(in);
+        
+        int success = 1;
+        string trashCode = "";
+        string commentString = "";
+        int currentSeqsDiffs = 0;
+        int barcodeIndex = 0;
+        
+        Sequence fSeq, rSeq;
+        QualityScores* fQual = NULL; QualityScores* rQual = NULL;
+        QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
+        Sequence findexBarcode("findex", index.getSeq());  Sequence rindexBarcode("rindex", "NONE");
+        Sequence savedFindex("findex", index.getSeq());  Sequence savedRIndex("rindex", "NONE");
+        
+        if(numBarcodes != 0){
+            vector<int> results;
+            
+            results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
+            
+            success = results[0] + results[2];
+            commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], bdiffs) + ") ";
+            if(success > bdiffs)        {    trashCode += 'b';    }
+            else{ currentSeqsDiffs += success;  }
+        }
+        
+        if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+            int thisSuccess = 0;
+            string thisTrashCode = "";
+            string thiscommentString = "";
+            int thisCurrentSeqsDiffs = 0;
+            
+            int thisBarcodeIndex = 0;
+            
+            if(numBarcodes != 0){
+                vector<int> results;
+                
+                results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
+                
+                thisSuccess = results[0] + results[2];
+                thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                if(thisSuccess > bdiffs)        {    thisTrashCode += 'b';    }
+                else{ thisCurrentSeqsDiffs += thisSuccess;  }
+            }
+            
+            if (thisTrashCode == "") {
+                trashCode = thisTrashCode;
+                success = thisSuccess;
+                currentSeqsDiffs = thisCurrentSeqsDiffs;
+                commentString = thiscommentString;
+                barcodeIndex = thisBarcodeIndex;
+            }else { trashCode += "(" + thisTrashCode + ")";  }
+        }
+        
+        
+        if (trashCode == "") {
+            string thisGroup = "";
+            if(numBarcodes != 0){ thisGroup = barcodeNames[barcodeIndex]; }
+            
+            
+            int pos = thisGroup.find("ignore");
+            if (pos == string::npos) {
+                if (thisGroup != "") {
+                    groupMap[index.getName()] = thisGroup;
+                    
+                    map<string, int>::iterator it = groupCounts.find(thisGroup);
+                    if (it == groupCounts.end()) {    groupCounts[thisGroup] = 1; }
+                    else { groupCounts[it->first] ++; }
+                }
+            }
+        }
+        
+        cout << index.getName() << '\t' << commentString << endl;
+        }
+        in.close();
+        
+        int total = 0;
+        if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
+        for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
+        if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
+        
+        exit(1);
+        
+}
+catch(exception& e) {
+    m->errorOut(e, "MakeContigsCommand", "getOligos");
+    exit(1);
+}
 }
 //**********************************************************************************************************************

@@ -31,6 +31,7 @@ Utils::Utils(){
         m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames();
         long long s = m->getRandomSeed();
         mersenne_twister_engine.seed(s); srand(s);
+        homePath = ""; currentWorkingDirectory = "";
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "mothurRandomShuffle");
@@ -440,16 +441,23 @@ string Utils::getFullPathName(string fileName){
             // ex. ../../../filename
             // cwd = /user/work/desktop
             //get current working directory
-            string cwd;
+            string cwd = currentWorkingDirectory;
+            
             if (path.find("~") != string::npos) { //go to home directory
-#if defined NON_WINDOWS
-                string homeDir;
-                char *homepath = NULL; homepath = getenv ("HOME");
-                if ( homepath != NULL) { homeDir = homepath; }
-                else { homeDir = "";  }
-#else
-                string homeDir = getenv ("HOMEPATH");
-#endif
+                string homeDir = homePath;
+                
+                if (homeDir == "") { //if we haven't found this already
+                    #if defined NON_WINDOWS
+
+                    char *homepath = NULL; homepath = getenv ("HOME");
+                    if ( homepath != NULL) { homeDir = homepath; }
+                    else { homeDir = "";  }
+    
+                    #else
+                    homeDir = getenv ("HOMEPATH");
+                    #endif
+                    homePath = homeDir; //set home directory path
+                }
                 newFileName = homeDir + fileName.substr(fileName.find("~")+1);
                 return newFileName;
             }else { //find path
@@ -457,10 +465,12 @@ string Utils::getFullPathName(string fileName){
                 if (path.rfind(pattern) == string::npos) { return fileName; } //already complete name
                 else { newFileName = fileName.substr(fileName.rfind(pattern)+2); } //save the complete part of the name
 
-                char *cwdpath = NULL; cwdpath = getcwd(NULL, 0); // or _getcwd
-                if (cwdpath != NULL)    { cwd = cwdpath;    }
-                else                    { cwd = "";         }
-
+                if (cwd == "") {
+                    char *cwdpath = NULL; cwdpath = getcwd(NULL, 0); // or _getcwd
+                    if (cwdpath != NULL)    { cwd = cwdpath;    }
+                    else                    { cwd = "";         }
+                    currentWorkingDirectory = cwd;
+                }
                 //rip off first '/'
                 string simpleCWD = cwd;
 #if defined NON_WINDOWS
@@ -2117,7 +2127,7 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, long long&
         num = positions.size()-1;
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
@@ -2171,7 +2181,7 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, unsigned l
         num = positions.size()-1;
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
@@ -2200,7 +2210,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         filename = getFullPathName(filename);
 
@@ -2279,7 +2289,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         filename = getFullPathName(filename);
 
@@ -2380,7 +2390,7 @@ vector<unsigned long long> Utils::divideFilePerLine(string filename, int& proc) 
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size;
+        unsigned long long size = 0;
 
         filename = getFullPathName(filename);
 

@@ -494,7 +494,7 @@ int ClassifySeqsCommand::execute(){
         util.mothurRemove(newTaxonomyFile);
         util.renameFile(unclass, newTaxonomyFile);
         
-        if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
+        if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; delete taxaSum;  return 0; }
         
         //print summary file
         ofstream outTaxTree;

@@ -101,14 +101,14 @@ bool OptiCluster::update(double& listMetric) {
             if (binNumber == -1) { }
             else {
                 
-                long long tn, tp, fp, fn;
+                double tn, tp, fp, fn;
                 double bestMetric = -1;
-                long long bestBin, bestTp, bestTn, bestFn, bestFp;
+                double bestBin, bestTp, bestTn, bestFn, bestFp;
                 tn = trueNegatives; tp = truePositives; fp = falsePositives; fn = falseNegatives;
                 
                 //close / far count in current bin
-                vector<long long> results = getCloseFarCounts(seqNumber, binNumber);
-                long long cCount = results[0];  long long fCount = results[1];
+                vector<double> results = getCloseFarCounts(seqNumber, binNumber);
+                double cCount = results[0];  double fCount = results[1];
                 
                 //metric in current bin
                 bestMetric = metric->getValue(tp, tn, fp, fn); bestBin = binNumber; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
@@ -171,9 +171,9 @@ bool OptiCluster::update(double& listMetric) {
     }
 }
 /***********************************************************************/
-vector<long long> OptiCluster::getCloseFarCounts(long long seq, long long newBin) {
+vector<double> OptiCluster::getCloseFarCounts(long long seq, long long newBin) {
     try {
-        vector<long long> results; results.push_back(0); results.push_back(0);
+        vector<double> results; results.push_back(0); results.push_back(0);
         
         if (newBin == -1) { }  //making a singleton bin. Close but we are forcing apart.
         else { //merging a bin
@@ -193,10 +193,10 @@ vector<long long> OptiCluster::getCloseFarCounts(long long seq, long long newBin
 }
 
 /***********************************************************************/
-vector<double> OptiCluster::getStats( long long& tp,  long long& tn,  long long& fp,  long long& fn) {
+vector<double> OptiCluster::getStats( double& tp,  double& tn,  double& fp,  double& fn) {
     try {
-        long long singletn = matrix->getNumSingletons() + numSingletons;
-        long long tempnumSeqs = numSeqs + singletn;
+        double singletn = matrix->getNumSingletons() + numSingletons;
+        double tempnumSeqs = numSeqs + singletn;
         
         tp = truePositives;
         fp = falsePositives;

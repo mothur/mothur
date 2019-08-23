@@ -33,6 +33,7 @@ void MothurOut::appendLogBuffer(string partialLog)  {
 void MothurOut::setLogFileName(string filename, bool append)  {
 	try {
         logFileName = filename;
+        silenceWarnings = false;
         Utils util;
         if ((filename == "silent")) { silenceLog = true; }
         else {
@@ -120,16 +121,25 @@ void MothurOut::mothurOut(string output) {
             if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
         }
         bool savedSilenceLog = silenceLog;
+        bool containsWarning = false;
         if (output.find("[WARNING]") != string::npos) {
             numWarnings++;
             numCommandWarnings++;
+            containsWarning = true;
             if (numCommandWarnings > maxCommandWarnings) {
-                silenceLog = true; // write to cout, don't add to logfile
+                if (!silenceWarnings) {
+                    logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                    out << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                }
+                silenceWarnings = true; // write to cout, don't add to logfile
             }
         }
         
         if (!quietMode) {
-            if (!silenceLog) { out << output; }
+            if (!silenceLog) {
+                if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
+                else { out << output;  }
+            }
             logger() << output;
         }else {
             //check for this being an error
@@ -155,9 +165,15 @@ void MothurOut::mothurOutJustToScreen(string output) {
             if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
         }
         
+        bool containsWarning = false;
         if (output.find("[WARNING]") != string::npos) {
             numWarnings++;
             numCommandWarnings++;
+            containsWarning = true;
+            if (numCommandWarnings > maxCommandWarnings) {
+                if (!silenceWarnings) {  logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n"; }
+                silenceWarnings = true; // write to cout, don't add to logfile
+            }
         }
         
         if (!quietMode) {
@@ -198,17 +214,25 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
             if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
         }
         bool savedSilenceLog = silenceLog;
+        bool containsWarning = false;
         if (output.find("[WARNING]") != string::npos) {
             numWarnings++;
             numCommandWarnings++;
+            containsWarning = true;
             if (numCommandWarnings > maxCommandWarnings) {
-                silenceLog = true; // write to cout, don't add to logfile
+                if (!silenceWarnings) {
+                    logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                    out << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                }
+                silenceWarnings = true; // write to cout, don't add to logfile
             }
         }
         
         if (!quietMode) {
-            if (!silenceLog) { out << output; }
-            outputFile << output;
+            if (!silenceLog) {
+                if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
+                else { out << output; outputFile << output;  }
+            }
             logger() << output;
         }else {
             //check for this being an error
@@ -250,17 +274,27 @@ void MothurOut::mothurOutJustToLog(string output) {
             numCommandErrors++;
             if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
         }
+        
         bool savedSilenceLog = silenceLog;
+        bool containsWarning = false;
         if (output.find("[WARNING]") != string::npos) {
             numWarnings++;
             numCommandWarnings++;
+            containsWarning = true;
             if (numCommandWarnings > maxCommandWarnings) {
-                silenceLog = true; // write to cout, don't add to logfile
+                if (!silenceWarnings) {
+                    logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                    out << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                }
+                silenceWarnings = true; // write to cout, don't add to logfile
             }
         }
         
         if (!quietMode) {
-            if (!silenceLog) { out << output; }
+            if (!silenceLog) {
+                if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
+                else { out << output; }
+            }
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
@@ -281,8 +315,7 @@ void MothurOut::errorOut(exception& e, string object, string function) {
     string errorType = toString(e.what());
     
     int pos = errorType.find("bad_alloc");
-    mothurOut("[ERROR]: ");
-    mothurOut(errorType);
+    mothurOut("[ERROR]: " + errorType);
     
     unsigned long long ramUsed, total;
     Utils util;
@@ -290,8 +323,7 @@ void MothurOut::errorOut(exception& e, string object, string function) {
     mothurOut("RAM used: " + toString(ramUsed/(double)GIG) + "Gigabytes . Total Ram: " + toString(total/(double)GIG) + "Gigabytes.\n\n");
     
     if (pos == string::npos) { //not bad_alloc
-        mothurOut(" has occurred in the " + object + " class function " + function + ". Please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
-        mothurOutEndLine();
+        mothurOut(" has occurred in the " + object + " class function " + function + ". Please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry\n");
     }else { //bad alloc
         if (object == "cluster"){
             mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory.  There are two common causes for this, file size and format.\n\nFile Size:\nThe cluster command loads your distance matrix into RAM, and your distance file is most likely too large to fit in RAM. There are two options to help with this. The first is to use a cutoff. By using a cutoff mothur will only load distances that are below the cutoff. If that is still not enough, there is a command called cluster.split, http://www.mothur.org/wiki/cluster.split which divides the distance matrix, and clusters the smaller pieces separately. You may also be able to reduce the size of the original distance matrix by using the commands outlined in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP. \n\nWrong Format:\nThis error can be caused by trying to read a column formatted distance matrix using the phylip parameter. By default, the dist.seqs command generates a column formatted distance matrix. To make a phylip formatted matrix set the dist.seqs command parameter output to lt.  \n\nIf you are unable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");

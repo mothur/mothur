@@ -956,7 +956,9 @@ int PreClusterCommand::execute(){
             newMapFile = fileroot + "precluster.";
             string convolutedNamesFile = newCountFile + ".temp";
             
+            current->setMothurCalling(true);
             createProcessesGroups(convolutedNamesFile, newMapFile);
+            current->setMothurCalling(false);
             
             string accnosFile;
             if (countfile != "") {  accnosFile = mergeGroupCounts(newCountFile, convolutedNamesFile); }

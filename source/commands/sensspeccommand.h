@@ -49,7 +49,7 @@ private:
 	vector<string> outputNames;
 	set<string> labels; //holds labels to be used
 
-    long long truePositives, falsePositives, trueNegatives, falseNegatives;
+    double truePositives, falsePositives, trueNegatives, falseNegatives;
 	bool abort, allLines, square;
 	double cutoff;
 	int precision;

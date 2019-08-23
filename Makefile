@@ -86,7 +86,7 @@ endif
 #User specified GSL library
 ifeq  ($(strip $(USEGSL)),yes)
 
-LDFLAGS += -L ${GSL_LIBRARY_DIR} -lgsl
+LDFLAGS += -L ${GSL_LIBRARY_DIR} -lgsl -lgslcblas -lm
 CXXFLAGS += -DUSE_GSL -I ${GSL_INCLUDE_DIR}
 
 endif

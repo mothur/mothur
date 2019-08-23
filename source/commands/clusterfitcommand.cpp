@@ -609,10 +609,10 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
             delete refList;
             
             long long numBins = cluster.getNumBins();
-            long long tp, tn, fp, fn;
+            double tp, tn, fp, fn;
             vector<double> results = cluster.getStats(tp, tn, fp, fn);
             
-            long long fittp, fittn, fitfp, fitfn;
+            double fittp, fittn, fitfp, fitfn;
             long long numFitBins = cluster.getNumFitBins();
             vector<double> fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
             
@@ -711,10 +711,10 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
         delete refList;
         
         long long numBins = cluster.getNumBins();
-        long long tp, tn, fp, fn;
+        double tp, tn, fp, fn;
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
         
-        long long fittp, fittn, fitfp, fitfn;
+        double fittp, fittn, fitfp, fitfn;
         long long numFitBins = cluster.getNumFitBins();
         vector<double> fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
         
@@ -774,7 +774,7 @@ ListVector* ClusterFitCommand::clusterRefs(OptiData*& refsMatrix, ClusterMetric*
         long long numBins = cluster.getNumBins();
         m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         
-        long long tp, tn, fp, fn;
+        double tp, tn, fp, fn;
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
         m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
         
@@ -851,10 +851,10 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         cluster.initialize(listVectorMetric, true, otus, refList->getLabels(), method, false);
         
         long long numBins = cluster.getNumBins();
-        long long tp, tn, fp, fn;
+        double tp, tn, fp, fn;
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
         
-        long long fittp, fittn, fitfp, fitfn;
+        double fittp, fittn, fitfp, fitfn;
         long long numFitBins = cluster.getNumFitBins();
         vector<double> fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
         
@@ -935,13 +935,13 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
                 int numBins = list->getNumBins();
                 
                 SensSpecCalc senscalc(matrix, list);
-                long long truePositives, trueNegatives, falsePositives, falseNegatives;
+                double truePositives, trueNegatives, falsePositives, falseNegatives;
                 senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
                 
-                long long tp =  truePositives;
-                long long fp =  falsePositives;
-                long long tn =  trueNegatives;
-                long long fn =  falseNegatives;
+                double tp =  truePositives;
+                double fp =  falsePositives;
+                double tn =  trueNegatives;
+                double fn =  falseNegatives;
                 
                 Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
                 Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
@@ -1031,13 +1031,13 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
                 
                 OptiMatrix matrix(thisDistFile, thisDupsFile, dupsFormat, "column", cutoff, false);
                 SensSpecCalc senscalc(matrix, list);
-                long long truePositives, trueNegatives, falsePositives, falseNegatives;
+                double truePositives, trueNegatives, falsePositives, falseNegatives;
                 senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
                 
-                long long tp =  truePositives;
-                long long fp =  falsePositives;
-                long long tn =  trueNegatives;
-                long long fn =  falseNegatives;
+                double tp =  truePositives;
+                double fp =  falsePositives;
+                double tn =  trueNegatives;
+                double fn =  falseNegatives;
                 
                 Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
                 Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
@@ -1096,13 +1096,13 @@ string ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMet
                 int numBins = list->getNumBins();
                 
                 SensSpecCalc senscalc(*matrix, list);
-                long long truePositives, trueNegatives, falsePositives, falseNegatives;
+                double truePositives, trueNegatives, falsePositives, falseNegatives;
                 senscalc.getResults(*matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
                 
-                long long tp =  truePositives;
-                long long fp =  falsePositives;
-                long long tn =  trueNegatives;
-                long long fn =  falseNegatives;
+                double tp =  truePositives;
+                double fp =  falsePositives;
+                double tn =  trueNegatives;
+                double fn =  falseNegatives;
                 
                 Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
                 Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
@@ -1142,7 +1142,7 @@ string ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMet
     }
 }
 //**********************************************************************************************************************
-void ClusterFitCommand::outputSteps(string outputName, bool& printHeaders, long long tp, long long tn, long long fp, long long fn, vector<double> results, long long numBins, long long fittp, long long fittn, long long fitfp, long long fitfn, vector<double> fitresults, long long numFitBins, int iter, bool printToFile, int denovoIter) {
+void ClusterFitCommand::outputSteps(string outputName, bool& printHeaders, double tp, double tn, double fp, double fn, vector<double> results, long long numBins, double fittp, double fittn, double fitfp, double fitfn, vector<double> fitresults, long long numFitBins, int iter, bool printToFile, int denovoIter) {
     try {
 
         if (!selfReference) { //writes to file as well

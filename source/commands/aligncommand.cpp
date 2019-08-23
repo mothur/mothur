@@ -244,17 +244,27 @@ AlignCommand::AlignCommand(string option)  {
 	}
 }
 //**********************************************************************************************************************
-AlignCommand::~AlignCommand(){	
-	if (!abort) { delete templateDB; }
-}
+AlignCommand::~AlignCommand(){}
 //**********************************************************************************************************************
 
 int AlignCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-
-		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, util.getRandomNumber(), true);
-		
+        
+        long long before = util.getRAMUsed(); long long total = util.getTotalRAM();
+        
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: RAM used before reading template " + toString(before) + " of total RAM available " + toString(total) + "\n"); }
+        
+		AlignmentDB* templateDB; templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, util.getRandomNumber(), true);
+        long long after = util.getRAMUsed();
+        int numTemplatthatcanfitinMEM = total / ((after-before)*1.25);
+        
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: RAM used after reading template " + toString(after) + ". Difference of " + toString(after-before) + "\n\nNumber of templates that can fit in memory " + toString(numTemplatthatcanfitinMEM) + "\n"); }
+        
+        if ((numTemplatthatcanfitinMEM < 1) || (numTemplatthatcanfitinMEM > processors)) {}
+        else if (numTemplatthatcanfitinMEM < processors) {  m->mothurOut("[WARNING]: You don't have enough RAM to run align.seqs with " + toString(processors) + " processors, reducing processors to " + toString(numTemplatthatcanfitinMEM) + ".\n"); processors = numTemplatthatcanfitinMEM; }
+        
+        delete templateDB;
         if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
         
         time_t start = time(NULL);
@@ -314,19 +324,19 @@ struct alignStruct {
     OutputWriter* reportWriter;
     OutputWriter* accnosWriter;
     string inputFilename;
-    string alignMethod, search;
+    string alignMethod, search, templateFileName;
     float match, misMatch, gapOpen, gapExtend, threshold;
     bool flip;
     long long numSeqs;
+    int kmerSize;
     
     vector<long long> flippedResults;
     linePair filePos;
     
     MothurOut* m;
-    AlignmentDB* templateDB;
     Utils util;
     
-       alignStruct (linePair fP, OutputWriter* aFName, OutputWriter* reFName, OutputWriter* ac, string fname, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, AlignmentDB* tB, string se) {
+       alignStruct (linePair fP, OutputWriter* aFName, OutputWriter* reFName, OutputWriter* ac, string fname, string tfn, string al, float ma, float misMa, float gOpen, float gExtend, float thr, bool fl, int ks, string se) {
         
         filePos.start = fP.start;
         filePos.end = fP.end;
@@ -334,6 +344,7 @@ struct alignStruct {
         reportWriter = reFName;
         accnosWriter = ac;
         inputFilename = fname;
+        templateFileName = tfn;
         numSeqs = 0;
         m = MothurOut::getInstance();
         alignMethod = al;
@@ -343,8 +354,8 @@ struct alignStruct {
         gapExtend = gExtend;
         threshold = thr;
         flip = fl;
-        templateDB = tB;
         search = se;
+        kmerSize = ks;
         flippedResults.resize(2, 0);
     }
     
@@ -352,6 +363,9 @@ struct alignStruct {
 //**********************************************************************************************************************
 void alignDriver(alignStruct* params) {
 	try {
+        AlignmentDB* templateDB;
+        templateDB = new AlignmentDB(params->templateFileName, params->search, params->kmerSize, params->gapOpen, params->gapExtend, params->match, params->misMatch, params->util.getRandomNumber(), false);
+        
         NastReport report;
 		
 		ifstream inFASTA;
@@ -367,7 +381,7 @@ void alignDriver(alignStruct* params) {
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;
-		int longestBase = params->templateDB->getLongestBase();
+		int longestBase = templateDB->getLongestBase();
         if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: template longest base = "  + toString(longestBase) + " \n"); }
 		if(params->alignMethod == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, longestBase);			}
 		else if(params->alignMethod == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, longestBase);				}
@@ -397,7 +411,7 @@ void alignDriver(alignStruct* params) {
 				}
                 
                 float searchScore;
-				Sequence temp = params->templateDB->findClosestSequence(candidateSeq, searchScore);
+				Sequence temp = templateDB->findClosestSequence(candidateSeq, searchScore);
 				Sequence* templateSeq = new Sequence(temp.getName(), temp.getAligned());
 								
 				Nast* nast = new Nast(alignment, candidateSeq, templateSeq);
@@ -424,7 +438,7 @@ void alignDriver(alignStruct* params) {
                         if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: flipping "  + candidateSeq->getName() + " \n"); }
 						
 						//rerun alignment
-						Sequence temp2 = params->templateDB->findClosestSequence(copy, searchScore);
+						Sequence temp2 = templateDB->findClosestSequence(copy, searchScore);
 						Sequence* templateSeq2 = new Sequence(temp2.getName(), temp2.getAligned());
                         
                         if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: closest template "  + temp2.getName() + " \n"); }
@@ -490,6 +504,7 @@ void alignDriver(alignStruct* params) {
         params->flippedResults[1] += numFlipped_1;
         
 		delete alignment;
+        delete templateDB;
 		inFASTA.close();
 		
 	}
@@ -546,8 +561,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
             OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedOutputAccnosFile);
 
             
-            alignStruct* dataBundle = new alignStruct(lines[i+1], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename,
-                                                        align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
+            alignStruct* dataBundle = new alignStruct(lines[i+1], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename, templateFileName, align, match, misMatch, gapOpen, gapExtend, threshold, flip, kmerSize, search);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new std::thread(alignDriver, dataBundle));
@@ -557,8 +571,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         OutputWriter* threadReportWriter = new OutputWriter(synchronizedOutputReportFile);
         OutputWriter* threadAccnosWriter = new OutputWriter(synchronizedOutputAccnosFile);
         
-        alignStruct* dataBundle = new alignStruct(lines[0], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename,
-                                                  align, match, misMatch, gapOpen, gapExtend, threshold, flip, templateDB, search);
+        alignStruct* dataBundle = new alignStruct(lines[0], threadAlignWriter, threadReportWriter, threadAccnosWriter, filename, templateFileName, align, match, misMatch, gapOpen, gapExtend, threshold, flip, kmerSize, search);
         alignDriver(dataBundle);
         numFlipped[0] = dataBundle->flippedResults[0];
         numFlipped[1] = dataBundle->flippedResults[1];

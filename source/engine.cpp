@@ -132,7 +132,7 @@ string InteractEngine::getCommand()  {
 				
 				mout->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
                 string returnCommand = nextCommand;
-                delete nextCommand;
+                free(nextCommand);
 				return returnCommand;
 			#else
 				string nextCommand = "";

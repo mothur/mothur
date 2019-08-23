@@ -43,6 +43,10 @@ ifeq  ($(strip $(USEBOOST)),yes)
     BOOST_INCLUDE_DIR="/usr/local/include"
     BOOST_LIBRARY_DIR="/usr/local/lib"
 
+    #windows paths
+    #BOOST_INCLUDE_DIR="/usr/x86_64-w64-mingw32/sys-root/mingw/include"
+    #BOOST_LIBRARY_DIR="/usr/x86_64-w64-mingw32/sys-root/mingw/lib"
+
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
 
     LIBS += ${BOOST_LIBRARY_DIR}/libboost_iostreams.a
@@ -75,8 +79,14 @@ ifeq  ($(strip $(USEGSL)),yes)
     GSL_LIBRARY_DIR ?= "\"/usr/local/gsl/lib\""
     GSL_INCLUDE_DIR ?= "\"/usr/local/gsl/include\""
 
+#windows paths
+#GSL_INCLUDE_DIR="/usr/x86_64-w64-mingw32/sys-root/mingw/include" 
+#GSL_LIBRARY_DIR="/usr/x86_64-w64-mingw32/sys-root/mingw/lib"
+
+
     LDFLAGS += -L ${GSL_LIBRARY_DIR}
     LIBS += ${GSL_LIBRARY_DIR}/libgsl.a
+    LIBS += ${GSL_LIBRARY_DIR}/libgslcblas.a
 
     CXXFLAGS += -DUSE_GSL -I ${GSL_INCLUDE_DIR}
 

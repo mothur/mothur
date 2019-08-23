@@ -39,7 +39,7 @@ vector<double> LSRarefaction::getValues(int numSeqs, vector<mcmcSample>& samplin
         
         //load sampling data
         for (int i = 0; i < nSamples; i++) {
-            if (m->getControl_pressed()) { return results; }
+            if (m->getControl_pressed()) { free(atLSParams); return results; }
             
             atLSParams[i].dMDash = sampling[i].alpha;
             atLSParams[i].dV = sampling[i].beta;
@@ -69,6 +69,7 @@ vector<double> LSRarefaction::getValues(int numSeqs, vector<mcmcSample>& samplin
         //printf("%.2e:%.2e:%.2e ", dLower, dMedian, dUpper);
         
         free(adMu);
+        free(atLSParams);
         
 #endif
         

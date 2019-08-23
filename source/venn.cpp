@@ -152,7 +152,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				outputNames.push_back(filenamesvg);
 				util.openOutputFile(filenamesvg, outsvg);
 				
-				if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
+                if (m->getControl_pressed()) { outsvg.close(); delete sabundA; delete sabundB; return outputNames; }
 				
 				//get estimates for sharedAB
                 vector<string> labels;
