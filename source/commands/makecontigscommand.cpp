@@ -585,6 +585,79 @@ int MakeContigsCommand::createGroupFile(string outputGroupFile, string resultFas
     }
 }
 //**********************************************************************************************************************
+bool testGZReadable(vector<string>& fileInputs, vector<string>& indexInputs, bool& decompressionHelped, string format, MothurOut* m) {
+    try {
+        
+        bool error = false; bool readable = true;
+        decompressionHelped = false;
+        
+#ifdef USE_BOOST
+        boost::iostreams::filtering_istream inFF, inRF;
+        ifstream inForward, inReverse;
+        string forwardFile = fileInputs[0];
+        string reverseFile = fileInputs[1];
+        
+        Utils util;
+        util.openInputFileBinary(forwardFile, inForward, inFF);
+        util.openInputFileBinary(reverseFile, inReverse, inRF);
+        
+        FastqRead fread(inFF, error, format);
+        FastqRead rread(inRF, error, format);
+        inFF.pop(); inRF.pop();
+        
+        //error=true;
+        if (error) { //error reading fastq files, try unzipping
+            
+            string forwardOutput = util.getRootName(forwardFile) + "mothurTest_forward.fastq";
+            string reverseOutput = util.getRootName(reverseFile) + "mothurTest_reverse.fastq";
+            
+            string unzipCommand = "gunzip < " + forwardFile + " > " + forwardOutput;
+            system(unzipCommand.c_str());
+            unzipCommand = "gunzip < " + reverseFile + " > " + reverseOutput;
+            system(unzipCommand.c_str());
+            
+            ifstream inForward1, inReverse1;
+            util.openInputFile(forwardOutput, inForward1);
+            util.openInputFile(reverseOutput, inReverse1);
+            
+            FastqRead fread(inForward1, error, format);
+            FastqRead rread(inReverse1, error, format);
+            
+            if (!error) {
+                m->mothurOut("[WARNING]: mothur is unable to read your compressed fastq files. Decompressing files and continuing to process.\n\n");
+                fileInputs[0] = forwardOutput;
+                fileInputs[1] = reverseOutput;
+                
+                if (indexInputs.size() != 0) {
+                    if ((indexInputs[0] != "NONE") && (indexInputs[0] != "")){
+                        string forwardIndex = util.getRootName(indexInputs[0]) + "mothurTest_forward_index.fastq";
+                        string unzipCommand = "gunzip < " + indexInputs[0] + " > " + forwardIndex;
+                        system(unzipCommand.c_str());
+                        indexInputs[0] = forwardIndex;
+                    }
+                    if ((indexInputs[1] != "NONE") && (indexInputs[1] != "")) {
+                        string reverseIndex = util.getRootName(indexInputs[1]) + "mothurTest_reverse_index.fastq";
+                        unzipCommand = "gunzip < " + indexInputs[1] + " > " + reverseIndex;
+                        system(unzipCommand.c_str());
+                        indexInputs[1] = reverseIndex;
+                    }
+                }
+                
+                decompressionHelped = true;
+            }
+            else { readable = false; }
+            
+        }
+#endif
+        
+        return readable;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "testGZReadable");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaFile, string& outScrapFastaFile, string& outQualFile, string& outScrapQualFile, string& outMisMatchFile, string group) {
     try {
         
@@ -676,7 +749,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
         if (allGZ)      {
             gz = true;
             //test to make sure you can read the gz files
-            bool readable = testGZReadable(fileInputs, qualOrIndexInputs, decompressionHelped);
+            bool readable = testGZReadable(fileInputs, qualOrIndexInputs, decompressionHelped, format, m);
             
             if (readable) {
                 if (decompressionHelped) { gz = false; }
@@ -1003,79 +1076,7 @@ int setNameType(string forwardFile, string reverseFile, char delim, int& offByOn
         exit(1);
     }
 }
-//**********************************************************************************************************************
-bool MakeContigsCommand::testGZReadable(vector<string>& fileInputs, vector<string>& indexInputs, bool& decompressionHelped) {
-    try {
-        
-        bool error = false; bool readable = true;
-        decompressionHelped = false;
 
-#ifdef USE_BOOST
-        boost::iostreams::filtering_istream inFF, inRF;
-        ifstream inForward, inReverse;
-        string forwardFile = fileInputs[0];
-        string reverseFile = fileInputs[1];
-        
-        Utils util;
-        util.openInputFileBinary(forwardFile, inForward, inFF);
-        util.openInputFileBinary(reverseFile, inReverse, inRF);
-        
-        FastqRead fread(inFF, error, format);
-        FastqRead rread(inRF, error, format);
-        inFF.pop(); inRF.pop();
-        
-        //error=true;
-        if (error) { //error reading fastq files, try unzipping
-            
-            string forwardOutput = util.hasPath(forwardFile) + "mothurTest_forward.fastq";
-            string reverseOutput = util.hasPath(reverseFile) + "mothurTest_reverse.fastq";
-            
-            string unzipCommand = "gunzip < " + forwardFile + " > " + forwardOutput;
-            system(unzipCommand.c_str());
-            unzipCommand = "gunzip < " + reverseFile + " > " + reverseOutput;
-            system(unzipCommand.c_str());
-            
-            ifstream inForward1, inReverse1;
-            util.openInputFile(forwardOutput, inForward1);
-            util.openInputFile(reverseOutput, inReverse1);
-            
-            FastqRead fread(inForward1, error, format);
-            FastqRead rread(inReverse1, error, format);
-            
-            if (!error) {
-                m->mothurOut("[WARNING]: mothur is unable to read your compressed fastq files. Decompressing files and continuing to process.\n\n");
-                fileInputs[0] = forwardOutput;
-                fileInputs[1] = reverseOutput;
-                
-                if (indexInputs.size() != 0) {
-                    if (indexInputs[0] != "NONE") {
-                        string forwardIndex = util.hasPath(indexInputs[0]) + "mothurTest_forward_index.fastq";
-                        string unzipCommand = "gunzip < " + indexInputs[0] + " > " + forwardIndex;
-                        system(unzipCommand.c_str());
-                        indexInputs[0] = forwardIndex;
-                    }
-                    if (indexInputs[0] != "NONE") {
-                        string reverseIndex = util.hasPath(indexInputs[1]) + "mothurTest_reverse_reverse.fastq";
-                        unzipCommand = "gunzip < " + indexInputs[1] + " > " + reverseIndex;
-                        system(unzipCommand.c_str());
-                        indexInputs[1] = reverseIndex;
-                    }
-                }
-                
-                decompressionHelped = true;
-            }
-            else { readable = false; }
-            
-        }
-#endif
-        
-        return readable;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "testGZReadable");
-        exit(1);
-    }
-}
 //**********************************************************************************************************************
 unsigned long long MakeContigsCommand::processMultipleFileOption(string& compositeFastaFile, string& compositeMisMatchFile) {
     try {
@@ -1969,8 +1970,8 @@ void driverContigs(contigsData* params){
 
 #if defined NON_WINDOWS
             if (!params->gz) {
-                unsigned long long pos = inFFasta.tellg();
-                if ((pos == -1) || (pos >= params->linesInput.end)) { good = false; break; }
+                double pos = inFFasta.tellg();
+                if (params->util.isEqual(pos,-1) || (pos >= params->linesInput.end)) { good = false; break; }
             }else {
 #ifdef USE_BOOST
                 if (inFF.eof() || inRF.eof()) { good = false; break; }
@@ -2167,7 +2168,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
     }
 }
 //**********************************************************************************************************************
-//process one file at a time
+//process one file at a time, only get here with gz=true
 void driverContigsGroups(groupContigsData* gparams) {
     try {
         gparams->count = 0;
@@ -2185,32 +2186,69 @@ void driverContigsGroups(groupContigsData* gparams) {
             vector<string>  theseQIInputs;
             string ffastqfile = gparams->fileInputs[l][0]; theseFileInputs.push_back(ffastqfile);
             string rfastqfile = gparams->fileInputs[l][1]; theseFileInputs.push_back(rfastqfile);
-            string findexfile = gparams->fileInputs[l][2]; theseQIInputs.push_back(findexfile);
-            string rindexfile = gparams->fileInputs[l][3]; theseQIInputs.push_back(rindexfile);
+            string findexfile = gparams->fileInputs[l][2]; theseQIInputs.push_back(findexfile); //could be blank, "NONE" or filename
+            string rindexfile = gparams->fileInputs[l][3]; theseQIInputs.push_back(rindexfile); //could be blank, "NONE" or filename
             gparams->bundle->group = gparams->file2Groups[l];
-
-            //find read name type to speed read matching later
-            gparams->bundle->nameType = setNameType(ffastqfile, rfastqfile, gparams->bundle->delim, gparams->bundle->offByOneTrimLength, gparams->bundle->gz, gparams->bundle->format);
-
-            string inputFile = ffastqfile;
-            vector<string> thisFileInputs; thisFileInputs.push_back(ffastqfile); thisFileInputs.push_back(rfastqfile);
-            vector<string> thisQualOrIndexInputs;
-            if ((findexfile != "") || (rindexfile != "")){
-                thisQualOrIndexInputs.push_back("NONE"); thisQualOrIndexInputs.push_back("NONE");
-                if (findexfile != "") { thisQualOrIndexInputs[0] = findexfile; }
-                if (rindexfile != "") { thisQualOrIndexInputs[1] = rindexfile; }
+            
+            bool decompressionHelped = false;
+            
+            //test to make sure you can read the gz files
+            bool readable = testGZReadable(theseFileInputs, theseQIInputs, decompressionHelped, gparams->bundle->format, gparams->bundle->m);
+                
+            if (readable) {
+                if (decompressionHelped) { gparams->bundle->gz = false; }
+            }else {
+                gparams->bundle->m->mothurOut("[ERROR]: Unable to read compressed .gz files, please decompress and run make.contigs again. \n"); gparams->bundle->m->setControl_pressed(true); break;
             }
 
-            //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
-            vector<linePair> thisLines; thisLines.push_back(linePair(0, 1000)); thisLines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
-            vector<linePair> thisQLines; thisQLines.push_back(linePair(0, 1000)); thisQLines.push_back(linePair(0, 1000));  //qual[0], qual[1] - forward and reverse
+            //find read name type to speed read matching later
+            gparams->bundle->nameType = setNameType(theseFileInputs[0], theseFileInputs[1], gparams->bundle->delim, gparams->bundle->offByOneTrimLength, gparams->bundle->gz, gparams->bundle->format);
 
+            //string inputFile = ffastqfile;
+            //vector<string> thisFileInputs; thisFileInputs.push_back(ffastqfile); thisFileInputs.push_back(rfastqfile);
+            //vector<string> thisQualOrIndexInputs;
+            //if ((findexfile != "") || (rindexfile != "")){
+               // thisQualOrIndexInputs.push_back("NONE"); thisQualOrIndexInputs.push_back("NONE");
+                //if (findexfile != "") { thisQualOrIndexInputs[0] = findexfile; }
+                //if (rindexfile != "") { thisQualOrIndexInputs[1] = rindexfile; }
+            //}
+
+            //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
+            vector<linePair> thisLines; vector<linePair> thisQLines;
+            if (decompressionHelped) {
+                //set file positions for file
+                int processors = 1;
+                vector<double> fastaFilePos = gparams->bundle->util.divideFile(theseFileInputs[0], processors, gparams->bundle->delim);
+                thisLines.push_back(linePair(fastaFilePos[0], fastaFilePos[1])); //forward fastq
+                fastaFilePos = gparams->bundle->util.divideFile(theseFileInputs[1], processors, gparams->bundle->delim);
+                thisLines.push_back(linePair(fastaFilePos[0], fastaFilePos[1])); //reverse fastq
+                
+                if ((theseQIInputs[0] != "") && (theseQIInputs[0] != "NONE")){
+                    fastaFilePos = gparams->bundle->util.divideFile(theseQIInputs[0], processors, gparams->bundle->delim);
+                    thisQLines.push_back(linePair(fastaFilePos[0], fastaFilePos[1])); //forward index
+                }
+                if ((theseQIInputs[1] != "") && (theseQIInputs[1] != "NONE")){
+                    fastaFilePos = gparams->bundle->util.divideFile(theseQIInputs[1], processors, gparams->bundle->delim);
+                    thisQLines.push_back(linePair(fastaFilePos[0], fastaFilePos[1])); //forward index
+                }
+                if (thisQLines.size() == 0) { thisQLines = thisLines; }
+            }
+            else {
+                thisLines.push_back(linePair(0, 1000)); thisLines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
+                thisQLines.push_back(linePair(0, 1000)); thisQLines.push_back(linePair(0, 1000));  //qual[0], qual[1] - forward and reverse
+            }
             gparams->bundle->m->mothurOut("Making contigs...\n");
 
             contigsData* dataBundle = new contigsData(gparams->bundle->trimFileName, gparams->bundle->scrapFileName, gparams->bundle->trimQFileName, gparams->bundle->scrapQFileName, gparams->bundle->misMatchesFile, theseFileInputs, theseQIInputs, thisLines[0], thisLines[1], thisQLines[0], thisQLines[1]);
             dataBundle->copyVariables(gparams->bundle);
             driverContigs(dataBundle);
 
+            if (decompressionHelped) {
+                gparams->bundle->util.mothurRemove(theseFileInputs[0]); gparams->bundle->util.mothurRemove(theseFileInputs[1]);
+                if (theseQIInputs[0] != "NONE") { gparams->bundle->util.mothurRemove(theseQIInputs[0]); }
+                if (theseQIInputs[1] != "NONE") { gparams->bundle->util.mothurRemove(theseQIInputs[1]); }
+            }
+            
             gparams->count += dataBundle->count;
             gparams->badNames.insert(dataBundle->badNames.begin(), dataBundle->badNames.end());
             gparams->bundle->groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
@@ -2347,9 +2385,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
     try {
         lines.clear();
         qLines.clear();
-        vector<unsigned long long> fastaFilePos;
-        vector<unsigned long long> qfileFilePos;
-        vector<unsigned long long> temp;
+        vector<double> fastaFilePos;
+        vector<double> qfileFilePos;
+        vector<double> temp;
 
         nameType = setNameType(fasta[0], fasta[1], delim, offByOneTrimLength, gz, format);
 
@@ -2402,7 +2440,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                     map<string, int>::iterator it = firstSeqNames.find(name);
 
                     if (it != firstSeqNames.end())  { //this is the start of a new chunk
-                        unsigned long long pos = in2.tellg();
+                        double pos = in2.tellg();
                         qfileFilePos.push_back(pos - input.length() - 1);
                         firstSeqNames.erase(it);
                     }
@@ -2415,7 +2453,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
         //get last file position of reverse fasta[1]
         FILE * pFile;
-        unsigned long long size;
+        double size;
 
         //get num bytes in file
         fasta[1] = util.getFullPathName(fasta[1]);
@@ -2475,7 +2513,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             map<string, int>::iterator it = firstSeqNames.find(name);
 
                             if(it != firstSeqNames.end()) { //this is the start of a new chunk
-                                unsigned long long pos = inQual.tellg();
+                                double pos = inQual.tellg();
                                 qfileFilePos.push_back(pos - input.length() - 1);
                                 firstSeqNames.erase(it);
                             }                        }
@@ -2487,7 +2525,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
                 //get last file position of reverse qual[0]
                 FILE * pFile;
-                unsigned long long size;
+                double size;
 
                 //get num bytes in file
                 qual[0] = util.getFullPathName(qual[0]);
@@ -2534,7 +2572,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             map<string, int>::iterator it = firstSeqNames.find(name);
 
                             if(it != firstSeqNames.end()) { //this is the start of a new chunk
-                                unsigned long long pos = inQual2.tellg();
+                                double pos = inQual2.tellg();
                                 temp.push_back(pos - input.length() - 1);
                                 firstSeqNames.erase(it);
                             }
@@ -2852,7 +2890,7 @@ void MakeContigsCommand::debugFunction() {
         
 }
 catch(exception& e) {
-    m->errorOut(e, "MakeContigsCommand", "getOligos");
+    m->errorOut(e, "MakeContigsCommand", "debugFunction");
     exit(1);
 }
 }

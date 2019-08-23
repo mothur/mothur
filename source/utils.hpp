@@ -78,10 +78,6 @@ public:
     bool checkLocations(string&, vector<string>);  //filename, inputDir, outputDir. checks for file in ./, inputdir, outputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
     bool dirCheck(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
     bool dirCheck(string&, string); //completes path, appends appropriate / or \, makes sure dir is writable. - no error
-    vector<unsigned long long> divideFile(string, int&); //divides splitting unevenness by sequence
-    vector<unsigned long long> divideFile(string filename, int& proc, char delimChar);
-    vector<unsigned long long> divideFilePerLine(string, int&); //divides splitting unevenness at line breaks
-    int divideFile(string, int&, vector<string>&);
     bool fileExists(string name);
     string findProgramPath(string programName);
     string getExtension(string);
@@ -114,10 +110,14 @@ public:
     int printVsearchFile(vector<seqPriorityNode>&, string, string, string); //sorts and prints by abundance adding /ab=xxx/
     int renameFile(string, string); //oldname, newname
     int copyFile(string, string); //oldname, newname
-    vector<unsigned long long> setFilePosEachLine(string, long long&);
-    vector<unsigned long long> setFilePosEachLine(string, unsigned long long&);
-    vector<unsigned long long> setFilePosFasta(string, long long&);
-    vector<unsigned long long> setFilePosFasta(string, long long&, char);
+    vector<double> setFilePosEachLine(string, long long&);
+    vector<double> setFilePosEachLine(string, unsigned long long&);
+    vector<double> setFilePosFasta(string, long long&);
+    vector<double> setFilePosFasta(string, long long&, char);
+    vector<double> divideFile(string, int&); //divides splitting unevenness by sequence
+    vector<double> divideFile(string filename, int& proc, char delimChar);
+    vector<double> divideFilePerLine(string, int&); //divides splitting unevenness at line breaks
+    int divideFile(string, int&, vector<string>&);
     string sortFile(string, string);
     
     //file reads

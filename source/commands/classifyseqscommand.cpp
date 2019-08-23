@@ -641,7 +641,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         time_t start, end;
         time(&start);
 
-        vector<unsigned long long> positions;
+        vector<double> positions;
         vector<linePair> lines;
 #if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);

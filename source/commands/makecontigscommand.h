@@ -87,8 +87,7 @@ private:
     vector< vector<string> > readFileNames(string, map<int, string>&);
     bool getOligos(map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes, vector<string>& barcodeNames, vector<string>& primerNames);
     int setLines(vector<string>, vector<string>, vector<linePair>& fastaFilePos, vector<linePair>& qfileFilePos, char delim); //the delim let you know whether this is fasta and qual, or fastq and index. linePair entries will always be in sets of two. One for the forward and one for hte reverse.  (fastaFilePos[0] - ffasta, fastaFilePos[1] - rfasta) - processor1
-    bool testGZReadable(vector<string>&, vector<string>&, bool&);
-
+    //bool testGZReadable(vector<string>&, vector<string>&, bool&);
     void debugFunction();
 };
 

@@ -336,7 +336,7 @@ void driverCreateSummary(seqSumQualData* params) {
 long long SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vector<int>& averageQ, vector< vector<int> >& scores, string filename) {
 	try {
         long long numSeqs = 0;
-        vector<unsigned long long> positions;
+        vector<double> positions;
         vector<linePair> lines;
 #if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);

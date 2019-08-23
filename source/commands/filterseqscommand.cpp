@@ -309,7 +309,7 @@ int FilterSeqsCommand::filterSequences() {
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafileNames[s]));
             string filteredFasta = getOutputFileName("fasta", variables);
             
-            vector<unsigned long long> positions;
+            vector<double> positions;
             if (savedPositions.size() != 0) { positions = savedPositions[s]; }
             else {
 #if defined NON_WINDOWS
@@ -561,7 +561,7 @@ void driverCreateFilter(filterData* params) {
 long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) {
 	try {
         vector<linePair> lines;
-        vector<unsigned long long> positions;
+        vector<double> positions;
         
 #if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);

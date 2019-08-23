@@ -1922,9 +1922,9 @@ bool Utils::stringBlank(string input){
     }
 }
 /**************************************************************************************************/
-vector<unsigned long long> Utils::setFilePosFasta(string filename, long long& num, char delim) {
+vector<double> Utils::setFilePosFasta(string filename, long long& num, char delim) {
     try {
-        vector<unsigned long long> positions;
+        vector<double> positions;
         ifstream inFASTA;
         string completeFileName = getFullPathName(filename);
         inFASTA.open(completeFileName.c_str(), ios::binary);
@@ -1933,7 +1933,7 @@ vector<unsigned long long> Utils::setFilePosFasta(string filename, long long& nu
         else if (delim == '>') { nameLine = 2; }
         else { m->mothurOut("[ERROR]: unknown file deliminator, quitting.\n"); m->setControl_pressed(true); }
 
-        unsigned long long count = 0;
+        double count = 0;
         long long numLines = 0;
         while(!inFASTA.eof()){
             char c = inFASTA.get(); count++;
@@ -1947,7 +1947,6 @@ vector<unsigned long long> Utils::setFilePosFasta(string filename, long long& nu
             while(isspace(c=inFASTA.get()))		{ input += c; count++;}
             if(!inFASTA.eof()) { inFASTA.putback(c); count--;  }
 
-
             if (input.length() != 0) {
                 if((input[0] == delim) && (((numLines-1)%nameLine) == 0)){ //this is a name line
                     positions.push_back(count+numLines-input.length());
@@ -1960,7 +1959,7 @@ vector<unsigned long long> Utils::setFilePosFasta(string filename, long long& nu
         num = positions.size();
 
         FILE * pFile;
-        unsigned long long size;
+        double size;
 
         //get num bytes in file
         pFile = fopen (completeFileName.c_str(),"rb");
@@ -1982,16 +1981,16 @@ vector<unsigned long long> Utils::setFilePosFasta(string filename, long long& nu
     }
 }
 /**************************************************************************************************/
-vector<unsigned long long> Utils::setFilePosFasta(string filename, long long& num) {
+vector<double> Utils::setFilePosFasta(string filename, long long& num) {
     try {
-        vector<unsigned long long> positions;
+        vector<double> positions;
         ifstream inFASTA;
         //openInputFileBinary(filename, inFASTA);
         string completeFileName = getFullPathName(filename);
         inFASTA.open(completeFileName.c_str(), ios::binary);
 
         string input;
-        unsigned long long count = 0;
+        double count = 0;
         while(!inFASTA.eof()){
             char c = inFASTA.get(); count++;
             if (c == '>') { positions.push_back(count-1); }
@@ -2001,7 +2000,7 @@ vector<unsigned long long> Utils::setFilePosFasta(string filename, long long& nu
         num = positions.size();
 
         FILE * pFile;
-        unsigned long long size;
+        double size;
 
         //get num bytes in file
         pFile = fopen (completeFileName.c_str(),"rb");
@@ -2093,11 +2092,11 @@ int Utils::readConsTax(string inputfile, map<int, consTax2>& taxes){
     }
 }
 /**************************************************************************************************/
-vector<unsigned long long> Utils::setFilePosEachLine(string filename, long long& num) {
+vector<double> Utils::setFilePosEachLine(string filename, long long& num) {
     try {
         filename = getFullPathName(filename);
 
-        vector<unsigned long long> positions;
+        vector<double> positions;
         ifstream in;
         //openInputFile(filename, in);
         openInputFileBinary(filename, in);
@@ -2127,7 +2126,7 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, long long&
         num = positions.size()-1;
 
         FILE * pFile;
-        unsigned long long size = 0;
+        double size = 0;
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
@@ -2148,11 +2147,11 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, long long&
     }
 }
 /**************************************************************************************************/
-vector<unsigned long long> Utils::setFilePosEachLine(string filename, unsigned long long& num) {
+vector<double> Utils::setFilePosEachLine(string filename, unsigned long long& num) {
     try {
         filename = getFullPathName(filename);
 
-        vector<unsigned long long> positions;
+        vector<double> positions;
         ifstream in;
         //openInputFile(filename, in);
         openInputFileBinary(filename, in);
@@ -2181,7 +2180,7 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, unsigned l
         num = positions.size()-1;
 
         FILE * pFile;
-        unsigned long long size = 0;
+        double size = 0;
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
@@ -2204,13 +2203,13 @@ vector<unsigned long long> Utils::setFilePosEachLine(string filename, unsigned l
 
 /**************************************************************************************************/
 
-vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
+vector<double> Utils::divideFile(string filename, int& proc) {
     try{
-        vector<unsigned long long> filePos;
+        vector<double> filePos;
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size = 0;
+        double size = 0;
 
         filename = getFullPathName(filename);
 
@@ -2222,11 +2221,13 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
             size=ftell (pFile);
             fclose (pFile);
         }
-
+        
+        if (proc == 1) { filePos.push_back(size); return filePos; }
+        
 #if defined NON_WINDOWS
 
         //estimate file breaks
-        unsigned long long chunkSize = 0;
+        double chunkSize = 0;
         chunkSize = size / proc;
 
         //file to small to divide by processors
@@ -2235,14 +2236,14 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
         if (proc > 1) {
             //for each process seekg to closest file break and search for next '>' char. make that the filebreak
             for (int i = 0; i < proc; i++) {
-                unsigned long long spot = (i+1) * chunkSize;
+                double spot = (i+1) * chunkSize;
 
                 ifstream in;
                 openInputFile(filename, in);
                 in.seekg(spot);
 
                 //look for next '>'
-                unsigned long long newSpot = spot;
+                double newSpot = spot;
                 while (!in.eof()) {
                     char c = in.get();
 
@@ -2252,9 +2253,9 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
                 }
 
                 //there was not another sequence before the end of the file
-                unsigned long long sanityPos = in.tellg();
+                double sanityPos = in.tellg();
 
-                if (sanityPos == -1) {	break;  }
+                if (isEqual(sanityPos, -1)) {	break;  }
                 else {  filePos.push_back(newSpot);  }
 
                 in.close();
@@ -2283,13 +2284,13 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc) {
 }
 /**************************************************************************************************/
 
-vector<unsigned long long> Utils::divideFile(string filename, int& proc, char delimChar) {
+vector<double> Utils::divideFile(string filename, int& proc, char delimChar) {
     try{
-        vector<unsigned long long> filePos;
+        vector<double> filePos;
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size = 0;
+        double size = 0;
 
         filename = getFullPathName(filename);
 
@@ -2304,11 +2305,13 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
 
         char secondaryDelim = '>';
         if (delimChar == '@') { secondaryDelim = '+'; }
+        
+        if (proc == 1) { filePos.push_back(size); return filePos; }
 
 #if defined NON_WINDOWS
 
         //estimate file breaks
-        unsigned long long chunkSize = 0;
+        double chunkSize = 0;
         chunkSize = size / proc;
 
         //file to small to divide by processors
@@ -2316,7 +2319,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
 
         //for each process seekg to closest file break and search for next delimChar char. make that the filebreak
         for (int i = 0; i < proc; i++) {
-            unsigned long long spot = (i+1) * chunkSize;
+            double spot = (i+1) * chunkSize;
 
             ifstream in;
             openInputFile(filename, in);
@@ -2325,7 +2328,7 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
             getline(in); //get to end of line in case you jump into middle of line where the delim char happens to fall.
 
             //look for next delimChar
-            unsigned long long newSpot = spot;
+            double newSpot = spot;
             while (!in.eof()) {
                 char c = in.get();
                 string input = ""; input += c;
@@ -2352,9 +2355,9 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
             }
 
             //there was not another sequence before the end of the file
-            unsigned long long sanityPos = in.tellg();
+            double sanityPos = in.tellg();
 
-            if (sanityPos == -1) {	break;  }
+            if (isEqual(sanityPos, -1)) {	break;  }
             else {  filePos.push_back(newSpot);  }
 
             in.close();
@@ -2384,13 +2387,13 @@ vector<unsigned long long> Utils::divideFile(string filename, int& proc, char de
 
 /**************************************************************************************************/
 
-vector<unsigned long long> Utils::divideFilePerLine(string filename, int& proc) {
+vector<double> Utils::divideFilePerLine(string filename, int& proc) {
     try{
-        vector<unsigned long long> filePos;
+        vector<double> filePos;
         filePos.push_back(0);
 
         FILE * pFile;
-        unsigned long long size = 0;
+        double size = 0;
 
         filename = getFullPathName(filename);
 
@@ -2405,7 +2408,7 @@ vector<unsigned long long> Utils::divideFilePerLine(string filename, int& proc) 
 
 #if defined NON_WINDOWS
         //estimate file breaks
-        unsigned long long chunkSize = 0;
+        double chunkSize = 0;
         chunkSize = size / proc;
 
         //file to small to divide by processors
@@ -2413,14 +2416,14 @@ vector<unsigned long long> Utils::divideFilePerLine(string filename, int& proc) 
 
         //for each process seekg to closest file break and search for next '>' char. make that the filebreak
         for (int i = 0; i < proc; i++) {
-            unsigned long long spot = (i+1) * chunkSize;
+            double spot = (i+1) * chunkSize;
 
             ifstream in;
             openInputFile(filename, in);
             in.seekg(spot);
 
             //look for next line break
-            unsigned long long newSpot = spot;
+            double newSpot = spot;
             while (!in.eof()) {
                 char c = in.get();
 
@@ -2429,7 +2432,7 @@ vector<unsigned long long> Utils::divideFilePerLine(string filename, int& proc) 
             }
 
             //there was not another line before the end of the file
-            unsigned long long sanityPos = in.tellg();
+            double sanityPos = in.tellg();
 
             if (sanityPos == -1) {	break;  }
             else {  filePos.push_back(newSpot);  }
@@ -2462,7 +2465,7 @@ vector<unsigned long long> Utils::divideFilePerLine(string filename, int& proc) 
 int Utils::divideFile(string filename, int& proc, vector<string>& files) {
     try{
 
-        vector<unsigned long long> filePos = divideFile(filename, proc);
+        vector<double> filePos = divideFile(filename, proc);
 
         for (int i = 0; i < (filePos.size()-1); i++) {
 

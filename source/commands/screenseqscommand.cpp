@@ -1132,7 +1132,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 	try {
         
         vector<linePair> lines;
-        vector<unsigned long long> positions;
+        vector<double> positions;
 #if defined NON_WINDOWS
         positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }

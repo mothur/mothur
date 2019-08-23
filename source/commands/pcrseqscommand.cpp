@@ -807,7 +807,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         Sequence ecoliSeq("filler","NNNN");
         if(ecolifile != "") {    ecoliSeq = readEcoli();      }  if (m->getControl_pressed()) {  return 0; }
         
-        vector<unsigned long long> positions;
+        vector<double> positions;
         vector<linePair> lines;
         long long numFastaSeqs = 0;
 #if defined NON_WINDOWS
