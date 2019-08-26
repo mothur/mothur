@@ -24,7 +24,7 @@ public:
 	void generateDB() {} //doesn't generate a search db 
 	void addSequence(Sequence); 
 	string getName(int i) { return data[i].getName(); } 
-	vector<int> findClosestSequences(Sequence*, int, vector<float>&);  // returns indexes of n closest sequences to query
+	vector<int> findClosestSequences(Sequence*, int, vector<float>&) const;  // returns indexes of n closest sequences to query
 	
 private:
 	vector<Sequence> data;

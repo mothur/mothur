@@ -41,7 +41,7 @@ public:
 	string getSeqName();
 	void print();	
 	int countSuffixes(string, int&);
-	int countSuffixes(string);	
+	int countSuffixes(string) const;
 
 private:	
 	void addPrefix(int);

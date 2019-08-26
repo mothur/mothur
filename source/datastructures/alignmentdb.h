@@ -26,7 +26,7 @@ public:
 	AlignmentDB(string);
 	~AlignmentDB();
 	
-	Sequence findClosestSequence(Sequence*, float&); //sequence to align, searchScore
+	Sequence findClosestSequence(Sequence*, float&) const; //sequence to align, searchScore
 	int getLongestBase()	{  return longest;  }
 	
 private:

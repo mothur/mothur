@@ -57,6 +57,7 @@ protected:
 	vector<string> outputNames;
 	
 	bool abort, flip, calledHelp, save;
+    AlignmentDB* templateDB;
 
 };
 

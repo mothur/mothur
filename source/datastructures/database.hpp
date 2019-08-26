@@ -54,7 +54,7 @@ public:
 	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
     
     
-	virtual vector<int> findClosestSequences(Sequence*, int, vector<float>&) = 0;  // returns indexes of n closest sequences to query
+	virtual vector<int> findClosestSequences(Sequence*, int, vector<float>&) const = 0;  // returns indexes of n closest sequences to query
 	
     virtual int getLongestBase() {	return longest+1;		}
     virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };
@@ -67,7 +67,7 @@ protected:
 	MothurOut* m;
     CurrentFile* current;
 	int numSeqs, longest;
-    std::mutex mutex;
+    //std::mutex mutex;
     Utils util;
 	
 	

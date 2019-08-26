@@ -146,7 +146,7 @@ AlignmentDB::AlignmentDB(string s){
 /**************************************************************************************************/
 AlignmentDB::~AlignmentDB() {  delete search;	}
 /**************************************************************************************************/
-Sequence AlignmentDB::findClosestSequence(Sequence* seq, float& searchScore) {
+Sequence AlignmentDB::findClosestSequence(Sequence* seq, float& searchScore) const {
 	try{
         
         vector<float> scores;

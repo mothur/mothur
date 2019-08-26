@@ -47,7 +47,7 @@ void DistanceDB::addSequence(Sequence seq) {
 }
 /**************************************************************************************************/
 //returns indexes to top matches
-vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted, vector<float>& Scores){
+vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted, vector<float>& Scores) const{
 	try {
 		vector<int> topMatches;
 		Scores.clear();

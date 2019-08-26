@@ -22,6 +22,7 @@ BlastAlignment::BlastAlignment(float go, float ge, float ma, float mm) :
 			match(ma),				//	This is the score to award for two nucleotides matching (match >= 0)
 			mismatch(mm)			//	This is the penalty to assess for a mismatch (mismatch <= 0)
 {
+    CurrentFile* current;
 	path = current->getBlastPath();
 	
 	gapOpen = abs(go);				//	This is the penalty to assess for opening a gap (gapOpen >= 0)
@@ -101,16 +102,6 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 			seqAend = 0;
 			seqBend = 0;
 			pairwiseLength = 0;
-			
-//			string dummy;
-//			while(dummy != "query:"){	m->mothurOut(dummy, ""); m->mothurOutEndLine(); blastFile >> dummy;	}
-//			blastFile >> seqBend;
-//			m->mothurOut(toString(seqBend), ""); m->mothurOutEndLine();
-//			for(int i=0;i<seqBend;i++){
-//				seqAaln += 'Z';
-//				seqBaln += 'X';
-//			}
-//			pairwiseLength = 0;
 			return;
 		}
 	}
