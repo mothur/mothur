@@ -63,41 +63,61 @@ vector<string> ScreenSeqsCommand::setParameters(){
 string ScreenSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The screen.seqs command reads a fastafile and screens sequences.\n";
-		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, count, qfile, alignreport, contigsreport, summary, taxonomy, optimize, criteria and processors.\n";
-		helpString += "The fasta parameter is required.\n";
+		helpString += "The screen.seqs command reads a fasta file and screens sequences.\n";
+		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, count, qfile, alignreport, contigsreport, summary, taxonomy, optimize, criteria and processors. The fasta parameter is required.\n";
         helpString += "The contigsreport parameter allows you to use the contigsreport file to determine if a sequence is good. Screening parameters include: minoverlap, ostart, oend and mismatches. \n";
         helpString += "The alignreport parameter allows you to use the alignreport file to determine if a sequence is good. Screening parameters include: minsim, minscore and maxinsert. \n";
         helpString += "The summary parameter allows you to use the summary file from summary.seqs to save time processing.\n";
 		helpString += "The taxonomy parameter allows you to remove bad seqs from taxonomy files.\n";
-		helpString += "The start parameter is used to set a position the \"good\" sequences must start by. The default is -1.\n";
-		helpString += "The end parameter is used to set a position the \"good\" sequences must end after. The default is -1.\n";
-		helpString += "The maxambig parameter allows you to set the maximum number of ambiguous bases allowed. The default is -1.\n";
+		helpString += "The start parameter is used to set a position the \"good\" sequences must start by. The default is -1, meaning ignore.\n";
+		helpString += "The end parameter is used to set a position the \"good\" sequences must end after. The default is -1, meaning ignore.\n";
+		helpString += "The maxambig parameter allows you to set the maximum number of ambiguous bases allowed. The default is -1, meaning ignore.\n";
 		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
 		helpString += "The minlength parameter allows you to set and minimum sequence length. Default=10.\n";
 		helpString += "The maxn parameter allows you to set and maximum number of N's allowed in a sequence. \n";
-        helpString += "The minoverlap parameter allows you to set and minimum overlap. The default is -1. \n";
-        helpString += "The ostart parameter is used to set an overlap position the \"good\" sequences must start by. The default is -1. \n";
-        helpString += "The oend parameter is used to set an overlap position the \"good\" sequences must end after. The default is -1.\n";
+        helpString += "The minoverlap parameter allows you to set and minimum overlap. The default is -1, meaning ignore. \n";
+        helpString += "The ostart parameter is used to set an overlap position the \"good\" sequences must start by. The default is -1, meaning ignore. \n";
+        helpString += "The oend parameter is used to set an overlap position the \"good\" sequences must end after. The default is -1, meaning ignore.\n";
         helpString += "The mismatches parameter allows you to set and maximum mismatches in the contigs.report. \n";
         helpString += "The minsim parameter allows you to set the minimum similarity to template sequences during alignment. Found in column \'SimBtwnQuery&Template\' in align.report file.\n";
         helpString += "The minscore parameter allows you to set the minimum search score during alignment. Found in column \'SearchScore\' in align.report file.\n";
         helpString += "The maxinsert parameter allows you to set the maximum number of insertions during alignment. Found in column \'LongestInsert\' in align.report file.\n";
-		helpString += "The processors parameter allows you to specify the number of processors to use while running the command. The default is 1.\n";
-		helpString += "The optimize and criteria parameters allow you set the start, end, maxabig, maxhomop, minlength and maxlength parameters relative to your set of sequences .\n";
+		helpString += "The processors parameter allows you to specify the number of processors to use while running the command. The default is all available.\n";
+		helpString += "The optimize and criteria parameters allow you set the start, end, maxabig, maxhomop, minlength and maxlength parameters relative to your set of sequences.\n";
 		helpString += "For example optimize=start-end, criteria=90, would set the start and end values to the position 90% of your sequences started and ended.\n";
 		helpString += "The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile.\n";
 		helpString += "The screen.seqs command should be in the following format: \n";
-		helpString += "screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  \n";
-		helpString += "maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n";	
-		helpString += "Example screen.seqs(fasta=abrecovery.fasta, name=abrecovery.names, group=abrecovery.groups, start=..., end=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n";
-		;
+		helpString += "screen.seqs(fasta=yourFastaFile, count=yourCountFile, start=yourStart, end=yourEnd)\n";
+		helpString += "Example screen.seqs(fasta=stability.trim.contigs.good.unique.align, count=stability.trim.contigs.good.count_table, start=1968, end=11550, maxhomop=8)\n";
+        
+        getCommonQuestions();
+        
 		return helpString;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "getHelpString");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+string ScreenSeqsCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string issue = "Screen.seqs is removing most / all of my sequences. What do I do?"; issues.push_back(issue);
+        string ianswer = "\tThe most common cause of mothur removing all of your reads is a misunderstanding of the start and end parameter options. The start parameter is used to set a position the \"good\" sequences must START BY. Any read with a start position before the value given to start will be removed. The end parameter is used to set a position the \"good\" sequences must END AFTER. Any read that ends before the value given to end will be removed. Alternatively, reads may be removed if there is poor or no overlap in your dataset.\n"; ianswers.push_back(ianswer);
+        
+        string howto = "How do I set the start and end parameters?"; howtos.push_back(howto);
+        string hanswer = "\tRun summary.seqs(fasta=yourFastaFile) to summarize your datasets start and end positions. \n\n\tStart\tEnd\tNBases\tAmbigs\tPolymer\tNumSeqs\nMinimum:\t1250\t10693\t250\t0\t3\t1\n2.5%-tile:\t1968\t11550\t252\t0\t3\t3222\n25%-tile:\t1968\t11550\t252\t0\t4\t32219\nMedian:\t\t1968\t11550\t252\t0\t4\t64437\n75%-tile:\t1968\t11550\t253\t0\t5\t96655\n97.5%-tile:\t1968\t11550\t253\t0\t6\t125651\nMaximum:\t1982\t13400\t270\t0\t12\t128872\nMean:\t\t1967.99\t11550\t252.462\t0\t4.36693\n# of unique seqs:\t16426\ntotal # of seqs:\t128872\n\nThe start parameter is used to set a position the \"good\" sequences must start by. In general, you want to select the start value found at 2.5%. Meaning 97.5% of your reads start by this position. In the example above we want to set start=1968. The end parameter is used to set a position the \"good\" sequences must end after. In general you set this to the end position at 97.5%. Meaning 97.5% of your reads end after this position. In the example above we want to set end=11550.\n"; hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ScreenSeqsCommand", "getCommonQuestions");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 string ScreenSeqsCommand::getOutputPattern(string type) {

@@ -25,7 +25,8 @@ public:
 	string getCommandName()			{ return "screen.seqs";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	
-	string getHelpString();	
+	string getHelpString();
+    string getCommonQuestions();
     string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Screen.seqs"; }
 	string getDescription()		{ return "enables you to keep sequences that fulfill certain user defined criteria"; }
