@@ -605,7 +605,7 @@ bool testGZReadable(vector<string>& fileInputs, vector<string>& indexInputs, boo
         FastqRead rread(inRF, error, format);
         inFF.pop(); inRF.pop();
         
-        //error=true;
+        //error=true; to force test of decompression
         if (error) { //error reading fastq files, try unzipping
             
             string forwardOutput = util.getRootName(forwardFile) + "mothurTest_forward.fastq";
