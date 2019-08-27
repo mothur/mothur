@@ -1,0 +1,15 @@
+#pre.cluster
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# fasta=stability.trim.contigs.good.unique.good.filter.unique.fasta, count=stability.trim.contigs.good.unique.good.filter.count_table,from MISeq_SOP
+set.dir(input=./TestFiles, output=./pre.cluster, tempdefault=./TestReferences)
+set.logfile(name=precluster.logfile)
+pre.cluster(fasta=testPrecluster.fasta, count=testPrecluster.count_table, diffs=2)
+summary.seqs(count=current)
+pre.cluster(fasta=testPrecluster.fasta, count=testPrecluster.count_table, diffs=2, method=unoise)
+summary.seqs(count=current)
+pre.cluster(fasta=testPrecluster.fasta, count=testPrecluster.count_table, diffs=2, method=tree)
+summary.seqs(count=current)
+pre.cluster(fasta=testPrecluster.fasta, count=testPrecluster.count_table, diffs=2, method=deblur)
+summary.seqs(count=current)
+quit()
+
