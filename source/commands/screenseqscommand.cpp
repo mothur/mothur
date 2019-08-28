@@ -484,7 +484,7 @@ int ScreenSeqsCommand::execute(){
         //don't write or keep if blank
         bool wroteAccnos = false;
         if (util.isBlank(badAccnosFile)) { m->mothurOut("[NOTE]: no sequences were bad, removing " + badAccnosFile + "\n\n"); util.mothurRemove(badAccnosFile);  }
-        else { outputNames.push_back(badAccnosFile); outputTypes["accnos"].push_back(badAccnosFile); wroteAccnos = true;}
+        else { outputNames.push_back(badAccnosFile); outputTypes["accnos"].push_back(badAccnosFile); wroteAccnos = true; }
         
         if (wroteAccnos) {
             //use remove.seqs to create new name, group and count file
@@ -623,13 +623,13 @@ int ScreenSeqsCommand::execute(){
 string ScreenSeqsCommand::printAccnos(map<string, string>& badSeqNames){
     try{
         string filename = badAccnosFile + ".temp";
-        ofstream out;
-        util.openOutputFile(filename, out);
         
-        for (map<string, string>::iterator it = badSeqNames.begin(); it != badSeqNames.end(); it++) {
-            out << it->first << endl;
-        }
+        ofstream out; util.openOutputFile(filename, out);
+        
+        for (map<string, string>::iterator it = badSeqNames.begin(); it != badSeqNames.end(); it++) { out << it->first << endl; }
+        
         out.close();
+        
         return filename;
     }
     catch(exception& e) {

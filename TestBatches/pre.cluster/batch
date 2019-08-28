@@ -11,5 +11,10 @@ pre.cluster(fasta=testPrecluster.fasta, count=testPrecluster.count_table, diffs=
 summary.seqs(count=current)
 pre.cluster(fasta=testPrecluster.fasta, count=testPrecluster.count_table, diffs=2, method=deblur)
 summary.seqs(count=current)
+#test unaligned clustering
+pre.cluster(fasta=testPrecluster.ng.fasta, count=testPrecluster.count_table, diffs=2)
+summary.seqs(count=current)
+pre.cluster(fasta=testPrecluster.names_groups.fasta, name=testPrecluster.names, group=testPrecluster.groups, diffs=2)
+summary.seqs(count=current)
 quit()
 
