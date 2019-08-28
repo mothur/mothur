@@ -1,0 +1,9 @@
+#summary.seqs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# final.fasta, final.names, final.count from MISeq_SOP
+set.dir(input=./TestFiles, output=./summary.seqs, tempdefault=./TestReferences)
+set.logfile(name=summaryseqs.logfile)
+summary.seqs(fasta=final.fasta)
+summary.seqs(fasta=final.fasta, name=final.names)
+summary.seqs(fasta=final.fasta, count=final.count_table)
+quit()
