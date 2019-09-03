@@ -18,65 +18,75 @@ class oneGapDist : public DistCalc {
 	
 public:
 	
-	oneGapDist() {}
+    oneGapDist() {}
+    oneGapDist(double c) : DistCalc(c) {}
 	
 	double calcDist(Sequence A, Sequence B){
 		
+        
 		int difference = 0;
-		int minLength = 0;
-		int openGapA = 0;
-		int openGapB = 0;
-		int start = 0;
+		bool openGapA = false;
+		bool openGapB = false;
+        int start = 0; int end = 0;
 		
 		string seqA = A.getAligned();
 		string seqB = B.getAligned();
 		int alignLength = seqA.length();
 		
 		for(int i=0;i<alignLength;i++){
-			if((seqA[i] != '.' || seqB[i] != '.')){
+			if((seqA[i] != '.' || seqB[i] != '.')){ //one of you is not a terminal gap
 				start = i;
 				break;
 			}
 		}
+        
+        for(int i=alignLength-1;i>=0;i--){
+            if((seqA[i] != '.' || seqB[i] != '.')){ //one of you is not a terminal gap
+                end = i;
+                break;
+            }
+        }
+        
+        int maxMinLength = end - start;
 
 		for(int i=start;i<alignLength;i++){
-			if((seqA[i] == '-' && seqB[i] == '-') || (seqA[i] == '.' && seqB[i] == '-') || (seqA[i] == '-' && seqB[i] == '.')){	;	}
-			else if(seqA[i] == '.' && seqB[i] == '.'){
-				break;
-			}
-			else if(seqB[i] != '-' && (seqA[i] == '-' || seqA[i] == '.')){
-				if(openGapA == 0){
+            
+            //comparing gaps, ignore
+			if((seqA[i] == '-' && seqB[i] == '-') || (seqA[i] == '.' && seqB[i] == '-') || (seqA[i] == '-' && seqB[i] == '.')){	maxMinLength--;	}
+			//trailing gaps, quit we already calulated all the diffs
+            else if(seqA[i] == '.' && seqB[i] == '.'){ break; }
+            
+			else if(seqB[i] != '-' && (seqA[i] == '-' || seqA[i] == '.')){ //seqB is a base, seqA is a gap
+				if(!openGapA){
 					difference++;
-					minLength++;
-					openGapA = 1;
-					openGapB = 0;
-				}
+					openGapA = true;
+                    openGapB = false;
+                }else { maxMinLength--; }
 			}
-			else if(seqA[i] != '-' && (seqB[i] == '-' || seqB[i] == '.')){
-				if(openGapB == 0){
+			else if(seqA[i] != '-' && (seqB[i] == '-' || seqB[i] == '.')){ //seqA is a base, seqB is a gap
+				if(!openGapB){
 					difference++;
-					minLength++;
-					openGapA = 0;
-					openGapB = 1;
-				}
+					openGapA = false;
+					openGapB = true;
+				}else { maxMinLength--; }
 			}
-			else if(seqA[i] != '-' && seqB[i] != '-'){
-				if(seqA[i] != seqB[i]){
-					difference++;
-					minLength++;
-					openGapA = 0;
-					openGapB = 0;
-				}
-				else{
-					minLength++;
-					openGapA = 0;
-					openGapB = 0;
-				}
+			else if(seqA[i] != '-' && seqB[i] != '-'){ //both bases
+                openGapA = false;
+                openGapB = false;
+                
+                //no match
+				if(seqA[i] != seqB[i]){ difference++; }
 			}
+            
+            dist = (double)difference / maxMinLength;
+            
+            if (dist > cutoff) { return 1.0000; }
 		}
 	
-		if(minLength == 0)	{	dist = 1.0000;							}
-		else				{	dist = (double)difference / minLength;	}
+		
+            if(maxMinLength == 0)    {    dist = 1.0000;                          }
+            else                {    dist = (double)difference / maxMinLength;    }
+            
         return dist;
 	}
 	

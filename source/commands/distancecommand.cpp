@@ -346,13 +346,13 @@ void driverColumn(distanceData* params){
             if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
                 if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
                 else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
             }
         }else {
             if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
                 if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
                 else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
             }
         }
         
@@ -405,7 +405,7 @@ void driverLt(distanceData* params){
             if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
                 if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
                 else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
             }
         }
         
@@ -525,13 +525,13 @@ void driverFitCalc(distanceData* params){
             if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
                 if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
                 else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
             }
         }else {
             if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
                 if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
                 else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
             }
         }
         
@@ -579,7 +579,7 @@ void DistanceCommand::createProcesses(string filename) {
         vector<std::thread*> workerThreads;
         vector<distanceData*> data;
         
-        unsigned long long numDists = 0;
+        double numDists = 0;
         
         if (output == "square") { numDists = numSeqs * numSeqs; }
         else { for(int i=0;i<numSeqs;i++){ for(int j=0;j<i;j++){ numDists++; if (numDists > processors) { break; } } } }

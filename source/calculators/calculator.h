@@ -84,7 +84,8 @@ protected:
 class DistCalc {
     
 public:
-    DistCalc(){ dist = 0; m = MothurOut::getInstance(); }
+    DistCalc(){ dist = 0; cutoff = 1.0;  m = MothurOut::getInstance(); } //no cutoff
+    DistCalc(double c){ dist = 0; cutoff = c;  m = MothurOut::getInstance(); }
     DistCalc(const DistCalc& d) : dist(d.dist) { m = MothurOut::getInstance(); }
     virtual ~DistCalc() {}
     virtual double calcDist(Sequence, Sequence) = 0;
@@ -93,6 +94,7 @@ protected:
     double dist;
     MothurOut* m;
     Utils util;
+    double cutoff;
 };
 
 /**************************************************************************************************/

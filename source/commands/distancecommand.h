@@ -24,7 +24,8 @@
 
 /**************************************************************************************************/
 struct distanceData {
-	long long startLine, endLine, numNewFasta, count;
+	long long startLine, endLine, numNewFasta;
+    double count;
 	float cutoff;
     SequenceDB alignDB;
     SequenceDB oldFastaDB;
