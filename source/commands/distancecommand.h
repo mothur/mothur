@@ -87,7 +87,7 @@ private:
 	float cutoff;
 	
 	bool abort, countends, fitCalc;
-	vector<string>  Estimators, outputNames; //holds estimators to be used
+	vector<string> outputNames; 
 	
 	void createProcesses(string);
 	bool sanityCheck();

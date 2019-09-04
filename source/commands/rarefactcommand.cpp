@@ -506,6 +506,9 @@ int RareFactCommand::execute(){
 			rDisplays.clear();
 		}
 		
+        if (inputFileNames.size() > 1) {
+            for (int p = 0; p < inputFileNames.size(); p++) { util.mothurRemove(inputFileNames[p]); }
+        }
 		
 		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 
