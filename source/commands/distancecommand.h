@@ -31,7 +31,7 @@ struct distanceData {
     SequenceDB oldFastaDB;
 	MothurOut* m;
 	OutputWriter* threadWriter;
-    string outputFileName, Estimator;
+    string outputFileName, calc;
 	bool countends;
     Utils util;
 	
@@ -51,7 +51,7 @@ struct distanceData {
 		cutoff = c;
 		alignDB = db;
         oldFastaDB = oldfn;
-		Estimator = Est;
+		calc = Est;
 		numNewFasta = num;
 		countends = cnt;
         count = 0;

@@ -57,7 +57,6 @@ public:
                     if(seqA[i] != seqB[i]){
                         diff++;
                     }
-                    //length++;
                 }
                 
                 dist = (double)diff / maxMinLength;

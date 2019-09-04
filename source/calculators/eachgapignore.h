@@ -18,12 +18,12 @@ class eachGapIgnoreTermGapDist : public DistCalc {
 	
 public:
 	eachGapIgnoreTermGapDist() {}
+    eachGapIgnoreTermGapDist(double c) : DistCalc(c) {}
 	eachGapIgnoreTermGapDist(const eachGapIgnoreTermGapDist& ddb) {}
 	
 	double calcDist(Sequence A, Sequence B){
         try {
             int diff = 0;
-            int length = 0;
             int start = 0;
             int end = 0;
             bool overlap = false;
@@ -47,23 +47,50 @@ public:
                 }
             }
             
-            for(int i=start;i<=end;i++){
-                if(seqA[i] == '.' || seqB[i] == '.'){
-                    break;
-                }
-                else if(seqA[i] != '-' || seqB[i] != '-'){
-                    if(seqA[i] != seqB[i]){
-                        diff++;
-                    }
-                    length++;
-                }
-            }
-            
             //non-overlapping sequences
-            if (!overlap) { length = 0; }
+            if (!overlap) { return 1.0000; }
             
-            if(length == 0)	{	dist = 1.0000;								}
-            else			{	dist = ((double)diff  / (double)length);	}
+            if (setCutoff) {
+                
+                int maxMinLength = end - start + 1;
+                
+                for(int i=start;i<alignLength;i++){
+                    if(seqA[i] == '.' || seqB[i] == '.'){ //reached terminal gaps, so quit
+                        break;
+                    }
+                    else if((seqA[i] == '-' && seqB[i] == '-') || (seqA[i] == '-' && seqB[i] == '.') || (seqA[i] == '.' && seqB[i] == '-')){ maxMinLength--; } //comparing gaps, ignore
+                    else{
+                        if(seqA[i] != seqB[i]){
+                            diff++;
+                        }
+                    }
+                    
+                    dist = (double)diff / maxMinLength;
+                    
+                    if (dist > cutoff) { return 1.0000; }
+                }
+                
+                if(maxMinLength == 0)    {    dist = 1.0000;                                }
+                else            {    dist = ((double)diff  / (double)maxMinLength);        }
+                
+            }else {
+                int length = 0;
+                
+                for(int i=start;i<=end;i++){
+                    if(seqA[i] == '.' || seqB[i] == '.'){
+                        break;
+                    }
+                    else if(seqA[i] != '-' || seqB[i] != '-'){
+                        if(seqA[i] != seqB[i]){
+                            diff++;
+                        }
+                        length++;
+                    }
+                }
+                
+                if(length == 0)    {    dist = 1.0000;                                }
+                else            {    dist = ((double)diff  / (double)length);    }
+            }
             
             return dist;
         }
