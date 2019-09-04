@@ -383,6 +383,8 @@ void driverColumn(distanceData* params){
         }
         params->threadWriter->write(buffer);
         
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        
         delete distCalculator;
     }
     catch(exception& e) {
@@ -446,6 +448,8 @@ void driverLt(distanceData* params){
             
         }
         
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        
         outFile.close();
         delete distCalculator;
     }
@@ -508,6 +512,8 @@ void driverSquare(distanceData* params){
             if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n");  }
         }
         
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        
         outFile.close();
         delete distCalculator;
     }
@@ -523,13 +529,13 @@ void driverFitCalc(distanceData* params){
         DistCalc* distCalculator;
         if (params->countends) {
             if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
+                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
+                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
                 else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
             }
         }else {
             if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
                 else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
                 else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
             }
@@ -558,6 +564,8 @@ void driverFitCalc(distanceData* params){
             
         }
         params->threadWriter->write(buffer);
+        
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
         
         delete distCalculator;
 
