@@ -1461,6 +1461,7 @@ int CountTable::removeGroup(string groupName) {
                             totals.erase(totals.begin()+i);
                             uniques--;
                             i--;
+                            if (i == -1) { i = 0; }
                             indexOfGroup = counts[i].size(); //don't adjust the the group indexes because we removed the read
                         }else { newIndexNameMap[reverse[thisIndex]] = i; }
                     }else { //you don't have this group, nothing to remove
