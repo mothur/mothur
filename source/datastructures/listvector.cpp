@@ -522,15 +522,17 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 	try {
         Utils util;
 		if(orderMap == NULL){
-			OrderVector ov;
-		
+			
+            vector<int> ovData;
 			for(int i=0;i<data.size();i++){
 				int binSize = util.getNumNames(data[i]);		
 				for(int j=0;j<binSize;j++){
-					ov.push_back(i);
+					ovData.push_back(i);
 				}
 			}
-			util.mothurRandomShuffle(ov);
+			util.mothurRandomShuffle(ovData);
+            OrderVector ov;
+            for(int i=0;i<ovData.size();i++){ ov.push_back(ovData[i]); }
 			ov.setLabel(label);
 			ov.getNumBins();
 		

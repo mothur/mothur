@@ -24,8 +24,14 @@ protected:
     Utils util;
     string filename, fileHeader;
     bool firstLabel;
-    vector< vector<double> > results;
-    
+    map<int, int> nseqsToRow; //maps number of seqs sampled to row in results
+    vector< vector<double> > results; //results[0] is the first row in output file. can contain multiple labels is 0.01 0.03
+    /*
+     numsampled    0.01    0.03
+     1.000000    1.000000   1.00000 - results[0]
+     100.000000    47.000000   30.00000 - results[1]
+     ....
+     */
     void printFile();
 };	
 	

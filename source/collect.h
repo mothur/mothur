@@ -21,15 +21,17 @@ public:
 	int getSharedCurve(float);
 	
 private:
+    MothurOut* m;
 	SharedOrderVector* sharedorder;
 	OrderVector* order;
 	vector<Display*> displays;
-	int numSeqs, numGroupComb, totalNumSeq;
+	int numSeqs, numGroupComb;
 	string label, groupLabel;
-	void getGroupComb(vector<string>);
 	vector<string> groupComb;
+    
 	bool validGroup(vector<string>, string);
-	MothurOut* m;
+    map<string, int> getGroupComb(vector<string>);
+	
 };
 
 

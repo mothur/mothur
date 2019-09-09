@@ -364,7 +364,6 @@ int CollectCommand::execute(){
 			string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
             map<string, string> variables; 
             variables["[filename]"] = fileNameRoot;
-			//globaldata->inputFileName = inputFileNames[p];
 		
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -459,8 +458,8 @@ int CollectCommand::execute(){
 			//if the users entered no valid calculators don't execute command
 			if (cDisplays.size() == 0) { return 0; }
 			
-			input = new InputData(inputFileNames[p], format, nullVector);
-			order = input->getOrderVector();
+			InputData input(inputFileNames[p], format, nullVector);
+			order = input.getOrderVector();
 			string lastLabel = order->getLabel();
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -469,11 +468,8 @@ int CollectCommand::execute(){
 			
 			if (m->getControl_pressed()) {  
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
-				delete input;  
-				delete order; 
-				
-				return 0;
+				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear();
+				delete order; return 0;
 			}
 
 
@@ -481,38 +477,29 @@ int CollectCommand::execute(){
 			
 				if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
-					delete input;  
-					delete order; 
-					
-					return 0;
+					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); delete order; return 0;
 				}
 
 				
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
 				
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					cCurve = new Collect(order, cDisplays);
-					cCurve->getCurve(freq);
-					delete cCurve;
+					Collect cCurve(order, cDisplays);
+					cCurve.getCurve(freq);
 					
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
-					
-					
 				}
 				//you have a label the user want that is smaller than this label and the last label has not already been processed 
 				if ((util.anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = order->getLabel();
 					
 					delete order;
-					order = (input->getOrderVector(lastLabel));
+					order = (input.getOrderVector(lastLabel));
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					cCurve = new Collect(order, cDisplays);
-					cCurve->getCurve(freq);
-					delete cCurve;
-					
+                    Collect cCurve(order, cDisplays);
+                    cCurve.getCurve(freq);
 					
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
@@ -524,16 +511,13 @@ int CollectCommand::execute(){
 				lastLabel = order->getLabel();	
 				
 				delete order;		
-				order = (input->getOrderVector());
+				order = (input.getOrderVector());
 			}
 			
 			
 			if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
-					delete input;  
-					
-					return 0;
+					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0;
 			}
 				
 			//output error messages about any remaining user labels
@@ -552,30 +536,28 @@ int CollectCommand::execute(){
 			//run last label if you need to
 			if (needToRun )  {
 				if (order != NULL) {	delete order;	}
-				order = (input->getOrderVector(lastLabel));
+				order = (input.getOrderVector(lastLabel));
 				
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				
-				cCurve = new Collect(order, cDisplays);
-				cCurve->getCurve(freq);
-				delete cCurve;
+                Collect cCurve(order, cDisplays);
+                cCurve.getCurve(freq);
 				
 				if (m->getControl_pressed()) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
-					delete input;  
-					delete order;
-					
-					return 0;
+					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); delete order;return 0;
 				}
 				delete order;
 			}
 			
 			for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-			cDisplays.clear();
-			delete input;  
+			cDisplays.clear(); 
 		}
 		
+        if (inputFileNames.size() > 1) {
+            for (int p = 0; p < inputFileNames.size(); p++) { util.mothurRemove(inputFileNames[p]); }
+        }
+        
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 				
 		m->mothurOut("\nOutput File Names: \n"); 
@@ -598,8 +580,8 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		map<string, string> files;
 		map<string, string>::iterator it3;
 					
-		input = new InputData(filename, "sharedfile", groups);
-		SharedRAbundVectors* shared = input->getSharedRAbundVectors();
+		InputData input(filename, "sharedfile", groups);
+		SharedRAbundVectors* shared = input.getSharedRAbundVectors();
 		
 		string sharedFileRoot = util.getRootName(filename);
         groups = shared->getNamesGroups();
@@ -626,10 +608,8 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 			}
 		
             for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i]; } lookup[i] = NULL; }
-			shared = input->getSharedRAbundVectors();
+			shared = input.getSharedRAbundVectors();
 		}
-		
-		delete input;
 
 		return filenames;
 	}

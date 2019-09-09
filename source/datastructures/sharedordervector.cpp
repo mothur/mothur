@@ -31,10 +31,8 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups, st
 		maxRank = 0; numBins = 0; numSeqs = 0;
         int numUserGroups = userGroups.size();
 				
-		groupmap = new GroupMap();
-		
-		int num, inputData, count;
-		count = 0;  numSeqs = 0;
+		int num, inputData;
+		numSeqs = 0;
 		string holdLabel, nextLabel, groupN;
 		individual newguy;
 		
@@ -84,14 +82,12 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups, st
         if (readData) {
             //save group in groupmap
             setNamesOfGroups(groupN);
-            groupmap->groupIndex[groupN] = 0;
             
-            
-            for(int i=0;i<num;i++){
-                f >> inputData;
+            for(int i=0;i<num;i++){ //for each otu
+                f >> inputData; //abundance of the otu
                 
-                for (int j = 0; j < inputData; j++) {
-                    push_back(i, i, groupN);
+                for (int j = 0; j < inputData; j++) { //for each abundance
+                    push_back(i, groupN);
                     numSeqs++;
                 }
             }
@@ -115,18 +111,14 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups, st
             }
 
             if (readData) {
-                count++;
-                
                 //save group in groupmap
                 setNamesOfGroups(groupN);
-                groupmap->groupIndex[groupN] = count;
-                
                 
                 for(int i=0;i<num;i++){
                     f >> inputData;
                     
                     for (int j = 0; j < inputData; j++) {
-                        push_back(i, i, groupN);
+                        push_back(i, groupN);
                         numSeqs++;
                     }
                 }
@@ -142,11 +134,9 @@ SharedOrderVector::SharedOrderVector(ifstream& f, vector<string>& userGroups, st
         
         sort(userGroups.begin(), userGroups.end());
         for (int i = 0; i < userGroups.size(); i++) { setNamesOfGroups(userGroups[i]); }
-			
-		groupmap->setNamesOfGroups(allGroups);
-		
+        
 		updateStats();
-		
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedOrderVector", "SharedOrderVector");
@@ -176,8 +166,7 @@ int SharedOrderVector::getMaxRank(){
 void SharedOrderVector::set(int index, int binNumber, int abund, string groupName){
     setNamesOfGroups(groupName);
 	data[index].group = groupName;
-	data[index].bin = binNumber;
-	data[index].abundance = abund;
+	data[index].binNumber = binNumber;
 	//if (abund > maxRank) { maxRank = abund; }
 	updateStats();
 }
@@ -205,18 +194,12 @@ void SharedOrderVector::setNamesOfGroups(string seqGroup) {
 }
 /***********************************************************************/
 //commented updateStats out to improve speed, but whoever calls this must remember to update when they are done with all the pushbacks they are doing 
-void SharedOrderVector::push_back(int binNumber, int abund, string groupName){
+void SharedOrderVector::push_back(int bin, string groupName){
 	setNamesOfGroups(groupName);
     individual newGuy;
 	newGuy.group = groupName;
-	newGuy.abundance = abund;
-	newGuy.bin = binNumber;
+	newGuy.binNumber = bin;
 	data.push_back(newGuy);
-	//numSeqs++;
-	//numBins++;
-	//if (abund > maxRank) { maxRank = abund; }
-	
-	//updateStats();
 }
 
 /***********************************************************************/
@@ -226,7 +209,7 @@ void SharedOrderVector::print(ostream& output){
 		output << label << '\t' << numSeqs;
 	
 		for(int i=0;i<data.size();i++){
-			output << '\t' << data[i].bin;
+			output << '\t' << data[i].binNumber;
 		}
 		output << endl;
 	}
@@ -276,14 +259,12 @@ RAbundVector SharedOrderVector::getRAbundVector(){
 		RAbundVector rav(data.size());
 	
 		for(int i=0;i<numSeqs;i++){
-			rav.set(data[i].bin, rav.get(data[i].bin) + 1);
+			rav.set(data[i].binNumber, rav.get(data[i].binNumber) + 1);
 		}	
 		sort(rav.rbegin(), rav.rend());
 		for(int i=numSeqs-1;i>=0;i--){
 			if(rav.get(i) == 0){	rav.pop_back();	}
-			else{
-				break;
-			}
+			else{ break; }
 		}
 		rav.setLabel(label);
 
@@ -301,7 +282,7 @@ OrderVector SharedOrderVector::getOrderVector(map<string,int>* nameMap = NULL) {
 		OrderVector ov;
 	
 		for (int i = 0; i < data.size(); i++) {
-			ov.push_back(data[i].bin);
+			ov.push_back(data[i].binNumber);
 		}
 		
 		util.mothurRandomShuffle(ov);
@@ -334,7 +315,7 @@ SharedRAbundVectors* SharedOrderVector::getSharedRAbundVector(string group) {
 		
 		for (int i = 0; i < data.size(); i++) {
 			if (data[i].group == group) {
-				sharedRav->set(data[i].abundance, sharedRav->get(data[i].abundance) + 1);
+				sharedRav->set(data[i].binNumber, sharedRav->get(data[i].binNumber) + 1);
 			}
 		}
         
@@ -367,8 +348,8 @@ SharedRAbundVectors* SharedOrderVector::getSharedRAbundVector() {
         for(int i=0;i<numSeqs;i++){
             //get first sample
             individual chosen = get(i);
-            int abundance = lookup->get(chosen.bin, chosen.group);
-            lookup->set(chosen.bin, (abundance + 1), chosen.group);
+            int abundance = lookup->get(chosen.binNumber, chosen.group);
+            lookup->set(chosen.binNumber, (abundance + 1), chosen.group);
         }
         
         lookup->setOTUNames(currentLabels);
@@ -397,17 +378,13 @@ void SharedOrderVector::updateStats(){
 		maxRank = 0;
 	
 		numSeqs = data.size();
-				
-		vector<int> hold(numSeqs, 0);
+        
+        std::set<int> uniqueBins;
 		for(int i=0;i<numSeqs;i++){
-			hold[data[i].bin] = hold[data[i].bin]+1;
-		}	
-		
-		for(int i=0;i<numSeqs;i++){
-			if(hold[i] > 0)				{	numBins++;				}
-			if(hold[i] > maxRank)		{	maxRank = hold[i];		}
+            uniqueBins.insert(data[i].binNumber);
+			if(data[i].binNumber > maxRank)		{	maxRank = data[i].binNumber;		}
 		}
-		
+        numBins = uniqueBins.size();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedOrderVector", "updateStats");

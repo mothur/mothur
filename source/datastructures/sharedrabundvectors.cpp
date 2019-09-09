@@ -472,7 +472,7 @@ SharedOrderVector SharedRAbundVectors::getSharedOrderVector(){
             for (int j = 0; j < lookup[i]->getNumBins(); j++) {
                 int abund = lookup[i]->get(j);
                 if (abund != 0) {
-                    for (int k = 0; k < abund; k++) {  order.push_back(j, j, lookup[i]->getGroup());  }
+                    for (int k = 0; k < abund; k++) {  order.push_back(j, lookup[i]->getGroup());  }
                 }
             }
         }

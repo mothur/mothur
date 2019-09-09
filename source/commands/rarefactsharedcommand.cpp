@@ -422,6 +422,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             subset = new SharedRAbundVectors();
             
             if (lookup != NULL) {
+                data = lookup->getSharedRAbundVectors();
                 if (thisSet != "") {//remove unwanted groups
                     for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
@@ -457,6 +458,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             subset = new SharedRAbundVectors();
             
             if (lookup != NULL) {
+                data = lookup->getSharedRAbundVectors();
                 if (thisSet != "") {//remove unwanted groups
                     for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();

@@ -309,26 +309,25 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 		order->setLabel(label);
         Utils util;
 		for(int i=0;i<numBins;i++){
-			int binSize = util.getNumNames(get(i));	//find number of individual in given bin	
+
 			string names = get(i);
             vector<string> binNames;
             util.splitAtComma(names, binNames);
-            if (groupMode != "group") {
-                binSize = 0;
-                for (int j = 0; j < binNames.size(); j++) {  binSize += countTable->getNumSeqs(binNames[i]);  }
-            }
+            
 			for (int j = 0; j < binNames.size(); j++) { 
                 if (m->getControl_pressed()) { return order; }
                 if (groupMode == "group") {
                     string groupName = groupmap->getGroup(binNames[i]);
-                    if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + binNames[i] + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-                    if (util.inUsersGroups(groupName, groups)) { order->push_back(i, binSize, groupName);  }//i represents what bin you are in
+                    if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + binNames[i] + "' was not found in the group file, please correct.\n");  exit(1); }
+                    if (util.inUsersGroups(groupName, groups)) { order->push_back(i,  groupName);  }//i represents what bin you are in
                 }else {
                     vector<int> groupAbundances = countTable->getGroupCounts(binNames[i]);
                     vector<string> groupNames = countTable->getNamesOfGroups();
                     for (int k = 0; k < groupAbundances.size(); k++) { //groupAbundances.size() == 0 if there is a file mismatch and m->control_pressed is true.
                         if (m->getControl_pressed()) { return order; }
-                        for (int l = 0; l < groupAbundances[k]; l++) {  if (util.inUsersGroups(groupNames[k], groups)) { order->push_back(i, binSize, groupNames[k]); } }
+                        for (int l = 0; l < groupAbundances[k]; l++) { //for each abundance != 0, add a individual for each
+                            if (util.inUsersGroups(groupNames[k], groups)) { order->push_back(i, groupNames[k]); }
+                        }
                     }
                 }
 			}

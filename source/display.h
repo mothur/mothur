@@ -9,8 +9,9 @@
 class Display {
 	
 public:
-	virtual void update(SAbundVector* rank) = 0;
-	virtual void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb, vector<string>) = 0;
+	virtual void update(SAbundVector& rank) = 0;
+    virtual void update(vector<SharedRAbundVector*> shared, int numSeqs) {}
+    virtual void update(vector<SharedRAbundVector*>& shared, int numSeqs, bool pairs, map<string, int>) {}
 	virtual void init(string) = 0;
 	virtual void reset() = 0;
 	virtual void close() = 0;
@@ -20,7 +21,7 @@ public:
 	virtual bool getAll()	{	bool a; return a;	}
 	virtual bool calcNeedsAll()    { bool a; return a;	}
 	virtual string getName() { return ""; };
-	virtual ~Display() {}
+    virtual ~Display() {}
 	Display() {  m = MothurOut::getInstance();  }
 	
 protected:

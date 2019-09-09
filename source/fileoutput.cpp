@@ -23,24 +23,22 @@ void ThreeColumnFile::setLabelName(string label){
 /***********************************************************************/
 void ThreeColumnFile::updateOutput(int nSeqs, vector<double> data){
 	try {
-        vector<double> theseResults;
-        int resultsIndex = results.size()-1;
-        bool newRow = false;
         
-		if(firstLabel){ //this is a new label for an existing row
+        map<int, int>::iterator it = nseqsToRow.find(nSeqs);
+        if (it != nseqsToRow.end()) { //new column in row for next label
+            int resultsIndex = it->second;
+            results[resultsIndex].push_back(data[0]);
+            results[resultsIndex].push_back(data[1]);
+            results[resultsIndex].push_back(data[2]);
+        }else{
+            //new row
+            nseqsToRow[nSeqs] = results.size();
+            vector<double> theseResults;
             theseResults.push_back(nSeqs);
-            newRow = true;
-		}
-        
-        if (newRow) {
             theseResults.push_back(data[0]);
             theseResults.push_back(data[1]);
             theseResults.push_back(data[2]);
             results.push_back(theseResults);
-        }else {
-            results[resultsIndex].push_back(data[0]);
-            results[resultsIndex].push_back(data[1]);
-            results[resultsIndex].push_back(data[2]);
         }
 	}
 	catch(exception& e) {
@@ -111,24 +109,22 @@ void SharedThreeColumnFile::setLabelName(string label){
 /***********************************************************************/
 void SharedThreeColumnFile::updateOutput(int nSeqs, vector<double> data){
 	try {
-        vector<double> theseResults;
-        int resultsIndex = results.size()-1;
-        bool newRow = false;
         
-        if(firstLabel){ //this is a new label for an existing row
+        map<int, int>::iterator it = nseqsToRow.find(nSeqs);
+        if (it != nseqsToRow.end()) { //new column in row for next label
+            int resultsIndex = it->second;
+            results[resultsIndex].push_back(data[0]);
+            results[resultsIndex].push_back(data[1]);
+            results[resultsIndex].push_back(data[2]);
+        }else{ //new row
+            nseqsToRow[nSeqs] = results.size();
+            vector<double> theseResults;
             theseResults.push_back(numGroup); numGroup++;
-            newRow = true;
-        }
-        
-        if (newRow) {
+            theseResults.push_back(nSeqs);
             theseResults.push_back(data[0]);
             theseResults.push_back(data[1]);
             theseResults.push_back(data[2]);
             results.push_back(theseResults);
-        }else {
-            results[resultsIndex].push_back(data[0]);
-            results[resultsIndex].push_back(data[1]);
-            results[resultsIndex].push_back(data[2]);
         }
     }
 	catch(exception& e) {
@@ -150,20 +146,17 @@ void OneColumnFile::setLabelName(string label){
 /***********************************************************************/
 void OneColumnFile::updateOutput(int nSeqs, vector<double> data){
 	try {
-        vector<double> theseResults;
-        int resultsIndex = results.size()-1;
-        bool newRow = false;
-        
-        if(firstLabel){ //this is a new label for an existing row
+        map<int, int>::iterator it = nseqsToRow.find(nSeqs);
+        if (it != nseqsToRow.end()) { //new column in row for next label
+            int resultsIndex = it->second;
+            results[resultsIndex].push_back(data[0]);
+        }else{
+            //new row
+            nseqsToRow[nSeqs] = results.size();
+            vector<double> theseResults;
             theseResults.push_back(nSeqs);
-            newRow = true;
-        }
-        
-        if (newRow) {
             theseResults.push_back(data[0]);
             results.push_back(theseResults);
-        }else {
-            results[resultsIndex].push_back(data[0]);
         }
 	}
 	catch(exception& e) {
@@ -186,24 +179,22 @@ void SharedOneColumnFile::setLabelName(string label){
 /***********************************************************************/
 void SharedOneColumnFile::updateOutput(int nSeqs, vector<double> data){
 	try {
-        vector<double> theseResults;
-        int resultsIndex = results.size()-1;
-        bool newRow = false;
         
-        if(firstLabel){ //this is a new label for an existing row
+        map<int, int>::iterator it = nseqsToRow.find(nSeqs);
+        if (it != nseqsToRow.end()) { //new column in row for next label
+            int resultsIndex = it->second;
+            for (int i = 0; i < data.size(); i++) { results[resultsIndex].push_back(data[i]); }
+        }else{
+            //new row
+            nseqsToRow[nSeqs] = results.size();
+            vector<double> theseResults;
             theseResults.push_back(nSeqs);
-            newRow = true;
-        }
-        
-        if (newRow) {
-            for (int i = 0; i < data.size(); i++) {  theseResults.push_back(data[i]);  }
+            for (int i = 0; i < data.size(); i++) { theseResults.push_back(data[i]); }
             results.push_back(theseResults);
-        }else {
-            for (int i = 0; i < data.size(); i++) {  results[resultsIndex].push_back(data[i]);  }
         }
     }
 	catch(exception& e) {
-		m->errorOut(e, "SharedOneColumnFile", "output");
+		m->errorOut(e, "SharedOneColumnFile", "updateOutput");
 		exit(1);
 	}
 }
