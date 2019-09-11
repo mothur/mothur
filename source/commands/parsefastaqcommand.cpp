@@ -283,7 +283,26 @@ int ParseFastaQCommand::execute(){
             map<string, string> variables;
             variables["[filename]"] = util.getRootName(file);
             string pacbioGroupFileName = getOutputFileName("group", variables);
-            if ((fileOption == 2) && pacbio) {  ofstream temppb; util.openOutputFile(pacbioGroupFileName, temppb);        temppb.close(); } //clear old file for append
+            string pacbioFastaFileName = getOutputFileName("fasta", variables);
+            string pacbioQualFileName = getOutputFileName("qfile", variables);
+            if ((fileOption == 2) && pacbio) {
+                ofstream temppb; util.openOutputFile(pacbioGroupFileName, temppb);
+                temppb.close();
+                outputNames.push_back(pacbioGroupFileName); outputTypes["group"].push_back(pacbioGroupFileName);
+                
+                if (fasta) {
+                    ofstream temppbf; util.openOutputFile(pacbioFastaFileName, temppbf);
+                    temppbf.close();
+                    outputNames.push_back(pacbioFastaFileName); outputTypes["fasta"].push_back(pacbioFastaFileName);
+                }
+                
+                if (qual) {
+                    ofstream temppbq; util.openOutputFile(pacbioQualFileName, temppbq);
+                    temppbq.close();
+                    outputNames.push_back(pacbioQualFileName); outputTypes["qfile"].push_back(pacbioQualFileName);
+                }
+                
+            } //clear old file for append
             
             for (int i = 0; i < files.size(); i++) { //process each pair
                 
@@ -311,7 +330,7 @@ int ParseFastaQCommand::execute(){
                     
                     //process each file to create fasta and qual files
                     set<string> seqNames;
-                    if (fasta || qual) {  seqNames = processFile(files[i][0], trimOligos, rtrimOligos); }  //split = 1, so no parsing by group will be done.
+                    if (fasta || qual) {  seqNames = processFile(inputFile, trimOligos, rtrimOligos); }  //split = 1, so no parsing by group will be done.
                     
                     if (seqNames.size() != 0) {
                         ofstream outGroupPacBio; util.openOutputFileAppend(pacbioGroupFileName, outGroupPacBio);
@@ -320,6 +339,14 @@ int ParseFastaQCommand::execute(){
                             outGroupPacBio << *it << '\t' << pacbioGroup << endl;
                         }
                         outGroupPacBio.close();
+                        groupCounts[pacbioGroup] = seqNames.size();
+                        
+                        map<string, string> variables;
+                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFile));
+                        string fastaFile = getOutputFileName("fasta",variables);
+                        string qualFile = getOutputFileName("qfile",variables);
+                        if (fasta) { util.appendFiles(fastaFile, pacbioFastaFileName); }
+                        if (qual)  { util.appendFiles(qualFile, pacbioQualFileName);   }
                     }
                 }else if (fileOption == 3) { //3 column file option with sample names
                     if (current->getMothurCalling()) {
@@ -414,14 +441,14 @@ int ParseFastaQCommand::execute(){
                     }
                 }
             }
-            
-            //output group counts
-            int total = 0;
-            if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
-            for (map<string, long long>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
-            if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
         }
 
+        //output group counts
+        int total = 0;
+        if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
+        for (map<string, long long>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
+        if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
+        
         if (groupfile != "")        { delete groupMap;      }
         if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
         
