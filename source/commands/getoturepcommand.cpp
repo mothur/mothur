@@ -46,7 +46,6 @@ vector<string> GetOTURepCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "ColumnName","count",false,false, true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false, true); parameters.push_back(pgroup);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName","",false,false, true); parameters.push_back(pcolumn);
-		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
@@ -71,12 +70,12 @@ vector<string> GetOTURepCommand::setParameters(){
 string GetOTURepCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, count, large, weighted, cutoff, precision, groups, sorted, method, label and rename.  The list parameter is required, as well as phylip or column and name if you are using method=distance. If method=abundance a name or count file is required.\n";
-        helpString += "The label parameter allows you to select what distance you would like a output files created for. Example label=0.03. If no label is provided the first label is used.\n";
+		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, count, large, weighted, cutoff, precision, groups, sorted, method and rename.  The list parameter is required, as well as phylip or column and name if you are using method=distance. If method=abundance a name or count file is required.\n";
 		helpString += "The rename parameter allows you to indicate you want the OTU label to replace the representative sequence name. Default=F. \n";
 		helpString += "The phylip or column parameter is required for method=distance, but only one may be used.  If you use a column file the name or count filename is required. \n";
         helpString += "The method parameter allows you to select the method of selecting the representative sequence. Choices are distance and abundance.  The distance method finds the sequence with the largest number of close sequences in the OTU. If tie occurs, a sequence is randomly selected from the ties.  The abundance method chooses the most abundant sequence in the OTU as the representative.\n";
 		helpString += "If you do not provide a cutoff value 0.03 is assumed. If you do not provide a precision value then 100 is assumed.\n";
+        helpString += "Multiple cutoffs can be entered as follows cutoff=0.01-0.03. \n";
 		helpString += "The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile).\n";
 		helpString += "Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n";
 		helpString += "The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n";
@@ -331,11 +330,16 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
             }
 
-        
-			//check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
-			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = "";   }
+            cutoffSet = false;
+            string temp = validParameter.valid(parameters, "cutoff");
+            if (temp == "not found") {  temp = "0.03"; }
+            else { cutoffSet = true; }
+            
+            int pos = temp.find('-');
+            if (pos != string::npos) { //multiple cutoffs given
+                util.splitAtDash(temp, cutoffs);  temp = *cutoffs.begin();
+            }else {     cutoffs.insert(temp);  }
+            util.mothurConvert(temp, cutoff);
 						
 			sorted = validParameter.valid(parameters, "sorted");		if (sorted == "not found"){	sorted = "";	}
 			if (sorted == "none") { sorted=""; }
@@ -344,8 +348,6 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				sorted = "";
 			}
             
-            
-			
 			if ((sorted == "group") && ((groupfile == "")&& !hasGroups)) {
 				m->mothurOut("You must provide a groupfile or have a count file with group info to sort by group. I will not sort."); m->mothurOutEndLine();
 				sorted = "";
@@ -363,7 +365,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				}
 			}
 			
-			string temp = validParameter.valid(parameters, "weighted");		if (temp == "not found") {	 temp = "f"; 	} weighted = util.isTrue(temp);
+			temp = validParameter.valid(parameters, "weighted");		if (temp == "not found") {	 temp = "f"; 	} weighted = util.isTrue(temp);
             
             temp = validParameter.valid(parameters, "rename");		if (temp == "not found") {	 temp = "f"; 	} rename = util.isTrue(temp);
             
@@ -375,7 +377,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			
 			temp = validParameter.valid(parameters, "precision");			if (temp == "not found") { temp = "100"; } util.mothurConvert(temp, precision);
 			
-			temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "0.03"; } util.mothurConvert(temp, cutoff);
+            matrix = NULL;
 			
 		}
 	}
@@ -391,46 +393,9 @@ int GetOTURepCommand::execute(){
 	try {
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-		list = NULL;
         
         if (method == "distance") {
-            if ((namefile != "") && (groupfile != "")) { //create count file for simplicity
-                
-                CountTable ct; ct.createTable(namefile, groupfile, nullVector);
-                
-                if (outputDir == "") { outputDir = util.hasPath(namefile); }
-                map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(namefile));
-                countfile = getOutputFileName("count", variables);
-                
-                ct.printCompressedTable(countfile);
-                
-                current->setCountFile(countfile);
-                if (ct.hasGroupInfo()) { hasGroups = true; }
-                
-                vector<string> uniqueNames = ct.getNamesOfSeqs();
-                util.printAccnos("temp.accnos", uniqueNames);
-                
-                string inputString = "list=" + listfile + ", accnos=temp.accnos";
-                
-                m->mothurOut("/******************************************/\n");
-                m->mothurOut("\nRunning command: get.seqs(" + inputString + ")\n");
-                current->setMothurCalling(true);
-                
-                Command* getSeqsCommand = new GetSeqsCommand(inputString);
-                getSeqsCommand->execute();
-                
-                string templistfile = getSeqsCommand->getOutputFiles()["list"][0];
-                string newName = util.getRootName(listfile) + "unique.list";
-                util.renameFile(templistfile, newName);  listfile = newName;
-                namefile = ""; groupfile = ""; util.mothurRemove("temp.accnos");
-                
-                delete getSeqsCommand;
-                current->setMothurCalling(false);
-                
-                m->mothurOut("/******************************************/\n");
-            }
-            readDist();
+            if ((namefile != "") && (groupfile != "")) { createCount();  } //create count file for simplicity
         }
        
         if (namefile != "") { nameMap = util.readNames(namefile); }
@@ -444,24 +409,36 @@ int GetOTURepCommand::execute(){
             if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile.\n");  groupfile = "";  }
         }
         
-        InputData input(listfile, "list", Groups);
-        list = input.getListVector();
-        string lastLabel = list->getLabel();
+        list = NULL;
         
-        if (label == "") { m->mothurOut("You did not provide a label, using " + lastLabel + ".\n");  }
-        else if ( lastLabel == label) {} //do nothing, this is the list we want
-        else {
-            delete list;
-            list = input.getListVector(label);
-            lastLabel = list->getLabel();
-        }
-        if (list == NULL) { m->mothurOut("[ERROR]: Unable to read list file, aborting.\n");  m->setControl_pressed(true); }
-        else {
-            m->mothurOut(lastLabel + "\t" + toString(list->getNumBins()) + "\n");
+        if (!cutoffSet) {
+            InputData input(listfile, "list", Groups);
+            list = input.getListVector();
+            string lastLabel = list->getLabel();
+            m->mothurOut("You did not provide a label, using " + lastLabel + ".\n");
+            if (lastLabel == "unique") { cutoff = 0.0; }
+            
+            if (method == "distance") { readDist(); }
             process(list);
             delete list;
         }
+        else { //multiple cutoffs
+            for (set<string>::iterator it = cutoffs.begin(); it != cutoffs.end(); it++) {
+                if (*it == "unique") { cutoff = 0.0; }
+                else { util.mothurConvert(*it, cutoff); }
+                
+                if (method == "distance") { readDist(); }
+                
+                InputData input(listfile, "list", Groups);
+                list = input.getListVector(*it);
+                string lastLabel = list->getLabel();
+                
+                process(list);
+                delete list;
+            }
+        }
         
+        //handles multiple labels
         if (fastafile != "") {
             //read fastafile
             FastaMap* fasta = new FastaMap();
@@ -528,6 +505,8 @@ int GetOTURepCommand::readDist() {
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         
+        if (matrix != NULL) { delete matrix; }
+        
         matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
         
         if (m->getControl_pressed()) { return 0; }
@@ -538,6 +517,47 @@ int GetOTURepCommand::readDist() {
 		m->errorOut(e, "GetOTURepCommand", "readDist");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int GetOTURepCommand::createCount() {
+    try {
+        CountTable ct; ct.createTable(namefile, groupfile, nullVector);
+        
+        if (outputDir == "") { outputDir = util.hasPath(namefile); }
+        map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(namefile));
+        countfile = getOutputFileName("count", variables);
+        
+        ct.printCompressedTable(countfile);
+        
+        current->setCountFile(countfile);
+        if (ct.hasGroupInfo()) { hasGroups = true; }
+        
+        vector<string> uniqueNames = ct.getNamesOfSeqs();
+        util.printAccnos("temp.accnos", uniqueNames);
+        
+        string inputString = "list=" + listfile + ", accnos=temp.accnos";
+        
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("\nRunning command: get.seqs(" + inputString + ")\n");
+        current->setMothurCalling(true);
+        
+        Command* getSeqsCommand = new GetSeqsCommand(inputString);
+        getSeqsCommand->execute();
+        
+        string templistfile = getSeqsCommand->getOutputFiles()["list"][0];
+        string newName = util.getRootName(listfile) + "unique.list";
+        util.renameFile(templistfile, newName);  listfile = newName;
+        namefile = ""; groupfile = ""; util.mothurRemove("temp.accnos");
+        
+        delete getSeqsCommand;
+        current->setMothurCalling(false);
+        
+        m->mothurOut("/******************************************/\n");
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetOTURepCommand", "readDist");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 void GetOTURepCommand::readNamesFile(FastaMap*& fasta) {
@@ -741,6 +761,9 @@ string GetOTURepCommand::findRep(vector<string> names, map<string, long long>& m
 //**********************************************************************************************************************
 int GetOTURepCommand::process(ListVector* processList) {
 	try{
+        
+        m->mothurOut(processList->getLabel() + "\t" + toString(list->getNumBins()) + "\n");
+        
 		string name, sequence;
 		string nameRep;
 
