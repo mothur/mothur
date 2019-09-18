@@ -750,8 +750,8 @@ int BiomInfoCommand::createFilesFromBiom() {
             maxLevel = 0;
             string thisLine = it->second;
             if ((biomType == "Taxon table") || (biomType == "Taxontable")) {
-                string mapFilename = getOutputFileName("map",variables);
-                outputNames.push_back(mapFilename); outputTypes["map"].push_back(mapFilename);
+                string mapFilename = getOutputFileName("constaxonomy",variables);
+                outputNames.push_back(mapFilename); outputTypes["constaxonomy"].push_back(mapFilename);
                 ofstream outMap;
                 util.openOutputFile(mapFilename, outMap);
                 
