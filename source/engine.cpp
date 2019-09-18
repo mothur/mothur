@@ -21,6 +21,9 @@ Engine::Engine(){
 		cFactory = CommandFactory::getInstance();
 		mout = MothurOut::getInstance();
         current = CurrentFile::getInstance();
+        
+        start = time(NULL);
+        numCommandsRun = 0;
 	}
 	catch(exception& e) {
 		mout->errorOut(e, "Engine", "Engine");
@@ -91,6 +94,7 @@ bool InteractEngine::getInput(){
             options = parser.getOptionString();
             
             if (commandName != "") {
+                numCommandsRun++;
                 mout->setExecuting(true);
                 mout->resetCommandErrors();
                 
@@ -197,7 +201,10 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 
 /***********************************************************************/
 
-BatchEngine::~BatchEngine(){	}
+BatchEngine::~BatchEngine(){
+    time_t end = time(NULL);
+    mout->mothurOut("\n\nIt took " + toString(end-start) + " seconds to run " + toString(numCommandsRun) + " commands from your batch file.\n\n");
+}
 
 /***********************************************************************/
 //This Function allows the user to run a batchfile containing several commands on Dotur
@@ -231,6 +238,7 @@ bool BatchEngine::getInput(){
 				options = parser.getOptionString();
 										
 				if (commandName != "") {
+                    numCommandsRun++;
 					mout->setExecuting(true);
                     mout->resetCommandErrors();
 					
@@ -314,7 +322,10 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 
 /***********************************************************************/
 
-ScriptEngine::~ScriptEngine(){ 	}
+ScriptEngine::~ScriptEngine(){
+    time_t end = time(NULL);
+    mout->mothurOut("\n\nIt took " + toString(end-start) + " seconds to run " + toString(numCommandsRun) + " commands from your script.\n\n");
+}
 
 /***********************************************************************/
 //This Function allows the user to run a batchfile containing several commands on mothur
@@ -346,6 +357,7 @@ bool ScriptEngine::getInput(){
 			options = parser.getOptionString();
 										
 			if (commandName != "") {
+                numCommandsRun++;
                 mout->setExecuting(true);
                 mout->resetCommandErrors();
                 

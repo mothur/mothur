@@ -32,6 +32,8 @@ protected:
 	MothurOut* mout;
     CurrentFile* current;
     Utils util;
+    time_t start;
+    int numCommandsRun;
 };
 
 
