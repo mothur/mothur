@@ -637,9 +637,6 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         vector<classifyData*> data;
         
         long long num = 0;
-        
-        time_t start, end;
-        time(&start);
 
         vector<double> positions;
         vector<linePair> lines;
@@ -696,8 +693,6 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         synchronizedTaxTFile->close(); synchronizedTaxFile->close(); synchronizedAccnosFile->close();
         delete threadTaxWriter; delete threadTaxTWriter; delete threadAccnosWriter;
         delete dataBundle;
-        time(&end);
-        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to classify " + toString(num) + " sequences.\n\n");
         
         return num;
 	}
