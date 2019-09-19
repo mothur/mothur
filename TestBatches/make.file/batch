@@ -1,0 +1,10 @@
+#make.file
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+set.dir(input=./TestFiles, output=./make.file, tempdefault=./TestReferences)
+set.logfile(name=makefile.logfile)
+make.file(inputdir=./TestFiles)
+make.file(inputdir=./TestFiles, numcols=2)
+make.file(inputdir=./TestFiles, type=gz)
+make.file(inputdir=./TestFiles, prefix=myReallyAwesomeData)
+make.file(inputdir=./TestFiles, type=gz, prefix=myReallyAwesomeData)
+quit()
