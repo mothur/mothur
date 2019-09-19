@@ -1003,9 +1003,11 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         strncat(tempVsearch, vsearchCommand.c_str(), vsearchCommand.length());
         cPara.push_back(tempVsearch);
         
+        string fileToRemove = "";
         //are you using a reference file
         if (templatefile != "self") {
             string outputFileName = filename.substr(1, filename.length()-2) + ".vsearch_formatted";
+            fileToRemove = outputFileName;
             prepFile(filename.substr(1, filename.length()-2), outputFileName);
             filename = outputFileName;
             filename = "\"" + filename + "\"";
@@ -1156,6 +1158,8 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         //free memory
         for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
         delete[] vsearchParameters;
+        
+        if (fileToRemove != "") { util.mothurRemove(fileToRemove); }
         
         //remove "" from filenames
         outputFName = outputFName.substr(1, outputFName.length()-2);
