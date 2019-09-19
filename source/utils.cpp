@@ -2626,12 +2626,13 @@ vector<string> Utils::splitWhiteSpaceWithQuotes(string input){
         if ((pos == string::npos) && (pos2 == string::npos)) { return splitWhiteSpace(input); } //no quotes to worry about
         else {
             for (int i = 0; i < input.length(); i++) {
+                
                 if ((input[i] == '\'') || (input[i] == '\"') || (rest == "\'") || (rest == "\"")) { //grab everything til end or next ' or "
                     rest += input[i];
                     for (int j = i+1; j < input.length(); j++) {
                         if ((input[j] == '\'') || (input[j] == '\"')) {  //then quit
                             rest += input[j];
-                            i = j+1;
+                            i = j;
                             j+=input.length();
                         }else { rest += input[j]; }
                     }

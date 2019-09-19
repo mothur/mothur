@@ -176,7 +176,7 @@ int MergeTaxSummaryCommand::execute(){
             
             ifstream in;
             util.openInputFile(fileNames[i], in);
-            string temp = util.getline(in);
+            string temp = util.getline(in); util.gobble(in);
             vector<string> headers = util.splitWhiteSpace(temp);
             
             vector<string> thisFilesGroups;
@@ -193,6 +193,7 @@ int MergeTaxSummaryCommand::execute(){
                 if (m->getControl_pressed()) {   return 0;  }
                 
                 in >> level >> rankId; util.gobble(in);
+               
                 string rest = util.getline(in); util.gobble(in);
                 vector<string> pieces = util.splitWhiteSpaceWithQuotes(rest);
                 
@@ -241,13 +242,13 @@ int MergeTaxSummaryCommand::execute(){
         ofstream out;
         util.openOutputFile(outputFileName, out);
         print(out, tree, groups);
+        outputNames.push_back(outputFileName);outputTypes["taxsummary"].push_back(outputFileName);
         		
 		if (m->getControl_pressed()) {  util.mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOut("\nOutput File Names: \n"); 
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["taxsummary"].push_back(outputFileName);
-		m->mothurOutEndLine();
-        
+		m->mothurOut(outputFileName+"\n\n");
+
 		return 0;
 	}
 	catch(exception& e) {
