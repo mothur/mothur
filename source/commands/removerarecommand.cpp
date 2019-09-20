@@ -408,17 +408,20 @@ int RemoveRareCommand::processList(){
 		//if groupfile is given then use it
 		GroupMap* groupMap;
         CountTable ct;
+        CountTable newCountTable; //instead of removing rare, fill new count table with "good" seqs
+        bool selectedGroups = true;
 		if (groupfile != "") { 
 			groupMap = new GroupMap(groupfile); groupMap->readMap(); 
-            if (Groups.size() == 0) { Groups = groupMap->getNamesOfGroups(); }
+            if (Groups.size() == 0) { Groups = groupMap->getNamesOfGroups(); selectedGroups = false; }
 			util.openOutputFile(outputGroupFileName, outGroup);
 		}else if (countfile != "") {
             ct.readTable(countfile, true, false);
             if (ct.hasGroupInfo()) {
                 vector<string> namesGroups = ct.getNamesOfGroups();
-                if (Groups.size() == 0) { Groups = ct.getNamesOfGroups(); }            }
+                if (Groups.size() == 0) { Groups = ct.getNamesOfGroups(); selectedGroups = false; }
+                for (int i = 0; i < namesGroups.size(); i++) { newCountTable.addGroup(namesGroups[i]); }
+            }
         }
-		
 		
 		if (list != NULL) {
             
@@ -428,65 +431,75 @@ int RemoveRareCommand::processList(){
 			//make a new list vector
 			ListVector newList;
 			newList.setLabel(list->getLabel());
-			
+
 			//for each bin
 			for (int i = 0; i < list->getNumBins(); i++) {
 				if (m->getControl_pressed()) {  if (groupfile != "") { delete groupMap; outGroup.close(); util.mothurRemove(outputGroupFileName); } out.close();  util.mothurRemove(outputFileName);  return 0; }
-				
+                
 				//parse out names that are in accnos file
 				string binnames = list->get(i);
 				vector<string> names;
-				string saveBinNames = binnames;
+                vector<string> newNames;
 				util.splitAtComma(binnames, names);
                 int binsize = names.size();
 				
 				vector<string> newGroupFile;
 				if (groupfile != "") {
-					vector<string> newNames;
-					saveBinNames = "";
 					for(int k = 0; k < names.size(); k++) {
 						string group = groupMap->getGroup(names[k]);
 						
-						if (util.inUsersGroups(group, Groups)) {
-							newGroupFile.push_back(names[k] + "\t" + group); 
-								
-							newNames.push_back(names[k]);	
-							saveBinNames += names[k] + ",";
-						}
+                        if (selectedGroups) {
+                            if (util.inUsersGroups(group, Groups)) {
+                                newGroupFile.push_back(names[k] + "\t" + group);
+                                newNames.push_back(names[k]);
+                            }
+                        }else {
+                            newGroupFile.push_back(names[k] + "\t" + group);
+                            newNames.push_back(names[k]);
+                        }
 					}
 					names = newNames; binsize = names.size();
-					saveBinNames = saveBinNames.substr(0, saveBinNames.length()-1);
 				}else if (countfile != "") {
-					saveBinNames = "";
                     binsize = 0;
 					for(int k = 0; k < names.size(); k++) {
                         if (ct.hasGroupInfo()) {
-                            vector<string> thisSeqsGroups = ct.getGroups(names[k]);
+                            if (selectedGroups) {
+                                vector<string> thisSeqsGroups = ct.getGroups(names[k]);
+                                vector<int> thisGroupCounts = ct.getGroupCounts(names[k]);
                             
-                            int thisSeqsCount = 0;
-                            for (int n = 0; n < thisSeqsGroups.size(); n++) {
-                                if (util.inUsersGroups(thisSeqsGroups[n], Groups)) {
-                                    thisSeqsCount += ct.getGroupCount(names[k], thisSeqsGroups[n]);
+                                int thisSeqsCount = 0;
+                                for (int n = 0; n < thisSeqsGroups.size(); n++) {
+                                    if (util.inUsersGroups(thisSeqsGroups[n], Groups)) {
+                                        thisSeqsCount += thisGroupCounts[n];
+                                    }
                                 }
+                                binsize += thisSeqsCount;
+                                //if you don't have any seqs from the groups the user wants, then remove you.
+                                if (thisSeqsCount == 0) { newGroupFile.push_back(names[k]); }
+                                else { newNames.push_back(names[k]); }
+                            }else { //all groups
+                                binsize += ct.getNumSeqs(names[k]);
+                                newNames.push_back(names[k]);
                             }
-                            binsize += thisSeqsCount;
-                            //if you don't have any seqs from the groups the user wants, then remove you.
-                            if (thisSeqsCount == 0) { newGroupFile.push_back(names[k]); }
-                            else { saveBinNames += names[k] + ","; }
                         }else {
                             binsize += ct.getNumSeqs(names[k]); 
-                            saveBinNames += names[k] + ",";
+                            newNames.push_back(names[k]);
                         }
 					}
-					saveBinNames = saveBinNames.substr(0, saveBinNames.length()-1);
                 }
 
 				if (binsize > nseqs) { //keep bin
+                    string saveBinNames = util.getStringFromVector(newNames, ",");
 					newList.push_back(saveBinNames);
                     newLabels.push_back(binLabels[i]);
 					if (groupfile != "") {  for(int k = 0; k < newGroupFile.size(); k++) { outGroup << newGroupFile[k] << endl; }  }
-                    else if (countfile != "") { for(int k = 0; k < newGroupFile.size(); k++) {  ct.remove(newGroupFile[k]); } }
-				}else {  if (countfile != "") {  for(int k = 0; k < names.size(); k++) {  ct.remove(names[k]); } }  }
+                    else if (countfile != "") {
+                        for(int k = 0; k < newNames.size(); k++) {
+                            vector<int> groupCounts = ct.getGroupCounts(newNames[k]);
+                            newCountTable.push_back(newNames[k], groupCounts);
+                        }
+                    }
+                }
 			}
 			
 			//print new listvector
@@ -500,14 +513,13 @@ int RemoveRareCommand::processList(){
 		out.close();
 		if (groupfile != "") { outGroup.close(); outputTypes["group"].push_back(outputGroupFileName); outputNames.push_back(outputGroupFileName); }
         if (countfile != "") { 
-            if (ct.hasGroupInfo()) {
-                vector<string> allGroups = ct.getNamesOfGroups();
+            if (newCountTable.hasGroupInfo()) {
+                vector<string> allGroups = newCountTable.getNamesOfGroups();
                 for (int i = 0; i < allGroups.size(); i++) {
-                    if (!util.inUsersGroups(allGroups[i], Groups)) { ct.removeGroup(allGroups[i]); }
+                    if (!util.inUsersGroups(allGroups[i], Groups)) { newCountTable.removeGroup(allGroups[i]); }
                 }
-
             }
-            ct.printTable(outputCountFileName);
+            newCountTable.printTable(outputCountFileName, true);
             outputTypes["count"].push_back(outputCountFileName); outputNames.push_back(outputCountFileName); 
         }
 		

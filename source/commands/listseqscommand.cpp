@@ -349,7 +349,7 @@ int ListSeqsCommand::readFasta(){
 			if (name != "") {  names.push_back(name);  }
 			
 			util.gobble(in);
-            m->mothurOut("[WARNING]: count = " + toString(count) + ", name = " + currSeq.getName() + "\n");
+           
 			if (m->getDebug()) { count++; m->mothurOut("[DEBUG]: count = " + toString(count) + ", name = " + currSeq.getName() + "\n"); }
 		}
 		in.close();
