@@ -1099,10 +1099,8 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(string& composi
         util.openOutputFile(compositeMisMatchFile, outCMisMatch); outCMisMatch.close(); outputNames.push_back(compositeMisMatchFile); outputTypes["report"].push_back(compositeMisMatchFile);
         
         if (gz) {
-            cout << "gz is true running createPrcessesGroups\n";
             numReads = createProcessesGroups(fileInputs, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, file2Group);
         }else {
-            cout << "gz is false running processSingleFileOption\n";
             for (int l = 0; l < fileInputs.size(); l++) {
                 if (m->getControl_pressed()) { break; }
 
@@ -1706,7 +1704,6 @@ void driverContigs(contigsData* params){
         boost::iostreams::filtering_istream inFF, inRF, inFQ, inRQ;
 #endif
         if (!params->gz) { //plain text files
-            cout << "params say no gz\n";
             params->util.openInputFile(thisffastafile, inFFasta);
             params->util.openInputFile(thisrfastafile, inRFasta);
 
@@ -1717,7 +1714,6 @@ void driverContigs(contigsData* params){
             params->util.openInputFileBinary(thisffastafile, inFFasta, inFF);
             params->util.openInputFileBinary(thisrfastafile, inRFasta, inRF);
 #endif
-            cout << "params say yes gz\n";
         }
 
         ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
@@ -2182,7 +2178,6 @@ void driverContigsGroups(groupContigsData* gparams) {
             //test to make sure you can read the gz files
             bool readable = testGZReadable(theseFileInputs, theseQIInputs, decompressionHelped, gparams->bundle->format, gparams->bundle->m);
                 
-            cout << readable << '\t' << decompressionHelped << '\t' << gparams->bundle->gz << endl;
             if (readable) {
                 if (decompressionHelped) { gparams->bundle->gz = false; }
             }else {

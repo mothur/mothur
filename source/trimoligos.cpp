@@ -387,7 +387,7 @@ string TrimOligos::getCodeValue(int code, int diffs){
         else if (code == (diffs+10000))     { value = "multipleMatches"; }
         else if (code == MOTHURMAX)               { value = "noMatch"; }
         else if (code == (diffs+1000))      { value = "shortSeq"; }
-        //cout << code << '\t' << value << endl;
+        
         return value;
     }
     catch(exception& e) {

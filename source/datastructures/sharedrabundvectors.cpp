@@ -561,9 +561,6 @@ vector<SharedRAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
             if (m->getControl_pressed()) { return newLookup; }
             SharedRAbundVector* temp = new SharedRAbundVector(*lookup[i]);
             newLookup.push_back(temp);
-            if (temp->getNumBins() != numBins) {
-                cout << temp->getGroup() << '\t' << temp->getNumBins() << '\t' << lookup[i]->getNumBins() << '\t' << numBins << endl;
-            }
         }
         
         return newLookup;

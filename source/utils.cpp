@@ -834,7 +834,7 @@ vector<bool> Utils::isGZ(string filename){
         ifstream fileHandle;
         boost::iostreams::filtering_istream gzin;
 
-        if (getExtension(filename) != ".gz") { return results; } // results[0] = false; results[1] = false;
+        if ((getExtension(filename) != ".gz") && (getExtension(filename) != ".GZ")) { return results; } // results[0] = false; results[1] = false;
 
         bool ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
         if (!ableToOpen) { return results; } // results[0] = false; results[1] = false;

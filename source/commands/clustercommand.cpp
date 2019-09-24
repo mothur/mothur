@@ -751,7 +751,6 @@ int ClusterCommand::runMothurCluster(){
             
             float dist = matrix->getSmallDist();
             float rndDist = util.ceilDist(dist, precision);
-            //cout << loops << '\t' << dist << '\t' << oldList.getNumBins() << '\t' << matrix->getNNodes() << endl; loops++;
             
             if(previousDist <= 0.0000 && !util.isEqual(dist, previousDist))  {  printData("unique", counts, printHeaders);                               }
             else if(!util.isEqual(rndDist, rndPreviousDist))                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }

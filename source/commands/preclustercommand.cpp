@@ -1313,7 +1313,7 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.");
         start = time(NULL);
-        //cout << newname << endl;
+        
         ct.printTable(newcount);
         util.mothurRemove(newname);
         

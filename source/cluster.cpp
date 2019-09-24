@@ -65,8 +65,6 @@ bool Cluster::update(double& cutOFF){
         
 		vector<int> foundCol(nColCells, 0);
         
-        //cout << "smallest row / col = " << smallRow << '\t' << smallCol  << '\t' << "numRowCells = " << nRowCells << " numColCells = " << nColCells << endl;
-        
 		int search;
 		bool changed = false;
         

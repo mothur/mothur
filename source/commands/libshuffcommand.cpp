@@ -349,7 +349,6 @@ int LibShuffCommand::printCoverageFile() {
 		util.openOutputFile(summaryFile, outCov);
 		outputNames.push_back(summaryFile); outputTypes["coverage"].push_back(summaryFile);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
-		//cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
 		map<double,vector<int> > allDistances;
 		map<double,vector<int> >::iterator it;

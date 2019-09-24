@@ -160,11 +160,7 @@ int RandomForest::calcForrestVariableImportance(string filename) {
             }
         }
         
-//        for (int i = 0; i < globalVariableRanks.size(); i++) {
-//            cout << m->currentBinLabels[(int)globalVariableRanks[i][0]] << '\t' << globalVariableImportanceList[globalVariableRanks[i][0]] << endl;
-//        }
 
-        
         VariableRankDescendingSorterDouble variableRankDescendingSorter;
         sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
         
@@ -258,7 +254,7 @@ int RandomForest::populateDecisionTrees() {
         double avgErrorRateImprovement = -1.0;
         if (errorRateImprovements.size() > 0) {
             avgErrorRateImprovement = accumulate(errorRateImprovements.begin(), errorRateImprovements.end(), 0.0);
-//            cout << "Total " << avgErrorRateImprovement << " size " << errorRateImprovements.size() << endl;
+
             avgErrorRateImprovement /= errorRateImprovements.size();
         }
         
