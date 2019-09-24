@@ -257,21 +257,6 @@ void FileFile::setGZ(string forward, string reverse, string findex, string rinde
         }
 #else
         allGZ=false;
-#if defined NON_WINDOWS
-#else
-        string extension = util.getExtension(forward);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        extension = util.getExtension(reverse);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        if ((findex != "") && (findex != "NONE")) {
-            extension = util.getExtension(findex);
-            if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        }
-        if ((rindex != "") && (rindex != "NONE")) {
-            extension = util.getExtension(rindex);
-            if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        }
-#endif
 #endif
         
     }

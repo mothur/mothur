@@ -726,23 +726,6 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
             }
         }
 #else
-        #if defined NON_WINDOWS
-        #else
-        string extension = util.getExtension(fileInputs[0]);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        extension = util.getExtension(fileInputs[1]);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        if (qualOrIndexInputs.size() != 0) {
-            if (qualOrIndexInputs[0] != "NONE") {
-                extension = util.getExtension(qualOrIndexInputs[0]);
-                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-            }
-            if (qualOrIndexInputs[1] != "NONE") {
-                extension = util.getExtension(qualOrIndexInputs[1]);
-                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-            }
-        }
-        #endif
         allGZ = false;
 #endif
         bool decompressionHelped = false;
@@ -1114,10 +1097,12 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(string& composi
         util.openOutputFile(compositeScrapFastaFile, outCSFasta); outCSFasta.close(); outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
         
         util.openOutputFile(compositeMisMatchFile, outCMisMatch); outCMisMatch.close(); outputNames.push_back(compositeMisMatchFile); outputTypes["report"].push_back(compositeMisMatchFile);
-
+        
         if (gz) {
+            cout << "gz is true running createPrcessesGroups\n";
             numReads = createProcessesGroups(fileInputs, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, file2Group);
         }else {
+            cout << "gz is false running processSingleFileOption\n";
             for (int l = 0; l < fileInputs.size(); l++) {
                 if (m->getControl_pressed()) { break; }
 
@@ -1721,6 +1706,7 @@ void driverContigs(contigsData* params){
         boost::iostreams::filtering_istream inFF, inRF, inFQ, inRQ;
 #endif
         if (!params->gz) { //plain text files
+            cout << "params say no gz\n";
             params->util.openInputFile(thisffastafile, inFFasta);
             params->util.openInputFile(thisrfastafile, inRFasta);
 
@@ -1731,6 +1717,7 @@ void driverContigs(contigsData* params){
             params->util.openInputFileBinary(thisffastafile, inFFasta, inFF);
             params->util.openInputFileBinary(thisrfastafile, inRFasta, inRF);
 #endif
+            cout << "params say yes gz\n";
         }
 
         ofstream outFasta, outMisMatch, outScrapFasta, outQual, outScrapQual;
@@ -1973,17 +1960,17 @@ void driverContigs(contigsData* params){
                 double pos = inFFasta.tellg();
                 if (params->util.isEqual(pos,-1) || (pos >= params->linesInput.end)) { good = false; break; }
             }else {
-#ifdef USE_BOOST
+    #ifdef USE_BOOST
                 if (inFF.eof() || inRF.eof()) { good = false; break; }
-#endif
+    #endif
             }
 #else
             if (!params->gz) {
                 if (params->count >= params->linesInput.end) { good = false; break; }
             }else {
-#ifdef USE_BOOST
+    #ifdef USE_BOOST
                 if (inFF.eof() || inRF.eof()) { good = false; break; }
-#endif
+    #endif
             }
 #endif
 
@@ -2195,6 +2182,7 @@ void driverContigsGroups(groupContigsData* gparams) {
             //test to make sure you can read the gz files
             bool readable = testGZReadable(theseFileInputs, theseQIInputs, decompressionHelped, gparams->bundle->format, gparams->bundle->m);
                 
+            cout << readable << '\t' << decompressionHelped << '\t' << gparams->bundle->gz << endl;
             if (readable) {
                 if (decompressionHelped) { gparams->bundle->gz = false; }
             }else {

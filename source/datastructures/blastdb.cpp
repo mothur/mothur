@@ -154,7 +154,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
 			blastCommand += (" -i " + (queryFileName+pid) + " -o " + blastFileName+pid);
 		#else
 			blastCommand =  "\"" + path + "blastall\" -p blastn -d " + "\"" + dbFileName + "\"" + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
-			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+pid) + " -o " + blastFileName+pid);
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
 		#endif
@@ -200,10 +200,9 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		
 		
 		ofstream queryFile;
-		int randNumber = util.getRandomNumber();
 		string pid = scrubName(seq->getName());
 		
-        Utils util; util.openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
+        Utils util; util.openOutputFile((queryFileName+pid), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -215,13 +214,10 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		string blastCommand;
 		#if defined NON_WINDOWS
 			blastCommand = path + "megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+pid) + " -o " + blastFileName+pid);
 		#else
-		//blastCommand = path + "blast\\bin\\megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-		//blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
-
 			blastCommand =  "\"" + path + "megablast\" -e 1e-10 -d " + "\"" + dbFileName + "\"" + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+pid) + " -o " + blastFileName+pid);
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
 
@@ -229,7 +225,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		system(blastCommand.c_str());
 
 		ifstream m8FileHandle;
-		util.openInputFile(blastFileName+pid+toString(randNumber), m8FileHandle, "no error");
+		util.openInputFile(blastFileName+pid, m8FileHandle, "no error");
 	
 		string dummy, eScore;
 		int templateAccession;
@@ -246,8 +242,8 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 
 		}
 		m8FileHandle.close();
-		util.mothurRemove((queryFileName+pid+toString(randNumber)));
-		util.mothurRemove((blastFileName+pid+toString(randNumber)));
+		util.mothurRemove((queryFileName+pid));
+		util.mothurRemove((blastFileName+pid));
 		
 		return topMatches;
 	}
