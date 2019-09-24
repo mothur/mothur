@@ -878,7 +878,7 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
         long long numSeqs;
-        vector<unsigned long long> positions = util.setFilePosFasta(fastafile, numSeqs);
+        vector<double> positions = util.setFilePosFasta(fastafile, numSeqs);
         if (numSeqs < processors) { processors = numSeqs; m->mothurOut("Reducing processors to " + toString(numSeqs) + ".\n");  }
         
         //figure out how many sequences you have to process
