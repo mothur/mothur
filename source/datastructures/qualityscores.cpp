@@ -412,7 +412,7 @@ bool QualityScores::stripQualThreshold(Sequence& sequence, double qThreshold){
 			m->mothurOutEndLine();	m->setControl_pressed(true);
 		}
 
-		int end;
+		int end = 0;
 		for(int i=0;i<seqLength;i++){
 			end = i;
 			if(qScores[i] < qThreshold){

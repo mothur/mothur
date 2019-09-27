@@ -478,9 +478,9 @@ int ClusterCommand::runVsearchCluster(){
         if ((namefile == "") && (countfile == ""))  { vParse = new VsearchFileParser(fastafile);                        }
         else if (namefile != "")                    { vParse = new VsearchFileParser(fastafile, namefile, "name");      }
         else if (countfile != "")                   { vParse = new VsearchFileParser(fastafile, countfile, "count");    }
-        else                                        { m->mothurOut("[ERROR]: Opps, should never get here. ClusterCommand::runVsearchCluster() \n"); m->setControl_pressed(true); }
+        else                                        { m->mothurOut("[ERROR]: Opps, should never get here. ClusterCommand::runVsearchCluster() \n"); m->setControl_pressed(true); return 0; }
     
-        if (m->getControl_pressed()) {  return 0; }
+        if (m->getControl_pressed()) {  delete vParse; return 0; }
         
         vsearchFastafile = vParse->getVsearchFile();
         
@@ -659,6 +659,7 @@ int ClusterCommand::runMothurCluster(){
         ReadMatrix* read;
         if (format == "column") { read = new ReadColumnMatrix(columnfile, sim); }	//sim indicates whether its a similarity matrix
         else if (format == "phylip") { read = new ReadPhylipMatrix(phylipfile, sim); }
+        else { m->setControl_pressed(true); return 0; }
         
         read->setCutoff(cutoff);
         
@@ -750,7 +751,6 @@ int ClusterCommand::runMothurCluster(){
             
             float dist = matrix->getSmallDist();
             float rndDist = util.ceilDist(dist, precision);
-            //cout << loops << '\t' << dist << '\t' << oldList.getNumBins() << '\t' << matrix->getNNodes() << endl; loops++;
             
             if(previousDist <= 0.0000 && !util.isEqual(dist, previousDist))  {  printData("unique", counts, printHeaders);                               }
             else if(!util.isEqual(rndDist, rndPreviousDist))                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
@@ -877,6 +877,7 @@ int ClusterCommand::runOptiCluster(){
         else if (metricName == "npv")        { metric = new NPV();              }
         else if (metricName == "fdr")        { metric = new FDR();              }
         else if (metricName == "fpfn")       { metric = new FPFN();             }
+        else { return 0; }
 
         string nameOrCount = "";
         string thisNamefile = "";
@@ -931,7 +932,7 @@ int ClusterCommand::runOptiCluster(){
             cluster.initialize(listVectorMetric, true, initialize);
             
             long long numBins = cluster.getNumBins();
-                        long long tp, tn, fp, fn;
+            double tp, tn, fp, fn;
             vector<double> results = cluster.getStats(tp, tn, fp, fn);
             m->mothurOut("0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(cutoff) + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
             outStep << "0\t0\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t" << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';

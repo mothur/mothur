@@ -330,7 +330,7 @@ long long Summary::summarizeFasta(string fastafile, string output) {
     try {
         long long num = 0;
         vector<linePair> lines;
-        vector<unsigned long long> positions;
+        vector<double> positions;
 #if defined NON_WINDOWS
         positions = util.divideFile(fastafile, processors);
         for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	 }
@@ -542,7 +542,7 @@ void driverFastaSummarySummarize(seqSumData* params) {
 long long Summary::summarizeFastaSummary(string summaryfile) {
     try {
         long long num = 0;
-        vector<unsigned long long> positions;
+        vector<double> positions;
         vector<linePair> lines;
 #if defined NON_WINDOWS
         positions = util.divideFilePerLine(summaryfile, processors);
@@ -735,7 +735,7 @@ void driverContigsSummarySummarize(seqSumData* params) {
 long long Summary::summarizeContigsSummary(string summaryfile) {
     try {
         long long num = 0;
-        vector<unsigned long long> positions;
+        vector<double> positions;
         vector<linePair> lines;
 #if defined NON_WINDOWS
         positions = util.divideFilePerLine(summaryfile, processors);
@@ -931,7 +931,7 @@ void driverAlignSummarySummarize(seqSumData* params) {
 long long Summary::summarizeAlignSummary(string summaryfile) {
     try {
         long long num = 0;
-        vector<unsigned long long> positions;
+        vector<double> positions;
         vector<linePair> lines;
 #if defined NON_WINDOWS
         positions = util.divideFilePerLine(summaryfile, processors);

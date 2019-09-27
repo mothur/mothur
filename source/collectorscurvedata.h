@@ -16,11 +16,11 @@ public:
 	
 	void registerDisplay(Display* o)            {	displays.insert(o);				}
     void registerDisplays(vector<Display*> o)	{	for(int i=0;i<o.size();i++){ registerDisplay(o[i]); 	} }
-	void updateRankData(SAbundVector* rv)       {	rank = rv; for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){ (*pos)->update(rank); }	}
+	void updateRankData(SAbundVector& rv)       {	rank = rv; for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){ (*pos)->update(rank); }	}
 	
 private:
 	set<Display*> displays;
-	SAbundVector* rank;
+	SAbundVector rank;
 	
 };
 
@@ -32,40 +32,42 @@ class SharedCollectorsCurveData : public Observable {
 public:
 	SharedCollectorsCurveData() {}
 	
-	void registerDisplay(Display* o)		{	displays.insert(o);			}
-    void registerDisplays(vector<Display*> o)	{	for(int i=0;i<o.size();i++){ registerDisplay(o[i]); 	} }
+	void registerDisplay(Display* o)		    {	displays.insert(o);			                       }
+    void registerDisplays(vector<Display*> o)	{	for(int i=0;i<o.size();i++){ displays.insert(o[i]); } }
     
-    void updateSharedData(vector<SharedRAbundVector*> s, int numSeqs, int numGroupComb, bool p, vector<string> g)	{
-        pairs = p; shared = s; NumSeqs = numSeqs; NumGroupComb = numGroupComb; groups = g;
-        SharedDataChanged();
+    void updateSharedData(vector<SharedRAbundVector*>& shared, int numSeqs, map<string, int>& groupComboToColumn)	{
+        
+       
+        for (int k = 0; k < (shared.size() - 1); k++) { // pass cdd each set of groups to commpare
+            for (int l = k+1; l < shared.size(); l++) {
+                
+                for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){
+                    vector<SharedRAbundVector*> subset;
+                    //add new pair of sharedrabund vectors
+                    subset.push_back(shared[k]); subset.push_back(shared[l]);
+                    if ((*pos)->calcNeedsAll()) {
+                        //load subset with rest of lookup for those calcs that need everyone to calc for a pair
+                        for (int w = 0; w < shared.size(); w++) {
+                            if ((w != k) && (w != l)) { subset.push_back(shared[w]); }
+                        }
+                        (*pos)->update(subset, numSeqs, true, groupComboToColumn);
+                    }else {
+                        (*pos)->update(subset, numSeqs, true, groupComboToColumn);
+                    }
+                }
+            }
+        }
+        
+        //if this is a calculator that can do multiples then do them
+        for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){
+            if ((*pos)->isCalcMultiple() && (*pos)->getAll()) {
+                (*pos)->update(shared, numSeqs, false, groupComboToColumn);
+            }
+        }
     }
 	
 private:
 	set<Display*> displays;
-	vector<Display*> multiDisplays;
-	vector<SharedRAbundVector*> shared;
-    vector<string> groups;
-	int NumSeqs, NumGroupComb;
-	bool pairs;
-    
-    
-    void SharedDataChanged()				{
-        for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){
-            
-            if ((*pos)->calcNeedsAll() ) {  (*pos)->update(shared, NumSeqs, NumGroupComb, groups);  }
-            else{
-                
-                if ( ((*pos)->isCalcMultiple() ) && ((*pos)->getAll() ) && (!pairs) ) { (*pos)->update(shared, NumSeqs, NumGroupComb, groups); }
-                else {
-                    vector<SharedRAbundVector*> temp; temp.push_back(shared[0]); temp.push_back(shared[1]);
-                    shared = temp;
-                    
-                    (*pos)->update(shared, NumSeqs, NumGroupComb, groups);
-                }
-            }
-        }
-    }
-
 };
 
 /***********************************************************************/

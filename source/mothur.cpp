@@ -25,9 +25,9 @@ void ctrlc_handler ( int sig ) {
 	m->setControl_pressed(ctrlc_pressed);
 	
 	if (m->getExecuting()) { //if mid command quit execution, else quit mothur
-		m->mothurOutEndLine(); m->mothurOut("quitting command...");  m->mothurOutEndLine();
+        m->mothurOut("\nquitting command...\n");
 	}else{
-		m->mothurOut("quitting mothur");  m->mothurOutEndLine();
+		m->mothurOut("quitting mothur\n");
 		exit(1);
 	}
 }

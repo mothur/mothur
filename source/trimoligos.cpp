@@ -227,7 +227,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
                         
                         string oligo = it->first;
                         
-                        if (m->getControl_pressed()) { primerStart = 0; primerEnd = 0; return success; }
+                        if (m->getControl_pressed()) { delete alignment; primerStart = 0; primerEnd = 0; return success; }
                         
                         string rawChunk = rawSequence.substr(j, olength+pdiffs);
                         
@@ -387,7 +387,7 @@ string TrimOligos::getCodeValue(int code, int diffs){
         else if (code == (diffs+10000))     { value = "multipleMatches"; }
         else if (code == MOTHURMAX)               { value = "noMatch"; }
         else if (code == (diffs+1000))      { value = "shortSeq"; }
-        //cout << code << '\t' << value << endl;
+        
         return value;
     }
     catch(exception& e) {

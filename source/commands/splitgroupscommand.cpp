@@ -419,10 +419,11 @@ int SplitGroupCommand::runNameGroup(){
             m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
             
             Command* getCommand = new GetSeqsCommand(inputString);
+            current->setMothurCalling(true);
             getCommand->execute();
             
             map<string, vector<string> > filenames = getCommand->getOutputFiles();
-            
+            current->setMothurCalling(true);
             delete getCommand;
             
             if (fastafile != "") {
@@ -512,10 +513,12 @@ int SplitGroupCommand::runCount(){
             m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
             
             Command* getCommand = new GetSeqsCommand(inputString);
+            current->setMothurCalling(true);
             getCommand->execute();
             
             map<string, vector<string> > filenames = getCommand->getOutputFiles();
             
+            current->setMothurCalling(false);
             delete getCommand;
             
             if (fastafile != "") {

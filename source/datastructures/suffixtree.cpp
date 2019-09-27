@@ -127,7 +127,7 @@ int SuffixTree::countSuffixes(string compareSequence, int& minValue){	//	here we
 }
 //********************************************************************************************************************
 
-int SuffixTree::countSuffixes(string compareSequence){	//	here we count the number of suffix parts 
+int SuffixTree::countSuffixes(string compareSequence) const{	//	here we count the number of suffix parts
 															//	we need to rewrite a user supplied sequence.  if the 
 	int numSuffixes = 0;									//	count exceeds the supplied minValue, bail out.  The
 	int seqLength = compareSequence.length();				//	time complexity should be O(L)

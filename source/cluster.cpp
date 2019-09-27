@@ -65,10 +65,8 @@ bool Cluster::update(double& cutOFF){
         
 		vector<int> foundCol(nColCells, 0);
         
-        //cout << "smallest row / col = " << smallRow << '\t' << smallCol  << '\t' << "numRowCells = " << nRowCells << " numColCells = " << nColCells << endl;
-        
 		int search;
-		bool changed;
+		bool changed = false;
         
 		for (int i=nRowCells-1;i>=0;i--) {  //matrix indexes sorted from largest to smallest, so start at smallest index
             if (m->getControl_pressed()) { break; }

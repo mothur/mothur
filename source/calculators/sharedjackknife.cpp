@@ -152,7 +152,8 @@ EstOutput SharedJackknife::getValues(vector<SharedRAbundVector*> vectorShared){ 
 			data[0] = rdata[0];
 			data[1] = rdata[1];
 			data[2] = rdata[2];
-		
+            delete[] rdata;
+            
 			if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 			if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
 			if (isnan(data[2]) || isinf(data[0])) { data[2] = 0; }

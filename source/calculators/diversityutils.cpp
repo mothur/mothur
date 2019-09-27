@@ -918,8 +918,6 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             double increment = factor / (double)(fitIters);
             sigmaA -= (increment*(fitIters/(double)2.0));
         }else { //good high and low
-            double increment = factor / (double)(fitIters);
-            sigmaA -= (increment*(fitIters/(double)2.0));
             factor /= (double) fitIters;
         }
 

@@ -35,7 +35,7 @@ public:
 	
 private:
 
-    vector< vector<unsigned long long> >  savedPositions;
+    vector< vector<double> >  savedPositions;
 
 	string vertical, filter, fasta, hard, outputDir, filterFileName;
 	vector<string> fastafileNames;	

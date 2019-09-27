@@ -34,7 +34,7 @@ ClusterClassic::ClusterClassic(float c, string f, bool s) : method(f),  nseqs(0)
 int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 	try {
 		double distance;
-		int square;
+		bool square;
 		string name;
 		vector<string> matrixNames;
 		
@@ -67,7 +67,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		while((d=fileHandle.get()) != EOF){
 
 				if(isalnum(d)){
-						square = 1;
+						square = true;
 						fileHandle.putback(d);
 						for(int i=0;i<nseqs;i++){
 								fileHandle >> distance;
@@ -75,14 +75,14 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 						break;
 				}
 				if(d == '\n'){
-						square = 0;
+						square = false;
 						break;
 				}
 		}
 
 		
 
-		if(square == 0){
+		if(!square){
 
 
 				int        index = 0;
@@ -220,7 +220,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
 	try {
 		double distance;
-		int square;
+		bool square;
 		string name;
 		vector<string> matrixNames;
 		
@@ -255,7 +255,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
 		while((d=fileHandle.get()) != EOF){
             
             if(isalnum(d)){
-                square = 1;
+                square = true;
                 fileHandle.putback(d);
                 for(int i=0;i<nseqs;i++){
                     fileHandle >> distance;
@@ -263,14 +263,14 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                 break;
             }
             if(d == '\n'){
-                square = 0;
+                square = false;
                 break;
             }
 		}
         
 		
         
-		if(square == 0){
+		if(!square){
             
             
             int        index = 0;
@@ -424,13 +424,10 @@ double ClusterClassic::getSmallCell() {
 					mins.clear();
 					colDist temp(i, j, dMatrix[i][j]);
 					mins.push_back(temp);
-                    //cout << "adding " << i << '\t' << j << " to mins\n";
 					smallDist = dMatrix[i][j];
 				}else if (dMatrix[i][j] == smallDist) {
 					colDist temp(i, j, dMatrix[i][j]);
 					mins.push_back(temp);
-                    //cout << "adding " << i << '\t' << j << " to mins\n";
-
 				}
 			}
 		}
@@ -441,8 +438,6 @@ double ClusterClassic::getSmallCell() {
             smallRow = mins[0].row;
             smallCol = mins[0].col;
         }
-        
-        //cout << "num mins = " << mins.size() << endl;
         
 		//eliminate smallCell
 		if (smallRow < smallCol) { dMatrix[smallCol][smallRow] = aboveCutoff; }
@@ -490,9 +485,7 @@ void ClusterClassic::update(double& cutOFF){
 		
 		int r, c;
 		r = smallRow; c = smallCol;
-        
-        //cout << "smallest row / col = " << smallRow << '\t' << smallCol << endl;
-				
+        				
 		for(int i=0;i<nseqs;i++){
 			if(i != r && i != c){
 				double distRow, distCol, newDist;

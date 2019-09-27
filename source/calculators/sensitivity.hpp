@@ -17,7 +17,7 @@ class Sensitivity : public ClusterMetric  {
     
 public:
     Sensitivity() : ClusterMetric("sens") {};
-    double getValue( long long tp,  long long tn,  long long fp,  long long fn); //ignores tn, fp
+    double getValue(double tp,  double tn,  double fp,  double fn); //ignores tn, fp
     string getCitation() { return "http://www.mothur.org/wiki/Sensitivity"; }
     
 private:

@@ -275,8 +275,6 @@ int ClusterDoturCommand::execute(){
 			float dist = cluster->getSmallDist();
 			float rndDist = util.ceilDist(dist, precision);
             
-            //cout << loop << '\t' << dist << '\t' << oldList.getNumBins() << endl; loop++;
-
 			if(previousDist <= 0.0000 && dist != previousDist)  { printData("unique", counts, printHeaders);                                }
 			else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
 		

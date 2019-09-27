@@ -87,7 +87,7 @@ RAbundFloatVector::RAbundFloatVector(ifstream& f, string l, string g) : DataVect
     try {
         int hold;
         label = l;
-        f >> numBins;
+        f >> hold;
         
         float inputData;
         for(int i=0;i<hold;i++){

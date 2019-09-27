@@ -182,7 +182,6 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
             
             if ((file == "") && (fastaQFile == "")) {  m->mothurOut("You must provide a file or fastq option.\n"); abort = true;  }
 
-            
             oligosfile = validParameter.validFile(parameters, "oligos");
 			if (oligosfile == "not found") {	oligosfile = "";	}
 			else if (oligosfile == "not open")	{	oligosfile = ""; abort = true;	}
@@ -274,14 +273,82 @@ int ParseFastaQCommand::execute(){
             
             inputFile = file;
             
-            if (m->getControl_pressed()) { return 0; }
+            if (m->getControl_pressed()) {
+                if (groupfile != "")        { delete groupMap;      }
+                if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
+                return 0;
+            }
+            
+            //groupfile name for pacbio with option 2
+            map<string, string> variables;
+            variables["[filename]"] = util.getRootName(file);
+            string pacbioGroupFileName = getOutputFileName("group", variables);
+            string pacbioFastaFileName = getOutputFileName("fasta", variables);
+            string pacbioQualFileName = getOutputFileName("qfile", variables);
+            if ((fileOption == 2) && pacbio) {
+                ofstream temppb; util.openOutputFile(pacbioGroupFileName, temppb);
+                temppb.close();
+                outputNames.push_back(pacbioGroupFileName); outputTypes["group"].push_back(pacbioGroupFileName);
+                
+                if (fasta) {
+                    ofstream temppbf; util.openOutputFile(pacbioFastaFileName, temppbf);
+                    temppbf.close();
+                    outputNames.push_back(pacbioFastaFileName); outputTypes["fasta"].push_back(pacbioFastaFileName);
+                }
+                
+                if (qual) {
+                    ofstream temppbq; util.openOutputFile(pacbioQualFileName, temppbq);
+                    temppbq.close();
+                    outputNames.push_back(pacbioQualFileName); outputTypes["qfile"].push_back(pacbioQualFileName);
+                }
+                
+            } //clear old file for append
             
             for (int i = 0; i < files.size(); i++) { //process each pair
                 
                 if (m->getControl_pressed()) { break; }
                 
-                if ((fileOption == 2) || (fileOption == 4))  {  processFile(files[i], trimOligos, rtrimOligos);  } //2 column and 4 column format file file
-                else if (fileOption == 3) { //3 column file option with sample names
+                if (((fileOption == 2) || (fileOption == 4)) && !pacbio)  { //2 column and 4 column format file file
+                    processFile(files[i], trimOligos, rtrimOligos);
+                }else if ((fileOption == 2) && pacbio)  { //pacbio with group filename option
+                    split = 1;
+                    
+                    if (current->getMothurCalling()) {
+                        //add group names to fastq files and make copies - for sra command parse
+                        ofstream temp;
+                        map<string, string> variables;
+                        variables["[filename]"] = util.getRootName(files[i][0]);
+                        variables["[group]"] = file2Group[i];
+                        variables["[tag]"] = "";
+                        string newfqFile = getOutputFileName("fastq", variables);
+                        util.openOutputFile(newfqFile, temp);        temp.close();
+                        util.appendFiles(files[i][0], newfqFile);
+                        outputNames.push_back(newfqFile); outputTypes["fastq"].push_back(newfqFile);
+                    }
+                    
+                    inputFile = files[i][0];
+                    
+                    //process each file to create fasta and qual files
+                    set<string> seqNames;
+                    if (fasta || qual) {  seqNames = processFile(inputFile, trimOligos, rtrimOligos); }  //split = 1, so no parsing by group will be done.
+                    
+                    if (seqNames.size() != 0) {
+                        ofstream outGroupPacBio; util.openOutputFileAppend(pacbioGroupFileName, outGroupPacBio);
+                        string pacbioGroup = file2Group[i];
+                        for (set<string>::iterator it = seqNames.begin(); it != seqNames.end(); it++) {
+                            outGroupPacBio << *it << '\t' << pacbioGroup << endl;
+                        }
+                        outGroupPacBio.close();
+                        groupCounts[pacbioGroup] = seqNames.size();
+                        
+                        map<string, string> variables;
+                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFile));
+                        string fastaFile = getOutputFileName("fasta",variables);
+                        string qualFile = getOutputFileName("qfile",variables);
+                        if (fasta) { util.appendFiles(fastaFile, pacbioFastaFileName); }
+                        if (qual)  { util.appendFiles(qualFile, pacbioQualFileName);   }
+                    }
+                }else if (fileOption == 3) { //3 column file option with sample names
                     if (current->getMothurCalling()) {
                         //add group names to fastq files and make copies - for sra command parse
                         ofstream temp, temp2;
@@ -374,16 +441,16 @@ int ParseFastaQCommand::execute(){
                     }
                 }
             }
-            
-            //output group counts
-            int total = 0;
-            if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
-            for (map<string, long long>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
-            if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
         }
 
+        //output group counts
+        int total = 0;
+        if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
+        for (map<string, long long>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
+        if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
+        
         if (groupfile != "")        { delete groupMap;      }
-        else if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
+        if (oligosfile != "")  { delete trimOligos; if (reorient) { delete rtrimOligos; }   }
         
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  outputTypes.clear(); outputNames.clear();  return 0; }
@@ -572,7 +639,7 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
                     if (oligosfile != "") {
                         QualityScores tempF = thisfRead.getQuality();
                         QualityScores tempR = thisrRead.getQuality();
-                        if ((files[2] != "") || (files[3] != "")) {
+                        if ((files[2] != "") || (files[3] != "")) { //has index files
                             //barcode already removed so no need to reset sequence to trimmed version
                             trashCodeLength = findGroup(findexBarcode, tempF, rindexBarcode, tempR, thisGroup, trimOligos, rtrimOligos, numBarcodes, numPrimers);
                         }else {
@@ -663,7 +730,7 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
 	}
 }
 //**********************************************************************************************************************
-int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos){
+set<string> ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos){
     try {
         //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
         for (int i = -64; i < 65; i++) {
@@ -686,6 +753,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
         util.openInputFile(inputfile, in);
         
         int count = 0;
+        set<string> names;
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
@@ -702,6 +770,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                     
                     for (int i = 0; i < qual.size(); i++) { if (qual[i] == 0){ seq[i] = 'N'; } }
                     thisRead.setSeq(seq);
+                    names.insert(thisRead.getName());
                 }
                 
                 FastqRead copy = thisRead;
@@ -712,7 +781,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
                 if (m->getControl_pressed()) { break; }
                 
                 if (split > 1) {
-                    int trashCodeLength; string thisGroup = "ignore";
+                    int trashCodeLength = 0; string thisGroup = "ignore";
                     if (oligosfile != "")      {
                         Sequence tempSeq = thisRead.getSequence();
                         QualityScores tempQual = thisRead.getQuality();
@@ -775,7 +844,7 @@ int ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimOligos, T
         //report progress
         if (!m->getControl_pressed()){   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
         
-        return 0;
+        return names;
     }
 	catch(exception& e) {
 		m->errorOut(e, "ParseFastaQCommand", "processFile");
@@ -1012,16 +1081,18 @@ int ParseFastaQCommand::findGroup(Sequence& fcurrSeq, QualityScores& fcurrQual, 
 // forward.fastq reverse.fastq forward.index.fastq  none  -> 4 column
 vector< vector<string> > ParseFastaQCommand::readFile(){
 	try {
+        string mode = "parseFastq";
+        if (pacbio) { mode = "parsefastqpacbio"; } //reads 2 column option as group filename
         
-        FileFile dataFile(inputfile, "parseFastq");
-        vector< vector<string> > files = dataFile.getFiles();
+        FileFile dataFile(inputfile, mode);
+        vector< vector<string> > files = dataFile.getFiles(); //if pacbio 2 columns, files[x][0] = filename, files[x][1] = "", files[x][2] = "", files[x][3] = "",
         file2Group = dataFile.getFile2Group();
-        createFileGroup = dataFile.is3ColumnWithGroupNames();
+        createFileGroup = dataFile.isColumnWithGroupNames();
         hasIndex = dataFile.containsIndexFiles();
         int dataFileFormat = dataFile.getFileFormat();
         if (hasIndex && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->setControl_pressed(true);  }
-        
         if ((oligosfile != "") && (dataFileFormat == 2)) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
+        if ((oligosfile != "") && (dataFileFormat == 1) && pacbio) { m->mothurOut("[ERROR]: You cannot have an oligosfile and 2 column pacbio file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
         if ((groupfile != "")  && (dataFileFormat == 2)){ m->mothurOut("[ERROR]: You cannot have an groupfile and 3 column file option at the same time. Aborting. \n"); m->setControl_pressed(true); }
 
         for (int i = 0; i < files.size(); i++) {
@@ -1032,7 +1103,6 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
             if (dataFileFormat == 1) { //2 column
                 fileOption = 2;
             }else if (dataFileFormat == 2) { //3 column
-                createFileGroup = true;
                 fileOption = 3;
             }else if (dataFileFormat == 3) { //4 column
                 fileOption = 4;

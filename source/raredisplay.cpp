@@ -24,12 +24,12 @@ void RareDisplay::init(string label){
 
 /***********************************************************************/
 
-void RareDisplay::update(SAbundVector* rank){
+void RareDisplay::update(SAbundVector& rank){
 	try {
         lock_guard<std::mutex> guard(mutex);
         
-		int newNSeqs = rank->getNumSeqs();
-		vector<double> data = estimate->getValues(rank);
+		int newNSeqs = rank.getNumSeqs();
+		vector<double> data = estimate->getValues(&rank);
 
 		map<int, vector<double> >::iterator it = results.find(newNSeqs);
         if (it == results.end()) { //first iter for this count
@@ -47,12 +47,11 @@ void RareDisplay::update(SAbundVector* rank){
 }
 
 /***********************************************************************/
-void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb, vector<string> g) {
+void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs) {
 	try {
         lock_guard<std::mutex> guard(mutex);
         
 		vector<double> data = estimate->getValues(shared);
-        Groups = g;
 		
 		map<int, vector<double> >::iterator it = results.find(numSeqs);
         if (it == results.end()) { //first iter for this count

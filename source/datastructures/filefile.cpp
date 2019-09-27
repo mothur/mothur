@@ -19,6 +19,7 @@ FileFile::FileFile(string f, string md) : filename(f), mode(md) {
         inputDir = current->getInputDir();
         mpath = current->getProgramPath();
         
+        columnWithGroups = false;
         fileOption = 0;
         gz = false;
         hasIndex = false;
@@ -29,7 +30,7 @@ FileFile::FileFile(string f, string md) : filename(f), mode(md) {
         exit(1);
     }
 }
-/**************************************************************************************************/
+/**************************************************************************************************
 
 FileFile::FileFile(){
     try {
@@ -139,9 +140,16 @@ bool FileFile::validateFiles(vector<string> pieces, string& forward, string& rev
         bool skip = false; //innocent until proven guilty
         group = "";
         if (pieces.size() == 2) {
-            forward = pieces[0];
-            reverse = pieces[1];
-            group = "";
+            if (mode == "parsefastqpacbio") {
+                group = pieces[0];
+                util.checkGroupName(group);
+                forward = pieces[1];
+                reverse = "";
+            }else {
+                forward = pieces[0];
+                reverse = pieces[1];
+                group = "";
+            }
             findex = "";
             rindex = "";
             fileOption = 1;
@@ -153,6 +161,7 @@ bool FileFile::validateFiles(vector<string> pieces, string& forward, string& rev
             findex = "";
             rindex = "";
             fileOption = 2;
+            columnWithGroups = true;
         }else if (pieces.size() == 4) {
             forward = pieces[0];
             reverse = pieces[1];
@@ -171,8 +180,10 @@ bool FileFile::validateFiles(vector<string> pieces, string& forward, string& rev
             string path = util.hasPath(forward);
             if (path == "") {  forward = inputDir + forward;  }
             
-            path = util.hasPath(reverse);
-            if (path == "") {  reverse = inputDir + reverse;  }
+            if (reverse != "") { //could be blank if pacbio mode
+                path = util.hasPath(reverse);
+                if (path == "") {  reverse = inputDir + reverse;  }
+            }
             
             if (findex != "") {
                 path = util.hasPath(findex);
@@ -191,11 +202,13 @@ bool FileFile::validateFiles(vector<string> pieces, string& forward, string& rev
             if (util.isBlank(forward)) { m->mothurOut("[WARNING]: " + forward + " is blank, skipping.\n"); skip=true; }
         }else { m->mothurOut("[WARNING]: can't find " + forward + ", ignoring pair.\n"); }
         
-        bool openReverse = util.checkLocations(reverse, current->getLocations());
-        if (openReverse) {
-            if (util.isBlank(reverse)) { m->mothurOut("[WARNING]: " + reverse + " is blank, skipping.\n"); skip=true; }
-        }else { m->mothurOut("[WARNING]: can't find " + reverse + ", ignoring pair.\n"); }
-        
+        bool openReverse = true;
+        if (reverse != ""){
+            openReverse = util.checkLocations(reverse, current->getLocations());
+            if (openReverse) {
+                if (util.isBlank(reverse)) { m->mothurOut("[WARNING]: " + reverse + " is blank, skipping.\n"); skip=true; }
+            }else { m->mothurOut("[WARNING]: can't find " + reverse + ", ignoring pair.\n"); }
+        }
         
         bool openFindex = true;
         if ((findex != "") && (findex != "NONE")){
@@ -244,21 +257,6 @@ void FileFile::setGZ(string forward, string reverse, string findex, string rinde
         }
 #else
         allGZ=false;
-#if defined NON_WINDOWS
-#else
-        string extension = util.getExtension(forward);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        extension = util.getExtension(reverse);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        if ((findex != "") && (findex != "NONE")) {
-            extension = util.getExtension(findex);
-            if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        }
-        if ((rindex != "") && (rindex != "NONE")) {
-            extension = util.getExtension(rindex);
-            if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        }
-#endif
 #endif
         
     }

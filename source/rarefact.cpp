@@ -46,21 +46,21 @@ int singleDriver(singleRarefactData* params){
             for(int i=0;i<params->displays.size();i++){ params->displays[i]->init(params->label); }
             
             RAbundVector lookup(params->order.getNumBins());
-            SAbundVector* rank	= new SAbundVector(params->order.getMaxRank()+1);
+            SAbundVector rank(params->order.getMaxRank()+1);
             params->util.mothurRandomShuffle(params->order);
             
             for(int i=0;i<params->numSeqs;i++){
                 
-                if (params->m->getControl_pressed()) { delete rank; return 0;  }
+                if (params->m->getControl_pressed()) {  return 0;  }
                 
                 int binNumber = params->order.get(i);
                 int abundance = lookup.get(binNumber);
                 
-                rank->set(abundance, rank->get(abundance)-1);
+                rank.set(abundance, rank.get(abundance)-1);
                 abundance++;
                 
                 lookup.set(binNumber, abundance);
-                rank->set(abundance, rank->get(abundance)+1);
+                rank.set(abundance, rank.get(abundance)+1);
                 
                 if((i == 0) || ((i+1) % params->increment == 0) || (params->ends.count(i+1) != 0)){ rcd.updateRankData(rank); }
             }
@@ -68,8 +68,6 @@ int singleDriver(singleRarefactData* params){
             if((params->numSeqs % params->increment != 0) || (params->ends.count(params->numSeqs) != 0)){ rcd.updateRankData(rank); }
             
             for(int i=0;i<params->displays.size();i++){ params->displays[i]->reset(); }
-            
-            delete rank;
         }
         
         return 0;

@@ -397,9 +397,9 @@ struct seqRead {
 };
 /**********************************************************/
 struct linePair {
-    unsigned long long start;
-    unsigned long long end;
-    linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
+    double start;
+    double end;
+    linePair(double i, double j) : start(i), end(j) {}
     linePair(){ start=0; end=0; }
     ~linePair(){}
 };

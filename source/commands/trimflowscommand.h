@@ -58,7 +58,7 @@ private:
     vector<string> revPrimer;
     map<string, string> groupMap;
     
-	vector<unsigned long long> getFlowFileBreaks();
+	vector<double> getFlowFileBreaks();
 	int createProcessesCreateTrim(string, string, string, string);
 	int getOligos();
 	

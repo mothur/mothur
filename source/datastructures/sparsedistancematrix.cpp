@@ -65,7 +65,6 @@ int SparseDistanceMatrix::rmCell(ull row, ull col){
         for (int i = 0; i < seqVec[vrow].size(); i++) {  if (seqVec[vrow][i].index == row) { vcol = i;  break; }  }
         
         
-        //cout << "removeing nodes: " << vrow << '-' << seqVec[vrow][vcol].index << " and " << row << '-' << seqVec[row][col].index << endl;
         seqVec[vrow].erase(seqVec[vrow].begin()+vcol);
         seqVec[row].erase(seqVec[row].begin()+col);
         
@@ -143,12 +142,12 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
                         smallDist = dist;
                         PDistCellMin temp(i, seqVec[i][j].index);
                         mins.push_back(temp);
-                        //cout << "adding " << i << '\t' << seqVec[i][j].index << " to mins\n";
+                        
                     }
                     else if(util.isEqual(dist, smallDist)){  //if a subsequent distance is the same as mins distance add the new iterator to the mins vector
                         PDistCellMin temp(i, seqVec[i][j].index);
                         mins.push_back(temp);
-                        //cout << "adding " << i << '\t' << seqVec[i][j].index << " to mins\n";
+                        
                     }
                 }else { j+=seqVec[i].size(); } //stop looking 
 			}
@@ -159,7 +158,7 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
         row = mins[0].row;
         ull col = mins[0].col;
         
-        //cout << "num mins = " << mins.size() << endl;
+        
 
 		return col;
 	}

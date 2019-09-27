@@ -53,12 +53,10 @@ private:
     vector< vector<string> > readFile();
     string ffqnoMatchFile, rfqnoMatchFile, ffnoMatchFile, rfnoMatchFile, fqnoMatchFile, rqnoMatchFile;
     vector<string> Groups;
-    //map<string, int> GroupToFile;
     map<string, string> seqGroups;
     map<string, long long> groupCounts;
 
-	
-    int processFile(string inputfile, TrimOligos*&, TrimOligos*&);
+    set<string> processFile(string inputfile, TrimOligos*&, TrimOligos*&);
     int processFile(vector<string> inputfiles, TrimOligos*&, TrimOligos*&);
 	vector<int> convertQual(string);
     vector<char> convertTable;

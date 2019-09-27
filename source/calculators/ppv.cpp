@@ -9,7 +9,7 @@
 #include "ppv.hpp"
 
 /***********************************************************************/
-double PPV::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double PPV::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         long long pPrime = tp + fp;
         double positivePredictiveValue = tp / (double) pPrime;

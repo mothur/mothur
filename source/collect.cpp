@@ -13,14 +13,13 @@
 
 int Collect::getCurve(float percentFreq = 0.01){
         try {
-            RAbundVector* lookup = new RAbundVector(order->getNumBins());
-            SAbundVector* rank        = new SAbundVector(order->getMaxRank()+1);
-            
-            CollectorsCurveData* ccd = new CollectorsCurveData();
-            
+            RAbundVector rabund(order->getNumBins());
+            SAbundVector rank(order->getMaxRank()+1);
+
             //sets displays label
             for(int i=0;i<displays.size();i++){ displays[i]->init(label); }
-            ccd->registerDisplays(displays);
+            
+            CollectorsCurveData ccd; ccd.registerDisplays(displays);
             
             //convert freq percentage to number
             int increment = 1;
@@ -29,26 +28,24 @@ int Collect::getCurve(float percentFreq = 0.01){
             
             for(int i=0;i<numSeqs;i++){
                 
-                if (m->getControl_pressed()) { delete lookup; delete rank; delete ccd;  return 1;  }
+                if (m->getControl_pressed()) {   return 1;  }
                 
                 int binNumber = order->get(i);
-                int abundance = lookup->get(binNumber);
+                int abundance = rabund.get(binNumber);
                 
-                rank->set(abundance, rank->get(abundance)-1);
+                rank.set(abundance, rank.get(abundance)-1);
                 
                 abundance++;
                 
-                lookup->set(binNumber, abundance);
-                rank->set(abundance, rank->get(abundance)+1); //increment rank(abundance)
+                rabund.set(binNumber, abundance);
+                rank.set(abundance, rank.get(abundance)+1); //increment rank(abundance)
                 
-                if((i == 0) || (i+1) % increment == 0){ ccd->updateRankData(rank); }
+                if((i == 0) || (i+1) % increment == 0){ ccd.updateRankData(rank); }
             }
             
-            if(numSeqs % increment != 0){ ccd->updateRankData(rank); }
+            if(numSeqs % increment != 0){ ccd.updateRankData(rank); }
             
             for(int i=0;i<displays.size();i++){ displays[i]->reset(); }
-            
-            delete lookup; delete rank; delete ccd;
             
             return 0;
         }
@@ -63,110 +60,45 @@ int Collect::getSharedCurve(float percentFreq = 0.01){
     try {
         vector<SharedRAbundVector*> lookup;
         map<string, int> indexLookup;
-        vector<SharedRAbundVector*> subset;
         
         //create and initialize vector of sharedvectors, one for each group
-        vector<string> mGroups = sharedorder->getGroups();
-        int numGroups = mGroups.size();
-        for (int i = 0; i < mGroups.size(); i++) {
-            SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
+        vector<string> groups = sharedorder->getGroups();
+        int numGroups = groups.size();
+        for (int i = 0; i < groups.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getMaxRank()+1);
             temp->setLabel(sharedorder->getLabel());
-            temp->setGroup(mGroups[i]);
-            indexLookup[mGroups[i]] = i;
+            temp->setGroup(groups[i]);
+            indexLookup[groups[i]] = i;
             lookup.push_back(temp);
         }
         
-        SharedCollectorsCurveData ccd;
+        map<string, int> groupComboToColumn = getGroupComb(groups); //makes  'uniqueAB         uniqueAC  uniqueBC' if your groups are A, B, C
         
-        //initialize labels for output
-        //makes  'uniqueAB         uniqueAC  uniqueBC' if your groups are A, B, C
-        getGroupComb(mGroups);
-        
-        for(int i=0;i<displays.size();i++){
-            ccd.registerDisplay(displays[i]); //adds a display[i] to cdd
-            bool hasLciHci = displays[i]->hasLciHci();
-            groupLabel = "";
-            for (int s = 0; s < groupComb.size(); s++) {
-                if (hasLciHci) {  groupLabel = groupLabel + label + groupComb[s] + "\t" + label + groupComb[s] + "lci\t" + label + groupComb[s] + "hci\t"; }
-                else{  groupLabel = groupLabel + label + groupComb[s] + "\t";  }
-            }
-            
-            string groupLabelAll = groupLabel + label + "all\t";
-            if ((displays[i]->isCalcMultiple() ) && (displays[i]->getAll() )) {   displays[i]->init(groupLabelAll); }
-            else {  displays[i]->init(groupLabel);  }
-        }
-        
+        SharedCollectorsCurveData ccd; ccd.registerDisplays(displays); //adds a displays to ccd management
+
         //convert freq percentage to number
         int increment = 1;
         if (percentFreq < 1.0) {  increment = numSeqs * percentFreq;  }
         else { increment = percentFreq;  }
         
-        //sample all the members
         for(int i=0;i<numSeqs;i++){
             
-            if (m->getControl_pressed()) { for (int j = 0; j < lookup.size(); j++) {  delete lookup[j]; }   return 1;  }
+            if (m->getControl_pressed()) { break;  }
             
             //get first sample
             individual chosen = sharedorder->get(i);
-            int abundance = lookup[indexLookup[chosen.group]]->get(chosen.bin);
-            lookup[indexLookup[chosen.group]]->set(chosen.bin, (abundance + 1));
-            
+            lookup[indexLookup[chosen.group]]->increment(chosen.binNumber);
             
             //calculate at 0 and the given increment
             if((i == 0) || (i+1) % increment == 0){
-                
-                //how many comparisons to make i.e. for group a, b, c = ab, ac, bc.
-                
-                int n = 1;
-                bool pair = true;
-                for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
-                    for (int l = n; l < lookup.size(); l++) {
-                        subset.clear(); //clear out old pair of sharedrabunds
-                        //add new pair of sharedrabund vectors
-                        subset.push_back(lookup[k]); subset.push_back(lookup[l]);
-                        
-                        //load subset with rest of lookup for those calcs that need everyone to calc for a pair
-                        for (int w = 0; w < lookup.size(); w++) {
-                            if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
-                        }
-                        
-                        ccd.updateSharedData(subset, i+1, numGroups, pair, mGroups);
-                    }
-                    n++;
-                }
-                
-                //if this is a calculator that can do multiples then do them
-                pair = false;
-                ccd.updateSharedData(lookup, i+1, numGroups, pair, mGroups);
-                
+                ccd.updateSharedData(lookup, i+1, groupComboToColumn);
             }
-            totalNumSeq = i+1;
         }
         
+        if (m->getControl_pressed()) { for (int j = 0; j < lookup.size(); j++) {  delete lookup[j]; }   return 1;  }
+        
         //calculate last label if you haven't already
-        if(numSeqs % increment != 0){
-            //how many comparisons to make i.e. for group a, b, c = ab, ac, bc.
-            int n = 1;
-            bool pair = true;
-            for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
-                for (int l = n; l < lookup.size(); l++) {
-                    subset.clear(); //clear out old pair of sharedrabunds
-                    //add new pair of sharedrabund vectors
-                    subset.push_back(lookup[k]); subset.push_back(lookup[l]);
-                    
-                    //load subset with rest of lookup for those calcs that need everyone to calc for a pair
-                    for (int w = 0; w < lookup.size(); w++) {
-                        if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
-                    }
-                    
-                    ccd.updateSharedData(subset, totalNumSeq, numGroups, pair, mGroups);
-                }
-                n++;
-            }
-            //if this is a calculator that can do multiples then do them
-            pair = false;
-            ccd.updateSharedData(lookup, totalNumSeq, numGroups, pair, mGroups);
-        }
+        if(numSeqs % increment != 0){ ccd.updateSharedData(lookup, numSeqs, groupComboToColumn); }
         
         //resets output files
         for(int i=0;i<displays.size();i++){ displays[i]->reset(); }
@@ -183,20 +115,34 @@ int Collect::getSharedCurve(float percentFreq = 0.01){
     }
 }
 /**************************************************************************************/
-void Collect::getGroupComb(vector<string> mGroups) {
+map<string, int> Collect::getGroupComb(vector<string> mGroups) {
 	string group;
-    
 	numGroupComb = 0;
+    map<string, int> groupComboToColumn;
     
-	int n = 1;
     int numGroups = mGroups.size();
 	for (int i = 0; i < (numGroups - 1); i++) {
-		for (int l = n; l < numGroups; l++) {
-			group = mGroups[i] + mGroups[l];
-			groupComb.push_back(group);        
+		for (int l = i+1; l < numGroups; l++) {
+			group = mGroups[i] +"_"+ mGroups[l];
+			groupComb.push_back(group);
+            groupComboToColumn[group] = numGroupComb;
 			numGroupComb++;
 		}
-		n++;
 	}
+    
+    for(int i=0;i<displays.size();i++){
+        bool hasLciHci = displays[i]->hasLciHci();
+        groupLabel = "";
+        for (int s = 0; s < groupComb.size(); s++) {
+            if (hasLciHci) {  groupLabel +=  label +"_"+ groupComb[s] + "\t" + label + groupComb[s] + "lci\t" + label + groupComb[s] + "hci\t"; }
+            else{  groupLabel += label +"_"+ groupComb[s] + "\t";  }
+        }
+        
+        string groupLabelAll = groupLabel + label +"_"+ "all\t";
+        if ((displays[i]->isCalcMultiple() ) && (displays[i]->getAll() )) { displays[i]->init(groupLabelAll); }
+        else {  displays[i]->init(groupLabel);  }
+    }
+    
+    return groupComboToColumn;
 }
 /**************************************************************************************/

@@ -212,6 +212,7 @@ BinSeqCommand::BinSeqCommand(string option) {
             if ((namesfile != "") && (countfile != "")) { m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true; }
             if ((groupfile != "") && (countfile != "")) {  m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true; }
             
+            if (!abort) {
             if ((namesfile != "") || (groupfile != "")) { //convert to count
                 
                 string rootFileName = namesfile;
@@ -251,6 +252,7 @@ BinSeqCommand::BinSeqCommand(string option) {
                 current->setMothurCalling(false);
                 
                 m->mothurOut("/******************************************/\n");
+            }
             }
 			
             if (countfile == "") {

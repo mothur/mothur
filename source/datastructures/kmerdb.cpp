@@ -55,9 +55,9 @@ KmerDB::~KmerDB(){}
 
 /**************************************************************************************************/
 
-vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num, vector<float>& Scores){
+vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num, vector<float>& Scores) const{
 	try {
-		if (num > numSeqs) { m->mothurOut("[WARNING]: you requested " + toString(num) + " closest sequences, but the template only contains " + toString(numSeqs) + ", adjusting."); m->mothurOutEndLine(); num = numSeqs; }
+		if (num > numSeqs) { m->mothurOut("[WARNING]: you requested " + toString(num) + " closest sequences, but the template only contains " + toString(numSeqs) + ", adjusting.\n");  num = numSeqs; }
 		
 		vector<int> topMatches;
 		Kmer kmer(kmerSize);
@@ -65,18 +65,18 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num, vector
 		Scores.clear();
 		
 		vector<int> matches(numSeqs, 0);						//	a record of the sequences with shared kmers
-		vector<int> timesKmerFound(kmerLocations.size()+1, 0);	//	a record of the kmers that we have already found
+		vector<bool> timesKmerFound(kmerLocations.size()+1, false);	//	a record of the kmers that we have already found
 		
 		int numKmers = candidateSeq->getNumBases() - kmerSize + 1;	
 	
 		for(int i=0;i<numKmers;i++){
 			int kmerNumber = kmer.getKmerNumber(candidateSeq->getUnaligned(), i);		//	go through the query sequence and get a kmer number
-			if(timesKmerFound[kmerNumber] == 0){				//	if we haven't seen it before...
+			if(!timesKmerFound[kmerNumber]){				//	if we haven't seen it before...
 				for(int j=0;j<kmerLocations[kmerNumber].size();j++){//increase the count for each sequence that also has
 					matches[kmerLocations[kmerNumber][j]]++;	//	that kmer
 				}
 			}
-			timesKmerFound[kmerNumber] = 1;						//	ok, we've seen the kmer now
+			timesKmerFound[kmerNumber] = true;						//	ok, we've seen the kmer now
 		}
 		
 		if (num != 1) {
@@ -102,6 +102,7 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num, vector
 		}else{
 			int bestIndex = 0;
 			int bestMatch = -1;
+            time_t start = time(NULL);
 			for(int i=0;i<numSeqs;i++){	
 				
 				if (matches[i] > bestMatch) {
@@ -109,7 +110,7 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num, vector
 					bestMatch = matches[i];
 				}
 			}
-			
+            
 			searchScore = bestMatch;
 			searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
 			topMatches.push_back(bestIndex);

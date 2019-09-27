@@ -23,23 +23,13 @@
 
 struct individual {
 		string group;
-		int bin;
-		int abundance;
+		int binNumber;
 		bool operator()(const individual& i1, const individual& i2) {
-		return (i1.abundance > i2.abundance);
+		return (i1.binNumber > i2.binNumber);
 		}
-	individual() {  group = ""; bin = 0; abundance = 0; }
+	individual() {  group = ""; binNumber = 0; }
 };
 
-struct individualFloat {
-		string group;
-		int bin;
-		float abundance;
-		bool operator()(const individual& i1, const individual& i2) {
-		return (i1.abundance > i2.abundance);
-		}
-	individualFloat() { group = ""; bin = 0; abundance = 0.0; }
-};
 
 class SharedOrderVector : public DataVector {
 	
@@ -59,7 +49,7 @@ public:
 	void print(ostream&);
 	vector<individual>::iterator begin();
 	vector<individual>::iterator end();
-	void push_back(int, int, string);  //OTU, abundance, group  MUST CALL UPDATE STATS AFTER PUSHBACK!!!
+	void push_back(int, string);  //abundance/OTUNUmber, group  MUST CALL UPDATE STATS AFTER PUSHBACK!!!
 	void updateStats();
 	void clear();
 
@@ -77,7 +67,7 @@ public:
 	SharedRAbundVectors* getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
 	
 private:
-	GroupMap* groupmap;
+	//GroupMap* groupmap;
     vector<string> currentLabels;
 	vector<individual>  data;
     vector<string> allGroups;

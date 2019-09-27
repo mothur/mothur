@@ -34,7 +34,7 @@ SuffixDB::SuffixDB() : Database() {
 
 /**************************************************************************************************/
 //assumes sequences have been added using addSequence
-vector<int> SuffixDB::findClosestSequences(Sequence* candidateSeq, int num, vector<float>& Scores){
+vector<int> SuffixDB::findClosestSequences(Sequence* candidateSeq, int num, vector<float>& Scores) const{
 	try {
 		vector<int> topMatches;
 		string processedSeq = candidateSeq->convert2ints();		//	the candidate sequence needs to be a string of ints

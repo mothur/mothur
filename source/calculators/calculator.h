@@ -64,7 +64,7 @@ public:
     ClusterMetric(string n){ m = MothurOut::getInstance();  name = n; }
     virtual ~ClusterMetric(){};
     
-    virtual double getValue(long long, long long, long long, long long) = 0; //tp, tn, fp, fn
+    virtual double getValue(double, double, double, double) = 0; //tp, tn, fp, fn
     
     virtual string getName()		{	return name;        }
     virtual string getCitation() = 0;
@@ -84,7 +84,8 @@ protected:
 class DistCalc {
     
 public:
-    DistCalc(){ dist = 0; m = MothurOut::getInstance(); }
+    DistCalc(){ setCutoff = false; dist = 0; cutoff = 1.0;  m = MothurOut::getInstance(); } //no cutoff
+    DistCalc(double c){ setCutoff = true; dist = 0; cutoff = c;  m = MothurOut::getInstance(); }
     DistCalc(const DistCalc& d) : dist(d.dist) { m = MothurOut::getInstance(); }
     virtual ~DistCalc() {}
     virtual double calcDist(Sequence, Sequence) = 0;
@@ -93,6 +94,8 @@ protected:
     double dist;
     MothurOut* m;
     Utils util;
+    double cutoff;
+    bool setCutoff;
 };
 
 /**************************************************************************************************/

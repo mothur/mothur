@@ -9,7 +9,7 @@
 #include "f1score.hpp"
 
 /***********************************************************************/
-double F1Score::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double F1Score::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         long long p = 2.0 * tp;
         long long pPrime = fn + fp;

@@ -18,7 +18,7 @@ public:
     SensSpecCalc(OptiData& matrix, ListVector* list);
     ~SensSpecCalc(){}
     
-    void getResults(OptiData& matrix, long long& tp, long long& tn, long long& fp, long long& fn);
+    void getResults(OptiData& matrix, double& tp, double& tn, double& fp, double& fn);
     
 private:
     Utils util;

@@ -40,9 +40,7 @@ public:
 	
 	
 private:
-	SharedOrderVector* order;
-	InputData* input;
-	Collect* cCurve;
+	
 	vector<Display*> cDisplays;
 	float freq;
 

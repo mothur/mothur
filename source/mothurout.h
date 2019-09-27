@@ -45,7 +45,7 @@ class MothurOut {
         bool getQuietMode()                             { return quietMode;                             }
         void setQuietMode(bool t)                       { quietMode = t;                                }
         int getNumErrors()                              { return numErrors;                             }
-        void resetCommandErrors()                       { numCommandErrors = 0; numCommandWarnings = 0; }
+        void resetCommandErrors()                       { numCommandErrors = 0; numCommandWarnings = 0; silenceWarnings = false;}
         string getLogFileName()                         { return logFileName;                           }
 		void setLogFileName(string f, bool append);
     
@@ -78,6 +78,7 @@ class MothurOut {
             quietMode = false;
             changedSeqNames = true;
             silenceLog = false;
+            silenceWarnings = false; //per command
             numErrors = 0; numWarnings = 0;
             numCommandErrors = 0; numCommandWarnings = 0;
             maxCommandErrors = 10; maxCommandWarnings = 10;
@@ -91,7 +92,7 @@ class MothurOut {
         unsigned seed;
         int numErrors, numWarnings, numCommandErrors, numCommandWarnings, maxCommandErrors, maxCommandWarnings;
         string logFileName, buffer;
-        bool changedSeqNames, silenceLog, control_pressed, executing, debug, quietMode;
+        bool changedSeqNames, silenceLog, silenceWarnings, control_pressed, executing, debug, quietMode;
 };
 /***********************************************/
 

@@ -1119,7 +1119,6 @@
 		7B21820217AD77BD00286E6A /* svm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = svm.hpp; path = source/svm/svm.hpp; sourceTree = SOURCE_ROOT; };
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = refchimeratest.h; path = source/refchimeratest.h; sourceTree = SOURCE_ROOT; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = refchimeratest.cpp; path = source/refchimeratest.cpp; sourceTree = SOURCE_ROOT; };
-		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eachgapdistignorens.h; path = source/calculators/eachgapdistignorens.h; sourceTree = SOURCE_ROOT; };
 		83F25B0A163B031200ABE73D /* forest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = forest.cpp; path = source/randomforest/forest.cpp; sourceTree = SOURCE_ROOT; };
 		83F25B0B163B031200ABE73D /* forest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = forest.h; path = source/randomforest/forest.h; sourceTree = SOURCE_ROOT; };
 		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2332,7 +2331,6 @@
 		48E544671E9D14C500FF6AB8 /* distcalcs */ = {
 			isa = PBXGroup;
 			children = (
-				7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */,
 				A7E9B6D512D37EC400DA6239 /* eachgapdist.h */,
 				A7E9B6D612D37EC400DA6239 /* eachgapignore.h */,
 				A7E9B72A12D37EC400DA6239 /* ignoregaps.h */,
@@ -3909,7 +3907,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.3\\\"\"",
@@ -3958,7 +3956,7 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.3\\\"\"",
@@ -4022,7 +4020,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.42.3\\\"\"",
@@ -4049,6 +4047,7 @@
 				"LIBRARY_SEARCH_PATHS[arch=*]" = (
 					/usr/local/lib/,
 					/usr/local/gsl/lib,
+					/usr/local/lib,
 				);
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
@@ -4106,7 +4105,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.42.3\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
@@ -4135,6 +4134,7 @@
 				"LIBRARY_SEARCH_PATHS[arch=*]" = (
 					/usr/local/lib/,
 					/usr/local/gsl/lib,
+					/usr/local/lib,
 				);
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;

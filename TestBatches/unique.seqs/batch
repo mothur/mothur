@@ -1,0 +1,13 @@
+#unique.seqs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# uniqueSeqs.fasta is stability.trim.contigs.good.fasta from MISeq_SOP
+# uniqueSeqs.aligned.fasta is stability.trim.contigs.good.unique.good.filter.fasta from MISeq_SOP
+# uniqueSeqs.count_table is stability.trim.contigs.good.good.count_table from MISeq_SOP
+# uniqueSeqs.names is stability.trim.contigs.good.names from MISeq_SOP
+set.dir(input=./TestFiles, output=./unique.seqs, tempdefault=./TestReferences)
+set.logfile(name=unique.seqs.logfile)
+unique.seqs(fasta=uniqueSeqs.fasta)
+unique.seqs(fasta=uniqueSeqs.unique.fasta, name=uniqueSeqs.names, format=count)
+unique.seqs(fasta=uniqueSeqs.aligned.fasta, count=uniqueSeqs.count_table)
+quit()
+

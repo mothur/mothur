@@ -9,7 +9,7 @@
 #include "tn.hpp"
 
 /***********************************************************************/
-double TN::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double TN::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         double tnmax = tn / (double)(tp + tn + fp + fn);
         

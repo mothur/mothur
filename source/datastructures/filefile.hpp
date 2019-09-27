@@ -32,35 +32,39 @@
  ffastqfile2 rfastqfile2
  ...
  
- file option 4
+ file option 4 - only vaild if mode is set to parsefastqpacbio
+ 
+ group1 pacBiofastqfile1
+ group2 pacBiofastqfile2
+ ...
+ 
+ file option 5
  
  group fastqfile  fastqfile
  group fastqfile  fastqfile
  group fastqfile  fastqfile
  ...
  
- file option 5
+ file option 6
  
  My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
  ...
  
  
  
- ********* fileOption; //1 -> 2 column(3 forms of 2 column), 2 -> 3 column, 3 -> 4 column ******************
+ ********* fileOption; //1 -> 2 column(4 forms of 2 column), 2 -> 3 column, 3 -> 4 column ******************
  */
 /**************************************************************************************************/
 
 class FileFile {
     
 public:
-    FileFile(string, string); //provide file file and read file, mode (ie. contigs, ...)
-    FileFile();
+    FileFile(string, string); //provide file file and read file, mode (ie. contigs) mode options include: mimarks,contigs,parseFastq,renameSeqs,sra,parsefastqpacbio
     ~FileFile() {}
     
-    vector< vector<string> > read(string, string); //read file, used with () constructor
     vector< vector<string> > getFiles() { return files; }
     
-    bool is3ColumnWithGroupNames() { if (fileOption == 2) { return true; }else{ return false; } }
+    bool isColumnWithGroupNames() { return columnWithGroups; }
     int getFileFormat() { return fileOption; }
     
     bool isGZ() { return gz; } //are files listed in file compressed
@@ -73,12 +77,12 @@ protected:
     CurrentFile* current;
     Utils util;
     string filename, mode, inputDir, mpath;
-    bool gz, hasIndex;
+    bool gz, hasIndex, columnWithGroups;
     int fileOption; //1 -> 2 column(3 forms of 2 column), 2 -> 3 column, 3 -> 4 column
     vector< vector<string> > files;
     map<int, string> file2Group;
     
-    
+    vector< vector<string> > read(string, string); //read file, used with () constructor
     bool validateFiles(vector<string> pieces, string& forward, string& reverse, string& findex, string& rindex, string& group); //checks locations, abletoOPen, fileOPtion
     void setGZ(string forward, string reverse, string findex, string rindex, bool&, bool&);
 };

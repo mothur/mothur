@@ -1,0 +1,26 @@
+#screen.seqs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# screenSeqs.fasta is stability.trim.contigs.fasta from MISeq_SOP
+# screenSeqs.groups is stability.contigs.groups from MISeq_SOP
+# screenSeqs.summary is stability.trim.contigs.summary from MISeq_SOP
+# screenSeqs.contigs.report is stability.contigs.report from MISeq_SOP
+# screenSeqs2.fasta is stability.trim.contigs.good.unique.align from MISeq_SOP
+# screenSeqs2.count_table is stability.trim.contigs.good.count_table from MISeq_SOP
+# screenSeqs2.summary is stability.trim.contigs.good.unique.summary from MISeq_SOP
+screen.seqs(fasta=stability.trim.contigs.good.unique.align, count=stability.trim.contigs.good.count_table, summary=stability.trim.contigs.good.unique.summary, start=1968, end=11550, maxhomop=8)
+
+set.dir(input=./TestFiles, output=./screen.seqs, tempdefault=./TestReferences)
+set.logfile(name=screen.seqs.logfile)
+#screening after make.contigs
+screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, maxambig=0, maxlength=275)
+screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, summary=screenSeqs.summary, maxambig=0, maxlength=275)
+#screening after alignment
+screen.seqs(fasta=screenSeqs2.fasta, count=screenSeqs2.count_table, start=1968, end=11550, maxhomop=8)
+screen.seqs(fasta=screenSeqs2.fasta, count=screenSeqs2.count_table, summary=screenSeqs2.summary, start=1968, end=11550, maxhomop=8)
+#additional parameters testing
+screen.seqs(fasta=screenSeqs2.fasta, count=screenSeqs2.count_table, optimize=start-end-maxambig, criteria=90)
+screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, contigsreport=screenSeqs.contigs.report, mismatches=5)
+screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, contigsreport=screenSeqs.contigs.report, minoverlap=25)
+screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, contigsreport=screenSeqs.contigs.report, optimize=ostart-oend, criteria=90)
+screen.seqs(fasta=screenSeqs2.fasta, count=screenSeqs2.count_table, alignreport=screenSeqs.align.report, minscore=60, maxinsert=5, minsim=90)
+quit()

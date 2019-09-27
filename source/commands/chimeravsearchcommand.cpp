@@ -282,7 +282,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             if (hasCount && (templatefile != "self")) { m->mothurOut("You have provided a countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
             if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
 
-            //look for uchime exe
+            //look for vsearch exe
             path = current->getProgramPath();
             
             if (vsearchLocation == "") {
@@ -424,7 +424,7 @@ int ChimeraVsearchCommand::execute(){
         }
         
         //setup fasta file if denovo and no groups
-        if ((templatefile == "self") && (!hasGroups)) { //you want to run uchime with a template=self and no groups
+        if ((templatefile == "self") && (!hasGroups)) { //you want to run vsearch with a template=self and no groups
             
             if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing.\n"); processors = 1; }
             
@@ -436,13 +436,12 @@ int ChimeraVsearchCommand::execute(){
             
             //read namefile
             vector<seqPriorityNode> nameMapCount;
-            int error;
+            //int error;
             if (hasCount) {
                 CountTable ct; ct.readTable(countfile, true, false);
                 for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
                     int num = ct.getNumSeqs(it->first);
-                    if (num == 0) { error = 1; }
-                    else { seqPriorityNode temp(num, it->second, it->first); nameMapCount.push_back(temp); }
+                    if (num != 0) { seqPriorityNode temp(num, it->second, it->first); nameMapCount.push_back(temp); }
                 }
             }
             
@@ -460,7 +459,9 @@ int ChimeraVsearchCommand::execute(){
             vector<string> groups;
             map<string, vector<string> > group2Files;
             if (hasCount) {
+                current->setMothurCalling(true);
                 SequenceCountParser cparser(countfile, fastafile, nullVector);
+                current->setMothurCalling(false);
                 groups = cparser.getNamesOfGroups();
                 group2Files = cparser.getFiles();
                 
@@ -544,7 +545,7 @@ int ChimeraVsearchCommand::execute(){
             
             if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
             
-            //remove file made for uchime
+            //remove file made for vsearch
             if (templatefile == "self") {  util.mothurRemove(fastafile); }
             
             m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check your sequences. " + toString(numChimeras) + " chimeras were found.\n");
@@ -634,7 +635,7 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
         string parent1, parent2, parent3, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10, temp11, temp12, temp13, flag;
         name = "";
         namesInFile.clear();
-        //assumptions - in file each read will always look like - if uchime source is updated, revisit this code.
+        //assumptions - in file each read will always look like - if vsearch source is updated, revisit this code.
         /*										1	2	3	4	5	6	7	8	9	10	11	12	13	14	15
          0.000000	F11Fcsw_33372/ab=18/		*	*	*	*	*	*	*	*	*	*	*	*	*	*	N
          0.0000	GQY1XT001C296C;size=356;	*	*	*	*	*	*	*	*	0	0	0	0	0	0	*	N
@@ -682,7 +683,7 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
         
         
         //edit anls file
-        //assumptions - in file each read will always look like - if uchime source is updated, revisit this code.
+        //assumptions - in file each read will always look like - if vsearch source is updated, revisit this code.
         /*
          ------------------------------------------------------------------------
          Query   (  179 nt) F21Fcsw_11639/ab=591/
@@ -784,7 +785,7 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
 //**********************************************************************************************************************
 int ChimeraVsearchCommand::readFasta(string filename, map<string, string>& seqs){
     try {
-        //create input file for uchime
+        //create input file for vsearch
         //read through fastafile and store info
         ifstream in;
         util.openInputFile(filename, in);
@@ -1002,9 +1003,11 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         strncat(tempVsearch, vsearchCommand.c_str(), vsearchCommand.length());
         cPara.push_back(tempVsearch);
         
+        string fileToRemove = "";
         //are you using a reference file
         if (templatefile != "self") {
             string outputFileName = filename.substr(1, filename.length()-2) + ".vsearch_formatted";
+            fileToRemove = outputFileName;
             prepFile(filename.substr(1, filename.length()-2), outputFileName);
             filename = outputFileName;
             filename = "\"" + filename + "\"";
@@ -1156,6 +1159,8 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
         delete[] vsearchParameters;
         
+        if (fileToRemove != "") { util.mothurRemove(fileToRemove); }
+        
         //remove "" from filenames
         outputFName = outputFName.substr(1, outputFName.length()-2);
         outputFNamec = outputFNamec.substr(1, outputFNamec.length()-2);
@@ -1164,7 +1169,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
         
         if (m->getControl_pressed()) { return 0; }
         
-        //create accnos file from uchime results
+        //create accnos file from vsearch results
         ifstream in;
         util.openInputFile(outputFNamec, in, "no error");
         
@@ -1193,7 +1198,7 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
     }
 }
 /**************************************************************************************************/
-//uchime can't handle some of the things allowed in mothurs fasta files. This functions "cleans up" the file.
+//vsearch can't handle some of the things allowed in mothurs fasta files. This functions "cleans up" the file.
 int ChimeraVsearchCommand::prepFile(string filename, string output) {
     try {
         

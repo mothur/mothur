@@ -282,9 +282,7 @@ int ListSeqsCommand::execute(){
 		
 		current->setAccnosFile(outputFileName);
 		
-		m->mothurOut("\nOutput File Names: \n"); 
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names: \n" + outputFileName + "\n\n");
 		
 		//set accnos file as new current accnosfile
 		string currentName = "";
@@ -351,6 +349,7 @@ int ListSeqsCommand::readFasta(){
 			if (name != "") {  names.push_back(name);  }
 			
 			util.gobble(in);
+           
 			if (m->getDebug()) { count++; m->mothurOut("[DEBUG]: count = " + toString(count) + ", name = " + currSeq.getName() + "\n"); }
 		}
 		in.close();

@@ -494,7 +494,7 @@ int ClassifySeqsCommand::execute(){
         util.mothurRemove(newTaxonomyFile);
         util.renameFile(unclass, newTaxonomyFile);
         
-        if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
+        if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; delete taxaSum;  return 0; }
         
         //print summary file
         ofstream outTaxTree;
@@ -637,11 +637,8 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         vector<classifyData*> data;
         
         long long num = 0;
-        
-        time_t start, end;
-        time(&start);
 
-        vector<unsigned long long> positions;
+        vector<double> positions;
         vector<linePair> lines;
 #if defined NON_WINDOWS
         positions = util.divideFile(filename, processors);
@@ -696,8 +693,6 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
         synchronizedTaxTFile->close(); synchronizedTaxFile->close(); synchronizedAccnosFile->close();
         delete threadTaxWriter; delete threadTaxTWriter; delete threadAccnosWriter;
         delete dataBundle;
-        time(&end);
-        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to classify " + toString(num) + " sequences.\n\n");
         
         return num;
 	}

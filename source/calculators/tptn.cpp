@@ -9,7 +9,7 @@
 #include "tptn.hpp"
 
 /***********************************************************************/
-double TPTN::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double TPTN::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         long long p = tp + tn;
         double tptn = p / (double)(tp + tn + fp + fn);

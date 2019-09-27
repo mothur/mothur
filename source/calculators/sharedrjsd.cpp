@@ -26,8 +26,8 @@ EstOutput RJSD::getValues(vector<SharedRAbundVector*> shared) {
             double tempA = shared[0]->get(i) / totalA;
             double tempB = shared[1]->get(i) / totalB;
             
-            tempA = shared[0]->get(i) / totalA;
-            tempB = shared[1]->get(i) / totalB;
+            //tempA = shared[0]->get(i) / totalA;
+            //tempB = shared[1]->get(i) / totalB;
             
             if (util.isEqual(tempA, 0)) { tempA = 0.000001; }
             if (util.isEqual(tempB, 0)) { tempB = 0.000001; }

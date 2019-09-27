@@ -9,7 +9,7 @@
 #include "accuracy.hpp"
 
 /***********************************************************************/
-double Accuracy::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double Accuracy::getValue(double tp,  double tn,  double fp,  double fn) {
     try {
         long long p = tp + fn;
         long long n = fp + tn;

@@ -48,8 +48,6 @@ public:
 	
 private:
 	OrderVector* order;
-	InputData* input;
-	Collect* cCurve;
 	vector<Display*> cDisplays;
 	int abund, size, alpha;
 	float freq;

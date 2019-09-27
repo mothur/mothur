@@ -617,7 +617,7 @@ int process(string group, string newMapFile, preClusterData* params){
                         
                         if (params->m->getControl_pressed()) { out.close(); return 0; }
                         
-                        if ((params->alignSeqs[i]->numIdentical != 0) && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet //  
+                        if ((params->alignSeqs[j]->numIdentical != 0) && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet //
                             //are you within "diff" bases
                             int mismatch = calcMisMatches(params->alignSeqs[i]->sequence, params->alignSeqs[j]->sequence, params);
                             
@@ -956,7 +956,9 @@ int PreClusterCommand::execute(){
             newMapFile = fileroot + "precluster.";
             string convolutedNamesFile = newCountFile + ".temp";
             
+            current->setMothurCalling(true);
             createProcessesGroups(convolutedNamesFile, newMapFile);
+            current->setMothurCalling(false);
             
             string accnosFile;
             if (countfile != "") {  accnosFile = mergeGroupCounts(newCountFile, convolutedNamesFile); }
@@ -1311,7 +1313,7 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.");
         start = time(NULL);
-        //cout << newname << endl;
+        
         ct.printTable(newcount);
         util.mothurRemove(newname);
         

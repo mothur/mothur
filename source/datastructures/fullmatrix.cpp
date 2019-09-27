@@ -33,7 +33,7 @@ FullMatrix::FullMatrix(ifstream& filehandle, GroupMap* g, bool s) : groupmap(g),
 		//determine if matrix is square or lower triangle
 		//if it is square read the distances for the first sequence
 		char d;
-		bool square;
+        bool square = true;
 		while((d=filehandle.get()) != EOF){
 			
 			//is d a number meaning its square
@@ -56,7 +56,7 @@ FullMatrix::FullMatrix(ifstream& filehandle, GroupMap* g, bool s) : groupmap(g),
 		}
 	
 		//read rest of matrix
-		if (square ) {  readSquareMatrix(filehandle); }
+		if (square) {  readSquareMatrix(filehandle); }
 		else {  readLTMatrix(filehandle); }
 		
 		filehandle.close();

@@ -24,13 +24,14 @@
 
 /**************************************************************************************************/
 struct distanceData {
-	long long startLine, endLine, numNewFasta, count;
+	long long startLine, endLine, numNewFasta;
+    double count;
 	float cutoff;
     SequenceDB alignDB;
     SequenceDB oldFastaDB;
 	MothurOut* m;
 	OutputWriter* threadWriter;
-    string outputFileName, Estimator;
+    string outputFileName, calc;
 	bool countends;
     Utils util;
 	
@@ -50,7 +51,7 @@ struct distanceData {
 		cutoff = c;
 		alignDB = db;
         oldFastaDB = oldfn;
-		Estimator = Est;
+		calc = Est;
 		numNewFasta = num;
 		countends = cnt;
         count = 0;
@@ -86,7 +87,7 @@ private:
 	float cutoff;
 	
 	bool abort, countends, fitCalc;
-	vector<string>  Estimators, outputNames; //holds estimators to be used
+	vector<string> outputNames; 
 	
 	void createProcesses(string);
 	bool sanityCheck();

@@ -275,7 +275,6 @@ int PCACommand::execute(){
 			delete lookupFloat;
 		}	
 		
-		delete lookupFloat;
 		delete input;
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }

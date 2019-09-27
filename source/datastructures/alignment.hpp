@@ -29,8 +29,6 @@ public:
 	virtual void align(string, string) = 0;
     virtual void alignPrimer(string, string) {}
 	
-	
-//	float getAlignmentScore();
 	string getSeqAAln();
 	string getSeqBAln();
     map<int, int> getSeqAAlnBaseMap();
@@ -43,7 +41,6 @@ public:
 	int getPairwiseLength();
 	void resize(int);
 	int getnRows() { return nRows; }
-//	int getLongestTemplateGap();
 
 protected:
 	void traceBack();
@@ -57,7 +54,7 @@ protected:
     map<int, int> ABaseMap;
     map<int, int> BBaseMap;
 	MothurOut* m;
-    CurrentFile* current;
+    
 };
 
 /**************************************************************************************************/

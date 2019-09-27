@@ -20,8 +20,8 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		count = 0;
 		path = b;
 		threadID = tid;
+        
         Utils util;
-
 		int randNumber = util.getRandomNumber();
 		string pid = toString(threadID);
 		
@@ -66,7 +66,6 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 BlastDB::BlastDB(string b, int tid) : Database() {
 	try {
 		count = 0;
-		
 		path = b;
 		threadID = tid;
         Utils util;
@@ -130,20 +129,20 @@ BlastDB::~BlastDB(){
 }
 /**************************************************************************************************/
 //assumes you have added all the template sequences using the addSequence function and run generateDB.
-vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& scores) {
+vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& scores) const {
 	try{
 		vector<int> topMatches;
 		
 		ofstream queryFile;
-		int randNumber = util.getRandomNumber();;
+        Utils util;
 		string pid = scrubName(seq->getName());
 		
-        Utils util; util.openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
+        util.openOutputFile((queryFileName+pid), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
 
-		lock_guard<std::mutex> guard(mutex);		
+		//lock_guard<std::mutex> guard(mutex);
 		//	the goal here is to quickly survey the database to find the closest match.  To do this we are using the default
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
@@ -152,10 +151,10 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
 		#if defined NON_WINDOWS
 		
 			blastCommand = path + "blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
-			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+pid) + " -o " + blastFileName+pid);
 		#else
 			blastCommand =  "\"" + path + "blastall\" -p blastn -d " + "\"" + dbFileName + "\"" + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
-			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+pid) + " -o " + blastFileName+pid);
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
 		#endif
@@ -163,7 +162,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
 		system(blastCommand.c_str());
 		
 		ifstream m8FileHandle;
-		util.openInputFile(blastFileName+pid+toString(randNumber), m8FileHandle, "no error");
+		util.openInputFile(blastFileName+pid, m8FileHandle, "no error");
 		
 		string dummy;
 		int templateAccession;
@@ -181,8 +180,8 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n, vector<float>& s
             scores.push_back(searchScore);
 		}
 		m8FileHandle.close();
-		util.mothurRemove((queryFileName+pid+toString(randNumber)));
-		util.mothurRemove((blastFileName+pid+toString(randNumber)));
+		util.mothurRemove((queryFileName+pid));
+		util.mothurRemove((blastFileName+pid));
 
 		return topMatches;
 	}
@@ -201,10 +200,9 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		
 		
 		ofstream queryFile;
-		int randNumber = util.getRandomNumber();
 		string pid = scrubName(seq->getName());
 		
-        Utils util; util.openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
+        Utils util; util.openOutputFile((queryFileName+pid), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -216,13 +214,10 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		string blastCommand;
 		#if defined NON_WINDOWS
 			blastCommand = path + "megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+pid) + " -o " + blastFileName+pid);
 		#else
-		//blastCommand = path + "blast\\bin\\megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-		//blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
-
 			blastCommand =  "\"" + path + "megablast\" -e 1e-10 -d " + "\"" + dbFileName + "\"" + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+pid) + " -o " + blastFileName+pid);
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
 
@@ -230,7 +225,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		system(blastCommand.c_str());
 
 		ifstream m8FileHandle;
-		util.openInputFile(blastFileName+pid+toString(randNumber), m8FileHandle, "no error");
+		util.openInputFile(blastFileName+pid, m8FileHandle, "no error");
 	
 		string dummy, eScore;
 		int templateAccession;
@@ -247,8 +242,8 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 
 		}
 		m8FileHandle.close();
-		util.mothurRemove((queryFileName+pid+toString(randNumber)));
-		util.mothurRemove((blastFileName+pid+toString(randNumber)));
+		util.mothurRemove((queryFileName+pid));
+		util.mothurRemove((blastFileName+pid));
 		
 		return topMatches;
 	}
@@ -303,7 +298,7 @@ void BlastDB::generateDB() {
 	}
 }
 /**************************************************************************************************/
-string BlastDB::scrubName(string seqName) {
+string BlastDB::scrubName(string seqName) const {
 	try {
 		
 		string cleanName = "";
@@ -321,6 +316,3 @@ string BlastDB::scrubName(string seqName) {
 	}
 }
 /**************************************************************************************************/
-
-/**************************************************************************************************/
-

@@ -612,16 +612,15 @@ struct treeSharedData {
     long long numIters;
     MothurOut* m;
     int count, subsampleSize;
-    bool mainThread, subsample, withReplacement;
+    bool subsample, withReplacement;
     
     treeSharedData(){}
-    treeSharedData(long long st, bool mt, bool su, bool wr, int subsize, vector<string> est, SharedRAbundVectors* lu) {
+    treeSharedData(long long st, bool su, bool wr, int subsize, vector<string> est, SharedRAbundVectors* lu) {
         m = MothurOut::getInstance();
         numIters = st;
         Estimators = est;
         thisLookup = lu;
         count = 0;
-        mainThread = mt;
         subsample = su;
         withReplacement = wr;
         subsampleSize = subsize;
@@ -734,7 +733,7 @@ int process(treeSharedData* params) {
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ) {
+            if (params->subsample) {
                 if (params->withReplacement)    { sample.getSampleWithReplacement(thisItersLookup, params->subsampleSize);  }
                 else                            { sample.getSample(thisItersLookup, params->subsampleSize);                 }
             }
@@ -746,7 +745,7 @@ int process(treeSharedData* params) {
             
             for (int i = 0; i < thisItersRabunds.size(); i++) { delete thisItersRabunds[i]; }
             
-            if ((params->subsample && (!params->mainThread)) || (params->mainThread && (thisIter != 0) ) ){
+            if (params->subsample){
                 if((thisIter+1) % 100 == 0){	params->m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
                 params->calcDistsTotals.push_back(calcDists);
                 for (int i = 0; i < calcDists.size(); i++) {
@@ -813,7 +812,7 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
             
             //make copy of lookup so we don't get access violations
             SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
-            treeSharedData* dataBundle = new treeSharedData(lines[i+1], false, subsample, withReplacement, subsampleSize, Estimators, newLookup);
+            treeSharedData* dataBundle = new treeSharedData(lines[i+1], subsample, withReplacement, subsampleSize, Estimators, newLookup);
             
             data.push_back(dataBundle);
             workerThreads.push_back(new std::thread(process, dataBundle));
@@ -821,7 +820,7 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
         
         //make copy of lookup so we don't get access violations
         SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookup);
-        treeSharedData* dataBundle = new treeSharedData(lines[0], true, subsample, withReplacement, subsampleSize, Estimators, newLookup);
+        treeSharedData* dataBundle = new treeSharedData(lines[0], subsample, withReplacement, subsampleSize, Estimators, newLookup);
         process(dataBundle);
         delete newLookup;
         
@@ -840,7 +839,8 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
             delete workerThreads[i];
         }
         delete dataBundle;
-        if (iters != 1) {
+        
+        if (subsample) {
             //we need to find the average distance and standard deviation for each groups distance
             vector< vector<seqDist>  > calcAverages = util.getAverages(calcDistsTotals);
             

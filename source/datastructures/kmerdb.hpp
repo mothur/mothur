@@ -31,7 +31,7 @@ public:
 	
 	void generateDB();
 	void addSequence(Sequence);
-	vector<int> findClosestSequences(Sequence*, int, vector<float>&);
+	vector<int> findClosestSequences(Sequence*, int, vector<float>&) const;
 	void readKmerDB(ifstream&);
 	int getCount(int);  //returns number of sequences with that kmer number
 	vector<int> getSequencesWithKmer(int);  //returns vector of sequences that contain kmer passed in

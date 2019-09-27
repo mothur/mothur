@@ -45,7 +45,7 @@ SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
     }
 }
 //***************************************************************************************************************
-void SensSpecCalc::getResults(OptiData& matrix, long long& tp, long long& tn, long long& fp, long long& fn){
+void SensSpecCalc::getResults(OptiData& matrix, double& tp, double& tn, double& fp, double& fn){
     try {
         tp = 0; tn = 0; fp = 0; fn = 0;
         
@@ -59,8 +59,8 @@ void SensSpecCalc::getResults(OptiData& matrix, long long& tp, long long& tn, lo
                 }
             }
         }
-        long long numSeqs = matrix.getNumSeqs() + matrix.getNumSingletons();
-        long long numDists = matrix.OptiData::getNumDists(); //square matrix OptiData:: uses the parent class function so that we can pass a optiref matrix
+        double numSeqs = matrix.getNumSeqs() + matrix.getNumSingletons();
+        double numDists = matrix.OptiData::getNumDists(); //square matrix OptiData:: uses the parent class function so that we can pass a optiref matrix
         
         fn = (numDists/2) - tp;
         tn = numSeqs * (numSeqs-1)/2  - (fp + fn + tp);

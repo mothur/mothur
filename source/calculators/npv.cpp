@@ -9,7 +9,7 @@
 #include "npv.hpp"
 
 /***********************************************************************/
-double NPV::getValue( long long tp,  long long tn,  long long fp,  long long fn) {
+double NPV::getValue(double tp,  double tn,  double fp,  double fn)  {
     try {
         long long nPrime = tn + fn;
         double negativePredictiveValue = tn / (double) nPrime;

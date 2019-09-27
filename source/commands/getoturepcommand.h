@@ -66,15 +66,14 @@ private:
     map<string, int> nameMap;
     OptiData* matrix;
     CountTable ct;
-	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, countfile, columnfile, distFile, format, outputDir, groups, method;
+	string filename, fastafile, listfile, namefile, groupfile, sorted, phylipfile, countfile, columnfile, distFile, format, outputDir, groups, method;
 	ofstream out;
 	ifstream in, inNames, inRow;
-	bool abort, allLines, groupError, weighted, hasGroups, rename;
-	set<string> labels; //holds labels to be used
-	//map<string, string> nameFileMap;
+	bool abort, allLines, groupError, weighted, hasGroups, rename, cutoffSet;
 	vector<string> outputNames, Groups;
 	map<string, string> outputNameFiles;
-	float cutoff;
+	set<string> cutoffs;
+    float cutoff;
 	int precision;
     
 	void readNamesFile(FastaMap*&);
@@ -85,6 +84,7 @@ private:
 	int processNames(string, string);
 	int processFastaNames(string, string, FastaMap*&);
     int readDist();
+    int createCount();
 };
 
 #endif

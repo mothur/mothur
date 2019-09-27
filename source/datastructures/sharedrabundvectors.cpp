@@ -472,7 +472,7 @@ SharedOrderVector SharedRAbundVectors::getSharedOrderVector(){
             for (int j = 0; j < lookup[i]->getNumBins(); j++) {
                 int abund = lookup[i]->get(j);
                 if (abund != 0) {
-                    for (int k = 0; k < abund; k++) {  order.push_back(j, j, lookup[i]->getGroup());  }
+                    for (int k = 0; k < abund; k++) {  order.push_back(j, lookup[i]->getGroup());  }
                 }
             }
         }
@@ -561,9 +561,6 @@ vector<SharedRAbundVector*> SharedRAbundVectors::getSharedRAbundVectors(){
             if (m->getControl_pressed()) { return newLookup; }
             SharedRAbundVector* temp = new SharedRAbundVector(*lookup[i]);
             newLookup.push_back(temp);
-            if (temp->getNumBins() != numBins) {
-                cout << temp->getGroup() << '\t' << temp->getNumBins() << '\t' << lookup[i]->getNumBins() << '\t' << numBins << endl;
-            }
         }
         
         return newLookup;

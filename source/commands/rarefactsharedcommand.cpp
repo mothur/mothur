@@ -419,13 +419,15 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 			//get next line to process
             delete lookup; delete subset;
 			lookup = input.getSharedRAbundVectors();
+            subset = new SharedRAbundVectors();
             
             if (lookup != NULL) {
+                data = lookup->getSharedRAbundVectors();
                 if (thisSet != "") {//remove unwanted groups
                     for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
                 }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
-            }else {  subset = NULL; }
+            }else {  delete subset; subset = NULL; }
 
 		}
 		
@@ -453,13 +455,15 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		if (needToRun )  {
             delete lookup; delete subset;
             lookup = input.getSharedRAbundVectors();
+            subset = new SharedRAbundVectors();
             
             if (lookup != NULL) {
+                data = lookup->getSharedRAbundVectors();
                 if (thisSet != "") {//remove unwanted groups
                     for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                     subset->eliminateZeroOTUS();
                 }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
-            }else {  subset = NULL; }
+            }else {  delete subset; subset = NULL; }
             
 			m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
             

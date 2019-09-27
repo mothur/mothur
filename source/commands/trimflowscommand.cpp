@@ -683,13 +683,13 @@ int TrimFlowsCommand::getOligos(){
 	}
 }
 /**************************************************************************************************/
-vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
+vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 	try{
-		vector<unsigned long long> filePos;
+		vector<double> filePos;
 		filePos.push_back(0);
 					
 		FILE * pFile;
-		unsigned long long size;
+		double size;
 		
 		//get num bytes in file
         flowFileName = util.getFullPathName(flowFileName);
@@ -702,7 +702,7 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 		}
 				
 		//estimate file breaks
-		unsigned long long chunkSize = 0;
+		double chunkSize = 0;
 		chunkSize = size / processors;
 
 		//file too small to divide by processors
@@ -710,7 +710,7 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 		
 		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
 		for (int i = 0; i < processors; i++) {
-			unsigned long long spot = (i+1) * chunkSize;
+			double spot = (i+1) * chunkSize;
 			
 			ifstream in;
 			util.openInputFile(flowFileName, in);
@@ -719,7 +719,7 @@ vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 			string dummy = util.getline(in);
 			
 			//there was not another sequence before the end of the file
-			unsigned long long sanityPos = in.tellg();
+			double sanityPos = in.tellg();
 			
 //			if (sanityPos == -1) {	break;  }
 //			else {  filePos.push_back(newSpot);  }
@@ -763,14 +763,14 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         
         vector<linePair> lines;
 #if defined NON_WINDOWS
-        vector<unsigned long long> flowFilePos = getFlowFileBreaks();
+        vector<double> flowFilePos = getFlowFileBreaks();
         for (int i = 0; i < (flowFilePos.size()-1); i++) { lines.push_back(linePair(flowFilePos[i], flowFilePos[(i+1)])); }
 #else
         
         if (processors == 1) { lines.push_back(linePair(0, -1)); }
         else {
             long long numFlowLines;
-            vector<unsigned long long> flowFilePos = util.setFilePosEachLine(flowFileName, numFlowLines);
+            vector<double> flowFilePos = util.setFilePosEachLine(flowFileName, numFlowLines);
             
             //figure out how many sequences you have to process
             int numSeqsPerProcessor = numFlowLines / processors;

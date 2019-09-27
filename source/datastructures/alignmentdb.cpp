@@ -146,9 +146,9 @@ AlignmentDB::AlignmentDB(string s){
 /**************************************************************************************************/
 AlignmentDB::~AlignmentDB() {  delete search;	}
 /**************************************************************************************************/
-Sequence AlignmentDB::findClosestSequence(Sequence* seq, float& searchScore) {
+Sequence AlignmentDB::findClosestSequence(Sequence* seq, float& searchScore) const {
 	try{
-        lock_guard<std::mutex> guard(mutex);
+        
         vector<float> scores;
 		vector<int> spot = search->findClosestSequences(seq, 1, scores);
 	

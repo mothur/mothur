@@ -21,8 +21,8 @@ OptiFitCluster::OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns, s
 /***********************************************************************/
 int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string> bls, string meth, bool denov) {
     try {
-        long long reftruePositives, reftrueNegatives, reffalsePositives, reffalseNegatives, numRefSeqs, numRefSingletons;
-        numRefSeqs = 0; numRefSingletons = 0; reftruePositives = 0; reffalsePositives = 0; reffalseNegatives = 0; reftrueNegatives = 0;
+        double reftruePositives, reftrueNegatives, reffalsePositives, reffalseNegatives, numRefSeqs;
+        numRefSeqs = 0; reftruePositives = 0; reffalsePositives = 0; reffalseNegatives = 0; reftrueNegatives = 0;
         
         if (meth == "closed") { closed = true; }
         denovo = denov;
@@ -96,7 +96,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
         
         if (criteria == "fit") {
-            long long temp1, temp2, temp3, temp4;
+            double temp1, temp2, temp3, temp4;
             getFitStats(temp1, temp2, temp3, temp4);
             value = metric->getValue(temp1, temp2, temp3, temp4);
         }else { value = comboValue; }
@@ -114,7 +114,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
  * keep or move the sequence to the OTU where the `metric` is the largest - flip a coin on ties */
 bool OptiFitCluster::update(double& listMetric) {
     try {
-        long long comboCaused, fitCaused, bothCaused; comboCaused = 0; fitCaused = 0; bothCaused = 0;
+        double comboCaused, fitCaused, bothCaused; comboCaused = 0; fitCaused = 0; bothCaused = 0;
         //for each sequence (singletons removed on read)
         for (int i = 0; i < randomizeSeqs.size(); i++) {
             
@@ -128,24 +128,24 @@ bool OptiFitCluster::update(double& listMetric) {
             if (binNumber == -1) { }
             else {
                 vector<long long> bestBin; bestBin.resize(2, binNumber);
-                vector<long long> tn; tn.push_back(fittrueNegatives); tn.push_back(combotrueNegatives);
-                vector<long long> tp; tp.push_back(fittruePositives); tp.push_back(combotruePositives);
-                vector<long long> fp; fp.push_back(fitfalsePositives); fp.push_back(combofalsePositives);
-                vector<long long> fn; fn.push_back(fitfalseNegatives); fn.push_back(combofalseNegatives);
+                vector<double> tn; tn.push_back(fittrueNegatives); tn.push_back(combotrueNegatives);
+                vector<double> tp; tp.push_back(fittruePositives); tp.push_back(combotruePositives);
+                vector<double> fp; fp.push_back(fitfalsePositives); fp.push_back(combofalsePositives);
+                vector<double> fn; fn.push_back(fitfalseNegatives); fn.push_back(combofalseNegatives);
                 vector<double> bestMetric; bestMetric.resize(2, -1);  //bestMetric[0] = fitSeqs alone, bestMetric[1] = combo or ref and fit
                 
-                vector<long long> bestTp; bestTp.resize(2, 0);
-                vector<long long> bestTn; bestTn.resize(2, 0);
-                vector<long long> bestFp; bestFp.resize(2, 0);
-                vector<long long> bestFn; bestFn.resize(2, 0);
+                vector<double> bestTp; bestTp.resize(2, 0);
+                vector<double> bestTn; bestTn.resize(2, 0);
+                vector<double> bestFp; bestFp.resize(2, 0);
+                vector<double> bestFn; bestFn.resize(2, 0);
             
                 //close / far count in current bin
-                vector<long long> results = getCloseFarCounts(seqNumber, binNumber);
-                long long combocCount = results[0];  long long combofCount = results[1];
+                vector<double> results = getCloseFarCounts(seqNumber, binNumber);
+                double combocCount = results[0];  double combofCount = results[1];
                 
                 //close / far count in current bin for fit seqs
-                vector<long long> fitresults = getCloseFarFitCounts(seqNumber, binNumber);
-                long long fitcCount = fitresults[0];  long long fitfCount = fitresults[1];
+                vector<double> fitresults = getCloseFarFitCounts(seqNumber, binNumber);
+                double fitcCount = fitresults[0];  double fitfCount = fitresults[1];
                 
                 //fit metrics in current bin
                 bestMetric[0] = metric->getValue(tp[0], tn[0], fp[0], fn[0]);
@@ -240,7 +240,7 @@ bool OptiFitCluster::update(double& listMetric) {
         }
         
         if (criteria == "fit") {
-            long long temp1, temp2, temp3, temp4;
+            double temp1, temp2, temp3, temp4;
             getFitStats(temp1, temp2, temp3, temp4);
             listMetric = metric->getValue(temp1, temp2, temp3, temp4);
         }
@@ -259,13 +259,13 @@ bool OptiFitCluster::update(double& listMetric) {
     }
 }
 /***********************************************************************/
-vector<long long> OptiFitCluster::getCloseFarCounts(long long seq, long long newBin) {
+vector<double> OptiFitCluster::getCloseFarCounts(long long seq, long long newBin) {
     try {
-        vector<long long> results; results.push_back(0); results.push_back(0); //results[0] = close count, results[1] = far count
+        vector<double> results; results.push_back(0); results.push_back(0); //results[0] = close count, results[1] = far count
         
         if (newBin == -1) { }  //making a singleton bin. Close but we are forcing apart.
         else { //merging a bin
-            for (int i = 0; i < bins[newBin].size(); i++) {
+            for (long long i = 0; i < bins[newBin].size(); i++) {
                 if (seq == bins[newBin][i]) {} //ignore self
                 else if (!matrix->isClose(seq, bins[newBin][i])) { results[1]++; }  //this sequence is "far away" from sequence i - above the cutoff
                 else { results[0]++;  }  //this sequence is "close" to sequence i - distance between them is less than cutoff
@@ -280,13 +280,13 @@ vector<long long> OptiFitCluster::getCloseFarCounts(long long seq, long long new
     }
 }
 /***********************************************************************/
-vector<long long> OptiFitCluster::getCloseFarFitCounts(long long seq, long long newBin) {
+vector<double> OptiFitCluster::getCloseFarFitCounts(long long seq, long long newBin) {
     try {
-        vector<long long> results; results.push_back(0); results.push_back(0); //results[0] = close count, results[1] = far count
+        vector<double> results; results.push_back(0); results.push_back(0); //results[0] = close count, results[1] = far count
         
         if (newBin == -1) { }  //making a singleton bin. Close but we are forcing apart.
         else { //merging a bin
-            for (int i = 0; i < bins[newBin].size(); i++) {
+            for (long long i = 0; i < bins[newBin].size(); i++) {
                 
                 if (seq == bins[newBin][i]) {} //ignore self
                 else {
@@ -308,11 +308,11 @@ vector<long long> OptiFitCluster::getCloseFarFitCounts(long long seq, long long 
 }
 
 /***********************************************************************/
-vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long long& fp,  long long& fn) {
+vector<double> OptiFitCluster::getStats(double& tp,  double& tn,  double& fp,  double& fn) {
     try {
-        long long singletn = 0;
+        double singletn = 0;
         if (!closed) { singletn = matrix->getNumSingletons(); }
-        long long tempnumSeqs = numComboSeqs + singletn;
+        double tempnumSeqs = numComboSeqs + singletn;
         
         tp = combotruePositives;
         fp = combofalsePositives;
@@ -338,11 +338,11 @@ vector<double> OptiFitCluster::getStats(long long& tp,  long long& tn,  long lon
     }
 }
 /***********************************************************************/
-vector<double> OptiFitCluster::getFitStats(long long& tp,  long long& tn,  long long& fp,  long long& fn) {
+vector<double> OptiFitCluster::getFitStats(double& tp,  double& tn,  double& fp,  double& fn) {
     try {
-        long long singletn = 0;
+        double singletn = 0;
         if (!closed) { singletn = matrix->getNumFitTrueSingletons(); }
-        long long tempnumSeqs = numFitSeqs + singletn; //numFitSingletons are reads that are selected as the fit seqs, that have dists to reference but not dists to other fit seqs. They are included
+        double tempnumSeqs = numFitSeqs + singletn; //numFitSingletons are reads that are selected as the fit seqs, that have dists to reference but not dists to other fit seqs. They are included
         
         tp = fittruePositives;
         fp = fitfalsePositives;
@@ -552,7 +552,7 @@ ListVector* OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix, string lab
         long long numBins = cluster.getNumBins();
         m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         
-        long long tp, tn, fp, fn;
+        double tp, tn, fp, fn;
         vector<double> results = cluster.getStats(tp, tn, fp, fn);
         m->mothurOut("0\t0\t" + label + "\t" + toString(numBins) + "\t"+ label + "\t" + toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
        

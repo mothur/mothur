@@ -1153,8 +1153,8 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
 int TrimSeqsCommand::setLines(string filename, string qfilename) {
 	try {
         
-        vector<unsigned long long> fastaFilePos;
-		vector<unsigned long long> qfileFilePos;
+        vector<double> fastaFilePos;
+		vector<double> qfileFilePos;
 		
 		#if defined NON_WINDOWS
 		//set file positions for fasta file
@@ -1197,7 +1197,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
                         map<string, int>::iterator it = firstSeqNames.find(sname);
                         
                         if(it != firstSeqNames.end()) { //this is the start of a new chunk
-                            unsigned long long pos = inQual.tellg(); 
+                            double pos = inQual.tellg();
                             qfileFilePos.push_back(pos - input.length() - 1);	
                             firstSeqNames.erase(it);
                         }
@@ -1219,7 +1219,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             
             //get last file position of qfile
             FILE * pFile;
-            unsigned long long size;
+            double size;
             
             //get num bytes in file
             qfilename = util.getFullPathName(qfilename);

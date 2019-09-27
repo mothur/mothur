@@ -93,7 +93,6 @@ DistanceCommand::DistanceCommand(){
 DistanceCommand::DistanceCommand(string option) {
 	try {
 		abort = false; calledHelp = false;   
-		Estimators.clear();
 				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -189,7 +188,6 @@ DistanceCommand::DistanceCommand(string option) {
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
 			}
-			util.splitAtDash(calc, Estimators);
 
 			string temp;
 			temp = validParameter.valid(parameters, "countends");	if(temp == "not found"){	temp = "T";	}
@@ -210,11 +208,13 @@ DistanceCommand::DistanceCommand(string option) {
 			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output == "phylip") { output = "lt";  }
 			
-			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both."); m->mothurOutEndLine(); abort=true; }
+			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both.\n");  abort=true; }
 			
-			if ((column != "") && (oldfastafile != "") && (output != "column")) { m->mothurOut("You have provided column and oldfasta, indicating you want to append distances to your column file. Your output must be in column format to do so."); m->mothurOutEndLine(); abort=true; }
+			if ((column != "") && (oldfastafile != "") && (output != "column")) { m->mothurOut("You have provided column and oldfasta, indicating you want to append distances to your column file. Your output must be in column format to do so.\n"); abort=true; }
 			
-			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
+			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column.\n");  output = "column"; }
+            
+            if ((calc != "onegap") && (calc != "eachgap") && (calc != "nogaps")) { m->mothurOut(calc + " is not a valid output form. Options are eachgap, onegap and nogaps. I'll use onegap.\n");  calc = "onegap";  }
 
 		}
 				
@@ -343,21 +343,21 @@ void driverColumn(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+            if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
+                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
+                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
+                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(params->cutoff);	}
+                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
             }
         }
         
         int startTime = time(NULL);
-        
+       
         params->count = 0;
         string buffer = "";
         for(int i=params->startLine;i<params->endLine;i++){
@@ -383,6 +383,8 @@ void driverColumn(distanceData* params){
         }
         params->threadWriter->write(buffer);
         
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        
         delete distCalculator;
     }
     catch(exception& e) {
@@ -396,16 +398,16 @@ void driverLt(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+            if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist();	}
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
             }
         }
         
@@ -446,6 +448,8 @@ void driverLt(distanceData* params){
             
         }
         
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        
         outFile.close();
         delete distCalculator;
     }
@@ -460,16 +464,16 @@ void driverSquare(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+            if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist();	    }
+                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist();	}
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
             }
         }
         int startTime = time(NULL);
@@ -508,6 +512,8 @@ void driverSquare(distanceData* params){
             if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n");  }
         }
         
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        
         outFile.close();
         delete distCalculator;
     }
@@ -522,16 +528,16 @@ void driverFitCalc(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->Estimator == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->Estimator == "onegap")		{	distCalculator = new oneGapDist();	}
+            if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
+                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
+                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->Estimator) ) {
-                if (params->Estimator == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (params->Estimator == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->Estimator == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
+                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(params->cutoff);	}
+                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
             }
         }
         
@@ -559,6 +565,8 @@ void driverFitCalc(distanceData* params){
         }
         params->threadWriter->write(buffer);
         
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        
         delete distCalculator;
 
     }
@@ -579,7 +587,7 @@ void DistanceCommand::createProcesses(string filename) {
         vector<std::thread*> workerThreads;
         vector<distanceData*> data;
         
-        unsigned long long numDists = 0;
+        double numDists = 0;
         
         if (output == "square") { numDists = numSeqs * numSeqs; }
         else { for(int i=0;i<numSeqs;i++){ for(int j=0;j<i;j++){ numDists++; if (numDists > processors) { break; } } } }
@@ -630,7 +638,7 @@ void DistanceCommand::createProcesses(string filename) {
                 threadWriter = new OutputWriter(synchronizedOutputFile);
                 dataBundle = new distanceData(threadWriter);
             }else { dataBundle = new distanceData(filename+extension); }
-            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, cutoff, alignDB, oldFastaDB, Estimators[0], numNewFasta, countends);
+            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, cutoff, alignDB, oldFastaDB, calc, numNewFasta, countends);
             data.push_back(dataBundle);
             
             std::thread* thisThread = NULL;
@@ -649,7 +657,7 @@ void DistanceCommand::createProcesses(string filename) {
             threadWriter = new OutputWriter(synchronizedOutputFile);
             dataBundle = new distanceData(threadWriter);
         }else { dataBundle = new distanceData(filename); }
-        dataBundle->setVariables(lines[0].start, lines[0].end, cutoff, alignDB, oldFastaDB, Estimators[0], numNewFasta, countends);
+        dataBundle->setVariables(lines[0].start, lines[0].end, cutoff, alignDB, oldFastaDB, calc, numNewFasta, countends);
         
         if (output == "column")     {
             if (fitCalc)    { driverFitCalc(dataBundle);    }

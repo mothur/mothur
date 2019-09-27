@@ -94,6 +94,7 @@ vector<string> MakeContigsCommand::setParameters(){
         CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","group",false,false,true); parameters.push_back(poligos);
         CommandParameter pfindex("findex", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(pfindex);
         CommandParameter prindex("rindex", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(prindex);
+        CommandParameter pqfile("qfile", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pqfile);
 				CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
 				CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
         CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
@@ -128,10 +129,10 @@ vector<string> MakeContigsCommand::setParameters(){
 string MakeContigsCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs new fasta. \n";
+		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs a fasta file. \n";
         helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
         helpString += "If a forward index or reverse index file is provided barcodes be trimmed, and a group file will be created. The oligos parameter is required if an index file is given.\n";
-		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, findex, rindex, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, maxee, allfiles and processors.\n";
+		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, findex, rindex, qfile, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, maxee, allfiles and processors.\n";
 		helpString += "The ffastq and rfastq, file, or ffasta and rfasta parameters are required.\n";
         helpString += "The file parameter is 2, 3 or 4 column file containing the forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one.  Mothur will process each pair and create a combined fasta and report file with all the sequences.\n";
         helpString += "The ffastq and rfastq parameters are used to provide a forward fastq and reverse fastq file to process.  If you provide one, you must provide the other.\n";
@@ -139,6 +140,7 @@ string MakeContigsCommand::getHelpString(){
         helpString += "The fqfile and rqfile parameters are used to provide a forward quality and reverse quality files to process with the ffasta and rfasta parameters.  If you provide one, you must provide the other.\n";
 		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
         helpString += "The findex and rindex parameters are used to provide a forward index and reverse index files to process.  \n";
+        helpString += "The qfile parameter is used to indicate you want a quality file assembled. Default=f. NOTE: The assembled quality scores outputted by mothur cannot be used for downstream quality screening. The score calculations are modeled after pandseq's method. Here's a link to the explanation from their documentation, https://github.com/neufeld/pandaseq#the-scores-of-the-output-bases-seem-really-low-whats-wrong. \n";
         helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: kmer, gotoh and needleman. The default is needleman.\n";
         helpString += "The ksize parameter allows you to set the kmer size if you are doing align=kmer. Default=8.\n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
@@ -152,7 +154,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
         helpString += "The insert parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score equal to or below the threshold we eliminate it. Default=20.\n";
-        helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+        helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is all available.\n";
         helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
 
         helpString += "The trimoverlap parameter allows you to trim the sequences to only the overlapping section. The default is F.\n";
@@ -444,6 +446,9 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 
             temp = validParameter.valid(parameters, "trimoverlap");		if (temp == "not found") { temp = "F"; }
 			trimOverlap = util.isTrue(temp);
+            
+            temp = validParameter.valid(parameters, "qfile");        if (temp == "not found") { temp = "F"; }
+            makeQualFile = util.isTrue(temp);
 
 			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh") && (align != "kmer")) { m->mothurOut(align + " is not a valid alignment method. Options are kmer, needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
@@ -473,106 +478,7 @@ int MakeContigsCommand::execute(){
 	try {
         bool debugIndex = false;
         if (debugIndex) { //allows you to run the oligos and index file independantly to check for barcode issues. make.contigs(findex=yourIndexFile, bdiffs=1, oligos=yourOligosFile, checkorient=t). just used for user support
-            
-            map<int, oligosPair> pairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reorientedPairedPrimers;
-            vector<string> barcodeNames, primerNames;
-            
-            if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, reorientedPairedPrimers, pairedBarcodes, reorientedPairedBarcodes, barcodeNames, primerNames);    }
-            
-            int numPrimers = pairedPrimers.size();
-            TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes, true);
-            int numBarcodes = pairedBarcodes.size();
-            TrimOligos* rtrimOligos = NULL;
-            if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, reorientedPairedPrimers, reorientedPairedBarcodes, true); numBarcodes = reorientedPairedBarcodes.size();   numPrimers = reorientedPairedPrimers.size();  }
-
-            ifstream in;
-            util.openInputFile(findexfile, in);
-            
-            while (!in.eof()) {
-                if (m->getControl_pressed()) { break; }
-                
-                bool ignore = false;
-                FastqRead index(in, ignore, format); util.gobble(in);
-                
-                int success = 1;
-                string trashCode = "";
-                string commentString = "";
-                int currentSeqsDiffs = 0;
-                int barcodeIndex = 0;
-                
-                Sequence fSeq, rSeq;
-                QualityScores* fQual = NULL; QualityScores* rQual = NULL;
-                QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
-                Sequence findexBarcode("findex", index.getSeq());  Sequence rindexBarcode("rindex", "NONE");
-                Sequence savedFindex("findex", index.getSeq());  Sequence savedRIndex("rindex", "NONE");
-                
-                if(numBarcodes != 0){
-                    vector<int> results;
-                    
-                    results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
-                    
-                    success = results[0] + results[2];
-                    commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], bdiffs) + ") ";
-                    if(success > bdiffs)		{	trashCode += 'b';	}
-                    else{ currentSeqsDiffs += success;  }
-                }
-                
-                if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
-                    int thisSuccess = 0;
-                    string thisTrashCode = "";
-                    string thiscommentString = "";
-                    int thisCurrentSeqsDiffs = 0;
-                    
-                    int thisBarcodeIndex = 0;
-                    
-                    if(numBarcodes != 0){
-                        vector<int> results;
-                        
-                        results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
-                        
-                        thisSuccess = results[0] + results[2];
-                        thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
-                        if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
-                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
-                    }
-                    
-                    if (thisTrashCode == "") {
-                        trashCode = thisTrashCode;
-                        success = thisSuccess;
-                        currentSeqsDiffs = thisCurrentSeqsDiffs;
-                        commentString = thiscommentString;
-                        barcodeIndex = thisBarcodeIndex;
-                    }else { trashCode += "(" + thisTrashCode + ")";  }
-                }
-                
-                
-                if (trashCode == "") {
-                    string thisGroup = "";
-                    if(numBarcodes != 0){ thisGroup = barcodeNames[barcodeIndex]; }
-                    
-                    
-                    int pos = thisGroup.find("ignore");
-                    if (pos == string::npos) {
-                        if (thisGroup != "") {
-                            groupMap[index.getName()] = thisGroup;
-                            
-                            map<string, int>::iterator it = groupCounts.find(thisGroup);
-                            if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
-                            else { groupCounts[it->first] ++; }
-                        }
-                    }
-                }
-                
-                cout << index.getName() << '\t' << commentString << endl;
-            }
-            in.close();
-            
-            int total = 0;
-            if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
-            for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
-            if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
-            
-            exit(1);
+            debugFunction();
         }
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
@@ -679,9 +585,82 @@ int MakeContigsCommand::createGroupFile(string outputGroupFile, string resultFas
     }
 }
 //**********************************************************************************************************************
+bool testGZReadable(vector<string>& fileInputs, vector<string>& indexInputs, bool& decompressionHelped, string format, MothurOut* m) {
+    try {
+        
+        bool error = false; bool readable = true;
+        decompressionHelped = false;
+        
+#ifdef USE_BOOST
+        boost::iostreams::filtering_istream inFF, inRF;
+        ifstream inForward, inReverse;
+        string forwardFile = fileInputs[0];
+        string reverseFile = fileInputs[1];
+        
+        Utils util;
+        util.openInputFileBinary(forwardFile, inForward, inFF);
+        util.openInputFileBinary(reverseFile, inReverse, inRF);
+        
+        FastqRead fread(inFF, error, format);
+        FastqRead rread(inRF, error, format);
+        inFF.pop(); inRF.pop();
+        
+        //error=true; to force test of decompression
+        if (error) { //error reading fastq files, try unzipping
+            
+            string forwardOutput = util.getRootName(forwardFile) + "mothurTest_forward.fastq";
+            string reverseOutput = util.getRootName(reverseFile) + "mothurTest_reverse.fastq";
+            
+            string unzipCommand = "gunzip < " + forwardFile + " > " + forwardOutput;
+            system(unzipCommand.c_str());
+            unzipCommand = "gunzip < " + reverseFile + " > " + reverseOutput;
+            system(unzipCommand.c_str());
+            
+            ifstream inForward1, inReverse1;
+            util.openInputFile(forwardOutput, inForward1);
+            util.openInputFile(reverseOutput, inReverse1);
+            
+            FastqRead fread(inForward1, error, format);
+            FastqRead rread(inReverse1, error, format);
+            
+            if (!error) {
+                m->mothurOut("[WARNING]: mothur is unable to read your compressed fastq files. Decompressing files and continuing to process.\n\n");
+                fileInputs[0] = forwardOutput;
+                fileInputs[1] = reverseOutput;
+                
+                if (indexInputs.size() != 0) {
+                    if ((indexInputs[0] != "NONE") && (indexInputs[0] != "")){
+                        string forwardIndex = util.getRootName(indexInputs[0]) + "mothurTest_forward_index.fastq";
+                        string unzipCommand = "gunzip < " + indexInputs[0] + " > " + forwardIndex;
+                        system(unzipCommand.c_str());
+                        indexInputs[0] = forwardIndex;
+                    }
+                    if ((indexInputs[1] != "NONE") && (indexInputs[1] != "")) {
+                        string reverseIndex = util.getRootName(indexInputs[1]) + "mothurTest_reverse_index.fastq";
+                        unzipCommand = "gunzip < " + indexInputs[1] + " > " + reverseIndex;
+                        system(unzipCommand.c_str());
+                        indexInputs[1] = reverseIndex;
+                    }
+                }
+                
+                decompressionHelped = true;
+            }
+            else { readable = false; }
+            
+        }
+#endif
+        
+        return readable;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "testGZReadable");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaFile, string& outScrapFastaFile, string& outQualFile, string& outScrapQualFile, string& outMisMatchFile, string group) {
     try {
-        bool hasQual = false;
+        
         unsigned long long numReads = 0;
         string inputFile = "";
         vector<string> fileInputs;
@@ -696,7 +675,6 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
             fileInputs.push_back(ffastafile); fileInputs.push_back(rfastafile);
 
             if (fqualfile != "") {
-                hasQual = true;
                 qualOrIndexInputs.push_back(fqualfile); qualOrIndexInputs.push_back(rqualfile);
                 variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fqualfile));
                 variables["[tag]"] = "trim";
@@ -704,13 +682,12 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
                 variables["[tag]"] = "scrap";
                 outScrapQualFile = getOutputFileName("qfile",variables);
             }else {
-                outQualFile = ""; outScrapQualFile = "";
+                outQualFile = ""; outScrapQualFile = ""; makeQualFile = false;
             }
 
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
             delim = '>';
         }else { //ffastqfile
-            hasQual = true;
             inputFile = ffastqfile;
             if (outputDir == "") {  thisOutputDir = util.hasPath(inputFile); }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
@@ -718,7 +695,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
             outQualFile = getOutputFileName("qfile",variables);
             variables["[tag]"] = "scrap";
             outScrapQualFile = getOutputFileName("qfile",variables);
-
+            
             fileInputs.push_back(ffastqfile); fileInputs.push_back(rfastqfile);
             if ((findexfile != "") || (rindexfile != "")){
                 qualOrIndexInputs.push_back("NONE"); qualOrIndexInputs.push_back("NONE");
@@ -749,27 +726,20 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
             }
         }
 #else
-        #if defined NON_WINDOWS
-        #else
-        string extension = util.getExtension(fileInputs[0]);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        extension = util.getExtension(fileInputs[1]);
-        if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-        if (qualOrIndexInputs.size() != 0) {
-            if (qualOrIndexInputs[0] != "NONE") {
-                extension = util.getExtension(qualOrIndexInputs[0]);
-                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-            }
-            if (qualOrIndexInputs[1] != "NONE") {
-                extension = util.getExtension(qualOrIndexInputs[1]);
-                if (extension == "gz") {  m->mothurOut("[ERROR]: You cannot use compressed .gz files as input with our windows version of mothur. \n"); m->setControl_pressed(true); }
-            }
-        }
-        #endif
         allGZ = false;
 #endif
-
-        if (allGZ)      { gz = true;    }
+        bool decompressionHelped = false;
+        if (allGZ)      {
+            gz = true;
+            //test to make sure you can read the gz files
+            bool readable = testGZReadable(fileInputs, qualOrIndexInputs, decompressionHelped, format, m);
+            
+            if (readable) {
+                if (decompressionHelped) { gz = false; }
+            }else {
+                m->mothurOut("[ERROR]: Unable to read compressed .gz files, please decompress and run make.contigs again. \n"); m->setControl_pressed(true); return 0;
+            }
+        }
         else            { gz = false;   }
 
         variables["[tag]"] = "trim";
@@ -792,13 +762,20 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
 
         m->mothurOut("Making contigs...\n");
         numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, group, pairedPrimers, rpairedPrimers, pairedBarcodes, rpairedBarcodes, barcodeNames, primerNames);
-
+        
+        if (decompressionHelped) { util.mothurRemove(fileInputs[0]); util.mothurRemove(fileInputs[1]); }
+        
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }
-
+        
+        
         if (file == "") {
             outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile); outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
-            if (hasQual) {
+            if (makeQualFile) {
                  outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile); outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile); }
+            else {
+                if (outQualFile != "")      { util.mothurRemove(outQualFile);       }
+                if (outScrapQualFile != "") { util.mothurRemove(outScrapQualFile);  }
+            }
             outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
         }
         m->mothurOut("Done.\n");
@@ -821,7 +798,7 @@ struct contigsData {
     OutputWriter* misMatchesFile;
     string align, group, format;
     float match, misMatch, gapOpen, gapExtend;
-    bool gz, reorient, trimOverlap, createGroup;
+    bool gz, reorient, trimOverlap, createGroup, makeQualFile;
     char delim;
     int nameType, offByOneTrimLength, pdiffs, bdiffs, tdiffs, kmerSize, insert, deltaq, maxee;
     vector<string> inputFiles, qualOrIndexFiles, outputNames;
@@ -841,6 +818,7 @@ struct contigsData {
 
 
     contigsData(){}
+    ~contigsData(){}
     contigsData(OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, OutputWriter* mmf) {
         trimFileName = tn;
         scrapFileName = sn;
@@ -849,6 +827,8 @@ struct contigsData {
         misMatchesFile = mmf;
         m = MothurOut::getInstance();
         count = 0;
+        makeQualFile = true;
+        if (trimQFileName == NULL) { makeQualFile = false; }
     }
 
     contigsData(OutputWriter* tn, OutputWriter* sn, OutputWriter* tqn, OutputWriter* sqn, OutputWriter* mmf, vector<string> ifn, vector<string> qif, linePair li, linePair lir, linePair qli, linePair qlir) {
@@ -865,6 +845,8 @@ struct contigsData {
         qlinesInput = qli;
         qlinesInputReverse = qlir;
         count = 0;
+        makeQualFile = true;
+        if (trimQFileName == NULL) { makeQualFile = false; }
     }
     void setVariables(bool isgz, char de, int nt, int offby, map<int, oligosPair> pbr, map<int, oligosPair> ppr, map<int, oligosPair> rpbr, map<int, oligosPair> rppr, vector<string> priNameVector, vector<string> barNameVector, bool ro, int pdf, int bdf, int tdf, string al, float ma, float misMa, float gapO, float gapE, int thr, int delt, double maxe, int km, string form, bool to, bool cfg, string gp) {
         gz = isgz;
@@ -1077,6 +1059,7 @@ int setNameType(string forwardFile, string reverseFile, char delim, int& offByOn
         exit(1);
     }
 }
+
 //**********************************************************************************************************************
 unsigned long long MakeContigsCommand::processMultipleFileOption(string& compositeFastaFile, string& compositeMisMatchFile) {
     try {
@@ -1098,16 +1081,23 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(string& composi
         string compositeQualFile = getOutputFileName("qfile",cvars);
         cvars["[tag]"] = "scrap";
         string compositeScrapQualFile = getOutputFileName("qfile",cvars);
+        
         cvars["[tag]"] = "";
         compositeMisMatchFile = getOutputFileName("report",cvars);
 
         ofstream outCTFasta, outCTQual, outCSFasta, outCSQual, outCMisMatch;
         util.openOutputFile(compositeFastaFile, outCTFasta); outCTFasta.close(); outputNames.push_back(compositeFastaFile); outputTypes["fasta"].push_back(compositeFastaFile);
-        util.openOutputFile(compositeQualFile, outCTQual); outCTQual.close(); outputNames.push_back(compositeQualFile); outputTypes["qfile"].push_back(compositeQualFile);
+        
+        util.openOutputFile(compositeScrapQualFile, outCSQual); outCSQual.close();
+        util.openOutputFile(compositeQualFile, outCTQual); outCTQual.close();
+        if (makeQualFile) {
+            outputNames.push_back(compositeScrapQualFile); outputTypes["qfile"].push_back(compositeScrapQualFile);
+            outputNames.push_back(compositeQualFile); outputTypes["qfile"].push_back(compositeQualFile);
+        }
         util.openOutputFile(compositeScrapFastaFile, outCSFasta); outCSFasta.close(); outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
-        util.openOutputFile(compositeScrapQualFile, outCSQual); outCSQual.close(); outputNames.push_back(compositeScrapQualFile); outputTypes["qfile"].push_back(compositeScrapQualFile);
+        
         util.openOutputFile(compositeMisMatchFile, outCMisMatch); outCMisMatch.close(); outputNames.push_back(compositeMisMatchFile); outputTypes["report"].push_back(compositeMisMatchFile);
-
+        
         if (gz) {
             numReads = createProcessesGroups(fileInputs, compositeFastaFile, compositeScrapFastaFile, compositeQualFile, compositeScrapQualFile, compositeMisMatchFile, file2Group);
         }else {
@@ -1128,13 +1118,16 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(string& composi
                 util.appendFiles(outMisMatchFile, compositeMisMatchFile); util.mothurRemove(outMisMatchFile);
                 util.appendFiles(outFastaFile, compositeFastaFile);  util.mothurRemove(outFastaFile);
                 util.appendFiles(outScrapFastaFile, compositeScrapFastaFile); util.mothurRemove(outScrapFastaFile);
-                util.appendFiles(outQualFile, compositeQualFile); util.mothurRemove(outQualFile);
-                util.appendFiles(outScrapQualFile, compositeScrapQualFile);  util.mothurRemove(outScrapQualFile);
-
+                if (makeQualFile) {
+                    util.appendFiles(outQualFile, compositeQualFile);
+                    util.appendFiles(outScrapQualFile, compositeScrapQualFile);
+                }
+                util.mothurRemove(outQualFile); util.mothurRemove(outScrapQualFile);
                 m->mothurOut("\nIt took " + toString(time(NULL) - startTime) + " secs to assemble " + toString(thisNumReads) + " reads.\n\n");
             }
         }
-
+        if (!makeQualFile) { util.mothurRemove(compositeQualFile); util.mothurRemove(compositeScrapQualFile); }
+        
         return numReads;
     }
     catch(exception& e) {
@@ -1932,7 +1925,7 @@ void driverContigs(contigsData* params){
                         //output
                         string output = ">" + fSeq.getName() + '\t' + "ee=" + toString(expected_errors) + '\t' + commentString + "\n" + contig + "\n";
                         params->trimFileName->write(output);
-                        if (hasQuality) {
+                        if (hasQuality && params->makeQualFile) {
                             output = ">" + fSeq.getName() + '\t' + "ee=" + toString(expected_errors) + '\t' + commentString +"\n";
                             for (int i = 0; i < contigScores.size(); i++) { output += toString(contigScores[i]) + " "; }  output += "\n";
                             params->trimQFileName->write(output);
@@ -1948,7 +1941,7 @@ void driverContigs(contigsData* params){
                     string output = ">" + fSeq.getName() + " | " + trashCode + '\t' + "ee=" +  toString(expected_errors) + '\t' + commentString + "\n" + contig + "\n";
                     params->scrapFileName->write(output);
 
-                    if (hasQuality) {
+                    if (hasQuality && params->makeQualFile) {
                         output = ">" + fSeq.getName() + " | " + trashCode + '\t' + "ee=" + toString(expected_errors) + '\t' + commentString + "\n";
                         for (int i = 0; i < contigScores.size(); i++) { output += toString(contigScores[i]) + " "; }  output += "\n";
                         params->scrapQFileName->write(output);
@@ -1960,20 +1953,20 @@ void driverContigs(contigsData* params){
 
 #if defined NON_WINDOWS
             if (!params->gz) {
-                unsigned long long pos = inFFasta.tellg();
-                if ((pos == -1) || (pos >= params->linesInput.end)) { good = false; break; }
+                double pos = inFFasta.tellg();
+                if (params->util.isEqual(pos,-1) || (pos >= params->linesInput.end)) { good = false; break; }
             }else {
-#ifdef USE_BOOST
+    #ifdef USE_BOOST
                 if (inFF.eof() || inRF.eof()) { good = false; break; }
-#endif
+    #endif
             }
 #else
             if (!params->gz) {
                 if (params->count >= params->linesInput.end) { good = false; break; }
             }else {
-#ifdef USE_BOOST
+    #ifdef USE_BOOST
                 if (inFF.eof() || inRF.eof()) { good = false; break; }
-#endif
+    #endif
             }
 #endif
 
@@ -2069,9 +2062,10 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 
         auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(outputFasta);
         auto synchronizedOutputFastaScrapFile = std::make_shared<SynchronizedOutputFile>(outputScrapFasta);
+        auto synchronizedMisMatchFile = std::make_shared<SynchronizedOutputFile>(outputMisMatches);
         auto synchronizedOutputQTrimFile = std::make_shared<SynchronizedOutputFile>(outputQual);
         auto synchronizedOutputQScrapFile = std::make_shared<SynchronizedOutputFile>(outputScrapQual);
-        auto synchronizedMisMatchFile = std::make_shared<SynchronizedOutputFile>(outputMisMatches);
+       
 
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
@@ -2080,7 +2074,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             OutputWriter* threadMismatchWriter = new OutputWriter(synchronizedMisMatchFile);
             OutputWriter* threadQTrimWriter = NULL;
             OutputWriter* threadQScrapWriter = NULL;
-            if (hasQuality) {
+            if (makeQualFile) {
                 threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
                 threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
             }
@@ -2098,7 +2092,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
         OutputWriter* threadQTrimWriter = NULL;
         OutputWriter* threadQScrapWriter = NULL;
-        if (hasQuality) {
+        if (makeQualFile) {
             threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
@@ -2123,7 +2117,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             delete data[i]->trimFileName;
             delete data[i]->scrapFileName;
             delete data[i]->misMatchesFile;
-            if (hasQuality) {
+            if (makeQualFile) {
                 delete data[i]->trimQFileName;
                 delete data[i]->scrapQFileName;
             }
@@ -2143,7 +2137,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
         delete threadFastaTrimWriter;
         delete threadFastaScrapWriter;
         delete threadMisMatchWriter;
-        if (hasQuality) {
+        if (makeQualFile) {
             delete threadQTrimWriter;
             delete threadQScrapWriter;
         }
@@ -2157,7 +2151,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
     }
 }
 //**********************************************************************************************************************
-//process one file at a time
+//process one file at a time, only get here with gz=true
 void driverContigsGroups(groupContigsData* gparams) {
     try {
         gparams->count = 0;
@@ -2175,32 +2169,69 @@ void driverContigsGroups(groupContigsData* gparams) {
             vector<string>  theseQIInputs;
             string ffastqfile = gparams->fileInputs[l][0]; theseFileInputs.push_back(ffastqfile);
             string rfastqfile = gparams->fileInputs[l][1]; theseFileInputs.push_back(rfastqfile);
-            string findexfile = gparams->fileInputs[l][2]; theseQIInputs.push_back(findexfile);
-            string rindexfile = gparams->fileInputs[l][3]; theseQIInputs.push_back(rindexfile);
+            string findexfile = gparams->fileInputs[l][2]; theseQIInputs.push_back(findexfile); //could be blank, "NONE" or filename
+            string rindexfile = gparams->fileInputs[l][3]; theseQIInputs.push_back(rindexfile); //could be blank, "NONE" or filename
             gparams->bundle->group = gparams->file2Groups[l];
-
-            //find read name type to speed read matching later
-            gparams->bundle->nameType = setNameType(ffastqfile, rfastqfile, gparams->bundle->delim, gparams->bundle->offByOneTrimLength, gparams->bundle->gz, gparams->bundle->format);
-
-            string inputFile = ffastqfile;
-            vector<string> thisFileInputs; thisFileInputs.push_back(ffastqfile); thisFileInputs.push_back(rfastqfile);
-            vector<string> thisQualOrIndexInputs;
-            if ((findexfile != "") || (rindexfile != "")){
-                thisQualOrIndexInputs.push_back("NONE"); thisQualOrIndexInputs.push_back("NONE");
-                if (findexfile != "") { thisQualOrIndexInputs[0] = findexfile; }
-                if (rindexfile != "") { thisQualOrIndexInputs[1] = rindexfile; }
+            
+            bool decompressionHelped = false;
+            
+            //test to make sure you can read the gz files
+            bool readable = testGZReadable(theseFileInputs, theseQIInputs, decompressionHelped, gparams->bundle->format, gparams->bundle->m);
+                
+            if (readable) {
+                if (decompressionHelped) { gparams->bundle->gz = false; }
+            }else {
+                gparams->bundle->m->mothurOut("[ERROR]: Unable to read compressed .gz files, please decompress and run make.contigs again. \n"); gparams->bundle->m->setControl_pressed(true); break;
             }
 
-            //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
-            vector<linePair> thisLines; thisLines.push_back(linePair(0, 1000)); thisLines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
-            vector<linePair> thisQLines; thisQLines.push_back(linePair(0, 1000)); thisQLines.push_back(linePair(0, 1000));  //qual[0], qual[1] - forward and reverse
+            //find read name type to speed read matching later
+            gparams->bundle->nameType = setNameType(theseFileInputs[0], theseFileInputs[1], gparams->bundle->delim, gparams->bundle->offByOneTrimLength, gparams->bundle->gz, gparams->bundle->format);
 
+            //string inputFile = ffastqfile;
+            //vector<string> thisFileInputs; thisFileInputs.push_back(ffastqfile); thisFileInputs.push_back(rfastqfile);
+            //vector<string> thisQualOrIndexInputs;
+            //if ((findexfile != "") || (rindexfile != "")){
+               // thisQualOrIndexInputs.push_back("NONE"); thisQualOrIndexInputs.push_back("NONE");
+                //if (findexfile != "") { thisQualOrIndexInputs[0] = findexfile; }
+                //if (rindexfile != "") { thisQualOrIndexInputs[1] = rindexfile; }
+            //}
+
+            //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
+            vector<linePair> thisLines; vector<linePair> thisQLines;
+            if (decompressionHelped) {
+                //set file positions for file
+                int processors = 1;
+                vector<double> fastaFilePos = gparams->bundle->util.divideFile(theseFileInputs[0], processors, gparams->bundle->delim);
+                thisLines.push_back(linePair(fastaFilePos[0], fastaFilePos[1])); //forward fastq
+                fastaFilePos = gparams->bundle->util.divideFile(theseFileInputs[1], processors, gparams->bundle->delim);
+                thisLines.push_back(linePair(fastaFilePos[0], fastaFilePos[1])); //reverse fastq
+                
+                if ((theseQIInputs[0] != "") && (theseQIInputs[0] != "NONE")){
+                    fastaFilePos = gparams->bundle->util.divideFile(theseQIInputs[0], processors, gparams->bundle->delim);
+                    thisQLines.push_back(linePair(fastaFilePos[0], fastaFilePos[1])); //forward index
+                }
+                if ((theseQIInputs[1] != "") && (theseQIInputs[1] != "NONE")){
+                    fastaFilePos = gparams->bundle->util.divideFile(theseQIInputs[1], processors, gparams->bundle->delim);
+                    thisQLines.push_back(linePair(fastaFilePos[0], fastaFilePos[1])); //forward index
+                }
+                if (thisQLines.size() == 0) { thisQLines = thisLines; }
+            }
+            else {
+                thisLines.push_back(linePair(0, 1000)); thisLines.push_back(linePair(0, 1000)); //fasta[0], fasta[1] - forward and reverse
+                thisQLines.push_back(linePair(0, 1000)); thisQLines.push_back(linePair(0, 1000));  //qual[0], qual[1] - forward and reverse
+            }
             gparams->bundle->m->mothurOut("Making contigs...\n");
 
             contigsData* dataBundle = new contigsData(gparams->bundle->trimFileName, gparams->bundle->scrapFileName, gparams->bundle->trimQFileName, gparams->bundle->scrapQFileName, gparams->bundle->misMatchesFile, theseFileInputs, theseQIInputs, thisLines[0], thisLines[1], thisQLines[0], thisQLines[1]);
             dataBundle->copyVariables(gparams->bundle);
             driverContigs(dataBundle);
 
+            if (decompressionHelped) {
+                gparams->bundle->util.mothurRemove(theseFileInputs[0]); gparams->bundle->util.mothurRemove(theseFileInputs[1]);
+                if (theseQIInputs[0] != "NONE") { gparams->bundle->util.mothurRemove(theseQIInputs[0]); }
+                if (theseQIInputs[1] != "NONE") { gparams->bundle->util.mothurRemove(theseQIInputs[1]); }
+            }
+            
             gparams->count += dataBundle->count;
             gparams->badNames.insert(dataBundle->badNames.begin(), dataBundle->badNames.end());
             gparams->bundle->groupMap.insert(dataBundle->groupMap.begin(), dataBundle->groupMap.end());
@@ -2243,7 +2274,6 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             remainingPairs = remainingPairs - numPairs;
         }
 
-        bool hasQuality = true;
         auto synchronizedOutputFastaTrimFile = std::make_shared<SynchronizedOutputFile>(compositeFastaFile);
         auto synchronizedOutputFastaScrapFile = std::make_shared<SynchronizedOutputFile>(compositeScrapFastaFile);
         auto synchronizedOutputQTrimFile = std::make_shared<SynchronizedOutputFile>(compositeQualFile);
@@ -2257,7 +2287,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             OutputWriter* threadMismatchWriter = new OutputWriter(synchronizedMisMatchFile);
             OutputWriter* threadQTrimWriter = NULL;
             OutputWriter* threadQScrapWriter = NULL;
-            if (hasQuality) {
+            if (makeQualFile) {
                 threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
                 threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
             }
@@ -2275,7 +2305,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
         OutputWriter* threadQTrimWriter = NULL;
         OutputWriter* threadQScrapWriter = NULL;
-        if (hasQuality) {
+        if (makeQualFile) {
             threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
@@ -2287,7 +2317,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         delete threadFastaTrimWriter;
         delete threadFastaScrapWriter;
         delete threadMisMatchWriter;
-        if (hasQuality) {
+        if (makeQualFile) {
             delete threadQTrimWriter;
             delete threadQScrapWriter;
         }
@@ -2308,7 +2338,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             delete data[i]->bundle->trimFileName;
             delete data[i]->bundle->scrapFileName;
             delete data[i]->bundle->misMatchesFile;
-            if (hasQuality) {
+            if (makeQualFile) {
                 delete data[i]->bundle->trimQFileName;
                 delete data[i]->bundle->scrapQFileName;
             }
@@ -2338,9 +2368,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
     try {
         lines.clear();
         qLines.clear();
-        vector<unsigned long long> fastaFilePos;
-        vector<unsigned long long> qfileFilePos;
-        vector<unsigned long long> temp;
+        vector<double> fastaFilePos;
+        vector<double> qfileFilePos;
+        vector<double> temp;
 
         nameType = setNameType(fasta[0], fasta[1], delim, offByOneTrimLength, gz, format);
 
@@ -2393,7 +2423,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                     map<string, int>::iterator it = firstSeqNames.find(name);
 
                     if (it != firstSeqNames.end())  { //this is the start of a new chunk
-                        unsigned long long pos = in2.tellg();
+                        double pos = in2.tellg();
                         qfileFilePos.push_back(pos - input.length() - 1);
                         firstSeqNames.erase(it);
                     }
@@ -2406,7 +2436,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
         //get last file position of reverse fasta[1]
         FILE * pFile;
-        unsigned long long size;
+        double size;
 
         //get num bytes in file
         fasta[1] = util.getFullPathName(fasta[1]);
@@ -2466,7 +2496,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             map<string, int>::iterator it = firstSeqNames.find(name);
 
                             if(it != firstSeqNames.end()) { //this is the start of a new chunk
-                                unsigned long long pos = inQual.tellg();
+                                double pos = inQual.tellg();
                                 qfileFilePos.push_back(pos - input.length() - 1);
                                 firstSeqNames.erase(it);
                             }                        }
@@ -2478,7 +2508,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
                 //get last file position of reverse qual[0]
                 FILE * pFile;
-                unsigned long long size;
+                double size;
 
                 //get num bytes in file
                 qual[0] = util.getFullPathName(qual[0]);
@@ -2525,7 +2555,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                             map<string, int>::iterator it = firstSeqNames.find(name);
 
                             if(it != firstSeqNames.end()) { //this is the start of a new chunk
-                                unsigned long long pos = inQual2.tellg();
+                                double pos = inQual2.tellg();
                                 temp.push_back(pos - input.length() - 1);
                                 firstSeqNames.erase(it);
                             }
@@ -2676,7 +2706,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename, map<
         vector< vector<string> > files = dataFile.getFiles();
         gz = dataFile.isGZ();
         file2Group = dataFile.getFile2Group();
-        createFileGroup = dataFile.is3ColumnWithGroupNames();
+        createFileGroup = dataFile.isColumnWithGroupNames();
         if (dataFile.containsIndexFiles() && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->setControl_pressed(true);  }
         
         if (files.size() == 0) { m->setControl_pressed(true); }
@@ -2735,5 +2765,116 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
 		m->errorOut(e, "MakeContigsCommand", "getOligos");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void MakeContigsCommand::debugFunction() {
+    try{
+//allows you to run the oligos and index file independantly to check for barcode issues. make.contigs(findex=yourIndexFile, bdiffs=1, oligos=yourOligosFile, checkorient=t). just used for user support
+    
+    map<int, oligosPair> pairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reorientedPairedPrimers;
+    vector<string> barcodeNames, primerNames;
+    
+    if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, reorientedPairedPrimers, pairedBarcodes, reorientedPairedBarcodes, barcodeNames, primerNames);    }
+    
+    int numPrimers = pairedPrimers.size();
+    TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes, true);
+    int numBarcodes = pairedBarcodes.size();
+    TrimOligos* rtrimOligos = NULL;
+    if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, reorientedPairedPrimers, reorientedPairedBarcodes, true); numBarcodes = reorientedPairedBarcodes.size();   numPrimers = reorientedPairedPrimers.size();  }
+    
+    ifstream in;
+    util.openInputFile(findexfile, in);
+    
+    while (!in.eof()) {
+        if (m->getControl_pressed()) { break; }
+        
+        bool ignore = false;
+        FastqRead index(in, ignore, format); util.gobble(in);
+        
+        int success = 1;
+        string trashCode = "";
+        string commentString = "";
+        int currentSeqsDiffs = 0;
+        int barcodeIndex = 0;
+        
+        Sequence fSeq, rSeq;
+        QualityScores* fQual = NULL; QualityScores* rQual = NULL;
+        QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
+        Sequence findexBarcode("findex", index.getSeq());  Sequence rindexBarcode("rindex", "NONE");
+        Sequence savedFindex("findex", index.getSeq());  Sequence savedRIndex("rindex", "NONE");
+        
+        if(numBarcodes != 0){
+            vector<int> results;
+            
+            results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
+            
+            success = results[0] + results[2];
+            commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], bdiffs) + ") ";
+            if(success > bdiffs)        {    trashCode += 'b';    }
+            else{ currentSeqsDiffs += success;  }
+        }
+        
+        if (reorient && (trashCode != "")) { //if you failed and want to check the reverse
+            int thisSuccess = 0;
+            string thisTrashCode = "";
+            string thiscommentString = "";
+            int thisCurrentSeqsDiffs = 0;
+            
+            int thisBarcodeIndex = 0;
+            
+            if(numBarcodes != 0){
+                vector<int> results;
+                
+                results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);
+                
+                thisSuccess = results[0] + results[2];
+                thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], bdiffs) + ") ";
+                if(thisSuccess > bdiffs)        {    thisTrashCode += 'b';    }
+                else{ thisCurrentSeqsDiffs += thisSuccess;  }
+            }
+            
+            if (thisTrashCode == "") {
+                trashCode = thisTrashCode;
+                success = thisSuccess;
+                currentSeqsDiffs = thisCurrentSeqsDiffs;
+                commentString = thiscommentString;
+                barcodeIndex = thisBarcodeIndex;
+            }else { trashCode += "(" + thisTrashCode + ")";  }
+        }
+        
+        
+        if (trashCode == "") {
+            string thisGroup = "";
+            if(numBarcodes != 0){ thisGroup = barcodeNames[barcodeIndex]; }
+            
+            
+            int pos = thisGroup.find("ignore");
+            if (pos == string::npos) {
+                if (thisGroup != "") {
+                    groupMap[index.getName()] = thisGroup;
+                    
+                    map<string, int>::iterator it = groupCounts.find(thisGroup);
+                    if (it == groupCounts.end()) {    groupCounts[thisGroup] = 1; }
+                    else { groupCounts[it->first] ++; }
+                }
+            }
+        }
+        
+        cout << index.getName() << '\t' << commentString << endl;
+        }
+        in.close();
+        
+        int total = 0;
+        if (groupCounts.size() != 0) {  m->mothurOut("\nGroup count: \n");  }
+        for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) { total += it->second; m->mothurOut(it->first + "\t" + toString(it->second) + "\n"); }
+        if (total != 0) { m->mothurOut("\nTotal of all groups is " + toString(total) + "\n"); }
+        
+        exit(1);
+        
+}
+catch(exception& e) {
+    m->errorOut(e, "MakeContigsCommand", "debugFunction");
+    exit(1);
+}
 }
 //**********************************************************************************************************************

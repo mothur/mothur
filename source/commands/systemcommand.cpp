@@ -47,7 +47,7 @@ SystemCommand::SystemCommand(string option)  {
 			if (commandOption == "not found") { commandOption = ""; }
 			else { command = commandOption; }
 			
-			if ((option == "") && (commandOption == "")) { m->mothurOut("You must enter a command to run."); m->mothurOutEndLine(); abort = true; }
+            if ((option == "") && (commandOption == "")) { m->mothurOut("[ERROR]: You must enter a command to run.\n"); abort = true; }
 			else if (commandOption == "") { 
 				//check for outputdir and inputdir parameters
 				int commaPos = option.find_first_of(',');

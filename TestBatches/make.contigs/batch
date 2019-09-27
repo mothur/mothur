@@ -1,0 +1,19 @@
+#make.contigs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# stability.files from MISeq_SOP
+set.dir(input=./TestFiles, output=./make.contigs, tempdefault=./TestReferences)
+set.logfile(name=makecontigs.logfile)
+make.contigs(file=stability.files)
+summary.seqs(fasta=current)
+make.contigs(file=stability.gz.files)
+summary.seqs(fasta=current)
+make.contigs(ffastq=F8D150_S368_L001_R1_001.fastq.gz, rfastq=F8D150_S368_L001_R2_001.fastq.gz)
+summary.seqs(fasta=current)
+make.contigs(ffastq=F8D150_S368_L001_R1_001.fastq, rfastq=F8D150_S368_L001_R2_001.fastq)
+summary.seqs(fasta=current)
+make.contigs(ffasta=F8D150_S368_L001_R1_001.fasta, rfasta=F8D150_S368_L001_R2_001.fasta, rqfile=F8D150_S368_L001_R2_001.qual, fqfile=F8D150_S368_L001_R1_001.qual)
+summary.seqs(fasta=current)
+make.contigs(ffastq=small.forward.fastq, rfastq=small.reverse.fastq, oligos=qatar.oligos, pdiffs=2, bdiffs=1, checkorient=t)
+summary.seqs(fasta=current)
+quit()
+
