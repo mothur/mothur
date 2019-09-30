@@ -130,6 +130,10 @@ int main(int argc, char *argv[]){
                 packagesUsed += "HDF5,";
             #endif
             
+            #ifdef USE_GSL
+                packagesUsed += "GSL,";
+            #endif
+            
             if (packagesUsed != "") {
                 //remove last comma
                 packagesUsed = packagesUsed.substr(0,packagesUsed.length()-1);
