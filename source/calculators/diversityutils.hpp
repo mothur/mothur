@@ -37,7 +37,7 @@ public:
     double sd(int n, double dAlpha, double dBeta, double);
     int minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, double (*f)(const gsl_vector*, void* params), double, double, double);
     vector<double> mcmc(t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));
-    void outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(const gsl_vector*, void* params));
+    vector<double> outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(const gsl_vector*, void* params));
     void getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vector *ptX, int* pnSDash, int nS, t_Params *ptParams);
     int solveF(double x_lo, double x_hi, void* params, double tol, double *xsolve);
     int solveF(double x_lo, double x_hi, double (*f)(double, void*), void* params, double tol, double *xsolve);
@@ -46,7 +46,7 @@ public:
     double logLikelihoodRampal(int n, double dMDash, double dV, double dNu);
     double logLikelihoodQuad(int n, double dMDash, double dV, double dNu);
     double calcMu(void *ptLNParams);
-    int fitSigma(vector<double>, double, int fi, t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));
+    int fitSigma(vector<double>, vector<double>, int fi, t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro));
     
     #endif
     

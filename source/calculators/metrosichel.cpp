@@ -209,14 +209,14 @@ vector<string> MetroSichel::getValues(SAbundVector* rank){
         m->mothurOut("\nMetroSichel - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
         
         dutils.minimiseSimplex(ptX, 4, (void*) &tData, &nLogLikelihood3, 0.1, 1.0e-5, 100000);
-        dutils.outputResults(ptX, &tData, &nLogLikelihood3);
+        vector<double> parameterResults  = dutils.outputResults(ptX, &tData, &nLogLikelihood3);
         
         
         if(tParams.nIter > 0){
             
             vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis3);
             
-            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, sigmaA, fitIters, &tParams, &tData, ptX, &metropolis3); }
+            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, parameterResults, fitIters, &tParams, &tData, ptX, &metropolis3); }
         }
         
         

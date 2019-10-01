@@ -34,7 +34,6 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
         CommandParameter pcalc("calc", "Multiple", "erarefact-ig-ln-ls-si-igabund-igrarefact-lnrarefact-lnabund-lnshift-lsabund-lsrarefact-siabund-sirarefact-sishift", "ig", "", "", "","",false,false,true); parameters.push_back(pcalc); //lnabund
-        CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
         CommandParameter palpha("sigmaa", "Number", "", "0.1", "", "", "","",false,false,true); parameters.push_back(palpha);
         CommandParameter pbeta("sigmab", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pbeta);
         CommandParameter psigman("sigman", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(psigman);
@@ -67,18 +66,18 @@ string EstimatorSingleCommand::getHelpString(){
         helpString += "estimator.single(list=yourListFile, calc=yourEstimators).\n";
         helpString += "Example estimator.single(list=final.opti_mcc.list, calc=erarefaction).\n";
         helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
-        helpString += "The sample file is used to provide mcmc sampling to the following calculators: ...............\n";
+        helpString += "The sample file is used to provide mcmc sampling to the calculators.\n";
         helpString += "The default values for freq is 100, and calc is erarefaction.\n";
         helpString += "The sigmaa parameter is used to set the std. dev. of alpha / X / mean prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
         helpString += "The sigmab parameter is used to set the std. dev. of beta / Y / V prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
-        helpString += "The sigman parameter is used to set the std. dev. of N / Gamma prop. distn for MetroLogStudent / MetroSichel, respectively. Default = 0.10. n";
+        helpString += "The sigman parameter is used to set the std. dev. of N / Gamma prop. distn for MetroLogStudent / MetroSichel, respectively. Default = 0.10.\n";
         helpString += "The sigmas parameter is used to set the std. dev. of S prop. distn for MetroIG / MetroLogNormal / MetroLogStudent / MetroSichel. Default = 100. n";
         helpString += "The coverage parameter allows you to the desired coverage.  Default=0.8.\n";
-        helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 1000.\n";
+        helpString += "The iters parameter allows you to set number of mcmc samples to generate.  The default is 250000.\n";
         helpString += "The burn parameter allows ignore part of the sampling file.  Default = 200000 / 100000 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, LSRarefaction, SIAbundance, SIRarefaction, SIShift respectively.\n";
         helpString += "The burnsample parameter allows you to set sampling frequency.  The default is 1000 / 100 for IGAbundance, LNShift, LSAbundance / IGRarefaction, LNRarefaction, LSRarefaction, SIAbundance, SIRarefaction, SIShift respectively.\n";
-        helpString += "The fit parameter is used to indicate to mothur you want mothur to auto adjust the sampling data parameters. default=100, meaning try fitting 100 times. \n";
-        helpString += validCalculator.printCalc("single");
+        helpString += "The fit parameter is used to indicate to mothur you want mothur to auto adjust the sampling data parameters. default=10, meaning try fitting 10 times. \n";
+        helpString += validCalculator.printCalc("estimator");
         helpString += "Be sure to use the correct sampling estimator with your calculator. IG is used for igabund and igrarefact. LN is used for lnabund, lnshift and lnrarefact. LS is used for lsabund and lsrarefaction. SI is used for siabund, sirarefact and sishift.\n";
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
         
@@ -97,7 +96,7 @@ string EstimatorSingleCommand::getCommonQuestions(){
         vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
         
         string howto = "How do you create the sampling files?"; howtos.push_back(howto);
-        string hanswer = "\tRun a short trial MCMC run of 1000 iterations with guessed std. dev.s for the proposal distributions say about 10% of the parameter values. Adjust the std. dev.s untill the acceptance ratios are about 0.5. Then perform a longer run of say 250,000 iterations (mothur's default). Three data files with posterior samples for three different sets of parameter values will be generated.\n"; hanswers.push_back(hanswer);
+        string hanswer = "\tRun a short trial MCMC run of 1000 iterations with guessed std. dev.s for the proposal distributions say about 10% of the parameter values. Adjust the std. dev.s until the acceptance ratios are about 0.5. Then perform a longer run of say 250,000 iterations (mothur's default). Three data files with posterior samples for three different sets of parameter values will be generated.\n"; hanswers.push_back(hanswer);
         
         string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
         
@@ -361,7 +360,7 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             util.mothurConvert(temp, sigmaS);
             
             itersSet = true;
-            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; itersSet = false; }
+            temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "250000"; itersSet = false; }
             util.mothurConvert(temp, iters);
             
             temp = validParameter.valid(parameters, "fit");		if (temp == "not found") { temp = "10"; }

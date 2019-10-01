@@ -116,21 +116,34 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 vector<float> DeCalculator::calcObserved(Sequence* query, Sequence* subject, vector<int> window, int size) {
 	try {
 		
+        if (query->getAligned().length() != subject->getAligned().length()) {
+            
+            m->mothurOut("[ERROR]: seqLengths must match. queryLength = " + toString(query->getAligned().length()) + ", subjectLength = " + toString(subject->getAligned().length()) +"\n");
+            m->setControl_pressed(true);
+        }
+        
+        
 		vector<float> temp;	
 		//int gaps = 0;		
 		for (int i = 0; i < window.size(); i++) {
-						
+					
+            if (m->getControl_pressed()) { break; }
+            
 			string seqFrag = query->getAligned().substr(window[i], size);
 			string seqFragsub = subject->getAligned().substr(window[i], size);
+            
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: seqLengths = " + toString(seqFrag.length()) + "," + toString(seqFragsub.length()) +  "\t" + toString(window[i]) + "\t" + toString(size) +"\n"); }
 				
 			int diff = 0;
 			for (int b = 0; b < seqFrag.length(); b++) {
 				//if at least one is a base and they are not equal
 				if( (isalpha(seqFrag[b]) || isalpha(seqFragsub[b])) && (seqFrag[b] != seqFragsub[b]) ) { diff++; }
             }
-               
+            
 			//percentage of mismatched bases
 			float dist = diff / (float) (seqFrag.length()) * 100;
+            
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: diffs = " + toString(diff) + ", dist = " + toString(dist) + "\n"); }
 			
 			temp.push_back(dist);
 		}

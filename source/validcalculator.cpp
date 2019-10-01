@@ -774,6 +774,7 @@ string ValidCalculators::printCalc(string parameter) {
         else if (parameter == "matrix")             {  output += util.getStringFromSet(matrix, ", ");               }
         else if (parameter == "heat")               {  output += util.getStringFromSet(heat, ", ");                 }
         else if (parameter == "distance")           {  output += util.getStringFromSet(distance, ", ");             }
+        else if (parameter == "estimator")          {  output += util.getStringFromSet(estimators, ", ");             }
 		output += "\n";
 		
 		return output;

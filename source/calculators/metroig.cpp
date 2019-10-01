@@ -210,13 +210,13 @@ vector<string> MetroIG::getValues(SAbundVector* rank){
         
         dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood0, 0.1, 1.0e-2, 100000);
         
-        dutils.outputResults(ptX, &tData, &nLogLikelihood0);
+        vector<double> parameterResults = dutils.outputResults(ptX, &tData, &nLogLikelihood0);
         
         if(tParams.nIter > 0){
     
             vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis0);
             
-            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, sigmaA, fitIters, &tParams, &tData, ptX, &metropolis0); }
+            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, parameterResults, fitIters, &tParams, &tData, ptX, &metropolis0); }
         }
         
         

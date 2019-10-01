@@ -234,13 +234,13 @@ vector<string> MetroLogNormal::getValues(SAbundVector* rank){
 
         dutils.minimiseSimplex(ptX, 3, (void*) &tData, &nLogLikelihood1, 1.0, 1.0e-2, 100000);
 
-        dutils.outputResults(ptX, &tData, &nLogLikelihood1);
+        vector<double> parameterResults = dutils.outputResults(ptX, &tData, &nLogLikelihood1);
         
         if(tParams.nIter > 0){
             
             vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis1); //sigmaX 0.1
             
-            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, sigmaX, fitIters, &tParams, &tData, ptX, &metropolis1); }
+            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, parameterResults, fitIters, &tParams, &tData, ptX, &metropolis1); }
             
         }
         

@@ -220,13 +220,13 @@ vector<string> MetroLogStudent::getValues(SAbundVector* rank){
         m->mothurOut("\nMetroLogStudent - D = " + toString(numOTUs) + " L = " + toString(sampled) +  " Chao = " + toString(chaoResult) +  "\n");
         
         dutils.minimiseSimplex(ptX, 4, (void*) &tData, &nLogLikelihood2, 0.1, 1.0e-3, 100000);
-        dutils.outputResults(ptX, &tData, &nLogLikelihood2);
+        vector<double> parameterResults = dutils.outputResults(ptX, &tData, &nLogLikelihood2);
         
         if(tParams.nIter > 0){
             
             vector<double> acceptanceRates = dutils.mcmc(&tParams, &tData, ptX, &metropolis2);
             
-            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, sigmaM, fitIters, &tParams, &tData, ptX, &metropolis2); }
+            if (fitIters != 0) { bestSample = dutils.fitSigma(acceptanceRates, parameterResults, fitIters, &tParams, &tData, ptX, &metropolis2); }
         }
         
         

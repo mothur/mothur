@@ -677,8 +677,10 @@ bool DiversityUtils::bessel(double* pdResult, int n, double dAlpha, double dBeta
 
 /***********************************************************************/
 
-void DiversityUtils::outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(const gsl_vector*, void* params)){
+vector<double> DiversityUtils::outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(const gsl_vector*, void* params)){
     try {
+        vector<double> results;
+        
         double dAlpha = 0.0, dBeta = 0.0, dS = 0.0, dL = 0.0, dGamma = 0.0;
         
         dAlpha = gsl_vector_get(ptX, 0);
@@ -694,10 +696,26 @@ void DiversityUtils::outputResults(gsl_vector *ptX, t_Data *ptData, double (*f)(
         
         dL = f(ptX, ptData);
         
-        if (method == "metroig")        { m->mothurOut("\nMetroIG - ML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");            }
-        else if (method == "metroln")   { m->mothurOut("\nMetroLogNormal - ML simplex: M = " + toString(dAlpha) +  " V = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");     }
-        else if (method == "metrols")   { m->mothurOut("\nMetroLogStudent - ML simplex: M = " + toString(dAlpha) +  " V = " + toString(dBeta) +  " Nu = " + toString(dGamma) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");     }
-        else if (method == "metrosichel")   { m->mothurOut("\nMetroSichel - ML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " g = " + toString(dGamma) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");     }
+        results.push_back(dAlpha); results.push_back(dBeta);
+        
+        if (method == "metroig")        {
+            m->mothurOut("\nMetroIG - ML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
+            results.push_back(dS); results.push_back(dL);
+        }
+        else if (method == "metroln")   {
+            m->mothurOut("\nMetroLogNormal - ML simplex: M = " + toString(dAlpha) +  " V = " + toString(dBeta) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
+            results.push_back(dS); results.push_back(dL);
+        }
+        else if (method == "metrols")   {
+            m->mothurOut("\nMetroLogStudent - ML simplex: M = " + toString(dAlpha) +  " V = " + toString(dBeta) +  " Nu = " + toString(dGamma) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
+            results.push_back(dGamma); results.push_back(dS); results.push_back(dL);
+        }
+        else if (method == "metrosichel")   {
+            m->mothurOut("\nMetroSichel - ML simplex: a = " + toString(dAlpha) +  " b = " + toString(dBeta) +  " g = " + toString(dGamma) +  " S = " + toString(dS) +  " NLL = " + toString(dL) + "\n");
+            results.push_back(dGamma); results.push_back(dS); results.push_back(dL);
+        }
+        
+        return results;
         
     }
     catch(exception& e) {
@@ -810,40 +828,58 @@ void DiversityUtils::getProposal(gsl_rng *ptGSLRNG, gsl_vector *ptXDash, gsl_vec
     }
 }
 /***********************************************************************/
-int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int fitIters, t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro)){
+int DiversityUtils::fitSigma(vector<double> acceptanceRates, vector<double> parameterResults, int fitIters, t_Params *ptParams, t_Data *ptData, gsl_vector* ptX, void* f (void * pvInitMetro)){
     try {
+        double sigmaA = 0.1;
+        vector<double> defaults;
+        defaults.push_back(ptParams->dSigmaX); defaults.push_back(ptParams->dSigmaY); defaults.push_back(ptParams->dSigmaN);
         acceptRatioPos defaultRatio = findBest(acceptanceRates);
         
         if (defaultRatio.acceptRatio <= 0.05) { return defaultRatio.pos;  }
         
+        for (int i = 0; i < parameterResults.size(); i++) { parameterResults[i] /= 10.0; }
+        
         int numTries = 1;
-        map<double, acceptRatioPos> sigmaToAccept; //sigma value -> acceptance ratio
-        map<acceptRatioPos, double> acceptToSigma; //acceptance ratio -> sigma value
+        map<vector<double>, acceptRatioPos> sigmaToAccept; //sigma value -> acceptance ratio
+        map<acceptRatioPos, vector<double>> acceptToSigma; //acceptance ratio -> sigma value
         
         acceptRatioPos temp; //1.0 and pos 0 be default
-        sigmaToAccept[(sigmaA/10.0)] = temp;        //0.01
-        sigmaToAccept[(sigmaA/100.0)] = temp;       //0.001
-        sigmaToAccept[(sigmaA/1000.0)] = temp;       //0.0001
-        sigmaToAccept[(sigmaA/10000.0)] = temp;       //0.00001
-        
+        sigmaToAccept[parameterResults] = temp;     //0.01
+        vector<double> testTries = parameterResults;
+        for (int i = 0; i < testTries.size(); i++) { testTries[i] /= 10.0; }
+        sigmaToAccept[testTries] = temp;        //0.01
+        testTries = parameterResults;
+        for (int i = 0; i < testTries.size(); i++) { testTries[i] /= 100.0; }
+        sigmaToAccept[testTries] = temp;       //0.001
+        testTries = parameterResults;
+        for (int i = 0; i < testTries.size(); i++) { testTries[i] /= 1000.0; }
+        sigmaToAccept[testTries] = temp;       //0.001
+        testTries = parameterResults;
+        for (int i = 0; i < testTries.size(); i++) { testTries[i] /= 10000.0; }
+        sigmaToAccept[testTries] = temp;       //0.001
+            
         double newSigmaA = sigmaA + (sigmaA/2.0);         //0.15
-        sigmaToAccept[newSigmaA] = temp;
-        newSigmaA = sigmaA+sigmaA;                  //0.2
-        sigmaToAccept[newSigmaA] = temp;
+        testTries = parameterResults;
+        for (int i = 0; i < testTries.size(); i++) { testTries[i] += newSigmaA; }
+        sigmaToAccept[testTries] = temp;
+        testTries = parameterResults;
+        for (int i = 0; i < testTries.size(); i++) { testTries[i] += sigmaA+sigmaA; }
+        sigmaToAccept[testTries] = temp;
+        
     
         //adjust around closest "high" and closest "low" values
         acceptRatioPos thisBestHigh, thisBestLow;
-        map<acceptRatioPos, double> acceptToSigmaHigh; //acceptance ratio -> sigma value
-        map<acceptRatioPos, double> acceptToSigmaLow; //acceptance ratio -> sigma value
+        map<acceptRatioPos, vector<double>> acceptToSigmaHigh; //acceptance ratio -> sigma value
+        map<acceptRatioPos, vector<double>> acceptToSigmaLow; //acceptance ratio -> sigma value
         
         //set iters to 1000, get close to value then run with nIters
         int savedIters = ptParams->nIter;
         ptParams->nIter = 1000;
     
-        for (map<double, acceptRatioPos>::iterator it = sigmaToAccept.begin(); it != sigmaToAccept.end(); it++) {
+        for (map<vector<double>, acceptRatioPos>::iterator it = sigmaToAccept.begin(); it != sigmaToAccept.end(); it++) {
             if (m->getControl_pressed()) { break; }
             
-            ptParams->dSigmaX = it->first; ptParams->dSigmaY = it->first; ptParams->dSigmaN = it->first;
+            ptParams->dSigmaX = it->first[0]; ptParams->dSigmaY = it->first[1]; ptParams->dSigmaN = it->first[2];
             
             acceptanceRates = mcmc(ptParams, ptData, ptX, f);
             
@@ -881,19 +917,20 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             }
         }
         
-        sigmaToAccept[sigmaA] = defaultRatio; //0.1
-        acceptToSigma[defaultRatio] = sigmaA;
+        sigmaToAccept[defaults] = defaultRatio;
+        acceptToSigma[defaultRatio] = defaults;
         
-        double factor = 0.0; bool badHigh = false; bool badLow = false; double badFactor = 0.0;
-        
+        vector<double> factors; factors.resize(3, 0); bool badHigh = false; bool badLow = false; double badFactor = 0.0;
+        vector<double> badFactors; badFactors.resize(3, 0);
+       
         //find best high and check
-        map<acceptRatioPos, double>::iterator itFind = acceptToSigma.find(thisBestHigh);
+        map<acceptRatioPos, vector<double>>::iterator itFind = acceptToSigma.find(thisBestHigh);
         if (itFind != acceptToSigma.end()) {
             if (thisBestHigh.acceptRatio > 0.25) {
-                badHigh = true; badFactor += itFind->second;
+                badHigh = true; for (int i = 0; i < badFactors.size(); i++) { badFactors[i] += itFind->second[i]; }
             }else {
-                factor += itFind->second;
-                sigmaA = itFind->second;
+                for (int i = 0; i < factors.size(); i++) { factors[i] += itFind->second[i]; }
+                sigmaA = itFind->second[0];
             }
         }//else no high values
         
@@ -901,27 +938,33 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
         itFind = acceptToSigma.find(thisBestLow);
         if (itFind != acceptToSigma.end()) {
             if (thisBestLow.acceptRatio > 0.25) { //below 25% acceptance, lets disregard
-                badLow = true; badFactor += itFind->second;
+                badLow = true; badHigh = true; for (int i = 0; i < badFactors.size(); i++) { badFactors[i] += itFind->second[i]; }
             }else {
-                factor += itFind->second;
-                if (badHigh) { sigmaA = itFind->second; }
-                else { if (sigmaA > itFind->second) { sigmaA = itFind->second; } }
+                for (int i = 0; i < factors.size(); i++) { factors[i] += itFind->second[i]; }
+                if (badHigh) { sigmaA = itFind->second[0]; }
+                else { if (sigmaA > itFind->second[0]) { sigmaA = itFind->second[0]; } }
             }
         }//no low values
         
         if (badHigh && badLow) {
             double increment = badFactor / (double)(fitIters);
-            sigmaA = acceptToSigma.begin()->second; //sigma for best try
+            sigmaA = acceptToSigma.begin()->second[0]; //sigma for best try
             sigmaA -= (increment*(fitIters/(double)2.0));
-            factor = badFactor / (double)(fitIters);
+            for (int i = 0; i < factors.size(); i++) { factors[i] = badFactors[i] / (double)(fitIters); }
         }else if (badHigh || badLow)  {
-            double increment = factor / (double)(fitIters);
-            sigmaA -= (increment*(fitIters/(double)2.0));
+            for (int i = 0; i < factors.size(); i++) {
+                double increment = factors[i] / (double)(fitIters);
+                sigmaA -= (increment*(fitIters/(double)2.0));
+            }
         }else { //good high and low
-            factor /= (double) fitIters;
+            for (int i = 0; i < factors.size(); i++) { factors[i] /= (double)(fitIters); }
         }
-
-        ptParams->dSigmaX = sigmaA; ptParams->dSigmaY = sigmaA; ptParams->dSigmaN = sigmaA;
+        
+        for (int i = 0; i < factors.size(); i++) {
+            if (util.isEqual(factors[i], 0)) { factors[i] = 0.1; }
+        }
+        
+        ptParams->dSigmaX = acceptToSigma.begin()->second[0]; ptParams->dSigmaY = acceptToSigma.begin()->second[1]; ptParams->dSigmaN = acceptToSigma.begin()->second[2];
         ptParams->nIter = savedIters;
         
         while ((thisBestLow.acceptRatio > 0.05) && (numTries < fitIters)) {
@@ -929,24 +972,26 @@ int DiversityUtils::fitSigma(vector<double> acceptanceRates, double sigmaA, int 
             
             m->mothurOut("\nFit try: " + toString(numTries) + "\n");
             
-            ptParams->dSigmaX += factor; ptParams->dSigmaY += factor; ptParams->dSigmaN += factor;
+            ptParams->dSigmaX += factors[0]; ptParams->dSigmaY += factors[1]; ptParams->dSigmaN += factors[2];
             
-            map<double, acceptRatioPos>::iterator it = sigmaToAccept.find(ptParams->dSigmaX);
-            
+            vector<double> theseSettings; theseSettings.push_back(ptParams->dSigmaX); theseSettings.push_back(ptParams->dSigmaY); theseSettings.push_back(ptParams->dSigmaN);
+            map<vector<double>, acceptRatioPos>::iterator it = sigmaToAccept.find(theseSettings);
+           
             if (it == sigmaToAccept.end()) {
                 acceptanceRates = mcmc(ptParams, ptData, ptX, f);
             
                 thisBestLow = findBest(acceptanceRates);
             
-                acceptToSigma[thisBestLow] = ptParams->dSigmaX;
-                sigmaToAccept[ptParams->dSigmaX] = thisBestLow;
+                acceptToSigma[thisBestLow] = theseSettings;
+                sigmaToAccept[theseSettings] = thisBestLow;
                 numTries++;
             }
         }
         
         if (numTries == fitIters) {
-            sigmaA = acceptToSigma.begin()->second;
-            ptParams->dSigmaX = sigmaA; ptParams->dSigmaY = sigmaA; ptParams->dSigmaN = sigmaA;
+            vector<double> theBestSettings = acceptToSigma.begin()->second;
+            
+            ptParams->dSigmaX = theBestSettings[0]; ptParams->dSigmaY = theBestSettings[1]; ptParams->dSigmaN = theBestSettings[2];
             
             acceptanceRates = mcmc(ptParams, ptData, ptX, f);
             

@@ -30,7 +30,7 @@ public:
     string getCommonQuestions();
     string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/Estimator.single"; }
-    string getDescription()		{ return "This command implements the diversity estimators from https://github.com/chrisquince/DiversityEstimates"; }
+    string getDescription()		{ return "This command implements the diversity estimators from https://github.com/chrisquince/DiversityEstimates. https://www.ncbi.nlm.nih.gov/pubmed/18650928"; }
     
     int execute();
     void help() { m->mothurOut(getHelpString()); }
