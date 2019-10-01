@@ -1889,6 +1889,126 @@ string Utils::getExtension(string longName){
     }
 }
 /***********************************************************************/
+bool Utils::mothurInitialPrep(string& defaultPath, string& mothurVersion, string& releaseDate, string& OS){
+    try {
+
+        #if defined NON_WINDOWS
+            system("clear");
+        #else
+            system("CLS");
+        #endif
+        
+        #ifdef MOTHUR_FILES
+            defaultPath = MOTHUR_FILES;
+        
+            //add / to name if needed
+            string lastChar = defaultPath.substr(defaultPath.length()-1);
+            if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+        
+            defaultPath = getFullPathName(defaultPath);
+        #else
+            defaultPath = "";
+        #endif
+        
+        #ifdef LOGFILE_NAME
+            string logfilename = LOGFILE_NAME;
+            logfilename = getFullPathName(logfilename);
+        
+            m->appendLogBuffer("Using Static Logfile " + logfilename +  "\n");
+        
+            m->setLogFileName(logfilename, false);
+            m->mothurOut("\n");
+        #endif
+        
+        releaseDate = "";
+        #ifdef RELEASE_DATE
+            releaseDate = RELEASE_DATE;
+        #else
+            string year, month, day;
+            getCurrentDate(year, month, day);
+            releaseDate = month + "/" + day + "/" + year;
+        #endif
+        
+        mothurVersion = VERSION;
+        
+        
+        //version
+#if defined NON_WINDOWS
+#if defined (__APPLE__) || (__MACH__)
+        m->appendLogBuffer("Mac version\n\n");
+#else
+        m->appendLogBuffer("Linux version\n\n");
+#endif
+#else
+        m->appendLogBuffer("Windows version\n\n");
+#endif
+        
+        string packagesUsed = "";
+#ifdef USE_READLINE
+        packagesUsed += "ReadLine,";
+#endif
+        
+#ifdef USE_BOOST
+        packagesUsed += "Boost,";
+#endif
+        
+#ifdef USE_HDF5
+        packagesUsed += "HDF5,";
+#endif
+        
+#ifdef USE_GSL
+        packagesUsed += "GSL,";
+#endif
+        
+        if (packagesUsed != "") {
+            //remove last comma
+            packagesUsed = packagesUsed.substr(0,packagesUsed.length()-1);
+            m->appendLogBuffer("Using " + packagesUsed + "\n");
+        }
+        
+#ifdef MOTHUR_FILES
+        m->appendLogBuffer("\nUsing default file location " + defaultPath + "\n\n");
+#endif
+        
+        //header
+        m->appendLogBuffer("mothur v." + mothurVersion + "\n");
+        m->appendLogBuffer("Last updated: " + releaseDate + "\n");
+        m->appendLogBuffer("by\n");
+        m->appendLogBuffer("Patrick D. Schloss\n\n");
+        m->appendLogBuffer("Department of Microbiology & Immunology\n\n");
+        m->appendLogBuffer("University of Michigan\n");
+        m->appendLogBuffer("http://www.mothur.org\n\n");
+        m->appendLogBuffer("When using, please cite:\n");
+        m->appendLogBuffer("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n\n");
+        m->appendLogBuffer("Distributed under the GNU General Public License\n\n");
+        m->appendLogBuffer("Type 'help()' for information on the commands that are available\n\n");
+        m->appendLogBuffer("For questions and analysis support, please visit our forum at https://forum.mothur.org\n\n");
+        m->appendLogBuffer("Type 'quit()' to exit program\n\n");
+        
+        m->setRandomSeed(19760620);
+        m->appendLogBuffer("[NOTE]: Setting random seed to 19760620.\n\n");
+     
+        OS = "";
+        //version
+        #if defined NON_WINDOWS
+            #if defined (__APPLE__) || (__MACH__)
+            OS = "Mac ";
+            #else
+            OS = "Linux ";
+            #endif
+        #else
+            OS = "Windows ";
+        #endif
+        
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurInitialPrep");
+        exit(1);
+    }
+}
+/***********************************************************************/
+/***********************************************************************/
 bool Utils::isBlank(string fileName){
     try {
 

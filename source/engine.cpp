@@ -167,7 +167,7 @@ string InteractEngine::getCommand()  {
 }
 /***********************************************************************/
 //This function opens the batchfile to be used by BatchEngine::getInput.
-BatchEngine::BatchEngine(string path, string batchFileName){
+BatchEngine::BatchEngine(string path, string batchFile){
 	try {
 		string temppath = path.substr(0, (path.find_last_of("othur")-5));
 	
@@ -178,10 +178,10 @@ BatchEngine::BatchEngine(string path, string batchFileName){
         current->setProgramPath(util.getFullPathName(path));
         current->setBlastPath(current->getProgramPath());
         
-        openedBatch = util.openInputFile(batchFileName, inputBatchFile, "no error");
+        openedBatch = util.openInputFile(batchFile, inputBatchFile, "no error");
         if (!openedBatch) {
-            if (util.checkLocations(batchFileName, current->getLocations())) { openedBatch = util.openInputFile(batchFileName, inputBatchFile); }
-            else {  mout->mothurOut("[ERROR]: unable to open batch file, please correct.\n");  }
+            if (util.checkLocations(batchFile, current->getLocations())) { openedBatch = util.openInputFile(batchFile, inputBatchFile); }
+            else {  mout->mothurOut("[ERROR]: unable to open " + batchFile + " batch file, please correct.\n");  }
         }
         
         //if you haven't set your own location
@@ -190,7 +190,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
         //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
         if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
 #endif
-
+        batchFileName = batchFile;
 				
 	}
 	catch(exception& e) {
@@ -203,7 +203,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 
 BatchEngine::~BatchEngine(){
     time_t end = time(NULL);
-    mout->mothurOut("\n\nIt took " + toString(end-start) + " seconds to run " + toString(numCommandsRun) + " commands from your batch file.\n\n");
+    mout->mothurOut("\n\nIt took " + toString(end-start) + " seconds to run " + toString(numCommandsRun) + " commands from " + batchFileName  + " batch file.\n\n");
 }
 
 /***********************************************************************/

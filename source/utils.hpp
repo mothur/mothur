@@ -67,6 +67,7 @@ public:
     void getCurrentDate(string& thisYear, string& thisMonth, string& thisDay);
     
     //file operations
+    bool mothurInitialPrep(string& defaultPath, string& mothurVersion, string& releaseDate, string& OS);
     bool anyLabelsToProcess(string, set<string>&, string);
     bool appendBinaryFiles(string, string);
     int appendFiles(string, string);

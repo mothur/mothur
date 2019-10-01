@@ -42,7 +42,10 @@ void MothurOut::setLogFileName(string filename, bool append)  {
             if (append)     {
                 util.openOutputFileAppend(filename, out);
                 out << "\n\n************************************************************\n\n\n";
-            }else            {  bool opendLog = util.openOutputFile(filename, out);       if (!opendLog) { control_pressed = true; } }
+            }else            {
+                bool opendLog = util.openOutputFile(filename, out);
+                if (!opendLog) { control_pressed = true; }
+            }
         }
         
 	}

@@ -47,6 +47,7 @@ public:
 private:
 	ifstream inputBatchFile;
 	string getNextCommand(ifstream&);
+    string batchFileName;
 
 };
 
