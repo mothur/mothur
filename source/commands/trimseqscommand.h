@@ -58,7 +58,6 @@ private:
 	vector<linePair> lines;
 	vector<linePair> qLines;
 	
-    bool getOligos();
 	long long createProcessesCreateTrim(string, string, string, string, string, string, string, string, string, string);
     int processNamesCountFiles(string trimFasta, set<string> badNames, map<string, string> groupMap, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName, string groupFile);
 	int setLines(string, string);
