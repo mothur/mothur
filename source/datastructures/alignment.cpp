@@ -81,33 +81,39 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
 		
 		if(currentCell.prevCell == 'x'){	seqAaln = seqBaln = "NOALIGNMENT";		}//If there's an 'x' in the bottom-
 		else{	//	right corner bail out because it means nothing got aligned
+            seqAaln.reserve(nRows);
+            seqBaln.reserve(nRows);
+
             int count = 0;
 			while(currentCell.prevCell != 'x'){				//	while the previous cell isn't an 'x', keep going...
 				
 				if(currentCell.prevCell == 'u'){			//	if the pointer to the previous cell is 'u', go up in the
-					seqAaln = '-' + seqAaln;				//	matrix.  this indicates that we need to insert a gap in
-					seqBaln = seqB[row] + seqBaln;			//	seqA and a base in seqB
                     BBaseMap[row] = count;
+				    seqAaln.append(1, '-');			//	matrix.  this indicates that we need to insert a gap in
+					seqBaln.append(1, seqB[row]);	//	seqA and a base in seqB
 					currentCell = alignment[--row][column];
 				}
 				else if(currentCell.prevCell == 'l'){		//	if the pointer to the previous cell is 'l', go to the left
-					seqBaln = '-' + seqBaln;				//	in the matrix.  this indicates that we need to insert a gap
-					seqAaln = seqA[column] + seqAaln;		//	in seqB and a base in seqA
                     ABaseMap[column] = count;
+					seqBaln.append(1, '-');			//	in the matrix.  this indicates that we need to insert a gap
+					seqAaln.append(1, seqA[column]);	//	in seqB and a base in seqA
 					currentCell = alignment[row][--column];
 				}
 				else{
-					seqAaln = seqA[column] + seqAaln;		//	otherwise we need to go diagonally up and to the left,
-					seqBaln = seqB[row] + seqBaln;			//	here we add a base to both alignments
                     BBaseMap[row] = count;
                     ABaseMap[column] = count;
+				    seqAaln.append(1, seqA[column]);	//	otherwise we need to go diagonally up and to the left,
+					seqBaln.append(1, seqB[row]);	//	here we add a base to both alignments
 					currentCell = alignment[--row][--column];
 				}
                 count++;
 			}
 		}
 		
-       
+		// Reverse the sequences that we constructed in reverse
+        std::reverse(seqAaln.begin(), seqAaln.end());
+        std::reverse(seqBaln.begin(), seqBaln.end());
+
         pairwiseLength = seqAaln.length();
 		seqAstart = 1;	seqAend = 0;
 		seqBstart = 1;	seqBend = 0;
