@@ -65,10 +65,12 @@ void Alignment::resize(int A) {
 }
 /**************************************************************************************************/
 
-void Alignment::traceBack(){			//	This traceback routine is used by the dynamic programming algorithms
-	try {	
-		BBaseMap.clear();
-        ABaseMap.clear(); //	to fill the values of seqAaln and seqBaln
+void Alignment::traceBack(bool constructMaps){			//	This traceback routine is used by the dynamic programming algorithms
+	try {
+		if (constructMaps) {
+			BBaseMap.clear();
+			ABaseMap.clear(); //	to fill the values of seqAaln and seqBaln
+		}
 		seqAaln = "";
 		seqBaln = "";
 		int row = lB-1;
@@ -88,20 +90,20 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
 			while(currentCell.prevCell != 'x'){				//	while the previous cell isn't an 'x', keep going...
 				
 				if(currentCell.prevCell == 'u'){			//	if the pointer to the previous cell is 'u', go up in the
-                    BBaseMap[row] = count;
+					if (constructMaps) BBaseMap[row] = count;
 				    seqAaln.append(1, '-');			//	matrix.  this indicates that we need to insert a gap in
 					seqBaln.append(1, seqB[row]);	//	seqA and a base in seqB
 					currentCell = alignment[--row][column];
 				}
 				else if(currentCell.prevCell == 'l'){		//	if the pointer to the previous cell is 'l', go to the left
-                    ABaseMap[column] = count;
+					if (constructMaps)  ABaseMap[column] = count;
 					seqBaln.append(1, '-');			//	in the matrix.  this indicates that we need to insert a gap
 					seqAaln.append(1, seqA[column]);	//	in seqB and a base in seqA
 					currentCell = alignment[row][--column];
 				}
 				else{
-                    BBaseMap[row] = count;
-                    ABaseMap[column] = count;
+					if (constructMaps) BBaseMap[row] = count;
+					if (constructMaps) ABaseMap[column] = count;
 				    seqAaln.append(1, seqA[column]);	//	otherwise we need to go diagonally up and to the left,
 					seqBaln.append(1, seqB[row]);	//	here we add a base to both alignments
 					currentCell = alignment[--row][--column];
@@ -118,18 +120,20 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
 		seqAstart = 1;	seqAend = 0;
 		seqBstart = 1;	seqBend = 0;
         //flip maps since we now know the total length
-        map<int, int> newAMap;
-        for (map<int, int>::iterator it = ABaseMap.begin(); it != ABaseMap.end(); it++) {
-            int spot = it->second;
-            newAMap[pairwiseLength-spot-1] = it->first-1;
-        }
-        ABaseMap = newAMap;
-        map<int, int> newBMap;
-        for (map<int, int>::iterator it = BBaseMap.begin(); it != BBaseMap.end(); it++) {
-            int spot = it->second;
-            newBMap[pairwiseLength-spot-1] = it->first-1;
-        }
-		BBaseMap = newBMap;
+		if (constructMaps) {
+			map<int, int> newAMap;
+			for (map<int, int>::iterator it = ABaseMap.begin(); it != ABaseMap.end(); it++) {
+				int spot = it->second;
+				newAMap[pairwiseLength - spot - 1] = it->first - 1;
+			}
+			ABaseMap = newAMap;
+			map<int, int> newBMap;
+			for (map<int, int>::iterator it = BBaseMap.begin(); it != BBaseMap.end(); it++) {
+				int spot = it->second;
+				newBMap[pairwiseLength - spot - 1] = it->first - 1;
+			}
+			BBaseMap = newBMap;
+		}
         
 		for(int i=0;i<seqAaln.length();i++){
 			if(seqAaln[i] != '-' && seqBaln[i] == '-')		{	seqAstart++;	}

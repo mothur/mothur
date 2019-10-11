@@ -29,7 +29,7 @@ KmerAlign::~KmerAlign(){	/*	do nothing	*/	}
 
 /**************************************************************************************************/
 //modelled after pandaseqs kmer align, assemble.c
-void KmerAlign::align(string A, string B){
+void KmerAlign::align(string A, string B, bool constructMaps) {
 	try {
         int aLength = A.length();
         int bLength = B.length();
@@ -83,9 +83,11 @@ void KmerAlign::align(string A, string B){
             if((aLength-bestOverlap) > 0){ //add gaps to the start of B
                 int numGaps = (aLength-bestOverlap);
                 B = string(numGaps, '-') + B;
-                for (int i = 0; i < bLength; i++) {  BBaseMap[i+numGaps] = i;   }
-                for (int i = 0; i < aLength; i++) {  ABaseMap[i] = i;           }
-            }else {
+                if (constructMaps) {
+                    for (int i = 0; i < bLength; i++) { BBaseMap[i + numGaps] = i; }
+                    for (int i = 0; i < aLength; i++) { ABaseMap[i] = i; }
+                }
+            }else if (constructMaps) {
                 for (int i = 0; i < bLength; i++) {  BBaseMap[i] = i;   }
                 for (int i = 0; i < aLength; i++) {  ABaseMap[i] = i;   }
             }

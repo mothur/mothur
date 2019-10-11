@@ -49,7 +49,7 @@ NeedlemanOverlap::~NeedlemanOverlap(){	/*	do nothing	*/	}
 
 /**************************************************************************************************/
 
-void NeedlemanOverlap::align(string A, string B){
+void NeedlemanOverlap::align(string A, string B, bool constructMaps) {
 	try {
 	
 		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
@@ -102,7 +102,7 @@ void NeedlemanOverlap::align(string A, string B){
 
 		Overlap over;						
 		over.setOverlap(alignment, lA, lB, 0);		//	Fix gaps at the beginning and end of the sequences
-		traceBack();								//	Traceback the alignment to populate seqAaln and seqBaln
+		traceBack(constructMaps);					//	Traceback the alignment to populate seqAaln and seqBaln
 	
 	}
 	catch(exception& e) {
@@ -113,7 +113,7 @@ void NeedlemanOverlap::align(string A, string B){
 }
 /**************************************************************************************************/
 
-void NeedlemanOverlap::alignPrimer(string A, string B){
+void NeedlemanOverlap::alignPrimer(string A, string B, bool constructMaps) {
 	try {
         
 		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
@@ -167,7 +167,7 @@ void NeedlemanOverlap::alignPrimer(string A, string B){
         
 		Overlap over;
 		over.setOverlap(alignment, lA, lB, 0);		//	Fix gaps at the beginning and end of the sequences
-		traceBack();								//	Traceback the alignment to populate seqAaln and seqBaln
+		traceBack(constructMaps);					//	Traceback the alignment to populate seqAaln and seqBaln
         
 	}
 	catch(exception& e) {

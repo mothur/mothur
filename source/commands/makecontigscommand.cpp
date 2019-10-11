@@ -1382,7 +1382,7 @@ vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesia
         if (hasQuality) { rQual->flipQScores(); }
 
         //pairwise align
-        alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned());
+        alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned(), true);
         map<int, int> ABaseMap = alignment->getSeqAAlnBaseMap();
         map<int, int> BBaseMap = alignment->getSeqBAlnBaseMap();
         fSeq.setAligned(alignment->getSeqAAln());
