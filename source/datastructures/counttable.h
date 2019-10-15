@@ -152,7 +152,7 @@ class CountTable {
         vector<int> expandAbunds(int index);
         vector<int> expandAbunds(vector<countTableItem>& items);
         vector<countTableItem> compressAbunds(vector<int> abunds);
-        int printGroupAbunds(ofstream& out, int index);
+        void printGroupAbunds(ofstream& out, int index);
         int sortCountTable();
         int sortRow(int);
 
