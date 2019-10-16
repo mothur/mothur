@@ -95,7 +95,7 @@ endif
 # INCLUDE directories for mothur
 #
 #
-    VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/metastats:source/randomforest:source/read:source/svm
+	VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/metastats:source/randomforest:source/read:source/svm
     skipUchime := source/uchime_src/
     subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
     subDirIncludes = $(patsubst %, -I %, $(subdirs))

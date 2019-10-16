@@ -1989,14 +1989,15 @@ int CountTable::mergeCounts(string seq1, string seq2) {
                 }
                 m->mothurOut("[ERROR]: " + seq2 + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else {
-                //merge data
-                vector<int> countsSeq1 = expandAbunds(it->second);
-                vector<int> countsSeq2 = expandAbunds(it2->second);
+                if (hasGroupInfo()) { //if no group data then counts are empty
+                    //merge data
+                    vector<int> countsSeq1 = expandAbunds(it->second);
+                    vector<int> countsSeq2 = expandAbunds(it2->second);
                 
-                for (int i = 0; i < groups.size(); i++) { countsSeq1[i] += countsSeq2[i]; }
+                    for (int i = 0; i < groups.size(); i++) { countsSeq1[i] += countsSeq2[i]; }
                 
-                counts[it->second] = compressAbunds(countsSeq1);
-                
+                    counts[it->second] = compressAbunds(countsSeq1);
+                }
                 totals[it->second] += totals[it2->second];
                 uniques--;
                 indexNameMap.erase(it2);
