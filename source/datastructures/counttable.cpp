@@ -1081,7 +1081,7 @@ vector<countTableItem> CountTable::compressAbunds(vector<int> abunds) {
     }
 }
 /************************************************************/
-int CountTable::printGroupAbunds(ofstream& out, int index) {
+void CountTable::printGroupAbunds(ofstream& out, int index) {
     try {
         
         vector<int> abunds = expandAbunds(index);
