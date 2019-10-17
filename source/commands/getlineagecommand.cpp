@@ -358,8 +358,7 @@ int GetLineageCommand::execute(){
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
                 runGetSeqs(accnosFileName);
-            }
-            util.mothurRemove(accnosFileName);
+            }else { util.mothurRemove(accnosFileName); }
             
         }else {
             string accnosFileName = readConsTax();
@@ -367,8 +366,7 @@ int GetLineageCommand::execute(){
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
                 runGetOTUs(accnosFileName);
-            }
-            util.mothurRemove(accnosFileName);
+            } else { util.mothurRemove(accnosFileName); }
         }
 				
 		

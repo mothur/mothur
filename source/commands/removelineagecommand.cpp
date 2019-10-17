@@ -368,16 +368,14 @@ int RemoveLineageCommand::execute(){
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
                 runRemoveSeqs(accnosFileName);
-            }else{ m->mothurOut("\n*** No contaminants to remove ***\n"); }
-            util.mothurRemove(accnosFileName);
+            }else{ m->mothurOut("\n*** No contaminants to remove ***\n"); util.mothurRemove(accnosFileName);  }
         }else {
             string accnosFileName = readConsTax(); //writes accnos file with otuNames
             
             if (!util.isBlank(accnosFileName)) {
                 outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
                 runRemoveOTUs(accnosFileName);
-            }else{ m->mothurOut("\n*** No contaminants to remove ***\n"); }
-            util.mothurRemove(accnosFileName);
+            }else{ m->mothurOut("\n*** No contaminants to remove ***\n"); util.mothurRemove(accnosFileName); }
         }
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
