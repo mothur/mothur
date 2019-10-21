@@ -20,7 +20,7 @@
 
 class Engine {
 public:
-	Engine(); 
+	Engine(string);
 	virtual ~Engine(){}
 	virtual bool getInput() = 0;
 	virtual string getLogFileName()			{	return mout->getLogFileName();          }
@@ -34,6 +34,7 @@ protected:
     Utils util;
     time_t start;
     int numCommandsRun;
+    string path;
 };
 
 

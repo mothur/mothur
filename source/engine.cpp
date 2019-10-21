@@ -16,11 +16,30 @@
 #include "mothur.h"
 
 /***********************************************************************/
-Engine::Engine(){
+Engine::Engine(string tpath){
 	try {
 		cFactory = CommandFactory::getInstance();
 		mout = MothurOut::getInstance();
         current = CurrentFile::getInstance();
+        
+        string temppath = tpath.substr(0, (tpath.find_last_of("othur")-5));
+        
+        //this will happen if you set the path variable to contain mothur's exe location
+        Utils util;
+        if (temppath == "") { path = util.findProgramPath("mothur"); }
+        else { path = temppath; }
+        
+        current->setProgramPath(util.getFullPathName(path));
+        current->setBlastPath(current->getProgramPath());
+        
+        //if you haven't set your own location
+        #ifdef MOTHUR_FILES
+        #else
+                //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
+                if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
+        #endif
+
+                        
         
         start = time(NULL);
         numCommandsRun = 0;
@@ -34,25 +53,7 @@ Engine::Engine(){
 
 /***********************************************************************/
 
-InteractEngine::InteractEngine(string path){
-
-	
-	string temppath = path.substr(0, (path.find_last_of("othur")-5));
-	
-	//this will happen if you set the path variable to contain mothur's exe location
-    Utils util;
-	if (temppath == "") { path = util.findProgramPath("mothur"); }
-    else { path = temppath; }
-	
-	current->setProgramPath(util.getFullPathName(path));
-    current->setBlastPath(current->getProgramPath());
-
-    //if you haven't set your own location
-    #ifdef MOTHUR_FILES
-    #else
-        //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
-    #endif
+InteractEngine::InteractEngine(string tpath) : Engine(tpath) {
     
     if (mout->getLogFileName() == "") {
         time_t ltime = time(NULL); /* calendar time */
@@ -167,29 +168,14 @@ string InteractEngine::getCommand()  {
 }
 /***********************************************************************/
 //This function opens the batchfile to be used by BatchEngine::getInput.
-BatchEngine::BatchEngine(string path, string batchFile){
+BatchEngine::BatchEngine(string tpath, string batchFile) : Engine(tpath) {
 	try {
-		string temppath = path.substr(0, (path.find_last_of("othur")-5));
-	
-		//this will happen if you set the path variable to contain mothur's exe location
-		if (temppath == "") { path = util.findProgramPath("mothur"); }
-        else { path = temppath; }
-		
-        current->setProgramPath(util.getFullPathName(path));
-        current->setBlastPath(current->getProgramPath());
-        
         openedBatch = util.openInputFile(batchFile, inputBatchFile, "no error");
         if (!openedBatch) {
             if (util.checkLocations(batchFile, current->getLocations())) { openedBatch = util.openInputFile(batchFile, inputBatchFile); }
             else {  mout->mothurOut("[ERROR]: unable to open " + batchFile + " batch file, please correct.\n");  }
         }
         
-        //if you haven't set your own location
-#ifdef MOTHUR_FILES
-#else
-        //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
-#endif
         batchFileName = batchFile;
 				
 	}
@@ -289,37 +275,16 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
 
 /***********************************************************************/
 /***********************************************************************/
-ScriptEngine::ScriptEngine(string path, string commandString){
+ScriptEngine::ScriptEngine(string tpath, string commandString) : Engine(tpath){
 	try {
-		
 		//remove quotes
 		listOfCommands = commandString.substr(1, (commandString.length()-1));
-		
-		string temppath = path.substr(0, (path.find_last_of("othur")-5));
-
-		//this will happen if you set the path variable to contain mothur's exe location
-		if (temppath == "") { path = util.findProgramPath("mothur"); }
-        else { path = temppath; }
-		
-        current->setProgramPath(util.getFullPathName(path));
-        current->setBlastPath(current->getProgramPath());
-    
-        //if you haven't set your own location
-#ifdef MOTHUR_FILES
-#else
-        //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-        //string tempDefault = path.substr(0, (path.find_last_of('m')));
-        if (path != "") { current->setDefaultPath(path); }
-#endif
-
-				
 	}
 	catch(exception& e) {
 		mout->errorOut(e, "ScriptEngine", "ScriptEngine");
 		exit(1);
 	}
 }
-
 /***********************************************************************/
 
 ScriptEngine::~ScriptEngine(){
