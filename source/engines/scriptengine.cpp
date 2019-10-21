@@ -77,7 +77,7 @@ bool ScriptEngine::getInput(){
             }else {    m->mothurOut("[ERROR]: Invalid.\n"); }
         }
         
-        return 1;
+        return true;
     }
     catch(exception& e) {
         m->errorOut(e, "ScriptEngine", "getInput");

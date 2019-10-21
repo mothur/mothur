@@ -40,8 +40,8 @@ CommandOptionParser::CommandOptionParser(string input){
                 }
             }
 		}
-		else if (openParen == -1) { m->mothurOut("[ERROR]: You are missing ("); m->mothurOutEndLine(); }
-		else if (closeParen == -1) { m->mothurOut("[ERROR]: You are missing )"); m->mothurOutEndLine(); }
+		else if (openParen == -1) { m->mothurOut("[ERROR]: You are missing (\n");  }
+		else if (closeParen == -1) { m->mothurOut("[ERROR]: You are missing )\n"); }
     }
 	catch(exception& e) {
 		m->errorOut(e, "CommandOptionParser", "CommandOptionParser");

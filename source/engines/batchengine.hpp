@@ -24,6 +24,8 @@ private:
     string getNextCommand(ifstream&);
     string batchFileName;
     bool openedBatch;
+    time_t bstart;
+    int numBatches;
 
 };
 
