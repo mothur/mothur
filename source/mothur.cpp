@@ -6,11 +6,11 @@
  *  Copyright 2008 Patrick D. Schloss. All rights reserved.
  *
  */
- 
-#include "mothur.h"
-#include "engine.hpp"
+
+#include "batchengine.hpp"
+#include "scriptengine.hpp"
+#include "interactengine.hpp"
 #include "mothurout.h"
-#include "currentfile.h"
 
 /**************************************************************************************************/
 
