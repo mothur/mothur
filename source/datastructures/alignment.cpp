@@ -65,7 +65,7 @@ void Alignment::resize(int A) {
 }
 /**************************************************************************************************/
 
-void Alignment::traceBack(){			//	This traceback routine is used by the dynamic programming algorithms
+void Alignment::traceBack(bool createBaseMap){			//	This traceback routine is used by the dynamic programming algorithms
 	try {	
 		BBaseMap.clear();
         ABaseMap.clear(); //	to fill the values of seqAaln and seqBaln
@@ -87,20 +87,22 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
 				if(currentCell.prevCell == 'u'){			//	if the pointer to the previous cell is 'u', go up in the
 					seqAaln = '-' + seqAaln;				//	matrix.  this indicates that we need to insert a gap in
 					seqBaln = seqB[row] + seqBaln;			//	seqA and a base in seqB
-                    BBaseMap[row] = count;
+                    if (createBaseMap) { BBaseMap[row] = count; }
 					currentCell = alignment[--row][column];
 				}
 				else if(currentCell.prevCell == 'l'){		//	if the pointer to the previous cell is 'l', go to the left
 					seqBaln = '-' + seqBaln;				//	in the matrix.  this indicates that we need to insert a gap
 					seqAaln = seqA[column] + seqAaln;		//	in seqB and a base in seqA
-                    ABaseMap[column] = count;
+                    if (createBaseMap) { ABaseMap[column] = count; }
 					currentCell = alignment[row][--column];
 				}
 				else{
 					seqAaln = seqA[column] + seqAaln;		//	otherwise we need to go diagonally up and to the left,
 					seqBaln = seqB[row] + seqBaln;			//	here we add a base to both alignments
-                    BBaseMap[row] = count;
-                    ABaseMap[column] = count;
+                    if (createBaseMap) {
+                        BBaseMap[row] = count;
+                        ABaseMap[column] = count;
+                    }
 					currentCell = alignment[--row][--column];
 				}
                 count++;
@@ -111,19 +113,22 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
         pairwiseLength = seqAaln.length();
 		seqAstart = 1;	seqAend = 0;
 		seqBstart = 1;	seqBend = 0;
-        //flip maps since we now know the total length
-        map<int, int> newAMap;
-        for (map<int, int>::iterator it = ABaseMap.begin(); it != ABaseMap.end(); it++) {
-            int spot = it->second;
-            newAMap[pairwiseLength-spot-1] = it->first-1;
+        
+        if (createBaseMap) {
+            //flip maps since we now know the total length
+            map<int, int> newAMap;
+            for (map<int, int>::iterator it = ABaseMap.begin(); it != ABaseMap.end(); it++) {
+                int spot = it->second;
+                newAMap[pairwiseLength-spot-1] = it->first-1;
+            }
+            ABaseMap = newAMap;
+            map<int, int> newBMap;
+            for (map<int, int>::iterator it = BBaseMap.begin(); it != BBaseMap.end(); it++) {
+                int spot = it->second;
+                newBMap[pairwiseLength-spot-1] = it->first-1;
+            }
+            BBaseMap = newBMap;
         }
-        ABaseMap = newAMap;
-        map<int, int> newBMap;
-        for (map<int, int>::iterator it = BBaseMap.begin(); it != BBaseMap.end(); it++) {
-            int spot = it->second;
-            newBMap[pairwiseLength-spot-1] = it->first-1;
-        }
-		BBaseMap = newBMap;
         
 		for(int i=0;i<seqAaln.length();i++){
 			if(seqAaln[i] != '-' && seqBaln[i] == '-')		{	seqAstart++;	}
@@ -213,29 +218,5 @@ int Alignment::getTemplateEndPos(){
 int Alignment::getPairwiseLength(){
 	return pairwiseLength;								//	this is the pairwise alignment length
 }
-
-/**************************************************************************************************/
-
-//int Alignment::getLongestTemplateGap(){
-//
-//	int length = seqBaln.length();
-//	int longGap = 0;
-//	int gapLength = 0;
-//	
-//	int start = seqAstart;
-//	if(seqAstart < seqBstart){	start = seqBstart;	}
-//	for(int i=seqAstart;i<length;i++){
-//		if(seqBaln[i] == '-'){
-//			gapLength++;
-//		}
-//		else{
-//			if(gapLength > 0){
-//				if(gapLength > longGap){	longGap = gapLength;	}
-//			}
-//			gapLength = 0;
-//		}
-//	}
-//	return longGap;
-//}
 
 /**************************************************************************************************/

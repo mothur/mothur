@@ -19,7 +19,7 @@ class NoAlign : public Alignment {
 public:
 	NoAlign();
 	~NoAlign();
-	void align(string, string);
+	void align(string, string, bool createBaseMap);
 	
 private:	
 };

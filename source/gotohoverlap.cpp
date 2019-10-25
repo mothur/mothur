@@ -50,7 +50,7 @@ GotohOverlap::GotohOverlap(float gO, float gE, float f, float mm, int r) :
 
 /**************************************************************************************************/
 
-void GotohOverlap::align(string A, string B){
+void GotohOverlap::align(string A, string B, bool createBaseMap){
 	try {
 		seqA = ' ' + A;	lA = seqA.length();		//	the algorithm requires that the first character be a dummy value
 		seqB = ' ' + B;	lB = seqB.length();		//	the algorithm requires that the first character be a dummy value
@@ -90,7 +90,7 @@ void GotohOverlap::align(string A, string B){
 		}
 		Overlap over;
 		over.setOverlap(alignment, lA, lB, 0);	//	Fix the gaps at the ends of the sequences
-		traceBack();							//	Construct the alignment and set seqAaln and seqBaln
+		traceBack(createBaseMap);							//	Construct the alignment and set seqAaln and seqBaln
 		
 	}
 	catch(exception& e) {

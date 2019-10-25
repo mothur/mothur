@@ -26,7 +26,7 @@ public:
     Alignment(int, int);
 	Alignment();
 	virtual ~Alignment();
-	virtual void align(string, string) = 0;
+	virtual void align(string, string, bool createBaseMap=false) = 0;
     virtual void alignPrimer(string, string) {}
 	
 	string getSeqAAln();
@@ -43,7 +43,7 @@ public:
 	int getnRows() { return nRows; }
 
 protected:
-	void traceBack();
+	void traceBack(bool createBaseMap);
 	string seqA, seqAaln;
 	string seqB, seqBaln;
 	int seqAstart, seqAend;

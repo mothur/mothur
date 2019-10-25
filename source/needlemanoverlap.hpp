@@ -31,7 +31,7 @@ class NeedlemanOverlap : public Alignment {
 public:
 	NeedlemanOverlap(float, float, float, int);
 	~NeedlemanOverlap();
-	void align(string, string);
+	void align(string, string, bool createBaseMap=false);
     void alignPrimer(string, string);
 	
 private:	
