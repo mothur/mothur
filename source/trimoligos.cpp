@@ -234,7 +234,7 @@ vector<int> TrimOligos::findForward(Sequence& seq, int& primerStart, int& primer
                         //if (m->getDebug()) { m->mothurOut(oligo + '\n' + rawChunk + '\n');  }
                         
                         //use needleman to align first primer.length()+numdiffs of sequence to each barcode
-                        alignment->alignPrimer(oligo, rawChunk, false);
+                        alignment->alignPrimer(oligo, rawChunk);
                         oligo = alignment->getSeqAAln();
                         string temp = alignment->getSeqBAln();
                         
@@ -338,7 +338,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
                         string rawChunk = rawRSequence.substr(j,oligo.length()+rdiffs);
                         
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                        alignment->alignPrimer(oligo, rawChunk, false);
+                        alignment->alignPrimer(oligo, rawChunk);
                         oligo = alignment->getSeqAAln();
                         string temp = alignment->getSeqBAln();
                         
@@ -454,7 +454,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& gr
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+bdiffs), false);
+                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+bdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
@@ -600,7 +600,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                 if (oligo != "NONE") {
                     
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                    alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+bdiffs), false);
+                    alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+bdiffs));
                     oligo = alignment->getSeqAAln();
                     string temp = alignment->getSeqBAln();
                     
@@ -674,7 +674,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     
                     if (oligo != "NONE") {
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs), false);
+                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs));
                         oligo = alignment->getSeqAAln();
                         string temp = alignment->getSeqBAln();
                         
@@ -864,7 +864,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                     }
                     
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                    alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+bdiffs), false);
+                    alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+bdiffs));
                     oligo = alignment->getSeqAAln();
                     string temp = alignment->getSeqBAln();
                     
@@ -937,7 +937,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                         }
                         
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs), false);
+                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs));
                         oligo = alignment->getSeqAAln();
                         string temp = alignment->getSeqBAln();
                         
@@ -1134,7 +1134,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                     }
                     
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                    alignment->alignPrimer(oligo, rawSeq.substr(0,oligo.length()+bdiffs), false);
+                    alignment->alignPrimer(oligo, rawSeq.substr(0,oligo.length()+bdiffs));
                     oligo = alignment->getSeqAAln();
                     string temp = alignment->getSeqBAln();
                     
@@ -1212,7 +1212,7 @@ vector<int> TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, i
                         }
                         
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs), false);
+                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+bdiffs));
                         oligo = alignment->getSeqAAln();
                         string temp = alignment->getSeqBAln();
                         
@@ -1415,7 +1415,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
                 
                 if (oligo != "NONE") {
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                    alignment->alignPrimer(oligo, rawSeq.substr(0,oligo.length()+pdiffs), false);
+                    alignment->alignPrimer(oligo, rawSeq.substr(0,oligo.length()+pdiffs));
                     oligo = alignment->getSeqAAln();
                     string temp = alignment->getSeqBAln();
                     
@@ -1493,7 +1493,7 @@ vector<int> TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, i
                     
                     if (oligo != "NONE") {
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs), false);
+                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs));
                         oligo = alignment->getSeqAAln();
                         string temp = alignment->getSeqBAln();
                         
@@ -1681,7 +1681,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                 
                 if (oligo != "NONE") {
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                    alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+pdiffs), false);
+                    alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+pdiffs));
                     oligo = alignment->getSeqAAln();
                     string temp = alignment->getSeqBAln();
                     
@@ -1755,7 +1755,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                     
                     if (oligo != "NONE") {
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs), false);
+                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs));
                         oligo = alignment->getSeqAAln();
                         string temp = alignment->getSeqBAln();
                         
@@ -1933,7 +1933,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                 
                 if (oligo != "NONE") {
                     //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                    alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+pdiffs), false);
+                    alignment->alignPrimer(oligo, rawFSequence.substr(0,oligo.length()+pdiffs));
                     oligo = alignment->getSeqAAln();
                     string temp = alignment->getSeqBAln();
                     
@@ -2007,7 +2007,7 @@ vector<int> TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq,
                     
                     if (oligo != "NONE") {
                         //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs), false);
+                        alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs));
                         oligo = alignment->getSeqAAln();
                         string temp = alignment->getSeqBAln();
                         
@@ -2147,7 +2147,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+bdiffs), false);
+                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+bdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
@@ -2252,7 +2252,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+pdiffs), false);
+                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+pdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
@@ -2363,7 +2363,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+pdiffs), false);
+                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+pdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
@@ -2475,7 +2475,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
                 }
             
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs), false);
+                alignment->alignPrimer(oligo, rawRSequence.substr(0,oligo.length()+pdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
             
@@ -2581,7 +2581,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawRSequence.substr(0, oligo.length()+pdiffs), false);
+                alignment->alignPrimer(oligo, rawRSequence.substr(0, oligo.length()+pdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
@@ -2671,7 +2671,7 @@ int TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+ldiffs), false);
+                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+ldiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
@@ -2768,7 +2768,7 @@ int TrimOligos::stripLinker(Sequence& seq){
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                 string temp = rawSequence.substr(0,oligo.length()+ldiffs);
-                alignment->alignPrimer(oligo, temp, false);
+                alignment->alignPrimer(oligo, temp);
                 oligo = alignment->getSeqAAln();
                 temp = alignment->getSeqBAln();
                 
@@ -2864,7 +2864,7 @@ int TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+sdiffs), false);
+                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+sdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
@@ -2963,7 +2963,7 @@ int TrimOligos::stripSpacer(Sequence& seq){
                 }
                 
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+sdiffs), false);
+                alignment->alignPrimer(oligo, rawSequence.substr(0,oligo.length()+sdiffs));
                 oligo = alignment->getSeqAAln();
                 string temp = alignment->getSeqBAln();
                 
