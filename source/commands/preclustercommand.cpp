@@ -478,7 +478,7 @@ int calcMisMatches(string seq1, string seq2, preClusterData* params){
       Sequence seqJ("seq2", seq2);
 
       //align seq2 to seq1 - less abundant to more abundant
-      params->alignment->align(seqJ.getUnaligned(), seqI.getUnaligned());
+      params->alignment->align(seqJ.getUnaligned(), seqI.getUnaligned(), false);
       seq2 = params->alignment->getSeqAAln();
       seq1 = params->alignment->getSeqBAln();
 
@@ -525,7 +525,7 @@ vector<int> calcMisMatchesIndels(string seq1, string seq2, preClusterData* param
       Sequence seqJ("seq2", seq2);
 
       //align seq2 to seq1 - less abundant to more abundant
-      params->alignment->align(seqJ.getUnaligned(), seqI.getUnaligned());
+      params->alignment->align(seqJ.getUnaligned(), seqI.getUnaligned(), false);
       seq2 = params->alignment->getSeqAAln();
       seq1 = params->alignment->getSeqBAln();
 

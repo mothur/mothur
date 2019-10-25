@@ -46,7 +46,7 @@ BlastAlignment::~BlastAlignment(){		//	The desctructor should clean up by removi
 
 //**************************************************************************************************/
 
-void BlastAlignment::align(string seqA, string seqB){	//Use blastn to align the two sequences
+void BlastAlignment::align(string seqA, string seqB, bool constructMaps) {	//Use blastn to align the two sequences
 
 	ofstream candidateFile(candidateFileName.c_str());	//	Write the sequence to be aligned to a temporary candidate seq file
 	candidateFile << ">candidate" << endl << seqA << endl;

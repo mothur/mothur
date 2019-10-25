@@ -28,7 +28,7 @@ class KmerAlign : public Alignment {
 public:
 	KmerAlign(int);
 	~KmerAlign();
-    void align(string, string);
+    void align(string, string, bool constructMaps = false);
 	
 private:
     int kmerSize;

@@ -31,8 +31,8 @@ class NeedlemanOverlap : public Alignment {
 public:
 	NeedlemanOverlap(float, float, float, int);
 	~NeedlemanOverlap();
-	void align(string, string);
-    void alignPrimer(string, string);
+	void align(string, string, bool constructMaps = false);
+    void alignPrimer(string, string, bool constructMaps = false);
 	
 private:	
 	float gap;

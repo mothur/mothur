@@ -49,44 +49,52 @@ NeedlemanOverlap::~NeedlemanOverlap(){	/*	do nothing	*/	}
 
 /**************************************************************************************************/
 
-void NeedlemanOverlap::align(string A, string B){
+void NeedlemanOverlap::align(string A, string B, bool constructMaps) {
 	try {
 	
 		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
 		seqB = ' ' + B;	lB = seqB.length();		//	algorithm requires a dummy space at the beginning of each string
 
+		const float gap = this->gap;
+		const float match = this->match;
+		const float mismatch = this->mismatch;
+		const char* const seqARef = seqA.c_str();
+		const char* const seqBRef = seqB.c_str();
+
 		if (lA > nRows) { m->mothurOut("One of your candidate sequences is longer than you longest template sequence. Your longest template sequence is " + toString(nRows) + ". Your candidate is " + toString(lA) + ".\n");   }
 		
-		for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1 
-		
+		for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1
+            AlignmentCell *const alignCellsI = &alignment[i][0];
+            AlignmentCell *const alignCellsUp = &alignment[i - 1][0];
+
 			for(int j=1;j<lA;j++){				//	of the O'Reilly BLAST book.  I found that the example output had a
 	
 				//	number of errors
 				float diagonal;
-				if(seqB[i] == seqA[j])	{	diagonal = alignment[i-1][j-1].cValue + match;		}
-				else					{	diagonal = alignment[i-1][j-1].cValue + mismatch;	}
+				if(seqARef[i] == seqBRef[j])	{	diagonal = alignCellsUp[j - 1].cValue + match;		}
+				else					{	diagonal = alignCellsUp[j - 1].cValue + mismatch;	}
 			
-				float up	= alignment[i-1][j].cValue + gap;
-				float left	= alignment[i][j-1].cValue + gap;
+				const float up	= alignCellsUp[j].cValue + gap;
+				const float left	= alignCellsI[j - 1].cValue + gap;
 				
 				if(diagonal >= up){
 					if(diagonal >= left){
-						alignment[i][j].cValue = diagonal;
-						alignment[i][j].prevCell = 'd';
+						alignCellsI[j].cValue = diagonal;
+						alignCellsI[j].prevCell = 'd';
 					}
 					else{
-						alignment[i][j].cValue = left;
-						alignment[i][j].prevCell = 'l';
+						alignCellsI[j].cValue = left;
+						alignCellsI[j].prevCell = 'l';
 					}
 				}
 				else{
 					if(up >= left){
-						alignment[i][j].cValue = up;
-						alignment[i][j].prevCell = 'u';
+						alignCellsI[j].cValue = up;
+						alignCellsI[j].prevCell = 'u';
 					}
 					else{
-						alignment[i][j].cValue = left;
-						alignment[i][j].prevCell = 'l';
+						alignCellsI[j].cValue = left;
+						alignCellsI[j].prevCell = 'l';
 					}
 				}
 			}
@@ -94,7 +102,7 @@ void NeedlemanOverlap::align(string A, string B){
 
 		Overlap over;						
 		over.setOverlap(alignment, lA, lB, 0);		//	Fix gaps at the beginning and end of the sequences
-		traceBack();								//	Traceback the alignment to populate seqAaln and seqBaln
+		traceBack(constructMaps);					//	Traceback the alignment to populate seqAaln and seqBaln
 	
 	}
 	catch(exception& e) {
@@ -105,44 +113,53 @@ void NeedlemanOverlap::align(string A, string B){
 }
 /**************************************************************************************************/
 
-void NeedlemanOverlap::alignPrimer(string A, string B){
+void NeedlemanOverlap::alignPrimer(string A, string B, bool constructMaps) {
 	try {
         
 		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
 		seqB = ' ' + B;	lB = seqB.length();		//	algorithm requires a dummy space at the beginning of each string
         
+		const float gap = this->gap;
+		const float match = this->match;
+		const float mismatch = this->mismatch;
+		const char* const seqARef = seqA.c_str();
+		const char* const seqBRef = seqB.c_str();
+		
 		if (lA > nRows) { m->mothurOut("One of your candidate sequences is longer than you longest template sequence. Your longest template sequence is " + toString(nRows) + ". Your candidate is " + toString(lA) + "."); m->mothurOutEndLine();  }
 		
 		for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1
             
+			AlignmentCell *const alignCellsI = &alignment[i][0];
+			AlignmentCell *const alignCellsISub1 = &alignment[i - 1][0];
+			
 			for(int j=1;j<lA;j++){				//	of the O'Reilly BLAST book.  I found that the example output had a
                 
 				//	number of errors
 				float diagonal;
-				if(isEquivalent(seqB[i],seqA[j]))	{	diagonal = alignment[i-1][j-1].cValue + match;		}
-				else                                {	diagonal = alignment[i-1][j-1].cValue + mismatch;	}
+				if(isEquivalent(seqB[i],seqA[j])) {	diagonal = alignCellsISub1[j - 1].cValue + match; }
+				else {	diagonal = alignCellsISub1[j - 1].cValue + mismatch;	}
                 
-				float up	= alignment[i-1][j].cValue + gap;
-				float left	= alignment[i][j-1].cValue + gap;
+				const float up	= alignCellsISub1[j].cValue + gap;
+				const float left	= alignCellsI[j - 1].cValue + gap;
 				
 				if(diagonal >= up){
 					if(diagonal >= left){
-						alignment[i][j].cValue = diagonal;
-						alignment[i][j].prevCell = 'd';
+						alignCellsI[j].cValue = diagonal;
+						alignCellsI[j].prevCell = 'd';
 					}
 					else{
-						alignment[i][j].cValue = left;
-						alignment[i][j].prevCell = 'l';
+						alignCellsI[j].cValue = left;
+						alignCellsI[j].prevCell = 'l';
 					}
 				}
 				else{
 					if(up >= left){
-						alignment[i][j].cValue = up;
-						alignment[i][j].prevCell = 'u';
+						alignCellsI[j].cValue = up;
+						alignCellsI[j].prevCell = 'u';
 					}
 					else{
-						alignment[i][j].cValue = left;
-						alignment[i][j].prevCell = 'l';
+						alignCellsI[j].cValue = left;
+						alignCellsI[j].prevCell = 'l';
 					}
 				}
 			}
@@ -150,7 +167,7 @@ void NeedlemanOverlap::alignPrimer(string A, string B){
         
 		Overlap over;
 		over.setOverlap(alignment, lA, lB, 0);		//	Fix gaps at the beginning and end of the sequences
-		traceBack();								//	Traceback the alignment to populate seqAaln and seqBaln
+		traceBack(constructMaps);					//	Traceback the alignment to populate seqAaln and seqBaln
         
 	}
 	catch(exception& e) {

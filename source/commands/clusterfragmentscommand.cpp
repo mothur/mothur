@@ -346,7 +346,7 @@ bool ClusterFragmentsCommand::isFragment(string seq1, string seq2){
 			Alignment* alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (seq1.length()+totalDiffs+1));
 							
 			//use needleman to align 
-			alignment->align(seq2, seq1);
+			alignment->align(seq2, seq1, false);
 			string tempSeq2 = alignment->getSeqAAln();
 			string temp = alignment->getSeqBAln();
 			
