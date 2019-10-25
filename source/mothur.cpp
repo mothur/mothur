@@ -73,7 +73,7 @@ int main(int argc, char *argv[]){
 		}
         
 		Engine* mothur = NULL;
-		bool bail = 0;
+		bool bail = false;
 		string input;
  
 		if(argc>1){
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]){
             mothur = new InteractEngine(argv[0]);
 		}
 		
-		while(bail == 0)	{	bail = mothur->getInput();	}
+		while(!bail)	{	bail = mothur->getInput();	}
 		
 		string newlogFileName = mothur->getLogFileName();
 		        

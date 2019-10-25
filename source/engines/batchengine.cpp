@@ -110,16 +110,16 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         //we know commands must include '(' characters for search for that
         int openParen = nextcommand.find_first_of('(');
         if (openParen == string::npos) { //no '(' character -> assume not a command, treat as new batchfile
-            m->mothurOut("/******************************************/\n");
-            m->mothurOut("/******************************************/\n");
+            m->mothurOut("/*****************************************************************************/\n");
             
             BatchEngine newBatchEngine(path, nextcommand);
-            bool bail = false;
-            while(!bail)    {    bail = newBatchEngine.getInput();    }
-            numBatches++;
             
-            m->mothurOut("/******************************************/\n");
-            m->mothurOut("/******************************************/\n");
+            if (newBatchEngine.getOpenedBatch()) {
+                bool bail = false;
+                while(!bail)    {    bail = newBatchEngine.getInput();    }
+                numBatches++;
+            }
+            m->mothurOut("/*****************************************************************************/\n");
             nextcommand = getNextCommand(inputBatchFile);
         }
         

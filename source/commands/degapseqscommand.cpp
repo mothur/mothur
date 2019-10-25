@@ -227,7 +227,7 @@ void driverDegap(degapData* params){
             }
     
             //report progress
-            if((params->count) % 1000 == 0){	params->m->mothurOutJustToScreen(toString(params->count) + "\n");  }
+            if((params->count) % 10000 == 0){	params->m->mothurOutJustToScreen(toString(params->count) + "\n");  }
             
 #if defined NON_WINDOWS
             unsigned long long pos = inFASTA.tellg();
@@ -237,7 +237,7 @@ void driverDegap(degapData* params){
 #endif
         }
         //report progress
-        if((params->count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(params->count) + "\n"); 		}
+        if((params->count) % 10000 != 0){	params->m->mothurOutJustToScreen(toString(params->count) + "\n"); 		}
         
         inFASTA.close();
     }

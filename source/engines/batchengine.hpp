@@ -18,6 +18,7 @@ public:
     ~BatchEngine();
     
     virtual bool getInput();
+    bool getOpenedBatch() { return openedBatch; }
     
 private:
     ifstream inputBatchFile;
