@@ -23,7 +23,7 @@ class BlastAlignment : public Alignment {
 public:
 	BlastAlignment(float, float, float, float);
 	~BlastAlignment();
-	void align(string, string, bool constructMaps = false);
+	void align(string, string);
 	void setMatrix(int){};
 	
 private:

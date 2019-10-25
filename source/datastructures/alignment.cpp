@@ -65,12 +65,10 @@ void Alignment::resize(int A) {
 }
 /**************************************************************************************************/
 
-void Alignment::traceBack(bool constructMaps){			//	This traceback routine is used by the dynamic programming algorithms
-	try {
-		if (constructMaps) {
-			BBaseMap.clear();
-			ABaseMap.clear(); //	to fill the values of seqAaln and seqBaln
-		}
+void Alignment::traceBack(){			//	This traceback routine is used by the dynamic programming algorithms
+	try {	
+		BBaseMap.clear();
+        ABaseMap.clear(); //	to fill the values of seqAaln and seqBaln
 		seqAaln = "";
 		seqBaln = "";
 		int row = lB-1;
@@ -83,57 +81,49 @@ void Alignment::traceBack(bool constructMaps){			//	This traceback routine is us
 		
 		if(currentCell.prevCell == 'x'){	seqAaln = seqBaln = "NOALIGNMENT";		}//If there's an 'x' in the bottom-
 		else{	//	right corner bail out because it means nothing got aligned
-            seqAaln.reserve(nRows);
-            seqBaln.reserve(nRows);
-
             int count = 0;
 			while(currentCell.prevCell != 'x'){				//	while the previous cell isn't an 'x', keep going...
 				
 				if(currentCell.prevCell == 'u'){			//	if the pointer to the previous cell is 'u', go up in the
-					if (constructMaps) BBaseMap[row] = count;
-				    seqAaln.append(1, '-');			//	matrix.  this indicates that we need to insert a gap in
-					seqBaln.append(1, seqB[row]);	//	seqA and a base in seqB
+					seqAaln = '-' + seqAaln;				//	matrix.  this indicates that we need to insert a gap in
+					seqBaln = seqB[row] + seqBaln;			//	seqA and a base in seqB
+                    BBaseMap[row] = count;
 					currentCell = alignment[--row][column];
 				}
 				else if(currentCell.prevCell == 'l'){		//	if the pointer to the previous cell is 'l', go to the left
-					if (constructMaps)  ABaseMap[column] = count;
-					seqBaln.append(1, '-');			//	in the matrix.  this indicates that we need to insert a gap
-					seqAaln.append(1, seqA[column]);	//	in seqB and a base in seqA
+					seqBaln = '-' + seqBaln;				//	in the matrix.  this indicates that we need to insert a gap
+					seqAaln = seqA[column] + seqAaln;		//	in seqB and a base in seqA
+                    ABaseMap[column] = count;
 					currentCell = alignment[row][--column];
 				}
 				else{
-					if (constructMaps) BBaseMap[row] = count;
-					if (constructMaps) ABaseMap[column] = count;
-				    seqAaln.append(1, seqA[column]);	//	otherwise we need to go diagonally up and to the left,
-					seqBaln.append(1, seqB[row]);	//	here we add a base to both alignments
+					seqAaln = seqA[column] + seqAaln;		//	otherwise we need to go diagonally up and to the left,
+					seqBaln = seqB[row] + seqBaln;			//	here we add a base to both alignments
+                    BBaseMap[row] = count;
+                    ABaseMap[column] = count;
 					currentCell = alignment[--row][--column];
 				}
                 count++;
 			}
 		}
 		
-		// Reverse the sequences that we constructed in reverse
-        std::reverse(seqAaln.begin(), seqAaln.end());
-        std::reverse(seqBaln.begin(), seqBaln.end());
-
+       
         pairwiseLength = seqAaln.length();
 		seqAstart = 1;	seqAend = 0;
 		seqBstart = 1;	seqBend = 0;
         //flip maps since we now know the total length
-		if (constructMaps) {
-			map<int, int> newAMap;
-			for (map<int, int>::iterator it = ABaseMap.begin(); it != ABaseMap.end(); it++) {
-				int spot = it->second;
-				newAMap[pairwiseLength - spot - 1] = it->first - 1;
-			}
-			ABaseMap = newAMap;
-			map<int, int> newBMap;
-			for (map<int, int>::iterator it = BBaseMap.begin(); it != BBaseMap.end(); it++) {
-				int spot = it->second;
-				newBMap[pairwiseLength - spot - 1] = it->first - 1;
-			}
-			BBaseMap = newBMap;
-		}
+        map<int, int> newAMap;
+        for (map<int, int>::iterator it = ABaseMap.begin(); it != ABaseMap.end(); it++) {
+            int spot = it->second;
+            newAMap[pairwiseLength-spot-1] = it->first-1;
+        }
+        ABaseMap = newAMap;
+        map<int, int> newBMap;
+        for (map<int, int>::iterator it = BBaseMap.begin(); it != BBaseMap.end(); it++) {
+            int spot = it->second;
+            newBMap[pairwiseLength-spot-1] = it->first-1;
+        }
+		BBaseMap = newBMap;
         
 		for(int i=0;i<seqAaln.length();i++){
 			if(seqAaln[i] != '-' && seqBaln[i] == '-')		{	seqAstart++;	}

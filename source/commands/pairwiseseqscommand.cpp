@@ -433,7 +433,7 @@ int driverColumn(pairwiseData* params){
                 Sequence seqJ = params->alignDB.get(j);
                 if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
                 
-                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned(), false);
+                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
                 seqI.setAligned(alignment->getSeqAAln());
                 seqJ.setAligned(alignment->getSeqBAln());
                 
@@ -501,7 +501,7 @@ int driverFitCalc(pairwiseData* params){
                 Sequence seqJ = params->alignDB.get(j);
                 if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
                 
-                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned(), false);
+                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
                 seqI.setAligned(alignment->getSeqAAln());
                 seqJ.setAligned(alignment->getSeqBAln());
                 
@@ -584,7 +584,7 @@ int driverLt(pairwiseData* params){
                 Sequence seqJ = params->alignDB.get(j);
                 if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
                 
-                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned(), false);
+                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
                 seqI.setAligned(alignment->getSeqAAln());
                 seqJ.setAligned(alignment->getSeqBAln());
                 
@@ -671,7 +671,7 @@ int driverSquare(pairwiseData* params){
                 Sequence seqJ = params->alignDB.get(j);
                 if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
 
-                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned(), false);
+                alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
                 seqI.setAligned(alignment->getSeqAAln());
                 seqJ.setAligned(alignment->getSeqBAln());
                 
