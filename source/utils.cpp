@@ -661,6 +661,65 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
     }
 }
 /***********************************************************************/
+bool Utils::checkLocations(string& filename, vector<string> locations, string silent){
+    try {
+        filename = getFullPathName(filename);
+        string inputDir = locations[0];
+        string outputDir = locations[1];
+        string defaultPath = locations[2];
+        string mothurPath = locations[3];
+
+        bool ableToOpen;
+        ifstream in;
+        ableToOpen = openInputFile(filename, in, "noerror");
+        in.close();
+
+        //if you can't open it, try input location
+        if (!ableToOpen) {
+            if (inputDir != "") { //default path is set
+                string tryPath = inputDir + getSimpleName(filename);
+                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                filename = tryPath;
+            }
+        }
+
+        //if you can't open it, try output location
+        if (!ableToOpen) {
+            if (outputDir != "") { //default path is set
+                string tryPath = outputDir + getSimpleName(filename);
+                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                filename = tryPath;
+            }
+        }
+
+
+        //if you can't open it, try default location
+        if (!ableToOpen) {
+            if (defaultPath != "") { //default path is set
+                string tryPath = defaultPath + getSimpleName(filename);
+                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                filename = tryPath;
+            }
+        }
+
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (!ableToOpen) {
+            string tryPath = mothurPath + getSimpleName(filename);
+            ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+            filename = tryPath;
+        }
+
+
+        if (!ableToOpen) { return false;  }
+
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "checkLocations");
+        exit(1);
+    }
+}
+/***********************************************************************/
 
 bool Utils::openInputFile(string fileName, ifstream& fileHandle, string mode){
     try {

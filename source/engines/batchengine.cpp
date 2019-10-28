@@ -8,7 +8,6 @@
 
 #include "batchengine.hpp"
 
-
 /***********************************************************************/
 //This function opens the batchfile to be used by BatchEngine::getInput.
 BatchEngine::BatchEngine(string tpath, string batchFile) : Engine(tpath) {
@@ -20,6 +19,27 @@ BatchEngine::BatchEngine(string tpath, string batchFile) : Engine(tpath) {
         }
         
         batchFileName = batchFile;
+        bstart = time(NULL);
+        numBatches = 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BatchEngine", "BatchEngine");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
+//This function opens the batchfile to be used by BatchEngine::getInput.
+BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev) : Engine(tpath) {
+    try {
+        openedBatch = util.openInputFile(batchFile, inputBatchFile, "no error");
+        if (!openedBatch) {
+            if (util.checkLocations(batchFile, current->getLocations())) { openedBatch = util.openInputFile(batchFile, inputBatchFile); }
+            else {  m->mothurOut("[ERROR]: unable to open " + batchFile + " batch file, please correct.\n");  }
+        }
+        
+        batchFileName = batchFile;
+        environmentalVariables = ev; //inherit environmental variables from nested batch files
         bstart = time(NULL);
         numBatches = 0;
     }
@@ -106,13 +126,12 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         if (nextcommand == "quit") { nextcommand = "quit()"; }
         if (nextcommand == "help") { nextcommand = "help()"; }
         
-        //determine if this is a command or batch file
-        //we know commands must include '(' characters for search for that
-        int openParen = nextcommand.find_first_of('(');
-        if (openParen == string::npos) { //no '(' character -> assume not a command, treat as new batchfile
+        string type = findType(nextcommand);
+        
+        if (type == "batch") {
             m->mothurOut("/*****************************************************************************/\n");
             
-            BatchEngine newBatchEngine(path, nextcommand);
+            BatchEngine newBatchEngine(path, nextcommand, environmentalVariables);
             
             if (newBatchEngine.getOpenedBatch()) {
                 bool bail = false;
@@ -120,7 +139,26 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
                 numBatches++;
             }
             m->mothurOut("/*****************************************************************************/\n");
+            
             nextcommand = getNextCommand(inputBatchFile);
+        }else if (type == "environment") {
+            //set environmental variables
+            string key, value; value = nextcommand;
+            util.splitAtEquals(key, value);
+            
+            map<string, string>::iterator it = environmentalVariables.find(key);
+            if (it == environmentalVariables.end())     { environmentalVariables[key] = value;  }
+            else                                        { it->second = value;                   }
+            
+            m->mothurOut("Setting environment variable " + key + " to " + value + "\n");
+            
+            nextcommand = getNextCommand(inputBatchFile);
+            
+        }else { //assume command, look for environmental variables to replace
+            
+            int evPos = nextcommand.find_first_of('$');
+            if (evPos == string::npos) { }//no '$' , nothing to do
+            else { replaceVariables(nextcommand); }
         }
         
         return nextcommand;
@@ -130,5 +168,47 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         exit(1);
     }
 }
-
+/***********************************************************************/
+string BatchEngine::findType(string nextCommand) {
+    try {
+        string type = "command";
+       
+        //determine if this is a command or batch file / environmental variable
+        //we know commands must include '(' characters for search for that
+        int openParen = nextCommand.find_first_of('(');
+        if (openParen == string::npos) { //no '(' character -> assume not a command, treat as new batchfile / environmental variable
+            //are you another batch file or an environmental variable
+            //if no '=' sign than not an environmental variable
+            int equalsSign = nextCommand.find_first_of('=');
+            if (equalsSign == string::npos) { //no '=' character -> assume not a environmental variable, treat as new batch
+                type = "batch";
+            }else { //assume environmental variable. filenames can contain '=' characters, but this is a rare case
+                type = "environment";
+            }
+        }
+                
+        return type;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BatchEngine", "findType");
+        exit(1);
+    }
+}
+/***********************************************************************/
+void BatchEngine::replaceVariables(string& nextCommand) {
+    try {
+        
+        for (map<string, string>::iterator it = environmentalVariables.begin(); it != environmentalVariables.end(); it++) {
+            int pos = nextCommand.find(it->first);
+            while (pos != string::npos) { //allow for multiple uses of a environmental variable in a single command
+                nextCommand.replace(pos-1,it->first.length()+1,it->second); //-1 to grab $char
+                pos = nextCommand.find(it->first);
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BatchEngine", "replaceVariables");
+        exit(1);
+    }
+}
 /***********************************************************************/

@@ -635,10 +635,12 @@ map<int, oligosPair> Oligos::getReorientedPairedBarcodes(){
         map<int, oligosPair> rpairedBarcodes;
         
         for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
+            //cout << (it->second).forward << '\t' << (it->second).reverse << endl;
             string forward = (it->second).reverse;
-            if (reversePairs) { forward = reverseOligo(forward); }
+            if (reversePairs) { forward = reverseOligo(forward); } //forward is now the reverse of reverse
             string reverse = (it->second).forward;
-            if (reversePairs) { reverse = reverseOligo(reverse); }
+            if (reversePairs) { reverse = reverseOligo(reverse); } //reverse is now the reverse of forward
+            //cout << "check orient = " << forward << '\t' << reverse << endl;
             oligosPair tempPair(forward, reverse); //reversePrimer, rc ForwardPrimer
             rpairedBarcodes[it->first] = tempPair;
         }
