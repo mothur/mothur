@@ -395,7 +395,7 @@ int TreeGroupCommand::execute(){
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
 			string outputFile = getOutputFileName("tree",variables);	
 			outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
-				
+				//printSims(cout, matrix, Treenames);
             Tree* newTree = new Tree(&ct, matrix, Treenames);
             if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
             else { newTree->assembleTree(); }
@@ -857,10 +857,10 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
                     int column = calcAverages[i][j].seq2;
                     float dist = calcAverages[i][j].dist;
                     
-                    matrix[row][column] = dist;
-                    matrix[column][row] = dist;
+                    matrix[row][column] = -(dist-1.0); //-(matrix->seqVec[i][j].dist -1.0)
+                    matrix[column][row] = -(dist-1.0);
                 }
-                
+                //printSims(cout, matrix, Treenames);
                 //create a new filename
                 map<string, string> variables;
                 variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
@@ -910,8 +910,8 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
                         int column = calcDistsTotals[myIter][i][j].seq2;
                         double dist = calcDistsTotals[myIter][i][j].dist;
                         
-                        matrix[row][column] = dist;
-                        matrix[column][row] = dist;
+                        matrix[row][column] = -(dist-1.0);
+                        matrix[column][row] = -(dist-1.0);
                     }
                     
                     //creates tree from similarity matrix and write out file

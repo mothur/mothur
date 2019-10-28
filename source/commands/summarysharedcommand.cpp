@@ -774,7 +774,7 @@ int SummarySharedCommand::process(SharedRAbundVectors* thisLookup, string sumFil
         vector< vector<seqDist>  > calcDists; calcDists.resize(numCalcs);
         
         SubSample sample;
-        for (int thisIter = 0; thisIter < iters+1; thisIter++) {
+        for (int thisIter = 0; thisIter < iters; thisIter++) {
             
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*thisLookup);
             
