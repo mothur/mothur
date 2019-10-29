@@ -511,6 +511,8 @@
 		48ED1E7E235E1BB4003E66F7 /* interactengine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ED1E7B235E1BB4003E66F7 /* interactengine.cpp */; };
 		48ED1E81235E1D59003E66F7 /* batchengine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ED1E7F235E1D59003E66F7 /* batchengine.cpp */; };
 		48ED1E82235E1D59003E66F7 /* batchengine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ED1E7F235E1D59003E66F7 /* batchengine.cpp */; };
+		48ED1E8523689DE8003E66F7 /* srainfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ED1E8323689DE8003E66F7 /* srainfocommand.cpp */; };
+		48ED1E8623689DE8003E66F7 /* srainfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ED1E8323689DE8003E66F7 /* srainfocommand.cpp */; };
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
@@ -1114,6 +1116,8 @@
 		48ED1E7C235E1BB4003E66F7 /* interactengine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = interactengine.hpp; path = source/engines/interactengine.hpp; sourceTree = SOURCE_ROOT; };
 		48ED1E7F235E1D59003E66F7 /* batchengine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = batchengine.cpp; path = source/engines/batchengine.cpp; sourceTree = SOURCE_ROOT; };
 		48ED1E80235E1D59003E66F7 /* batchengine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = batchengine.hpp; path = source/engines/batchengine.hpp; sourceTree = SOURCE_ROOT; };
+		48ED1E8323689DE8003E66F7 /* srainfocommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = srainfocommand.cpp; path = source/commands/srainfocommand.cpp; sourceTree = SOURCE_ROOT; };
+		48ED1E8423689DE8003E66F7 /* srainfocommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = srainfocommand.hpp; path = source/commands/srainfocommand.hpp; sourceTree = SOURCE_ROOT; };
 		48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = chimeravsearchcommand.cpp; path = source/commands/chimeravsearchcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chimeravsearchcommand.h; path = source/commands/chimeravsearchcommand.h; sourceTree = SOURCE_ROOT; };
 		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
@@ -2716,6 +2720,8 @@
 				A7E9B84112D37EC400DA6239 /* splitgroupscommand.cpp */,
 				A747EC6F181EA0E500345732 /* sracommand.h */,
 				A747EC70181EA0F900345732 /* sracommand.cpp */,
+				48ED1E8323689DE8003E66F7 /* srainfocommand.cpp */,
+				48ED1E8423689DE8003E66F7 /* srainfocommand.hpp */,
 				A7E9B85012D37EC400DA6239 /* subsamplecommand.h */,
 				A7E9B84F12D37EC400DA6239 /* subsamplecommand.cpp */,
 				A7E9B85812D37EC400DA6239 /* summarycommand.h */,
@@ -3124,6 +3130,7 @@
 				48E5445E1E9C2F0F00FF6AB8 /* fn.cpp in Sources */,
 				481FB6721AC1B8820076CFF3 /* refchimeratest.cpp in Sources */,
 				481FB6051AC1B7970076CFF3 /* seqerrorcommand.cpp in Sources */,
+				48ED1E8623689DE8003E66F7 /* srainfocommand.cpp in Sources */,
 				481FB6871AC1B8B80076CFF3 /* venn.cpp in Sources */,
 				48E544791E9D3CE400FF6AB8 /* npv.cpp in Sources */,
 				481FB5D71AC1B75C0076CFF3 /* makebiomcommand.cpp in Sources */,
@@ -3842,6 +3849,7 @@
 				A774101414695AF60098E6AC /* shhhseqscommand.cpp in Sources */,
 				A774104814696F320098E6AC /* myseqdist.cpp in Sources */,
 				835FE03E19F00A4D005AA754 /* svm.cpp in Sources */,
+				48ED1E8523689DE8003E66F7 /* srainfocommand.cpp in Sources */,
 				A77410F614697C300098E6AC /* seqnoise.cpp in Sources */,
 				A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */,
 				48705AC619BE32C50075E977 /* mergesfffilecommand.cpp in Sources */,
