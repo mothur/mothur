@@ -629,7 +629,7 @@ int RemoveSeqsCommand::readCount(){
         CountTable ct; ct.readTable(countfile, true, false); int originalCount = ct.getNumSeqs();
         
         for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
-            ct.setNumSeqs(*it, 0);
+            ct.zeroOutSeq(*it);
             if (m->getControl_pressed()) {  return 0; }
         }
         

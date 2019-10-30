@@ -74,7 +74,6 @@ class CountTable {
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
     
         int zeroOutTable(); //turn all counts to zeros
-        void eliminateZeroSeqs();
         int clearTable();
         bool isCountTable(string);
         bool isTableCompressed() { return isCompressed; }
@@ -118,6 +117,7 @@ class CountTable {
         int getGroupCount(string); // returns total seqs for that group
         int getNumSeqs(string); //returns total seqs for that seq, 0 if not found
         int setNumSeqs(string, int); //set total seqs for that seq, return -1 if not found
+        int zeroOutSeq(string); //set total seqs for that seq to 0, return -1 if not found
         int getNumSeqs() { return total; } //return total number of seqs
         int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
         int getNumSeqsSmallestGroup(); //returns size of smallest group. If no groups, returns total num seqs (includes non uniques)
