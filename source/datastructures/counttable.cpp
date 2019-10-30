@@ -1602,7 +1602,34 @@ int CountTable::setNumSeqs(string seqName, int abund) {
         exit(1);
     }
 }
+/************************************************************/
+int CountTable::zeroOutSeq(string seqName) {
+    try {
 
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it == indexNameMap.end()) {
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true); return -1;
+        }else {
+            int abund = totals[it->second];
+            totals[it->second] = 0;
+            total-=abund;
+            
+            if (hasGroups) {
+                int seqIndexIntoCounts = it->second;
+                for (int i = 0; i < counts[seqIndexIntoCounts].size(); i++) {
+                    totalGroups[counts[seqIndexIntoCounts][i].group] -= counts[seqIndexIntoCounts][i].abund;
+                }
+                counts[seqIndexIntoCounts].clear();
+            }
+        }
+
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "zeroOutSeq");
+        exit(1);
+    }
+}
 /************************************************************/
 //returns unique index for sequence like get in NameAssignment
 int CountTable::get(string seqName) {
@@ -1715,35 +1742,6 @@ int CountTable::remove(string seqName) {
 		m->errorOut(e, "CountTable", "remove");
 		exit(1);
 	}
-}
-/************************************************************/
-//remove sequences with zeroed out counts
-void CountTable::eliminateZeroSeqs() {
-    try {
-        //save for later in case removing a group means we need to remove a seq.
-        map<int, string> reverse;
-        for (map<string, int>::iterator it2 = indexNameMap.begin(); it2 !=indexNameMap.end(); it2++) { reverse[it2->second] = it2->first;  }
-        
-        int thisIndex = 0;
-        map<string, int> newIndexNameMap;
-        for (int i = 0; i < totals.size(); i++) {
-            if (totals[i] == 0) { //remove
-                counts.erase(counts.begin()+i);
-                totals.erase(totals.begin()+i);
-                --i;
-                uniques--;
-            }else {
-                string seqName = reverse[thisIndex];
-                newIndexNameMap[seqName] = i;
-            }
-            thisIndex++;
-        }
-        indexNameMap = newIndexNameMap;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "CountTable", "eliminateZeroSeqs");
-        exit(1);
-    }
 }
 /************************************************************/
 //add seqeunce without group info
