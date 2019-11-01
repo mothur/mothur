@@ -64,7 +64,7 @@ string ChimeraVsearchCommand::getHelpString(){
         helpString += "The xn parameter - weight of a no vote. Default 8.0. Decreasing this weight to around 3 or 4 may give better performance on denoised data.\n";
         helpString += "The dn parameter - pseudo-count prior on number of no votes. Default 1.4. Probably no good reason to change this unless you can retune to a good benchmark for your data. Reasonable values are probably in the range from 0.2 to 2.\n";
         helpString += "The mindiffs parameter - minimum number of differences in segment Default = (3).\n";
-        helpString += "The vsearch parameter allows you to specify the name and location of your vsearch executable. By default mothur will look in your path and mothur's executable.  You can set the vsearch location as follows, vsearch=/usr/bin/vsearch.\n";
+        helpString += "The vsearch parameter allows you to specify the name and location of your vsearch executable. By default mothur will look in your path and mothur's executable and mothur tools locations.  You can set the vsearch location as follows, vsearch=/usr/bin/vsearch.\n";
         helpString += "The chimera.vsearch command should be in the following format: \n";
         helpString += "chimera.vsearch(fasta=yourFastaFile, reference=yourTemplate) \n";
         helpString += "Example: chimera.vsearch(fasta=AD.align, reference=silva.gold.align) \n";
@@ -267,14 +267,26 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             if (temp == "not found") { temp = "false";			}
             dups = util.isTrue(temp);
             
+            vector<string> versionOutputs;
+            bool foundTool = false;
+            path = current->getProgramPath();
+            string programName = "vsearch"; programName += EXECUTABLE_EXT;
+            
             vsearchLocation = validParameter.valid(parameters, "vsearch");
-            if (vsearchLocation == "not found") { vsearchLocation = ""; }
+            if (vsearchLocation == "not found") {
+                vsearchLocation = "";
+                foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+            }
             else {
                 //test to make sure vsearch exists
                 ifstream in;
                 vsearchLocation = util.getFullPathName(vsearchLocation);
                 bool ableToOpen = util.openInputFile(vsearchLocation, in, "no error"); in.close();
-                if(!ableToOpen) { m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = ""; }
+                if(!ableToOpen) {
+                    m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = "";
+                    programName = util.getSimpleName(vsearchLocation); vsearchLocation = "";
+                    foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                }
             }
 
             
@@ -285,86 +297,25 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             //look for vsearch exe
             path = current->getProgramPath();
             
-            if (vsearchLocation == "") {
-
-                string vsearchCommand;
-#if defined NON_WINDOWS
-                vsearchCommand = path + "vsearch";	//	format the database, -o option gives us the ability
-                if (m->getDebug()) {
-                    m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
-                    Command* newCommand = new SystemCommand("which vsearch\n");
-                    newCommand->execute();
-                    delete newCommand;
-                    m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
-                    newCommand = new SystemCommand("which mothur\n");
-                    newCommand->execute();
-                    delete newCommand;
-                }
-#else
-                vsearchCommand = path + "\\vsearch.exe";
-#endif
-                
-                //test to make sure vsearch exists
-                ifstream in;
-                vsearchCommand = util.getFullPathName(vsearchCommand);
-                bool ableToOpen = util.openInputFile(vsearchCommand, in, "no error"); in.close();
-                if(!ableToOpen) {
-                    
-                    if (util.checkLocations(vsearchCommand, current->getLocations())) { vsearchLocation = vsearchCommand; }
-                    else {
+            if (foundTool && !abort) {
                         
-                        m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-                        //check to see if vsearch is in the path??
-                        
-                        ifstream in2;
-                        string programName = "vsearch"; programName += EXECUTABLE_EXT;
-                        string uLocation = util.findProgramPath(programName);
-                        uLocation += programName;
-                        ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
-                        
-                        if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  abort = true; }
-                        else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation; }
-                    }
-                }else {  vsearchLocation = vsearchCommand; }
-                
-                vsearchLocation = util.getFullPathName(vsearchLocation);
-                
-                if (!abort) { //check vsearch version
-                    string versionTestCommand = vsearchLocation + " -version > ./commandScreen.output 2>&1";
-                    system(versionTestCommand.c_str());
-                    
-                    ifstream in;
-                    string versionOutput = "./commandScreen.output";
-                    util.openInputFile(versionOutput, in, "no error");
-                    
-                    while (!in.eof()) {
-                        string output = util.getline(in); util.gobble(in);
-                        
-                        vector<string> outputs = util.splitWhiteSpace(output);
-                        
-                        if (outputs.size() != 0) {
+                if (versionOutputs.size() != 0) {
                             
-                            if (outputs[0] == "vsearch") {
-                                if (outputs.size() >= 2) {
-                                    string version = outputs[1];
+                    if (versionOutputs[0] == "vsearch") {
+                        if (versionOutputs.size() >= 2) {
+                            string version = versionOutputs[1];
                                     
-                                    int pos = version.find_first_of('_');
-                                    if (pos != string::npos) { version = version.substr(0, pos); }
+                            int pos = version.find_first_of('_');
+                            if (pos != string::npos) { version = version.substr(0, pos); }
                                     
-                                    if (version != "v2.13.3") {
-                                        m->mothurOut("[ERROR]: vsearch version found = " + version + ". Mothur requires version v2.13.3 which is distributed with mothur's executable or available on github https://github.com/torognes/vsearch/releases/tag/v2.13.3, please correct. \n");  abort = true;
-                                    }else {
-                                        m->mothurOut("Using vsearch version " + version + ".\n");
-                                    }
-                                }
-                            }
+                            if (version != "v2.13.3") {
+                                m->mothurOut("[ERROR]: vsearch version found = " + version + ". Mothur requires version v2.13.3 which is distributed with mothur's executable or available on github https://github.com/torognes/vsearch/releases/tag/v2.13.3, please correct. \n");  abort = true;
+                            }else { m->mothurOut("Using vsearch version " + version + ".\n"); }
                         }
                     }
-                    in.close();
-                    util.mothurRemove(versionOutput);
                 }
             }
-            
+                   
             if (!abort) {
                 if ((namefile != "") || (groupfile != "")) { //convert to count
                     

@@ -21,6 +21,7 @@ vector<string> ChimeraUchimeCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter puchimelocation("uchime", "String", "", "", "", "", "","",false,false); parameters.push_back(puchimelocation);
         CommandParameter pstrand("strand", "String", "", "", "", "", "","",false,false); parameters.push_back(pstrand);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -67,6 +68,7 @@ string ChimeraUchimeCommand::getHelpString(){
         helpString += "If the dereplicate parameter is false, then if one group finds the sequence to be chimeric, then all groups find it to be chimeric, default=f.\n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+        helpString += "The uchime parameter allows you to specify the name and location of your uchime executable. By default mothur will look in your path and mothur's executable and mothur tools locations.  You can set the uchime location as follows, uchime=/usr/bin/uchime.\n";
 		helpString += "The abskew parameter can only be used with template=self. Minimum abundance skew. Default 1.9. Abundance skew is: min [ abund(parent1), abund(parent2) ] / abund(query).\n";
 		helpString += "The chimealns parameter allows you to indicate you would like a file containing multiple alignments of query sequences to parents in human readable format. Alignments show columns with differences that support or contradict a chimeric model.\n";
 		helpString += "The minh parameter - mininum score to report chimera. Default 0.3. Values from 0.1 to 5 might be reasonable. Lower values increase sensitivity but may report more false positives. If you decrease xn you may need to increase minh, and vice versa.\n";
@@ -294,25 +296,27 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
             if (hasCount && (templatefile != "self")) { m->mothurOut("You have provided a countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
 			
-			//look for uchime exe
-			string path = current->getProgramPath();
-			string uchimeCommand = path + "uchime" + EXECUTABLE_EXT;
-			ifstream in;
-			uchimeCommand = util.getFullPathName(uchimeCommand);
-			bool ableToOpen = util.openInputFile(uchimeCommand, in, "no error"); in.close();
-			if(!ableToOpen) {	
-                m->mothurOut(uchimeCommand + " file does not exist. Checking path... \n");
-                //check to see if uchime is in the path??
-                ifstream in2;
-                string uName = "uchime"; uName += EXECUTABLE_EXT;
-                string uLocation = util.findProgramPath(uName);
-                uLocation += uName;
-                ableToOpen = util.openInputFile(uLocation, in2, "no error"); in2.close();
-
-                if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the uchime executable.\n");  abort = true; }
-                else {  m->mothurOut("Found uchime in your path, using " + uLocation + "\n");uchimeLocation = uLocation; }
-            }else {  uchimeLocation = uchimeCommand; }
+            vector<string> versionOutputs;
+            bool foundTool = false;
+            string path = current->getProgramPath();
+            string programName = "uchime"; programName += EXECUTABLE_EXT;
             
+            uchimeLocation = validParameter.valid(parameters, "uchime");
+            if (uchimeLocation == "not found") {
+                uchimeLocation = "";
+                foundTool = util.findTool(programName, uchimeLocation, path, versionOutputs, current->getLocations());
+            }
+            else {
+                //test to make sure vsearch exists
+                ifstream in;
+                uchimeLocation = util.getFullPathName(uchimeLocation);
+                bool ableToOpen = util.openInputFile(uchimeLocation, in, "no error"); in.close();
+                if(!ableToOpen) {
+                    m->mothurOut(uchimeLocation + " file does not exist or cannot be opened, ignoring.\n"); uchimeLocation = "";
+                    programName = util.getSimpleName(uchimeLocation); uchimeLocation = "";
+                    foundTool = util.findTool(programName, uchimeLocation, path, versionOutputs, current->getLocations());
+                }
+            }
             uchimeLocation = util.getFullPathName(uchimeLocation);
             
             if (!abort) {
