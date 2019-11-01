@@ -222,7 +222,7 @@ int SetDirectoryCommand::execute(){
             }
             
             //set default
-            if (blastLocation == "") {  //do nothing   }
+            if (blastLocation == "") {
             }else if ((blastLocation == "default") || (blastLocation == "clear")){
                 string blastLocation = current->getProgramPath();
                                 

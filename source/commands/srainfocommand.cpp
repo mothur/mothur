@@ -7,11 +7,14 @@
 //
 
 #include "srainfocommand.hpp"
+#include "systemcommand.h"
 
 //**********************************************************************************************************************
 vector<string> SRAInfoCommand::setParameters(){
     try {
         CommandParameter psra("sra", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(psra);
+        CommandParameter ptype("type", "Multiple", "fastq-sff", "fastq", "", "", "","",false,false,true); parameters.push_back(ptype);
+        CommandParameter pFasterQlocation("fasterq", "String", "", "", "", "", "","",false,false); parameters.push_back(pFasterQlocation);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -30,7 +33,7 @@ string SRAInfoCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The sra.info command reads a sra file and extracts the fastq or sff data.\n";
-        helpString += "The sra.info  command parameters are ....\n";
+        helpString += "The sra.info command parameters are ....\n";
         helpString += "The sra.info command should be in the following format: sra.info(sra=yourSRAFile)\n";
         helpString += "sra.info(sra=SRR000004) \n";
         return helpString;
@@ -120,6 +123,45 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 outputDir = "";
                 outputDir += util.hasPath(srafile); //if user entered a file with a path then preserve it
             }
+            
+            outputType = validParameter.valid(parameters, "type");        if (outputType == "not found"){
+                outputType = "fastq";
+            }
+            if ((outputType == "fastq") || (outputType == "sff")) {}
+            else { m->mothurOut("[ERROR]: " + outputType + " is not a valid type option. The sra.info can extract files of type sff or fastq.\n");  abort = true; }
+            
+            vector<string> versionOutputs;
+            bool foundTool = false;
+            string path = current->getProgramPath();
+            string programName = "fasterq_dump"; programName += EXECUTABLE_EXT;
+            
+            fasterQLocation = validParameter.valid(parameters, "fasterq");
+            if (fasterQLocation == "not found") {
+                fasterQLocation = "";
+                foundTool = util.findTool(programName, fasterQLocation, path, versionOutputs, current->getLocations());
+            }else {
+                //test to make sure vsearch exists
+                ifstream in;
+                fasterQLocation = util.getFullPathName(fasterQLocation);
+                bool ableToOpen = util.openInputFile(fasterQLocation, in, "no error"); in.close();
+                if(!ableToOpen) {
+                    m->mothurOut(fasterQLocation + " file does not exist or cannot be opened, ignoring.\n"); fasterQLocation = "";
+                    programName = util.getSimpleName(fasterQLocation); fasterQLocation = "";
+                    foundTool = util.findTool(programName, fasterQLocation, path, versionOutputs, current->getLocations());
+                }
+            }
+          
+            if (foundTool && !abort) { //check fasterq_dump version
+                if (versionOutputs.size() >= 3) {
+                    string version = versionOutputs[2];
+                                                
+                    if (version != "2.9.6") {
+                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version 2.9.6 which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
+                    }else { m->mothurOut("Using " + programName + " version " + version + ".\n"); }
+                }
+            }
+            
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump location using " + fasterQLocation + "\n"); }
         }
     }
     catch(exception& e) {
@@ -133,13 +175,25 @@ int SRAInfoCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
-        
-    
+        if (outputType == "fastq")      {  runFastqDump();  }
+        //else if (outputType == "sff")   {  runSFFDump();    }
         
         return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "SRAInfoCommand", "execute");
+        exit(1);
+    }
+}
+//***************************************************************************************************************
+void SRAInfoCommand::runFastqDump(){
+    try{
+        
+       
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SRAInfoCommand", "runFastqDump");
         exit(1);
     }
 }

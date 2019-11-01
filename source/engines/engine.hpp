@@ -38,7 +38,12 @@ public:
                     //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
                     if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
             #endif
-
+            
+            //if you haven't set your own location
+            #ifdef MOTHUR_TOOLS
+                current->setBlastPath(current->getToolsPath());
+            #endif
+            
             start = time(NULL);
             numCommandsRun = 0;
         }

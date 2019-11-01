@@ -26,8 +26,8 @@ public:
     string getOutputPattern(string);
     
     string getHelpString();
-    string getCitation()    { return "http://www.mothur.org/wiki/sra.info"; }
-    string getDescription() { return "extracts fastq or sff files from sra file"; }
+    string getCitation()    { return ".... Add reference for NCBI .... http://www.mothur.org/wiki/sra.info"; }
+    string getDescription() { return "extracts fastq or sff files from sra file using fasterq_dump or sff_dump programs written by NCBI"; }
     
     int execute();
     void help() { m->mothurOut(getHelpString()); }
@@ -36,9 +36,9 @@ private:
     
     bool abort;
     vector<string> outputNames;
-    string srafile, outputDir;
+    string srafile, outputDir, outputType, fasterQLocation;
     
-    
+    void runFastqDump();
 };
 
 /**************************************************************************************************/
