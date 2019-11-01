@@ -403,9 +403,11 @@ int SplitGroupCommand::runNameGroup(){
             string uniqueName = namefile+Groups[i];
             string uniqueList = fastafile+Groups[i];
             
-            util.copyFile(namefile, uniqueName);
-            
-            string inputString = "dups=f, accnos=" + newGroup+".accnos" + ", name=" + uniqueName;
+            string inputString = "dups=f, accnos=" + newGroup+".accnos";
+            if (namefile != "") {
+                inputString += ", name=" + uniqueName;
+                util.copyFile(namefile, uniqueName);
+            }
             if (fastafile != "") {
                 inputString += ", fasta=" + uniqueFasta;
                 util.copyFile(fastafile, uniqueFasta);
@@ -436,9 +438,10 @@ int SplitGroupCommand::runNameGroup(){
                 outputNames.push_back(newList); outputTypes["list"].push_back(newList);
                 util.mothurRemove(uniqueList);
             }
-            
-            util.renameFile(filenames["name"][0], newName);
-            outputNames.push_back(newName); outputTypes["name"].push_back(newName);
+            if (namefile != "") {
+                util.renameFile(filenames["name"][0], newName);
+                outputNames.push_back(newName); outputTypes["name"].push_back(newName);
+            }
             
             m->mothurOut("/******************************************/\nDone.\n");
             
