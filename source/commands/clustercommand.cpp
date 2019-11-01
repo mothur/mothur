@@ -49,6 +49,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
+        CommandParameter pvsearchlocation("vsearch", "String", "", "", "", "", "","",false,false); parameters.push_back(pvsearchlocation);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
@@ -78,6 +79,7 @@ string ClusterCommand::getHelpString(){
         helpString += "The delta parameter allows to set the stable value for the metric in the opticluster method (delta=0.0001). \n";
         helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc, unique and opti. Default=opti.  The agc and dgc methods require a fasta file.";
         helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
+         helpString += "The vsearch parameter allows you to specify the name and location of your vsearch executable if using agc or dgc clustering methods. By default mothur will look in your path, mothur's executable and mothur tools locations.  You can set the vsearch location as follows, vsearch=/usr/bin/vsearch.\n";
        helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		return helpString;
@@ -233,6 +235,32 @@ ClusterCommand::ClusterCommand(string option)  {
 			
             method = validParameter.valid(parameters, "method");
             if (method == "not found") {  method = "opti";}
+            
+            vector<string> versionOutputs;
+            bool foundTool = false;
+            string path = current->getProgramPath();
+            string programName = "vsearch"; programName += EXECUTABLE_EXT;
+            
+            vsearchLocation = validParameter.valid(parameters, "vsearch");
+            if (vsearchLocation == "not found") {
+                vsearchLocation = "";
+                if ((method == "agc") || (method == "dgc")) {
+                    foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                }
+            }
+            else {
+                if ((method == "agc") || (method == "dgc")) {
+                    //test to make sure vsearch exists
+                    ifstream in;
+                    vsearchLocation = util.getFullPathName(vsearchLocation);
+                    bool ableToOpen = util.openInputFile(vsearchLocation, in, "no error"); in.close();
+                    if(!ableToOpen) {
+                        m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = "";
+                        programName = util.getSimpleName(vsearchLocation); vsearchLocation = "";
+                        foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                    }
+                }
+            }
             
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti") || (method == "unique")) { }
             else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc, unique and opti."); m->mothurOutEndLine(); abort = true; }
@@ -440,40 +468,6 @@ int ClusterCommand::execute(){
 
 int ClusterCommand::runVsearchCluster(){
     try {
-        //look for vsearch exe
-        string path = current->getProgramPath();
-        string vsearchCommand = path + PATH_SEPARATOR + "vsearch" + EXECUTABLE_EXT;
-#if defined NON_WINDOWS
-        if (m->getDebug()) {
-            m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
-            Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
-            newCommand->execute(); delete newCommand;
-            m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
-            newCommand = new SystemCommand("which mothur"); m->mothurOutEndLine();
-            newCommand->execute(); delete newCommand;
-        }
-#endif
-        
-        //test to make sure vsearch exists
-        ifstream in;
-        vsearchCommand = util.getFullPathName(vsearchCommand);
-        bool ableToOpen = util.openInputFile(vsearchCommand, in, "no error"); in.close();
-        if(!ableToOpen) {
-            m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-
-            ifstream in2;
-            string programName = "vsearch"; programName += EXECUTABLE_EXT;
-            string uLocation = util.findProgramPath(programName);
-            ableToOpen = util.openInputFile(uLocation+programName, in2, "no error"); in2.close();
-            
-            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  m->setControl_pressed(true);  }
-            else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation+programName; }
-        }else {  vsearchLocation = vsearchCommand; }
-        
-        if (m->getControl_pressed()) {  return 0; }
-        
-        vsearchLocation = util.getFullPathName(vsearchLocation);
-        
         string vsearchFastafile = ""; VsearchFileParser* vParse;
         if ((namefile == "") && (countfile == ""))  { vParse = new VsearchFileParser(fastafile);                        }
         else if (namefile != "")                    { vParse = new VsearchFileParser(fastafile, namefile, "name");      }
