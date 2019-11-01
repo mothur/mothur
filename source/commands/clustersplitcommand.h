@@ -63,7 +63,6 @@ private:
     string readFile(vector< map<string, string> >&);
     string printFile(string, vector< map<string, string> >&);
     int getLabels(string, set<string>& listLabels);
-    bool findVsearch();
     int runSensSpec();
 };
 

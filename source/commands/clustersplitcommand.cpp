@@ -53,6 +53,7 @@ vector<string> ClusterSplitCommand::setParameters(){
        CommandParameter pdist("dist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdist);
         CommandParameter pislist("islist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pislist);
         CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
+        CommandParameter pvsearchlocation("vsearch", "String", "", "", "", "", "","",false,false); parameters.push_back(pvsearchlocation);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -98,6 +99,7 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
         helpString += "The classic parameter allows you to indicate that you want to run your files with cluster.classic.  It is only valid with splitmethod=fasta. Default=f.\n";
         helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
+         helpString += "The vsearch parameter allows you to specify the name and location of your vsearch executable if using agc or dgc clustering methods. By default mothur will look in your path, mothur's executable and mothur tools locations.  You can set the vsearch location as follows, vsearch=/usr/bin/vsearch.\n";
 		helpString += "The cluster.split command should be in the following format: \n";
 		helpString += "cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision, splitmethod=yourSplitmethod, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n";
 		helpString += "Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=opti, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n";	
@@ -422,6 +424,32 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
 
 			method = validParameter.valid(parameters, "method");		if (method == "not found") { method = "opti";  }
+            
+            vector<string> versionOutputs;
+            bool foundTool = false;
+            string path = current->getProgramPath();
+            string programName = "vsearch"; programName += EXECUTABLE_EXT;
+            
+            vsearchLocation = validParameter.valid(parameters, "vsearch");
+            if (vsearchLocation == "not found") {
+                vsearchLocation = "";
+                if ((method == "agc") || (method == "dgc")) {
+                    foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                }
+            }
+            else {
+                if ((method == "agc") || (method == "dgc")) {
+                    //test to make sure vsearch exists
+                    ifstream in;
+                    vsearchLocation = util.getFullPathName(vsearchLocation);
+                    bool ableToOpen = util.openInputFile(vsearchLocation, in, "no error"); in.close();
+                    if(!ableToOpen) {
+                        m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = "";
+                        programName = util.getSimpleName(vsearchLocation); vsearchLocation = "";
+                        foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                    }
+                }
+            }
 			
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
             else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
@@ -555,7 +583,7 @@ int ClusterSplitCommand::execute(){
                 else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod, large);					}
                 else if (splitmethod == "fasta")		{
                     if ((method == "agc") || (method == "dgc")) {
-                        if (!findVsearch()) { m->mothurOut("[ERROR] cannot find vsearch executable, aborting.\n"); return 0; }
+                        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
                         split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, "vsearch", processors, classic, outputDir, "fasta");
                     }else{
                         split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir, "distance");
@@ -1806,62 +1834,6 @@ int ClusterSplitCommand::getLabels(string file, set<string>& listLabels){
     }
     catch(exception& e) {
         m->errorOut(e, "ClusterSplitCommand", "getLabels");
-        exit(1);
-    }
-    
-}
-//**********************************************************************************************************************
-bool ClusterSplitCommand::findVsearch(){
-    try {
-        
-        abort = false;
-        
-        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
-        
-        //look for vsearch exe
-
-        string path = current->getProgramPath();
-      
-        string vsearchCommand = path + PATH_SEPARATOR;
-        vsearchCommand += "vsearch";  vsearchCommand += EXECUTABLE_EXT;
-#if defined NON_WINDOWS
-        if (m->getDebug()) {
-            m->mothurOut("[DEBUG]: vsearch location using \"which vsearch\" = ");
-            Command* newCommand = new SystemCommand("which vsearch"); m->mothurOutEndLine();
-            newCommand->execute(); delete newCommand;
-            m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = ");
-            newCommand = new SystemCommand("which mothur"); m->mothurOutEndLine();
-            newCommand->execute(); delete newCommand;
-        }
-#endif
-        
-        //test to make sure vsearch exists
-        ifstream in;
-        vsearchCommand = util.getFullPathName(vsearchCommand);
-        bool ableToOpen = util.openInputFile(vsearchCommand, in, "no error"); in.close();
-        if(!ableToOpen) {
-            m->mothurOut(vsearchCommand + " file does not exist. Checking path... \n");
-            
-            ifstream in2;
-            string programName = "vsearch"; programName += EXECUTABLE_EXT;
-            string uLocation = util.findProgramPath(programName);
-            ableToOpen = util.openInputFile(uLocation+programName, in2, "no error"); in2.close();
-            
-            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the vsearch executable.\n");  m->setControl_pressed(true);  }
-            else {  m->mothurOut("Found vsearch in your path, using " + uLocation + "\n");vsearchLocation = uLocation+programName; }
-        }else {  vsearchLocation = vsearchCommand; }
-        
-        vsearchLocation = util.getFullPathName(vsearchLocation);
-        
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: vsearch location using " + vsearchLocation + "\n"); }
-        
-        if (!abort) { return true; }
-        
-        return false;
-
-    }
-    catch(exception& e) {
-        m->errorOut(e, "ClusterSplitCommand", "findVsearch");
         exit(1);
     }
     

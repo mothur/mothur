@@ -307,7 +307,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                 foundTool = util.findTool(programName, uchimeLocation, path, versionOutputs, current->getLocations());
             }
             else {
-                //test to make sure vsearch exists
+                //test to make sure uchime exists
                 ifstream in;
                 uchimeLocation = util.getFullPathName(uchimeLocation);
                 bool ableToOpen = util.openInputFile(uchimeLocation, in, "no error"); in.close();
