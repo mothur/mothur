@@ -41,8 +41,8 @@ int main(int argc, char *argv[]){
         
 		signal(SIGINT, ctrlc_handler );
         
-        string defaultPath, mothurVersion, releaseDate, OS;
-        util.mothurInitialPrep(defaultPath, mothurVersion, releaseDate, OS);
+        string defaultPath, mothurVersion, releaseDate, OS, toolsPath;
+        util.mothurInitialPrep(defaultPath, toolsPath, mothurVersion, releaseDate, OS);
         
         current->setReleaseDate(releaseDate);
         current->setVersion(mothurVersion);
@@ -51,6 +51,11 @@ int main(int argc, char *argv[]){
 			current->setDefaultPath(defaultPath);
             m->appendLogBuffer("\nUsing default file location " + defaultPath + "\n\n");
 		#endif
+        
+        #ifdef MOTHUR_TOOLS
+            current->setToolsPath(toolsPath);
+            m->appendLogBuffer("\nUsing tools location " + toolsPath + "\n\n");
+        #endif
     
 		if (argc>1) {
             if (argc > 2) { //is one of these -q for quiet mode?

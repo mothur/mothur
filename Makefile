@@ -35,6 +35,7 @@ HDF5_INCLUDE_DIR ?= "\"Enter_your_HDF5_include_path_here\""
 GSL_LIBRARY_DIR ?= "\"Enter_your_GSL_library_path_here\""
 GSL_INCLUDE_DIR ?= "\"Enter_your_GSL_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
+MOTHUR_TOOLS="\"Enter_your_mothur_tools_path_here\""
 VERSION = "\"1.43.0\""
 
 
@@ -55,6 +56,10 @@ else
     CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}
 endif
 
+ifeq  ($(strip $(MOTHUR_TOOLS)),"\"Enter_your_default_path_here\"")
+else
+    CXXFLAGS += -DMOTHUR_TOOLS=${MOTHUR_TOOLS}
+endif
 
 # if you do not want to use the readline library, set this to no.
 # make sure you have the library installed

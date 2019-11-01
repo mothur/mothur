@@ -605,6 +605,7 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
         string outputDir = locations[1];
         string defaultPath = locations[2];
         string mothurPath = locations[3];
+        string mothurToolsPath = locations[4];
 
         bool ableToOpen;
         ifstream in;
@@ -650,6 +651,13 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
             filename = tryPath;
         }
 
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (!ableToOpen) {
+            string tryPath = mothurToolsPath + getSimpleName(filename);
+            m->mothurOut("Unable to open " + filename + ". Trying mothur's tools location " + tryPath+ ".\n");
+            ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+            filename = tryPath;
+        }
 
         if (!ableToOpen) { m->mothurOut("Unable to open " + filename + ".\n");  return false;  }
 
@@ -668,6 +676,7 @@ bool Utils::checkLocations(string& filename, vector<string> locations, string si
         string outputDir = locations[1];
         string defaultPath = locations[2];
         string mothurPath = locations[3];
+        string mothurToolsPath = locations[4];
 
         bool ableToOpen;
         ifstream in;
@@ -709,6 +718,14 @@ bool Utils::checkLocations(string& filename, vector<string> locations, string si
             filename = tryPath;
         }
 
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (!ableToOpen) {
+            if (mothurToolsPath != "") { //default path is set
+                string tryPath = mothurToolsPath + getSimpleName(filename);
+                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                filename = tryPath;
+            }
+        }
 
         if (!ableToOpen) { return false;  }
 
@@ -716,6 +733,58 @@ bool Utils::checkLocations(string& filename, vector<string> locations, string si
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "checkLocations");
+        exit(1);
+    }
+}
+/***********************************************************************/
+bool Utils::findTool(string& toolName, string& toolLocation, string mothurProgramPath, vector<string>& versionOutputs, vector<string> locations){
+    try {
+        bool foundTool = false;
+        string toolCommand = mothurProgramPath + toolName; //windows def
+        
+        //test to make sure tool exists
+        ifstream in;
+        toolCommand = getFullPathName(toolCommand);
+        bool ableToOpen = openInputFile(toolCommand, in, "no error"); in.close();
+        if(!ableToOpen) {
+                            
+            if (checkLocations(toolCommand, locations)) { toolLocation = toolCommand; }
+            else {
+                                
+            m->mothurOut(toolCommand + " file does not exist. Checking path... \n");
+            //check to see if tool is in the path??
+                                
+            ifstream in2;
+            string uLocation = findProgramPath(toolName);
+            uLocation += toolName;
+            ableToOpen = openInputFile(uLocation, in2, "no error"); in2.close();
+                                
+            if(!ableToOpen) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the " + toolName + " executable.\n");  foundTool = false; }
+            else {  m->mothurOut("Found " + toolName + " in your path, using " + uLocation + "\n"); toolLocation = uLocation; foundTool = true; }
+            }
+        }else {  toolLocation = toolCommand; foundTool = true;  }
+                        
+        toolLocation = getFullPathName(toolLocation);
+                        
+        if (foundTool) { //check fasterq_dump version
+            string versionTestCommand = toolLocation + " --version > ./commandScreen.output 2>&1";
+            system(versionTestCommand.c_str());
+                            
+            ifstream in;
+            string versionOutput = "./commandScreen.output";
+            openInputFile(versionOutput, in, "no error");
+                            
+            string output = getline(in); gobble(in);
+            versionOutputs = splitWhiteSpace(output);
+            in.close();
+            
+            mothurRemove(versionOutput);
+        }
+        
+        return foundTool;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "findTool");
         exit(1);
     }
 }
@@ -1948,7 +2017,7 @@ string Utils::getExtension(string longName){
     }
 }
 /***********************************************************************/
-bool Utils::mothurInitialPrep(string& defaultPath, string& mothurVersion, string& releaseDate, string& OS){
+bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothurVersion, string& releaseDate, string& OS){
     try {
 
         #if defined NON_WINDOWS
@@ -1967,6 +2036,18 @@ bool Utils::mothurInitialPrep(string& defaultPath, string& mothurVersion, string
             defaultPath = getFullPathName(defaultPath);
         #else
             defaultPath = "";
+        #endif
+        
+        #ifdef MOTHUR_TOOLS
+            tools = MOTHUR_TOOLS;
+        
+            //add / to name if needed
+            lastChar = tools.substr(tools.length()-1);
+            if (lastChar != PATH_SEPARATOR) { tools += PATH_SEPARATOR; }
+        
+            tools = getFullPathName(tools);
+        #else
+            tools = "";
         #endif
         
         #ifdef LOGFILE_NAME

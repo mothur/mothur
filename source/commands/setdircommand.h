@@ -29,13 +29,13 @@ public:
 	string getHelpString();	
     string getOutputPattern(string){ return ""; }	
 	string getCitation() { return "http://www.mothur.org/wiki/Set.dir"; }
-	string getDescription()		{ return "set input, output and default directories"; }
+	string getDescription()		{ return "set various directories"; }
 
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string output, input, tempdefault, blastLocation;
+	string output, input, tempdefault, blastLocation, toolsLocation;
 	bool abort, debugorSeedOnly, modifyNames;
     int random;
 	vector<string> outputNames;

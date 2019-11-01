@@ -281,7 +281,25 @@ void CurrentFile::setBlastPath(string pathname)  {
         
     }
     catch(exception& e) {
-        m->errorOut(e, "CurrentFile", "setDefaultPath");
+        m->errorOut(e, "CurrentFile", "setBlastPath");
+        exit(1);
+    }
+}
+/*********************************************************************************************/
+void CurrentFile::setToolsPath(string pathname)  {
+    try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
+        if (pathname != "") {
+            //add / to name if needed
+            string lastChar = pathname.substr(pathname.length()-1);
+            if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+        }
+        toolsPath = util.getFullPathName(pathname);
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CurrentFile", "setToolsPath");
         exit(1);
     }
 }

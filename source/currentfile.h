@@ -96,6 +96,8 @@ class CurrentFile {
         void setTestFilePath(string);
         string getBlastPath() { lock_guard<std::mutex> guard(currentProtector); return blastPath; }
         void setBlastPath(string);
+        string getToolsPath() { lock_guard<std::mutex> guard(currentProtector); return toolsPath; }
+        void setToolsPath(string);
         string getOutputDir() { lock_guard<std::mutex> guard(currentProtector); return outputDir; }
         void setOutputDir(string f) { lock_guard<std::mutex> guard(currentProtector); outputDir = util.getFullPathName(f); }
         string getInputDir() { lock_guard<std::mutex> guard(currentProtector); return inputDir; }
@@ -105,7 +107,7 @@ class CurrentFile {
         void setReleaseDate(string r) { lock_guard<std::mutex> guard(currentProtector); releaseDate = r; }
         string getVersion() { lock_guard<std::mutex> guard(currentProtector); return version; }
         void setVersion(string r) { lock_guard<std::mutex> guard(currentProtector); version = r; }
-        vector<string> getLocations() { lock_guard<std::mutex> guard(currentProtector); vector<string> locations; locations.push_back(inputDir); locations.push_back(outputDir); locations.push_back(defaultPath); locations.push_back(mothurProgramPath); return locations; }
+        vector<string> getLocations() { lock_guard<std::mutex> guard(currentProtector); vector<string> locations; locations.push_back(inputDir); locations.push_back(outputDir); locations.push_back(defaultPath); locations.push_back(mothurProgramPath); locations.push_back(toolsPath); return locations; }
     
 
         bool getMothurCalling()                         { lock_guard<std::mutex> guard(currentProtector); return mothurCalling;             }
@@ -131,7 +133,7 @@ class CurrentFile {
         string releaseDate, version;
     
         string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile;
-        string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode, samplefile;
+        string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode, samplefile, toolsPath;
     bool mothurCalling;
 		
         void setGroupMode(string t)                     { groupMode = t;                    }
@@ -143,7 +145,7 @@ class CurrentFile {
         std::mutex currentProtector;
 		CurrentFile() {
             m = MothurOut::getInstance();
-            defaultPath=""; blastPath=""; testFilePath = "";
+            defaultPath=""; blastPath=""; toolsPath=""; testFilePath = "";
             inputDir = ""; outputDir= "";
             accnosfile = "";
             filefile = "";

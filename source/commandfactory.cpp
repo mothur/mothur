@@ -154,6 +154,7 @@
 #include "clusterfitcommand.hpp"
 #include "mergeotuscommand.hpp"
 #include "diversityestimatorcommand.hpp"
+#include "srainfocommand.hpp"
 
 
 /*******************************************************/
@@ -323,8 +324,9 @@ CommandFactory::CommandFactory(){
     commands["rename.file"]         = "rename.file";
     commands["merge.count"]         = "merge.count";
     commands["cluster.fit"]         = "cluster.fit";
-    commands["merge.otus"]         = "merge.otus";
+    commands["merge.otus"]          = "merge.otus";
     commands["estimator.single"]    = "estimator.single";
+    commands["sra.info"]            = "sra.info";
 
 
 }
@@ -574,6 +576,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "cluster.fit")           {	command = new ClusterFitCommand(optionString);              }
         else if(commandName == "merge.otus")            {	command = new MergeOTUsCommand(optionString);               }
         else if(commandName == "estimator.single")      {	command = new EstimatorSingleCommand(optionString);         }
+        else if(commandName == "sra.info")              {    command = new SRAInfoCommand(optionString);         }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -750,7 +753,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "cluster.fit")           {	pipecommand = new ClusterFitCommand(optionString);              }
         else if(commandName == "merge.otus")            {	pipecommand = new MergeOTUsCommand(optionString);               }
         else if(commandName == "estimator.single")      {	pipecommand = new EstimatorSingleCommand(optionString);         }
+        else if(commandName == "sra.info")              {    pipecommand = new SRAInfoCommand(optionString);         }
 		else											{	pipecommand = new NoCommand(optionString);						}
+        
         
 
 		return pipecommand;
@@ -912,6 +917,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "cluster.fit")           {	shellcommand = new ClusterFitCommand();             }
         else if(commandName == "merge.otus")            {	shellcommand = new MergeOTUsCommand();              }
         else if(commandName == "estimator.single")      {	shellcommand = new EstimatorSingleCommand();        }
+        else if(commandName == "sra.info")              {   shellcommand = new SRAInfoCommand();                }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
