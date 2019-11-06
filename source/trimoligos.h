@@ -36,7 +36,8 @@ class TrimOligos {
 		vector<int> stripBarcode(Sequence&, QualityScores&, int&);
         vector<int> stripBarcode(Sequence&, Sequence&, QualityScores&, QualityScores&, int&);
         vector<int> stripBarcode(Sequence&, Sequence&, int&);
-    	
+        vector<int> stripIndexBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& group);
+
 		vector<int> stripForward(Sequence&, int&);
 		vector<int> stripForward(Sequence&, QualityScores&, int&, bool);
         vector<int> stripForward(Sequence&, Sequence&, QualityScores&, QualityScores&, int&);

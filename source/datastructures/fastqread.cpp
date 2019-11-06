@@ -38,7 +38,7 @@ FastqRead::FastqRead(Sequence s, QualityScores q) {
             convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
         }
         
-        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Cannot construct fastq object.\n"); m->setControl_pressed(true); }
+        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Found sequence named " + s.getName() + " quality scores named " + q.getName() + " Cannot construct fastq object.\n"); m->setControl_pressed(true); }
         else {
             name = s.getName();
             comment = s.getComment();
@@ -66,7 +66,7 @@ FastqRead::FastqRead(Sequence s, QualityScores q, string f) {
             convertBackTable.push_back(((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499)));
         }
         
-        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Cannot construct fastq object.\n"); m->setControl_pressed(true); }
+        if (s.getName() != q.getName()) { m->mothurOut("[ERROR]: sequence name does not match quality score name. Found sequence named " + s.getName() + " quality scores named " + q.getName() + " Cannot construct fastq object.\n"); m->setControl_pressed(true); }
         else {
             name = s.getName();
             comment = s.getComment();

@@ -294,7 +294,7 @@ void driverCreateSummary(seqSumQualData* params) {
 					else { num = it->second; }
 				}
 				
-				vector<int> thisScores = current.getQualityScores();
+				vector<int> thisScores = current.getScores();
 				
 				//resize to num of positions setting number of seqs with that size to 1
 				if (params->position.size() < thisScores.size()) { params->position.resize(thisScores.size(), 0); }

@@ -185,12 +185,12 @@ bool FileFile::validateFiles(vector<string> pieces, string& forward, string& rev
                 if (path == "") {  reverse = inputDir + reverse;  }
             }
             
-            if (findex != "") {
+            if ((findex != "") && (findex != "NONE")) {
                 path = util.hasPath(findex);
                 if (path == "") {  findex = inputDir + findex;  }
             }
             
-            if (rindex != "") {
+            if ((rindex != "") && (rindex != "NONE")) {
                 path = util.hasPath(rindex);
                 if (path == "") {  rindex = inputDir + rindex;  }
             }

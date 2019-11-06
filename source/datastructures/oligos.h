@@ -35,6 +35,8 @@ public:
     
     map<int, oligosPair> getReorientedPairedPrimers();
     map<int, oligosPair> getReorientedPairedBarcodes();
+    map<int, oligosPair> getReversedPairedPrimers();
+    map<int, oligosPair> getReversedPairedBarcodes();
     map<string, int> getReorientedPrimers();
     map<string, int> getReorientedBarcodes();
     

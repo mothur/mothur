@@ -349,7 +349,7 @@ int Oligos::readOligos(){
                         
                         //check for repeat barcodes
                         string tempPair = oligo+reverseBarcode;
-                        if (uniqueBarcodes.count(tempPair) != 0) { m->mothurOut("barcode pair " + newPair.forward + " " + newPair.reverse +  " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
+                        if (uniqueBarcodes.count(tempPair) != 0) { m->mothurOut("barcode pair " + newPair.forward + " " + newPair.reverse +  " is in your oligos file already, disregarding.\n");  }
                         else {
                             uniqueBarcodes.insert(tempPair);
                             pairedBarcodes[indexPairedBarcode]=newPair; indexPairedBarcode++;
@@ -602,6 +602,47 @@ vector<string> Oligos::getPrimers(string groupName){
 }
 //********************************************************************/
 //can't have paired and unpaired so this function will either run the paired map or the unpaired
+map<int, oligosPair> Oligos::getReversedPairedPrimers(){
+    try {
+        map<int, oligosPair> rpairedPrimers;
+        
+        for (map<int, oligosPair>::iterator it = pairedPrimers.begin(); it != pairedPrimers.end(); it++) {
+            //add reverse compliment barcodes
+            string forward = reverseOligo((it->second).forward);
+            string reverse = reverseOligo((it->second).reverse);
+            
+            string temp = forward+reverse;
+            if (uniquePrimers.count(temp) != 0) { } //already have this pair assigned to a sample, ignore reversed version
+            else {
+                uniquePrimers.insert(temp);
+                oligosPair tempPair(forward, reverse); //reverseforward, reverseReverse
+                rpairedPrimers[it->first] = tempPair;
+            }
+        }
+        
+        for (map<string, int>::iterator it = primers.begin(); it != primers.end(); it++) {
+            //add reverse compliment barcodes
+            string forward = reverseOligo(it->first);
+            string reverse = "";
+            
+            string temp = forward+reverse;
+            if (uniquePrimers.count(temp) != 0) { } //already have this pair assigned to a sample, ignore reversed version
+            else {
+                uniquePrimers.insert(temp);
+                oligosPair tempPair(forward, reverse); //reverseforward, reverseReverse
+                rpairedPrimers[it->second] = tempPair;
+            }
+        }
+
+        return rpairedPrimers;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Oligos", "getReversedPairedPrimers");
+        exit(1);
+    }
+}
+//********************************************************************/
+//can't have paired and unpaired so this function will either run the paired map or the unpaired
 map<int, oligosPair> Oligos::getReorientedPairedPrimers(){
 	try {
         map<int, oligosPair> rpairedPrimers;
@@ -630,24 +671,76 @@ map<int, oligosPair> Oligos::getReorientedPairedPrimers(){
 }
 //********************************************************************/
 //can't have paired and unpaired so this function will either run the paired map or the unpaired
+map<int, oligosPair> Oligos::getReversedPairedBarcodes(){
+    try {
+        map<int, oligosPair> rpairedBarcodes;
+        
+        for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
+            //add reverse compliment barcodes
+            string forward = reverseOligo((it->second).forward);
+            string reverse = reverseOligo((it->second).reverse);
+            
+            string temp = forward+reverse;
+            if (uniqueBarcodes.count(temp) != 0) { } //already have this pair assigned to a sample, ignore reversed version
+            else {
+                uniqueBarcodes.insert(temp);
+                oligosPair tempPair(forward, reverse); //reverseforward, reverseReverse
+                rpairedBarcodes[it->first] = tempPair;
+            }
+        }
+        
+        for (map<string, int>::iterator it = barcodes.begin(); it != barcodes.end(); it++) {
+            //add reverse compliment barcodes
+            string forward = reverseOligo(it->first);
+            string reverse = "";
+            
+            string temp = forward+reverse;
+            if (uniqueBarcodes.count(temp) != 0) { } //already have this pair assigned to a sample, ignore reversed version
+            else {
+                uniqueBarcodes.insert(temp);
+                oligosPair tempPair(forward, reverse); //reverseforward, reverseReverse
+                rpairedBarcodes[it->second] = tempPair;
+            }
+        }
+
+        return rpairedBarcodes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Oligos", "getReversedPairedBarcodes");
+        exit(1);
+    }
+}
+//********************************************************************/
+//can't have paired and unpaired so this function will either run the paired map or the unpaired
 map<int, oligosPair> Oligos::getReorientedPairedBarcodes(){
 	try {
         map<int, oligosPair> rpairedBarcodes;
         
         for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
-            //cout << (it->second).forward << '\t' << (it->second).reverse << endl;
             string forward = (it->second).reverse;
             if (reversePairs) { forward = reverseOligo(forward); } //forward is now the reverse of reverse
             string reverse = (it->second).forward;
             if (reversePairs) { reverse = reverseOligo(reverse); } //reverse is now the reverse of forward
-            //cout << "check orient = " << forward << '\t' << reverse << endl;
-            oligosPair tempPair(forward, reverse); //reversePrimer, rc ForwardPrimer
-            rpairedBarcodes[it->first] = tempPair;
+            
+            //check for repeat barcodes
+            string temp = forward+reverse;
+            if (uniqueBarcodes.count(temp) != 0) { cout << "1 "<< it->first << '\t' << forward << '\t' << reverse << endl;} //already have this pair assigned to a sample, ignore reoriented version
+            else {
+                uniqueBarcodes.insert(temp);
+                oligosPair tempPair(forward, reverse); //(reverse, forward) or if reversePairs (rc_reverse, rc_forward)
+                rpairedBarcodes[it->first] = tempPair;
+            }
         }
-        
+       
         for (map<string, int>::iterator it = barcodes.begin(); it != barcodes.end(); it++) {
-            oligosPair tempPair("", reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
-            rpairedBarcodes[it->second] = tempPair;
+            string forward = ""; string reverse = reverseOligo((it->first));
+            string temp = forward+reverse;
+            
+            if (uniqueBarcodes.count(temp) != 0) { } //already have this pair assigned to a sample, ignore reoriented version
+            else { uniqueBarcodes.insert(temp);
+                oligosPair tempPair(forward, reverse); //reversePrimer, rc ForwardPrimer
+                rpairedBarcodes[it->second] = tempPair;
+            }
         }
 
         return rpairedBarcodes;
@@ -657,7 +750,6 @@ map<int, oligosPair> Oligos::getReorientedPairedBarcodes(){
 		exit(1);
 	}
 }
-
 //********************************************************************/
 string Oligos::reverseOligo(string oligo){
 	try {

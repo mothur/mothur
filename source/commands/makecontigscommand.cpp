@@ -752,16 +752,16 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
         vector<vector<string> > fastaFileNames, qualFileNames;
         map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
         createOligosGroup = false;
-        map<int, oligosPair> pairedPrimers, rpairedPrimers, pairedBarcodes, rpairedBarcodes;
+        map<int, oligosPair> pairedPrimers, rpairedPrimers, revpairedPrimers, pairedBarcodes, rpairedBarcodes, revpairedBarcodes;
         vector<string> barcodeNames, primerNames;
 
-        if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, rpairedPrimers, pairedBarcodes, rpairedBarcodes, barcodeNames, primerNames);    }
+        if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, rpairedPrimers, revpairedPrimers, pairedBarcodes, rpairedBarcodes, revpairedBarcodes, barcodeNames, primerNames);    }
 
         //give group in file file precedence
         if (createFileGroup) {  createOligosGroup = false; }
 
         m->mothurOut("Making contigs...\n");
-        numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, group, pairedPrimers, rpairedPrimers, pairedBarcodes, rpairedBarcodes, barcodeNames, primerNames);
+        numReads = createProcesses(fileInputs, qualOrIndexInputs, outFastaFile, outScrapFastaFile, outQualFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames, group, pairedPrimers, rpairedPrimers, revpairedPrimers, pairedBarcodes, rpairedBarcodes, revpairedBarcodes, barcodeNames, primerNames);
         
         if (decompressionHelped) { util.mothurRemove(fileInputs[0]); util.mothurRemove(fileInputs[1]); }
         
@@ -813,8 +813,8 @@ struct contigsData {
     vector<string> barcodeNameVector;
     map<string, int> groupCounts;
     map<string, string> groupMap;
-    map<int, oligosPair> pairedBarcodes, reorientedPairedBarcodes;
-    map<int, oligosPair> pairedPrimers, reorientedPairedPrimers;
+    map<int, oligosPair> pairedBarcodes, reorientedPairedBarcodes, reversedPairedBarcodes;
+    map<int, oligosPair> pairedPrimers, reorientedPairedPrimers, reversedPairedPrimers;
 
 
     contigsData(){}
@@ -848,7 +848,7 @@ struct contigsData {
         makeQualFile = true;
         if (trimQFileName == NULL) { makeQualFile = false; }
     }
-    void setVariables(bool isgz, char de, int nt, int offby, map<int, oligosPair> pbr, map<int, oligosPair> ppr, map<int, oligosPair> rpbr, map<int, oligosPair> rppr, vector<string> priNameVector, vector<string> barNameVector, bool ro, int pdf, int bdf, int tdf, string al, float ma, float misMa, float gapO, float gapE, int thr, int delt, double maxe, int km, string form, bool to, bool cfg, string gp) {
+    void setVariables(bool isgz, char de, int nt, int offby, map<int, oligosPair> pbr, map<int, oligosPair> ppr, map<int, oligosPair> rpbr, map<int, oligosPair> rppr, map<int, oligosPair> repbr, map<int, oligosPair> reppr, vector<string> priNameVector, vector<string> barNameVector, bool ro, int pdf, int bdf, int tdf, string al, float ma, float misMa, float gapO, float gapE, int thr, int delt, double maxe, int km, string form, bool to, bool cfg, string gp) {
         gz = isgz;
         delim = de;
         nameType = nt;
@@ -857,6 +857,8 @@ struct contigsData {
         pairedBarcodes = pbr;
         reorientedPairedPrimers = rppr;
         reorientedPairedBarcodes = rpbr;
+        reversedPairedPrimers = reppr;
+        reversedPairedBarcodes = repbr;
         primerNameVector = priNameVector;
         barcodeNameVector = barNameVector;
         group = gp;
@@ -886,6 +888,8 @@ struct contigsData {
         pairedBarcodes = copy->pairedBarcodes;
         reorientedPairedPrimers = copy->reorientedPairedPrimers;
         reorientedPairedBarcodes = copy->reorientedPairedBarcodes;
+        reversedPairedPrimers = copy->reversedPairedPrimers;
+        reversedPairedBarcodes = copy->reversedPairedBarcodes;
         primerNameVector = copy->primerNameVector;
         barcodeNameVector = copy->barcodeNameVector;
         group = copy->group;
@@ -1372,14 +1376,13 @@ bool checkName(Sequence& forward, QualityScores& reverse, int nameType, int offB
 /**************************************************************************************************/
 
 //vector<int> contigScores = assembleFragments(qual_match_simple_bayesian, qual_mismatch_simple_bayesian, fSeq, rSeq, alignment, contig);
-vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesian, vector< vector<double> >& qual_mismatch_simple_bayesian, Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, bool hasQuality, Alignment*& alignment, string& contig, string& trashCode, int& oend, int& oStart, int& numMismatches, int insert, int deltaq, bool trimOverlap) {
+vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesian, vector< vector<double> >& qual_mismatch_simple_bayesian, Sequence& fSeq, Sequence& rSeq, vector<int> scores1, vector<int> scores2, bool hasQuality, Alignment*& alignment, string& contig, string& trashCode, int& oend, int& oStart, int& numMismatches, int insert, int deltaq, bool trimOverlap) {
     MothurOut* m; m = MothurOut::getInstance();
     try {
         vector<int> contigScores;
 
         //flip the reverse reads
         rSeq.reverseComplement();
-        if (hasQuality) { rQual->flipQScores(); }
 
         //pairwise align
         alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned(), true);
@@ -1392,13 +1395,7 @@ vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesia
         //traverse alignments merging into one contiguous seq
         string seq1 = fSeq.getAligned();
         string seq2 = rSeq.getAligned();
-        vector<int> scores1, scores2;
-        if (hasQuality) {
-            scores1 = fQual->getQualityScores();
-            scores2 = rQual->getQualityScores();
-            delete fQual; delete rQual;  delete savedFQual; delete savedRQual;
-        }
-
+        
         int overlapStart = fSeq.getStartPos()-1;
         int seq2Start = rSeq.getStartPos()-1;
 
@@ -1504,7 +1501,7 @@ vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesia
 /**************************************************************************************************/
 #ifdef USE_BOOST
 //ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim,  inFF, inRF, inFQ, inRQ);
-bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, boost::iostreams::filtering_istream& inFF, boost::iostreams::filtering_istream& inRF, boost::iostreams::filtering_istream& inFQ, boost::iostreams::filtering_istream& inRQ, string thisfqualindexfile, string thisrqualindexfile, string format, int nameType, int offByOneTrimLength, MothurOut* m) {
+bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, boost::iostreams::filtering_istream& inFF, boost::iostreams::filtering_istream& inRF, boost::iostreams::filtering_istream& inFQ, boost::iostreams::filtering_istream& inRQ, string thisfqualindexfile, string thisrqualindexfile, string format, int nameType, int offByOneTrimLength, MothurOut* m) {
     try {
         bool ignore = false;
         Utils util;
@@ -1526,8 +1523,6 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
             fQual = new QualityScores(fread.getName(), fread.getScores());
             rQual = new QualityScores(rread.getName(), rread.getScores());
-            savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
-            savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
             if (thisfqualindexfile != "") { //forward index file
                 FastqRead firead(inFQ, tignore, format);
                 if (tignore) { ignore=true; }
@@ -1572,8 +1567,6 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
                 if (!checkName(*fQual, *rQual, nameType, offByOneTrimLength)) {
                     m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true;
                 }
-                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
-                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                 if (fQual->getName() != tfSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
                 if (rQual->getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
             }
@@ -1590,7 +1583,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
 #endif
 /**************************************************************************************************/
 
-bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, QualityScores*& savedFQual, QualityScores*& savedRQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, ifstream& inFFasta, ifstream& inRFasta, ifstream& inFQualIndex, ifstream& inRQualIndex, string thisfqualindexfile, string thisrqualindexfile, string format, int nameType, int offByOneTrimLength, MothurOut* m) {
+bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual,Sequence& findexBarcode, Sequence& rindexBarcode, char delim, ifstream& inFFasta, ifstream& inRFasta, ifstream& inFQualIndex, ifstream& inRQualIndex, string thisfqualindexfile, string thisrqualindexfile, string format, int nameType, int offByOneTrimLength, MothurOut* m) {
     try {
         bool ignore = false;
         Utils util;
@@ -1612,8 +1605,6 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
             fQual = new QualityScores(fread.getName(), fread.getScores());
             rQual = new QualityScores(rread.getName(), rread.getScores());
-            savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
-            savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
             if (thisfqualindexfile != "") { //forward index file
                 FastqRead firead(inFQualIndex, tignore, format); util.gobble(inFQualIndex);
                 if (tignore) { ignore=true; }
@@ -1658,8 +1649,6 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
                 if (!checkName(*fQual, *rQual, nameType, offByOneTrimLength)) {
                     m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true;
                 }
-                savedFQual = new QualityScores(fQual->getName(), fQual->getQualityScores());
-                savedRQual = new QualityScores(rQual->getName(), rQual->getQualityScores());
                 if (fQual->getName() != tfSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in forward quality file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true; }
                 if (rQual->getName() != trSeq.getName()) { m->mothurOut("[WARNING]: name mismatch in reverse quality file. Ignoring, " + trSeq.getName() + ".\n"); ignore = true; }
             }
@@ -1670,6 +1659,101 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
 
     }
     catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "read");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+
+vector<int> trimBarCodesAndPrimers(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, Sequence& findexBarcode, Sequence& rindexBarcode, vector<TrimOligos*> trims, vector<string>& codes, int numBarcodes, int numPrimers, bool hasQuality, bool hasIndex, int pdiffs, int bdiffs, int tdiffs, MothurOut* m) {
+    try {
+        
+        vector<int> oligosResults; oligosResults.resize(2, 0); //barcodeIndex, primerIndex
+        codes.resize(2, "");
+        
+        for (int i = 0; i < trims.size(); i++) {
+            Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());
+            Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
+            Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned());
+            Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
+            
+            QualityScores* savedFQual = NULL;
+            QualityScores* savedRQual = NULL;
+            if (hasQuality) {
+                savedFQual = new QualityScores(fQual->getName(), fQual->getScores());
+                savedRQual = new QualityScores(rQual->getName(), rQual->getScores());
+            }
+            
+            string trashCode = "";
+            string commentString = "";
+            int currentSeqsDiffs = 0;
+            int barcodeIndex = 0;
+            int primerIndex = 0;
+            
+            if(numBarcodes != 0){
+                vector<int> results;
+                if (hasQuality) {
+                    if (hasIndex)   {  results = trims[i]->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, barcodeIndex);    }
+                    else            {  results = trims[i]->stripBarcode(savedFSeq, savedRSeq, *savedFQual, *savedRQual, barcodeIndex);                            }
+                }else {
+                    results = trims[i]->stripBarcode(savedFSeq, savedRSeq, barcodeIndex);
+                }
+                int success = results[0] + results[2];
+                commentString += "fbdiffs=" + toString(results[0]) + "(" + trims[i]->getCodeValue(results[1], bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trims[i]->getCodeValue(results[3], bdiffs) + ") ";
+                if(success > bdiffs)        {    trashCode += 'b';    }
+                else{ currentSeqsDiffs += success;  }
+            }
+            
+            if(numPrimers != 0){
+                vector<int> results;
+                if (hasQuality)     { results = trims[i]->stripForward(savedFSeq, savedRSeq, *savedFQual, *savedRQual, primerIndex);   }
+                else                { results = trims[i]->stripForward(savedFSeq, savedRSeq, primerIndex);                   }
+                int success = results[0] + results[2];
+                commentString += "fpdiffs=" + toString(results[0]) + "(" + trims[i]->getCodeValue(results[1], pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trims[i]->getCodeValue(results[3], pdiffs) + ") ";
+                if(success > pdiffs)        {    trashCode += 'f';    }
+                else{ currentSeqsDiffs += success;  }
+            }
+            
+            if (currentSeqsDiffs > tdiffs)    {    trashCode += 't';   }
+            
+            if (trashCode == "") {
+                oligosResults.push_back(barcodeIndex);
+                oligosResults.push_back(primerIndex);
+                
+                codes[0] = "";  
+                codes[1] = commentString;
+               
+                if (i > 0) { //checkOrient trimOligos - reoriented and reversed
+                    savedFSeq.reverseComplement();
+                    savedRSeq.reverseComplement();
+                }
+                fSeq.setAligned(savedFSeq.getAligned());
+                rSeq.setAligned(savedRSeq.getAligned());
+                if(hasQuality){
+                    if (i > 0) { //checkOrient trimOligos - reoriented and reversed
+                        savedFQual->flipQScores();
+                        savedRQual->flipQScores();
+                    }
+                    fQual->setScores(savedFQual->getScores());
+                    rQual->setScores(savedRQual->getScores());
+                    delete savedRQual; delete savedFQual;
+                }
+                break;
+            }else {
+                if (codes[0] == "") { codes[0] = trashCode;                 }
+                else                { codes[0] += "(" + trashCode + ")";    }
+                
+                codes[1] = commentString;
+                
+                if(hasQuality){  delete savedRQual; delete savedFQual;  }
+            }
+        }
+        
+        if (hasQuality) { rQual->flipQScores(); }
+        
+        return oligosResults;
+
+    }catch(exception& e) {
         m->errorOut(e, "MakeContigsCommand", "read");
         exit(1);
     }
@@ -1753,11 +1837,20 @@ void driverContigs(contigsData* params){
         if (params->m->getDebug()) { if (hasQuality) { params->m->mothurOut("[DEBUG]: hasQuality = true\n");  } else { params->m->mothurOut("[DEBUG]: hasQuality = false\n"); } }
 
         int numPrimers = params->pairedPrimers.size();
-        TrimOligos trimOligos(params->pdiffs, params->bdiffs, 0, 0, params->pairedPrimers, params->pairedBarcodes, hasIndex);
         int numBarcodes = params->pairedBarcodes.size();
-        TrimOligos* rtrimOligos = NULL;
-        if (params->reorient) {  rtrimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->reorientedPairedPrimers, params->reorientedPairedBarcodes, hasIndex); numBarcodes = params->reorientedPairedBarcodes.size();   numPrimers = params->reorientedPairedPrimers.size();  }
-
+        
+        vector<TrimOligos*> trims;
+        if ((numPrimers != 0) || (numBarcodes != 0)) {
+            //standard
+            trims.push_back(new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->pairedPrimers, params->pairedBarcodes, hasIndex));
+    
+            if (params->reorient) {
+                //reoriented
+                trims.push_back(new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->reorientedPairedPrimers, params->reorientedPairedBarcodes, hasIndex));
+                //reversed
+                trims.push_back(new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->reversedPairedPrimers, params->reversedPairedBarcodes, hasIndex));
+            }
+        }
         Alignment* alignment; int longestBase = 1000;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, longestBase);			}
         else if(params->align == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, longestBase);                        }
@@ -1768,118 +1861,37 @@ void driverContigs(contigsData* params){
 
             if (params->m->getControl_pressed()) { break; }
 
-            int success = 1;
-            string trashCode = "";
-            string commentString = "";
-            int currentSeqsDiffs = 0;
-
             bool ignore = false;
             Sequence fSeq, rSeq;
             QualityScores* fQual = NULL; QualityScores* rQual = NULL;
-            QualityScores* savedFQual = NULL; QualityScores* savedRQual = NULL;
             Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
 
             //read from input files
             if (params->gz) {
 #ifdef USE_BOOST
-                ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, params->delim, inFF, inRF, inFQ, inRQ, thisfqualindexfile, thisrqualindexfile, params->format, params->nameType, params->offByOneTrimLength, params->m);
+                ignore = read(fSeq, rSeq, fQual, rQual, findexBarcode, rindexBarcode, params->delim, inFF, inRF, inFQ, inRQ, thisfqualindexfile, thisrqualindexfile, params->format, params->nameType, params->offByOneTrimLength, params->m);
 #endif
             }else    {
-                ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, params->delim, inFFasta, inRFasta, inFQualIndex, inRQualIndex, thisfqualindexfile, thisrqualindexfile, params->format, params->nameType, params->offByOneTrimLength, params->m);
+                ignore = read(fSeq, rSeq, fQual, rQual, findexBarcode, rindexBarcode, params->delim, inFFasta, inRFasta, inFQualIndex, inRQualIndex, thisfqualindexfile, thisrqualindexfile, params->format, params->nameType, params->offByOneTrimLength, params->m);
             }
 
-            //remove primers and barcodes if neccessary
             if (!ignore) {
-
-                int barcodeIndex = 0;
-                int primerIndex = 0;
-                Sequence savedFSeq(fSeq.getName(), fSeq.getAligned());  Sequence savedRSeq(rSeq.getName(), rSeq.getAligned());
-                Sequence savedFindex(findexBarcode.getName(), findexBarcode.getAligned()); Sequence savedRIndex(rindexBarcode.getName(), rindexBarcode.getAligned());
+                //remove primers and barcodes if neccessary
+                vector<string> codes;
+                vector<int> oligosResults = trimBarCodesAndPrimers(fSeq, rSeq, fQual, rQual, findexBarcode, rindexBarcode, trims, codes, numBarcodes, numPrimers, hasQuality, hasIndex, params->pdiffs, params->bdiffs, params->tdiffs, params->m);
                 
-                if(numBarcodes != 0){
-                    vector<int> results;
-                    if (hasQuality) {
-                        if (hasIndex)   {  results = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);   }
-                        else            {  results = trimOligos.stripBarcode(fSeq, rSeq, *fQual, *rQual, barcodeIndex);                     }
-                    }else {
-                        results = trimOligos.stripBarcode(fSeq, rSeq, barcodeIndex);
-                    }
-                    success = results[0] + results[2];
-                    commentString += "fbdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], params->bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], params->bdiffs) + ") ";
-                    if(success > params->bdiffs)		{	trashCode += 'b';	}
-                    else{ currentSeqsDiffs += success;  }
-                }
-
-                if(numPrimers != 0){
-                    vector<int> results;
-                    if (hasQuality)     { results = trimOligos.stripForward(fSeq, rSeq, *fQual, *rQual, primerIndex);   }
-                    else                { results = trimOligos.stripForward(fSeq, rSeq, primerIndex);                   }
-                    success = results[0] + results[2];
-                    commentString += "fpdiffs=" + toString(results[0]) + "(" + trimOligos.getCodeValue(results[1], params->pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + trimOligos.getCodeValue(results[3], params->pdiffs) + ") ";
-                    if(success > params->pdiffs)		{	trashCode += 'f';	}
-                    else{ currentSeqsDiffs += success;  }
-                }
-
-                if (currentSeqsDiffs > params->tdiffs)	{	trashCode += 't';   }
-
-                if (params->reorient && (trashCode != "")) { //if you failed and want to check the reverse
-                    int thisSuccess = 0;
-                    string thisTrashCode = "";
-                    string thiscommentString = "";
-                    int thisCurrentSeqsDiffs = 0;
-
-                    int thisBarcodeIndex = 0;
-                    int thisPrimerIndex = 0;
-
-                    if(numBarcodes != 0){
-                        vector<int> results;
-                        if (hasQuality) {
-                            if (hasIndex)   { results = rtrimOligos->stripBarcode(savedFindex, savedRIndex, *savedFQual, *savedRQual, thisBarcodeIndex);    }
-                            else            { results = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisBarcodeIndex);        }
-                        }else {
-                            results = rtrimOligos->stripBarcode(savedFSeq, savedRSeq, thisBarcodeIndex);
-                        }
-                        thisSuccess = results[0] + results[2];
-                        thiscommentString += "fbdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->bdiffs) + "), rbdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], params->bdiffs) + ") ";
-                        if(thisSuccess > params->bdiffs)		{	thisTrashCode += 'b';	}
-                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
-                    }
-
-                    if(numPrimers != 0){
-                        vector<int> results;
-                        if (hasQuality)     { results = rtrimOligos->stripForward(savedFSeq, savedRSeq, *savedFQual, *savedRQual, thisPrimerIndex); }
-                        else                { results = rtrimOligos->stripForward(savedFSeq, savedRSeq, thisPrimerIndex);                           }
-                        thisSuccess = results[0] + results[2];
-                        thiscommentString += "fpdiffs=" + toString(results[0]) + "(" + rtrimOligos->getCodeValue(results[1], params->pdiffs) + "), rpdiffs=" + toString(results[2]) + "(" + rtrimOligos->getCodeValue(results[3], params->pdiffs) + ") ";
-                        if(thisSuccess > params->pdiffs)		{	thisTrashCode += 'f';	}
-                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
-                    }
-
-                    if (thisCurrentSeqsDiffs > params->tdiffs)	{	thisTrashCode += 't';   }
-
-                    if (thisTrashCode == "") {
-                        trashCode = thisTrashCode;
-                        success = thisSuccess;
-                        currentSeqsDiffs = thisCurrentSeqsDiffs;
-                        commentString = thiscommentString;
-                        barcodeIndex = thisBarcodeIndex;
-                        primerIndex = thisPrimerIndex;
-                        savedFSeq.reverseComplement();
-                        savedRSeq.reverseComplement();
-                        fSeq.setAligned(savedFSeq.getAligned());
-                        rSeq.setAligned(savedRSeq.getAligned());
-                        if(hasQuality){
-                            savedFQual->flipQScores(); savedRQual->flipQScores();
-                            fQual->setScores(savedFQual->getScores()); rQual->setScores(savedRQual->getScores());
-                        }
-                    }else { trashCode += "(" + thisTrashCode + ")";  }
-                }
-
+                string trashCode = codes[0];
+                string commentString = codes[1];
+                int barcodeIndex = oligosResults[0];
+                int primerIndex = oligosResults[1];
+                
                 //assemble reads
                 string contig = "";
                 int oend, oStart;
                 int numMismatches = 0;
-                vector<int> contigScores = assembleFragments(qual_match_simple_bayesian, qual_mismatch_simple_bayesian, fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, hasQuality, alignment, contig, trashCode, oend, oStart, numMismatches, params->insert, params->deltaq, params->trimOverlap);
+                vector<int> scores1, scores2;
+                if(hasQuality){ scores1 = fQual->getScores(); scores2 = rQual->getScores(); }
+                vector<int> contigScores = assembleFragments(qual_match_simple_bayesian, qual_mismatch_simple_bayesian, fSeq, rSeq, scores1, scores2, hasQuality, alignment, contig, trashCode, oend, oStart, numMismatches, params->insert, params->deltaq, params->trimOverlap);
 
 								//Note that usearch/vsearch cap the maximum Q value at 41 - perhaps due to ascii
 								//limits? we leave this value unbounded. if two sequences have a 40 then the
@@ -2014,8 +2026,9 @@ void driverContigs(contigsData* params){
         }
 
         //cleanup memory
+        for (int i = 0; i < trims.size(); i++) {  delete trims[i]; }
         delete alignment;
-        if (params->reorient) { delete rtrimOligos; }
+        
     }
     catch(exception& e) {
         params->m->errorOut(e, "MakeContigsCommand", "driverContigs");
@@ -2034,7 +2047,7 @@ void driverContigs(contigsData* params){
 //...
 //if using index files and only have 1 then the file name = NONE, and entries are duds. Copies of other index file.
 //if no index files are given, then qualOrIndexFiles.size() == 0.
-unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual, string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, string group, map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes, vector<string>& barcodeNames, vector<string>& primerNames) {
+unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs, vector<string> qualOrIndexFiles, string outputFasta, string outputScrapFasta, string outputQual, string outputScrapQual, string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, string group, map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>& revpairedPrimers, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes, map<int, oligosPair>& revpairedBarcodes, vector<string>& barcodeNames, vector<string>& primerNames) {
     try {
         vector<linePair> lines;
         vector<linePair> qLines;
@@ -2081,7 +2094,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 
             int spot = (i+1)*2;
             contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMismatchWriter, fileInputs, qualOrIndexFiles, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1]);
-            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, group);
+            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, group);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new std::thread(driverContigs, dataBundle));
@@ -2097,7 +2110,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
         contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMisMatchWriter, fileInputs, qualOrIndexFiles, lines[0], lines[1], qLines[0], qLines[1]);
-        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, group);
+        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, group);
 
         driverContigs(dataBundle);
 
@@ -2253,10 +2266,10 @@ void driverContigsGroups(groupContigsData* gparams) {
 //only getting here is gz=true
 unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<int, string>& file2Groups) {
     try {
-        map<int, oligosPair> pairedPrimers, rpairedPrimers, pairedBarcodes, rpairedBarcodes;
+        map<int, oligosPair> pairedPrimers, rpairedPrimers, revpairedPrimers, pairedBarcodes, rpairedBarcodes, revpairedBarcodes;
         vector<string> barcodeNames, primerNames;
 
-        if(oligosfile != "")  {   createOligosGroup = getOligos(pairedPrimers, rpairedPrimers, pairedBarcodes, rpairedBarcodes, barcodeNames, primerNames);    }
+        if(oligosfile != "")  {   createOligosGroup = getOligos(pairedPrimers, rpairedPrimers, revpairedPrimers, pairedBarcodes, rpairedBarcodes, revpairedBarcodes, barcodeNames, primerNames);    }
 
         vector<std::thread*> workerThreads;
         vector<groupContigsData*> data;
@@ -2293,7 +2306,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             }
 
             contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMismatchWriter);
-            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, "");
+            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, "");
             groupContigsData* groupDataBundle = new groupContigsData(fileInputs, startEndIndexes[i+1].start, startEndIndexes[i+1].end, dataBundle, file2Groups);
             data.push_back(groupDataBundle);
 
@@ -2310,7 +2323,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
         contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMisMatchWriter);
-        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, "");
+        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, "");
         groupContigsData* groupDataBundle = new groupContigsData(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, dataBundle, file2Groups);
         driverContigsGroups(groupDataBundle);
 
@@ -2723,7 +2736,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename, map<
 //BARCODE   atgcatgc   atgcatgc    groupName
 //PRIMER   atgcatgc   atgcatgc    groupName
 //PRIMER   atgcatgc   atgcatgc
-bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes, vector<string>& barcodeNames, vector<string>& primerNames){
+bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>& revpairedPrimers, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes, map<int, oligosPair>& revpairedBarcodes, vector<string>& barcodeNames, vector<string>& primerNames){
 	try {
         if (m->getDebug()) { m->mothurOut("[DEBUG]: oligosfile = " + oligosfile + "\n"); }
 
@@ -2735,9 +2748,11 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
         if (oligos.hasPairedBarcodes() || oligos.hasPairedPrimers()) {
             pairedPrimers = oligos.getPairedPrimers();
             rpairedPrimers = oligos.getReorientedPairedPrimers();
+            revpairedPrimers = oligos.getReversedPairedPrimers();
             primerNames = oligos.getPrimerNames();
             pairedBarcodes = oligos.getPairedBarcodes();
             rpairedBarcodes = oligos.getReorientedPairedBarcodes();
+            revpairedBarcodes = oligos.getReversedPairedBarcodes();
             barcodeNames = oligos.getBarcodeNames();
         }else {
             m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); m->setControl_pressed(true);
@@ -2771,10 +2786,10 @@ void MakeContigsCommand::debugFunction() {
     try{
 //allows you to run the oligos and index file independantly to check for barcode issues. make.contigs(findex=yourIndexFile, bdiffs=1, oligos=yourOligosFile, checkorient=t). just used for user support
     
-    map<int, oligosPair> pairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reorientedPairedPrimers;
+    map<int, oligosPair> pairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reorientedPairedPrimers, reversedPairedBarcodes, reverseedPairedPrimers;
     vector<string> barcodeNames, primerNames;
     
-    if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, reorientedPairedPrimers, pairedBarcodes, reorientedPairedBarcodes, barcodeNames, primerNames);    }
+    if(oligosfile != "")                        {       createOligosGroup = getOligos(pairedPrimers, reorientedPairedPrimers, reverseedPairedPrimers, pairedBarcodes, reorientedPairedBarcodes, reversedPairedBarcodes,  barcodeNames, primerNames);    }
     
     int numPrimers = pairedPrimers.size();
     TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, pairedPrimers, pairedBarcodes, true);

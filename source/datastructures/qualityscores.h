@@ -33,7 +33,7 @@ public:
     int read(ifstream&);
 	string getName();
 	int getLength(){    return (int)qScores.size();  }
-	vector<int> getQualityScores() { return qScores; }
+	//vector<int> getQualityScores() { return qScores; }
 	void printQScores(ofstream&);
     void printQScores(ostream&);
     void printQScores(OutputWriter*);
