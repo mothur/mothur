@@ -37,6 +37,7 @@ private:
     bool abort;
     vector<string> outputNames;
     string srafile, outputDir, outputType, fasterQLocation;
+    int processors;
     
     void runFastqDump();
 };

@@ -718,24 +718,30 @@ int driverPcr(pcrData* params){
                     //make sure the seqs are aligned
                     if (!params->fileAligned) { params->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); params->m->setControl_pressed(true); break; }
                     else {
-                        if (params->end != -1) {
-                            if (params->end > currSeq.getAligned().length()) {  params->m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); params->m->setControl_pressed(true); break; }
-                            else {
-                                if (params->keepdots)   { currSeq.filterFromPos(params->end); }
+                        string alignedString = currSeq.getAligned();
+                        //cout << currSeq.getName() << '\t' << alignedString[params->start] << '\t' << alignedString[params->end] << endl;
+                        //if ((alignedString[params->start] == '.') || (alignedString[params->end] != '.')) { goodSeq = false; }
+                       // else {
+                            if (params->end != -1) {
+                                if (params->end > currSeq.getAligned().length()) {  params->m->mothurOut("[ERROR]: end of " +toString(params->end)  + " is longer than " + currSeq.getName() + " length of " +toString(currSeq.getAligned().length()) + ", aborting.\n"); params->m->setControl_pressed(true); break; }
                                 else {
-                                    string seqString = currSeq.getAligned().substr(0, (params->end));
+                                    if (params->keepdots)   { currSeq.filterFromPos(params->end); }
+                                    else {
+                                        string seqString = currSeq.getAligned().substr(0, (params->end));
+                                        currSeq.setAligned(seqString);
+                                    }
+                                }
+                            }
+                            
+                            if (params->start != -1) {
+                                if (params->keepdots)   {  currSeq.filterToPos(params->start-1);  }
+                                else {
+                                    string seqString = currSeq.getAligned().substr(params->start);
                                     currSeq.setAligned(seqString);
                                 }
                             }
-                        }
-                        
-                        if (params->start != -1) {
-                            if (params->keepdots)   {  currSeq.filterToPos(params->start-1);  }
-                            else {
-                                string seqString = currSeq.getAligned().substr(params->start);
-                                currSeq.setAligned(seqString);
-                            }
-                        }
+                       
+                        //}
                     }
                 }
                 
@@ -746,8 +752,8 @@ int driverPcr(pcrData* params){
                 
                 if (totalDiffs > (params->pdiffs + params->rdiffs)) { trashCode += "t"; goodSeq = false; }
                 
-                //trimming removed all bases
-                if (currSeq.getUnaligned() == "") { goodSeq = false; }
+                //remove super short reads
+                if (currSeq.getUnaligned() == "") { goodSeq = false;  }
                 
                 if(goodSeq)    {
                     currSeq.printSequence(params->goodFasta);

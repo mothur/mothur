@@ -15,6 +15,7 @@ vector<string> SRAInfoCommand::setParameters(){
         CommandParameter psra("sra", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(psra);
         CommandParameter ptype("type", "Multiple", "fastq-sff", "fastq", "", "", "","",false,false,true); parameters.push_back(ptype);
         CommandParameter pFasterQlocation("fasterq", "String", "", "", "", "", "","",false,false); parameters.push_back(pFasterQlocation);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -34,6 +35,7 @@ string SRAInfoCommand::getHelpString(){
         string helpString = "";
         helpString += "The sra.info command reads a sra file and extracts the fastq or sff data.\n";
         helpString += "The sra.info command parameters are ....\n";
+        helpString += "The processors parameter allows you to specify how many processors you would like to use. The default is all available. \n";
         helpString += "The sra.info command should be in the following format: sra.info(sra=yourSRAFile)\n";
         helpString += "sra.info(sra=SRR000004) \n";
         return helpString;
@@ -130,6 +132,9 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             if ((outputType == "fastq") || (outputType == "sff")) {}
             else { m->mothurOut("[ERROR]: " + outputType + " is not a valid type option. The sra.info can extract files of type sff or fastq.\n");  abort = true; }
             
+            string temp = validParameter.valid(parameters, "processors");    if (temp == "not found"){    temp = current->getProcessors();    }
+            processors = current->setProcessors(temp);
+            
             vector<string> versionOutputs;
             bool foundTool = false;
             string path = current->getProgramPath();
@@ -189,7 +194,63 @@ int SRAInfoCommand::execute(){
 void SRAInfoCommand::runFastqDump(){
     try{
         
+        vector<char*> cPara;
+        string fasterQCommand = fasterQLocation;
+        fasterQCommand = "\"" + fasterQCommand + "\" " + srafile + " ";
+        
+        char* tempFasterQ;
+        tempFasterQ= new char[fasterQCommand.length()+1];
+        *tempFasterQ = '\0';
+        strncat(tempFasterQ, fasterQCommand.c_str(), fasterQCommand.length());
+        cPara.push_back(tempFasterQ);
+        
+        //--force - overwrite output files if they exist
+        char* force = new char[8];  force[0] = '\0'; strncat(force, "--force", 7);
+        cPara.push_back(force);
+        
+        //-S|--split-files                 write reads into different files
+        char* splitFiles = new char[3];     splitFiles[0] = '\0'; strncat(splitFiles, "-S", 2);
+        cPara.push_back(splitFiles);
+        
+        //-3|--split-3                     writes single reads in special file
+        char* splitSingleFiles = new char[3];     splitSingleFiles[0] = '\0'; strncat(splitSingleFiles, "-3", 2);
+        cPara.push_back(splitSingleFiles);
+        
+        //--threads=processors
+        char* threads = new char[10];  threads[0] = '\0'; strncat(threads, "--threads", 9);
+        cPara.push_back(threads);
+        string numProcessors = toString(processors);
+        char* tempThreads = new char[numProcessors.length()+1];
+        *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), numProcessors.length());
+        cPara.push_back(tempThreads);
+        
+        if (outputDir != "") {
+            char* outDir = new char[9];  outDir[0] = '\0'; strncat(outDir, "--outdir", 8);
+            cPara.push_back(outDir);
+            char* tempoutputDir = new char[outputDir.length()+1];
+            *tempoutputDir = '\0'; strncat(tempoutputDir, outputDir.c_str(), outputDir.length());
+            cPara.push_back(tempoutputDir);
+        }
        
+        char** fasterQParameters;
+        fasterQParameters = new char*[cPara.size()];
+        string commandString = "";
+        for (int i = 0; i < cPara.size(); i++) {  fasterQParameters[i] = cPara[i];  commandString += toString(cPara[i]) + " "; }
+        
+#if defined NON_WINDOWS
+#else
+        commandString = "\"" + commandString + "\"";
+#endif
+        
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n"); }
+        m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n");
+        
+        system(commandString.c_str());
+        
+        //free memory
+        for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
+        delete[] fasterQParameters;
+        
         return;
     }
     catch(exception& e) {
