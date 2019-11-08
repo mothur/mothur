@@ -98,7 +98,7 @@ vector<string> MakeContigsCommand::setParameters(){
 				CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
 				CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
         CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
-        CommandParameter preorient("checkorient", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(preorient);
+        CommandParameter preorient("checkorient", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(preorient);
         CommandParameter palign("align", "Multiple", "needleman-gotoh-kmer", "needleman", "", "", "","",false,false); parameters.push_back(palign);
         CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pallfiles);
         CommandParameter ptrimoverlap("trimoverlap", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptrimoverlap);
@@ -148,7 +148,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
-        helpString += "The checkorient parameter will look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is false.\n";
+        helpString += "The checkorient parameter will look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is true.\n";
         helpString += "The deltaq parameter allows you to specify the delta allowed between quality scores of a mismatched base.  For example in the overlap, if deltaq=5 and in the alignment seqA, pos 200 has a quality score of 30 and the same position in seqB has a quality score of 20, you take the base from seqA (30-20 >= 5).  If the quality score in seqB is 28 then the base in the consensus will be an N (30-28<5). The default is 6.\n";
 				helpString += "The maxee parameter allows you to specify the maximum number of errors to allow in a sequence. Makes sense to use with deltaq=0. This numbrer is a decimal number. The expected numbrer of errors is based on Edgar's approach used in USEARCH/VSEARCH.";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
@@ -460,7 +460,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 				abort=true;
 			}
 
-            temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "F"; }
+            temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "T"; }
 			reorient = util.isTrue(temp);
 
 
@@ -1890,7 +1890,10 @@ void driverContigs(contigsData* params){
                 int oend, oStart;
                 int numMismatches = 0;
                 vector<int> scores1, scores2;
-                if(hasQuality){ scores1 = fQual->getScores(); scores2 = rQual->getScores(); }
+                if(hasQuality){
+                    scores1 = fQual->getScores(); scores2 = rQual->getScores();
+                    delete fQual; delete rQual;
+                }
                 vector<int> contigScores = assembleFragments(qual_match_simple_bayesian, qual_mismatch_simple_bayesian, fSeq, rSeq, scores1, scores2, hasQuality, alignment, contig, trashCode, oend, oStart, numMismatches, params->insert, params->deltaq, params->trimOverlap);
 
 								//Note that usearch/vsearch cap the maximum Q value at 41 - perhaps due to ascii
@@ -2199,15 +2202,6 @@ void driverContigsGroups(groupContigsData* gparams) {
 
             //find read name type to speed read matching later
             gparams->bundle->nameType = setNameType(theseFileInputs[0], theseFileInputs[1], gparams->bundle->delim, gparams->bundle->offByOneTrimLength, gparams->bundle->gz, gparams->bundle->format);
-
-            //string inputFile = ffastqfile;
-            //vector<string> thisFileInputs; thisFileInputs.push_back(ffastqfile); thisFileInputs.push_back(rfastqfile);
-            //vector<string> thisQualOrIndexInputs;
-            //if ((findexfile != "") || (rindexfile != "")){
-               // thisQualOrIndexInputs.push_back("NONE"); thisQualOrIndexInputs.push_back("NONE");
-                //if (findexfile != "") { thisQualOrIndexInputs[0] = findexfile; }
-                //if (rindexfile != "") { thisQualOrIndexInputs[1] = rindexfile; }
-            //}
 
             //fake out lines - we are just going to check for end of file. Work is divided by number of files per processor.
             vector<linePair> thisLines; vector<linePair> thisQLines;

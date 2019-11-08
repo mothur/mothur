@@ -3948,7 +3948,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.42.3\\\"\"",
+					"VERSION=\"\\\"1.43.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"silent\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
 				);
@@ -3998,7 +3998,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.42.3\\\"\"",
+					"VERSION=\"\\\"1.43.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
 				);
