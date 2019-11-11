@@ -241,15 +241,13 @@ void SRAInfoCommand::runFastqDump(){
 #else
         commandString = "\"" + commandString + "\"";
 #endif
-        
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n"); }
-        m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n");
-        
-        system(commandString.c_str());
-        
         //free memory
         for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
         delete[] fasterQParameters;
+        
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n"); }
+        
+        system(commandString.c_str());
         
         return;
     }

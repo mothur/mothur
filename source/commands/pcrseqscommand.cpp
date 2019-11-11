@@ -720,8 +720,14 @@ int driverPcr(pcrData* params){
                     else {
                         string alignedString = currSeq.getAligned();
                         //cout << currSeq.getName() << '\t' << alignedString[params->start] << '\t' << alignedString[params->end] << endl;
-                        //if ((alignedString[params->start] == '.') || (alignedString[params->end] != '.')) { goodSeq = false; }
-                       // else {
+                        if ((alignedString[params->start] == '.') || (alignedString[params->end] != '.')) {
+                            goodSeq = false;
+                            if (params->m->getDebug()) {
+                                params->m->mothurOut("[DEBUG]: " + currSeq.getName()+ " values at locations (" + toString(params->start) + "," + toString(params->end) + ") = (" + alignedString[params->start] + "," + alignedString[params->end] + ")\n");
+                                
+                            }
+                        }
+                        else {
                             if (params->end != -1) {
                                 if (params->end > currSeq.getAligned().length()) {  params->m->mothurOut("[ERROR]: end of " +toString(params->end)  + " is longer than " + currSeq.getName() + " length of " +toString(currSeq.getAligned().length()) + ", aborting.\n"); params->m->setControl_pressed(true); break; }
                                 else {
@@ -741,7 +747,7 @@ int driverPcr(pcrData* params){
                                 }
                             }
                        
-                        //}
+                        }
                     }
                 }
                 
