@@ -1717,8 +1717,8 @@ vector<int> trimBarCodesAndPrimers(Sequence& fSeq, Sequence& rSeq, QualityScores
             if (currentSeqsDiffs > tdiffs)    {    trashCode += 't';   }
             
             if (trashCode == "") {
-                oligosResults.push_back(barcodeIndex);
-                oligosResults.push_back(primerIndex);
+                oligosResults[0] = barcodeIndex;
+                oligosResults[1] = primerIndex;
                 
                 codes[0] = "";  
                 codes[1] = commentString;
