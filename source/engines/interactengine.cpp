@@ -98,20 +98,20 @@ string InteractEngine::getCommand()  {
                 return returnCommand;
             #else
                 string nextCommand = "";
-                mout->mothurOut("\nmothur > ");
+                m->mothurOut("\nmothur > ");
                 getline(cin, nextCommand);
-                mout->mothurOut("\n");
-                mout->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
+                m->mothurOut("\n");
+                m->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
                 
                 return nextCommand;
             #endif
         #else
                 string nextCommand = "";
                 
-                mout->mothurOut("\nmothur > ");
+                m->mothurOut("\nmothur > ");
                 getline(cin, nextCommand);
-                mout->mothurOut("\n");
-                mout->mothurOutJustToLog(toString(nextCommand) + "\n");
+                m->mothurOut("\n");
+                m->mothurOutJustToLog(toString(nextCommand) + "\n");
                 
                 return nextCommand;
         #endif

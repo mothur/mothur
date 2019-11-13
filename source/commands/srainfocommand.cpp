@@ -183,6 +183,15 @@ int SRAInfoCommand::execute(){
         if (outputType == "fastq")      {  runFastqDump();  }
         //else if (outputType == "sff")   {  runSFFDump();    }
         
+        string currentName = "";
+        itTypes = outputTypes.find("file");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFileFile(currentName); }
+        }
+        
+        m->mothurOut("\nOutput File Names: \n");
+        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i] +"\n");     } m->mothurOutEndLine();
+        
         return 0;
     }
     catch(exception& e) {
@@ -203,6 +212,14 @@ void SRAInfoCommand::runFastqDump(){
         *tempFasterQ = '\0';
         strncat(tempFasterQ, fasterQCommand.c_str(), fasterQCommand.length());
         cPara.push_back(tempFasterQ);
+        
+        // --skip-technical                 skip technical reads
+        //char* stech = new char[17];  stech[0] = '\0'; strncat(stech, "--skip-technical", 16);
+       // cPara.push_back(stech);
+        
+        //-S|--split-files                 write reads into different files
+       // char* temp = new char[3];     temp[0] = '\0'; strncat(temp, "-P", 2);
+        //cPara.push_back(temp);
         
         //--force - overwrite output files if they exist
         char* force = new char[8];  force[0] = '\0'; strncat(force, "--force", 7);
@@ -249,15 +266,41 @@ void SRAInfoCommand::runFastqDump(){
 #else
         commandString = "\"" + commandString + "\"";
 #endif
-        
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n"); }
-        m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n");
-        
-        system(commandString.c_str());
-        
         //free memory
         for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
         delete[] fasterQParameters;
+        
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n"); }
+        
+        system(commandString.c_str());
+        
+        //check for output files
+        string ffastq = srafile+"_1.fastq"; ifstream fin, rin;
+        string rfastq = srafile+"_2.fastq";
+        bool hasBoth = true;
+        
+        if (util.openInputFile(ffastq, fin, "no error")) {
+            outputNames.push_back(ffastq); outputTypes["fastq"].push_back(ffastq);
+            fin.close();
+        }else { hasBoth = false; }
+        
+        if (util.openInputFile(rfastq, rin, "no error")) {
+            outputNames.push_back(rfastq); outputTypes["fastq"].push_back(rfastq);
+            rin.close();
+        }else { hasBoth = false; }
+        
+        if (hasBoth) {
+            string fileFileName = srafile + ".files";
+            ofstream out;
+            
+            util.openOutputFile(fileFileName, out);
+            
+            out << ffastq << '\t' << rfastq << endl;
+            
+            out.close();
+            
+            outputNames.push_back(fileFileName); outputTypes["file"].push_back(fileFileName);
+        }
         
         return;
     }
