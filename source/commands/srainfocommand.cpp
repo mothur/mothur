@@ -232,6 +232,14 @@ void SRAInfoCommand::runFastqDump(){
             cPara.push_back(tempoutputDir);
         }
        
+        //-o|--outfile                     output-file
+        char* outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", 2);
+        cPara.push_back(outputFile);
+        string outputFileName = util.getRootName(util.getSimpleName(srafile)) + "fastq";
+        char* tempoutfile = new char[outputFileName.length()+1];
+        *tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
+        cPara.push_back(tempoutfile);
+        
         char** fasterQParameters;
         fasterQParameters = new char*[cPara.size()];
         string commandString = "";
