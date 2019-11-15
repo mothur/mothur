@@ -790,6 +790,22 @@ bool Utils::findTool(string& toolName, string& toolLocation, string mothurProgra
 }
 /***********************************************************************/
 
+string Utils::trimString(string name, int numToRemove){
+    try {
+        int length = name.length();
+        string trimmedName = "";
+        
+        if (length > numToRemove) { trimmedName = name.substr(0, (length-numToRemove)); }
+        
+        return trimmedName;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "trimString");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
 bool Utils::openInputFile(string fileName, ifstream& fileHandle, string mode){
     try {
         //get full path name
