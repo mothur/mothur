@@ -27,7 +27,7 @@ public:
     
     string getHelpString();
     string getCitation()    { return ".... Add reference for NCBI .... http://www.mothur.org/wiki/sra.info"; }
-    string getDescription() { return "extracts fastq or sff files from sra file using fasterq_dump or sff_dump programs written by NCBI"; }
+    string getDescription() { return "extracts fastq files from sra file using fasterq_dump program written by NCBI"; }
     
     int execute();
     void help() { m->mothurOut(getHelpString()); }
