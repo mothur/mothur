@@ -149,6 +149,7 @@ public:
     int readNames(string, map<string, string>&, int);
     int readNames(string, map<string, vector<string> >&);
     int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
+    int scanNames(string namefile); //return totalnum seqs
     int readTax(string, map<string, string>&, bool);
     void zapGremlins(istream&);
     void zapGremlins(istringstream&);

@@ -46,31 +46,20 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	int splitList(ListVector*);
-	int splitNames(); //namefile
-	int writeNames(); 
-	int writeList(ListVector*, string, int); 
-	int writeAccnos(string); 
-	int parseGroup(string); 
-	int parseFasta(string); 
-    int parseCount(string);
+	int splitList();
     int splitCount();
-	int readNamesFile(); //namefile
-	int createNameMap(ListVector*);
-	
+    int splitNames();
+    int process(ListVector*);
+	int writeList(ListVector*, string, int); 
+	vector<string> writeAccnos(string, set<string>, set<string>);
+    
 	vector<string> outputNames;
-    GroupMap groupMap;
     CountTable ct;
 	
 	string outputDir, listfile, namefile, groupfile, countfile, label, groups, fastafile, inputFile;
-	set<string> labels, rareNames, abundNames;
-	vector<string> Groups;
+	set<string> labels;
 	bool abort, allLines, accnos;
-	int cutoff;
-	map<string, string> nameMap;
-	
-	
-
+	float cutoff;
 };
 
 /***************************************************************************************/

@@ -3332,54 +3332,56 @@ map<string, int> Utils::readNames(string namefile) {
         ifstream in;
         openInputFile(namefile, in);
 
-        string rest = "";
-        char buffer[4096];
-        bool pairDone = false;
-        bool columnOne = true;
+       
         string firstCol, secondCol;
 
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
 
-            in.read(buffer, 4096);
-            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
-
-            for (int i = 0; i < pieces.size(); i++) {
-                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
-                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
-
-                if (pairDone) {
-                    checkName(firstCol);
-                    checkName(secondCol);
-                    int num = getNumNames(secondCol);
-                    nameMap[firstCol] = num;
-                    pairDone = false;
-                }
-            }
+            in >> firstCol; gobble(in);
+            in >> secondCol; gobble(in);
+            
+            checkName(firstCol);
+            checkName(secondCol);
+            int num = getNumNames(secondCol);
+            nameMap[firstCol] = num;
         }
         in.close();
-
-        if (rest != "") {
-            vector<string> pieces = splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {
-                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
-                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
-
-                if (pairDone) {
-                    checkName(firstCol);
-                    checkName(secondCol);
-                    int num = getNumNames(secondCol);
-                    nameMap[firstCol] = num;
-                    pairDone = false;
-                }
-            }
-        }
 
         return nameMap;
 
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "readNames");
+        exit(1);
+    }
+}
+/**********************************************************************************************************************/
+int Utils::scanNames(string namefile) {
+    try {
+        
+        //open input file
+        ifstream in;
+        openInputFile(namefile, in);
+        
+        int total = 0;
+        string firstCol, secondCol;
+
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+
+            in >> firstCol; gobble(in);
+            in >> secondCol; gobble(in);
+            
+            total += getNumNames(secondCol);
+        }
+        in.close();
+
+        return total;
+
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "scanNames");
         exit(1);
     }
 }
