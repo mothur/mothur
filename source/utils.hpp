@@ -211,6 +211,7 @@ public:
     string getStringFromSet(set<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getFormattedHelp(vector<string> question, vector<string> aquestion, vector<string> issue, vector<string> aissue, vector<string> howto,vector<string> ahowto);
+    string trimString(string, int); //string, number of chars to remove from end.
     
     bool inUsersGroups(vector<string>, vector<string>); //returns true if any of the strings in first vector are in second vector
     bool inUsersGroups(vector<int>, vector< vector<int> >);

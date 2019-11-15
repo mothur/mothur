@@ -1235,7 +1235,6 @@ void driverGroups(uchimeData* params){
             SequenceCountParser cparser(params->dupsfile, params->fastafile, params->groups);
             params->groups = cparser.getNamesOfGroups();
             group2Files = cparser.getFiles();
-            
         }
 
 		int totalSeqs = 0;

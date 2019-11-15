@@ -13,7 +13,7 @@
 vector<string> SRAInfoCommand::setParameters(){
     try {
         CommandParameter psra("sra", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(psra);
-        CommandParameter ptype("type", "Multiple", "fastq-sff", "fastq", "", "", "","",false,false,true); parameters.push_back(ptype);
+        //CommandParameter ptype("type", "Multiple", "fastq-sff", "fastq", "", "", "","",false,false,true); parameters.push_back(ptype);
         CommandParameter pFasterQlocation("fasterq", "String", "", "", "", "", "","",false,false); parameters.push_back(pFasterQlocation);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -33,9 +33,10 @@ vector<string> SRAInfoCommand::setParameters(){
 string SRAInfoCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The sra.info command reads a sra file and extracts the fastq or sff data.\n";
-        helpString += "The sra.info command parameters are ....\n";
+        helpString += "The sra.info command reads a sra file and extracts the fastq files from it using the fasterq_dump tool developed by written by NCBI. Mothur is compatible with version 2.9.6. \n";
+        helpString += "The sra.info command parameters are sra, processors and fasterq.\n";
         helpString += "The processors parameter allows you to specify how many processors you would like to use. The default is all available. \n";
+        helpString += "The fasterq parameter allows you to specify location of the fasterq_dump file. By default  othur will look in its location and the location of MOTHUR_TOOLS if specified at compile time or set through the set.dir(tools=locationOfExternalTools) command. Ex. sra.info(sra=SRR0000004, fasterq=/usr/bin/fasterq-dump.2.9.6) or  sra.info(sra=SRR0000004, fasterq=/usr/local/fasterq_dump). Location and name of exe can be set.\n";
         helpString += "The sra.info command should be in the following format: sra.info(sra=yourSRAFile)\n";
         helpString += "sra.info(sra=SRR000004) \n";
         return helpString;
@@ -51,7 +52,8 @@ string SRAInfoCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fastq") {  pattern = "[filename],fastq"; }
-        else if (type == "sff") {  pattern = "[filename],sff"; }
+        else if (type == "file") {  pattern = "[filename],files"; }
+        //else if (type == "sff") {  pattern = "[filename],sff"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -67,7 +69,8 @@ SRAInfoCommand::SRAInfoCommand(){
         abort = true; calledHelp = true;
         setParameters();
         vector<string> tempOutNames;
-        outputTypes["summary"] = tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
+        outputTypes["file"] = tempOutNames;
     }
     catch(exception& e) {
         m->errorOut(e, "SRAInfoCommand", "SRAInfoCommand");
@@ -114,7 +117,8 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             
             //initialize outputTypes
             vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
+            outputTypes["fastq"] = tempOutNames;
+            outputTypes["file"] = tempOutNames;
             
             //check for required parameters
             srafile = validParameter.validFile(parameters, "sra");
@@ -126,11 +130,9 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 outputDir += util.hasPath(srafile); //if user entered a file with a path then preserve it
             }
             
-            outputType = validParameter.valid(parameters, "type");        if (outputType == "not found"){
-                outputType = "fastq";
-            }
-            if ((outputType == "fastq") || (outputType == "sff")) {}
-            else { m->mothurOut("[ERROR]: " + outputType + " is not a valid type option. The sra.info can extract files of type sff or fastq.\n");  abort = true; }
+            //outputType = validParameter.valid(parameters, "type");        if (outputType == "not found"){ outputType = "fastq"; }
+            //if ((outputType == "fastq") || (outputType == "sff")) {}
+            //else { m->mothurOut("[ERROR]: " + outputType + " is not a valid type option. The sra.info can extract files of type sff or fastq.\n");  abort = true; }
             
             string temp = validParameter.valid(parameters, "processors");    if (temp == "not found"){    temp = current->getProcessors();    }
             processors = current->setProcessors(temp);
@@ -180,7 +182,8 @@ int SRAInfoCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
-        if (outputType == "fastq")      {  runFastqDump();  }
+        runFastqDump();
+        //if (outputType == "fastq")      {   }
         //else if (outputType == "sff")   {  runSFFDump();    }
         
         string currentName = "";
@@ -213,14 +216,6 @@ void SRAInfoCommand::runFastqDump(){
         strncat(tempFasterQ, fasterQCommand.c_str(), fasterQCommand.length());
         cPara.push_back(tempFasterQ);
         
-        // --skip-technical                 skip technical reads
-        //char* stech = new char[17];  stech[0] = '\0'; strncat(stech, "--skip-technical", 16);
-       // cPara.push_back(stech);
-        
-        //-S|--split-files                 write reads into different files
-       // char* temp = new char[3];     temp[0] = '\0'; strncat(temp, "-P", 2);
-        //cPara.push_back(temp);
-        
         //--force - overwrite output files if they exist
         char* force = new char[8];  force[0] = '\0'; strncat(force, "--force", 7);
         cPara.push_back(force);
@@ -249,6 +244,14 @@ void SRAInfoCommand::runFastqDump(){
             cPara.push_back(tempoutputDir);
         }
        
+        //-o|--outfile                     output-file
+        char* outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", 2);
+        cPara.push_back(outputFile);
+        string outputFileName = util.getRootName(util.getSimpleName(srafile)) + "fastq";
+        char* tempoutfile = new char[outputFileName.length()+1];
+        *tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
+        cPara.push_back(tempoutfile);
+        
         char** fasterQParameters;
         fasterQParameters = new char*[cPara.size()];
         string commandString = "";
@@ -263,33 +266,32 @@ void SRAInfoCommand::runFastqDump(){
         delete[] fasterQParameters;
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n"); }
-        
+        //m->mothurOut("fasterq_dump command = " + commandString + ".\n");
         system(commandString.c_str());
         
         //check for output files
-        string ffastq = srafile+"_1.fastq"; ifstream fin, rin;
-        string rfastq = srafile+"_2.fastq";
-        bool hasBoth = true;
+        ifstream fin, rin;
+        string ffastq = util.trimString(util.getRootName(util.getSimpleName(srafile)), 1) +"_1.fastq";
+        string rfastq = util.trimString(util.getRootName(util.getSimpleName(srafile)), 1) +"_2.fastq";
         
-        if (util.openInputFile(ffastq, fin, "no error")) {
-            outputNames.push_back(ffastq); outputTypes["fastq"].push_back(ffastq);
+        bool hasBoth = true;
+        if (util.openInputFile(outputDir + ffastq, fin, "no error")) {
+            outputNames.push_back(outputDir + ffastq); outputTypes["fastq"].push_back(outputDir + ffastq);
             fin.close();
         }else { hasBoth = false; }
         
-        if (util.openInputFile(rfastq, rin, "no error")) {
-            outputNames.push_back(rfastq); outputTypes["fastq"].push_back(rfastq);
+        if (util.openInputFile(outputDir + rfastq, rin, "no error")) {
+            outputNames.push_back(outputDir + rfastq); outputTypes["fastq"].push_back(outputDir + rfastq);
             rin.close();
         }else { hasBoth = false; }
         
         if (hasBoth) {
             string fileFileName = srafile + ".files";
-            ofstream out;
             
+            ofstream out;
             util.openOutputFile(fileFileName, out);
             
-            out << ffastq << '\t' << rfastq << endl;
-            
-            out.close();
+            out << ffastq << '\t' << rfastq << endl; out.close();
             
             outputNames.push_back(fileFileName); outputTypes["file"].push_back(fileFileName);
         }
