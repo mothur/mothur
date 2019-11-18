@@ -347,7 +347,7 @@ int GetSeqsCommand::execute(){
         
         if (countfile != "") {
             if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
-                m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
+                //m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
             }
         }
 		

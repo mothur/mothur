@@ -358,7 +358,10 @@ int RemoveLineageCommand::execute(){
 		if (m->getControl_pressed()) { return 0; }
         
         if (countfile != "") {
-            if ((fastafile != "") || (listfile != "") || (taxfile != "")) {  m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n"); }
+            if ((fastafile != "") || (listfile != "") || (taxfile != "")) {
+                //m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
+                
+            }
         }
 		
 		//read through the correct file and output lines you want to keep

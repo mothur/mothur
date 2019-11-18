@@ -480,9 +480,8 @@ int SplitAbundCommand::process(ListVector* thisList) {
          outputNames.push_back(abundList); outputTypes["list"].push_back(abundList);
          m->mothurOut("/******************************************/\nDone.\n");
          
-        vector<string> accnosNames = writeAccnos(tag, rareNames, abundNames); //return rare, abund accnos files
+        
         string rareCount, abundCount, rareName, abundName, rareFasta, abundFasta, rareGroup, abundGroup;
-        inputString = "dups=t, accnos=" + accnosNames[0]; //get rare
         string inputString2 = "";
         if (countfile != "") {
             if (outputDir == "") { thisOutputDir = util.hasPath(countfile); }
@@ -527,6 +526,10 @@ int SplitAbundCommand::process(ListVector* thisList) {
         }
         
         if (inputString2 != "") {
+            vector<string> accnosNames = writeAccnos(tag, rareNames, abundNames); //return rare, abund accnos files
+            
+            inputString = "dups=t, accnos=" + accnosNames[0]; //get rare
+            
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: get.seqs(" + inputString + inputString2 + ")\n");
             
