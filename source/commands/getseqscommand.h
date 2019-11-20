@@ -27,7 +27,7 @@ class GetSeqsCommand : public Command {
 	string getHelpString();	
     string getOutputPattern(string);	
 		string getCitation() { return "http://www.mothur.org/wiki/Get.seqs"; }
-		string getDescription()		{ return "gets sequences from a list, fasta, name, group, alignreport, quality or taxonomy file"; }
+		string getDescription()		{ return "gets sequences from a list, fasta, count, name, group, alignreport, quality, fastq, contigsreport or taxonomy file"; }
 
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	
@@ -36,7 +36,7 @@ class GetSeqsCommand : public Command {
 	private:
 		set<string> names;
 		vector<string> outputNames;
-		string accnosfile, accnosfile2, fastafile, fastqfile, namefile, countfile, groupfile, alignfile, listfile, taxfile, qualfile, outputDir, format;
+		string accnosfile, accnosfile2, fastafile, fastqfile, namefile, countfile, groupfile, alignfile, listfile, taxfile, qualfile, outputDir, format, contigsreportfile;
 		bool abort, dups;
         map<string, string> uniqueMap;
         //for debug
@@ -51,6 +51,7 @@ class GetSeqsCommand : public Command {
 		int readList();
 		int readTax();
 		int readQual();
+        int readContigsReport();
 		int compareAccnos();
         int runSanityCheck();
         int createMisMatchFile(ofstream&, string, string, set<string>, set<string>);

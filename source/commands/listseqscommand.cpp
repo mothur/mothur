@@ -237,7 +237,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
             if (inputDir != "") { okay++; }
             if (formatFound) { okay++; }
 			
-			if (parameters.size() > okay) { m->mothurOut("You may only enter one file."); m->mothurOutEndLine(); abort = true;  }
+			if (parameters.size() > okay) { m->mothurOut("You may only enter one file.\n");  abort = true;  }
 		}
 
 	}

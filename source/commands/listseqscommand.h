@@ -27,7 +27,7 @@ class ListSeqsCommand : public Command {
 	string getHelpString();	
     string getOutputPattern(string);	
 		string getCitation() { return "http://www.mothur.org/wiki/List.seqs"; }
-		string getDescription()		{ return "lists sequences from a list, fasta, name, group, alignreport or taxonomy file"; }
+		string getDescription()		{ return "lists sequences from a list, fasta, name, group, count, fastq, alignreport or taxonomy file"; }
 
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	
