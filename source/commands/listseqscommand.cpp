@@ -24,6 +24,7 @@ vector<string> ListSeqsCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(ptaxonomy);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false); parameters.push_back(palignreport);
+        CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false); parameters.push_back(pcontigsreport);
         CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -42,8 +43,8 @@ vector<string> ListSeqsCommand::setParameters(){
 string ListSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy, fastq or alignreport file and outputs a .accnos file containing sequence names.\n";
-		helpString += "The list.seqs command parameters are fasta, name, group, count, list, taxonomy, fastq and alignreport.  You must provide one of these parameters.\n";
+		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy, fastq, alignreport or contigsreport file and outputs a .accnos file containing sequence names.\n";
+		helpString += "The list.seqs command parameters are fasta, name, group, count, list, taxonomy, fastq, contigsreport and alignreport.  You must provide one of these parameters.\n";
          helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n";
 		helpString += "Example list.seqs(fasta=amazon.fasta).\n";
@@ -125,6 +126,14 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("contigsreport");
+                //user has given a template file
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {    parameters["contigsreport"] = inputDir + it->second;        }
+                }
 				
 				it = parameters.find("fasta");
 				//user has given a template file
@@ -202,6 +211,10 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			alignfile = validParameter.validFile(parameters, "alignreport");
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
+            
+            contigsreportfile = validParameter.validFile(parameters, "contigsreport");
+            if (contigsreportfile == "not open") { abort = true; }
+            else if (contigsreportfile == "not found") {  contigsreportfile = "";  }
 			
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
@@ -222,15 +235,12 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			if (fastqfile == "not open") { abort = true; }
 			else if (fastqfile == "not found") {  fastqfile = "";  }
 			
-			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
+			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide a file.\n"); abort = true; }
             
             bool formatFound = true;
             format = validParameter.valid(parameters, "format");		if (format == "not found"){	formatFound = false; format = "illumina1.8+";	}
             
-            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  {
-                m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
-                abort=true;
-            }
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  { m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting.\n" ); abort=true; }
             
             int okay = 1;
             if (outputDir != "") { okay++; }
@@ -254,14 +264,15 @@ int ListSeqsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read functions fill names vector
-		if (fastafile != "")		{	inputFileName = fastafile;	readFasta();	}
-        else if (fastqfile != "")	{	inputFileName = fastqfile;	readFastq();	}
-		else if (namefile != "")	{	inputFileName = namefile;	readName();		}
-		else if (groupfile != "")	{	inputFileName = groupfile;	readGroup();	}
-		else if (alignfile != "")	{	inputFileName = alignfile;	readAlign();	}
-		else if (listfile != "")	{	inputFileName = listfile;	readList();		}
-		else if (taxfile != "")		{	inputFileName = taxfile;	readTax();		}
-        else if (countfile != "")	{	inputFileName = countfile;	readCount();	}
+		if (fastafile != "")		            {	inputFileName = fastafile;	readFasta();	            }
+        else if (fastqfile != "")	            {	inputFileName = fastqfile;	readFastq();	            }
+		else if (namefile != "")	            {	inputFileName = namefile;	readName();		            }
+		else if (groupfile != "")	            {	inputFileName = groupfile;	readGroup();	            }
+		else if (alignfile != "")	            {	inputFileName = alignfile;	readAlign();	            }
+        else if (contigsreportfile != "")       {    inputFileName = contigsreportfile;    readContigs();   }
+		else if (listfile != "")	            {	inputFileName = listfile;	readList();		            }
+		else if (taxfile != "")		            {	inputFileName = taxfile;	readTax();		            }
+        else if (countfile != "")	            {	inputFileName = countfile;	readCount();	            }
 		
 		if (m->getControl_pressed()) { outputTypes.clear();  return 0; }
 		
@@ -292,15 +303,13 @@ int ListSeqsCommand::execute(){
 		}
 		
 		return 0;		
-	}
-
-	catch(exception& e) {
+	}catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int ListSeqsCommand::readFastq(){
+void ListSeqsCommand::readFastq(){
 	try {
 		
 		ifstream in;
@@ -310,7 +319,7 @@ int ListSeqsCommand::readFastq(){
 		int count = 1;
 		while(!in.eof()){
 			
-			if (m->getControl_pressed()) { in.close(); return 0; }
+            if (m->getControl_pressed()) { break; }
 			
             bool ignore;
             FastqRead fread(in, ignore, format); util.gobble(in);
@@ -321,17 +330,15 @@ int ListSeqsCommand::readFastq(){
 		}
 		in.close();
 		
-		return 0;
-        
+		return;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "readFastq");
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
-int ListSeqsCommand::readFasta(){
+void ListSeqsCommand::readFasta(){
 	try {
 		
 		ifstream in;
@@ -341,7 +348,7 @@ int ListSeqsCommand::readFasta(){
 		
 		while(!in.eof()){
 			
-			if (m->getControl_pressed()) { in.close(); return 0; }
+            if (m->getControl_pressed()) { break; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -354,7 +361,7 @@ int ListSeqsCommand::readFasta(){
 		}
 		in.close();
 		
-		return 0;
+		return;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "readFasta");
@@ -362,7 +369,7 @@ int ListSeqsCommand::readFasta(){
 	}
 }
 //**********************************************************************************************************************
-int ListSeqsCommand::readList(){
+void ListSeqsCommand::readList(){
 	try {
 		ifstream in;
 		util.openInputFile(listfile, in);
@@ -377,15 +384,14 @@ int ListSeqsCommand::readList(){
 			for (int i = 0; i < list.getNumBins(); i++) {
 				string binnames = list.get(i);
 				
-				if (m->getControl_pressed()) { in.close(); return 0; }
+                if (m->getControl_pressed()) { break; }
 				
 				util.splitAtComma(binnames, names);
 			}
 		}
 		in.close();	
 		
-		return 0;
-		
+		return;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "readList");
@@ -394,7 +400,7 @@ int ListSeqsCommand::readList(){
 }
 
 //**********************************************************************************************************************
-int ListSeqsCommand::readName(){
+void ListSeqsCommand::readName(){
 	try {
 		
 		ifstream in;
@@ -403,7 +409,7 @@ int ListSeqsCommand::readName(){
 		
 		while(!in.eof()){
 		
-			if (m->getControl_pressed()) { in.close(); return 0; }
+            if (m->getControl_pressed()) { break; }
 
 			in >> firstCol;	util.gobble(in);
 			in >> secondCol;			
@@ -414,8 +420,7 @@ int ListSeqsCommand::readName(){
 			util.gobble(in);
 		}
 		in.close();
-		return 0;
-		
+		return;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "readName");
@@ -424,7 +429,7 @@ int ListSeqsCommand::readName(){
 }
 
 //**********************************************************************************************************************
-int ListSeqsCommand::readGroup(){
+void ListSeqsCommand::readGroup(){
 	try {
 	
 		ifstream in;
@@ -433,7 +438,7 @@ int ListSeqsCommand::readGroup(){
 		
 		while(!in.eof()){
 			
-			if (m->getControl_pressed()) { in.close(); return 0; }
+            if (m->getControl_pressed()) { break; }
 			
 			in >> name;	util.gobble(in);			//read from first column
 			in >> group;			//read from second column
@@ -443,7 +448,7 @@ int ListSeqsCommand::readGroup(){
 			util.gobble(in);
 		}
 		in.close();
-		return 0;
+		return;
 
 	}
 	catch(exception& e) {
@@ -452,16 +457,16 @@ int ListSeqsCommand::readGroup(){
 	}
 }
 //**********************************************************************************************************************
-int ListSeqsCommand::readCount(){
+void ListSeqsCommand::readCount(){
 	try {
 		CountTable ct;
 		ct.readTable(countfile, false, false);
         
-        if (m->getControl_pressed()) { return 0; }
+        if (m->getControl_pressed()) { return; }
         
         names = ct.getNamesOfSeqs();
         
-        return 0;
+        return;
         
 	}
 	catch(exception& e) {
@@ -471,7 +476,7 @@ int ListSeqsCommand::readCount(){
 }
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
-int ListSeqsCommand::readAlign(){
+void ListSeqsCommand::readAlign(){
 	try {
 	
 		ifstream in;
@@ -487,7 +492,7 @@ int ListSeqsCommand::readAlign(){
 		
 		while(!in.eof()){
 		
-			if (m->getControl_pressed()) { in.close(); return 0; }
+            if (m->getControl_pressed()) { break; }
 
 			in >> name;				//read from first column
 			//util.getline(in);
@@ -503,9 +508,7 @@ int ListSeqsCommand::readAlign(){
 		}
 		in.close();
 		
-		return 0;
-
-		
+		return;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "readAlign");
@@ -513,7 +516,36 @@ int ListSeqsCommand::readAlign(){
 	}
 }
 //**********************************************************************************************************************
-int ListSeqsCommand::readTax(){
+//contigsreport file has a column header line then all other lines contain 8 columns.  we just want the first column since that contains the name
+void ListSeqsCommand::readContigs(){
+    try {
+    
+        ifstream in;
+        util.openInputFile(contigsreportfile, in);
+        string name, junk;
+        
+        util.getline(in);  util.gobble(in);
+        
+        while(!in.eof()){
+        
+            if (m->getControl_pressed()) { break; }
+
+            in >> name;   util.gobble(in);              //read from first column
+            util.getline(in); util.gobble(in);
+            
+            names.push_back(name);
+        }
+        in.close();
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readContigs");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void ListSeqsCommand::readTax(){
 	try {
 		
 		ifstream in;
@@ -522,7 +554,7 @@ int ListSeqsCommand::readTax(){
 		
 		while(!in.eof()){
 		
-			if (m->getControl_pressed()) { in.close(); return 0; }
+            if (m->getControl_pressed()) { break; }
 
             in >> firstCol; util.gobble(in);
             secondCol = util.getline(in); util.gobble(in);
@@ -531,7 +563,7 @@ int ListSeqsCommand::readTax(){
 		}
 		in.close();
 		
-		return 0;
+		return;
 		
 	}
 	catch(exception& e) {

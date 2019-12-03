@@ -24,10 +24,10 @@ class ListSeqsCommand : public Command {
 		string getCommandName()			{ return "list.seqs";				}
 		string getCommandCategory()		{ return "Sequence Processing";		}
 		
-	string getHelpString();	
-    string getOutputPattern(string);	
+        string getHelpString();	
+        string getOutputPattern(string);
 		string getCitation() { return "http://www.mothur.org/wiki/List.seqs"; }
-		string getDescription()		{ return "lists sequences from a list, fasta, name, group, count, fastq, alignreport or taxonomy file"; }
+		string getDescription()		{ return "lists sequences from a list, fasta, name, group, count, fastq, taxonomy, alignreport or contigsreport file"; }
 
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	
@@ -35,17 +35,18 @@ class ListSeqsCommand : public Command {
 	
 	private:
 		vector<string> names, outputNames;
-		string fastafile, namefile, groupfile, countfile, alignfile, inputFileName, outputDir, listfile, taxfile, fastqfile, format;
+		string fastafile, namefile, groupfile, countfile, alignfile, inputFileName, outputDir, listfile, taxfile, fastqfile, format, contigsreportfile;
 		bool abort;
 		
-		int readFasta();
-		int readName();
-		int readGroup();
-		int readAlign();
-		int readList();
-		int readTax();
-        int readCount();
-        int readFastq();
+		void readFasta();
+		void readName();
+		void readGroup();
+		void readAlign();
+        void readContigs();
+		void readList();
+		void readTax();
+        void readCount();
+        void readFastq();
 };
 
 #endif
