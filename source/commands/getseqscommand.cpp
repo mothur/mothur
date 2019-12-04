@@ -1025,19 +1025,16 @@ void GetSeqsCommand::readAlign(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
 		
-		//read column headers
-		for (int i = 0; i < 16; i++) {  
-			if (!in.eof())	{	in >> junk;	 out << junk << '\t';	}
-			else			{	break;			}
-		}
-		out << endl;
+		//read and write headers
+        out << util.getline(in) << endl;  util.gobble(in);
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 		
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-			in >> name;				//read from first column
+			in >> name;   util.gobble(in);              //read from first column
+            junk = util.getline(in); util.gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -1051,27 +1048,12 @@ void GetSeqsCommand::readAlign(){
                     wroteSomething = true;
                     selectedCount++;
                     
-                    out << name << '\t';
-                    
-                    //read rest
-                    for (int i = 0; i < 15; i++) {
-                        if (!in.eof())	{	in >> junk;	 out << junk << '\t';	}
-                        else			{	break;			}
-                    }
-                    out << endl;
+                    out << name << '\t' << junk << endl;
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your alignreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
 				
-			}else {//still read just don't do anything with it
-				//read rest
-				for (int i = 0; i < 15; i++) {  
-					if (!in.eof())	{	in >> junk;		}
-					else			{	break;			}
-				}
 			}
-			
-			util.gobble(in);
 		}
 		in.close();
 		out.close();

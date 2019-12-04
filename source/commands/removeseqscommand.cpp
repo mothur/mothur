@@ -964,18 +964,15 @@ void RemoveSeqsCommand::readAlign(){
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
-		//read column headers
-		for (int i = 0; i < 16; i++) {  
-			if (!in.eof())	{	in >> junk;	 out << junk << '\t';	}
-			else			{	break;			}
-		}
-		out << endl;
+        //read and write headers
+		out << util.getline(in) << endl;  util.gobble(in);
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> name;				//read from first column
+			in >> name;   util.gobble(in);              //read from first column
+            junk = util.getline(in); util.gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -988,33 +985,17 @@ void RemoveSeqsCommand::readAlign(){
                     uniqueNames.insert(name);
                     wroteSomething = true;
                     
-                    out << name << '\t';
+                    out << name << '\t' << junk << endl;
                     
-                    //read rest
-                    for (int i = 0; i < 15; i++) {
-                        if (!in.eof())	{	in >> junk;	 out << junk << '\t';	}
-                        else			{	break;			}
-                    }
-                    out << endl;
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your alignreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
-			}else {//still read just don't do anything with it
-				removedCount++;  
-				
-				//read rest
-				for (int i = 0; i < 15; i++) {  
-					if (!in.eof())	{	in >> junk;		}
-					else			{	break;			}
-				}
-			}
-			
-			util.gobble(in);
+			}else { removedCount++;   }
 		}
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");   }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");  ofstream out1; util.openOutputFile(outputFileName, out1); out1.close(); }
 		outputTypes["alignreport"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		m->mothurOut("Removed " + toString(removedCount) + " sequences from your alignreport file.\n"); 
@@ -1076,7 +1057,7 @@ void RemoveSeqsCommand::readContigs(){
         if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  ofstream out1; util.openOutputFile(outputFileName, out1); out1.close(); } //reopening file clears header line
         outputNames.push_back(outputFileName);  outputTypes["contigsreport"].push_back(outputFileName);
         
-        m->mothurOut("Removed " + toString(removedCount) + " sequences from your contigsreport file.\n"); 
+        m->mothurOut("Removed " + toString(removedCount) + " sequences from your contigsreport file.\n");
         
         return;
     }
