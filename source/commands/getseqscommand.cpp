@@ -25,7 +25,7 @@ vector<string> GetSeqsCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none","list",false,false,true); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none","taxonomy",false,false,true); parameters.push_back(ptaxonomy);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none","alignreport",false,false); parameters.push_back(palignreport);
-        CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false); parameters.push_back(pcontigsreport);
+        CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","contigsreport",false,false); parameters.push_back(pcontigsreport);
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "FNGLT", "none","qfile",false,false); parameters.push_back(pqfile);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(paccnos);
 		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdups);
@@ -340,7 +340,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
                 abort=true;
             }
 			
-			if ((fastqfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == "") && (countfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, quality, fastq or listfile.\n");  abort = true; }
+			if ((fastqfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == "") && (countfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, contigsreport, taxonomy, quality, fastq or listfile.\n");  abort = true; }
 		}
 	}
 	catch(exception& e) {
@@ -587,48 +587,27 @@ void GetSeqsCommand::readQual(){
         if (m->getDebug()) { set<string> temp; sanity["qual"] = temp; }
 		
         set<string> uniqueNames;
-		while(!in.eof()){	
-			string saveName = "";
-			string name = "";
-			string scores = "";
-			
-            if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
+		while(!in.eof()){
             
-			in >> name;
+			QualityScores qual(in); util.gobble(in);
             
             if (!dups) {//adjust name if needed
-                map<string, string>::iterator it = uniqueMap.find(name);
-                if (it != uniqueMap.end()) { name = it->second; }
+                map<string, string>::iterator it = uniqueMap.find(qual.getName());
+                if (it != uniqueMap.end()) { qual.setName(it->second); }
             }
-				
-			if (name.length() != 0) { 
-				saveName = name.substr(1);
-				while (!in.eof())	{	
-					char c = in.get(); 
-					if (c == 10 || c == 13 || c == -1){	break;	}
-					else { name += c; }	
-				} 
-				util.gobble(in);
-			}
-			
-			while(in){
-				char letter= in.get();
-				if(letter == '>'){	in.putback(letter);	break;	}
-				else{ scores += letter; }
-			}
-			
-			util.gobble(in);
-			
-            if (names.count(saveName) != 0) {
-                if (uniqueNames.count(saveName) == 0) { //this name hasn't been seen yet
-                    uniqueNames.insert(saveName);
+            
+            string name = qual.getName();
+            
+            if (names.count(name) != 0) {
+                if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                    uniqueNames.insert(name);
                     wroteSomething = true;
                     
-                    out << name << endl << scores;
+                    qual.printQScores(out);
                     selectedCount++;
                     if (m->getDebug()) { sanity["qual"].insert(name); }
                 }else {
-                    m->mothurOut("[WARNING]: " + saveName + " is in your qfile more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                    m->mothurOut("[WARNING]: " + name + " is in your qfile more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
             }
 			

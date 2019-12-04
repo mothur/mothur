@@ -27,28 +27,28 @@ class RemoveSeqsCommand : public Command {
 	string getHelpString();	
     string getOutputPattern(string);	
 		string getCitation() { return "http://www.mothur.org/wiki/Remove.seqs"; }
-		string getDescription()		{ return "removes sequences from a list, fasta, name, group, alignreport, quality or taxonomy file"; }
+		string getDescription()		{ return "removes sequences from a list, fasta, name, group, alignreport, contigsreport, quality or taxonomy file"; }
 
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	
 	
-	
 	private:
 		set<string> names;
-		string accnosfile, fastafile, fastqfile, namefile, groupfile, countfile, alignfile, listfile, taxfile, qualfile, outputDir, format;
+		string accnosfile, fastafile, fastqfile, namefile, groupfile, countfile, alignfile, listfile, taxfile, qualfile, outputDir, format, contigsreportfile;
 		bool abort, dups;
 		vector<string> outputNames;
         map<string, string> uniqueMap;
 		
-		int readFasta();
-        int readFastq();
-		int readName();
-		int readGroup();
-        int readCount();
-		int readAlign();
-		int readList();
-		int readTax();
-		int readQual();
+		void readFasta();
+        void readFastq();
+		void readName();
+		void readGroup();
+        void readCount();
+		void readAlign();
+        void readContigs();
+		void readList();
+		void readTax();
+		void readQual();
 		
 };
 
