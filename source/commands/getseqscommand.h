@@ -42,16 +42,16 @@ class GetSeqsCommand : public Command {
         //for debug
         map<string, set<string> > sanity; //maps file type to names chosen for file. something like "fasta" -> vector<string>. If running in debug mode this is filled and we check to make sure all the files have the same names. If they don't we output the differences for the user.
 		
-		int readFasta();
-        int readFastq();
-		int readName();
-		int readGroup();
-        int readCount();
-		int readAlign();
-		int readList();
-		int readTax();
-		int readQual();
-        int readContigsReport();
+		void readFasta();
+        void readFastq();
+		void readName();
+		void readGroup();
+        void readCount();
+		void readAlign();
+		void readList();
+		void readTax();
+		void readQual();
+        void readContigs();
 		int compareAccnos();
         int runSanityCheck();
         int createMisMatchFile(ofstream&, string, string, set<string>, set<string>);
