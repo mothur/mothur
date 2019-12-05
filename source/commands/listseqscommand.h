@@ -34,19 +34,12 @@ class ListSeqsCommand : public Command {
 	
 	
 	private:
-		vector<string> names, outputNames;
-		string fastafile, namefile, groupfile, countfile, alignfile, inputFileName, outputDir, listfile, taxfile, fastqfile, format, contigsreportfile;
-		bool abort;
-		
-		void readFasta();
-		void readName();
-		void readGroup();
-		void readAlign();
-        void readContigs();
-		void readList();
-		void readTax();
-        void readCount();
-        void readFastq();
+		vector<string> outputNames;
+		vector<string> fastafiles, namefiles, groupfiles, countfiles, alignfiles, listfiles, taxfiles, fastqfiles, contigsreportfiles;
+        string outputDir, format, inputFileName;
+        bool abort;
+        
+        void process(vector<string> files, set<string>&, void f(set<string>&, string, MothurOut*&));
 };
 
 #endif

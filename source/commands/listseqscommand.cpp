@@ -25,7 +25,6 @@ vector<string> ListSeqsCommand::setParameters(){
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(ptaxonomy);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false); parameters.push_back(palignreport);
         CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false); parameters.push_back(pcontigsreport);
-        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -45,7 +44,6 @@ string ListSeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy, fastq, alignreport or contigsreport file and outputs a .accnos file containing sequence names.\n";
 		helpString += "The list.seqs command parameters are fasta, name, group, count, list, taxonomy, fastq, contigsreport and alignreport.  You must provide one of these parameters.\n";
-         helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
 		helpString += "The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n";
 		helpString += "Example list.seqs(fasta=amazon.fasta).\n";
 		;
@@ -193,68 +191,277 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			}
 
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta");
-			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") {  fastafile = "";  }
-			else { current->setFastaFile(fastafile); }
-			
-			namefile = validParameter.validFile(parameters, "name");
-			if (namefile == "not open") { abort = true; }
-			else if (namefile == "not found") {  namefile = "";  }	
-			else { current->setNameFile(namefile); }
-			
-			groupfile = validParameter.validFile(parameters, "group");
-			if (groupfile == "not open") { abort = true; }
-			else if (groupfile == "not found") {  groupfile = "";  }	
-			else { current->setGroupFile(groupfile); }
-			
-			alignfile = validParameter.validFile(parameters, "alignreport");
-			if (alignfile == "not open") { abort = true; }
-			else if (alignfile == "not found") {  alignfile = "";  }
+			fastafiles = validParameter.validFiles(parameters, "fasta");
+            if (fastafiles.size() != 0) {
+                if (fastafiles[0] == "not open") { abort = true; }
+                else { current->setFastaFile(fastafiles[0]); }
+            }
             
-            contigsreportfile = validParameter.validFile(parameters, "contigsreport");
-            if (contigsreportfile == "not open") { abort = true; }
-            else if (contigsreportfile == "not found") {  contigsreportfile = "";  }
+			namefiles = validParameter.validFiles(parameters, "name");
+            if (namefiles.size() != 0) {
+                if (namefiles[0] == "not open") { abort = true; }
+                else { current->setNameFile(namefiles[0]); }
+            }
 			
-			listfile = validParameter.validFile(parameters, "list");
-			if (listfile == "not open") { abort = true; }
-			else if (listfile == "not found") {  listfile = "";  }
-			else { current->setListFile(listfile); }
+			groupfiles = validParameter.validFiles(parameters, "group");
+            if (groupfiles.size() != 0) {
+                if (groupfiles[0] == "not open") { abort = true; }
+                else { current->setGroupFile(groupfiles[0]); }
+            }
 			
-			taxfile = validParameter.validFile(parameters, "taxonomy");
-			if (taxfile == "not open") { abort = true; }
-			else if (taxfile == "not found") {  taxfile = "";  }
-			else { current->setTaxonomyFile(taxfile); }
-            
-            countfile = validParameter.validFile(parameters, "count");
-			if (countfile == "not open") { abort = true; }
-			else if (countfile == "not found") {  countfile = "";  }
-			else { current->setCountFile(countfile); }
-            
-            fastqfile = validParameter.validFile(parameters, "fastq");
-			if (fastqfile == "not open") { abort = true; }
-			else if (fastqfile == "not found") {  fastqfile = "";  }
+			alignfiles = validParameter.validFiles(parameters, "alignreport");
+            if (alignfiles.size() != 0) {
+                if (alignfiles[0] == "not open") { abort = true; }
+            }
 			
-			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide a file.\n"); abort = true; }
-            
-            bool formatFound = true;
-            format = validParameter.valid(parameters, "format");		if (format == "not found"){	formatFound = false; format = "illumina1.8+";	}
-            
-            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  { m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting.\n" ); abort=true; }
-            
-            int okay = 1;
-            if (outputDir != "") { okay++; }
-            if (inputDir != "") { okay++; }
-            if (formatFound) { okay++; }
+            contigsreportfiles = validParameter.validFiles(parameters, "contigsreport");
+            if (contigsreportfiles.size() != 0) {
+                if (contigsreportfiles[0] == "not open") { abort = true; }
+            }
 			
-			if (parameters.size() > okay) { m->mothurOut("You may only enter one file.\n");  abort = true;  }
+			listfiles = validParameter.validFiles(parameters, "list");
+            if (listfiles.size() != 0) {
+                if (listfiles[0] == "not open") { abort = true; }
+                else { current->setListFile(listfiles[0]); }
+            }
+			
+			taxfiles = validParameter.validFiles(parameters, "taxonomy");
+            if (taxfiles.size() != 0) {
+                if (taxfiles[0] == "not open") { abort = true; }
+                else { current->setTaxonomyFile(taxfiles[0]); }
+            }
+            
+            countfiles = validParameter.validFiles(parameters, "count");
+            if (countfiles.size() != 0) {
+                if (countfiles[0] == "not open") { abort = true; }
+                else { current->setCountFile(countfiles[0]); }
+            }
+            
+            fastqfiles = validParameter.validFiles(parameters, "fastq");
+            if (fastqfiles.size() != 0) {
+                if (fastqfiles[0] == "not open") { abort = true; }
+            }
+			
+			if ((fastqfiles.size() == 0) && (countfiles.size() == 0) && (fastafiles.size() == 0) && (namefiles.size() == 0) && (listfiles.size() == 0) && (groupfiles.size() == 0) && (alignfiles.size() == 0) && (taxfiles.size() == 0) && (contigsreportfiles.size() == 0))  { m->mothurOut("You must provide a file.\n"); abort = true; }
 		}
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "ListSeqsCommand");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void readFastq(set<string>& names, string file, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+        
+        ifstream in;
+        Utils util; util.openInputFile(file, in);
+        
+        while(!in.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            bool ignore;
+            FastqRead fread(in, ignore, "illumina1.8+"); util.gobble(in);
+            string name = fread.getName();
+            
+            if (!ignore) {
+                if (empty) { newNames.insert(name); } //for first file or single file
+                else {
+                    if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
+                }
+            }
+        }
+        in.close();
+        
+        names = newNames;
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readFastq");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void readFasta(set<string>& names, string file, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+        
+        ifstream in;
+        Utils util; util.openInputFile(file, in);
+        string name;
+        
+        while(!in.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            Sequence currSeq(in); util.gobble(in);
+            name = currSeq.getName();
+            
+            if (name != "") {
+               if (empty) { newNames.insert(name); } //for first file or single file
+                else {
+                    if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
+                }
+            }
+        }
+        in.close();
+        
+        names = newNames;
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readFasta");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void readList(set<string>& names, string file, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+        
+        ifstream in;
+        Utils util; util.openInputFile(file, in);
+        string otuTag = util.getTag(file); //looks at filename to determine if OTU labels should be "Otu" or "Phylotype"
+        string readHeaders = ""; //Tells mothur to try and read headers from the file
+        
+        if(!in.eof()){
+            //read in list vector
+            ListVector list(in, readHeaders, otuTag);
+            
+            //for each bin
+            for (int i = 0; i < list.getNumBins(); i++) {
+                string bin = list.get(i);
+                
+                if (m->getControl_pressed()) { break; }
+                
+                vector<string> binnames;
+                util.splitAtComma(bin, binnames);
+                
+                for (int j = 0; j < binnames.size(); j++) {
+                    if (empty) { newNames.insert(binnames[j]); } //for first file or single file
+                    else {
+                        if (names.count(binnames[j]) != 0) { newNames.insert(binnames[j]); } //present in files so far so add to newNames
+                    }
+                }
+            }
+        }
+        in.close();
+        
+        names = newNames;
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readList");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void readNameTaxGroup(set<string>& names, string file, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+        
+        ifstream in;
+        Utils util; util.openInputFile(file, in);
+        string name;
+        
+        while(!in.eof()){
+        
+            if (m->getControl_pressed()) { break; }
+
+            in >> name; util.getline(in); util.gobble(in);
+            
+            if (empty) { newNames.insert(name); } //for first file or single file
+            else {
+                if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
+            }
+        }
+        in.close();
+        
+        names = newNames;
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readNameTaxGroup");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void readCount(set<string>& names, string file, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+        
+        CountTable ct;
+        ct.readTable(file, false, false);
+        
+        if (m->getControl_pressed()) { return; }
+        
+        vector<string> cnames = ct.getNamesOfSeqs();
+        
+        for (int j = 0; j < cnames.size(); j++) {
+            if (empty) { newNames.insert(cnames[j]); } //for first file or single file
+            else {
+                if (names.count(cnames[j]) != 0) { newNames.insert(cnames[j]); } //present in files so far so add to newNames
+            }
+        }
+        
+        names = newNames;
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readCount");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void readAlignContigs(set<string>& names, string file, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+    
+        ifstream in;
+        Utils util; util.openInputFile(file, in);
+        string name;
+        
+        util.getline(in);  util.gobble(in);
+        
+        while(!in.eof()){
+            if (m->getControl_pressed()) { break; }
+
+            in >> name; util.getline(in); util.gobble(in);
+            
+            if (empty) { newNames.insert(name); } //for first file or single file
+            else {
+                if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
+            }
+        }
+        in.close();
+        
+        names = newNames;
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readAlignContigs");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 
@@ -263,21 +470,20 @@ int ListSeqsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
+        set<string> names;
+        
 		//read functions fill names vector
-		if (fastafile != "")		            {	inputFileName = fastafile;	readFasta();	            }
-        else if (fastqfile != "")	            {	inputFileName = fastqfile;	readFastq();	            }
-		else if (namefile != "")	            {	inputFileName = namefile;	readName();		            }
-		else if (groupfile != "")	            {	inputFileName = groupfile;	readGroup();	            }
-		else if (alignfile != "")	            {	inputFileName = alignfile;	readAlign();	            }
-        else if (contigsreportfile != "")       {    inputFileName = contigsreportfile;    readContigs();   }
-		else if (listfile != "")	            {	inputFileName = listfile;	readList();		            }
-		else if (taxfile != "")		            {	inputFileName = taxfile;	readTax();		            }
-        else if (countfile != "")	            {	inputFileName = countfile;	readCount();	            }
-		
+		if (fastafiles.size() != 0)		    {   process(fastafiles, names, &readFasta);	        }
+        if (fastqfiles.size() != 0)	        {	process(fastqfiles, names, &readFastq);	        }
+		if (namefiles.size() != 0)	        {	process(namefiles, names, &readNameTaxGroup);   }
+		if (groupfiles.size() != 0)	        {	process(groupfiles, names, &readNameTaxGroup);  }
+        if (taxfiles.size() != 0)           {   process(taxfiles, names, &readNameTaxGroup);    }
+		if (alignfiles.size() != 0)	        {   process(alignfiles, names, &readAlignContigs);         }
+        if (contigsreportfiles.size() != 0) {   process(contigsreportfiles, names, &readAlignContigs); }
+		if (listfiles.size() != 0)	        {	process(listfiles, names, &readList);       }
+        if (countfiles.size() != 0)	        {	process(countfiles, names, &readCount);     }
+        
 		if (m->getControl_pressed()) { outputTypes.clear();  return 0; }
-		
-		//sort in alphabetical order
-		sort(names.begin(), names.end());
 		
 		if (outputDir == "") {  outputDir += util.hasPath(inputFileName);  }
 		
@@ -309,266 +515,19 @@ int ListSeqsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-void ListSeqsCommand::readFastq(){
-	try {
-		
-		ifstream in;
-		util.openInputFile(fastqfile, in);
-		string name;
-		
-		int count = 1;
-		while(!in.eof()){
-			
-            if (m->getControl_pressed()) { break; }
-			
-            bool ignore;
-            FastqRead fread(in, ignore, format); util.gobble(in);
-            
-            if (!ignore) { names.push_back(fread.getName()); }
-			
-			if (m->getDebug()) { count++; m->mothurOut("[DEBUG]: count = " + toString(count) + ", name = " + name + "\n"); }
-		}
-		in.close();
-		
-		return;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "readFastq");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-void ListSeqsCommand::readFasta(){
-	try {
-		
-		ifstream in;
-		util.openInputFile(fastafile, in);
-		string name;
-		int count = 1;
-		
-		while(!in.eof()){
-			
-            if (m->getControl_pressed()) { break; }
-			
-			Sequence currSeq(in);
-			name = currSeq.getName();
-			
-			if (name != "") {  names.push_back(name);  }
-			
-			util.gobble(in);
-           
-			if (m->getDebug()) { count++; m->mothurOut("[DEBUG]: count = " + toString(count) + ", name = " + currSeq.getName() + "\n"); }
-		}
-		in.close();
-		
-		return;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "readFasta");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-void ListSeqsCommand::readList(){
-	try {
-		ifstream in;
-		util.openInputFile(listfile, in);
-        string otuTag = util.getTag(listfile); //looks at filename to determine if OTU labels should be "Otu" or "Phylotype"
-        string readHeaders = ""; //Tells mothur to try and read headers from the file
-		
-		if(!in.eof()){
-			//read in list vector
-			ListVector list(in, readHeaders, otuTag);
-			
-			//for each bin
-			for (int i = 0; i < list.getNumBins(); i++) {
-				string binnames = list.get(i);
-				
-                if (m->getControl_pressed()) { break; }
-				
-				util.splitAtComma(binnames, names);
-			}
-		}
-		in.close();	
-		
-		return;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "readList");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-void ListSeqsCommand::readName(){
-	try {
-		
-		ifstream in;
-		util.openInputFile(namefile, in);
-		string name, firstCol, secondCol;
-		
-		while(!in.eof()){
-		
-            if (m->getControl_pressed()) { break; }
-
-			in >> firstCol;	util.gobble(in);
-			in >> secondCol;			
-			
-			//parse second column saving each name
-			util.splitAtComma(secondCol, names);
-			
-			util.gobble(in);
-		}
-		in.close();
-		return;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "readName");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-void ListSeqsCommand::readGroup(){
-	try {
-	
-		ifstream in;
-		util.openInputFile(groupfile, in);
-		string name, group;
-		
-		while(!in.eof()){
-			
-            if (m->getControl_pressed()) { break; }
-			
-			in >> name;	util.gobble(in);			//read from first column
-			in >> group;			//read from second column
-			
-			names.push_back(name);
-					
-			util.gobble(in);
-		}
-		in.close();
-		return;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "readGroup");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-void ListSeqsCommand::readCount(){
-	try {
-		CountTable ct;
-		ct.readTable(countfile, false, false);
-        
-        if (m->getControl_pressed()) { return; }
-        
-        names = ct.getNamesOfSeqs();
-        
-        return;
-        
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "readCount");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-//alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
-void ListSeqsCommand::readAlign(){
-	try {
-	
-		ifstream in;
-		util.openInputFile(alignfile, in);
-		string name, junk;
-		
-		//read column headers
-		for (int i = 0; i < 16; i++) {  
-			if (!in.eof())	{	in >> junk;		}
-			else			{	break;			}
-		}
-		//util.getline(in);
-		
-		while(!in.eof()){
-		
-            if (m->getControl_pressed()) { break; }
-
-			in >> name;				//read from first column
-			//util.getline(in);
-			//read rest
-			for (int i = 0; i < 15; i++) {  
-				if (!in.eof())	{	in >> junk;		}
-				else			{	break;			}
-			}
-			
-			names.push_back(name);
-					
-			util.gobble(in);
-		}
-		in.close();
-		
-		return;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "readAlign");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-//contigsreport file has a column header line then all other lines contain 8 columns.  we just want the first column since that contains the name
-void ListSeqsCommand::readContigs(){
+void ListSeqsCommand::process(vector<string> files, set<string>& names, void f(set<string>&, string, MothurOut*&)){
     try {
-    
-        ifstream in;
-        util.openInputFile(contigsreportfile, in);
-        string name, junk;
-        
-        util.getline(in);  util.gobble(in);
-        
-        while(!in.eof()){
-        
+        for (int i = 0; i < files.size(); i++) {
             if (m->getControl_pressed()) { break; }
-
-            in >> name;   util.gobble(in);              //read from first column
-            util.getline(in); util.gobble(in);
-            
-            names.push_back(name);
+            f(names, files[i], m);
+            inputFileName = files[i];
         }
-        in.close();
         
         return;
     }
     catch(exception& e) {
-        m->errorOut(e, "ListSeqsCommand", "readContigs");
+        m->errorOut(e, "ListSeqsCommand", "process");
         exit(1);
     }
-}
-//**********************************************************************************************************************
-void ListSeqsCommand::readTax(){
-	try {
-		
-		ifstream in;
-		util.openInputFile(taxfile, in);
-		string name, firstCol, secondCol;
-		
-		while(!in.eof()){
-		
-            if (m->getControl_pressed()) { break; }
-
-            in >> firstCol; util.gobble(in);
-            secondCol = util.getline(in); util.gobble(in);
-			
-			names.push_back(firstCol);
-		}
-		in.close();
-		
-		return;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "readTax");
-		exit(1);
-	}
 }
 //**********************************************************************************************************************

@@ -230,54 +230,58 @@ string ValidParameters::valid(map<string, string>& container, string parameter) 
     }
 }
 /******************************************************/
-string ValidParameters::validFile(map<string, string>& container, string parameter, vector<string> locations) {
-	try {
-		bool ableToOpen;
+vector<string> ValidParameters::validFiles(map<string, string>& container, string parameter) {
+    try {
+        vector<string> vFiles;
+        bool ableToOpen;
         Utils util;
-		
-		map<string, string>::iterator it;
-		
-		it = container.find(parameter);
-		if(it != container.end()){ //no parameter given
-                if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
-                else {
+        bool openedAtLeastOne = false;
+
+        map<string, string>::iterator it = container.find(parameter);
+        if(it != container.end()){ //no parameter given
+            if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
+            else {
                 
-				int pos = (it->second).find(".tx.");
-				if (pos != string::npos) { current->setSharedHeaderMode("tax"); }
-				else { current->setSharedHeaderMode("otu"); }
-			
-                string filename = it->second;
-                if (util.checkLocations(filename, locations)) { container[parameter] = filename; }
-                else { m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine(); return "not open";  }
-				
-				//check phylip file to make sure its really phylip and not column
-				if ((it->first == "phylip") && (ableToOpen)) {
-					ifstream inPhylip;
-					util.openInputFile(it->second, inPhylip);
-										
-					string numTest, name;
-					inPhylip >> numTest >> name;
-					inPhylip.close();
-					
-					if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting."); m->mothurOutEndLine(); return "not found"; }
-				}
+                vector<string> files; util.splitAtDash(it->second, files);
                 
-                //check for blank file
-                if (ableToOpen) {
-                    if (util.isBlank(container[parameter])) {
-                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting.\n");  return "not found"; 
+                for (int i = 0; i < files.size(); i++) {
+                    string filename = files[i];
+                    int pos = filename.find(".tx.");
+                    if (pos != string::npos) { current->setSharedHeaderMode("tax"); }
+                    else { current->setSharedHeaderMode("otu"); }
+                    
+                    if (util.checkLocations(filename, current->getLocations())) { vFiles.push_back(filename); container[parameter] = filename; openedAtLeastOne = true; }
+                    else { m->mothurOut("Unable to open " + filename + ", skipping.\n");  }
+                    
+                    //check phylip file to make sure its really phylip and not column
+                    if ((it->first == "phylip") && (ableToOpen)) {
+                        ifstream inPhylip;
+                        util.openInputFile(filename, inPhylip);
+                        
+                        string numTest, name;
+                        inPhylip >> numTest >> name;
+                        inPhylip.close();
+                        
+                        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting.\n"); return nullVector; }
+                    }
+                    
+                    //check for blank file
+                    if (ableToOpen) {
+                        if (util.isBlank(container[parameter])) { m->mothurOut("[ERROR]: " + filename + " is blank, skipping.\n");  }
                     }
                 }
-                }
-		}else { return "not found"; }
-		
-		return it->second;
-	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ValidParameters", "validFile");
-		exit(1);
-	}
+                
+                if (!openedAtLeastOne) { vFiles.push_back("not open"); }
+            }
+        }else { return vFiles; }
+        
+        return vFiles;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidParameters", "validFile");
+        exit(1);
+    }
 }
 /******************************************************/
 string ValidParameters::validFile(map<string, string>& container, string parameter) {
