@@ -251,14 +251,19 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 	}
 }
 //**********************************************************************************************************************
-void readFastq(set<string>& names, string file, MothurOut*& m){
+void addName(bool empty, string name, set<string>& names, set<string>& newNames) {
+    if (empty) { newNames.insert(name); } //for first file or single file
+    else {
+        if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
+    }
+}
+//**********************************************************************************************************************
+void readFastq(set<string>& names, ifstream& in, MothurOut*& m){
     try {
         set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
-        
-        ifstream in;
-        Utils util; util.openInputFile(file, in);
+        Utils util;
         
         while(!in.eof()){
             
@@ -266,20 +271,11 @@ void readFastq(set<string>& names, string file, MothurOut*& m){
             
             bool ignore;
             FastqRead fread(in, ignore, "illumina1.8+"); util.gobble(in);
-            string name = fread.getName();
             
-            if (!ignore) {
-                if (empty) { newNames.insert(name); } //for first file or single file
-                else {
-                    if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
-                }
-            }
+            if (!ignore) { addName(empty, fread.getName(), names, newNames); }
         }
-        in.close();
         
         names = newNames;
-        
-        return;
     }
     catch(exception& e) {
         m->errorOut(e, "ListSeqsCommand", "readFastq");
@@ -287,35 +283,23 @@ void readFastq(set<string>& names, string file, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readFasta(set<string>& names, string file, MothurOut*& m){
+void readFasta(set<string>& names, ifstream& in, MothurOut*& m){
     try {
         set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
-        
-        ifstream in;
-        Utils util; util.openInputFile(file, in);
-        string name;
+        Utils util;
         
         while(!in.eof()){
             
             if (m->getControl_pressed()) { break; }
             
             Sequence currSeq(in); util.gobble(in);
-            name = currSeq.getName();
             
-            if (name != "") {
-               if (empty) { newNames.insert(name); } //for first file or single file
-                else {
-                    if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
-                }
-            }
+            if (currSeq.getName() != "") { addName(empty, currSeq.getName(), names, newNames); }
         }
-        in.close();
         
         names = newNames;
-        
-        return;
     }
     catch(exception& e) {
         m->errorOut(e, "ListSeqsCommand", "readFasta");
@@ -323,43 +307,29 @@ void readFasta(set<string>& names, string file, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readList(set<string>& names, string file, MothurOut*& m){
+void readList(set<string>& names, ifstream& in, MothurOut*& m){
     try {
         set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         
-        ifstream in;
-        Utils util; util.openInputFile(file, in);
-        string otuTag = util.getTag(file); //looks at filename to determine if OTU labels should be "Otu" or "Phylotype"
-        string readHeaders = ""; //Tells mothur to try and read headers from the file
+        Utils util; string tag = "Otu"; string readHeaders = ""; //Tells mothur to try and read headers from the file
         
         if(!in.eof()){
-            //read in list vector
-            ListVector list(in, readHeaders, otuTag);
+            ListVector list(in, readHeaders, tag); //read in list vector
             
             //for each bin
             for (int i = 0; i < list.getNumBins(); i++) {
-                string bin = list.get(i);
-                
                 if (m->getControl_pressed()) { break; }
                 
-                vector<string> binnames;
-                util.splitAtComma(bin, binnames);
+                string bin = list.get(i);
+                vector<string> binnames; util.splitAtComma(bin, binnames);
                 
-                for (int j = 0; j < binnames.size(); j++) {
-                    if (empty) { newNames.insert(binnames[j]); } //for first file or single file
-                    else {
-                        if (names.count(binnames[j]) != 0) { newNames.insert(binnames[j]); } //present in files so far so add to newNames
-                    }
-                }
+                for (int j = 0; j < binnames.size(); j++) { addName(empty, binnames[j], names, newNames); }
             }
         }
-        in.close();
         
         names = newNames;
-        
-        return;
     }
     catch(exception& e) {
         m->errorOut(e, "ListSeqsCommand", "readList");
@@ -367,15 +337,13 @@ void readList(set<string>& names, string file, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readNameTaxGroup(set<string>& names, string file, MothurOut*& m){
+void readNameTaxGroup(set<string>& names, ifstream& in, MothurOut*& m){
     try {
         set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
-        
-        ifstream in;
-        Utils util; util.openInputFile(file, in);
-        string name;
+
+        Utils util; string name;
         
         while(!in.eof()){
         
@@ -383,16 +351,10 @@ void readNameTaxGroup(set<string>& names, string file, MothurOut*& m){
 
             in >> name; util.getline(in); util.gobble(in);
             
-            if (empty) { newNames.insert(name); } //for first file or single file
-            else {
-                if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
-            }
+            addName(empty, name, names, newNames);
         }
-        in.close();
         
         names = newNames;
-        
-        return;
     }
     catch(exception& e) {
         m->errorOut(e, "ListSeqsCommand", "readNameTaxGroup");
@@ -400,29 +362,21 @@ void readNameTaxGroup(set<string>& names, string file, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readCount(set<string>& names, string file, MothurOut*& m){
+void readCount(set<string>& names, ifstream& in, MothurOut*& m){
     try {
         set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         
-        CountTable ct;
-        ct.readTable(file, false, false);
+        CountTable ct; ct.readTable(in, false, false);
         
         if (m->getControl_pressed()) { return; }
         
         vector<string> cnames = ct.getNamesOfSeqs();
         
-        for (int j = 0; j < cnames.size(); j++) {
-            if (empty) { newNames.insert(cnames[j]); } //for first file or single file
-            else {
-                if (names.count(cnames[j]) != 0) { newNames.insert(cnames[j]); } //present in files so far so add to newNames
-            }
-        }
+        for (int j = 0; j < cnames.size(); j++) { addName(empty, cnames[j], names, newNames); }
         
         names = newNames;
-        
-        return;
     }
     catch(exception& e) {
         m->errorOut(e, "ListSeqsCommand", "readCount");
@@ -430,33 +384,24 @@ void readCount(set<string>& names, string file, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readAlignContigs(set<string>& names, string file, MothurOut*& m){
+void readAlignContigs(set<string>& names, ifstream& in, MothurOut*& m){
     try {
         set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
-    
-        ifstream in;
-        Utils util; util.openInputFile(file, in);
         string name;
         
-        util.getline(in);  util.gobble(in);
+        Utils util; util.getline(in);  util.gobble(in);
         
         while(!in.eof()){
             if (m->getControl_pressed()) { break; }
 
             in >> name; util.getline(in); util.gobble(in);
             
-            if (empty) { newNames.insert(name); } //for first file or single file
-            else {
-                if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
-            }
+            addName(empty, name, names, newNames);
         }
-        in.close();
-        
+ 
         names = newNames;
-        
-        return;
     }
     catch(exception& e) {
         m->errorOut(e, "ListSeqsCommand", "readAlignContigs");
@@ -515,15 +460,20 @@ int ListSeqsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-void ListSeqsCommand::process(vector<string> files, set<string>& names, void f(set<string>&, string, MothurOut*&)){
+void ListSeqsCommand::process(vector<string> files, set<string>& names, void f(set<string>&, ifstream&, MothurOut*&)){
     try {
+        Utils util;
         for (int i = 0; i < files.size(); i++) {
             if (m->getControl_pressed()) { break; }
-            f(names, files[i], m);
+            
             inputFileName = files[i];
+            
+            ifstream in; util.openInputFile(inputFileName, in);
+            
+            f(names, in, m);
+            
+            in.close();
         }
-        
-        return;
     }
     catch(exception& e) {
         m->errorOut(e, "ListSeqsCommand", "process");

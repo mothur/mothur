@@ -39,7 +39,7 @@ class ListSeqsCommand : public Command {
         string outputDir, format, inputFileName;
         bool abort;
         
-        void process(vector<string> files, set<string>&, void f(set<string>&, string, MothurOut*&));
+        void process(vector<string> files, set<string>&, void f(set<string>&, ifstream&, MothurOut*&));
 };
 
 #endif

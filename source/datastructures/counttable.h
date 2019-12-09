@@ -69,7 +69,9 @@ class CountTable {
         int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames
         int createTable(string, string, vector<string>, bool createGroup=false); //namefile, groupfile, selectedGroups, createGroup,
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
+        int readTable(ifstream&, bool, bool); //filehandler, readGroups, mothurRunning
         int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
+        int readTable(ifstream&, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(string, bool, bool, set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
     
@@ -79,7 +81,6 @@ class CountTable {
         bool isTableCompressed() { return isCompressed; }
         int copy(CountTable*); //copy countable
         bool inTable(string);  //accepts sequence name and returns true if sequence is in table, false if not present
-
 
         //all print commands ignore zeroed out seqs
         vector<string> printCompressedTable(string, vector<string> optionalGroups=nullVector); //nameOfFile, optionalVectorOfGroups (if empty, prints all possible groups), returns names of seqs in table - excludes zeroed reads

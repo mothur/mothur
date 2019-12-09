@@ -2633,9 +2633,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
             if (numFastaSeqs != numRFastaSeqs) {
                 if (delim == '>') {
-                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, but " + toString(numRFastaSeqs) + " sequences in your reverse fasta file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, but " + toString(numRFastaSeqs) + " sequences in your reverse fasta file. Please use the list.seqs and get.seqs commands to make the files match before proceeding. list.seqs(fasta=yourForward.fasta-yourReverse.fasta);get.seqs(fasta=yourForward.fasta, accnos=current);get.seqs(fasta=yourReverse.fasta, accnos=current);\n");  m->setControl_pressed(true); return processors;
                 }else {
-                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, but " + toString(numRFastaSeqs) + " sequences in your reverse fastq file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, but " + toString(numRFastaSeqs) + " sequences in your reverse fastq file. Please use the list.seqs and get.seqs commands to make the files match before proceeding. list.seqs(fastq=yourForward.fastq-yourReverse.fastq);get.seqs(fastq=yourForward.fastq, accnos=current);get.seqs(fastq=yourReverse.fastq, accnos=current);\n"); m->setControl_pressed(true); return processors;
                 }
             }
 
@@ -2664,7 +2664,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
                 if ((numFQualSeqs != numRQualSeqs) || (numFQualSeqs != numFastaSeqs)){
                     if (delim == '>') {
-                        m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, " + toString(numRFastaSeqs) + " sequences in your reverse fasta file, " + toString(numFQualSeqs) + " sequences in your forward qual file, " + toString(numRQualSeqs) + " sequences in your reverse qual file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
+                        m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, " + toString(numRFastaSeqs) + " sequences in your reverse fasta file, " + toString(numFQualSeqs) + " sequences in your forward qual file, " + toString(numRQualSeqs) + " sequences in your reverse qual file. Please use the list.seqs and get.seqs commands to make the files match before proceeding.\n");  m->setControl_pressed(true); return processors;
                     }else {
                         if (qual[0] != "NONE") {
                             m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;

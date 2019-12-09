@@ -362,6 +362,16 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
     }
 }
 /************************************************************/
+int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning) {
+    try {
+        return (readTable(in, readGroups, mothurRunning, nullVector));
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "readTable");
+        exit(1);
+    }
+}
+/************************************************************/
 bool CountTable::isCountTable(string file) {
     try {
         
@@ -401,11 +411,23 @@ bool CountTable::isCountTable(string file) {
 /************************************************************/
 int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vector<string> selectedGroups) {
     try {
-        if (!readGroups) { selectedGroups.clear(); }
-        
         filename = file;
         ifstream in;
         util.openInputFile(filename, in);
+        
+        readTable(file, readGroups, mothurRunning, selectedGroups);
+        
+        in.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "readTable");
+        exit(1);
+    }
+}
+/************************************************************/
+int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vector<string> selectedGroups) {
+    try {
+        if (!readGroups) { selectedGroups.clear(); }
 
         string headers = util.getline(in); util.gobble(in);
         
@@ -582,7 +604,6 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
                 m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + name + ", sequence names must be unique. Please correct.\n");
             }
         }
-        in.close();
 
         if (error) { m->setControl_pressed(true); }
         else { //check for zero groups
