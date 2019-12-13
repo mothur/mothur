@@ -26,20 +26,22 @@ public:
     string getOutputPattern(string);
     
     string getHelpString();
-    string getCitation()    { return ".... Add reference for NCBI .... http://www.mothur.org/wiki/sra.info"; }
-    string getDescription() { return "extracts fastq files from sra file using fasterq_dump program written by NCBI"; }
+    string getCitation()    { return "Wrapper for prefetch and fasterq_dump programs written by NCBI https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software http://www.mothur.org/wiki/sra.info"; }
+    string getDescription() { return "extracts fastq files from samples using prefetch and fasterq_dump program written by NCBI"; }
     
     int execute();
     void help() { m->mothurOut(getHelpString()); }
     
 private:
     
-    bool abort;
+    bool abort, compressGZ;
     vector<string> outputNames;
-    string srafile, outputDir, outputType, fasterQLocation;
-    int processors;
+    string accnosfile, outputDir, outputType, fasterQLocation, prefetchLocation;
+    int processors, maxSize;
     
-    void runFastqDump();
+    string runPreFetch(string);
+    bool runFastqDump(string, vector<string>&);
+    void runSystemCommand(string);
 };
 
 /**************************************************************************************************/

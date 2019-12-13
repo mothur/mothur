@@ -90,20 +90,23 @@ int SystemCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
+        
+        string outputDir = current->getOutputDir();
+        if (outputDir == "") { outputDir = "./"; }
+        string redirectFileName = outputDir + "commandScreen.output";
+        
 		//if command contains a redirect don't add the redirect
 		bool usedRedirect = false;
 		if ((command.find('>')) == string::npos) {
-			command += " > ./commandScreen.output 2>&1";
+			command += " > " + redirectFileName + " 2>&1";
 			usedRedirect = true;
 		}
-		
+       
 		system(command.c_str());
-		
+  
 		if (usedRedirect) {
 			ifstream in;
-			string filename = "./commandScreen.output";
-			util.openInputFile(filename, in, "no error");
+			util.openInputFile(redirectFileName, in, "no error");
 			
 			string output = "";
 			while(char c = in.get()){
@@ -111,9 +114,9 @@ int SystemCommand::execute(){
 				else				{	output += c;	}
 			}
 			in.close();
-			
+            
 			m->mothurOut(output); m->mothurOutEndLine();
-			util.mothurRemove(filename);
+			util.mothurRemove(redirectFileName);
 		}
 		
 		return 0;		

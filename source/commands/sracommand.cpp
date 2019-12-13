@@ -486,8 +486,6 @@ int SRACommand::execute(){
                 itGroup = Group2Primer.find(Groups[i]);
                 if (itGroup != Group2Primer.end()) { thisGroupsPrimer = itGroup->second;  }
                 
-                
-                
                 for (int j = 0; j < thisGroupsFiles.size(); j++) {
                     string libId = util.getSimpleName(thisGroupsFiles[j]) + "." + thisGroup;
                     

@@ -789,7 +789,6 @@ bool Utils::findTool(string& toolName, string& toolLocation, string mothurProgra
     }
 }
 /***********************************************************************/
-
 string Utils::trimString(string name, int numToRemove){
     try {
         int length = name.length();
