@@ -143,7 +143,7 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             temp = validParameter.valid(parameters, "gz");        if (temp == "not found") { temp = "F"; }
             compressGZ = util.isTrue(temp);
             
-            temp = validParameter.valid(parameters, "maxsize"); if (temp == "not found"){    temp = "20000000";    }
+            temp = validParameter.valid(parameters, "maxsize"); if (temp == "not found"){    temp = "20";    }
             util.mothurConvert(temp, maxSize);
             maxSize *= 1000000;
             
