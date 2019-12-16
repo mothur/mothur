@@ -62,8 +62,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
         else if(method == "blast")		{	database = new BlastDB(tempFile.substr(0,tempFile.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
         else if(method == "distance")	{	database = new DistanceDB();	}
         else {
-            m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
-            m->mothurOutEndLine();
+            m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.\n");
             database = new KmerDB(tempFile, 8);
         }
         

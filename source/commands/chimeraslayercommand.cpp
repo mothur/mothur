@@ -303,9 +303,21 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			if (temp == "not found") { temp = "false";			}
 			dups = util.isTrue(temp);
 			
+            bool foundTool = false;
+            path = current->getProgramPath();
+            
 			blastlocation = validParameter.valid(parameters, "blastlocation");	
-			if (blastlocation == "not found") { blastlocation = ""; }
-			else {
+			if (blastlocation == "not found") {
+                if (search == "blast") {
+                    blastlocation = "";
+                    vector<string> locations = current->getLocations();
+                    foundTool = util.findBlastLocation(blastlocation, path, locations);
+
+                    if (!foundTool){
+                        m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search method. Using kmer instead.\n"); search = "kmer";
+                    }
+                }
+            }else {
 				//add / to name if needed
 				string lastChar = blastlocation.substr(blastlocation.length()-1);
                 if (lastChar != PATH_SEPARATOR) { blastlocation += PATH_SEPARATOR; }
@@ -325,7 +337,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				ableToOpen = util.openInputFile(blastCommand, in2, "no error"); in2.close();
 				if(!ableToOpen) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe to run chimera.slayer.\n");  abort = true; }
 			}
-
+            
 			if ((search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search.\n");  abort = true;  }
 			
 			if ((hasName || hasCount) && (templatefile != "self")) { m->mothurOut("You have provided a namefile or countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }

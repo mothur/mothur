@@ -737,6 +737,30 @@ bool Utils::checkLocations(string& filename, vector<string> locations, string si
     }
 }
 /***********************************************************************/
+bool Utils::findBlastLocation(string& toolLocation, string mothurProgramPath, vector<string> locations){
+    try {
+        bool foundTool = false;
+        string programName = "formatdb"; programName += EXECUTABLE_EXT;
+
+        toolLocation = "";
+        string blastBin = "blast"; blastBin += PATH_SEPARATOR; blastBin += "bin"; blastBin += PATH_SEPARATOR;
+       
+        for (int i = 0; i < locations.size(); i++) { locations[i] += blastBin; }
+        
+        vector<string> versionOutputs;
+        foundTool = findTool(programName, toolLocation, mothurProgramPath, versionOutputs, locations);
+        
+        if (foundTool) { toolLocation = hasPath(toolLocation); }
+        else { toolLocation = ""; }
+        
+        return foundTool;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "findBlastLocation");
+        exit(1);
+    }
+}
+/***********************************************************************/
 bool Utils::findTool(string& toolName, string& toolLocation, string mothurProgramPath, vector<string>& versionOutputs, vector<string> locations){
     try {
         bool foundTool = false;
@@ -748,7 +772,7 @@ bool Utils::findTool(string& toolName, string& toolLocation, string mothurProgra
         bool ableToOpen = openInputFile(toolCommand, in, "no error"); in.close();
         if(!ableToOpen) {
                             
-            if (checkLocations(toolCommand, locations)) { toolLocation = toolCommand; }
+            if (checkLocations(toolCommand, locations)) { toolLocation = toolCommand; foundTool = true; }
             else {
                                 
             m->mothurOut(toolCommand + " file does not exist. Checking path... \n");
@@ -1982,35 +2006,16 @@ void Utils::getCurrentDate(string& thisYear, string& thisMonth, string& thisDay)
     }
 }
 /***********************************************************************/
-bool Utils::isUTF_8(string& input){
+bool Utils::isASCII(string input){
     try {
-        string::iterator end_it = utf8::find_invalid(input.begin(), input.end());
-
-        if (end_it != input.end()) {
-
-            //try to convert it
-            // Get the line length (at least for the valid part)
-            //int length = utf8::distance(input.begin(), end_it);
-            m->mothurOut("[WARNING]: trying to convert " + input + " to UTF-8 format..."); cout.flush();
-
-            // Convert it to utf-16
-            vector<unsigned short> utf16line;
-            utf8::utf8to16(input.begin(), end_it, back_inserter(utf16line));
-
-            // And back to utf-8
-            string utf8line;
-            utf8::utf16to8(utf16line.begin(), utf16line.end(), back_inserter(utf8line));
-
-            // Confirm that the conversion went OK:
-            if (utf8line != string(input.begin(), end_it)) {  m->mothurOut(" unsuccessful.\n"); return false; }
-            else { m->mothurOut(" successful. Replacing " + input + " with " + utf8line + ".\n"); input = utf8line; }
-
+        
+        for (int i = 0; i < input.length(); i++) {
+            if (isascii(input[i]) == 0) { return false; } //non ascii
         }
-
         return true;
     }
     catch(exception& e) {
-        m->errorOut(e, "Utils", "isUTF_8");
+        m->errorOut(e, "Utils", "isASCII");
         exit(1);
     }
 }

@@ -648,7 +648,7 @@ int SRACommand::readContactFile(){
             in >> key; util.gobble(in);
             value = util.getline(in); util.gobble(in);
             
-            if (!util.isUTF_8(value)) { m->mothurOut("[ERROR]: " + value + " is not UTF8 compliant. Submission entries must be in UTF8 format, please correct.\n"); m->setControl_pressed(true); }
+            if (!util.isASCII(value)) { m->mothurOut("[ERROR]: " + value + " contains non ASCII characters. Submission entries cannot contains non ASCII characters, please correct.\n"); m->setControl_pressed(true); }
             
             for (int i = 0; i < key.length(); i++) { key[i] = toupper(key[i]); }
             
@@ -817,7 +817,11 @@ int SRACommand::readMIMarksFile(){
             string original = temp;
             vector<string> linePieces; util.splitAtChar(temp, linePieces, '\t');
             util.removeBlanks(linePieces);
-            for (int i = 0; i < linePieces.size(); i++) { if (!util.isUTF_8(linePieces[i])) { m->mothurOut("[ERROR]: " + linePieces[i] + " is not UTF8 compliant. Submission entries must be in UTF8 format, please correct. Try resaving mimarks file in UTF-8 format.\n"); m->setControl_pressed(true); } }
+            for (int i = 0; i < linePieces.size(); i++) {
+                if (!util.isASCII(linePieces[i] )) { m->mothurOut("[ERROR]: " + linePieces[i]  + " contains non ASCII characters. Submission entries cannot contains non ASCII characters, please correct.\n"); m->setControl_pressed(true); break; }
+            }
+            
+            if (m->getControl_pressed()) { break; }
             
             if (linePieces.size() != headers.size()) { m->mothurOut("[ERROR]: line: " + original + " contains " + toString(linePieces.size()) + " columns, but you have " + toString(headers.size()) + " column headers, please correct.\n"); m->setControl_pressed(true); }
             else {

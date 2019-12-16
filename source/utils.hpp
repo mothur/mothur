@@ -53,6 +53,7 @@ public:
     bool isTrue(string);
     bool isContainingOnlyDigits(string);
     bool containsAlphas(string);
+    bool isASCII(string);
     bool isAllAlphas(string);
     bool isAllAlphaNumerics(string);
     bool isNumeric1(string);
@@ -63,7 +64,6 @@ public:
     bool hasConfidenceScore(string&, float&); //taxon, confidence score. Returns taxon with confidence removed and confidence score.  If no confidence score, then confidence=0
     unsigned long long getRAMUsed();
     unsigned long long getTotalRAM();
-    bool isUTF_8(string& input);
     void getCurrentDate(string& thisYear, string& thisMonth, string& thisDay);
     
     //file operations
@@ -77,6 +77,7 @@ public:
     vector<bool> allGZFiles(vector<string>&);
     bool appendSFFFiles(string, string);
     bool findTool(string& toolName, string&, string mothurProgramPath, vector<string>&, vector<string> locations);
+    bool findBlastLocation(string& toolLocation, string mothurProgramPath, vector<string> locations);
     bool checkLocations(string&, vector<string>, string silent);
     bool checkLocations(string&, vector<string>);  //filename, inputDir, outputDir. checks for file in ./, inputdir, outputdir, default and mothur's exe location, and tools location.  Returns false if cant be found. If found completes name with location
     bool dirCheck(string&); //completes path, appends appropriate / or \, makes sure dir is writable.

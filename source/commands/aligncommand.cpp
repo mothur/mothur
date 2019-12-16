@@ -230,11 +230,22 @@ AlignCommand::AlignCommand(string option)  {
 			util.mothurConvert(temp, threshold); 
 			
 			search = validParameter.valid(parameters, "search");		if (search == "not found"){	search = "kmer";		}
-			if ((search != "suffix") && (search != "kmer") && (search != "blast")) { m->mothurOut("invalid search option: choices are kmer, suffix or blast."); m->mothurOutEndLine(); abort=true; }
+			if ((search != "suffix") && (search != "kmer") && (search != "blast")) { m->mothurOut("invalid search option: choices are kmer, suffix or blast.\n");  abort=true; }
 			
 			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
-			if ((align != "needleman") && (align != "gotoh") && (align != "blast") && (align != "noalign")) { m->mothurOut("invalid align option: choices are needleman, gotoh, blast or noalign."); m->mothurOutEndLine(); abort=true; }
-
+			if ((align != "needleman") && (align != "gotoh") && (align != "blast") && (align != "noalign")) { m->mothurOut("invalid align option: choices are needleman, gotoh, blast or noalign.\n");  abort=true; }
+            
+            if ((search == "blast") || (align == "blast")) {
+                string blastlocation = "";
+                vector<string> locations = current->getLocations();
+                string path = current->getProgramPath();
+                
+                if (!util.findBlastLocation(blastlocation, path, locations)){
+                    m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search or align method. Using defaults instead.\n");
+                    if (search == "blast") { search = "kmer"; }
+                    if (align == "blast") { align = "needleman"; }
+                }
+            }
 		}
 		
 	}

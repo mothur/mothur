@@ -457,6 +457,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
                 if (classic) { m->mothurOut("[ERROR]: You cannot use cluster.classic with the agc or dgc clustering methods, aborting\n."); abort = true; }
+                if (!foundTool) { abort = true; }
             }
             
             cutoffNotSet = false;

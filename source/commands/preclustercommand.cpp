@@ -292,6 +292,16 @@ PreClusterCommand::PreClusterCommand(string option) {
             
             
             align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
+            if (align == "blast") {
+                string blastlocation = "";
+                vector<string> locations = current->getLocations();
+                string path = current->getProgramPath();
+                bool foundTool = util.findBlastLocation(blastlocation, path, locations);
+
+                if (!foundTool){
+                    m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as align method. Using needleman instead.\n"); align = "needleman";
+                }
+            }
             
             align_method = "unaligned";
             
