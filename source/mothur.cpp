@@ -49,12 +49,12 @@ int main(int argc, char *argv[]){
 		
 		#ifdef MOTHUR_FILES
 			current->setDefaultPath(defaultPath);
-            m->appendLogBuffer("\nUsing default file location " + defaultPath + "\n\n");
+            m->appendLogBuffer("\nUsing default search path for mothur input files: " + defaultPath + "\n\n");
 		#endif
         
         #ifdef MOTHUR_TOOLS
             current->setToolsPath(toolsPath);
-            m->appendLogBuffer("\nUsing tools location " + toolsPath + "\n\n");
+            m->appendLogBuffer("\nUsing mothur tools location: " + toolsPath + "\n\n");
         #endif
     
 		if (argc>1) {
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
             mothur = new InteractEngine(argv[0]);
 		}
 		
-		while(!bail)	{	bail = mothur->getInput();	}
+		while(!bail)	{   bail = mothur->getInput();	}
 		
 		string newlogFileName = mothur->getLogFileName();
 		        

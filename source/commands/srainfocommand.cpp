@@ -41,8 +41,8 @@ string SRAInfoCommand::getHelpString(){
         helpString += "The processors parameter allows you to specify how many processors you would like to use. The default is all available. \n";
         helpString += "The maxsize parameter allows you to limit the size of the files downloaded by prefetch. The default is 20 (20GB). \n";
         helpString += "The gz parameter allows you to compress the fastq files. The default is false. \n";
-        helpString += "The fasterq parameter allows you to specify location of the fasterq_dump executable. By default mothur will look in its location and the location of MOTHUR_TOOLS if specified at compile time or set through the set.dir(tools=locationOfExternalTools) command. Ex. sra.info(accnos=SRR_Acc_List.txt.csv, fasterq=/usr/bin/fasterq-dump.2.9.6) or  sra.info(accnos=SRR_Acc_List.txt.csv, fasterq=/usr/local/fasterq_dump). Location and name of exe can be set.\n";
-        helpString += "The prefetch parameter allows you to specify location of the prefetch executable. By default mothur will look in its location and the location of MOTHUR_TOOLS if specified at compile time or set through the set.dir(tools=locationOfExternalTools) command. Ex. sra.info(accnos=SRR_Acc_List.txt.csv, prefetch=/usr/bin/prefetch.2.9.3) or  sra.info(accnos=SRR_Acc_List.txt.csv, prefetch=/usr/local/prefetch). Location and name of exe can be set.\n";
+        helpString += "The fasterq parameter allows you to specify location of the fasterq_dump executable. By default mothur will look in its location and the location of MOTHUR_TOOLS if specified at compile time or set through the set.dir(tools=locationOfExternalTools) command. Ex. sra.info(accnos=SRR_Acc_List.txt.csv, fasterq=/usr/bin/fasterq-dump.2.10.1) or  sra.info(accnos=SRR_Acc_List.txt.csv, fasterq=/usr/local/fasterq_dump). Location and name of exe can be set.\n";
+        helpString += "The prefetch parameter allows you to specify location of the prefetch executable. By default mothur will look in its location and the location of MOTHUR_TOOLS if specified at compile time or set through the set.dir(tools=locationOfExternalTools) command. Ex. sra.info(accnos=SRR_Acc_List.txt.csv, prefetch=/usr/bin/prefetch.2.10.1) or  sra.info(accnos=SRR_Acc_List.txt.csv, prefetch=/usr/local/prefetch). Location and name of exe can be set.\n";
         helpString += "The sra.info command should be in the following format: sra.info(accnos=yourAccnosFile)\n";
         helpString += "sra.info(sra=SRR_Acc_List.txt.csv) \n";
         return helpString;
@@ -150,7 +150,7 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             vector<string> versionOutputs;
             bool foundTool = false;
             string path = current->getProgramPath();
-            string programName = "fasterq_dump"; programName += EXECUTABLE_EXT;
+            string programName = "fasterq-dump"; programName += EXECUTABLE_EXT;
             
             fasterQLocation = validParameter.valid(parameters, "fasterq");
             if (fasterQLocation == "not found") {
@@ -172,8 +172,8 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 if (versionOutputs.size() >= 3) {
                     string version = versionOutputs[2];
                                                 
-                    if (version != "2.9.6") {
-                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version 2.9.6 which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
+                    if (version != "2.10.1") {
+                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version 2.10.1 which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
                     }else { m->mothurOut("Using " + programName + " version " + version + ".\n"); }
                 }
             }
@@ -203,13 +203,13 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 if (versionOutputs.size() >= 3) {
                     string version = versionOutputs[2];
                     
-                    if (version != "2.9.3") {
-                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version 2.9.3 which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
+                    if (version != "2.10.1") {
+                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version 2.10.1 which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
                     }else { m->mothurOut("Using " + programName + " version " + version + ".\n"); }
                 }
             }
             
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump location using " + fasterQLocation + "\n"); m->mothurOut("[DEBUG]: prefetch location using " + prefetchLocation + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq-dump location using " + fasterQLocation + "\n"); m->mothurOut("[DEBUG]: prefetch location using " + prefetchLocation + "\n"); }
         }
     }
     catch(exception& e) {
@@ -246,7 +246,7 @@ int SRAInfoCommand::execute(){
                 
                 if (hasBoth) {
                     if (compressGZ) {
-                        string inputString = "gzip -f -9 " + filenames[0];
+                        string inputString = "gzip -f " + filenames[0];
                         runSystemCommand(inputString);
                         util.mothurRemove(filenames[0]);
                         inputString = "gzip -f " + filenames[1];
@@ -311,20 +311,12 @@ string SRAInfoCommand::runPreFetch(string sampleName){
             *tempSize = '\0'; strncat(tempSize, msize.c_str(), msize.length());
             cPara.push_back(tempSize);
         }
-        
-        if (outputDir != "") {
-            char* outDir = new char[3];  outDir[0] = '\0'; strncat(outDir, "-O", 2);
-            cPara.push_back(outDir);
-            char* tempoutputDir = new char[outputDir.length()+1];
-            *tempoutputDir = '\0'; strncat(tempoutputDir, outputDir.c_str(), outputDir.length());
-            cPara.push_back(tempoutputDir);
-        }
        
         //-o|--outfile                     output-file
         char* outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", 2);
         cPara.push_back(outputFile);
         map<string, string> variables;
-        variables["[filename]"] = util.getRootName(util.getSimpleName(sampleName))+".";
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sampleName))+".";
         string outputFileName = getOutputFileName("sra",variables);
         char* tempoutfile = new char[outputFileName.length()+1];
         *tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
@@ -347,20 +339,20 @@ string SRAInfoCommand::runPreFetch(string sampleName){
         //m->mothurOut("prefetch command = " + commandString + ".\n");
         
         ifstream inTest;
-        if (util.openInputFile(outputDir + outputFileName, inTest, "no error")) { m->mothurOut("\n" + outputDir + outputFileName + " is found locally, skipping prefetch.\n\n"); return outputDir + outputFileName; }
+        if (util.openInputFile(outputFileName, inTest, "no error")) { m->mothurOut("\n" + outputFileName + " is found locally, skipping prefetch.\n\n"); return outputFileName; }
             
         //run system command
         runSystemCommand(commandString);
         
         //check for output files
         ifstream in;
-        if (!util.openInputFile(outputDir + outputFileName, in, "no error")) {
+        if (!util.openInputFile(outputFileName, in, "no error")) {
             m->mothurOut("\n\n[ERROR]: prefetch was unable to download sample " + sampleName + ", skipping.\n\n"); return "fail";
-        }else { outputNames.push_back(outputDir + outputFileName); outputTypes["sra"].push_back(outputDir + outputFileName); }
+        }else { outputNames.push_back(outputFileName); outputTypes["sra"].push_back(outputFileName); }
         
         m->mothurOut("It took " + toString(time(NULL)-start)+ " seconds to download sample " + sampleName + ".\n");
         
-        return outputDir + outputFileName;
+        return outputFileName;
     }
     catch(exception& e) {
         m->errorOut(e, "SRAInfoCommand", "runPreFetch");
@@ -382,8 +374,8 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         cPara.push_back(tempFasterQ);
         
         //--force - overwrite output files if they exist
-        char* force = new char[8];  force[0] = '\0'; strncat(force, "--force", 7);
-        cPara.push_back(force);
+        //char* force = new char[8];  force[0] = '\0'; strncat(force, "--force", 7);
+        //cPara.push_back(force);
         
         //-S|--split-files                 write reads into different files
         char* splitFiles = new char[3];     splitFiles[0] = '\0'; strncat(splitFiles, "-S", 2);
@@ -401,19 +393,11 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), numProcessors.length());
         cPara.push_back(tempThreads);
         
-        if (outputDir != "") {
-            char* outDir = new char[9];  outDir[0] = '\0'; strncat(outDir, "--outdir", 8);
-            cPara.push_back(outDir);
-            char* tempoutputDir = new char[outputDir.length()+1];
-            *tempoutputDir = '\0'; strncat(tempoutputDir, outputDir.c_str(), outputDir.length());
-            cPara.push_back(tempoutputDir);
-        }
-       
         //-o|--outfile                     output-file
         char* outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", 2);
         cPara.push_back(outputFile);
         map<string, string> variables;
-        variables["[filename]"] = util.getRootName(util.getSimpleName(sampleFile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sampleFile));
         string outputFileName = getOutputFileName("fastq",variables);
         char* tempoutfile = new char[outputFileName.length()+1];
         *tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
@@ -436,16 +420,16 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         //m->mothurOut("fasterq_dump command = " + commandString + ".\n");
         
         ifstream testfin, testrin;
-        string ffastq = util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1.fastq";
-        string rfastq = util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2.fastq";
+        string ffastq = outputDir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1.fastq";
+        string rfastq = outputDir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2.fastq";
         
         bool found = false;
         string tag = "";
-        if (compressGZ) { tag = ".gz"; }
+        if (compressGZ) { tag= ".gz";  }
         
-        if (util.openInputFile(outputDir + ffastq+ tag, testfin, "no error")) {
-            if (util.openInputFile(outputDir + rfastq+tag, testrin, "no error")) {
-                m->mothurOut("\n" + outputDir + ffastq+tag + " and " +  outputDir + rfastq+ tag + " found locally, skipping fasterq_dump.\n\n"); found = true;
+        if (util.openInputFile(ffastq+tag, testfin, "no error")) {
+            if (util.openInputFile(rfastq+tag, testrin, "no error")) {
+                m->mothurOut("\n" + ffastq+tag + " and " +  rfastq+tag + " found locally, skipping fasterq_dump.\n\n"); found = true;
             }
         }
         
@@ -454,12 +438,12 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         //check for output files. trimstring removes last character
         ifstream fin, rin;
         bool hasBoth = true;
-        if (util.openInputFile(outputDir + ffastq, fin, "no error")) {
+        if (util.openInputFile(ffastq, fin, "no error")) {
             filenames.push_back(ffastq);
             fin.close();
         }else { hasBoth = false; }
         
-        if (util.openInputFile(outputDir + rfastq, rin, "no error")) {
+        if (util.openInputFile(rfastq, rin, "no error")) {
             filenames.push_back(rfastq);
             rin.close();
         }else { hasBoth = false; }
