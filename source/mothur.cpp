@@ -49,12 +49,10 @@ int main(int argc, char *argv[]){
 		
 		#ifdef MOTHUR_FILES
 			current->setDefaultPath(defaultPath);
-            m->appendLogBuffer("\nUsing default search path for mothur input files: " + defaultPath + "\n\n");
 		#endif
         
         #ifdef MOTHUR_TOOLS
             current->setToolsPath(toolsPath);
-            m->appendLogBuffer("\nUsing mothur tools location: " + toolsPath + "\n\n");
         #endif
     
 		if (argc>1) {

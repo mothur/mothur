@@ -2126,9 +2126,13 @@ bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothur
             m->appendLogBuffer("Using " + packagesUsed + "\n");
         }
         
-#ifdef MOTHUR_FILES
-        m->appendLogBuffer("\nUsing default file location " + defaultPath + "\n\n");
-#endif
+        #ifdef MOTHUR_FILES
+            m->appendLogBuffer("\nUsing default search path for mothur input files: " + defaultPath + "\n\n");
+        #endif
+        
+        #ifdef MOTHUR_TOOLS
+            m->appendLogBuffer("\nUsing mothur tools location: " + tools + "\n\n");
+        #endif
         
         //header
         m->appendLogBuffer("mothur v." + mothurVersion + "\n");

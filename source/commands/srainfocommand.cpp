@@ -58,7 +58,7 @@ string SRAInfoCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fastq") {  pattern = "[filename],fastq"; }
-        else if (type == "file") {  pattern = "[filename],files"; }
+        else if (type == "file") {  pattern = "[filename],[tag],files"; }
         else if (type == "sra") {  pattern = "[filename],sra"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
@@ -229,9 +229,13 @@ int SRAInfoCommand::execute(){
         string thisOutputDir = outputDir;
         if (outputDir == "") { thisOutputDir = util.hasPath(accnosfile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(accnosfile));
+        variables["[tag]"] = "";
         string fileFileName = getOutputFileName("file",variables);
         ofstream out; util.openOutputFile(fileFileName, out);
-        outputNames.push_back(fileFileName); outputTypes["file"].push_back(fileFileName);
+        //outputNames.push_back(fileFileName); outputTypes["file"].push_back(fileFileName);
+        variables["[tag]"] = "single";
+        string singleFileFileName = getOutputFileName("file",variables);
+        ofstream outSingle; util.openOutputFile(fileFileName, outSingle);
         
         int count = 0;
         for (set<string>::iterator it = samples.begin(); it != samples.end(); it++) {
@@ -246,24 +250,36 @@ int SRAInfoCommand::execute(){
                 
                 if (hasBoth) {
                     if (compressGZ) {
-                        string inputString = "gzip -f " + filenames[0];
+                        string inputString = "gzip " + filenames[0];
                         runSystemCommand(inputString);
                         util.mothurRemove(filenames[0]);
-                        inputString = "gzip -f " + filenames[1];
+                        inputString = "gzip " + filenames[1];
                         runSystemCommand(inputString);
                         util.mothurRemove(filenames[1]);
                         
                         outputNames.push_back(filenames[0]+".gz"); outputTypes["fastq"].push_back(filenames[0]+".gz");
                         outputNames.push_back(filenames[1]+".gz"); outputTypes["fastq"].push_back(filenames[1]+".gz");
-                        
-                        out << *it << '\t' << filenames[0]+".gz"<< '\t' << filenames[1]+".gz" << endl;
+                  
+                        out << *it << '\t' << util.getSimpleName(filenames[0]+".gz")<< '\t' << util.getSimpleName(filenames[1]+".gz") << endl;
                     }else {
                         outputNames.push_back(filenames[0]); outputTypes["fastq"].push_back(filenames[0]);
                         outputNames.push_back(filenames[1]); outputTypes["fastq"].push_back(filenames[1]);
                         
                         out << *it << '\t' << filenames[0] << '\t' << filenames[1] << endl;
                     }
-                    
+                }else {
+                    if (filenames.size() != 0) {
+                        if (compressGZ) {
+                            string inputString = "gzip " + filenames[0];
+                            runSystemCommand(inputString);
+                            util.mothurRemove(filenames[0]);
+                            outputNames.push_back(filenames[0]+".gz"); outputTypes["fastq"].push_back(filenames[0]+".gz");
+                            outSingle << util.getSimpleName(filenames[0]+".gz") <<  endl;
+                        }else {
+                            outputNames.push_back(filenames[0]); outputTypes["fastq"].push_back(filenames[0]);
+                            outSingle << util.getSimpleName(filenames[0]) <<  endl;
+                        }
+                    }
                 }
             }
         }
@@ -428,8 +444,13 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         if (compressGZ) { tag= ".gz";  }
         
         if (util.openInputFile(ffastq+tag, testfin, "no error")) {
+            testfin.close();
             if (util.openInputFile(rfastq+tag, testrin, "no error")) {
-                m->mothurOut("\n" + ffastq+tag + " and " +  rfastq+tag + " found locally, skipping fasterq_dump.\n\n"); found = true;
+                m->mothurOut("\n" + ffastq+tag + " and " +  rfastq+tag + " found locally, skipping fasterq_dump.\n\n");
+                found = true; testrin.close();
+                filenames.push_back(ffastq);
+                filenames.push_back(rfastq);
+                return found;
             }
         }
         
