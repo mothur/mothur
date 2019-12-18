@@ -232,7 +232,6 @@ int SRAInfoCommand::execute(){
         variables["[tag]"] = "";
         string fileFileName = getOutputFileName("file",variables);
         ofstream out; util.openOutputFile(fileFileName, out);
-        //outputNames.push_back(fileFileName); outputTypes["file"].push_back(fileFileName);
         variables["[tag]"] = "single";
         string singleFileFileName = getOutputFileName("file",variables);
         ofstream outSingle; util.openOutputFile(fileFileName, outSingle);
@@ -250,10 +249,10 @@ int SRAInfoCommand::execute(){
                 
                 if (hasBoth) {
                     if (compressGZ) {
-                        string inputString = "gzip " + filenames[0];
+                        string inputString = "gzip -f " + filenames[0];
                         runSystemCommand(inputString);
                         util.mothurRemove(filenames[0]);
-                        inputString = "gzip " + filenames[1];
+                        inputString = "gzip -f " + filenames[1];
                         runSystemCommand(inputString);
                         util.mothurRemove(filenames[1]);
                         
@@ -284,9 +283,11 @@ int SRAInfoCommand::execute(){
             }
         }
         out.close();
+        outSingle.close();
         
         //remove if not filled
-        if (util.isBlank(fileFileName)) { util.mothurRemove(fileFileName); }
+        if (util.isBlank(fileFileName)) { util.mothurRemove(fileFileName); }else { outputNames.push_back(fileFileName); outputTypes["file"].push_back(fileFileName); }
+        if (util.isBlank(singleFileFileName)) { util.mothurRemove(singleFileFileName); }else { outputNames.push_back(singleFileFileName); outputTypes["file"].push_back(singleFileFileName); }
         
         string currentName = "";
         itTypes = outputTypes.find("file");
