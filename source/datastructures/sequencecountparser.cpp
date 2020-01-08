@@ -22,7 +22,7 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
             ct.testGroups(countfile, groupsSelected); //fills groupsSelected with groups in count table
         }
         
-        inputString += "processors=1, groups=" + util.getStringFromVector(groupsSelected, "-"); //split.groups is paraplellized, we don't want the thread spinning up threads.
+        inputString += "groups=" + util.getStringFromVector(groupsSelected, "-");
         inputString += ", fasta=" + fastafile;
         inputString += ", count=" + countfile;
         

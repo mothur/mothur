@@ -415,7 +415,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
         ifstream in;
         util.openInputFile(filename, in);
         
-        readTable(in, readGroups, mothurRunning, selectedGroups);
+        readTable(file, readGroups, mothurRunning, selectedGroups);
         
         in.close();
     }

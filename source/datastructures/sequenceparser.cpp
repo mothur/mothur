@@ -30,7 +30,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
         if (groupsSelected.size() != 0) { sort(groupsSelected.begin(), groupsSelected.end());   }
         else                            { groupsSelected = namesOfGroups;                       }
         
-        inputString += "processors=1, groups=" + util.getStringFromVector(groupsSelected, "-"); //split.groups is paraplellized, we don't want the thread spinning up threads.
+        inputString += "groups=" + util.getStringFromVector(groupsSelected, "-");
         inputString += ", fasta=" + fastaFile;
         inputString += ", name=" + nameFile;
         inputString += ", group=" + groupFile;
