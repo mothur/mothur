@@ -1180,7 +1180,7 @@ long long driverGroups(preClusterData* params){
         for (int i = params->start; i < params->end; i++) {  subsetGroups.push_back(params->groups[i]);  }
         
         //run splitGroups command to parse files
-        string inputString = "groups=" + params->util.getStringFromVector(subsetGroups, "-");
+        string inputString = "processors=1, groups=" + params->util.getStringFromVector(subsetGroups, "-"); //split.groups is paraplellized, we don't want the thread spinning up threads.
         inputString += ", fasta=" + params->fastafile;
         
         if (params->hasCount) {  inputString += ", count=" + params->countfile;  }
@@ -1193,7 +1193,7 @@ long long driverGroups(preClusterData* params){
         
         //type -> files in groups order. fasta -> vector<string>. fastaFileForGroup1 stored in filenames["fasta"][1]
         map<string, vector<string> > filenames = splitCommand->getOutputFiles();
-        
+       
         delete splitCommand;
         params->m->mothurOut("/******************************************/\n");
     
@@ -1385,7 +1385,9 @@ void PreClusterCommand::createProcessesGroups(string newNName, string newMFile) 
     driverGroups(dataBundle);
 
     outputNames.insert(outputNames.end(), dataBundle->outputNames.begin(), dataBundle->outputNames.end());
-    outputTypes.insert(dataBundle->outputTypes.begin(), dataBundle->outputTypes.end());
+    for (itTypes = dataBundle->outputTypes.begin(); itTypes != dataBundle->outputTypes.end(); itTypes++) {
+        outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
+    }
 
     for (int i = 0; i < processors-1; i++) {
       workerThreads[i]->join();
@@ -1393,7 +1395,9 @@ void PreClusterCommand::createProcessesGroups(string newNName, string newMFile) 
       delete data[i]->newNName;
 
       outputNames.insert(outputNames.end(), data[i]->outputNames.begin(), data[i]->outputNames.end());
-      outputTypes.insert(data[i]->outputTypes.begin(), data[i]->outputTypes.end());
+      for (itTypes = data[i]->outputTypes.begin(); itTypes != data[i]->outputTypes.end(); itTypes++) {
+          outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
+      }
 
       delete data[i];
       delete workerThreads[i];
