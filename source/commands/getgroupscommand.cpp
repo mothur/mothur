@@ -605,13 +605,13 @@ int GetGroupsCommand::readShared(){
 			out.close();
 		}
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file contains only the groups you wish to remove."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");   }
 		
 		string groupsString = "";
 		for (int i = 0; i < Groups.size()-1; i++) {	groupsString += Groups[i] + ", "; }
 		groupsString += Groups[Groups.size()-1];
 		
-		m->mothurOut("Selected groups: " + groupsString + " from your shared file."); m->mothurOutEndLine();
+		m->mothurOut("Selected groups: " + groupsString + " from your shared file.\n"); 
 		
 		return 0;
 		
@@ -819,7 +819,7 @@ int GetGroupsCommand::readGroup(){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
 			
-			in >> name;				//read from first column
+			in >> name;		util.gobble(in);		//read from first column
 			in >> group;			//read from second column
 			
 			//if this name is in the accnos file
@@ -837,7 +837,7 @@ int GetGroupsCommand::readGroup(){
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
 		outputTypes["group"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your group file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your group file.\n");
 
 		return 0;
 	}

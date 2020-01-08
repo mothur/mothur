@@ -914,7 +914,7 @@ void GetSeqsCommand::readGroup(){
                     uniqueNames.insert(name);
                     wroteSomething = true;
                     
-                    out << name << '\t' << group << endl;
+                    out << name  << '\t' << group << endl;
                     selectedCount++;
                     
                     if (m->getDebug()) {  sanity["group"].insert(name); }
