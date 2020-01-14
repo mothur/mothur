@@ -17,7 +17,6 @@
 
 //Data Structure for a fasta file.
 
-#include "mothur.h"
 #include "mothurout.h"
 #include "utils.hpp"
 #include "writer.h"
