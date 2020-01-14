@@ -3935,7 +3935,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.43.0\\\"\"",
@@ -3985,7 +3985,7 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.43.0\\\"\"",
@@ -4050,7 +4050,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.43.0\\\"\"",
@@ -4136,7 +4136,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.43.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",

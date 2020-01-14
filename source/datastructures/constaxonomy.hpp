@@ -24,14 +24,14 @@ struct Taxon {
 
 /**************************************************************************************************/
 
-class ConsTaxonommy {
+class OTUTaxonomy {
     
 public:
     
-    ConsTaxonommy();
-    ConsTaxonommy(string, string, int);
-    ConsTaxonommy(ifstream&);
-    ~ConsTaxonommy() {}
+    OTUTaxonomy();
+    OTUTaxonomy(string, string, int);
+    OTUTaxonomy(ifstream&);
+    ~OTUTaxonomy() {}
     
     void setName(string n)          { name = n;         }
     void setNumReps(int n)          { numReps = n;      }
@@ -42,7 +42,7 @@ public:
     void setTaxons(string);
     
     string getInlineConsTaxonomy();
-    string getConsTaxString(bool); //pass in true to include confidences
+    string getConsTaxString(bool includeConfidence=true); //pass in true to include confidences
 
     void printConsTax(ostream&);
     void printConsTax(OutputWriter*);

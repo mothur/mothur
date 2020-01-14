@@ -616,8 +616,6 @@ string GetLineageCommand::readConsTax(){
 		
 		ifstream in;
 		util.openInputFile(constaxonomy, in);
-		string otuLabel, tax;
-        int numReps;
         
         //read headers
         string headers = util.getline(in);
@@ -640,15 +638,13 @@ string GetLineageCommand::readConsTax(){
             
 			if (m->getControl_pressed()) { break; }
             
-			in >> otuLabel;	 		util.gobble(in);
-            in >> numReps;          util.gobble(in);
-            tax = util.getline(in);   util.gobble(in);
-			
-            string noQuotesTax = util.removeQuotes(tax);
+            OTUTaxonomy otuTax(in);
+            
+            string noQuotesTax = util.removeQuotes(otuTax.getConsTaxString());
             
             if (util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
-                wroteSomething = true; outAccnos << otuLabel << endl;
-                out << otuLabel << '\t' << numReps << '\t' << tax << endl;
+                wroteSomething = true; outAccnos << otuTax.getName() << endl;
+                otuTax.printConsTax(out);
             }
         }
 		in.close();

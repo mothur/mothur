@@ -15,6 +15,7 @@
 #include "listvector.hpp"
 #include "getseqscommand.h"
 #include "getotulabelscommand.h"
+#include "constaxonomy.hpp"
 
 class GetLineageCommand : public Command {
 	
