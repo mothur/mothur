@@ -543,7 +543,7 @@ int ClusterSplitCommand::execute(){
                 //if user gave a phylip file convert to column file
                 if (format == "phylip") {
                     estart = time(NULL);
-                    m->mothurOut("Converting to column format..."); m->mothurOutEndLine();
+                    m->mothurOut("Converting to column format...\n");
                     
                     ReadCluster* convert = new ReadCluster(distfile, cutoff, outputDir, false);
                     

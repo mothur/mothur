@@ -10,10 +10,6 @@
 #include "getoturepcommand.h"
 #include "readphylip.h"
 #include "readcolumn.h"
-#include "formatphylip.h"
-#include "formatcolumn.h"
-
-
 
 //********************************************************************************************************************
 //sorts lowest to highest
