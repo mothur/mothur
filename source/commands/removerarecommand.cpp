@@ -266,9 +266,9 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			temp = validParameter.valid(parameters, "bygroup");	 if (temp == "not found") { temp = "f"; }
 			byGroup = util.isTrue(temp);
 			
-			if (byGroup && (sharedfile == "")) { m->mothurOut("The byGroup parameter is only valid with a shared file."); m->mothurOutEndLine(); }
+			if (byGroup && (sharedfile == "")) { m->mothurOut("The byGroup parameter is only valid with a shared file.\n"); }
 			
-			if (((groupfile != "") || (countfile != "")) && (listfile == "")) { m->mothurOut("A group or count file is only valid with a list file."); m->mothurOutEndLine(); groupfile = ""; countfile = ""; }
+			if (((groupfile != "") || (countfile != "")) && (listfile == "")) { m->mothurOut("A group or count file is only valid with a list file.\n");  groupfile = ""; countfile = ""; }
 		}
 		
 	}
@@ -422,7 +422,7 @@ int RemoveRareCommand::processList(){
                 for (int i = 0; i < namesGroups.size(); i++) { newCountTable.addGroup(namesGroups[i]); }
             }
         }
-		
+        
 		if (list != NULL) {
             
             vector<string> binLabels = list->getLabels();
@@ -495,8 +495,13 @@ int RemoveRareCommand::processList(){
 					if (groupfile != "") {  for(int k = 0; k < newGroupFile.size(); k++) { outGroup << newGroupFile[k] << endl; }  }
                     else if (countfile != "") {
                         for(int k = 0; k < newNames.size(); k++) {
-                            vector<int> groupCounts = ct.getGroupCounts(newNames[k]);
-                            newCountTable.push_back(newNames[k], groupCounts);
+                            if (ct.hasGroupInfo()) {
+                                vector<int> groupCounts = ct.getGroupCounts(newNames[k]);
+                                newCountTable.push_back(newNames[k], groupCounts);
+                            }else {
+                                int reps = ct.getNumSeqs(newNames[k]);
+                                newCountTable.push_back(newNames[k], reps);
+                            }
                         }
                     }
                 }
