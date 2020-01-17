@@ -10,7 +10,7 @@
  *
  */
 
-#include "mothur.h"
+
 #include "mothurout.h"
 #include "utils.hpp"
 #include "currentfile.h"
@@ -42,6 +42,7 @@ public:
 	PhyloTree(ifstream&, string);  //pass it a taxonomy file and it makes the train.tree
 	~PhyloTree() {};
 	int addSeqToTree(string, string);
+    int addSeqToTree(string, vector<Taxon>);
 	void assignHeirarchyIDs(int);
 	void printTreeNodes(string); //used by bayesian to save time
 	vector<int> getGenusNodes();

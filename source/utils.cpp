@@ -9,6 +9,8 @@
 #include "utils.hpp"
 #include "ordervector.hpp"
 #include "sharedordervector.h"
+#include "phylotree.h"
+#include "taxonomy.hpp"
 
 /***********************************************************************/
 string getLabelTag(string label){
@@ -2302,6 +2304,31 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num) {
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "setFilePosFasta");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+vector<Taxonomy> Utils::readConsTax(string inputfile, PhyloTree& tree){
+    try {
+        //read headers
+        ifstream in; openInputFile(inputfile, in); getline(in);
+
+        vector<Taxonomy> taxes;
+        while (!in.eof()) {
+
+            if (m->getControl_pressed()) { break; }
+
+            Taxonomy thisTax(in);
+            taxes.push_back(thisTax);
+
+            tree.addSeqToTree(thisTax.getName(), thisTax.getTaxons());
+        }
+        in.close();
+        
+        return taxes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "readConsTax");
         exit(1);
     }
 }

@@ -182,7 +182,61 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
 
+int PhyloTree::addSeqToTree(string seqName, vector<Taxon> seqTax){
+    try {
+        numSeqs++;
+        
+        map<string, int>::iterator childPointer;
+        
+        int currentNode = 0;
+        int level = 0;
+        
+        tree[0].accessions.push_back(seqName);
+    
+        for (int i = 0; i < seqTax.size(); i++) {
+            
+            level++;
+            string taxon = seqTax[i].name;
+        
+            if (m->getControl_pressed()) { return 0; }
+            
+            if (m->getDebug()) { m->mothurOut(seqName +'\t' + taxon +'\n'); }
+            
+            childPointer = tree[currentNode].children.find(taxon);
+            
+            if(childPointer != tree[currentNode].children.end()){    //if the node already exists, move on
+                currentNode = childPointer->second;
+                tree[currentNode].accessions.push_back(seqName);
+                name2Taxonomy[seqName] = currentNode;
+            }
+            else{                                            //otherwise, create it
+                tree.push_back(TaxNode(taxon));
+                
+                tree[currentNode].children[taxon] = numNodes;
+                tree[numNodes].level = level;
+                tree[numNodes].parent = currentNode;
+                currentNode = numNodes;
+                numNodes++;
+                
+                tree[currentNode].accessions.push_back(seqName);
+                name2Taxonomy[seqName] = currentNode;
+            }
+    
+            if (i == (seqTax.size()-1)) {   uniqueTaxonomies.insert(currentNode);    } //last level
+        }
+        
+        //save maxLevel for binning the unclassified seqs
+        if (level > maxLevel) { maxLevel = level; }
+        
+        return level;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloTree", "addSeqToTree");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 
 int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
