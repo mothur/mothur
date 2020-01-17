@@ -559,14 +559,14 @@ string GetLineageCommand::readTax(){
 		
 		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
-		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
+		vector< vector<Taxon> > searchTaxons; searchTaxons.resize(listOfTaxons.size());
 		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
-			noConfidenceTaxons[i] = listOfTaxons[i];
-            bool hasCon = false;
-            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);  taxonsHasConfidence[i] = hasCon;
             noConfidenceTaxons[i] = listOfTaxons[i];
+            bool hasCon = false;
+            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);
+            taxonsHasConfidence[i] = hasCon;
             if (hasCon) { util.removeConfidences(noConfidenceTaxons[i]); }
 		}
 		
@@ -576,10 +576,12 @@ string GetLineageCommand::readTax(){
 
             in >> name; util.gobble(in);
             tax = util.getline(in); util.gobble(in);
-			
-            string noQuotesTax = util.removeQuotes(tax);
             
-			if (util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+            Taxonomy thisSeq(name, tax);
+			vector<Taxon> otuTax = thisSeq.getTaxons();
+            util.removeQuotes(otuTax);
+            
+			if (util.searchTax(otuTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
                 out << name << '\t' << tax << endl;
                 outAccnos << name << endl; wroteSomething = true;
             }
@@ -623,13 +625,14 @@ string GetLineageCommand::readConsTax(){
 		
 		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
-		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
+		vector< vector<Taxon> > searchTaxons; searchTaxons.resize(listOfTaxons.size());
 		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
             noConfidenceTaxons[i] = listOfTaxons[i];
             bool hasCon = false;
-            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);  taxonsHasConfidence[i] = hasCon;
+            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);
+            taxonsHasConfidence[i] = hasCon;
             noConfidenceTaxons[i] = listOfTaxons[i];
             if (hasCon) { util.removeConfidences(noConfidenceTaxons[i]); }
         }
@@ -638,13 +641,13 @@ string GetLineageCommand::readConsTax(){
             
 			if (m->getControl_pressed()) { break; }
             
-            OTUTaxonomy otuTax(in);
+            Taxonomy thisOtu(in);
+            vector<Taxon> otuTax = thisOtu.getTaxons();
+            util.removeQuotes(otuTax);
             
-            string noQuotesTax = util.removeQuotes(otuTax.getConsTaxString());
-            
-            if (util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
-                wroteSomething = true; outAccnos << otuTax.getName() << endl;
-                otuTax.printConsTax(out);
+            if (util.searchTax(otuTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+                wroteSomething = true; outAccnos << thisOtu.getName() << endl;
+                thisOtu.printConsTax(out);
             }
         }
 		in.close();

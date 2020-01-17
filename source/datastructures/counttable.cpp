@@ -866,6 +866,45 @@ vector<string> CountTable::printTable(string file) {
 }
 /************************************************************/
 //zeroed reads are not printed
+vector<string> CountTable::printNoGroupsTable(string file) {
+    try {
+        
+        ofstream out;
+        util.openOutputFile(file, out);
+        
+        vector<string> namesInTable;
+        
+        if (total != 0) {
+            vector<string> headers = getHardCodedHeaders();
+            out << headers[0] << '\t' << headers[1] << endl;
+            
+            map<int, string> reverse; //use this to preserve order
+            for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+            
+            for (int i = 0; i < totals.size(); i++) {
+                if (totals[i] != 0) {
+
+                    map<int, string>::iterator itR = reverse.find(i);
+                
+                    if (itR != reverse.end()) {
+                        
+                        namesInTable.push_back(itR->second);
+                        
+                        out << itR->second << '\t' << totals[i] << endl;
+                    }
+                }
+            }
+        }
+        out.close();
+        return namesInTable;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "printTable");
+        exit(1);
+    }
+}
+/************************************************************/
+//zeroed reads are not printed
 vector<string> CountTable::printTable(string file, bool compressedFormat) {
     try {
         

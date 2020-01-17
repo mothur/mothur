@@ -85,6 +85,7 @@ class CountTable {
         //all print commands ignore zeroed out seqs
         vector<string> printCompressedTable(string, vector<string> optionalGroups=nullVector); //nameOfFile, optionalVectorOfGroups (if empty, prints all possible groups), returns names of seqs in table - excludes zeroed reads
         vector<string> printTable(string); //preserves order in original, defaults compress to state of original file
+        vector<string> printNoGroupsTable(string); //preserves order in original, defaults compress to state of original file
         vector<string> printTable(string, bool compress); //preserves order in original, printing compressed or not based on compress flag pasted in
         vector<string> printSortedTable(string); //sorted by seqName
         int printHeaders(ofstream&, vector<string> optionalGroups=nullVector);

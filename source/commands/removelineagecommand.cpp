@@ -12,6 +12,7 @@
 #include "listvector.hpp"
 #include "counttable.h"
 #include "inputdata.h"
+#include "taxonomy.hpp"
 
 //**********************************************************************************************************************
 vector<string> RemoveLineageCommand::setParameters(){	
@@ -576,7 +577,7 @@ string RemoveLineageCommand::readTax(){
 		bool wroteSomething = false;
 		
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
-		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
+		vector< vector<Taxon> > searchTaxons; searchTaxons.resize(listOfTaxons.size());
 		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
@@ -594,9 +595,11 @@ string RemoveLineageCommand::readTax(){
             in >> name; util.gobble(in);
             tax = util.getline(in); util.gobble(in);
 			
-            string noQuotesTax = util.removeQuotes(tax);
+            Taxonomy thisSeq(name, tax);
+            vector<Taxon> otuTax = thisSeq.getTaxons();
+            util.removeQuotes(otuTax);
             
-            if (!util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+            if (!util.searchTax(otuTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
                 wroteSomething = true; out << name << '\t' << tax << endl;
             }else { outAccnos << name << endl; }
 		}
@@ -639,7 +642,7 @@ string RemoveLineageCommand::readConsTax(){
 		
 		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
-		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
+		vector< vector<Taxon> > searchTaxons; searchTaxons.resize(listOfTaxons.size());
 		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
@@ -655,17 +658,15 @@ string RemoveLineageCommand::readConsTax(){
             
 			if (m->getControl_pressed()) { break; }
             
-			in >> otuLabel;	 		util.gobble(in);
-            in >> numReps;          util.gobble(in);
-			tax = util.getline(in);   util.gobble(in);
-			
-            string noQuotesTax = util.removeQuotes(tax);
+			Taxonomy thisOtu(in);
+            vector<Taxon> otuTax = thisOtu.getTaxons();
+            util.removeQuotes(otuTax);
             
-            if (!util.searchTax(noQuotesTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
-                out << otuLabel << '\t' << numReps << '\t' << tax << endl;
+            if (!util.searchTax(otuTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+                thisOtu.printConsTax(out);
                 wroteSomething = true;
             }else {
-                outAccnos << otuLabel << endl;
+                outAccnos << thisOtu.getName() << endl;
                 numR++;
             }
 		}

@@ -410,8 +410,8 @@
 		48705AC719BE32C50075E977 /* sharedrjsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48705AC119BE32C50075E977 /* sharedrjsd.cpp */; };
 		487C5A871AB88B93002AF48A /* mimarksattributescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */; };
 		487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
-		488563D123CD00C4007B5659 /* constaxonomy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488563CF23CD00C4007B5659 /* constaxonomy.cpp */; };
-		488563D223CD00C4007B5659 /* constaxonomy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488563CF23CD00C4007B5659 /* constaxonomy.cpp */; };
+		488563D123CD00C4007B5659 /* taxonomy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488563CF23CD00C4007B5659 /* taxonomy.cpp */; };
+		488563D223CD00C4007B5659 /* taxonomy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488563CF23CD00C4007B5659 /* taxonomy.cpp */; };
 		488841611CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		488841621CC515A000C5E972 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		488841651CC6C34900C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
@@ -1002,8 +1002,8 @@
 		48789AF22061776100A7D848 /* unchecked.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unchecked.h; path = source/unchecked.h; sourceTree = SOURCE_ROOT; };
 		487C5A851AB88B93002AF48A /* mimarksattributescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mimarksattributescommand.cpp; path = source/commands/mimarksattributescommand.cpp; sourceTree = SOURCE_ROOT; };
 		487C5A861AB88B93002AF48A /* mimarksattributescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mimarksattributescommand.h; path = source/commands/mimarksattributescommand.h; sourceTree = SOURCE_ROOT; };
-		488563CF23CD00C4007B5659 /* constaxonomy.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = constaxonomy.cpp; path = source/datastructures/constaxonomy.cpp; sourceTree = SOURCE_ROOT; };
-		488563D023CD00C4007B5659 /* constaxonomy.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = constaxonomy.hpp; path = source/datastructures/constaxonomy.hpp; sourceTree = SOURCE_ROOT; };
+		488563CF23CD00C4007B5659 /* taxonomy.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = taxonomy.cpp; path = source/datastructures/taxonomy.cpp; sourceTree = SOURCE_ROOT; };
+		488563D023CD00C4007B5659 /* taxonomy.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = taxonomy.hpp; path = source/datastructures/taxonomy.hpp; sourceTree = SOURCE_ROOT; };
 		48883FFB20C6D6C000CAF112 /* compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = compare.h; path = source/datastructures/compare.h; sourceTree = SOURCE_ROOT; };
 		488841631CC6C34900C5E972 /* renamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renamefilecommand.cpp; path = source/commands/renamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		488841641CC6C34900C5E972 /* renamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renamefilecommand.h; path = source/commands/renamefilecommand.h; sourceTree = SOURCE_ROOT; };
@@ -2780,8 +2780,8 @@
 				48883FFB20C6D6C000CAF112 /* compare.h */,
 				A74D59A6159A1E3600043046 /* counttable.h */,
 				A74D59A3159A1E2000043046 /* counttable.cpp */,
-				488563D023CD00C4007B5659 /* constaxonomy.hpp */,
-				488563CF23CD00C4007B5659 /* constaxonomy.cpp */,
+				488563D023CD00C4007B5659 /* taxonomy.hpp */,
+				488563CF23CD00C4007B5659 /* taxonomy.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
 				A77916E7176F7F7600EEFE18 /* designmap.h */,
@@ -3086,7 +3086,7 @@
 				481FB5FE1AC1B7970076CFF3 /* removerarecommand.cpp in Sources */,
 				481FB53C1AC1B5F10076CFF3 /* bootstrap.cpp in Sources */,
 				481FB5E21AC1B77E0076CFF3 /* metastatscommand.cpp in Sources */,
-				488563D223CD00C4007B5659 /* constaxonomy.cpp in Sources */,
+				488563D223CD00C4007B5659 /* taxonomy.cpp in Sources */,
 				481FB5631AC1B6A10076CFF3 /* sharedkulczynski.cpp in Sources */,
 				481FB5EF1AC1B77E0076CFF3 /* pcoacommand.cpp in Sources */,
 				481FB64E1AC1B7F40076CFF3 /* treenode.cpp in Sources */,
@@ -3733,7 +3733,7 @@
 				48C728791B728D6B00D40830 /* biominfocommand.cpp in Sources */,
 				A7E9B95112D37EC400DA6239 /* sharedlennon.cpp in Sources */,
 				A7E9B95212D37EC400DA6239 /* sharedlistvector.cpp in Sources */,
-				488563D123CD00C4007B5659 /* constaxonomy.cpp in Sources */,
+				488563D123CD00C4007B5659 /* taxonomy.cpp in Sources */,
 				A7E9B95312D37EC400DA6239 /* sharedmarczewski.cpp in Sources */,
 				A7E9B95412D37EC400DA6239 /* sharedmorisitahorn.cpp in Sources */,
 				A7E9B95512D37EC400DA6239 /* sharedochiai.cpp in Sources */,

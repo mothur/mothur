@@ -434,6 +434,14 @@ struct consTax2{
 	consTax2() :  otuName("OTUxxx"), taxonomy("unknown"), abundance(0) {};
 	consTax2(string n, string t, int a) :  otuName(n), taxonomy(t), abundance(a) {}
 };
+/***********************************************************************/
+struct Taxon {
+    string name;
+    float confidence;
+
+    Taxon(string n, float conf) : name(n), confidence(conf) {}
+    ~Taxon(){}
+};
 /************************************************************/
 struct clusterNode {
 	int numSeq;

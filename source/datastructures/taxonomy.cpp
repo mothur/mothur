@@ -6,14 +6,14 @@
 //  Copyright © 2020 Schloss Lab. All rights reserved.
 //
 
-#include "constaxonomy.hpp"
+#include "taxonomy.hpp"
 
 /***********************************************************************/
-OTUTaxonomy::OTUTaxonomy(){
+Taxonomy::Taxonomy(){
     m = MothurOut::getInstance();
 }
 /***********************************************************************/
-OTUTaxonomy::OTUTaxonomy(string otuname, string consensusTax, int num) {
+Taxonomy::Taxonomy(string otuname, string consensusTax, int num) {
     try {
         m = MothurOut::getInstance();
         
@@ -23,12 +23,27 @@ OTUTaxonomy::OTUTaxonomy(string otuname, string consensusTax, int num) {
         
     }
     catch(exception& e) {
-        m->errorOut(e, "OTUTaxonomy", "OTUTaxonomy");
+        m->errorOut(e, "Taxonomy", "Taxonomy");
         exit(1);
     }
 }
 /***********************************************************************/
-OTUTaxonomy::OTUTaxonomy(ifstream& in) {
+Taxonomy::Taxonomy(string otuname, string consensusTax) {
+    try {
+        m = MothurOut::getInstance();
+        
+        name = otuname;
+        numReps = 0;
+        taxonomy = parseTax(consensusTax);
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Taxonomy", "Taxonomy");
+        exit(1);
+    }
+}
+/***********************************************************************/
+Taxonomy::Taxonomy(ifstream& in) {
     try {
         m = MothurOut::getInstance();
         
@@ -45,23 +60,23 @@ OTUTaxonomy::OTUTaxonomy(ifstream& in) {
         
     }
     catch(exception& e) {
-        m->errorOut(e, "OTUTaxonomy", "OTUTaxonomy");
+        m->errorOut(e, "Taxonomy", "Taxonomy");
         exit(1);
     }
 }
 /***********************************************************************/
-void OTUTaxonomy::setTaxons(string consensusTax){
+void Taxonomy::setTaxons(string consensusTax){
     try {
         
         taxonomy = parseTax(consensusTax);
         
     }catch(exception& e) {
-            m->errorOut(e, "OTUTaxonomy", "setTaxons");
+            m->errorOut(e, "Taxonomy", "setTaxons");
             exit(1);
     }
 }
 /***********************************************************************/
-string OTUTaxonomy::getInlineConsTaxonomy(){
+string Taxonomy::getInlineConsTaxonomy(){
     try {
         string otuConsensus = "";
         
@@ -70,12 +85,12 @@ string OTUTaxonomy::getInlineConsTaxonomy(){
         return otuConsensus;
         
     }catch(exception& e) {
-            m->errorOut(e, "OTUTaxonomy", "getInlineConsTaxonomy");
+            m->errorOut(e, "Taxonomy", "getInlineConsTaxonomy");
             exit(1);
     }
 }
 /***********************************************************************/
-string OTUTaxonomy::getConsTaxString(bool includeConfidence) { //pass in true to include confidences
+string Taxonomy::getConsTaxString(bool includeConfidence) { //pass in true to include confidences
     try {
         
         string conTax = "";
@@ -93,12 +108,12 @@ string OTUTaxonomy::getConsTaxString(bool includeConfidence) { //pass in true to
         return conTax;
         
     }catch(exception& e) {
-            m->errorOut(e, "OTUTaxonomy", "getConsTaxString");
+            m->errorOut(e, "Taxonomy", "getConsTaxString");
             exit(1);
     }
 }
 /***********************************************************************/
-vector<Taxon> OTUTaxonomy::parseTax(string tax){
+vector<Taxon> Taxonomy::parseTax(string tax){
     try {
         string taxon = "";
         vector<Taxon> consTaxs;
@@ -109,28 +124,10 @@ vector<Taxon> OTUTaxonomy::parseTax(string tax){
             
             if(tax[i] == ';'){
                 
-                string newtaxon = taxon; string confidence = "-1";
+                string newtaxon = taxon; float confidence = 0;
+                bool hasConfidence = util.hasConfidenceScore(newtaxon, confidence);
                 
-                int openParen = taxon.find_last_of('(');
-                int closeParen = taxon.find_last_of(')');
-                
-                if ((openParen != string::npos) && (closeParen != string::npos)) {
-                    string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
-                    if (util.isNumeric1(confidenceScore)) {  //its a confidence
-                        newtaxon = taxon.substr(0, openParen); //rip off confidence
-                        confidence = taxon.substr((openParen+1), (closeParen-openParen-1));
-                    }else { //its part of the taxon
-                        newtaxon = taxon;
-                        confidence = "-1";
-                    }
-                }else{
-                    newtaxon = taxon;
-                    confidence = "-1";
-                }
-                
-                float con = 0; convert(confidence, con);
-                
-                Taxon thisTax(newtaxon, con);
+                Taxon thisTax(newtaxon, confidence);
                 consTaxs.push_back(thisTax);
                 
                 taxon = "";
@@ -141,34 +138,34 @@ vector<Taxon> OTUTaxonomy::parseTax(string tax){
         return consTaxs;
        
     }catch(exception& e) {
-            m->errorOut(e, "OTUTaxonomy", "parseTax");
+            m->errorOut(e, "Taxonomy", "parseTax");
             exit(1);
     }
 }
 /***********************************************************************/
-void OTUTaxonomy::printConsTax(ostream& out){
+void Taxonomy::printConsTax(ostream& out){
     try {
         
         out << getInlineConsTaxonomy() << endl;
         
     }catch(exception& e) {
-            m->errorOut(e, "OTUTaxonomy", "printConsTax");
+            m->errorOut(e, "Taxonomy", "printConsTax");
             exit(1);
     }
 }
 /***********************************************************************/
-void OTUTaxonomy::printConsTax(OutputWriter* out){
+void Taxonomy::printConsTax(OutputWriter* out){
     try {
         
         out->write(getInlineConsTaxonomy()+"\n");
         
     }catch(exception& e) {
-            m->errorOut(e, "OTUTaxonomy", "printConsTax");
+            m->errorOut(e, "Taxonomy", "printConsTax");
             exit(1);
     }
 }
 /***********************************************************************/
-void OTUTaxonomy::printConsTaxNoConfidence(ostream& out){
+void Taxonomy::printConsTaxNoConfidence(ostream& out){
     try {
         
         string otuConsensus = name + '\t' + toString(numReps) + '\t' + getConsTaxString(false);
@@ -176,7 +173,7 @@ void OTUTaxonomy::printConsTaxNoConfidence(ostream& out){
         out << otuConsensus << endl;
         
     }catch(exception& e) {
-            m->errorOut(e, "OTUTaxonomy", "printConsTaxNoConfidence");
+            m->errorOut(e, "Taxonomy", "printConsTaxNoConfidence");
             exit(1);
     }
 }

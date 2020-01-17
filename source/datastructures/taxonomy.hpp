@@ -13,28 +13,21 @@
 #include "utils.hpp"
 #include "writer.h"
 
-/***********************************************************************/
-struct Taxon {
-    string name;
-    float confidence;
-
-    Taxon(string n, float conf) : name(n), confidence(conf) {}
-    ~Taxon(){}
-};
 
 /**************************************************************************************************/
 
-class OTUTaxonomy {
+class Taxonomy {
     
 public:
     
-    OTUTaxonomy();
-    OTUTaxonomy(string, string, int);
-    OTUTaxonomy(ifstream&);
-    ~OTUTaxonomy() {}
+    Taxonomy();
+    Taxonomy(string, string, int);
+    Taxonomy(string, string);
+    Taxonomy(ifstream&);
+    ~Taxonomy() {}
     
     void setName(string n)          { name = n;         }
-    void setNumReps(int n)          { numReps = n;      }
+    void setNumSeqs(int n)          { numReps = n;      }
     string getName()                { return name;      }
     vector<Taxon> getTaxons()       { return taxonomy;  }
     void setTaxons(vector<Taxon> t) { taxonomy = t;     }

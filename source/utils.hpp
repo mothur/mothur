@@ -61,7 +61,6 @@ public:
     bool isInteger(string);
     bool allSpaces(string);
     bool isLabelEquivalent(string, string);
-    bool hasConfidenceScore(string&, float&); //taxon, confidence score. Returns taxon with confidence removed and confidence score.  If no confidence score, then confidence=0
     unsigned long long getRAMUsed();
     unsigned long long getTotalRAM();
     void getCurrentDate(string& thisYear, string& thisMonth, string& thisDay);
@@ -227,6 +226,7 @@ public:
     int removeBlanks(vector<string>&);
     float removeConfidences(string&);
     string removeQuotes(string);
+    void removeQuotes(vector<Taxon>& tax);
     bool stringBlank (string);
     
     void splitAtComma(string&, string&);
@@ -250,9 +250,11 @@ public:
     string findEdianness();
     string removeNs(string seq);
     string reverseOligo(string);
-    vector< map<string, float> > getTaxons(string, bool&);
-    bool findTaxon(string tax, string searchTax);
-    bool searchTax(string noQuotesTax, vector<string> listOfTaxons, vector<bool> taxonsHasConfidence, vector<string> noConfidenceTaxons, vector< vector< map<string, float> > > searchTaxons);
+    bool hasConfidenceScore(string&, float&); //taxon, confidence score. Returns taxon with confidence removed and confidence score.  If no confidence score, then confidence=0
+    bool hasConfidenceScore(vector<Taxon> taxons); //returns true if taxons have positve confidences
+    vector<Taxon> getTaxons(string, bool&);
+    bool findTaxon(vector<Taxon> tax, string searchTax);
+    bool searchTax(vector<Taxon>, vector<string> listOfTaxons, vector<bool> taxonsHasConfidence, vector<string> noConfidenceTaxons, vector< vector<Taxon> > searchTaxons);
 
     
     
