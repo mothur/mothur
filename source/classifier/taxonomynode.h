@@ -20,20 +20,20 @@ class TaxonomyNode {
 public:
 	TaxonomyNode();
 	TaxonomyNode(string, int);
-	void setName(string);
-	string getName();
-
-
-	void setParent(int);
-	int getParent();
+    
+	void setName(string n)  {    name = n;      }
+    string getName()        { return name;      }
+    void setParent(int p)   { parent = p;       }
+    int getParent()         { return parent;    }
 	
-	void makeChild(string, int);
-	map<string, int> getChildren();
-	int getChildIndex(string);
-	int	getNumKids();
-	int getNumSeqs();
-	void setTotalSeqs(int);
-	int getLevel();
+	void makeChild(string c, int i)     {    children[c] = i;               }
+	map<string, int> getChildren()      {    return children;               }
+	int	getNumKids()                    {    return (int)children.size();   }
+	int getNumSeqs()                    {    return numSeqs;                }
+	void setTotalSeqs(int n)            {    totalSeqs = n;                 }
+	int getLevel()                      {    return level;                  }
+    
+    int getChildIndex(string);
 	
 private:
 	int parent;
