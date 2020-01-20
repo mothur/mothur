@@ -83,7 +83,8 @@ endif
 #User specified HDF5 library
 ifeq  ($(strip $(USEHDF5)),yes)
 
-LDFLAGS += -L ${HDF5_LIBRARY_DIR} -lhdf5 -lhdf5_cpp
+LDFLAGS += -L ${HDF5_LIBRARY_DIR}
+LIBS += -lhdf5 -lhdf5_cpp
 CXXFLAGS += -DUSE_HDF5 -I ${HDF5_INCLUDE_DIR}
 
 endif
@@ -91,7 +92,8 @@ endif
 #User specified GSL library
 ifeq  ($(strip $(USEGSL)),yes)
 
-LDFLAGS += -L ${GSL_LIBRARY_DIR} -lgsl -lgslcblas -lm
+LDFLAGS += -L ${GSL_LIBRARY_DIR}
+LIBS += -lgsl -lgslcblas -lm
 CXXFLAGS += -DUSE_GSL -I ${GSL_INCLUDE_DIR}
 
 endif
