@@ -624,8 +624,6 @@ SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
 		string lastLabel = lookup->getLabel();
         
 		if (label == "") { label = lastLabel;  return lookup; }
-		
-        if (label == "") { label = lastLabel;  return lookup; }
         
         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> labels; labels.insert(label);
