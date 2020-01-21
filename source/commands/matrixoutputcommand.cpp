@@ -223,15 +223,14 @@ int MatrixOutputCommand::execute(){
         time_t start = time(NULL);
         
 		InputData input(sharedfile, "sharedfile", Groups);
-		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-        vector<string> lookupGroups = lookup->getNamesGroups();
-		string lastLabel = lookup->getLabel();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = labels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
 					
-        if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");  delete lookup; return 0;}
+        if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n");  delete lookup; return 0;}
         
         if (subsample) { 
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
@@ -242,77 +241,22 @@ int MatrixOutputCommand::execute(){
                 Groups = lookup->getNamesGroups();
             }
             
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n"); m->setControl_pressed(true);  return 0; }
+            if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n"); m->setControl_pressed(true);  return 0; }
         }
 		numGroups = lookup->size();
         
         if (m->getControl_pressed()) { delete lookup;  return 0;  }
+        
+        while (lookup != NULL) {
+            
+            if (m->getControl_pressed()) { delete lookup; break; }
+            
+            createProcesses(lookup); delete lookup;
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
 				
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-		
-			if (m->getControl_pressed()) { outputTypes.clear(); delete lookup;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
-		
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				createProcesses(lookup);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup->getLabel();
-				
-				delete lookup;
-				lookup = input.getSharedRAbundVectors(lastLabel);
-
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				createProcesses(lookup);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup->setLabels(saveLabel);
-			}
-
-			lastLabel = lookup->getLabel();
-			
-			//get next line to process
-			delete lookup;
-			lookup = input.getSharedRAbundVectors();
-		}
-		
 		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
-
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it);  
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + ".\n");
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + ".\n");
-			}
-		}
-		
-		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
-
-		//run last label if you need to
-		if (needToRun )  {
-			delete lookup;
-			lookup = input.getSharedRAbundVectors(lastLabel);
-
-			m->mothurOut(lookup->getLabel()+"\n"); 
-			createProcesses(lookup);
-			delete lookup;
-		}
-		
-		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
-		
-		//reset groups parameter
-		  
 		
 		//set phylip file as new current phylipfile
 		string currentName = "";

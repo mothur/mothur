@@ -171,7 +171,7 @@ int MakeLCRCommand::execute(){
         
         while (lookup != NULL) {
             
-            if (m->getControl_pressed()) { break; }
+            if (m->getControl_pressed()) { delete lookup; break; }
             
             process(lookup); delete lookup;
             
