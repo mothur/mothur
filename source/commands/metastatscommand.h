@@ -39,8 +39,8 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-    DesignMap* designMap;
-	SharedRAbundVectors* lookup;
+    //DesignMap* designMap;
+	//SharedRAbundVectors* lookup;
 		
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
@@ -50,7 +50,7 @@ private:
 	int iters, processors;
 	float threshold;
 	
-	int process(SharedRAbundVectors*&);
+	int process(SharedRAbundVectors*&, DesignMap*&);
 };
 
 /**************************************************************************************************/

@@ -217,17 +217,16 @@ int MetaStatsCommand::execute(){
 	
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-		designMap = new DesignMap(designfile);
+		DesignMap* designMap = new DesignMap(designfile);
 
 		InputData input(sharedfile, "sharedfile", Groups);
-		lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup->getLabel();
-        Groups = lookup->getNamesGroups();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
+        
         if (Sets.size() == 0) { Sets = designMap->getCategory();  }
 		int numGroups = (int)Sets.size();
 		for (int a=0; a<numGroups; a++) { 
@@ -238,73 +237,19 @@ int MetaStatsCommand::execute(){
 		}
 	
 		if (numGroups == 2) { processors = 1; }
-		else if (numGroups < 2)	{ m->mothurOut("Not enough sets, I need at least 2 valid sets. Unable to complete command.\n");  m->setControl_pressed(true); }
-
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-            if (m->getControl_pressed()) {  outputTypes.clear(); delete lookup;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
-	
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				process(lookup);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup->getLabel();
-			
-				delete lookup;
-				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				
-				process(lookup);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup->setLabels(saveLabel);
-			}
-			
-			lastLabel = lookup->getLabel();
-			//prevent memory leak
-			delete lookup;
-			
-			if (m->getControl_pressed()) {  outputTypes.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
-
-			//get next line to process
-			lookup = input.getSharedRAbundVectors();
-		}
-		
-		if (m->getControl_pressed()) { outputTypes.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }
-
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-	
-		//run last label if you need to
-		if (needToRun )  {
-			delete lookup;
-			lookup = input.getSharedRAbundVectors(lastLabel);
-			
-			m->mothurOut(lookup->getLabel()+"\n"); 
-			
-			process(lookup);
-			
-			delete lookup;
-		}
-	
-		//reset groups parameter
-		
-		delete designMap;
-		
-        if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0;}
+		else if (numGroups < 2)	{ m->mothurOut("[ERROR]: Not enough sets, I need at least 2 valid sets. Unable to complete command.\n");  m->setControl_pressed(true); }
+        
+        while (lookup != NULL) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            process(lookup, designMap); delete lookup;
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        
+        delete designMap;
+        if (m->getControl_pressed()) {  outputTypes.clear(); delete lookup; for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -399,7 +344,7 @@ int driver(metastatsData* params) {
 }
 //**********************************************************************************************************************
 
-int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
+int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp, DesignMap*& designMap){
 	try {
         vector<linePair> lines;
         vector<std::thread*> workerThreads;
@@ -431,13 +376,13 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
             remainingPairs = remainingPairs - numPairs;
         }
         
-        vector<string> designMapGroups = lookup->getNamesGroups();
+        vector<string> designMapGroups = thisLookUp->getNamesGroups();
         for (int j = 0; j < designMapGroups.size(); j++) {  designMapGroups[j] = designMap->get(designMapGroups[j]); }
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             //make copy of lookup so we don't get access violations
-            SharedRAbundVectors* newLookup = new SharedRAbundVectors(*lookup);
+            SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookUp);
             
             metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, outputNames, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
             data.push_back(dataBundle);
@@ -446,7 +391,7 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp){
             workerThreads.push_back(thisThread);
         }
 
-        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, outputNames, namesOfGroupCombos, lookup, designMapGroups, iters, threshold);
+        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, outputNames, namesOfGroupCombos, thisLookUp, designMapGroups, iters, threshold);
         driver(dataBundle);
         
         for (int i = 0; i < processors-1; i++) {
