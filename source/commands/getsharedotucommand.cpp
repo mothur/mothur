@@ -585,9 +585,12 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 int GetSharedOTUCommand::runShared() {
 	try {
         InputData input(sharedfile, "sharedfile", Groups);
-		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         Groups = lookup->getNamesGroups();
-		string lastLabel = lookup->getLabel();
         
         if (userGroups == "") {
             //make string for outputfile name
@@ -599,80 +602,18 @@ int GetSharedOTUCommand::runShared() {
         
         //put groups in map to find easier
         for(int i = 0; i < Groups.size(); i++) { groupFinder[Groups[i]] = Groups[i];}
-
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
         
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) {
-                outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }
-                delete lookup;  return 0;
-			}
+        while (lookup != NULL) {
             
+            if (m->getControl_pressed()) { delete lookup; break; }
             
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				m->mothurOut(lookup->getLabel());
-				process(lookup);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup->getLabel();
-                
-                delete lookup;
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                
-                m->mothurOut(lookup->getLabel());
-                process(lookup);
-                
-                processedLabels.insert(lookup->getLabel());
-                userLabels.erase(lookup->getLabel());
-                
-                //restore real lastlabel to save below
-                lookup->setLabels(saveLabel);
-			}
-			
-			lastLabel = lookup->getLabel();
+            process(lookup); delete lookup;
             
-			//get next line to process
-			//prevent memory leak
-			delete lookup;
-			lookup = input.getSharedRAbundVectors();
-		}
-		
-		if (m->getControl_pressed()) {
-            outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }
-            delete lookup;  return 0;
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         }
         
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it);
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-            delete lookup;
-            lookup = input.getSharedRAbundVectors(lastLabel);
-            
-            m->mothurOut(lookup->getLabel());
-            process(lookup);
-            delete lookup;
-		}
+		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
-		//reset groups parameter
-		  
 		
 		return 0;
 
