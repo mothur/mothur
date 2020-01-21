@@ -241,7 +241,7 @@ int MetaStatsCommand::execute(){
         
         while (lookup != NULL) {
             
-            if (m->getControl_pressed()) { break; }
+            if (m->getControl_pressed()) { delete lookup; break; }
             
             process(lookup, designMap); delete lookup;
             
