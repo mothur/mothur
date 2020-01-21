@@ -841,10 +841,13 @@ vector<string> SubSampleCommand::readNames() {
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleShared() {
 	try {
-		
 		InputData input(sharedfile, "sharedfile", Groups);
-		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-		string lastLabel = lookup->getLabel();
+		set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
         
         if (constaxonomyfile != "") { //you have a constaxonomy file and have not set the labels parameter. Either your sharedfile has one label or we only want to use one since the constaxonomy file is related to one label
             if (labels.size() == 0) {
@@ -853,10 +856,6 @@ int SubSampleCommand::getSubSampleShared() {
             }
         }
         
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
 		if (size == 0) { //user has not set size, set size = smallest samples size
 			size = lookup->getNumSeqsSmallestGroup();
         }else {
@@ -866,69 +865,17 @@ int SubSampleCommand::getSubSampleShared() {
 		if (lookup->size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file.\n");   return 0; }
 		
 		m->mothurOut("Sampling " + toString(size) + " from each group.\n");
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) {  if (lookup != NULL) { delete lookup; lookup = NULL; }  return 0;  }
-			
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				
-				processShared(lookup);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup->getLabel();
-				
-				if (lookup != NULL) { delete lookup; lookup = NULL; }
-				
-				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				
-				processShared(lookup);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup->setLabels(saveLabel);
-			}
-			
-			lastLabel = lookup->getLabel();
-			//prevent memory leak
-            if (lookup != NULL) { delete lookup; lookup = NULL; }
-			
-			//get next line to process
-			lookup = input.getSharedRAbundVectors();
-		}
-		
-		
-		if (m->getControl_pressed()) {   return 0;  }
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (lookup != NULL) { delete lookup; lookup = NULL; }
-			lookup = input.getSharedRAbundVectors(lastLabel);
-			
-			m->mothurOut(lookup->getLabel()+"\n"); 
-			
-			processShared(lookup);
-			
-			if (lookup != NULL) { delete lookup; lookup = NULL; }
-		}
+        
+        while (lookup != NULL) {
+            
+            if (m->getControl_pressed()) { delete lookup; break; }
+            
+            processShared(lookup); delete lookup;
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
 		
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "getSubSampleShared");
