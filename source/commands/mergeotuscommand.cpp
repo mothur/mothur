@@ -319,78 +319,25 @@ int MergeOTUsCommand::mergeSharedOTUs(vector<TaxNode>& nodes){
         util.openOutputFile(outputFileName, out);
         
         InputData input(sharedfile, "sharedfile", Groups);
-        SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-        string lastLabel = lookup->getLabel();
-        Groups = lookup->getNamesGroups();
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
         bool printHeaders = true;
         
-        //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while (lookup != NULL) {
             
-            if (m->getControl_pressed()) {  out.close(); delete lookup;  return 0; }
+            if (m->getControl_pressed()) { delete lookup; break; }
             
-            if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-                
-                m->mothurOut(lookup->getLabel()+"\t"+numNodes+"\n");
-                process(lookup, out, printHeaders, nodes);
-                
-                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-            }
+            process(lookup, out, printHeaders, nodes); delete lookup;
             
-            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup->getLabel();
-                
-                delete lookup;
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                m->mothurOut(lookup->getLabel()+"\t"+numNodes+"\n");
-                
-                process(lookup, out, printHeaders, nodes);
-                
-                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-                
-                //restore real lastlabel to save below
-                lookup->setLabels(saveLabel);
-            }
-            
-            lastLabel = lookup->getLabel();
-            //prevent memory leak
-            delete lookup;
-            
-            if (m->getControl_pressed()) {  out.close();  return 0; }
-            
-            //get next line to process
-            lookup = input.getSharedRAbundVectors();
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         }
-        
-        if (m->getControl_pressed()) { out.close(); return 0; }
-        
-        //output error messages about any remaining user labels
-        bool needToRun = false;
-        for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            delete lookup;
-            lookup = input.getSharedRAbundVectors(lastLabel);
-            
-            m->mothurOut(lookup->getLabel()+"\t"+numNodes+"\n");
-            process(lookup, out, printHeaders, nodes);
-            
-            delete lookup;
-        }
-        
         out.close();
         
         return 0;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "MergeOTUsCommand", "mergeSharedOTUs");
