@@ -517,6 +517,10 @@
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
 		48F1C16623D606050034DAAF /* makelcrcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F1C16423D606050034DAAF /* makelcrcommand.cpp */; };
 		48F1C16723D606050034DAAF /* makelcrcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F1C16423D606050034DAAF /* makelcrcommand.cpp */; };
+		48F1C16A23D78D7B0034DAAF /* sharedlcrvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F1C16823D78D7B0034DAAF /* sharedlcrvectors.cpp */; };
+		48F1C16B23D78D7B0034DAAF /* sharedlcrvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F1C16823D78D7B0034DAAF /* sharedlcrvectors.cpp */; };
+		48F1C16E23D78F8D0034DAAF /* sharedlcrvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F1C16C23D78F8D0034DAAF /* sharedlcrvector.cpp */; };
+		48F1C16F23D78F8D0034DAAF /* sharedlcrvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F1C16C23D78F8D0034DAAF /* sharedlcrvector.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
 		48FB99C5209B69FA00FF9F6E /* optirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */; };
 		48FB99C920A48EF700FF9F6E /* optidata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C720A48EF700FF9F6E /* optidata.cpp */; };
@@ -1126,6 +1130,10 @@
 		48F06CCC1D74BEC4004A45DD /* testphylotree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testphylotree.hpp; path = testclassifier/testphylotree.hpp; sourceTree = "<group>"; };
 		48F1C16423D606050034DAAF /* makelcrcommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = makelcrcommand.cpp; path = source/commands/makelcrcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48F1C16523D606050034DAAF /* makelcrcommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = makelcrcommand.hpp; path = source/commands/makelcrcommand.hpp; sourceTree = SOURCE_ROOT; };
+		48F1C16823D78D7B0034DAAF /* sharedlcrvectors.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sharedlcrvectors.cpp; path = source/datastructures/sharedlcrvectors.cpp; sourceTree = SOURCE_ROOT; };
+		48F1C16923D78D7B0034DAAF /* sharedlcrvectors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sharedlcrvectors.hpp; path = source/datastructures/sharedlcrvectors.hpp; sourceTree = SOURCE_ROOT; };
+		48F1C16C23D78F8D0034DAAF /* sharedlcrvector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sharedlcrvector.cpp; path = source/datastructures/sharedlcrvector.cpp; sourceTree = SOURCE_ROOT; };
+		48F1C16D23D78F8D0034DAAF /* sharedlcrvector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sharedlcrvector.hpp; path = source/datastructures/sharedlcrvector.hpp; sourceTree = SOURCE_ROOT; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optirefmatrix.cpp; path = source/datastructures/optirefmatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99C4209B69FA00FF9F6E /* optirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optirefmatrix.hpp; path = source/datastructures/optirefmatrix.hpp; sourceTree = SOURCE_ROOT; };
@@ -2846,6 +2854,10 @@
 				A7E9B7DE12D37EC400DA6239 /* sequencedb.h */,
 				A7F9F5CD141A5E500032F693 /* sequenceparser.h */,
 				A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */,
+				48F1C16C23D78F8D0034DAAF /* sharedlcrvector.cpp */,
+				48F1C16D23D78F8D0034DAAF /* sharedlcrvector.hpp */,
+				48F1C16823D78D7B0034DAAF /* sharedlcrvectors.cpp */,
+				48F1C16923D78D7B0034DAAF /* sharedlcrvectors.hpp */,
 				A7E9B80412D37EC400DA6239 /* sharedlistvector.cpp */,
 				A7E9B80512D37EC400DA6239 /* sharedlistvector.h */,
 				A7E9B80E12D37EC400DA6239 /* sharedordervector.h */,
@@ -3091,6 +3103,7 @@
 				48BDDA7A1ECA3B8E00F0F6C0 /* rabundfloatvector.cpp in Sources */,
 				481FB5FE1AC1B7970076CFF3 /* removerarecommand.cpp in Sources */,
 				481FB53C1AC1B5F10076CFF3 /* bootstrap.cpp in Sources */,
+				48F1C16B23D78D7B0034DAAF /* sharedlcrvectors.cpp in Sources */,
 				481FB5E21AC1B77E0076CFF3 /* metastatscommand.cpp in Sources */,
 				488563D223CD00C4007B5659 /* taxonomy.cpp in Sources */,
 				481FB5631AC1B6A10076CFF3 /* sharedkulczynski.cpp in Sources */,
@@ -3300,6 +3313,7 @@
 				481FB5441AC1B6140076CFF3 /* goodscoverage.cpp in Sources */,
 				481FB5DD1AC1B77E0076CFF3 /* matrixoutputcommand.cpp in Sources */,
 				481FB5771AC1B6EA0076CFF3 /* spearman.cpp in Sources */,
+				48F1C16F23D78F8D0034DAAF /* sharedlcrvector.cpp in Sources */,
 				48ED1E7A235E1ACA003E66F7 /* scriptengine.cpp in Sources */,
 				481FB6031AC1B7970076CFF3 /* secondarystructurecommand.cpp in Sources */,
 				481FB5361AC1B5DC0076CFF3 /* getopt_long.cpp in Sources */,
@@ -3642,6 +3656,7 @@
 				A7E9B8F412D37EC400DA6239 /* logsd.cpp in Sources */,
 				A7E9B8F512D37EC400DA6239 /* makegroupcommand.cpp in Sources */,
 				48705AC719BE32C50075E977 /* sharedrjsd.cpp in Sources */,
+				48F1C16E23D78F8D0034DAAF /* sharedlcrvector.cpp in Sources */,
 				48E5445D1E9C2F0F00FF6AB8 /* fn.cpp in Sources */,
 				A7E9B8F612D37EC400DA6239 /* maligner.cpp in Sources */,
 				A7E9B8F712D37EC400DA6239 /* manhattan.cpp in Sources */,
@@ -3854,6 +3869,7 @@
 				48E544491E9C2BE100FF6AB8 /* specificity.cpp in Sources */,
 				A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */,
 				A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */,
+				48F1C16A23D78D7B0034DAAF /* sharedlcrvectors.cpp in Sources */,
 				A7EEB0F514F29BFE00344B83 /* classifytreecommand.cpp in Sources */,
 				48C51DF01A76B888004ECDF1 /* fastqread.cpp in Sources */,
 				A7C3DC0B14FE457500FE1924 /* cooccurrencecommand.cpp in Sources */,

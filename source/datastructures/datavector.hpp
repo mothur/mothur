@@ -9,6 +9,8 @@
 	
 class SharedSAbundVector;
 class SharedRAbundVectors;
+class SharedLCRVector;
+class SharedLCRVectors;
 class RAbundVector;
 class RAbundFloatVector;
 class SAbundVector;
