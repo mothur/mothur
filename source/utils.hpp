@@ -16,9 +16,11 @@ class OrderVector;
 class SharedOrderVector;
 class RAbundVector;
 class SharedRAbundVector;
+class SharedRAbundVectors;
 class Tree;
 class PhyloTree;
 class Taxonomy;
+class InputData;
 
 class Utils {
     
@@ -186,7 +188,7 @@ public:
     bool isPositiveNumeric(string);
     bool isEqual(float, float); //handles approximate equal
     bool isEqual(double, double); //handles approximate equal
-    
+    double geometricMean(vector<float>&, double);
     
     //type conversion
     bool mothurConvert(char, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
@@ -231,6 +233,7 @@ public:
     string removeQuotes(string);
     void removeQuotes(vector<Taxon>& tax);
     bool stringBlank (string);
+    SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string);//input, allLines, userLabels, processedLabels, lastLabel
     
     void splitAtComma(string&, string&);
     void splitAtComma(string&, vector<string>&);

@@ -515,6 +515,8 @@
 		48ED1E8623689DE8003E66F7 /* srainfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ED1E8323689DE8003E66F7 /* srainfocommand.cpp */; };
 		48EDB76C1D1320DD00F76E93 /* chimeravsearchcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48EDB76A1D1320DD00F76E93 /* chimeravsearchcommand.cpp */; };
 		48F06CCD1D74BEC4004A45DD /* testphylotree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */; };
+		48F1C16623D606050034DAAF /* makelcrcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F1C16423D606050034DAAF /* makelcrcommand.cpp */; };
+		48F1C16723D606050034DAAF /* makelcrcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F1C16423D606050034DAAF /* makelcrcommand.cpp */; };
 		48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48F98E4C1A9CFD670005E81B /* completelinkage.cpp */; };
 		48FB99C5209B69FA00FF9F6E /* optirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */; };
 		48FB99C920A48EF700FF9F6E /* optidata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C720A48EF700FF9F6E /* optidata.cpp */; };
@@ -1122,6 +1124,8 @@
 		48EDB76B1D1320DD00F76E93 /* chimeravsearchcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chimeravsearchcommand.h; path = source/commands/chimeravsearchcommand.h; sourceTree = SOURCE_ROOT; };
 		48F06CCB1D74BEC4004A45DD /* testphylotree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testphylotree.cpp; path = testclassifier/testphylotree.cpp; sourceTree = "<group>"; };
 		48F06CCC1D74BEC4004A45DD /* testphylotree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testphylotree.hpp; path = testclassifier/testphylotree.hpp; sourceTree = "<group>"; };
+		48F1C16423D606050034DAAF /* makelcrcommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = makelcrcommand.cpp; path = source/commands/makelcrcommand.cpp; sourceTree = SOURCE_ROOT; };
+		48F1C16523D606050034DAAF /* makelcrcommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = makelcrcommand.hpp; path = source/commands/makelcrcommand.hpp; sourceTree = SOURCE_ROOT; };
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optirefmatrix.cpp; path = source/datastructures/optirefmatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99C4209B69FA00FF9F6E /* optirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optirefmatrix.hpp; path = source/datastructures/optirefmatrix.hpp; sourceTree = SOURCE_ROOT; };
@@ -2599,6 +2603,8 @@
 				48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */,
 				A7E9B74412D37EC400DA6239 /* makegroupcommand.h */,
 				A7E9B74312D37EC400DA6239 /* makegroupcommand.cpp */,
+				48F1C16423D606050034DAAF /* makelcrcommand.cpp */,
+				48F1C16523D606050034DAAF /* makelcrcommand.hpp */,
 				A741744B175CD9B1007DF49B /* makelefsecommand.h */,
 				A741744A175CD9B1007DF49B /* makelefsecommand.cpp */,
 				A7E6F69C17427CF2006775E2 /* makelookupcommand.h */,
@@ -3279,6 +3285,7 @@
 				481FB5451AC1B6170076CFF3 /* gower.cpp in Sources */,
 				481FB5AC1AC1B7300076CFF3 /* corraxescommand.cpp in Sources */,
 				481FB5A11AC1B71B0076CFF3 /* classifytreecommand.cpp in Sources */,
+				48F1C16723D606050034DAAF /* makelcrcommand.cpp in Sources */,
 				48C7286A1B69598400D40830 /* testmergegroupscommand.cpp in Sources */,
 				481FB62F1AC1B7EA0076CFF3 /* fastqread.cpp in Sources */,
 				481FB6901AC1BA9E0076CFF3 /* knn.cpp in Sources */,
@@ -3625,6 +3632,7 @@
 				A7E9B8EF12D37EC400DA6239 /* knn.cpp in Sources */,
 				48A85BAD18E1AF2000199B6F /* (null) in Sources */,
 				A7E9B8F012D37EC400DA6239 /* libshuff.cpp in Sources */,
+				48F1C16623D606050034DAAF /* makelcrcommand.cpp in Sources */,
 				48F98E4D1A9CFD670005E81B /* completelinkage.cpp in Sources */,
 				A7E9B8F112D37EC400DA6239 /* libshuffcommand.cpp in Sources */,
 				A7E9B8F212D37EC400DA6239 /* listseqscommand.cpp in Sources */,

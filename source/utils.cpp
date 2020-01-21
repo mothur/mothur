@@ -11,6 +11,8 @@
 #include "sharedordervector.h"
 #include "phylotree.h"
 #include "taxonomy.hpp"
+#include "inputdata.h"
+
 
 /***********************************************************************/
 string getLabelTag(string label){
@@ -4982,6 +4984,78 @@ int Utils::removeBlanks(vector<string>& tempVector) {
     }
 }
 /***********************************************************************/
+SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = lookup->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(lookup->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(lookup->getLabel()+"\n");
+                
+                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+                
+                return lookup;
+            }
+            
+            if ((anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = lookup->getLabel();
+                
+                delete lookup;
+                lookup = input.getSharedRAbundVectors(lastLabel);
+                m->mothurOut(lookup->getLabel()+"\n");
+                
+                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return lookup;
+            }
+            
+            lastLabel = lookup->getLabel();
+            //prevent memory leak
+            delete lookup;
+            
+            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            
+            //get next line to process
+            lookup = input.getSharedRAbundVectors();
+        }
+        
+        if (m->getControl_pressed()) { delete lookup;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete lookup;
+            lookup = input.getSharedRAbundVectors(lastLabel);
+            m->mothurOut(lookup->getLabel()+"\n");
+        }
+        
+        return lookup;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextShared");
+            exit(1);
+    }
+}
+/***********************************************************************/
 //this function determines if the user has given us labels that are smaller than the given label.
 //if so then it returns true so that the calling function can run the previous valid distance.
 //it's a "smart" distance function.  It also checks for invalid labels.
@@ -5158,6 +5232,24 @@ int Utils::getTimeStamp(string filename) {
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "getTimeStamp");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+double Utils::geometricMean(vector<float>& abunds, double zeroReplacementValue) {
+    try{
+        double sum = 0;
+        for (int j = 0; j < abunds.size(); j++) {
+            if (isEqual(abunds[j], 0)) { abunds[j] += zeroReplacementValue; }
+            sum += log(abunds[j]);
+        }
+        sum /= abunds.size();
+        sum = exp(sum);
+
+        return sum;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "geometricMean");
         exit(1);
     }
 }
