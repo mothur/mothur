@@ -183,13 +183,12 @@ int CooccurrenceCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		InputData input(sharedfile, "sharedfile", Groups);
-		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-        Groups = lookup->getNamesGroups();
-		string lastLabel = lookup->getLabel();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = labels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
 
         ofstream out;
         map<string, string> variables; 
@@ -200,69 +199,17 @@ int CooccurrenceCommand::execute(){
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
         out << "metric\tlabel\tScore\tzScore\tstandardDeviation\tnp_Pvalue\n";
 
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-            if (m->getControl_pressed()) { delete lookup; out.close(); util.mothurRemove(outputFileName); return 0; }
-	
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				
-				getCooccurrence(lookup, out);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup->getLabel();
-			
-				delete lookup;
-				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				getCooccurrence(lookup, out);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup->setLabels(saveLabel);
-			}
-			
-			lastLabel = lookup->getLabel();
-			delete lookup;
-			
-			if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); util.mothurRemove(outputFileName); return 0; }
-
-			//get next line to process
-			lookup = input.getSharedRAbundVectors();
-		}
-		
-		if (m->getControl_pressed()) { out.close(); util.mothurRemove(outputFileName); return 0; }
-
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-	
-		//run last label if you need to
-		if (needToRun )  {
-			delete lookup;
-			lookup = input.getSharedRAbundVectors(lastLabel);
-			
-			m->mothurOut(lookup->getLabel()+"\n"); 
-			
-			getCooccurrence(lookup, out);
-			
-			delete lookup;
-		}
-	
-        out.close(); 
+        while (lookup != NULL) {
+            
+            if (m->getControl_pressed()) { delete lookup; break; }
+            
+            getCooccurrence(lookup, out); delete lookup;
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        out.close();
         
-		//reset groups parameter
-         
+        if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return 0; }
 
         m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
