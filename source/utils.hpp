@@ -233,7 +233,7 @@ public:
     string removeQuotes(string);
     void removeQuotes(vector<Taxon>& tax);
     bool stringBlank (string);
-    SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string);//input, allLines, userLabels, processedLabels, lastLabel
+    SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     
     void splitAtComma(string&, string&);
     void splitAtComma(string&, vector<string>&);

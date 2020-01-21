@@ -163,9 +163,9 @@ int MakeLCRCommand::execute(){
         if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
         InputData input(sharedfile, "sharedfile", Groups);
-        string lastLabel = "";
         set<string> processedLabels;
         set<string> userLabels = labels;
+        string lastLabel = "";
         
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         

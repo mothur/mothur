@@ -4984,7 +4984,7 @@ int Utils::removeBlanks(vector<string>& tempVector) {
     }
 }
 /***********************************************************************/
-SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string lastLabel) {//input, allLines, userLabels, processedLabels
+SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
     try {
         
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
@@ -5046,6 +5046,8 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
             m->mothurOut(lookup->getLabel()+"\n");
+            processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+            return lookup;
         }
         
         return lookup;
