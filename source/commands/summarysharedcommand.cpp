@@ -328,10 +328,13 @@ int SummarySharedCommand::execute(){
 		else{ if (all){  for (int i = 0; i < sumCalculators.size(); i++) { if (sumCalculators[i]->getMultiple() ) { mult = true; } } } }
 			
 		InputData input(sharedfile, "sharedfile", Groups);
-		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
+		set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         Groups = lookup->getNamesGroups();
-		string lastLabel = lookup->getLabel();
-	
+
 		/******************************************************/
 		//output headings for files
 		/******************************************************/
@@ -405,65 +408,17 @@ int SummarySharedCommand::execute(){
 		}		
 		/******************************************************/
 		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
         vector<string> currentLabels = lookup->getOTUNames();
-			
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) { if (mult) {  util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName);  delete lookup; for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0; }
+        
+        while (lookup != NULL) {
+            
+            if (m->getControl_pressed()) { delete lookup; break; }
+            
+            process(lookup, outputFileName, outAllFileName, currentLabels); delete lookup;
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
 
-		
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				m->mothurOut(lookup->getLabel()+"\n");
-                process(lookup, outputFileName, outAllFileName, currentLabels);
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookup->getLabel();
-					
-					delete lookup;
-					lookup = input.getSharedRAbundVectors(lastLabel);
-
-					m->mothurOut(lookup->getLabel()+"\n");
-                    process(lookup, outputFileName, outAllFileName, currentLabels);
-					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-					
-					//restore real lastlabel to save below
-					lookup->setLabels(saveLabel);
-			}
-			
-			lastLabel = lookup->getLabel();
-				
-			//get next line to process
-			//prevent memory leak
-			delete lookup;
-			lookup = input.getSharedRAbundVectors();
-		}
-		
-		if (m->getControl_pressed()) { if (mult) { util.mothurRemove(outAllFileName);  } util.mothurRemove(outputFileName); for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   return 0; }
-
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-            delete lookup;
-            lookup = input.getSharedRAbundVectors(lastLabel);
-
-            m->mothurOut(lookup->getLabel()+"\n");
-            process(lookup, outputFileName, outAllFileName, currentLabels);
-            delete lookup;
-		}
-		
-		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		
 		if (m->getControl_pressed()) { util.mothurRemove(outAllFileName);   util.mothurRemove(outputFileName);  return 0; }
@@ -473,9 +428,7 @@ int SummarySharedCommand::execute(){
             m->mothurOut(outputFileName+"\n");
             if (mult) { m->mothurOut(outAllFileName+"\n"); outputTypes["summary"].push_back(outAllFileName); }
             outputTypes["summary"].push_back(outputFileName);
-        }else { for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	} }
-        
-		m->mothurOutEndLine();
+        }else { for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	} } m->mothurOutEndLine();
 
 		return 0;
 	}
