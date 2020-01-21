@@ -5058,6 +5058,80 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
     }
 }
 /***********************************************************************/
+ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        ListVector* list = input.getListVector();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete list;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = list->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(list->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(list->getLabel()+"\n");
+                
+                processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
+                
+                return list;
+            }
+            
+            if ((anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = list->getLabel();
+                
+                delete list;
+                list = input.getListVector(lastLabel);
+                m->mothurOut(list->getLabel()+"\n");
+                
+                processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return list;
+            }
+            
+            lastLabel = list->getLabel();
+            //prevent memory leak
+            delete list;
+            
+            if (m->getControl_pressed()) {  delete list;  return NULL; }
+            
+            //get next line to process
+            list = input.getListVector();
+        }
+        
+        if (m->getControl_pressed()) { delete list;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete list;
+            list = input.getListVector(lastLabel);
+            m->mothurOut(list->getLabel()+"\n");
+            processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
+            return list;
+        }
+        
+        return list;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextShared");
+            exit(1);
+    }
+}
+/***********************************************************************/
 //this function determines if the user has given us labels that are smaller than the given label.
 //if so then it returns true so that the calling function can run the previous valid distance.
 //it's a "smart" distance function.  It also checks for invalid labels.

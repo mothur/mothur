@@ -313,13 +313,12 @@ int SplitAbundCommand::execute(){
 /**********************************************************************************************************************/
 int SplitAbundCommand::splitList() {
     try {
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        InputData input(listfile, "list", nullVector);
         set<string> processedLabels;
         set<string> userLabels = labels;
+        string lastLabel = "";
         
-        InputData input(listfile, "list", nullVector);
-        ListVector* list = input.getListVector();
-        string lastLabel = list->getLabel();
+        ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         
         if (cutoff < 1) { //percentage instead of raw count
             int total = list->getNumSeqs();
@@ -331,73 +330,18 @@ int SplitAbundCommand::splitList() {
         
         if (m->getControl_pressed()) { delete list; return 0; }
         
-        while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-        
-            if (m->getControl_pressed()) {  delete list; for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0; }
+        while (list != NULL) {
             
-            if(allLines == 1 || labels.count(list->getLabel()) == 1){
-                    
-                    m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-                    process(list);
-                                        
-                    processedLabels.insert(list->getLabel());
-                    userLabels.erase(list->getLabel());
-            }
+            if (m->getControl_pressed()) { delete list; break; }
             
-            if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = list->getLabel();
-                    
-                    delete list;
-                    list = input.getListVector(lastLabel); //get new list vector to process
-                    
-                    m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-                    process(list);
-                    
-                    processedLabels.insert(list->getLabel());
-                    userLabels.erase(list->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    list->setLabel(saveLabel);
-            }
-            
-        
-            lastLabel = list->getLabel();
-                
-            delete list;
-            list = input.getListVector(); //get new list vector to process
-        }
-        
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0; }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                needToRun = true;
-            }else {
-                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-            }
-
-        }
-        
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0; }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            if (list != NULL) {    delete list;    }
-            list = input.getListVector(lastLabel); //get new list vector to process
-            
-            m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-            process(list);
-            
-            delete list;
+            process(list); delete list;
+    
+            list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         }
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); }    return 0;    }
-                                
+        
+        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "SplitAbundCommand", "splitList");

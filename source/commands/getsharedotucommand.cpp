@@ -329,71 +329,19 @@ int GetSharedOTUCommand::execute(){
             }
             
             InputData input(listfile, "list", nullVector);
-            ListVector* list = input.getListVector();
-            string lastLabel = "";
-            
-            //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
             set<string> processedLabels;
             set<string> userLabels = labels;
+            string lastLabel = "";
             
+            ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
             
-            while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while (list != NULL) {
                 
-                if (m->getControl_pressed()) {
-                    for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  outputTypes.clear();
-                    if (groupfile != "") { delete groupMap; }else { delete ct; } return 0;
-                }
+                if (m->getControl_pressed()) { delete list; break; }
                 
-                if(allLines == 1 || labels.count(list->getLabel()) == 1){
-                    m->mothurOut(list->getLabel());
-                    process(list);
+                process(list); delete list;
                 
-                    processedLabels.insert(list->getLabel());
-                    userLabels.erase(list->getLabel());
-                }
-                
-                if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = list->getLabel();
-                    
-                    delete list;
-                    list = input.getListVector(lastLabel);
-                    
-                    m->mothurOut(list->getLabel());
-                    process(list);
-                    
-                    processedLabels.insert(list->getLabel());
-                    userLabels.erase(list->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    list->setLabel(saveLabel);
-                }
-                
-                lastLabel = list->getLabel();			
-                
-                delete list;
-                list = input.getListVector();
-            }
-
-            //output error messages about any remaining user labels
-            set<string>::iterator it;
-            bool needToRun = false;
-            for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-                m->mothurOut("Your file does not include the label " + *it); 
-                if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                    needToRun = true;
-                }else {
-                    m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-                }
-            }
-            
-            //run last label if you need to
-            if (needToRun )  {
-                if (list != NULL) {		delete list;	}
-                list = input.getListVector(lastLabel);
-                
-                process(list);
-                delete list;
+                list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
             }
             
             if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  if (groupfile != "") { delete groupMap; }else { delete ct; } return 0; } 

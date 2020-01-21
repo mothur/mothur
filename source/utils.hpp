@@ -21,6 +21,7 @@ class Tree;
 class PhyloTree;
 class Taxonomy;
 class InputData;
+class ListVector;
 
 class Utils {
     
@@ -234,6 +235,7 @@ public:
     void removeQuotes(vector<Taxon>& tax);
     bool stringBlank (string);
     SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+    ListVector* getNextList(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     
     void splitAtComma(string&, string&);
     void splitAtComma(string&, vector<string>&);

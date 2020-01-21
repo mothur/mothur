@@ -443,77 +443,25 @@ int MergeOTUsCommand::mergeListOTUs(vector<TaxNode>& nodes){
         util.openOutputFile(outputFileName, out);
         
         InputData input(listfile, "list", Groups);
-        ListVector* list = input.getListVector();
-        string lastLabel = list->getLabel();
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         bool printHeaders = true;
         
-        //as long as you are not at the end of the file or done wih the lines you want
-        while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while (list != NULL) {
             
-            if (m->getControl_pressed()) {  out.close(); delete list;  return 0; }
+            if (m->getControl_pressed()) { delete list; break; }
             
-            if(allLines == 1 || labels.count(list->getLabel()) == 1){
-                
-                m->mothurOut(list->getLabel()+"\t"+numNodes+"\n");
-                process(list, out, printHeaders, nodes);
-                
-                processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
-            }
+            process(list, out, printHeaders, nodes); delete list;
             
-            if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = list->getLabel();
-                
-                delete list;
-                list = input.getListVector(lastLabel);
-                m->mothurOut(list->getLabel()+"\t"+numNodes+"\n");
-                
-                process(list, out, printHeaders, nodes);
-                
-                processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
-                
-                //restore real lastlabel to save below
-                list->setLabel(saveLabel);
-            }
-            
-            lastLabel = list->getLabel();
-            //prevent memory leak
-            delete list;
-            
-            if (m->getControl_pressed()) {  out.close();  return 0; }
-            
-            //get next line to process
-            list = input.getListVector();
+            list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         }
-        
-        if (m->getControl_pressed()) { out.close(); return 0; }
-        
-        //output error messages about any remaining user labels
-        bool needToRun = false;
-        for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            delete list;
-            list = input.getListVector(lastLabel);
-            
-            m->mothurOut(list->getLabel()+"\t"+numNodes+"\n");
-            process(list, out, printHeaders, nodes);
-            
-            delete list;
-        }
-        
+    
         out.close();
         
         return 0;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "MergeOTUsCommand", "mergeListOTUs");

@@ -277,86 +277,31 @@ BinSeqCommand::~BinSeqCommand(){}
 int BinSeqCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-	
-		int error = 0;
-		
+
 		FastaMap fasta; fasta.readFastaFile(fastafile);
         
 		//if user gave a namesfile then use it
         if (countfile != "") {  ct.readTable(countfile, true, false);  }
 		
 		InputData input(listfile, "list", nullVector);
-		ListVector* list = input.getListVector();
-		string lastLabel = list->getLabel();
-		
-		if (m->getControl_pressed()) {  return 0; }
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        int error = 0;
+        
+        ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+        
+        while (list != NULL) {
+            
+            if (m->getControl_pressed()) { delete list; break; }
+            
+            error = process(list, fasta); delete list;
+            if (error == 1)  { for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]);        }  return 0; }
+            
+            list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+        }
 
-		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if(m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}   return 0; }
-			
-			if(allLines == 1 || labels.count(list->getLabel()) == 1){
-				
-				error = process(list, fasta);
-				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }
-							
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = list->getLabel();
-				
-				delete list;
-				list = input.getListVector(lastLabel);
-				
-				error = process(list, fasta);
-				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }
-													
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				
-				//restore real lastlabel to save below
-				list->setLabel(saveLabel);
-			}
-			
-			lastLabel = list->getLabel();			
-			
-			delete list;
-			list = input.getListVector();
-		}
-		
 		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }
-
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + ".");  m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (list != NULL) {		delete list;	}
-			list = input.getListVector(lastLabel);
-				
-			error = process(list, fasta);	
-			if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}   return 0; }
-			
-			delete list;  
-		}
-		
-		if(m->getControl_pressed())  { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);		}  return 0; }	
         
         //set align file as new current fastafile
 		string currentFasta = "";
@@ -368,7 +313,6 @@ int BinSeqCommand::execute(){
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
-		
 		return 0;
 	}
 	catch(exception& e) {
@@ -440,7 +384,6 @@ int BinSeqCommand::process(ListVector* list, FastaMap& fasta) {
         
         out.close();
         return 0;
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "BinSeqCommand", "process");

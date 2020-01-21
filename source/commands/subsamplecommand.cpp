@@ -963,8 +963,11 @@ int SubSampleCommand::getSubSampleList() {
         if ((countfile == "") && withReplacement) { m->mothurOut("[WARNING]: To use the withreplacement option with a fasta file, you need to provide a count file, running without replacement.\n"); withReplacement = false;  }
         
 		InputData input(listfile, "list", nullVector);
-		ListVector* list = input.getListVector();
-		string lastLabel = list->getLabel();
+		set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         
         if (constaxonomyfile != "") { //you have a constaxonomy file and have not set the labels parameter. Either your list file has one label or we only want to use one since the constaxonomy file is related to one label
             if (labels.size() == 0) {
@@ -972,11 +975,6 @@ int SubSampleCommand::getSubSampleList() {
                 m->mothurOut("\n[WARNING]: The constaxonomy file represents a single label in your list file. You did not set the label parameter, so mothur is assuming you want to use label " + lastLabel + ". If this is not correct file mismatches can occur.\n\n");
             }
         }
-
-		
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
 
 		GroupMap groupMap;
 		if (groupfile != "") {
@@ -1116,70 +1114,15 @@ int SubSampleCommand::getSubSampleList() {
             outputTypes["count"].push_back(countOutputFileName);  outputNames.push_back(countOutputFileName);
             sampledCt.printTable(countOutputFileName);
         }
-						
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->getControl_pressed()) {  delete list;   return 0;  }
-			
-			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
-				
-				m->mothurOut(list->getLabel()+"\n");
-				
-				processList(list,  subset);
-				
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = list->getLabel();
-				
-				delete list; 
-				
-				list = input.getListVector(lastLabel);
-				m->mothurOut(list->getLabel()+"\n");
-				
-				processList(list,  subset);
-				
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				
-				//restore real lastlabel to save below
-				list->setLabel(saveLabel);
-			}
-			
-			lastLabel = list->getLabel();
-			
-			delete list; list = NULL;
-			
-			//get next line to process
-			list = input.getListVector();
-		}
-		
-		
-		if (m->getControl_pressed()) {  if (list != NULL) { delete list; }  return 0;  }
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (list != NULL) { delete list; }
-			
-			list = input.getListVector(lastLabel);
-			
-			m->mothurOut(list->getLabel()+"\n");
-			
-			processList(list, subset);
-			
-			delete list; list = NULL;
-		}
+        while (list != NULL) {
+            
+            if (m->getControl_pressed()) { delete list; break; }
+            
+            processList(list,  subset); delete list;
+            
+            list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+        }
 		
 		if (list != NULL) { delete list; }
         
@@ -1246,7 +1189,6 @@ int SubSampleCommand::getSubSampleList() {
         }
 						
 		return 0;
- 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "getSubSampleList");
