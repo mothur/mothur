@@ -183,7 +183,7 @@ int MakeLCRCommand::execute(){
         string currentName = "";
         itTypes = outputTypes.find("lcr");
         if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setLCRFile(currentName); }
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setLCRFile(currentName);  }
         }
         
         m->mothurOut("\nOutput File Names: \n");

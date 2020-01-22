@@ -13,6 +13,7 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "sharedrabundvectors.hpp"
+#include "sharedlcrvectors.hpp"
 #include "mothurmetastats.h"
 #include "designmap.h"
 
@@ -39,18 +40,17 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-    //DesignMap* designMap;
-	//SharedRAbundVectors* lookup;
-		
+    
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, inputDir, designfile, sets, sharedfile;
+	string groups, label, outputDir, inputDir, designfile, sets, sharedfile, lcrfile, inputfile, format;
 	vector<string> Groups, outputNames, Sets;
 	vector< vector<string> > namesOfGroupCombos;
 	int iters, processors;
 	float threshold;
 	
 	int process(SharedRAbundVectors*&, DesignMap*&);
+    int process(SharedLCRVectors*&, DesignMap*&);
 };
 
 /**************************************************************************************************/

@@ -12,6 +12,7 @@
 #include "listvector.hpp"
 #include "rabundvector.hpp"
 #include "sharedrabundvectors.hpp"
+#include "sharedlcrvectors.hpp"
 
 /***********************************************************************/
 
@@ -661,6 +662,74 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 		m->errorOut(e, "InputData", "getSharedRAbundFloatVectors");
 		exit(1);
 	}
+}
+/***********************************************************************/
+//this is used when you don't need the order vector
+SharedLCRVectors* InputData::getSharedLCRVectors(){
+    try {
+        if(fileHandle){
+            if (format == "lcrfile")  {
+                SharedLCRVectors* SharedLCR = new SharedLCRVectors(fileHandle, groups, nextDistanceLabel, otuTag);
+                if (SharedLCR->getNumBins() == 0) { delete SharedLCR; SharedLCR = NULL;  } //no valid groups
+                else { //pass labels to others distances in file
+                    if (currentLabels.size() == 0) { currentLabels = SharedLCR->getOTUNames(); }
+                    else { SharedLCR->setOTUNames(currentLabels);  }
+                }
+                return SharedLCR;
+            }
+            util.gobble(fileHandle);
+        }
+                
+        //this is created to signal to calling function that the input file is at eof
+        SharedLCRVectors* null;  null = (NULL);
+        return null;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "InputData", "getSharedLCRVectors");
+        exit(1);
+    }
+}
+/***********************************************************************/
+SharedLCRVectors* InputData::getSharedLCRVectors(string label){
+    try {
+        ifstream in;
+        string  thisLabel;
+        
+        util.openInputFile(filename, in);
+        nextDistanceLabel = "";
+        
+        if(in){
+            if (format == "lcrfile")  {
+                while (!in.eof()) {
+                    
+                    SharedLCRVectors* SharedLCR = new SharedLCRVectors(in, groups, nextDistanceLabel, otuTag);
+                    if (SharedLCR != NULL) {
+                        thisLabel = SharedLCR->getLabel();
+                        
+                        if (SharedLCR->getNumBins() == 0) { delete SharedLCR; SharedLCR = NULL; break;  } //no valid groups
+                        
+                        //pass labels to others distances in file
+                        if (currentLabels.size() == 0) { currentLabels = SharedLCR->getOTUNames(); }
+                        else { SharedLCR->setOTUNames(currentLabels);  }
+                        //if you are at the last label
+                        if (thisLabel == label) {  in.close(); return SharedLCR;  }
+                        else { delete SharedLCR; }
+                    }else{  break;  }
+                    util.gobble(in);
+                }
+            }
+        }
+        
+        //this is created to signal to calling function that the input file is at eof
+        SharedLCRVectors* null;  null = (NULL);
+        in.close();
+        return null;
+    
+    }
+    catch(exception& e) {
+        m->errorOut(e, "InputData", "getSharedLCRVectors");
+        exit(1);
+    }
 }
 /***********************************************************************/
 

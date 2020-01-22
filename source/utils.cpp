@@ -12,7 +12,7 @@
 #include "phylotree.h"
 #include "taxonomy.hpp"
 #include "inputdata.h"
-
+#include "sharedlcrvectors.hpp"
 
 /***********************************************************************/
 string getLabelTag(string label){
@@ -5054,6 +5054,80 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
         
     }catch(exception& e) {
             m->errorOut(e, "Utils", "getNextShared");
+            exit(1);
+    }
+}
+/***********************************************************************/
+SharedLCRVectors* Utils::getNextLCR(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        SharedLCRVectors* lookup = input.getSharedLCRVectors();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = lookup->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(lookup->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(lookup->getLabel()+"\n");
+                
+                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+                
+                return lookup;
+            }
+            
+            if ((anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = lookup->getLabel();
+                
+                delete lookup;
+                lookup = input.getSharedLCRVectors(lastLabel);
+                m->mothurOut(lookup->getLabel()+"\n");
+                
+                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return lookup;
+            }
+            
+            lastLabel = lookup->getLabel();
+            //prevent memory leak
+            delete lookup;
+            
+            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            
+            //get next line to process
+            lookup = input.getSharedLCRVectors();
+        }
+        
+        if (m->getControl_pressed()) { delete lookup;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete lookup;
+            lookup = input.getSharedLCRVectors(lastLabel);
+            m->mothurOut(lookup->getLabel()+"\n");
+            processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+            return lookup;
+        }
+        
+        return lookup;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextLCR");
             exit(1);
     }
 }

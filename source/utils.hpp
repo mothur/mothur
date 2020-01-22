@@ -17,6 +17,7 @@ class SharedOrderVector;
 class RAbundVector;
 class SharedRAbundVector;
 class SharedRAbundVectors;
+class SharedLCRVectors;
 class Tree;
 class PhyloTree;
 class Taxonomy;
@@ -236,6 +237,8 @@ public:
     bool stringBlank (string);
     SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     ListVector* getNextList(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+    SharedLCRVectors* getNextLCR(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+
     
     void splitAtComma(string&, string&);
     void splitAtComma(string&, vector<string>&);

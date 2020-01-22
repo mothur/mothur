@@ -122,6 +122,8 @@ map<string, string> OptionParser::getParameters() {
                         it->second = current->getListFile();
                     }else if (it->first == "rabund") {
                         it->second = current->getRabundFile();
+                    }else if (it->first == "lcr") {
+                        it->second = current->getLCRFile();
                     }else if (it->first == "sabund") {
                         it->second = current->getSabundFile();
                     }else if (it->first == "name") {

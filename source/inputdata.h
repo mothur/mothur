@@ -33,6 +33,8 @@ public:
 	SharedRAbundVectors* getSharedRAbundVectors(string);  //pass the label you want
 	SharedRAbundFloatVectors* getSharedRAbundFloatVectors();
 	SharedRAbundFloatVectors* getSharedRAbundFloatVectors(string);  //pass the label you want
+    SharedLCRVectors* getSharedLCRVectors();
+    SharedLCRVectors* getSharedLCRVectors(string);  //pass the label you want
     
 private:
     Utils util;

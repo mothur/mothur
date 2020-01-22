@@ -47,10 +47,10 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
         //      convert to proportions
         //      generate Pmatrix
         //*************************************
-        vector<double> totals; totals.resize(column, 0); // sum of columns
+        vector<double> totals; totals.resize(column, 0); // sum of columns / samples -> numSeqs for each sample
         //total[i] = total abundance for group[i]
-		for (int i = 0; i < column; i++) {
-			for (int j = 0; j < row; j++) {
+		for (int i = 0; i < column; i++) { //each sample
+			for (int j = 0; j < row; j++) { //each otu
 				totals[i] += data[j][i];
 			}
         }
@@ -79,16 +79,17 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             vector<double> fish;	fish.resize(row, 0.0);
 			vector<double> fish2;	fish2.resize(row, 0.0);
             //vector<string> currentLabels = m->getCurrentSharedBinLabels();
-			for(int i = 0; i < row; i++){
+			for(int i = 0; i < row; i++){ //numBins
 				
 				for(int j = 0; j < secondGroupingStart; j++)		{ fish[i] += data[i][j];	}
 				for(int j = secondGroupingStart; j < column; j++)	{ fish2[i] += data[i][j];	}
 				
 				double f11, f12, f21, f22;
-				f11 = fish[i];
-				f12 = fish2[i];
-				f21 = total1 - fish[i];
-				f22 = total2 - fish2[i];
+				f11 = fish[i];  if (f11 < 0) { f11 *= -1.0; } f11 = floor(f11);
+                f12 = fish2[i]; if (f12 < 0) { f12 *= -1.0; } f12 = floor(f11);
+                f21 = total1 - fish[i]; if (f21 < 0) { f21 *= -1.0; } f21 = floor(f21);
+                f22 = total2 - fish2[i]; if (f22 < 0) { f22 *= -1.0; } f22 = floor(f22);
+                
 				
 				MothurFisher fisher;
 				double pre = fisher.fexact(f11, f12, f21, f22, currentLabels[i]);
@@ -161,15 +162,15 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             //#*************************************
             double total1, total2; total1 = 0; total2 = 0;
 			//total for first grouping
-            for (int i = 0; i < secondGroupingStart; i++) { total1 += totals[i];  }
+            for (int i = 0; i < secondGroupingStart; i++) { total1 += totals[i];  } //total all seqs in first set
             
             //total for second grouping
-            for (int i = secondGroupingStart; i < column; i++) { total2 += totals[i];  }
+            for (int i = secondGroupingStart; i < column; i++) { total2 += totals[i];  } //total all seqs in second set
             
             vector<double> fish;	fish.resize(row, 0.0);
 			vector<double> fish2;	fish2.resize(row, 0.0);
             
-			for(int i = 0; i < row; i++){
+			for(int i = 0; i < row; i++){ //numBins
 				
 				for(int j = 0; j < secondGroupingStart; j++)		{ fish[i] += data[i][j];	}
 				for(int j = secondGroupingStart; j < column; j++)	{ fish2[i] += data[i][j];	}
@@ -177,10 +178,10 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                 if ((fish[i] < secondGroupingStart) && (fish2[i] < (column-secondGroupingStart))) {
     
                     double f11, f12, f21, f22;
-                    f11 = fish[i];
-                    f12 = fish2[i];
-                    f21 = total1 - fish[i];
-                    f22 = total2 - fish2[i];
+                    f11 = fish[i];  if (f11 < 0) { f11 *= -1.0; } f11 = floor(f11);
+                    f12 = fish2[i]; if (f12 < 0) { f12 *= -1.0; } f12 = floor(f11);
+                    f21 = total1 - fish[i]; if (f21 < 0) { f21 *= -1.0; } f21 = floor(f21);
+                    f22 = total2 - fish2[i]; if (f22 < 0) { f22 *= -1.0; } f22 = floor(f22);
 				
                     MothurFisher fisher;
                     if (m->getDebug()) {    m->mothurOut("[DEBUG]: about to run fisher for Otu " + currentLabels[i] + " F11, F12, F21, F22 = " + toString(f11) + " " + toString(f12) + " " + toString(f21) + " " + toString(f22) + " " + "\n"); }
