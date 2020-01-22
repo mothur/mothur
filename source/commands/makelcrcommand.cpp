@@ -180,6 +180,12 @@ int MakeLCRCommand::execute(){
             
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]);    } outputTypes.clear(); return 0;}
         
+        string currentName = "";
+        itTypes = outputTypes.find("lcr");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setLCRFile(currentName); }
+        }
+        
         m->mothurOut("\nOutput File Names: \n");
         for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i] +"\n");     } m->mothurOutEndLine();
         

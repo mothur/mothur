@@ -40,12 +40,22 @@ class CurrentFile {
 		string getTreeFile()		{ lock_guard<std::mutex> guard(currentProtector); return treefile;			}
 		string getSharedFile()		{ lock_guard<std::mutex> guard(currentProtector); return sharedfile;		}
 		string getRelAbundFile()	{ lock_guard<std::mutex> guard(currentProtector); return relabundfile;		}
+        string getLCRFile()         { lock_guard<std::mutex> guard(currentProtector); return lcrfile;           }
 		string getDesignFile()		{ lock_guard<std::mutex> guard(currentProtector); return designfile;		}
 		string getFastaFile()		{ lock_guard<std::mutex> guard(currentProtector); return fastafile;			}
 		string getSFFFile()			{ lock_guard<std::mutex> guard(currentProtector); return sfffile;			}
 		string getQualFile()		{ lock_guard<std::mutex> guard(currentProtector); return qualfile;			}
 		string getOligosFile()		{ lock_guard<std::mutex> guard(currentProtector); return oligosfile;		}
         string getSampleFile()      { lock_guard<std::mutex> guard(currentProtector); return samplefile;        }
+        string getAccnosFile()        { lock_guard<std::mutex> guard(currentProtector); return accnosfile;        }
+        string getTaxonomyFile()    { lock_guard<std::mutex> guard(currentProtector); return taxonomyfile;        }
+        string getFlowFile()        { lock_guard<std::mutex> guard(currentProtector); return flowfile;            }
+        string getContigsReportFile(){ lock_guard<std::mutex> guard(currentProtector); return contigsreportfile;            }
+        string getBiomFile()        { lock_guard<std::mutex> guard(currentProtector); return biomfile;            }
+        string getCountFile()       { lock_guard<std::mutex> guard(currentProtector); return countfile;         }
+        string getSummaryFile()     { lock_guard<std::mutex> guard(currentProtector); return summaryfile;       }
+        string getFileFile()        { lock_guard<std::mutex> guard(currentProtector); return filefile;          }
+        string getConsTaxonomyFile(){ lock_guard<std::mutex> guard(currentProtector); return constaxonomyfile;  }
 		
 		void setListFile(string f)			{ lock_guard<std::mutex> guard(currentProtector); listfile = util.getFullPathName(f);			}
         void setBiomFile(string f)			{ lock_guard<std::mutex> guard(currentProtector); biomfile = util.getFullPathName(f);			}
@@ -62,6 +72,7 @@ class CurrentFile {
 		void setSabundFile(string f)		{ lock_guard<std::mutex> guard(currentProtector); sabundfile = util.getFullPathName(f);			}
 		void setSharedFile(string f)		{ lock_guard<std::mutex> guard(currentProtector); sharedfile = util.getFullPathName(f);			}
 		void setRelAbundFile(string f)		{ lock_guard<std::mutex> guard(currentProtector); relabundfile = util.getFullPathName(f);		}
+        void setLCRFile(string f)           { lock_guard<std::mutex> guard(currentProtector); lcrfile = util.getFullPathName(f);        }
 		void setOrderFile(string f)			{ lock_guard<std::mutex> guard(currentProtector); orderfile = util.getFullPathName(f);			}
 		void setOrderGroupFile(string f)	{ lock_guard<std::mutex> guard(currentProtector); ordergroupfile = util.getFullPathName(f);		}
 		void setDesignFile(string f)		{ lock_guard<std::mutex> guard(currentProtector); designfile = util.getFullPathName(f);			}
@@ -77,19 +88,10 @@ class CurrentFile {
         void setSampleFile(string f)        { lock_guard<std::mutex> guard(currentProtector); samplefile = util.getFullPathName(f);         }
     
         //current files - if you add a new type you must edit optionParser->getParameters, get.current and set.current commands and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes/hasCurrentFiles. add a get and set function.
-        string getAccnosFile()		{ lock_guard<std::mutex> guard(currentProtector); return accnosfile;		}
-        string getTaxonomyFile()	{ lock_guard<std::mutex> guard(currentProtector); return taxonomyfile;		}
-        string getFlowFile()		{ lock_guard<std::mutex> guard(currentProtector); return flowfile;			}
-        string getContigsReportFile(){ lock_guard<std::mutex> guard(currentProtector); return contigsreportfile;			}
-        string getBiomFile()		{ lock_guard<std::mutex> guard(currentProtector); return biomfile;			}
-        string getCountFile()       { lock_guard<std::mutex> guard(currentProtector); return countfile;         }
-        string getSummaryFile()     { lock_guard<std::mutex> guard(currentProtector); return summaryfile;       }
-        string getFileFile()        { lock_guard<std::mutex> guard(currentProtector); return filefile;          }
+        
         string getProcessors()		{ lock_guard<std::mutex> guard(currentProtector); return processors;		}
         int setProcessors(string p);
-        string getConsTaxonomyFile(){ lock_guard<std::mutex> guard(currentProtector); return constaxonomyfile;  }
         string getProgramPath()     { lock_guard<std::mutex> guard(currentProtector); return mothurProgramPath;  }
-    
         string getDefaultPath() { lock_guard<std::mutex> guard(currentProtector); return defaultPath; }
         void setDefaultPath(string);
         string getTestFilePath() { lock_guard<std::mutex> guard(currentProtector); return testFilePath; }
@@ -117,8 +119,6 @@ class CurrentFile {
         set<string> getCurrentTypes();
         bool hasCurrentFiles();
     
-        string getSharedHeaderMode()                    { lock_guard<std::mutex> guard(currentProtector); return sharedHeaderMode;          }
-        void setSharedHeaderMode(string t)              { lock_guard<std::mutex> guard(currentProtector); sharedHeaderMode = t;             }
         string getGroupMode()                           { lock_guard<std::mutex> guard(currentProtector); return groupMode;                 }
     
         string getTestDirectory()                       { lock_guard<std::mutex> guard(currentProtector); return testDirectory;             }
@@ -132,7 +132,7 @@ class CurrentFile {
         string defaultPath, outputDir, blastPath, inputDir;
         string releaseDate, version;
     
-        string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile;
+        string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile, lcrfile;
         string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode, samplefile, toolsPath;
     bool mothurCalling;
 		
@@ -168,6 +168,7 @@ class CurrentFile {
 			sharedfile = "";
 			ordergroupfile = "";
 			relabundfile = "";
+            lcrfile = "";
 			fastafile = "";
 			qualfile = "";
 			sfffile = "";

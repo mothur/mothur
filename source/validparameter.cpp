@@ -246,10 +246,6 @@ vector<string> ValidParameters::validFiles(map<string, string>& container, strin
                 
                 for (int i = 0; i < files.size(); i++) {
                     string filename = files[i];
-                    int pos = filename.find(".tx.");
-                    if (pos != string::npos) { current->setSharedHeaderMode("tax"); }
-                    else { current->setSharedHeaderMode("otu"); }
-                    
                     if (util.checkLocations(filename, current->getLocations())) { vFiles.push_back(filename); container[parameter] = filename; openedAtLeastOne = true; }
                     else { m->mothurOut("Unable to open " + filename + ", skipping.\n");  }
                     
@@ -295,11 +291,6 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
         if(it != container.end()){ //no parameter given
             if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
             else {
-                
-                int pos = (it->second).find(".tx.");
-                if (pos != string::npos) { current->setSharedHeaderMode("tax"); }
-                else { current->setSharedHeaderMode("otu"); }
-                
                 string filename = it->second;
                 if (util.checkLocations(filename, current->getLocations())) { container[parameter] = filename; }
                 else { m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine(); return "not open";  }

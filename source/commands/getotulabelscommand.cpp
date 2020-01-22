@@ -190,6 +190,7 @@ GetOtuLabelsCommand::GetOtuLabelsCommand(string option)  {
 			constaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
 			if (constaxonomyfile == "not open") { constaxonomyfile = ""; abort = true; }
 			else if (constaxonomyfile == "not found") {  constaxonomyfile = "";  }
+            else { current->setConsTaxonomyFile(constaxonomyfile); }
             
             corraxesfile = validParameter.validFile(parameters, "corraxes");
 			if (corraxesfile == "not open") { corraxesfile = ""; abort = true; }
