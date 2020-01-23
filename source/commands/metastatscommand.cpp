@@ -161,7 +161,10 @@ MetaStatsCommand::MetaStatsCommand(string option) {
             lcrfile = validParameter.validFile(parameters, "lcr");
             if (lcrfile == "not open") { abort = true; }
             else if (lcrfile == "not found") { lcrfile = "";  }
-            else { current->setLCRFile(lcrfile); inputfile = lcrfile; format = "lcrfile"; }
+            else {
+                current->setLCRFile(lcrfile); inputfile = lcrfile; format = "lcrfile";
+                m->mothurOut("[NOTE]: When using an lcr file mothur will run the fisher exact test with the floor of the values generated.\n");
+            }
             
             if ((sharedfile == "") && (lcrfile == "")) {
                 //is there are current file available for any of these?
@@ -171,7 +174,7 @@ MetaStatsCommand::MetaStatsCommand(string option) {
                 if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n"); }
                 else {
                     lcrfile = current->getLCRFile();
-                    if (lcrfile != "") { inputfile = lcrfile; format = "lcrfile"; m->mothurOut("Using " + lcrfile + " as input file for the lcr parameter.\n");  }
+                    if (lcrfile != "") { inputfile = lcrfile; format = "lcrfile"; m->mothurOut("Using " + lcrfile + " as input file for the lcr parameter.\n");  m->mothurOut("[NOTE]: When using an lcr file mothur will run the fisher exact test with the floor of the values generated.\n"); }
                     else { m->mothurOut("No valid current files. You must provide a lcrfile or shared file.\n"); abort = true; }
                 }
             }
@@ -376,7 +379,7 @@ int driverShared(metastatsData* params) {
                 
                 params->m->mothurOut("\nComparing " + setA + " and " + setB + "...\n");
                 MothurMetastats mothurMeta(params->threshold, params->iters);
-                mothurMeta.runMetastats(outputFileName , data2, setACount, params->thisLookUp->getOTUNames());
+                mothurMeta.runMetastats(outputFileName , data2, setACount, params->thisLookUp->getOTUNames(), true);
                 params->m->mothurOutEndLine();
             }
         }
@@ -496,7 +499,7 @@ int driverLCR(metastatsData* params) {
                 
                 params->m->mothurOut("\nComparing " + setA + " and " + setB + "...\n");
                 MothurMetastats mothurMeta(params->threshold, params->iters);
-                mothurMeta.runMetastats(outputFileName , data2, setACount, params->thisLCR->getOTUNames());
+                mothurMeta.runMetastats(outputFileName , data2, setACount, params->thisLCR->getOTUNames(), false); 
                 params->m->mothurOutEndLine();
             }
         }
@@ -512,7 +515,7 @@ int driverLCR(metastatsData* params) {
     }
 }
 //**********************************************************************************************************************
-int MetaStatsCommand::process(SharedLCRVectors*& thisLookUp, DesignMap*& designMap){
+int MetaStatsCommand::process(SharedLCRVectors*& thisLCR, DesignMap*& designMap){
     try {
         vector<linePair> lines;
         vector<std::thread*> workerThreads;
@@ -534,7 +537,7 @@ int MetaStatsCommand::process(SharedLCRVectors*& thisLookUp, DesignMap*& designM
                 //get filename
                 map<string, string> variables;
                 variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
-                variables["[distance]"] = thisLookUp->getLabel();
+                variables["[distance]"] = thisLCR->getLabel();
                 variables["[group]"] = setA + "-" + setB;
                 string outputFileName = getOutputFileName("metastats",variables);
                 outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
@@ -544,13 +547,13 @@ int MetaStatsCommand::process(SharedLCRVectors*& thisLookUp, DesignMap*& designM
             remainingPairs = remainingPairs - numPairs;
         }
         
-        vector<string> designMapGroups = thisLookUp->getNamesGroups();
+        vector<string> designMapGroups = thisLCR->getNamesGroups();
         for (int j = 0; j < designMapGroups.size(); j++) {  designMapGroups[j] = designMap->get(designMapGroups[j]); }
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             //make copy of lookup so we don't get access violations
-            SharedLCRVectors* newLookup = new SharedLCRVectors(*thisLookUp);
+            SharedLCRVectors* newLookup = new SharedLCRVectors(*thisLCR);
             
             metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, outputNames, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
             data.push_back(dataBundle);
@@ -559,7 +562,7 @@ int MetaStatsCommand::process(SharedLCRVectors*& thisLookUp, DesignMap*& designM
             workerThreads.push_back(thisThread);
         }
 
-        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, outputNames, namesOfGroupCombos, thisLookUp, designMapGroups, iters, threshold);
+        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, outputNames, namesOfGroupCombos, thisLCR, designMapGroups, iters, threshold);
         driverLCR(dataBundle);
         
         for (int i = 0; i < processors-1; i++) {

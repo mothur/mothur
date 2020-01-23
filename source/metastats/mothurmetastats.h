@@ -20,11 +20,11 @@ class MothurMetastats {
 		MothurMetastats(double, int); //threshold, numPermutations
 		~MothurMetastats();
 	
-		int runMetastats(string, vector< vector<double> >&, int, vector<string>); //outputFileName, data, secondGroupingStart, otuNames
+		int runMetastats(string, vector< vector<double> >&, int, vector<string>, bool); //outputFileName, data, secondGroupingStart, otuNames, fillPMatrix (if using lcr file, abundances are already a proportion so we don't want to redo that step)
 	
 	private:
 		MothurOut* m;
-		int row, column, numPermutations, secondGroupingStart;
+		int numOTUs, numSamples, numPermutations, secondGroupingStart;
 		double threshold;
         Utils util;
         
