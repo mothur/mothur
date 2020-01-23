@@ -236,11 +236,8 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             //if (pvalues[i] < 0.05) { cout << currentLabels[i] << endl; }
 		}  
 		
-		out << endl << endl;
-		out.close();
+		out << endl << endl; out.close();
 		
-
-
         return 0;
         
     }catch(exception& e) {

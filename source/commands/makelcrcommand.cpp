@@ -169,15 +169,25 @@ int MakeLCRCommand::execute(){
         
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        string outputFileName = getOutputFileName("lcr",variables);
+        bool printHeaders = true;
+        
+        ofstream out;
+        util.openOutputFile(outputFileName, out);
+        outputNames.push_back(outputFileName); outputTypes["lcr"].push_back(outputFileName);
+        
         while (lookup != NULL) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
-            process(lookup); delete lookup;
+            process(lookup, out, printHeaders); delete lookup;
             
             lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         }
-            
+        out.close();
+        
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]);    } outputTypes.clear(); return 0;}
         
         string currentName = "";
@@ -205,22 +215,14 @@ int MakeLCRCommand::execute(){
 //> x[x==0] <- 0.1
 //> log2(x / prod(x)^(1/4))
 //[1]  2.3452054  1.3452054  0.6082399 -0.9767226 -4.2986507
-void MakeLCRCommand::process(SharedRAbundVectors*& thisLookUp){
+void MakeLCRCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out, bool& printHeaders){
     try {
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
-        map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
-        variables["[distance]"] = thisLookUp->getLabel();
-        string outputFileName = getOutputFileName("lcr",variables);
         
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
-        outputNames.push_back(outputFileName); outputTypes["lcr"].push_back(outputFileName);
-                
         vector<SharedRAbundFloatVector*> lookup = thisLookUp->getSharedRAbundFloatVectors();
         vector<string> otuNames = thisLookUp->getOTUNames();
         
-        out << "label\tGroup\tnumOtus\t" << util.getStringFromVector(otuNames, "\t") << endl;
+        if (printHeaders) {  out << "label\tGroup\tnumOtus\t" << util.getStringFromVector(otuNames, "\t") << endl; printHeaders = false; }
         
         for (int i = 0; i < lookup.size(); i++) {
             
@@ -236,7 +238,7 @@ void MakeLCRCommand::process(SharedRAbundVectors*& thisLookUp){
             
             delete lookup[i];
         }
-        out.close();
+        
     }
     catch(exception& e) {
         m->errorOut(e, "MakeLCRCommand", "process");

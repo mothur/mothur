@@ -40,7 +40,7 @@ private:
     vector<string> Groups, outputNames;
     double zeroReplacementValue;
         
-    void process(SharedRAbundVectors*&);
+    void process(SharedRAbundVectors*&, ofstream&, bool&);
     
 };
 

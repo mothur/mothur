@@ -403,7 +403,7 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp, DesignMap*& desi
         
         int remainingPairs = namesOfGroupCombos.size();
         int startIndex = 0;
-        vector<vector<string> > outputFileNames;
+        vector<string> thisLabelsOutputFiles;
         for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
             int numPairs = remainingPairs; //case for last processor
             if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
@@ -421,6 +421,7 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp, DesignMap*& desi
                 variables["[group]"] = setA + "-" + setB;
                 string outputFileName = getOutputFileName("metastats",variables);
                 outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
+                thisLabelsOutputFiles.push_back(outputFileName);
             }
             
             startIndex = startIndex + numPairs;
@@ -435,14 +436,14 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp, DesignMap*& desi
             //make copy of lookup so we don't get access violations
             SharedRAbundVectors* newLookup = new SharedRAbundVectors(*thisLookUp);
             
-            metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, outputNames, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
+            metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, thisLabelsOutputFiles, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
             data.push_back(dataBundle);
             
             std::thread* thisThread = new std::thread(driverShared, dataBundle);
             workerThreads.push_back(thisThread);
         }
 
-        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, outputNames, namesOfGroupCombos, thisLookUp, designMapGroups, iters, threshold);
+        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, thisLabelsOutputFiles, namesOfGroupCombos, thisLookUp, designMapGroups, iters, threshold);
         driverShared(dataBundle);
         
         for (int i = 0; i < processors-1; i++) {
@@ -499,7 +500,7 @@ int driverLCR(metastatsData* params) {
                 
                 params->m->mothurOut("\nComparing " + setA + " and " + setB + "...\n");
                 MothurMetastats mothurMeta(params->threshold, params->iters);
-                mothurMeta.runMetastats(outputFileName , data2, setACount, params->thisLCR->getOTUNames(), false); 
+                mothurMeta.runMetastats(outputFileName, data2, setACount, params->thisLCR->getOTUNames(), false);
                 params->m->mothurOutEndLine();
             }
         }
@@ -523,7 +524,7 @@ int MetaStatsCommand::process(SharedLCRVectors*& thisLCR, DesignMap*& designMap)
         
         int remainingPairs = namesOfGroupCombos.size();
         int startIndex = 0;
-        vector<vector<string> > outputFileNames;
+        vector<string> thisLabelsOutputFiles;
         for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
             int numPairs = remainingPairs; //case for last processor
             if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
@@ -541,6 +542,7 @@ int MetaStatsCommand::process(SharedLCRVectors*& thisLCR, DesignMap*& designMap)
                 variables["[group]"] = setA + "-" + setB;
                 string outputFileName = getOutputFileName("metastats",variables);
                 outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
+                thisLabelsOutputFiles.push_back(outputFileName);
             }
             
             startIndex = startIndex + numPairs;
@@ -555,14 +557,14 @@ int MetaStatsCommand::process(SharedLCRVectors*& thisLCR, DesignMap*& designMap)
             //make copy of lookup so we don't get access violations
             SharedLCRVectors* newLookup = new SharedLCRVectors(*thisLCR);
             
-            metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, outputNames, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
+            metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, thisLabelsOutputFiles, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
             data.push_back(dataBundle);
             
             std::thread* thisThread = new std::thread(driverLCR, dataBundle);
             workerThreads.push_back(thisThread);
         }
 
-        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, outputNames, namesOfGroupCombos, thisLCR, designMapGroups, iters, threshold);
+        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, thisLabelsOutputFiles, namesOfGroupCombos, thisLCR, designMapGroups, iters, threshold);
         driverLCR(dataBundle);
         
         for (int i = 0; i < processors-1; i++) {
