@@ -38,9 +38,10 @@ cd boost_versionNumber/
 ./b2 install
 ```
 Alternatively, you can install boost on Linux with:
+```
 sudo apt-get install libboost-all-dev
 sudo yum install libboost-all-dev
-
+```
 
 #### 4. Compile mothur:
 
