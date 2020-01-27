@@ -10,6 +10,9 @@ The easiest way to get mothur is to download the release from [GitHub]([GitHub](
 (For Unix-based operating systems.)
 
 Download the mothur [source code](https://github.com/mothur/mothur).
+Download the mothur tools [external binaries](https://github.com/mothur/mothur/releases/).
+
+Note: Tool version requirements - vsearch v2.13.3, uchime, blast
 
 ### Compiling with Boost:
 
@@ -24,7 +27,7 @@ Download the mothur [source code](https://github.com/mothur/mothur).
 
 You can use a package manager such as yum, apt-get, homebrew, or conda.
 
-#### 2. Download [Boost](http://www.boost.org).
+#### 2. Download [Boost](http://www.boost.org). 
 
 #### 3. Follow their install [instructions]( http://www.boost.org/doc/libs/1_58_0/more/getting_started/unix-variants.html#easy-build-and-install):
 
@@ -34,6 +37,10 @@ cd boost_versionNumber/
 ./bootstrap.sh --prefix=/desired/install/path
 ./b2 install
 ```
+Alternatively, you can install boost on Linux with:
+sudo apt-get install libboost-all-dev
+sudo yum install libboost-all-dev
+
 
 #### 4. Compile mothur:
 

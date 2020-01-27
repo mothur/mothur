@@ -23,6 +23,7 @@ class PhyloTree;
 class Taxonomy;
 class InputData;
 class ListVector;
+class SharedRAbundFloatVectors;
 
 class Utils {
     
@@ -236,6 +237,7 @@ public:
     void removeQuotes(vector<Taxon>& tax);
     bool stringBlank (string);
     SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+    SharedRAbundFloatVectors* getNextRelabund(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     ListVector* getNextList(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     SharedLCRVectors* getNextLCR(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
 
