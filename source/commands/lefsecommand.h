@@ -61,7 +61,6 @@ private:
     map<int, double> runKruskalWallis(SharedRAbundFloatVectors*&, SharedLCRVectors*&, DesignMap&);
     map<int, double> runWilcoxon(SharedRAbundFloatVectors*&, SharedLCRVectors*&, DesignMap&, map<int, double>, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
     map<int, double> testLDA(SharedRAbundFloatVectors*&, SharedLCRVectors*&, map<int, double>, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >&);
-    
     vector< vector<double> > getMeans(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& lcr, map<string, vector<int> >& class2GroupIndex);
     
     bool contastWithinClassesOrFewPerClass(vector< vector<double> >&, vector<int> rands, int minCl, map<string, vector<int> > class2GroupIndex,  map<int, string> indexToClass);

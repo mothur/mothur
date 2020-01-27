@@ -212,7 +212,7 @@ LefseCommand::LefseCommand(string option)  {
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-				outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
+				outputDir = util.hasPath(inputfile); //if user entered a file with a path then preserve it
 			}
             
             string label = validParameter.valid(parameters, "label");
@@ -452,8 +452,8 @@ int LefseCommand::normalize(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*
         
         for (int i = 0; i < numSamples; i++) {
             double sum = 0;
-            if (lookup != NULL) {  lookup->getNumSeqs(namesOfGroups[i]);    }
-            else                {  lcr->getNumSeqs(namesOfGroups[i]);       }
+            if (lookup != NULL) {  sum = lookup->getNumSeqs(namesOfGroups[i]);    }
+            else                {  sum = lcr->getNumSeqs(namesOfGroups[i]);       }
             mul.push_back(1000000.0/sum);
         }
         
@@ -1033,7 +1033,7 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
 int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels) {
     try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
         variables["[distance]"] = label;
         string outputFileName = getOutputFileName("summary",variables);
 		ofstream out;
