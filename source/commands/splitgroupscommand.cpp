@@ -602,17 +602,6 @@ int SplitGroupCommand::splitCountOrGroup(bool isCount){
         }
         
         delete dataBundle;
-        
-        cout << outputTypes.size() << endl;
-        
-        for (map<string, vector<string> >::iterator itT = outputTypes.begin(); itT != outputTypes.end(); itT++) {
-            cout << "FileType = " << itT->first  << '\t' << itT->second.size() << endl;
-            for (int i = 0; i < itT->second.size(); i++) {
-                cout << itT->second[i] << endl;
-            }
-        }
-        cout << "output names \n";
-        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i] +"\n");     } m->mothurOutEndLine();
     }
     catch(exception& e) {
         m->errorOut(e, "SplitGroupCommand", "splitCountOrGroup");

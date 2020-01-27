@@ -151,6 +151,10 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             bool foundTool = false;
             string path = current->getProgramPath();
             string programName = "fasterq-dump"; programName += EXECUTABLE_EXT;
+            string programVersion = "2.10.1";
+#ifdef WINDOWS
+            programName = "fastq-dump"; programName += EXECUTABLE_EXT; programVersion = "2.9.6";
+#endif
             
             fasterQLocation = validParameter.valid(parameters, "fasterq");
             if (fasterQLocation == "not found") {
@@ -172,8 +176,8 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 if (versionOutputs.size() >= 3) {
                     string version = versionOutputs[2];
                                                 
-                    if (version != "2.10.1") {
-                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version 2.10.1 which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
+                    if (version != programVersion) {
+                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version " + programVersion + " which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
                     }else { m->mothurOut("Using " + programName + " version " + version + ".\n"); }
                 }
             }
@@ -203,8 +207,8 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 if (versionOutputs.size() >= 3) {
                     string version = versionOutputs[2];
                     
-                    if (version != "2.10.1") {
-                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version 2.10.1 which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
+                    if (version != programVersion) {
+                        m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version " + programVersion + " which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
                     }else { m->mothurOut("Using " + programName + " version " + version + ".\n"); }
                 }
             }

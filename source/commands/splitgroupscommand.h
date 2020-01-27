@@ -148,7 +148,7 @@ struct splitGroups2Struct {
                 files.push_back(newGroupFileName);
                 if (namefile != "") {
                     files.push_back(newNameFileName);
-                }
+                }//else{ files.push_back(""); }
             }
             
             group2Files[Groups[i]] = files;
