@@ -930,7 +930,6 @@ int ChimeraVsearchCommand::driverGroups(map<string, vector<string> > parsedFiles
 
 int ChimeraVsearchCommand::driver(string outputFName, string filename, string accnos, string alns, int& numChimeras){
     try {
-        
         outputFName = util.getFullPathName(outputFName);
         string outputFNamec = util.getFullPathName(outputFName+"vsearch_out");
         filename = util.getFullPathName(filename);
@@ -988,6 +987,13 @@ int ChimeraVsearchCommand::driver(string outputFName, string filename, string ac
             cPara.push_back(temp);
         }
         
+        /*char* tempRandSeed = new char[11];
+        *tempRandSeed = '\0'; strncat(tempRandSeed, "--randseed", 10);
+        cPara.push_back(tempRandSeed);
+        string mothurSeed = toString(m->getRandomSeed());
+        char* tempRS = new char[mothurSeed.length()+1];
+        *tempRS = '\0'; strncat(tempRS, mothurSeed.c_str(), mothurSeed.length());
+        cPara.push_back(tempRS);*/
         
         char* tempO = new char[11];
         *tempO = '\0'; strncat(tempO, "--chimeras", 10);

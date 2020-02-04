@@ -1,17 +1,17 @@
 //
-//  makelcrcommand.cpp
+//  makeclrcommand.cpp
 //  Mothur
 //
 //  Created by Sarah Westcott on 1/20/20.
 //  Copyright © 2020 Schloss Lab. All rights reserved.
 //
 
-#include "makelcrcommand.hpp"
+#include "makeclrcommand.hpp"
 
 //**********************************************************************************************************************
-vector<string> MakeLCRCommand::setParameters(){
+vector<string> MakeCLRCommand::setParameters(){
     try {
-        CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","lcr",false,false,true); parameters.push_back(pshared);
+        CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","clr",false,false,true); parameters.push_back(pshared);
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
         CommandParameter pzero("zero", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pzero);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
@@ -24,61 +24,61 @@ vector<string> MakeLCRCommand::setParameters(){
         return myArray;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeLCRCommand", "setParameters");
+        m->errorOut(e, "MakeCLRCommand", "setParameters");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-string MakeLCRCommand::getHelpString(){
+string MakeCLRCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The make.lcr command parameters are shared, groups, zero and label. The shared file is required, unless you have a valid current file.\n";
+        helpString += "The make.clr command parameters are shared, groups, zero and label. The shared file is required, unless you have a valid current file.\n";
         helpString += "The groups parameter allows you to specify which of the groups in your sharedfile you would like included. The group names are separated by dashes.\n";
         helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
         helpString += "The zero parameter allows you to set an value for zero OTUs. Default is 0.1.\n";
-        helpString += "The make.lcr command should be in the following format: make.lcr(shared=yourSharedFile).\n";
-        helpString += "Example make.lcr(shared=final.opti_mcc.shared, zero=0.25).\n";
+        helpString += "The make.clr command should be in the following format: make.clr(shared=yourSharedFile).\n";
+        helpString += "Example make.clr(shared=final.opti_mcc.shared, zero=0.25).\n";
         helpString += "The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n";
-        helpString += "The make.lcr command outputs a .lcr file.\n";
+        helpString += "The make.clr command outputs a .clr file.\n";
         
         return helpString;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeLCRCommand", "MakeLCRCommand");
+        m->errorOut(e, "MakeCLRCommand", "MakeCLRCommand");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-string MakeLCRCommand::getOutputPattern(string type) {
+string MakeCLRCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "lcr") {  pattern = "[filename],[distance],lcr-[filename],lcr"; }
+        if (type == "clr") {  pattern = "[filename],[distance],clr-[filename],clr"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeLCRCommand", "getOutputPattern");
+        m->errorOut(e, "MakeCLRCommand", "getOutputPattern");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-MakeLCRCommand::MakeLCRCommand(){
+MakeCLRCommand::MakeCLRCommand(){
     try {
         abort = true; calledHelp = true;
         setParameters();
         vector<string> tempOutNames;
-        outputTypes["lcr"] = tempOutNames;
+        outputTypes["clr"] = tempOutNames;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeLCRCommand", "MakeLCRCommand");
+        m->errorOut(e, "MakeCLRCommand", "MakeCLRCommand");
         exit(1);
     }
 }
 //**********************************************************************************************************************
 
-MakeLCRCommand::MakeLCRCommand(string option) {
+MakeCLRCommand::MakeCLRCommand(string option) {
     try {
         abort = false; calledHelp = false; allLines = true;
         
@@ -102,7 +102,7 @@ MakeLCRCommand::MakeLCRCommand(string option) {
             
             //initialize outputTypes
             vector<string> tempOutNames;
-            outputTypes["lcr"] = tempOutNames;
+            outputTypes["clr"] = tempOutNames;
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
@@ -151,13 +151,13 @@ MakeLCRCommand::MakeLCRCommand(string option) {
 
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeLCRCommand", "MakeLCRCommand");
+        m->errorOut(e, "MakeCLRCommand", "MakeCLRCommand");
         exit(1);
     }
 }
 //**********************************************************************************************************************
 
-int MakeLCRCommand::execute(){
+int MakeCLRCommand::execute(){
     try {
     
         if (abort) { if (calledHelp) { return 0; }  return 2;    }
@@ -171,12 +171,12 @@ int MakeLCRCommand::execute(){
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
-        string outputFileName = getOutputFileName("lcr",variables);
+        string outputFileName = getOutputFileName("clr",variables);
         bool printHeaders = true;
         
         ofstream out;
         util.openOutputFile(outputFileName, out);
-        outputNames.push_back(outputFileName); outputTypes["lcr"].push_back(outputFileName);
+        outputNames.push_back(outputFileName); outputTypes["clr"].push_back(outputFileName);
         
         while (lookup != NULL) {
             
@@ -191,9 +191,9 @@ int MakeLCRCommand::execute(){
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]);    } outputTypes.clear(); return 0;}
         
         string currentName = "";
-        itTypes = outputTypes.find("lcr");
+        itTypes = outputTypes.find("clr");
         if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setLCRFile(currentName);  }
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCLRFile(currentName);  }
         }
         
         m->mothurOut("\nOutput File Names: \n");
@@ -202,7 +202,7 @@ int MakeLCRCommand::execute(){
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeLCRCommand", "execute");
+        m->errorOut(e, "MakeCLRCommand", "execute");
         exit(1);
     }
 }
@@ -215,7 +215,7 @@ int MakeLCRCommand::execute(){
 //> x[x==0] <- 0.1
 //> log2(x / prod(x)^(1/4))
 //[1]  2.3452054  1.3452054  0.6082399 -0.9767226 -4.2986507
-void MakeLCRCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out, bool& printHeaders){
+void MakeCLRCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out, bool& printHeaders){
     try {
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
         
@@ -241,7 +241,7 @@ void MakeLCRCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out, bo
         
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeLCRCommand", "process");
+        m->errorOut(e, "MakeCLRCommand", "process");
         exit(1);
     }
 }

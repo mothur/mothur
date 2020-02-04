@@ -1,30 +1,30 @@
 //
-//  sharedlcrvector.cpp
+//  sharedclrvector.cpp
 //  Mothur
 //
 //  Created by Sarah Westcott on 1/21/20.
 //  Copyright © 2020 Schloss Lab. All rights reserved.
 //
 
-#include "sharedlcrvector.hpp"
+#include "sharedclrvector.hpp"
 
 /***********************************************************************/
-SharedLCRVector::SharedLCRVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0), group("") {}
+SharedCLRVector::SharedCLRVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0), group("") {}
 /***********************************************************************/
-SharedLCRVector::SharedLCRVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(n), numSeqs(0), group("") {}
+SharedCLRVector::SharedCLRVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(n), numSeqs(0), group("") {}
 /***********************************************************************/
-SharedLCRVector::SharedLCRVector(vector<float> rav) :  DataVector(), maxRank(0), numBins(rav.size()), numSeqs(0), group("")  {
+SharedCLRVector::SharedCLRVector(vector<float> rav) :  DataVector(), maxRank(0), numBins(rav.size()), numSeqs(0), group("")  {
     try {
         data.assign(numBins, 0);
         for(int i=0;i<rav.size();i++){ set(i, rav[i]); }
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "SharedLCRVector");
+        m->errorOut(e, "SharedCLRVector", "SharedCLRVector");
         exit(1);
     }
 }
 /***********************************************************************/
-SharedLCRVector::SharedLCRVector(vector<float> rav, float mr, int nb, float ns) :  DataVector(), group(""){
+SharedCLRVector::SharedCLRVector(vector<float> rav, float mr, int nb, float ns) :  DataVector(), group(""){
     try {
         numBins = nb;
         maxRank = mr;
@@ -32,12 +32,12 @@ SharedLCRVector::SharedLCRVector(vector<float> rav, float mr, int nb, float ns) 
         data = rav;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "SharedLCRVector");
+        m->errorOut(e, "SharedCLRVector", "SharedCLRVector");
         exit(1);
     }
 }
 /***********************************************************************/
-SharedLCRVector::SharedLCRVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
+SharedCLRVector::SharedCLRVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
     try {
         f >> label >> group >> numBins;
         
@@ -51,12 +51,12 @@ SharedLCRVector::SharedLCRVector(ifstream& f) : DataVector(), maxRank(0), numBin
         
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "SharedLCRVector");
+        m->errorOut(e, "SharedCLRVector", "SharedCLRVector");
         exit(1);
     }
 }
 /***********************************************************************/
-SharedLCRVector::SharedLCRVector(ifstream& f, string l, string g, int n) : DataVector(), maxRank(0), numBins(n), numSeqs(0) {
+SharedCLRVector::SharedCLRVector(ifstream& f, string l, string g, int n) : DataVector(), maxRank(0), numBins(n), numSeqs(0) {
     try {
         label = l;
         group = g;
@@ -70,12 +70,12 @@ SharedLCRVector::SharedLCRVector(ifstream& f, string l, string g, int n) : DataV
         
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "SharedLCRVector");
+        m->errorOut(e, "SharedCLRVector", "SharedCLRVector");
         exit(1);
     }
 }
 /***********************************************************************/
-void SharedLCRVector::set(int binNumber, float newBinSize){
+void SharedCLRVector::set(int binNumber, float newBinSize){
     try {
         int oldBinSize = data[binNumber];
         data[binNumber] = newBinSize;
@@ -85,14 +85,14 @@ void SharedLCRVector::set(int binNumber, float newBinSize){
         numSeqs += (newBinSize - oldBinSize);
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "set");
+        m->errorOut(e, "SharedCLRVector", "set");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVector::get(int index){ return data[index]; }
+float SharedCLRVector::get(int index){ return data[index]; }
 /***********************************************************************/
-void SharedLCRVector::clear(){
+void SharedCLRVector::clear(){
     numBins = 0;
     maxRank = 0;
     numSeqs = 0;
@@ -100,7 +100,7 @@ void SharedLCRVector::clear(){
     data.clear();
 }
 /***********************************************************************/
-void SharedLCRVector::push_back(float binSize){
+void SharedCLRVector::push_back(float binSize){
     try {
         data.push_back(binSize);
         numBins++;
@@ -110,12 +110,12 @@ void SharedLCRVector::push_back(float binSize){
         numSeqs += binSize;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "push_back");
+        m->errorOut(e, "SharedCLRVector", "push_back");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVector::remove(int bin){
+float SharedCLRVector::remove(int bin){
     try {
         float abund = data[bin];
         data.erase(data.begin()+bin);
@@ -128,12 +128,12 @@ float SharedLCRVector::remove(int bin){
         return abund;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "remove");
+        m->errorOut(e, "SharedCLRVector", "remove");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVector::remove(vector<int> bins){
+float SharedCLRVector::remove(vector<int> bins){
     try {
         if (bins.size() == 0) { return 0; }
         
@@ -165,12 +165,12 @@ float SharedLCRVector::remove(vector<int> bins){
         return numRemoved;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "remove");
+        m->errorOut(e, "SharedCLRVector", "remove");
         exit(1);
     }
 }
 /***********************************************************************/
-void SharedLCRVector::resize(int size){
+void SharedCLRVector::resize(int size){
     data.resize(size);
     
     vector<float>::iterator it = max_element(data.begin(), data.end());
@@ -179,9 +179,9 @@ void SharedLCRVector::resize(int size){
     numBins = size;
 }
 /***********************************************************************/
-int SharedLCRVector::size(){ return data.size(); }
+int SharedCLRVector::size(){ return data.size(); }
 /***********************************************************************/
-void SharedLCRVector::print(ostream& output){
+void SharedCLRVector::print(ostream& output){
     try {
         output << label;
         output << '\t' << group << '\t' << numBins;
@@ -190,7 +190,7 @@ void SharedLCRVector::print(ostream& output){
         output << endl;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVector", "nonSortedPrint");
+        m->errorOut(e, "SharedCLRVector", "nonSortedPrint");
         exit(1);
     }
 }

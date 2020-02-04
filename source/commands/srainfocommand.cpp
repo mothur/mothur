@@ -187,6 +187,10 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             programName = "prefetch"; programName += EXECUTABLE_EXT;
             versionOutputs.clear();
             
+            #ifdef WINDOWS
+                programName = "prefetch"; programName += EXECUTABLE_EXT; programVersion = "2.9.3";
+            #endif
+            
             prefetchLocation = validParameter.valid(parameters, "prefetch");
             if (prefetchLocation == "not found") {
                 prefetchLocation = "";

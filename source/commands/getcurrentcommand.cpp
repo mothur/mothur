@@ -152,8 +152,8 @@ int GetCurrentCommand::execute(){
 					current->setSharedFile("");
                 }else if (types[i] == "relabund") {
                     current->setRelAbundFile("");
-                }else if (types[i] == "lcr") {
-                    current->setLCRFile("");
+                }else if (types[i] == "clr") {
+                    current->setCLRFile("");
                 }else if (types[i] == "design") {
 					current->setDesignFile("");
 				}else if (types[i] == "sff") {

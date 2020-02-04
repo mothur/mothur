@@ -14,8 +14,8 @@
 vector<string> LefseCommand::setParameters(){
 	try {
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
-        CommandParameter pshared("shared", "InputTypes", "", "", "shared-lcr", "none", "none","metastats",false,false,true); parameters.push_back(pshared);
-        CommandParameter plcr("lcr", "InputTypes", "", "", "shared-lcr", "none", "none","metastats",false,false,true); parameters.push_back(plcr);
+        CommandParameter pshared("shared", "InputTypes", "", "", "shared-clr", "none", "none","metastats",false,false,true); parameters.push_back(pshared);
+        //CommandParameter pclr("clr", "InputTypes", "", "", "shared-clr", "none", "none","metastats",false,false,true); parameters.push_back(pclr);
         CommandParameter pclass("class", "String", "", "", "", "", "","",false,false); parameters.push_back(pclass);
         CommandParameter psubclass("subclass", "String", "", "", "", "", "","",false,false); parameters.push_back(psubclass);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
@@ -61,7 +61,7 @@ string LefseCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The lefse command allows you to ....\n";
-		helpString += "The lefse command parameters are: shared, lcr, design, class, subclass, label, walpha, aalpha, lda, wilc, iters, curv, fboots, strict, minc, multiclass and norm.\n";
+		helpString += "The lefse command parameters are: shared, design, class, subclass, label, walpha, aalpha, lda, wilc, iters, curv, fboots, strict, minc, multiclass and norm.\n";
 		helpString += "The class parameter is used to indicate the which category you would like used for the Kruskal Wallis analysis. If none is provided first category is used.\n";
         helpString += "The subclass parameter is used to indicate the .....If none is provided, second category is used, or if only one category subclass is ignored. \n";
         helpString += "The aalpha parameter is used to set the alpha value for the Krukal Wallis Anova test Default=0.05. \n";
@@ -163,14 +163,6 @@ LefseCommand::LefseCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
-                
-                it = parameters.find("lcr");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["lcr"] = inputDir + it->second;        }
-                }
             }
                     
             //check for required parameters
@@ -179,24 +171,14 @@ LefseCommand::LefseCommand(string option)  {
             else if (sharedfile == "not found") { sharedfile = "";  }
             else { current->setSharedFile(sharedfile); inputfile = sharedfile; format = "sharedfile";  }
             
-            lcrfile = validParameter.validFile(parameters, "lcr");
-            if (lcrfile == "not open") { abort = true; }
-            else if (lcrfile == "not found") { lcrfile = "";  }
-            else {
-                current->setLCRFile(lcrfile); inputfile = lcrfile; format = "lcrfile";
-                m->mothurOut("[NOTE]: When using an lcr file mothur will run the fisher exact test with the floor of the values generated.\n");
-            }
-            
-            if ((sharedfile == "") && (lcrfile == "")) {
+            if ((sharedfile == "")) {
                 //is there are current file available for any of these?
                 //give priority to shared, then list, then rabund, then sabund
                 //if there is a current shared file, use it
                 sharedfile = current->getSharedFile();
                 if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n"); }
                 else {
-                    lcrfile = current->getLCRFile();
-                    if (lcrfile != "") { inputfile = lcrfile; format = "lcrfile"; m->mothurOut("Using " + lcrfile + " as input file for the lcr parameter.\n");  m->mothurOut("[NOTE]: When using an lcr file mothur will run the fisher exact test with the floor of the values generated.\n"); }
-                    else { m->mothurOut("No valid current files. You must provide a lcrfile or shared file.\n"); abort = true; }
+                    m->mothurOut("No valid current files. You must provide a shared file.\n"); abort = true;
                 }
             }
             
@@ -310,24 +292,20 @@ int LefseCommand::execute(){
         set<string> userLabels = labels;
         string lastLabel = "";
         
-        SharedRAbundFloatVectors* lookup = NULL; SharedLCRVectors* lcr = NULL;
+        SharedRAbundFloatVectors* lookup = NULL; SharedCLRVectors* clr = NULL;
         
         if (format == "sharedfile") {
             lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
             Groups = lookup->getNamesGroups();
-        }else {
-            lcr = util.getNextLCR(input, allLines, userLabels, processedLabels, lastLabel);
-            Groups = lcr->getNamesGroups();
         }
         
-        while ((lookup != NULL) || (lcr != NULL)){
+        while ((lookup != NULL) || (clr != NULL)){
             
-            if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (lcr != NULL) { delete lcr; }break; }
+            if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; }break; }
             
-            process(lookup, lcr, designMap);
+            process(lookup, clr, designMap);
             
             if (format == "sharedfile") { delete lookup; lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel); }
-            else                        { delete lcr; lcr = util.getNextLCR(input, allLines, userLabels, processedLabels, lastLabel); }
         }
 		
         //output files created by command
@@ -343,7 +321,7 @@ int LefseCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& lcr, DesignMap& designMap) {
+int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, DesignMap& designMap) {
 	try {
         vector<string> classes;
         vector<string> subclasses;
@@ -351,10 +329,10 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& 
         map<string, set<string> > class2SubClasses; //maps class name to vector of its subclasses
         map<string, vector<int> > subClass2GroupIndex; //maps subclass name to vector of indexes in lookup from that subclass. old -> 1,2,3 means groups in location 1,2,3 of lookup are from old.  Saves time below.
         map<string, vector<int> > class2GroupIndex; //maps subclass name to vector of indexes in lookup from that class. old -> 1,2,3 means groups in location 1,2,3 of lookup are from old.  Saves time below.
-        if (normMillion) {  normalize(lookup, lcr);  }
+        if (normMillion) {  normalize(lookup, clr);  }
         vector<string> namesOfGroups;
         if (lookup != NULL) { namesOfGroups = lookup->getNamesGroups();  }
-        else                { namesOfGroups = lcr->getNamesGroups();     }
+        else                { namesOfGroups = clr->getNamesGroups();     }
         
         for (int j = 0; j < namesOfGroups.size(); j++) {
             string group = namesOfGroups[j];
@@ -390,10 +368,10 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& 
         //sort classes so order is right
         sort(classes.begin(), classes.end());
         
-        vector< vector<double> > means = getMeans(lookup, lcr, class2GroupIndex); //[numOTUs][classes] - classes in same order as class2GroupIndex
+        vector< vector<double> > means = getMeans(lookup, clr, class2GroupIndex); //[numOTUs][classes] - classes in same order as class2GroupIndex
         
         //run kruskal wallis on each otu
-        map<int, double> significantOtuLabels = runKruskalWallis(lookup, lcr, designMap);
+        map<int, double> significantOtuLabels = runKruskalWallis(lookup, clr, designMap);
         
         int numSigBeforeWilcox = significantOtuLabels.size();
         
@@ -401,7 +379,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& 
         
         //check for subclass
         string wilcoxString = "";
-        if ((subclass != "") && wilc) {  significantOtuLabels = runWilcoxon(lookup, lcr, designMap, significantOtuLabels, class2SubClasses, subClass2GroupIndex, subclass2Class);  wilcoxString += " ( " + toString(numSigBeforeWilcox) + " ) before internal wilcoxon"; }
+        if ((subclass != "") && wilc) {  significantOtuLabels = runWilcoxon(lookup, clr, designMap, significantOtuLabels, class2SubClasses, subClass2GroupIndex, subclass2Class);  wilcoxString += " ( " + toString(numSigBeforeWilcox) + " ) before internal wilcoxon"; }
         
         int numSigAfterWilcox = significantOtuLabels.size();
         
@@ -411,7 +389,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& 
         
         map<int, double> sigOTUSLDA;
         if (numSigAfterWilcox > 0) {
-            sigOTUSLDA = testLDA(lookup, lcr, significantOtuLabels, class2GroupIndex, subClass2GroupIndex);
+            sigOTUSLDA = testLDA(lookup, clr, significantOtuLabels, class2GroupIndex, subClass2GroupIndex);
             m->mothurOut("Number of discriminative features with abs LDA score > " + toString(ldaThreshold) + " : " + toString(significantOtuLabels.size()) + ".\n");
         }
         else { m->mothurOut("No features with significant differences between the classes.\n"); }
@@ -421,7 +399,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& 
         string label;
         vector<string> otuNames;
         if (lookup != NULL) {   label = lookup->getLabel();  otuNames = lookup->getOTUNames(); }
-        else                {   label = lcr->getLabel();  otuNames = lcr->getOTUNames();       }
+        else                {   label = clr->getLabel();  otuNames = clr->getOTUNames();       }
         
         printResults(means, significantOtuLabels, sigOTUSLDA, label, classes, otuNames);
         
@@ -433,7 +411,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& 
 	}
 }
 //**********************************************************************************************************************
-int LefseCommand::normalize(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& lcr) {
+int LefseCommand::normalize(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr) {
 	try {
         vector<double> mul;
         vector<string> namesOfGroups;
@@ -445,22 +423,22 @@ int LefseCommand::normalize(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*
             numBins = lookup->getNumBins();
             numSamples = lookup->size();
         }else {
-            namesOfGroups = lcr->getNamesGroups();
-            numBins = lcr->getNumBins();
-            numSamples = lcr->size();
+            namesOfGroups = clr->getNamesGroups();
+            numBins = clr->getNumBins();
+            numSamples = clr->size();
         }
         
         for (int i = 0; i < numSamples; i++) {
             double sum = 0;
             if (lookup != NULL) {  sum = lookup->getNumSeqs(namesOfGroups[i]);    }
-            else                {  sum = lcr->getNumSeqs(namesOfGroups[i]);       }
+            else                {  sum = clr->getNumSeqs(namesOfGroups[i]);       }
             mul.push_back(1000000.0/sum);
         }
         
         for (int i = 0; i < numSamples; i++) {
             for (int j = 0; j < numBins; j++) {
                 if (lookup != NULL) { lookup->set(j, lookup->get(j, namesOfGroups[i])*mul[i], namesOfGroups[i]);    }
-                else                { lcr->set(j, lcr->get(j, namesOfGroups[i])*mul[i], namesOfGroups[i]);       }
+                else                { clr->set(j, clr->get(j, namesOfGroups[i])*mul[i], namesOfGroups[i]);       }
             }
         }
         
@@ -472,7 +450,7 @@ int LefseCommand::normalize(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*
 	}
 }
 //**********************************************************************************************************************
-map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& lcr, DesignMap& designMap) {
+map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, DesignMap& designMap) {
 	try {
         vector<string> namesOfGroups;
         int numBins = 0;
@@ -481,8 +459,8 @@ map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& looku
             namesOfGroups = lookup->getNamesGroups();
             numBins = lookup->getNumBins();
         }else {
-            namesOfGroups = lcr->getNamesGroups();
-            numBins = lcr->getNumBins();
+            namesOfGroups = clr->getNamesGroups();
+            numBins = clr->getNumBins();
         }
         map<int, double> significantOtuLabels;
         
@@ -502,7 +480,7 @@ map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& looku
             vector<spearmanRank> values;
             vector<float> abunds;
             if (lookup != NULL) { abunds = lookup->getOTU(i);   }
-            else                { abunds = lcr->getOTU(i);      }
+            else                { abunds = clr->getOTU(i);      }
             
             for (int j = 0; j < namesOfGroups.size(); j++) {
                 string group = namesOfGroups[j];
@@ -526,7 +504,7 @@ map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& looku
 }
 //**********************************************************************************************************************
 //assumes not neccessarily paired
-map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& lcr, DesignMap& designMap, map<int, double> bins, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string> subclass2Class) {
+map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, DesignMap& designMap, map<int, double> bins, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string> subclass2Class) {
     try {
         map<int, double> significantOtuLabels;
         map<int, double>::iterator it;
@@ -537,7 +515,7 @@ map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors*& lookup, Sh
         */
         int numBins = 0;
         if (lookup != NULL) { numBins = lookup->getNumBins();   }
-        else                { numBins = lcr->getNumBins();      }
+        else                { numBins = clr->getNumBins();      }
         
         for (int i = 0; i < numBins; i++) {
             if (m->getControl_pressed()) { break; }
@@ -547,7 +525,7 @@ map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors*& lookup, Sh
                 
                 vector<float> abunds;
                 if (lookup != NULL) { abunds = lookup->getOTU(i);   }
-                else                { abunds = lcr->getOTU(i);      }
+                else                { abunds = clr->getOTU(i);      }
                 
                 bool sig = testOTUWilcoxon(class2SubClasses, abunds, subClass2GroupIndex, subclass2Class);
                 if (sig) { significantOtuLabels[i] = it->second;  }
@@ -719,7 +697,7 @@ bool LefseCommand::testOTUWilcoxon(map<string, set<string> >& class2SubClasses, 
 }
 //**********************************************************************************************************************
 //modelled after lefse.py test_lda_r function
-map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& lcr, map<int, double> bins, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >& subClass2GroupIndex) {
+map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, map<int, double> bins, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >& subClass2GroupIndex) {
     try {
         map<int, double> sigOTUS;
         map<int, double>::iterator it;
@@ -731,8 +709,8 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, Shared
             numBins = lookup->getNumBins();
             numGroups = lookup->size(); //lfk
         }else                {
-            numBins = lcr->getNumBins();
-            numGroups = lcr->size(); //lfk
+            numBins = clr->getNumBins();
+            numGroups = clr->size(); //lfk
         }
         vector< vector<double> > adjustedLookup;
         
@@ -749,7 +727,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, Shared
                 //fill x with this OTUs abundances
                 vector<float> tempx;
                 if (lookup != NULL) { tempx = lookup->getOTU(i);   }
-                else                { tempx = lcr->getOTU(i);      }
+                else                { tempx = clr->getOTU(i);      }
                 vector<double> x; for (int h = 0; h < tempx.size(); h++) { x.push_back((double)tempx[h]); }
                 
                 //go through classes
@@ -859,11 +837,11 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, Shared
     }
 }
 //**********************************************************************************************************************
-vector< vector<double> > LefseCommand::getMeans(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& lcr, map<string, vector<int> >& class2GroupIndex) {
+vector< vector<double> > LefseCommand::getMeans(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, map<string, vector<int> >& class2GroupIndex) {
     try {
         int numBins = 0;
         if (lookup != NULL) {  numBins = lookup->getNumBins();   }
-        else                {  numBins = lcr->getNumBins();      }
+        else                {  numBins = clr->getNumBins();      }
         
         int numClasses = class2GroupIndex.size();
         vector< vector<double> > means; //[numOTUS][classes]
@@ -884,7 +862,7 @@ vector< vector<double> > LefseCommand::getMeans(SharedRAbundFloatVectors*& looku
         for (int i = 0; i < numBins; i++) {
             vector<float> abunds;
             if (lookup != NULL) { abunds = lookup->getOTU(i);   }
-            else                { abunds = lcr->getOTU(i);      }
+            else                { abunds = clr->getOTU(i);      }
             
             for (int j = 0; j < abunds.size(); j++) {
                 if (m->getControl_pressed()) { return means; }

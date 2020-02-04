@@ -26,7 +26,7 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "designmap.h"
-#include "sharedlcrvectors.hpp"
+#include "sharedclrvectors.hpp"
 
 /**************************************************************************************************/
 
@@ -50,18 +50,18 @@ public:
     
 private:
     bool abort, allLines, wilc, wilcsamename, curv, subject, normMillion;
-    string outputDir, sharedfile, designfile, mclass, subclass, rankTec, multiClassStrat, sets, inputfile, lcrfile, format;
+    string outputDir, sharedfile, designfile, mclass, subclass, rankTec, multiClassStrat, sets, inputfile, clrfile, format;
     vector<string> outputNames, Sets;
     set<string> labels;
     double anovaAlpha, wilcoxonAlpha, fBoots, ldaThreshold;
     int nlogs, iters, strict, minC;
     
-    int process(SharedRAbundFloatVectors*&, SharedLCRVectors*&, DesignMap&);
-    int normalize(SharedRAbundFloatVectors*&, SharedLCRVectors*&);
-    map<int, double> runKruskalWallis(SharedRAbundFloatVectors*&, SharedLCRVectors*&, DesignMap&);
-    map<int, double> runWilcoxon(SharedRAbundFloatVectors*&, SharedLCRVectors*&, DesignMap&, map<int, double>, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
-    map<int, double> testLDA(SharedRAbundFloatVectors*&, SharedLCRVectors*&, map<int, double>, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >&);
-    vector< vector<double> > getMeans(SharedRAbundFloatVectors*& lookup, SharedLCRVectors*& lcr, map<string, vector<int> >& class2GroupIndex);
+    int process(SharedRAbundFloatVectors*&, SharedCLRVectors*&, DesignMap&);
+    int normalize(SharedRAbundFloatVectors*&, SharedCLRVectors*&);
+    map<int, double> runKruskalWallis(SharedRAbundFloatVectors*&, SharedCLRVectors*&, DesignMap&);
+    map<int, double> runWilcoxon(SharedRAbundFloatVectors*&, SharedCLRVectors*&, DesignMap&, map<int, double>, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
+    map<int, double> testLDA(SharedRAbundFloatVectors*&, SharedCLRVectors*&, map<int, double>, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >&);
+    vector< vector<double> > getMeans(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, map<string, vector<int> >& class2GroupIndex);
     
     bool contastWithinClassesOrFewPerClass(vector< vector<double> >&, vector<int> rands, int minCl, map<string, vector<int> > class2GroupIndex,  map<int, string> indexToClass);
     vector< vector<double> > lda(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<int, string>& indexToClass, vector<string>);

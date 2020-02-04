@@ -116,6 +116,7 @@ int SystemCommand::execute(){
 			in.close();
             
 			m->mothurOut(output); m->mothurOutEndLine();
+            //if (output != "") { exit(1); }
 			util.mothurRemove(redirectFileName);
 		}
 		

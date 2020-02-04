@@ -40,7 +40,7 @@ class CurrentFile {
 		string getTreeFile()		{ lock_guard<std::mutex> guard(currentProtector); return treefile;			}
 		string getSharedFile()		{ lock_guard<std::mutex> guard(currentProtector); return sharedfile;		}
 		string getRelAbundFile()	{ lock_guard<std::mutex> guard(currentProtector); return relabundfile;		}
-        string getLCRFile()         { lock_guard<std::mutex> guard(currentProtector); return lcrfile;           }
+        string getCLRFile()         { lock_guard<std::mutex> guard(currentProtector); return clrfile;           }
 		string getDesignFile()		{ lock_guard<std::mutex> guard(currentProtector); return designfile;		}
 		string getFastaFile()		{ lock_guard<std::mutex> guard(currentProtector); return fastafile;			}
 		string getSFFFile()			{ lock_guard<std::mutex> guard(currentProtector); return sfffile;			}
@@ -72,7 +72,7 @@ class CurrentFile {
 		void setSabundFile(string f)		{ lock_guard<std::mutex> guard(currentProtector); sabundfile = util.getFullPathName(f);			}
 		void setSharedFile(string f)		{ lock_guard<std::mutex> guard(currentProtector); sharedfile = util.getFullPathName(f);			}
 		void setRelAbundFile(string f)		{ lock_guard<std::mutex> guard(currentProtector); relabundfile = util.getFullPathName(f);		}
-        void setLCRFile(string f)           { lock_guard<std::mutex> guard(currentProtector); lcrfile = util.getFullPathName(f);        }
+        void setCLRFile(string f)           { lock_guard<std::mutex> guard(currentProtector); clrfile = util.getFullPathName(f);        }
 		void setOrderFile(string f)			{ lock_guard<std::mutex> guard(currentProtector); orderfile = util.getFullPathName(f);			}
 		void setOrderGroupFile(string f)	{ lock_guard<std::mutex> guard(currentProtector); ordergroupfile = util.getFullPathName(f);		}
 		void setDesignFile(string f)		{ lock_guard<std::mutex> guard(currentProtector); designfile = util.getFullPathName(f);			}
@@ -132,7 +132,7 @@ class CurrentFile {
         string defaultPath, outputDir, blastPath, inputDir;
         string releaseDate, version;
     
-        string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile, lcrfile;
+        string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile, clrfile;
         string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode, samplefile, toolsPath;
     bool mothurCalling;
 		
@@ -168,7 +168,7 @@ class CurrentFile {
 			sharedfile = "";
 			ordergroupfile = "";
 			relabundfile = "";
-            lcrfile = "";
+            clrfile = "";
 			fastafile = "";
 			qualfile = "";
 			sfffile = "";

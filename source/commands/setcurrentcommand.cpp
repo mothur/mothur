@@ -36,7 +36,7 @@ vector<string> SetCurrentCommand::setParameters(){
 		CommandParameter porder("order", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(porder);
 		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(ptree);
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pshared);
-        CommandParameter plcr("lcr", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(plcr);
+        CommandParameter pclr("clr", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pclr);
 		CommandParameter pordergroup("ordergroup", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pordergroup);
         CommandParameter pcount("count", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcount);
         CommandParameter pcurrent("current", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcurrent);
@@ -62,7 +62,7 @@ string SetCurrentCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The set.current command allows you to set the current files saved by mothur.\n";
-		helpString += "The set.current command parameters are: current, clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, lcr, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, contigsreport, constaxonomy, taxonomy and sample.\n";
+		helpString += "The set.current command parameters are: current, clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, clr, fasta, qfile, sff, oligos, accnos, biom, count, summary, file, contigsreport, constaxonomy, taxonomy and sample.\n";
         helpString += "The current parameter is used to input the output file from get.current.  This function is intended to allow you to input filenames from previous instances on mothur.  NOTE: If you have a current file set in the file *.current_files.summary file, and also set a value for that file type, the value set takes precedence.  For example, if you run set.current(current=current_files.summary, fasta=abrecovery.fasta) and your have fasta=final.fasta in the *.current_files.summary file the current fasta file will be set to abrecovery.fasta.\n";
 		helpString += "The clear parameter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
 		helpString += "The set.current command should be in the following format: \n";
@@ -231,12 +231,12 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
                 
-                it = parameters.find("lcr");
+                it = parameters.find("clr");
                 //user has given a template file
                 if(it != parameters.end()){
                     path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["lcr"] = inputDir + it->second;        }
+                    if (path == "") {    parameters["clr"] = inputDir + it->second;        }
                 }
 				
 				it = parameters.find("ordergroup");
@@ -445,10 +445,10 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 			else if (sharedfile == "not found") {  sharedfile = "";  }	
 			if (sharedfile != "") { current->setSharedFile(sharedfile); }
 			
-            lcrfile = validParameter.validFile(parameters, "lcr");
-            if (lcrfile == "not open") { m->mothurOut("Ignoring: " + parameters["lcr"]); m->mothurOutEndLine(); lcrfile = ""; }
-            else if (lcrfile == "not found") {  lcrfile = "";  }
-            if (lcrfile != "") { current->setLCRFile(lcrfile); }
+            clrfile = validParameter.validFile(parameters, "clr");
+            if (clrfile == "not open") { m->mothurOut("Ignoring: " + parameters["clr"]); m->mothurOutEndLine(); clrfile = ""; }
+            else if (clrfile == "not found") {  clrfile = "";  }
+            if (clrfile != "") { current->setCLRFile(clrfile); }
             
 			ordergroupfile = validParameter.validFile(parameters, "ordergroup");
 			if (ordergroupfile == "not open") { m->mothurOut("Ignoring: " + parameters["ordergroup"]); m->mothurOutEndLine(); ordergroupfile = ""; }
@@ -582,8 +582,8 @@ int SetCurrentCommand::execute(){
 					current->setSharedFile("");
 				}else if (types[i] == "relabund") {
 					current->setRelAbundFile("");
-                }else if (types[i] == "lcr") {
-                    current->setLCRFile("");
+                }else if (types[i] == "clr") {
+                    current->setCLRFile("");
 				}else if (types[i] == "design") {
 					current->setDesignFile("");
 				}else if (types[i] == "sff") {
@@ -693,8 +693,8 @@ int SetCurrentCommand::readCurrentFiles(){
                     current->setSharedFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "relabund") {
                     current->setRelAbundFile(util.getFullPathName(pieces[1]));
-                }else if (pieces[0] == "lcr") {
-                    current->setLCRFile(util.getFullPathName(pieces[1]));
+                }else if (pieces[0] == "clr") {
+                    current->setCLRFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "design") {
                     current->setDesignFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "sff") {

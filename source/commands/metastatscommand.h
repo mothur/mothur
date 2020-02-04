@@ -13,7 +13,7 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "sharedrabundvectors.hpp"
-#include "sharedlcrvectors.hpp"
+#include "sharedclrvectors.hpp"
 #include "mothurmetastats.h"
 #include "designmap.h"
 
@@ -43,14 +43,14 @@ private:
     
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, inputDir, designfile, sets, sharedfile, lcrfile, inputfile, format;
+	string groups, label, outputDir, inputDir, designfile, sets, sharedfile, clrfile, inputfile, format;
 	vector<string> Groups, outputNames, Sets;
 	vector< vector<string> > namesOfGroupCombos;
 	int iters, processors;
 	float threshold;
 	
 	int process(SharedRAbundVectors*&, DesignMap*&);
-    int process(SharedLCRVectors*&, DesignMap*&);
+    int process(SharedCLRVectors*&, DesignMap*&);
 };
 
 /**************************************************************************************************/

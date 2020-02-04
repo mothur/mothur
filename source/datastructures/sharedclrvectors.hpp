@@ -1,20 +1,20 @@
 //
-//  sharedlcrvectors.hpp
+//  sharedclrvectors.hpp
 //  Mothur
 //
 //  Created by Sarah Westcott on 1/21/20.
 //  Copyright © 2020 Schloss Lab. All rights reserved.
 //
 
-#ifndef sharedlcrvectors_hpp
-#define sharedlcrvectors_hpp
+#ifndef sharedclrvectors_hpp
+#define sharedclrvectors_hpp
 
 #include "datavector.hpp"
-#include "sharedlcrvector.hpp"
+#include "sharedclrvector.hpp"
 
-/*  DataStructure for a lcr relabund file.
+/*  DataStructure for a clr relabund file.
  
- The lcr - log centered ratio - is the log (base 2) of a value divided by the geometric mean of the values across all OTUs for that sample. For example here are the counts for four OTUs in one sample...
+ The clr - log centered ratio - is the log (base 2) of a value divided by the geometric mean of the values across all OTUs for that sample. For example here are the counts for four OTUs in one sample...
 
  > x <- c(10, 5, 3, 1)
  > log2(x / prod(x)^(1/4))
@@ -22,23 +22,23 @@
  
  */
 //********************************************************************************************************************
-inline bool compareLCRVectors(SharedLCRVector* left, SharedLCRVector* right){ return (left->getGroup() < right->getGroup()); }
+inline bool compareCLRVectors(SharedCLRVector* left, SharedCLRVector* right){ return (left->getGroup() < right->getGroup()); }
 //********************************************************************************************************************
 
 
-class SharedLCRVectors : public DataVector {
+class SharedCLRVectors : public DataVector {
     
 public:
-    SharedLCRVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu";  }
-    SharedLCRVectors(ifstream&, vector<string>&, string&, string&);
-    SharedLCRVectors(SharedLCRVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
-        vector<SharedLCRVector*> data = bv.getSharedLCRVectors();
+    SharedCLRVectors() : DataVector() { label = ""; numBins = 0;  otuTag = "Otu";  }
+    SharedCLRVectors(ifstream&, vector<string>&, string&, string&);
+    SharedCLRVectors(SharedCLRVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
+        vector<SharedCLRVector*> data = bv.getSharedCLRVectors();
         for (int i = 0; i < data.size(); i++) { push_back(data[i]); }
         setLabels(bv.getLabel());
         setOTUNames(bv.getOTUNames());
        //eliminateZeroOTUS();
     }
-    ~SharedLCRVectors() { clear(); }
+    ~SharedCLRVectors() { clear(); }
     
     vector<string> getNamesGroups();
     void setLabels(string l);
@@ -54,10 +54,10 @@ public:
     void setOTUName(int, string);
 
     int push_back(vector<float>, string binLabel=""); //add otu. mothur assumes abunds are in same order as groups.
-    int push_back(SharedLCRVector*);
+    int push_back(SharedCLRVector*);
     void removeGroups(vector<string> g);
     int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize
-    void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedLCRVectors.\n"); }
+    void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedCLRVectors.\n"); }
     void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; currentLabels.clear(); }
     int size() { return (int)lookup.size();  }
     int getNumGroups() { return (int)lookup.size(); }
@@ -66,19 +66,19 @@ public:
     float getNumSeqsSmallestGroup();
     void print(ostream&, bool&);
     
-    vector<SharedLCRVector*> getSharedLCRVectors();
+    vector<SharedCLRVector*> getSharedCLRVectors();
     
-    RAbundVector getRAbundVector() { m->mothurOut("[ERROR]: can not use getRAbundVector for SharedLCRVectors.\n"); RAbundVector r; return r; }
-    SAbundVector getSAbundVector() { m->mothurOut("[ERROR]: can not use getSAbundVector for SharedLCRVectors.\n"); SAbundVector s; return s; }
-    OrderVector getOrderVector(map<string,int>* hold = NULL) { m->mothurOut("[ERROR]: can not use getOrderVector for SharedLCRVectors.\n"); OrderVector o; return o; }
+    RAbundVector getRAbundVector() { m->mothurOut("[ERROR]: can not use getRAbundVector for SharedCLRVectors.\n"); RAbundVector r; return r; }
+    SAbundVector getSAbundVector() { m->mothurOut("[ERROR]: can not use getSAbundVector for SharedCLRVectors.\n"); SAbundVector s; return s; }
+    OrderVector getOrderVector(map<string,int>* hold = NULL) { m->mothurOut("[ERROR]: can not use getOrderVector for SharedCLRVectors.\n"); OrderVector o; return o; }
     
 private:
     void printHeaders(ostream&, bool&);
-    vector<SharedLCRVector*> lookup;
+    vector<SharedCLRVector*> lookup;
     vector<string> currentLabels;
     map<string, int> groupNames;
     int numBins;
     string otuTag;
 };
 
-#endif /* sharedlcrvectors_hpp */
+#endif /* sharedclrvectors_hpp */

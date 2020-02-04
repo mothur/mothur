@@ -1,16 +1,16 @@
 //
-//  sharedlcrvectors.cpp
+//  sharedclrvectors.cpp
 //  Mothur
 //
 //  Created by Sarah Westcott on 1/21/20.
 //  Copyright © 2020 Schloss Lab. All rights reserved.
 //
 
-#include "sharedlcrvectors.hpp"
+#include "sharedclrvectors.hpp"
 
 /***********************************************************************/
-//reads a lcr file
-SharedLCRVectors::SharedLCRVectors(ifstream& f, vector<string>& userGroups, string& nextLabel, string& labelTag) : DataVector() {
+//reads a clr file
+SharedCLRVectors::SharedCLRVectors(ifstream& f, vector<string>& userGroups, string& nextLabel, string& labelTag) : DataVector() {
     try {
         int num;
         string holdLabel, groupN;
@@ -91,7 +91,7 @@ SharedLCRVectors::SharedLCRVectors(ifstream& f, vector<string>& userGroups, stri
         
         if (readData) {
             //add new vector to lookup
-            SharedLCRVector* temp = new SharedLCRVector(f, label, groupN, numBins);
+            SharedCLRVector* temp = new SharedCLRVector(f, label, groupN, numBins);
             push_back(temp);
         } else { util.getline(f); }
         util.gobble(f);
@@ -111,7 +111,7 @@ SharedLCRVectors::SharedLCRVectors(ifstream& f, vector<string>& userGroups, stri
             }
             
             if (readData) {
-                SharedLCRVector* temp = new SharedLCRVector(f, label, groupN, numBins);
+                SharedCLRVector* temp = new SharedCLRVector(f, label, groupN, numBins);
                 push_back(temp);
             }else { util.getline(f); }
             util.gobble(f);
@@ -125,39 +125,39 @@ SharedLCRVectors::SharedLCRVectors(ifstream& f, vector<string>& userGroups, stri
         if (lookup.size() < userGroups.size()) { m->mothurOut("[ERROR]: requesting groups not present in files, aborting.\n"); m->setControl_pressed(true); }
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "SharedLCRVectors");
+        m->errorOut(e, "SharedCLRVectors", "SharedCLRVectors");
         exit(1);
     }
 }
 /***********************************************************************/
-void SharedLCRVectors::print(ostream& output, bool& printOTUHeaders){
+void SharedCLRVectors::print(ostream& output, bool& printOTUHeaders){
     try {
         printHeaders(output, printOTUHeaders);
-        sort(lookup.begin(), lookup.end(), compareLCRVectors);
+        sort(lookup.begin(), lookup.end(), compareCLRVectors);
         for (int i = 0; i < lookup.size(); i++) {
             if (m->getControl_pressed()) { break; }
             lookup[i]->print(output);
         }
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "print");
+        m->errorOut(e, "SharedCLRVectors", "print");
         exit(1);
     }
 }
 /***********************************************************************/
-string SharedLCRVectors::getOTUName(int bin){
+string SharedCLRVectors::getOTUName(int bin){
     try {
         if (currentLabels.size() > bin) {  }
         else { getOTUNames(); }
         return currentLabels[bin];
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "getOTUName");
+        m->errorOut(e, "SharedCLRVectors", "getOTUName");
         exit(1);
     }
 }
 /***********************************************************************/
-void SharedLCRVectors::setOTUName(int bin, string otuName){
+void SharedCLRVectors::setOTUName(int bin, string otuName){
     try {
         if (currentLabels.size() > bin) {  currentLabels[bin] = otuName; }
         else {
@@ -170,12 +170,12 @@ void SharedLCRVectors::setOTUName(int bin, string otuName){
         }
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "setOTUName");
+        m->errorOut(e, "SharedCLRVectors", "setOTUName");
         exit(1);
     }
 }
 /***********************************************************************/
-int SharedLCRVectors::push_back(vector<float> abunds, string binLabel){
+int SharedCLRVectors::push_back(vector<float> abunds, string binLabel){
     try {
         if (abunds.size() != lookup.size()) {  m->mothurOut("[ERROR]: you have provided " + toString(abunds.size()) + " abundances, but mothur was expecting " + toString(lookup.size()) + ", please correct.\n"); m->setControl_pressed(true); return 0; }
         
@@ -219,64 +219,64 @@ int SharedLCRVectors::push_back(vector<float> abunds, string binLabel){
         return lookup.size();
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "push_back");
+        m->errorOut(e, "SharedCLRVectors", "push_back");
         exit(1);
     }
 }
 /***********************************************************************/
-int SharedLCRVectors::push_back(SharedLCRVector* thisLookup){
+int SharedCLRVectors::push_back(SharedCLRVector* thisLookup){
     try {
         if (numBins == 0) { numBins = thisLookup->getNumBins();  }
         lookup.push_back(thisLookup);
-        sort(lookup.begin(), lookup.end(), compareLCRVectors);
+        sort(lookup.begin(), lookup.end(), compareCLRVectors);
         if (label == "") { label = thisLookup->getLabel(); }
         groupNames.clear();
         for (int i = 0; i < lookup.size(); i ++) { groupNames[lookup[i]->getGroup()] = i; }
         return lookup.size();
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "push_back");
+        m->errorOut(e, "SharedCLRVectors", "push_back");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVectors::getOTUTotal(int bin){
+float SharedCLRVectors::getOTUTotal(int bin){
     try {
         float totalOTUAbund = 0;
         for (int i = 0; i < lookup.size(); i++) { totalOTUAbund += lookup[i]->get(bin); }
         return totalOTUAbund;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "getOTUTotal");
+        m->errorOut(e, "SharedCLRVectors", "getOTUTotal");
         exit(1);
     }
 }
 /***********************************************************************/
-vector<float> SharedLCRVectors::getOTU(int bin){
+vector<float> SharedCLRVectors::getOTU(int bin){
     try {
         vector<float> abunds;
         for (int i = 0; i < lookup.size(); i++) { abunds.push_back(lookup[i]->get(bin)); }
         return abunds;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "getOTU");
+        m->errorOut(e, "SharedCLRVectors", "getOTU");
         exit(1);
     }
 }
 
 /***********************************************************************/
-void SharedLCRVectors::setLabels(string l){
+void SharedCLRVectors::setLabels(string l){
     try {
         label = l;
         for (int i = 0; i < lookup.size(); i++) { lookup[i]->setLabel(l); }
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "setLabels");
+        m->errorOut(e, "SharedCLRVectors", "setLabels");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVectors::get(int bin, string group){
+float SharedCLRVectors::get(int bin, string group){
     try {
         float abund = 0;
         map<string, int>::iterator it = groupNames.find(group);
@@ -285,12 +285,12 @@ float SharedLCRVectors::get(int bin, string group){
         return abund;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "get");
+        m->errorOut(e, "SharedCLRVectors", "get");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVectors::getNumSeqs(string group){
+float SharedCLRVectors::getNumSeqs(string group){
     try {
         float numSeqs = 0;
         map<string, int>::iterator it = groupNames.find(group);
@@ -300,24 +300,24 @@ float SharedLCRVectors::getNumSeqs(string group){
         return numSeqs;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "getNumSeqs");
+        m->errorOut(e, "SharedCLRVectors", "getNumSeqs");
         exit(1);
     }
 }
 /***********************************************************************/
-void SharedLCRVectors::set(int bin, float binSize, string group){
+void SharedCLRVectors::set(int bin, float binSize, string group){
     try {
         map<string, int>::iterator it = groupNames.find(group);
         if (it == groupNames.end()) { m->mothurOut("[ERROR]: can not find group " + group + ".\n"); m->setControl_pressed(true);  }
         else { lookup[it->second]->set(bin, binSize); }
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "set");
+        m->errorOut(e, "SharedCLRVectors", "set");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVectors::removeOTU(int bin){
+float SharedCLRVectors::removeOTU(int bin){
     try {
         float totalOTUAbund = 0;
         for (int i = 0; i < lookup.size(); i ++) { totalOTUAbund += lookup[i]->remove(bin); }
@@ -328,12 +328,12 @@ float SharedLCRVectors::removeOTU(int bin){
         return totalOTUAbund;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "removeOTU");
+        m->errorOut(e, "SharedCLRVectors", "removeOTU");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVectors::removeOTUs(vector<int> bins, bool sorted){
+float SharedCLRVectors::removeOTUs(vector<int> bins, bool sorted){
     try {
         if (bins.size() == 0) { return 0; }
         
@@ -364,36 +364,36 @@ float SharedLCRVectors::removeOTUs(vector<int> bins, bool sorted){
         return totalOTUAbund;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "removeOTUs");
+        m->errorOut(e, "SharedCLRVectors", "removeOTUs");
         exit(1);
     }
 }
 
 /***********************************************************************/
-void SharedLCRVectors::setOTUNames(vector<string> names){
+void SharedCLRVectors::setOTUNames(vector<string> names){
     try {
         currentLabels.clear();
         currentLabels = names;
         getOTUNames();
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "setOTUNames");
+        m->errorOut(e, "SharedCLRVectors", "setOTUNames");
         exit(1);
     }
 }
 /***********************************************************************/
-vector<string> SharedLCRVectors::getOTUNames(){
+vector<string> SharedCLRVectors::getOTUNames(){
     try {
         util.getOTUNames(currentLabels, numBins, otuTag);
         return currentLabels;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "getOTUNames");
+        m->errorOut(e, "SharedCLRVectors", "getOTUNames");
         exit(1);
     }
 }
 /***********************************************************************/
-void SharedLCRVectors::printHeaders(ostream& output, bool& printSharedHeaders){
+void SharedCLRVectors::printHeaders(ostream& output, bool& printSharedHeaders){
     try {
         if (printSharedHeaders) {
             getOTUNames();
@@ -405,24 +405,24 @@ void SharedLCRVectors::printHeaders(ostream& output, bool& printSharedHeaders){
         }
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "printHeaders");
+        m->errorOut(e, "SharedCLRVectors", "printHeaders");
         exit(1);
     }
 }
 /***********************************************************************/
-vector<string> SharedLCRVectors::getNamesGroups(){
+vector<string> SharedCLRVectors::getNamesGroups(){
     try {
         vector<string> names;
         for (int i = 0; i < lookup.size(); i ++) { names.push_back(lookup[i]->getGroup()); }
         return names;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "getNamesGroups");
+        m->errorOut(e, "SharedCLRVectors", "getNamesGroups");
         exit(1);
     }
 }
 /***********************************************************************/
-float SharedLCRVectors::getNumSeqsSmallestGroup(){
+float SharedCLRVectors::getNumSeqsSmallestGroup(){
     try {
         float smallest = MOTHURMAX;
         for (int i = 0; i < lookup.size(); i++) {
@@ -436,26 +436,26 @@ float SharedLCRVectors::getNumSeqsSmallestGroup(){
     }
 }
 /***********************************************************************/
-vector<SharedLCRVector*> SharedLCRVectors::getSharedLCRVectors(){
+vector<SharedCLRVector*> SharedCLRVectors::getSharedCLRVectors(){
     try {
-        vector<SharedLCRVector*> newLookup;
+        vector<SharedCLRVector*> newLookup;
         for (int i = 0; i < lookup.size(); i++) {
-            SharedLCRVector* temp = new SharedLCRVector(*lookup[i]);
+            SharedCLRVector* temp = new SharedCLRVector(*lookup[i]);
             newLookup.push_back(temp);
         }
         
         return newLookup;
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "getSharedLCRVectors");
+        m->errorOut(e, "SharedCLRVectors", "getSharedCLRVectors");
         exit(1);
     }
 }
 /***********************************************************************/
-void SharedLCRVectors::removeGroups(vector<string> g){
+void SharedCLRVectors::removeGroups(vector<string> g){
     try {
         bool remove = false;
-        for (vector<SharedLCRVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+        for (vector<SharedCLRVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             //if this sharedrabund is not from a group the user wants then delete it.
             if (util.inUsersGroups((*it)->getGroup(), g) ) {
                 remove = true;
@@ -474,11 +474,11 @@ void SharedLCRVectors::removeGroups(vector<string> g){
     }
 }
 /***********************************************************************/
-int SharedLCRVectors::removeGroups(int minSize, bool silent){
+int SharedCLRVectors::removeGroups(int minSize, bool silent){
     try {
         vector<string> Groups;
         bool remove = false;
-        for (vector<SharedLCRVector*>::iterator it = lookup.begin(); it != lookup.end();) {
+        for (vector<SharedCLRVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             if ((*it)->getNumSeqs() < minSize) {
                 if (!silent) { m->mothurOut((*it)->getGroup() + " contains " + toString((*it)->getNumSeqs()) + ". Eliminating.\n"); }
                 delete (*it); (*it) = NULL;
@@ -495,7 +495,7 @@ int SharedLCRVectors::removeGroups(int minSize, bool silent){
         return lookup.size();
     }
     catch(exception& e) {
-        m->errorOut(e, "SharedLCRVectors", "removeGroups");
+        m->errorOut(e, "SharedCLRVectors", "removeGroups");
         exit(1);
     }
 }

@@ -129,7 +129,6 @@
 #include "makecontigscommand.h"
 #include "sffmultiplecommand.h"
 #include "classifysvmsharedcommand.h"
-#include "classifyrfsharedcommand.h"
 #include "filtersharedcommand.h"
 #include "primerdesigncommand.h"
 #include "getdistscommand.h"
@@ -367,7 +366,6 @@ int HelpCommand::execute(){
                 else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
                 else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
                 else if(commandName == "classify.svm")          {   command = new ClassifySvmSharedCommand(optionString);       }
-                else if(commandName == "classify.rf")           {	command = new ClassifyRFSharedCommand(optionString);          }
                 else if(commandName == "filter.shared")         {	command = new FilterSharedCommand(optionString);            }
                 else if(commandName == "primer.design")         {	command = new PrimerDesignCommand(optionString);            }
                 else if(commandName == "get.dists")             {	command = new GetDistsCommand(optionString);                }

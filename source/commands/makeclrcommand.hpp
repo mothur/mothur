@@ -1,31 +1,31 @@
 //
-//  makelcrcommand.hpp
+//  makeclrcommand.hpp
 //  Mothur
 //
 //  Created by Sarah Westcott on 1/20/20.
 //  Copyright © 2020 Schloss Lab. All rights reserved.
 //
 
-#ifndef makelcrcommand_hpp
-#define makelcrcommand_hpp
+#ifndef makeclrcommand_hpp
+#define makeclrcommand_hpp
 
 #include "command.hpp"
 #include "inputdata.h"
 
-class MakeLCRCommand : public Command {
+class MakeCLRCommand : public Command {
 
 public:
-    MakeLCRCommand(string);
-    MakeLCRCommand();
-    ~MakeLCRCommand() {}
+    MakeCLRCommand(string);
+    MakeCLRCommand();
+    ~MakeCLRCommand() {}
     
     vector<string> setParameters();
-    string getCommandName()            { return "make.lcr";                 }
+    string getCommandName()            { return "make.clr";                 }
     string getCommandCategory()        { return "OTU-Based Approaches";     }
     
     string getHelpString();
     string getOutputPattern(string);
-    string getCitation()            { return "http://www.mothur.org/wiki/Make.lcr";                 }
+    string getCitation()            { return "http://www.mothur.org/wiki/Make.clr";                 }
     string getDescription()         { return "create a log centered ratio file from a shared file"; }
 
     
@@ -44,4 +44,4 @@ private:
     
 };
 
-#endif /* makelcrcommand_hpp */
+#endif /* makeclrcommand_hpp */

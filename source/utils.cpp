@@ -12,7 +12,7 @@
 #include "phylotree.h"
 #include "taxonomy.hpp"
 #include "inputdata.h"
-#include "sharedlcrvectors.hpp"
+#include "sharedclrvectors.hpp"
 #include "sharedrabundfloatvectors.hpp"
 
 /***********************************************************************/
@@ -5133,10 +5133,10 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
     }
 }
 /***********************************************************************/
-SharedLCRVectors* Utils::getNextLCR(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
     try {
         
-        SharedLCRVectors* lookup = input.getSharedLCRVectors();
+        SharedCLRVectors* lookup = input.getSharedCLRVectors();
         
         //as long as you are not at the end of the file or done wih the lines you want
         while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -5159,7 +5159,7 @@ SharedLCRVectors* Utils::getNextLCR(InputData& input, bool allLines, set<string>
                 string saveLabel = lookup->getLabel();
                 
                 delete lookup;
-                lookup = input.getSharedLCRVectors(lastLabel);
+                lookup = input.getSharedCLRVectors(lastLabel);
                 m->mothurOut(lookup->getLabel()+"\n");
                 
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
@@ -5176,7 +5176,7 @@ SharedLCRVectors* Utils::getNextLCR(InputData& input, bool allLines, set<string>
             if (m->getControl_pressed()) {  delete lookup;  return NULL; }
             
             //get next line to process
-            lookup = input.getSharedLCRVectors();
+            lookup = input.getSharedCLRVectors();
         }
         
         if (m->getControl_pressed()) { delete lookup;  return NULL; }
@@ -5193,7 +5193,7 @@ SharedLCRVectors* Utils::getNextLCR(InputData& input, bool allLines, set<string>
         //run last label if you need to
         if (needToRun )  {
             delete lookup;
-            lookup = input.getSharedLCRVectors(lastLabel);
+            lookup = input.getSharedCLRVectors(lastLabel);
             m->mothurOut(lookup->getLabel()+"\n");
             processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
             return lookup;
@@ -5202,7 +5202,7 @@ SharedLCRVectors* Utils::getNextLCR(InputData& input, bool allLines, set<string>
         return lookup;
         
     }catch(exception& e) {
-            m->errorOut(e, "Utils", "getNextLCR");
+            m->errorOut(e, "Utils", "getNextCLR");
             exit(1);
     }
 }

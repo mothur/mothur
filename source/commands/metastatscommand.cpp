@@ -15,8 +15,8 @@
 //**********************************************************************************************************************
 vector<string> MetaStatsCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "shared-lcr", "none", "none","metastats",false,false,true); parameters.push_back(pshared);
-        CommandParameter plcr("lcr", "InputTypes", "", "", "shared-lcr", "none", "none","metastats",false,false,true); parameters.push_back(plcr);
+		CommandParameter pshared("shared", "InputTypes", "", "", "shared-clr", "none", "none","metastats",false,false,true); parameters.push_back(pshared);
+        CommandParameter pclr("clr", "InputTypes", "", "", "shared-clr", "none", "none","metastats",false,false,true); parameters.push_back(pclr);
 		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
@@ -43,7 +43,7 @@ string MetaStatsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "This command is based on the Metastats program, White, J.R., Nagarajan, N. & Pop, M. Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Comput Biol 5, e1000352 (2009).\n";
 		helpString += "The metastats command outputs a .metastats file. \n";
-		helpString += "The metastats command parameters are shared, lcr, iters, threshold, groups, label, design, sets and processors.  The shared or lcr and design parameters are required, unless you have valid current files.\n";
+		helpString += "The metastats command parameters are shared, clr, iters, threshold, groups, label, design, sets and processors.  The shared or clr and design parameters are required, unless you have valid current files.\n";
 		helpString += "The design parameter allows you to assign your groups to sets when you are running metastat. mothur will run all pairwise comparisons of the sets. It is required. \n";
 		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n";
 		helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
@@ -143,12 +143,12 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
 				
-                it = parameters.find("lcr");
+                it = parameters.find("clr");
                 //user has given a template file
                 if(it != parameters.end()){
                     path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["lcr"] = inputDir + it->second;        }
+                    if (path == "") {    parameters["clr"] = inputDir + it->second;        }
                 }
 			}
 			
@@ -158,24 +158,24 @@ MetaStatsCommand::MetaStatsCommand(string option) {
             else if (sharedfile == "not found") { sharedfile = "";  }
 			else { current->setSharedFile(sharedfile); inputfile = sharedfile; format = "sharedfile";  }
 			
-            lcrfile = validParameter.validFile(parameters, "lcr");
-            if (lcrfile == "not open") { abort = true; }
-            else if (lcrfile == "not found") { lcrfile = "";  }
+            clrfile = validParameter.validFile(parameters, "clr");
+            if (clrfile == "not open") { abort = true; }
+            else if (clrfile == "not found") { clrfile = "";  }
             else {
-                current->setLCRFile(lcrfile); inputfile = lcrfile; format = "lcrfile";
-                m->mothurOut("[NOTE]: When using an lcr file mothur will run the fisher exact test with the floor of the values generated.\n");
+                current->setCLRFile(clrfile); inputfile = clrfile; format = "clrfile";
+                m->mothurOut("[NOTE]: When using a clr file mothur will run the fisher exact test with the floor of the values generated.\n");
             }
             
-            if ((sharedfile == "") && (lcrfile == "")) {
+            if ((sharedfile == "") && (clrfile == "")) {
                 //is there are current file available for any of these?
                 //give priority to shared, then list, then rabund, then sabund
                 //if there is a current shared file, use it
                 sharedfile = current->getSharedFile();
                 if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n"); }
                 else {
-                    lcrfile = current->getLCRFile();
-                    if (lcrfile != "") { inputfile = lcrfile; format = "lcrfile"; m->mothurOut("Using " + lcrfile + " as input file for the lcr parameter.\n");  m->mothurOut("[NOTE]: When using an lcr file mothur will run the fisher exact test with the floor of the values generated.\n"); }
-                    else { m->mothurOut("No valid current files. You must provide a lcrfile or shared file.\n"); abort = true; }
+                    clrfile = current->getCLRFile();
+                    if (clrfile != "") { inputfile = clrfile; format = "clrfile"; m->mothurOut("Using " + clrfile + " as input file for the clr parameter.\n");  m->mothurOut("[NOTE]: When using a clr file mothur will run the fisher exact test with the floor of the values generated.\n"); }
+                    else { m->mothurOut("No valid current files. You must provide a clrfile or shared file.\n"); abort = true; }
                 }
             }
         
@@ -248,14 +248,14 @@ int MetaStatsCommand::execute(){
 		set<string> userLabels = labels;
         string lastLabel = "";
         
-        SharedRAbundVectors* lookup = NULL; SharedLCRVectors* lcr = NULL;
+        SharedRAbundVectors* lookup = NULL; SharedCLRVectors* clr = NULL;
         
         if (format == "sharedfile") {
             lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             Groups = lookup->getNamesGroups();
         }else {
-            lcr = util.getNextLCR(input, allLines, userLabels, processedLabels, lastLabel);
-            Groups = lcr->getNamesGroups();
+            clr = util.getNextCLR(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = clr->getNamesGroups();
         }
         
         if (Sets.size() == 0) { Sets = designMap->getCategory();  }
@@ -270,22 +270,22 @@ int MetaStatsCommand::execute(){
 		if (numGroups == 2) { processors = 1; }
 		else if (numGroups < 2)	{ m->mothurOut("[ERROR]: Not enough sets, I need at least 2 valid sets. Unable to complete command.\n");  m->setControl_pressed(true); }
         
-        while ((lookup != NULL) || (lcr != NULL)){
+        while ((lookup != NULL) || (clr != NULL)){
             
-            if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (lcr != NULL) { delete lcr; }break; }
+            if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; }break; }
             
             if (format == "sharedfile") {
                 process(lookup, designMap); delete lookup;
                 lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             }
             else {
-                process(lcr, designMap); delete lcr;
-                lcr = util.getNextLCR(input, allLines, userLabels, processedLabels, lastLabel);
+                process(clr, designMap); delete clr;
+                clr = util.getNextCLR(input, allLines, userLabels, processedLabels, lastLabel);
             }
         }
         
         delete designMap;
-        if (m->getControl_pressed()) {  outputTypes.clear(); if (lookup != NULL) { delete lookup; } if (lcr != NULL) { delete lcr; } for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) {  outputTypes.clear(); if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; } for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -300,7 +300,7 @@ int MetaStatsCommand::execute(){
 /**************************************************************************************************/
 struct metastatsData {
     SharedRAbundVectors* thisLookUp;
-    SharedLCRVectors* thisLCR;
+    SharedCLRVectors* thisCLR;
     vector< vector<string> > namesOfGroupCombos;
     vector<string> designMapGroups, outputNames;
     int start, num, iters, count;
@@ -320,16 +320,16 @@ struct metastatsData {
         iters = i;
         threshold = thr;
         count=0;
-        thisLCR = NULL;
+        thisCLR = NULL;
     }
     
-    metastatsData(int st, int en, vector<string> on, vector< vector<string> > ns, SharedLCRVectors*& lu, vector<string> dg, int i, float thr) {
+    metastatsData(int st, int en, vector<string> on, vector< vector<string> > ns, SharedCLRVectors*& lu, vector<string> dg, int i, float thr) {
         m = MothurOut::getInstance();
         outputNames = on;
         start = st;
         num = en;
         namesOfGroupCombos = ns;
-        thisLCR = lu;
+        thisCLR = lu;
         designMapGroups = dg;
         iters = i;
         threshold = thr;
@@ -462,11 +462,11 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp, DesignMap*& desi
 	}
 }
 //**********************************************************************************************************************
-int driverLCR(metastatsData* params) {
+int driverCLR(metastatsData* params) {
     try {
         
-        vector<string> thisLookupNames = params->thisLCR->getNamesGroups();
-        vector<SharedLCRVector*> thisLCRRabunds = params->thisLCR->getSharedLCRVectors();
+        vector<string> thisLookupNames = params->thisCLR->getNamesGroups();
+        vector<SharedCLRVector*> thisCLRRabunds = params->thisCLR->getSharedCLRVectors();
         
         //for each combo
         for (int c = params->start; c < (params->start+params->num); c++) {
@@ -476,36 +476,36 @@ int driverLCR(metastatsData* params) {
             string setB = params->namesOfGroupCombos[c][1];
             string outputFileName = params->outputNames[c];
             
-            vector< vector<double> > data2; data2.resize(params->thisLCR->getNumBins());
+            vector< vector<double> > data2; data2.resize(params->thisCLR->getNumBins());
             
-            vector<SharedLCRVector*> subset;
+            vector<SharedCLRVector*> subset;
             int setACount = 0; int setBCount = 0;
-            for (int i = 0; i < params->thisLCR->size(); i++) {
+            for (int i = 0; i < params->thisCLR->size(); i++) {
                 string thisGroup = thisLookupNames[i];
                 if (params->designMapGroups[i] == setB) {
-                    subset.push_back(thisLCRRabunds[i]);
+                    subset.push_back(thisCLRRabunds[i]);
                     setBCount++;
                 }else if (params->designMapGroups[i] == setA) {
-                    subset.insert(subset.begin()+setACount, thisLCRRabunds[i]);
+                    subset.insert(subset.begin()+setACount, thisCLRRabunds[i]);
                     setACount++;
                 }
             }
             
             if ((setACount == 0) || (setBCount == 0))  { params->m->mothurOut("Missing shared info for " + setA + " or " + setB + ". Skipping comparison.\n"); }
             else {
-                for (int j = 0; j < params->thisLCR->getNumBins(); j++) {
+                for (int j = 0; j < params->thisCLR->getNumBins(); j++) {
                     data2[j].resize(subset.size(), 0.0);
                     for (int i = 0; i < subset.size(); i++) { data2[j][i] = (subset[i]->get(j)); }
                 }
                 
                 params->m->mothurOut("\nComparing " + setA + " and " + setB + "...\n");
                 MothurMetastats mothurMeta(params->threshold, params->iters);
-                mothurMeta.runMetastats(outputFileName, data2, setACount, params->thisLCR->getOTUNames(), false);
+                mothurMeta.runMetastats(outputFileName, data2, setACount, params->thisCLR->getOTUNames(), false);
                 params->m->mothurOutEndLine();
             }
         }
         
-        for(int i = 0; i < thisLCRRabunds.size(); i++)  {  delete thisLCRRabunds[i];  }
+        for(int i = 0; i < thisCLRRabunds.size(); i++)  {  delete thisCLRRabunds[i];  }
         
         return 0;
         
@@ -516,7 +516,7 @@ int driverLCR(metastatsData* params) {
     }
 }
 //**********************************************************************************************************************
-int MetaStatsCommand::process(SharedLCRVectors*& thisLCR, DesignMap*& designMap){
+int MetaStatsCommand::process(SharedCLRVectors*& thisCLR, DesignMap*& designMap){
     try {
         vector<linePair> lines;
         vector<std::thread*> workerThreads;
@@ -538,7 +538,7 @@ int MetaStatsCommand::process(SharedLCRVectors*& thisLCR, DesignMap*& designMap)
                 //get filename
                 map<string, string> variables;
                 variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
-                variables["[distance]"] = thisLCR->getLabel();
+                variables["[distance]"] = thisCLR->getLabel();
                 variables["[group]"] = setA + "-" + setB;
                 string outputFileName = getOutputFileName("metastats",variables);
                 outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
@@ -549,23 +549,23 @@ int MetaStatsCommand::process(SharedLCRVectors*& thisLCR, DesignMap*& designMap)
             remainingPairs = remainingPairs - numPairs;
         }
         
-        vector<string> designMapGroups = thisLCR->getNamesGroups();
+        vector<string> designMapGroups = thisCLR->getNamesGroups();
         for (int j = 0; j < designMapGroups.size(); j++) {  designMapGroups[j] = designMap->get(designMapGroups[j]); }
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             //make copy of lookup so we don't get access violations
-            SharedLCRVectors* newLookup = new SharedLCRVectors(*thisLCR);
+            SharedCLRVectors* newLookup = new SharedCLRVectors(*thisCLR);
             
             metastatsData* dataBundle = new metastatsData(lines[i+1].start, lines[i+1].end, thisLabelsOutputFiles, namesOfGroupCombos, newLookup, designMapGroups, iters, threshold);
             data.push_back(dataBundle);
             
-            std::thread* thisThread = new std::thread(driverLCR, dataBundle);
+            std::thread* thisThread = new std::thread(driverCLR, dataBundle);
             workerThreads.push_back(thisThread);
         }
 
-        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, thisLabelsOutputFiles, namesOfGroupCombos, thisLCR, designMapGroups, iters, threshold);
-        driverLCR(dataBundle);
+        metastatsData* dataBundle = new metastatsData(lines[0].start, lines[0].end, thisLabelsOutputFiles, namesOfGroupCombos, thisCLR, designMapGroups, iters, threshold);
+        driverCLR(dataBundle);
         
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();

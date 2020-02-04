@@ -28,7 +28,7 @@ set<string> CurrentFile::getCurrentTypes()  {
         types.insert("phylip");
         types.insert("qfile");
         types.insert("relabund");
-        types.insert("lcr");
+        types.insert("clr");
         types.insert("sabund");
         types.insert("rabund");
         types.insert("sff");
@@ -73,7 +73,7 @@ void CurrentFile::printCurrentFiles(string filename)  {
             if (qualfile != "")			{  m->mothurOut("qfile=" + qualfile, out); m->mothurOutEndLine(out);				}
             if (rabundfile != "")		{  m->mothurOut("rabund=" + rabundfile, out); m->mothurOutEndLine(out);			}
             if (relabundfile != "")		{  m->mothurOut("relabund=" + relabundfile, out); m->mothurOutEndLine(out);		}
-            if (lcrfile != "")          {  m->mothurOut("lcr=" + lcrfile, out); m->mothurOutEndLine(out);               }
+            if (clrfile != "")          {  m->mothurOut("clr=" + clrfile, out); m->mothurOutEndLine(out);               }
             if (sabundfile != "")		{  m->mothurOut("sabund=" + sabundfile, out); m->mothurOutEndLine(out);			}
             if (sfffile != "")			{  m->mothurOut("sff=" + sfffile, out); m->mothurOutEndLine(out);					}
             if (sharedfile != "")		{  m->mothurOut("shared=" + sharedfile, out); m->mothurOutEndLine(out);			}
@@ -106,7 +106,7 @@ void CurrentFile::printCurrentFiles(string filename)  {
             if (qualfile != "")			{  m->mothurOut("qfile=" + qualfile); m->mothurOutEndLine();				}
             if (rabundfile != "")		{  m->mothurOut("rabund=" + rabundfile); m->mothurOutEndLine();			}
             if (relabundfile != "")		{  m->mothurOut("relabund=" + relabundfile); m->mothurOutEndLine();		}
-            if (lcrfile != "")          {  m->mothurOut("lcr=" + lcrfile); m->mothurOutEndLine();               }
+            if (clrfile != "")          {  m->mothurOut("clr=" + clrfile); m->mothurOutEndLine();               }
             if (sabundfile != "")		{  m->mothurOut("sabund=" + sabundfile); m->mothurOutEndLine();			}
             if (sfffile != "")			{  m->mothurOut("sff=" + sfffile); m->mothurOutEndLine();					}
             if (sharedfile != "")		{  m->mothurOut("shared=" + sharedfile); m->mothurOutEndLine();			}
@@ -150,7 +150,7 @@ bool CurrentFile::hasCurrentFiles()  {
         if (qualfile != "")			{  return true;			}
         if (rabundfile != "")		{  return true;			}
         if (relabundfile != "")		{  return true;			}
-        if (lcrfile != "")          {  return true;         }
+        if (clrfile != "")          {  return true;         }
         if (sabundfile != "")		{  return true;			}
         if (sfffile != "")			{  return true;			}
         if (sharedfile != "")		{  return true;			}
@@ -196,7 +196,7 @@ void CurrentFile::clearCurrentFiles()  {
         contigsreportfile = "";
         constaxonomyfile = "";
         relabundfile = "";
-        lcrfile = "";
+        clrfile = "";
         fastafile = "";
         qualfile = "";
         sfffile = "";
