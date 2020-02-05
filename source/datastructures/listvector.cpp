@@ -151,7 +151,6 @@ ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : Dat
 		exit(1);
 	}
 }
-
 /***********************************************************************/
 
 void ListVector::set(int binNumber, string seqNames){
