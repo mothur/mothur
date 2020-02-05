@@ -156,12 +156,12 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             programName = "fastq-dump"; programName += EXECUTABLE_EXT; programVersion = "2.9.6";
 #endif
             
-            fasterQLocation = validParameter.valid(parameters, "fasterq");
+            fasterQLocation = validParameter.validFile(parameters, "fasterq");
             if (fasterQLocation == "not found") {
                 fasterQLocation = "";
                 foundTool = util.findTool(programName, fasterQLocation, path, versionOutputs, current->getLocations());
             }else {
-                //test to make sure vsearch exists
+                //test to make sure fasterq exists
                 ifstream in;
                 fasterQLocation = util.getFullPathName(fasterQLocation);
                 bool ableToOpen = util.openInputFile(fasterQLocation, in, "no error"); in.close();
@@ -176,9 +176,10 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 if (versionOutputs.size() >= 3) {
                     string version = versionOutputs[2];
                                                 
-                    if (version != programVersion) {
+                    ////if (version != programVersion) {
                         m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version " + programVersion + " which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
-                    }else { m->mothurOut("Using " + programName + " version " + version + ".\n"); }
+                    //}else {
+                    m->mothurOut("Using " + programName + " version " + version + ".\n"); //}
                 }
             }
             
@@ -191,12 +192,12 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 programName = "prefetch"; programName += EXECUTABLE_EXT; programVersion = "2.9.3";
             #endif
             
-            prefetchLocation = validParameter.valid(parameters, "prefetch");
+            prefetchLocation = validParameter.validFile(parameters, "prefetch");
             if (prefetchLocation == "not found") {
                 prefetchLocation = "";
                 foundTool = util.findTool(programName, prefetchLocation, path, versionOutputs, current->getLocations());
             }else {
-                //test to make sure vsearch exists
+                //test to make sure prefetch exists
                 ifstream in;
                 prefetchLocation = util.getFullPathName(prefetchLocation);
                 bool ableToOpen = util.openInputFile(prefetchLocation, in, "no error"); in.close();
@@ -211,9 +212,10 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 if (versionOutputs.size() >= 3) {
                     string version = versionOutputs[2];
                     
-                    if (version != programVersion) {
+                    //if (version != programVersion) {
                         m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version " + programVersion + " which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
-                    }else { m->mothurOut("Using " + programName + " version " + version + ".\n"); }
+                   // }else {
+                    m->mothurOut("Using " + programName + " version " + version + ".\n"); //}
                 }
             }
             
@@ -361,7 +363,7 @@ string SRAInfoCommand::runPreFetch(string sampleName){
         delete[] preFetchParameters;
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: prefetch command = " + commandString + ".\n"); }
-        //m->mothurOut("prefetch command = " + commandString + ".\n");
+        m->mothurOut("prefetch command = " + commandString + ".\n");
         
         ifstream inTest;
         if (util.openInputFile(outputFileName, inTest, "no error")) { m->mothurOut("\n" + outputFileName + " is found locally, skipping prefetch.\n\n"); return outputFileName; }
@@ -442,7 +444,7 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         delete[] fasterQParameters;
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: fasterq_dump command = " + commandString + ".\n"); }
-        //m->mothurOut("fasterq_dump command = " + commandString + ".\n");
+        m->mothurOut("fasterq_dump command = " + commandString + ".\n");
         
         ifstream testfin, testrin;
         string ffastq = outputDir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1.fastq";

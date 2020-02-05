@@ -81,7 +81,7 @@ ListVector::ListVector(string id, vector<string> lv, string& tag) : DataVector(i
 ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
         printListHeaders = true;
-		int hold;
+		int thisNumBins = 0;
         Utils util;
         
         //are we at the beginning of the file??
@@ -110,15 +110,15 @@ ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : Dat
                     labelTag = "";
                     for (int i = 0; i < binLabelTag.length(); i++) { if (isalpha(binLabelTag[i])){ labelTag += binLabelTag[i]; } }
                 }
-				f >> label >> hold;
+				f >> label >> thisNumBins;
 			}else {
                 //read in first row
-                f >> hold;
+                f >> thisNumBins;
                 
                 //make binlabels because we don't have any
-                string snumBins = toString(hold);
+                string snumBins = toString(thisNumBins);
                 if (labelTag == "") { labelTag = "Otu"; }
-                for (int i = 0; i < hold; i++) {
+                for (int i = 0; i < thisNumBins; i++) {
                     //if there is a bin label use it otherwise make one
                     string binLabel = labelTag;
                     string sbinNumber = toString(i+1);
@@ -130,17 +130,21 @@ ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : Dat
                     binLabels.push_back(binLabel);
                 }
             }
-		}else { f >> label >> hold; }
+		}else { f >> label >> thisNumBins; }
 		
-		data.assign(hold, "");
+        util.gobble(f);
+		data.assign(thisNumBins, "");
 		string inputData = "";
         otuTag = labelTag;
 	
-		for(int i=0;i<hold;i++){
-			f >> inputData;
-			set(i, inputData);
-		}
-		util.gobble(f);
+        string buffer = util.getline(f); util.gobble(f);
+        vector<string> thisListBins = util.splitWhiteSpace(buffer);
+        
+        if (thisListBins.size() != thisNumBins) {
+            m->mothurOut("[ERROR]: Your list file indicates you have " + toString(thisNumBins) + ", but mothur found " + toString(thisListBins.size())+ " bins in your file, please correct.\n"); m->setControl_pressed(true);
+        }else {
+            for(int i=0;i<thisListBins.size();i++){ set(i, thisListBins[i]); }
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "ListVector");
