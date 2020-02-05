@@ -361,6 +361,8 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			
 			if ((accnosfile == "") && (Groups.size() == 0) && (Sets.size() == 0)) { m->mothurOut("[ERROR]: You must provide an accnos file or specify groups using the groups or sets parameters.\n"); abort = true; }
             
+            if ((Groups.size() != 0) && (Sets.size() != 0)) { m->mothurOut("[ERROR]: You cannot use the groups and sets parameters at the same time, quitting.\n"); abort = true; }
+            
             if ((Sets.size() != 0) && (designfile == "")) { m->mothurOut("[ERROR]: You must provide a design file when using the sets parameter.\n"); abort = true;  }
 			
 			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("[ERROR]: You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count, phylip, column or list.\n");  abort = true; }

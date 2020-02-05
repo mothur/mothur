@@ -41,25 +41,26 @@ public:
 	
 private:
 	set<string> names;
-	string accnosfile, fastafile, namefile, groupfile, countfile, designfile, listfile, taxfile, outputDir, groups, sharedfile, phylipfile, columnfile;
+	string accnosfile, fastafile, namefile, groupfile, countfile, designfile, listfile, taxfile, outputDir, groups, sharedfile, phylipfile, columnfile, sets;
 	bool abort;
-	vector<string> outputNames, Groups;
+	vector<string> outputNames, Groups, Sets;
 	GroupMap* groupMap;
 	map<string, string> uniqueToRedundant; //if a namefile is given and the first column name is not selected
 	//then the other files need to change the unique name in their file to match.
 	//only add the names that need to be changed to keep the map search quick
-	
-	
-	int readFasta();
-	int readShared();
-	int readName();
-	int readGroup();
-	int readList();
-	int readTax();
-	int fillNames();
-    int readDesign();
-    int readPhylip();
-    int readColumn();
+
+    
+    void readFasta();
+    void readName();
+    void readGroup();
+    void readList();
+    void readTax();
+    void fillNames();
+    void readShared();
+    void readDesign();
+    void readPhylip();
+    void readColumn();
+    void fillGroupsFromDesign();
 	
 };
 
