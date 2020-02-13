@@ -2996,7 +2996,7 @@ int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfi
                 if (taxonomy != "") { if (taxonomy[taxonomy.length()-1] != ';') { m->mothurOut("[ERROR]: " + name + " is missing the final ';', ignoring.\n"); ignore=true; }
                 }
                 if (!ignore) { taxMap[name] = taxonomy; }
-            }else { m->mothurOut("[ERROR]: " + name + " is already in your taxonomy file, names must be unique./n"); error = true; }
+            }else { m->mothurOut("[ERROR]: " + name + " is already in your taxonomy file, names must be unique.\n"); error = true; }
         }
         in.close();
 

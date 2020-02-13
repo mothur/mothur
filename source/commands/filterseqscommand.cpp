@@ -235,7 +235,7 @@ int FilterSeqsCommand::execute() {
 		inFASTA.close();
 		
 		////////////create filter/////////////////
-		m->mothurOut("Creating Filter... "); m->mothurOutEndLine();
+		m->mothurOut("Creating Filter...\n");
 		
 		filter = createFilter();
 		
@@ -625,7 +625,6 @@ long long FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string file
             for (int k = 0; k < alignmentLength; k++) {	 F.g[k] += data[i]->F.g[k];       }
             for (int k = 0; k < alignmentLength; k++) {	 F.c[k] += data[i]->F.c[k];       }
             for (int k = 0; k < alignmentLength; k++) {	 F.gap[k] += data[i]->F.gap[k];   }
-            
             
             delete data[i];
             delete workerThreads[i];

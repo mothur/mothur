@@ -411,7 +411,7 @@ struct preClusterData {
   string fastafile, countfile, pc_method, align_method, align, newMName;
   OutputWriter* newNName;
   MothurOut* m;
-  int start, end, count, diffs, length;
+  int start, end, count, diffs, length, numGroups;
   vector<string> groups;
   bool hasCount;
   float match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels;
@@ -446,6 +446,7 @@ struct preClusterData {
   void setVariables(int st, int en, int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx, float a, float del, float me, float ip, float mi, vector<float> ed) {
     start = st;
     end = en;
+      numGroups = end-start;
     diffs = d;
 		pc_method = pcm;
     align_method = am;
@@ -945,6 +946,8 @@ int PreClusterCommand::execute(){
         
         long start = time(NULL);
         
+        string numProcessors = current->getProcessors();
+        
         string fileroot = outputDir + util.getRootName(util.getSimpleName(fastafile));
         map<string, string> variables;
         variables["[filename]"] = fileroot;
@@ -1009,6 +1012,8 @@ int PreClusterCommand::execute(){
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
             m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
         }
+        
+        current->setProcessors(numProcessors);
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  return 0; }
         
@@ -1198,6 +1203,15 @@ long long driverGroups(preClusterData* params){
         params->m->mothurOut("/******************************************/\n");
     
         if (params->m->getControl_pressed()) { return 0; }
+        
+        if (filenames["fasta"].size() != params->numGroups) {
+            vector<string> thisGroups;
+            for (int i = params->start; i < params->end; i++) {
+                thisGroups.push_back(params->groups[i]);
+            }
+            params->m->mothurOut("[ERROR]: split.groups found " + toString(filenames["fasta"].size()) + " samples, but this process was assigned " + toString(params->numGroups) + " samples. Do you have samples with no reads in your count file?\n\n Sample names assigned to this process -> " + params->util.getStringFromVector(thisGroups, ", ")+ ".\n Parsed fasta files -> " + params->util.getStringFromVector(filenames["fasta"], "\n") + ".\n\n"); params->m->setControl_pressed(true);
+            
+        }
         
         long long numSeqs = 0;
     
