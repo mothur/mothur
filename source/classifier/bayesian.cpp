@@ -408,8 +408,8 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
         
         in >> numKmers; util.gobble(in);
         //initialze probabilities
-        wordGenusProb.resize(numKmers);
         
+        wordGenusProb.resize(numKmers);
         for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
         
         int kmer, name, count;  count = 0;
@@ -428,6 +428,9 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
             count++;
             util.gobble(inNum);
             
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(zeroCountProb[count]) + '\t' + toString(num[count]) + '\t' + toString(numKmers) + "\n"); }
+
+            
         }
         inNum.close();
  
@@ -443,13 +446,13 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
             for (int i = 0; i < num[kmer]; i++) {
                 in >> name >> prob;
                 wordGenusProb[kmer][name] = prob;
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(name) + '\t' + toString(prob) + '\t' + toString(kmer) + "\n"); }
             }
             
             util.gobble(in);
         }
         in.close();
-        
-		
+  		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "readProbFile");

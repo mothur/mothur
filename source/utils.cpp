@@ -5461,6 +5461,7 @@ int Utils::getTimeStamp(string filename) {
     }
 }
 /**************************************************************************************************/
+//Referenced - https://genome.sph.umich.edu/w/images/d/d5/Biostat615-Fall2011-lecture03-handout.pdf
 double Utils::geometricMean(vector<float>& abunds, double zeroReplacementValue) {
     try{
         double sum = 0;

@@ -52,17 +52,22 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
         for (int i = 0; i < tree.size(); i++) {
             tree[i].name = util.getline(in); util.gobble(in);
             in >> tree[i].level >> tree[i].parent; util.gobble(in);
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(i) + '\t' + tree[i].name + '\t' + toString(tree[i].level) + "\n"); }
         }
         
         //read genus nodes
         int numGenus = 0;
         in >> numGenus; util.gobble(in);
         
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(numNodes) + '\t' + toString(numGenus) + '\t' + toString(maxLevel) + "\n"); }
+
         int gnode, gsize;
         totals.clear();
         for (int i = 0; i < numGenus; i++) {
             in >> gnode >> gsize; util.gobble(in);
             
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(gnode) + '\t' + toString(gsize) + '\t' + toString(i) + "\n"); }
+
             uniqueTaxonomies.insert(gnode);
             totals.push_back(gsize);
         }
