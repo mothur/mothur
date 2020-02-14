@@ -20,7 +20,7 @@
 # GSL_INCLUDE_DIR - location of GSL include files
 # MOTHUR_FILES - The MOTHUR_FILES parameter is optional, but allows you to set a default location for mothur to look for input files it can't find. This is often used for reference files you want to store in one location separate from your data.
 
-PREFIX := ${CURDIR} 
+INSTALL_DIR ?= "\"Enter_your_mothur_install_path_here\""
 
 OPTIMIZE ?= yes
 USEREADLINE ?= yes
@@ -56,7 +56,7 @@ else
     CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}
 endif
 
-ifeq  ($(strip $(MOTHUR_TOOLS)),"\"Enter_your_default_path_here\"")
+ifeq  ($(strip $(MOTHUR_TOOLS)),"\"Enter_your_mothur_tools_path_here\"")
 else
     CXXFLAGS += -DMOTHUR_TOOLS=${MOTHUR_TOOLS}
 endif
@@ -119,23 +119,18 @@ endif
     OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
-mothur : $(OBJECTS) uchime
+mothur : $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 
-uchime:
-	cd source/uchime_src && export CXX=$(CXX) && ./mk && mv uchime ../../ && cd ..
+install : mothur
 
-install : mothur uchime
-#if [ "${CURDIR}" = "$(PREFIX)" ]; then \
-#		echo 'done'; \
-#	else \
-#		mkdir -p $(PREFIX); \
-#		for file in mothur uchime; do \
-#			cp -f $$file $(PREFIX) ; \
-#		done \
-#	fi
+ifeq  ($(strip $(INSTALL_DIR)),"\"Enter_your_mothur_install_path_here\"")
+else
+	mkdir -p ${INSTALL_DIR}
+	mv mothur ${INSTALL_DIR}/mothur
+endif
 
-
+	
 %.o : %.c %.h
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.h
