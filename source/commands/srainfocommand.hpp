@@ -42,6 +42,8 @@ private:
     string runPreFetch(string);
     bool runFastqDump(string, vector<string>&);
     void runSystemCommand(string);
+    bool checkVersion(string versionNeeded, string versionProvided);
+
 };
 
 /**************************************************************************************************/

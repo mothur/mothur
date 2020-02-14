@@ -151,9 +151,9 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             bool foundTool = false;
             string path = current->getProgramPath();
             string programName = "fasterq-dump"; programName += EXECUTABLE_EXT;
-            string programVersion = "2.10.1";
+            string programVersion = "2.9.6";
 #ifdef WINDOWS
-            programName = "fastq-dump"; programName += EXECUTABLE_EXT; programVersion = "2.9.6";
+            programName = "fastq-dump"; programName += EXECUTABLE_EXT;
 #endif
             
             fasterQLocation = validParameter.validFile(parameters, "fasterq");
@@ -176,20 +176,19 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 if (versionOutputs.size() >= 3) {
                     string version = versionOutputs[2];
                                                 
-                    ////if (version != programVersion) {
+                    if (checkVersion(programVersion, version)) {
                         m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version " + programVersion + " which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
-                    //}else {
-                    m->mothurOut("Using " + programName + " version " + version + ".\n"); //}
+                    }else {  m->mothurOut("Using " + programName + " version " + version + ".\n"); }
                 }
             }
             
             foundTool = false;
             path = current->getProgramPath();
             programName = "prefetch"; programName += EXECUTABLE_EXT;
-            versionOutputs.clear();
+            versionOutputs.clear(); programVersion = "2.9.3";
             
             #ifdef WINDOWS
-                programName = "prefetch"; programName += EXECUTABLE_EXT; programVersion = "2.9.3";
+                programName = "prefetch"; programName += EXECUTABLE_EXT;
             #endif
             
             prefetchLocation = validParameter.validFile(parameters, "prefetch");
@@ -212,10 +211,9 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
                 if (versionOutputs.size() >= 3) {
                     string version = versionOutputs[2];
                     
-                    //if (version != programVersion) {
+                    if (checkVersion(programVersion, version)) {
                         m->mothurOut("[ERROR]: " + programName + " version found = " + version + ". Mothur requires version " + programVersion + " which is distributed with mothur's executable or available for download here, https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software\n");  abort = true;
-                   // }else {
-                    m->mothurOut("Using " + programName + " version " + version + ".\n"); //}
+                    }else { m->mothurOut("Using " + programName + " version " + version + ".\n"); }
                 }
             }
             
@@ -244,7 +242,7 @@ int SRAInfoCommand::execute(){
         ofstream out; util.openOutputFile(fileFileName, out);
         variables["[tag]"] = "single";
         string singleFileFileName = getOutputFileName("file",variables);
-        ofstream outSingle; util.openOutputFile(fileFileName, outSingle);
+        ofstream outSingle; util.openOutputFile(singleFileFileName, outSingle);
         
         int count = 0;
         for (set<string>::iterator it = samples.begin(); it != samples.end(); it++) {
@@ -274,7 +272,7 @@ int SRAInfoCommand::execute(){
                         outputNames.push_back(filenames[0]); outputTypes["fastq"].push_back(filenames[0]);
                         outputNames.push_back(filenames[1]); outputTypes["fastq"].push_back(filenames[1]);
                         
-                        out << *it << '\t' << filenames[0] << '\t' << filenames[1] << endl;
+                        out << *it << '\t' << util.getSimpleName(filenames[0]) << '\t' << util.getSimpleName(filenames[1]) << endl;
                     }
                 }else {
                     if (filenames.size() != 0) {
@@ -484,6 +482,38 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
     }
     catch(exception& e) {
         m->errorOut(e, "SRAInfoCommand", "runFastqDump");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+//versionNeeded = 2.9.3 versionProvided = 2.10.1
+bool SRAInfoCommand::checkVersion(string versionNeeded, string versionProvided){
+    try{
+        vector<int> versionRequired; vector<int> versionGiven;
+        
+        vector<string> temps; util.splitAtChar(versionProvided, temps, '.');
+        for (int i = 0; i < temps.size(); i++) {
+            int thisTemp; util.mothurConvert(temps[i], thisTemp);
+            versionGiven.push_back(thisTemp);
+        }
+        
+        temps.clear(); util.splitAtChar(versionNeeded, temps, '.');
+        for (int i = 0; i < temps.size(); i++) {
+            int thisTemp; util.mothurConvert(temps[i], thisTemp);
+            versionRequired.push_back(thisTemp);
+        }
+        
+        //main version tag is too old. 2.9.3, 1.9.1 ie versionNeeded[0] = 2, versionProvided[0] = 1
+        if (versionRequired[0] > versionGiven[0]) { return false; }
+        //minor version tag is too old. 2.9.3, 2.8.1 ie versionNeeded[0] = 9, versionProvided[0] = 8
+        if (versionRequired[1] > versionGiven[1]) { return false; }
+        //patch version tag is too old. 2.9.3, 2.9.1 ie versionNeeded[0] = 3, versionProvided[0] = 1
+        if (versionRequired[2] > versionGiven[2]) { return false; }
+        
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SRAInfoCommand", "checkVersion");
         exit(1);
     }
 }
