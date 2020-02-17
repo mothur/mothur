@@ -421,6 +421,7 @@ struct preClusterData {
   map<string, vector<string> > outputTypes;
   vector<seqPNode*> alignSeqs; //maps the number of identical seqs to a sequence. filled and freed by functions
   Alignment* alignment;
+    map<string, vector<string> > parsedFiles;
 
 				// double error_rate = 0.005;error_rate
 				// double indel_prob = 0.01;indel_prob
@@ -430,7 +431,7 @@ struct preClusterData {
 
   preClusterData(){}
 
-  preClusterData(string f, string c, string pcm, string am,  OutputWriter* nnf, string nmf, vector<string> gr) {
+  preClusterData(map<string, vector<string> > g2f, string f, string c, string pcm, string am,  OutputWriter* nnf, string nmf, vector<string> gr) {
     fastafile = f;
     pc_method = pcm;
     align_method = am;
@@ -441,12 +442,12 @@ struct preClusterData {
     countfile = c; if (countfile != "") { hasCount = true; }
     count=0;
     m = MothurOut::getInstance();
+      parsedFiles = g2f;
   }
 
-  void setVariables(int st, int en, int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx, float a, float del, float me, float ip, float mi, vector<float> ed) {
-    start = st;
-    end = en;
-      numGroups = end-start;
+  void setVariables(int d, string pcm, string am, string al, float ma, float misma, float gpOp, float gpEx, float a, float del, float me, float ip, float mi, vector<float> ed) {
+    
+      numGroups = groups.size();
     diffs = d;
 		pc_method = pcm;
     align_method = am;
@@ -969,9 +970,16 @@ int PreClusterCommand::execute(){
             newMapFile = fileroot + "precluster.";
             string convolutedNamesFile = newCountFile + ".temp";
             
+            vector<string> groups;
+            map<string, vector<string> > group2Files;
+            
             current->setMothurCalling(true);
-            createProcessesGroups(convolutedNamesFile, newMapFile);
+            SequenceCountParser cparser(countfile, fastafile, nullVector);
             current->setMothurCalling(false);
+            groups = cparser.getNamesOfGroups();
+            group2Files = cparser.getFiles();
+            
+            createProcessesGroups(group2Files, groups, convolutedNamesFile, newMapFile);
             
             string accnosFile;
             if (countfile != "") {  accnosFile = mergeGroupCounts(newCountFile, convolutedNamesFile); }
@@ -986,8 +994,10 @@ int PreClusterCommand::execute(){
         }else {
             if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing.\n");  processors = 1; }
             
-            preClusterData* params = new preClusterData(fastafile, countfile, pc_method, align_method, NULL, newMapFile, nullVector);
-            params->setVariables(0,0, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
+            vector<string> groups;
+            map<string, vector<string> > group2Files;
+            preClusterData* params = new preClusterData(group2Files, fastafile, countfile, pc_method, align_method, NULL, newMapFile, nullVector);
+            params->setVariables(diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
             
             //reads fasta file and return number of seqs
             long long numSeqs = 0; params->alignSeqs = readFASTA(params, numSeqs); //fills alignSeqs and makes all seqs active
@@ -1181,62 +1191,29 @@ bool fillWeighted(preClusterData* params, string fastafileName, string groupOrCo
 
 long long driverGroups(preClusterData* params){
     try {
-        vector<string> subsetGroups;
-        for (int i = params->start; i < params->end; i++) {  subsetGroups.push_back(params->groups[i]);  }
-        
-        //run splitGroups command to parse files
-        string inputString = "processors=1, groups=" + params->util.getStringFromVector(subsetGroups, "-"); //split.groups is paraplellized, we don't want the thread spinning up threads.
-        inputString += ", fasta=" + params->fastafile;
-        
-        if (params->hasCount) {  inputString += ", count=" + params->countfile;  }
-        
-        params->m->mothurOut("\n/******************************************/\n");
-        params->m->mothurOut("Running command: split.groups(" + inputString + ")\n");
-        
-        Command* splitCommand = new SplitGroupCommand(inputString);
-        splitCommand->execute();
-        
-        //type -> files in groups order. fasta -> vector<string>. fastaFileForGroup1 stored in filenames["fasta"][1]
-        map<string, vector<string> > filenames = splitCommand->getOutputFiles();
-       
-        delete splitCommand;
-        params->m->mothurOut("/******************************************/\n");
-    
-        if (params->m->getControl_pressed()) { return 0; }
-        
-        if (filenames["fasta"].size() != params->numGroups) {
-            vector<string> thisGroups;
-            for (int i = params->start; i < params->end; i++) {
-                thisGroups.push_back(params->groups[i]);
-            }
-            params->m->mothurOut("[ERROR]: split.groups found " + toString(filenames["fasta"].size()) + " samples, but this process was assigned " + toString(params->numGroups) + " samples. Do you have samples with no reads in your count file?\n\n Sample names assigned to this process -> " + params->util.getStringFromVector(thisGroups, ", ")+ ".\n Parsed fasta files -> " + params->util.getStringFromVector(filenames["fasta"], "\n") + ".\n\n"); params->m->setControl_pressed(true);
-            
-        }
-        
         long long numSeqs = 0;
     
         //precluster each group
-        int fileIndex = 0;
-        for (int i = params->start; i < params->end; i++) {
+        for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
             if (params->m->getControl_pressed()) { return numSeqs; }
             
-            params->m->mothurOut("\nProcessing group " + params->groups[i] + ":\n");
+            string thisGroup = it->first;
+            params->m->mothurOut("\nProcessing group " + thisGroup + ":\n");
             
             time_t start = time(NULL);
             bool aligned = false;
             
-            string thisGroupsFasta = filenames["fasta"][fileIndex];
+            string thisGroupsFasta = it->second[0];
             
             map<string, string> thisGroupsNameMap;
             if (params->hasCount)          {
-                string thisGroupsCount = filenames["count"][fileIndex];
+                string thisGroupsCount = it->second[1];
                 
                 aligned = fillWeighted(params, thisGroupsFasta, thisGroupsCount);
                 
                 params->util.mothurRemove(thisGroupsCount);
             }
             params->util.mothurRemove(thisGroupsFasta);
-            fileIndex++;
             
             //sort seqs by number of identical seqs
             sort(params->alignSeqs.begin(), params->alignSeqs.end(), comparePriorityTopDown);
@@ -1254,8 +1231,8 @@ long long driverGroups(preClusterData* params){
                 }
             }
             
-            string extension = params->groups[i]+".map";
-            long long count = process(params->groups[i]+"\t", params->newMName+extension, params);
+            string extension = thisGroup+".map";
+            long long count = process(thisGroup+"\t", params->newMName+extension, params);
             
             if(params->pc_method != "deblur"){
                 params->outputNames.push_back(params->newMName+extension);
@@ -1267,7 +1244,7 @@ long long driverGroups(preClusterData* params){
             params->m->mothurOut("Total number of sequences before pre.cluster was " + toString(num) + ".\n");
             params->m->mothurOut("pre.cluster removed " + toString(count) + " sequences.\n\n");
                 
-            printData(params->groups[i], params, thisGroupsNameMap);
+            printData(thisGroup, params, thisGroupsNameMap);
             
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
             
@@ -1354,12 +1331,9 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
 }
 /**************************************************************************************************/
 
-void PreClusterCommand::createProcessesGroups(string newNName, string newMFile) {
+void PreClusterCommand::createProcessesGroups(map<string, vector<string> >& parsedFiles, vector<string> groups, string newNName, string newMFile) {
   try {
-    //parse fasta and name file by group
-    vector<string> groups;
-    if (countfile != "") { CountTable ct; ct.testGroups(countfile, groups); }
-
+    
     //sanity check
     if (groups.size() < processors) { processors = groups.size(); m->mothurOut("Reducing processors to " + toString(groups.size()) + ".\n"); }
 
@@ -1384,17 +1358,40 @@ void PreClusterCommand::createProcessesGroups(string newNName, string newMFile) 
     //Lauch worker threads
     for (int i = 0; i < processors-1; i++) {
       OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
-
-      preClusterData* dataBundle = new preClusterData(fastafile, countfile, pc_method, align_method, threadNameWriter, newMFile, groups);
-      dataBundle->setVariables(lines[i+1].start, lines[i+1].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
+        
+        vector<string> thisGroups;
+        map<string, vector<string> > thisGroupsParsedFiles;
+        for (int j = lines[i+1].start; j < lines[i+1].end; j++) {
+            
+            map<string, vector<string> >::iterator it = parsedFiles.find(groups[j]);
+            if (it != parsedFiles.end()) {
+                thisGroupsParsedFiles[groups[j]] = (it->second);
+                thisGroups.push_back(groups[j]);
+            }
+            else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
+        }
+        
+      preClusterData* dataBundle = new preClusterData(thisGroupsParsedFiles, fastafile, countfile, pc_method, align_method, threadNameWriter, newMFile, thisGroups);
+      dataBundle->setVariables(diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
       data.push_back(dataBundle);
 
       workerThreads.push_back(new std::thread(driverGroups, dataBundle));
     }
     OutputWriter* threadNameWriter = new OutputWriter(synchronizedNameFile);
-
-    preClusterData* dataBundle = new preClusterData(fastafile, countfile, pc_method, align_method, threadNameWriter, newMFile, groups);
-    dataBundle->setVariables(lines[0].start, lines[0].end, diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
+      
+      vector<string> thisGroups;
+      map<string, vector<string> > thisGroupsParsedFiles;
+      for (int j = lines[0].start; j < lines[0].end; j++) {
+          
+          map<string, vector<string> >::iterator it = parsedFiles.find(groups[j]);
+          if (it != parsedFiles.end()) {
+              thisGroupsParsedFiles[groups[j]] = (it->second);
+              thisGroups.push_back(groups[j]);
+          }
+          else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
+      }
+    preClusterData* dataBundle = new preClusterData(thisGroupsParsedFiles, fastafile, countfile, pc_method, align_method, threadNameWriter, newMFile, thisGroups);
+    dataBundle->setVariables(diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
 
     driverGroups(dataBundle);
 

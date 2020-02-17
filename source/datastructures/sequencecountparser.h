@@ -15,11 +15,10 @@
 #include "counttable.h"
 #include "utils.hpp"
 
+
 /* This class reads a fasta and count file and parses the data by group. The countfile must contain group information.
  
- Note: The sum of all the groups unique sequences will be larger than the original number of unique sequences. 
- This is because when we parse the count file we make a unique for each group instead of 1 unique for all
- groups. 
+ Note: THIS CODE IS NOT THREAD SAFE. ONLY CALL WHEN A SINGLE THREAD IS RUNNING
  
  */
 

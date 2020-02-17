@@ -358,6 +358,7 @@ struct uchimeData {
     string outputFName;
     string accnos, alns, formattedFastaFilename, templatefile, uchimeLocation, countlist;
     string driverAccnos, driverAlns, driverOutputFName;
+    map<string, vector<string> > parsedFiles;
     
     int count, numChimeras;
     vector<string> groups;
@@ -366,7 +367,7 @@ struct uchimeData {
     Utils util;
     
     uchimeData(){}
-    uchimeData(string o, string uloc, string t, string file, string f, string n, string ac,  string al, string nc, vector<string> gr, uchimeVariables* vs) {
+    uchimeData(map<string, vector<string> > g2f, string o, string uloc, string t, string file, string f, string n, string ac,  string al, string nc, vector<string> gr, uchimeVariables* vs) {
         fastafile = f;
         dupsfile = n;
         formattedFastaFilename = file;
@@ -384,6 +385,7 @@ struct uchimeData {
         driverAccnos = ac;
         driverAlns = al;
         driverOutputFName = o;
+        parsedFiles = g2f;
     }
     void setDriverNames(string o, string al, string ac) {
         driverAccnos = ac;
@@ -803,13 +805,24 @@ int ChimeraUchimeCommand::execute(){
         if (hasGroups) {
             if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  delete vars; return 0; }
             
+            vector<string> groups;
+            map<string, vector<string> > group2Files;
+            if (hasCount) {
+                current->setMothurCalling(true);
+                SequenceCountParser cparser(countfile, fastafile, nullVector);
+                current->setMothurCalling(false);
+                groups = cparser.getNamesOfGroups();
+                group2Files = cparser.getFiles();
+                
+            }
+            
             //clears files
             ofstream out, out1, out2;
             util.openOutputFile(outputFileName, out); out.close();
             util.openOutputFile(accnosFileName, out1); out1.close();
             if (chimealns) { util.openOutputFile(alnsFileName, out2); out2.close(); }
             
-            int totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups);
+            int totalSeqs = createProcessesGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups);
             
             if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars;  return 0;	}
             
@@ -841,8 +854,9 @@ int ChimeraUchimeCommand::execute(){
             
             int numSeqs = 0;
             int numChimeras = 0;
+            map<string, vector<string> > dummy;
             
-            uchimeData* dataBundle = new uchimeData(outputFileName, uchimeLocation, templatefile, fastafile, fastafile, countfile, accnosFileName, alnsFileName, accnosFileName+".byCount.temp", nullVector, vars);
+            uchimeData* dataBundle = new uchimeData(dummy, outputFileName, uchimeLocation, templatefile, fastafile, fastafile, countfile, accnosFileName, alnsFileName, accnosFileName+".byCount.temp", nullVector, vars);
             
             numSeqs = driver(dataBundle);
             numChimeras = dataBundle->numChimeras;
@@ -1237,19 +1251,12 @@ int getSeqs(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename,
 //**********************************************************************************************************************
 void driverGroups(uchimeData* params){
 	try {
-        //Parse sequences by group
-        map<string, vector<string> > group2Files;
-        if (params->vars->hasCount) {
-            SequenceCountParser cparser(params->dupsfile, params->fastafile, params->groups);
-            params->groups = cparser.getNamesOfGroups();
-            group2Files = cparser.getFiles();
-        }
 
 		int totalSeqs = 0;
         ofstream outCountList;
         if (params->vars->hasCount && params->vars->dups) { params->util.openOutputFile(params->countlist, outCountList); }
         
-        for (map<string, vector<string> >::iterator it = group2Files.begin(); it != group2Files.end(); it++) {
+        for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
             long start = time(NULL);
             if (params->m->getControl_pressed()) {  outCountList.close(); params->util.mothurRemove(params->countlist); break; }
             
@@ -1330,7 +1337,7 @@ void driverGroups(uchimeData* params){
 }	
 /**************************************************************************************************/
 
-int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups) {
+int ChimeraUchimeCommand::createProcessesGroups(map<string, vector<string> >& groups2Files, string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups) {
 	try {
         CountTable newCount;
         string dupsFileName = countfile;
@@ -1363,16 +1370,33 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
         for (int i = 0; i < processors-1; i++) {
             string extension = toString(i+1) + ".temp";
             vector<string> thisGroups;
-            for (int j = lines[i+1].start; j < lines[i+1].end; j++) { thisGroups.push_back(groups[j]); }
-            uchimeData* dataBundle = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastafile, dupsFileName,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
+            map<string, vector<string> > thisGroupsParsedFiles;
+            for (int j = lines[i+1].start; j < lines[i+1].end; j++) {
+                
+                map<string, vector<string> >::iterator it = groups2Files.find(groups[j]);
+                if (it != groups2Files.end()) {
+                    thisGroupsParsedFiles[groups[j]] = (it->second);
+                    thisGroups.push_back(groups[j]);
+                }
+                else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
+            }
+            uchimeData* dataBundle = new uchimeData(thisGroupsParsedFiles, outputFName+extension, uchimeLocation, templatefile, filename+extension, fastafile, dupsFileName,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new std::thread(driverGroups, dataBundle));
         }
         
         vector<string> thisGroups;
-        for (int j = lines[0].start; j < lines[0].end; j++) { thisGroups.push_back(groups[j]); }
-        uchimeData* dataBundle = new uchimeData(outputFName, uchimeLocation, templatefile, filename, fastafile, dupsFileName, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
+        map<string, vector<string> > thisGroupsParsedFiles;
+        for (int j = lines[0].start; j < lines[0].end; j++) {
+            map<string, vector<string> >::iterator it = groups2Files.find(groups[j]);
+            if (it != groups2Files.end()) {
+                thisGroupsParsedFiles[groups[j]] = (it->second);
+                thisGroups.push_back(groups[j]);
+            }
+            else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
+        }
+        uchimeData* dataBundle = new uchimeData(thisGroupsParsedFiles, outputFName, uchimeLocation, templatefile, filename, fastafile, dupsFileName, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
         driverGroups(dataBundle);
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;

@@ -489,7 +489,7 @@ int driverRunCount(splitGroups2Struct* params){
         
         params->Groups = ct.getNamesOfGroups();
         //GroupName -> files(fasta, list, count)
-        for (int i = 0; i < params->Groups.size(); i++) {
+        for (int i = 0; i < params->Groups.size(); i++) { //Groups only contains the samples assigned to this process
            
             vector<string> files;
             map<string, vector<string> >::iterator it = params->group2Files.find(params->Groups[i]);

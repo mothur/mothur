@@ -49,7 +49,7 @@ private:
 	string getCountFile(string&);
 	vector<seqData> readFiles(string, map<string, int>);
 	int deconvoluteResults(string, string);
-	int createProcessesGroups(string, string, string, string, vector<string>, string, string, int&);
+	int createProcessesGroups(map<string, vector<string> >&, string, string, string, string, vector<string>, string, string, int&);
 };
 /***********************************************************/
 

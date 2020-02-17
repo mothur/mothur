@@ -437,6 +437,17 @@ int ChimeraPerseusCommand::execute(){
                 variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
                 newCountFile = getOutputFileName("count", variables);
                 
+                vector<string> groups;
+                map<string, vector<string> > group2Files;
+                if (hasCount) {
+                    current->setMothurCalling(true);
+                    SequenceCountParser cparser(countfile, fastafile, nullVector);
+                    current->setMothurCalling(false);
+                    groups = cparser.getNamesOfGroups();
+                    group2Files = cparser.getFiles();
+                    
+                }
+                
                 if (m->getControl_pressed()) { return 0; }
                 
                 //clears files
@@ -445,7 +456,7 @@ int ChimeraPerseusCommand::execute(){
                 util.openOutputFile(accnosFileName, out1); out1.close();
                 
                 string countlist = accnosFileName+".byCount";
-                numSeqs = createProcessesGroups(outputFileName, countlist, accnosFileName, newCountFile, groups, fastafile, countfile, numChimeras);
+                numSeqs = createProcessesGroups(group2Files, outputFileName, countlist, accnosFileName, newCountFile, groups, fastafile, countfile, numChimeras);
                 
                 if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
                 
@@ -572,6 +583,7 @@ struct perseusGroupsData {
     string chimeraFileName;
     string accnosFileName;
     string countlist;
+    map<string, vector<string> > parsedFiles;
     
     bool hasCount, dups;
     int threadID, count, numChimeras;
@@ -581,7 +593,7 @@ struct perseusGroupsData {
     MothurOut* m;
     
     perseusGroupsData(){}
-    perseusGroupsData(bool dps, bool hc, double a, double b, double c, string o,  string f, string n, string ac, string ctlist, vector<string> gr, int tid) {
+    perseusGroupsData(map<string, vector<string> >& g2f,bool dps, bool hc, double a, double b, double c, string o,  string f, string n, string ac, string ctlist, vector<string> gr, int tid) {
         alpha = a;
         beta = b;
         cutoff = c;
@@ -597,6 +609,7 @@ struct perseusGroupsData {
         dups = dps;
         count = 0;
         numChimeras = 0;
+        parsedFiles = g2f;
     }
 };
 //**********************************************************************************************************************
@@ -651,20 +664,11 @@ void driverGroups(perseusGroupsData* params){
         params->util.openOutputFile(params->chimeraFileName, out); out.close();
         params->util.openOutputFile(params->accnosFileName, out1); out1.close();
         
-        //Parse sequences by group
-        map<string, vector<string> > group2Files;
-        if (params->hasCount) {
-            SequenceCountParser cparser(params->dupsfile, params->fastafile, params->groups);
-            params->groups = cparser.getNamesOfGroups();
-            group2Files = cparser.getFiles();
-            
-        }
-        
 		int totalSeqs = 0;
         ofstream outCountList;
         if (params->hasCount && params->dups) { params->util.openOutputFile(params->countlist, outCountList); }
 		
-        for (map<string, vector<string> >::iterator it = group2Files.begin(); it != group2Files.end(); it++) {
+        for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
             long start = time(NULL);	 if (params->m->getControl_pressed()) {  break; }
             
             
@@ -765,7 +769,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, map<string, i
 /**************************************************************************************************/
 //perseusData(vector<seqData>& s, double a, double b, double c, string o, string ac, MothurOut* mout)
 //numSeqs = createProcessesGroups(outputFileName, countlist, accnosFileName, newCountFile, groups, fastafile, countfile, numChimeras);
-int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string countlisttemp, string accnos, string newCountFile, vector<string> groups, string fasta, string dupsFile, int& numChimeras) {
+int ChimeraPerseusCommand::createProcessesGroups(map<string, vector<string> >& parsedFiles, string outputFName, string countlisttemp, string accnos, string newCountFile, vector<string> groups, string fasta, string dupsFile, int& numChimeras) {
 	try {
         numChimeras = 0;
         
@@ -796,16 +800,34 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string coun
         for (int i = 0; i < processors-1; i++) {
             string extension = toString(i+1) + ".temp";
             vector<string> thisGroups;
-            for (int j = lines[i+1].start; j < lines[i+1].end; j++) { thisGroups.push_back(groups[j]); }
-            perseusGroupsData* dataBundle = new perseusGroupsData(dups, hasCount, alpha, beta, cutoff, (outputFName+extension), fasta, dupsFile,  (accnos+extension), (countlisttemp+extension), thisGroups, (i+1));
+            map<string, vector<string> > thisGroupsParsedFiles;
+            for (int j = lines[i+1].start; j < lines[i+1].end; j++) {
+                
+                map<string, vector<string> >::iterator it = parsedFiles.find(groups[j]);
+                if (it != parsedFiles.end()) {
+                    thisGroupsParsedFiles[groups[j]] = (it->second);
+                    thisGroups.push_back(groups[j]);
+                }
+                else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
+            }
+            perseusGroupsData* dataBundle = new perseusGroupsData(thisGroupsParsedFiles, dups, hasCount, alpha, beta, cutoff, (outputFName+extension), fasta, dupsFile,  (accnos+extension), (countlisttemp+extension), thisGroups, (i+1));
             data.push_back(dataBundle);
             
             workerThreads.push_back(new std::thread(driverGroups, dataBundle));
         }
         
         vector<string> thisGroups;
-        for (int j = lines[0].start; j < lines[0].end; j++) { thisGroups.push_back(groups[j]); }
-        perseusGroupsData* dataBundle = new perseusGroupsData(dups, hasCount, alpha, beta, cutoff, outputFName, fasta, dupsFile,  accnos, countlisttemp, thisGroups, 0);
+        map<string, vector<string> > thisGroupsParsedFiles;
+        for (int j = lines[0].start; j < lines[0].end; j++) {
+            
+            map<string, vector<string> >::iterator it = parsedFiles.find(groups[j]);
+            if (it != parsedFiles.end()) {
+                thisGroupsParsedFiles[groups[j]] = (it->second);
+                thisGroups.push_back(groups[j]);
+            }
+            else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
+        }
+        perseusGroupsData* dataBundle = new perseusGroupsData(thisGroupsParsedFiles, dups, hasCount, alpha, beta, cutoff, outputFName, fasta, dupsFile,  accnos, countlisttemp, thisGroups, 0);
         driverGroups(dataBundle);
         num = dataBundle->count;
         numChimeras = dataBundle->numChimeras;

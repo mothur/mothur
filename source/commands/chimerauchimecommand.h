@@ -94,7 +94,7 @@ private:
 	string getCountFile(string&);
 	int readFasta(string, map<string, string>&);
 	int deconvoluteResults(string, string, string);
-	int createProcessesGroups(string, string, string, string, string, vector<string>);
+	int createProcessesGroups(map<string, vector<string> >&, string, string, string, string, string, vector<string>);
 };
 /**************************************************************************************************/
 
