@@ -190,6 +190,13 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["group"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("vsearch");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {    parameters["vsearch"] = inputDir + it->second;        }
+                }
             }
             
             fastafile = validParameter.validFile(parameters, "fasta");
@@ -272,7 +279,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             path = current->getProgramPath();
             string programName = "vsearch"; programName += EXECUTABLE_EXT;
             
-            vsearchLocation = validParameter.valid(parameters, "vsearch");
+            vsearchLocation = validParameter.validFile(parameters, "vsearch");
             if (vsearchLocation == "not found") {
                 vsearchLocation = "";
                 foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());

@@ -194,6 +194,13 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {	parameters["group"] = inputDir + it->second;		}
                 }
+                
+                it = parameters.find("uchime");
+                if(it != parameters.end()){
+                    path = util.hasPath(it->second);
+                    //if the user has not given a path then, add inputdir. else leave path alone.
+                    if (path == "") {    parameters["uchime"] = inputDir + it->second;        }
+                }
             }
             
             fastafile = validParameter.validFile(parameters, "fasta");
@@ -301,7 +308,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
             string path = current->getProgramPath();
             string programName = "uchime"; programName += EXECUTABLE_EXT;
             
-            uchimeLocation = validParameter.valid(parameters, "uchime");
+            uchimeLocation = validParameter.validFile(parameters, "uchime");
             if (uchimeLocation == "not found") {
                 uchimeLocation = "";
                 foundTool = util.findTool(programName, uchimeLocation, path, versionOutputs, current->getLocations());
