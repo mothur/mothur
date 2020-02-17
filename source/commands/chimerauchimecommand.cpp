@@ -313,11 +313,12 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                 bool ableToOpen = util.openInputFile(uchimeLocation, in, "no error"); in.close();
                 if(!ableToOpen) {
                     m->mothurOut(uchimeLocation + " file does not exist or cannot be opened, ignoring.\n"); uchimeLocation = "";
-                    programName = util.getSimpleName(uchimeLocation); uchimeLocation = "";
                     foundTool = util.findTool(programName, uchimeLocation, path, versionOutputs, current->getLocations());
                 }
             }
             uchimeLocation = util.getFullPathName(uchimeLocation);
+            m->mothurOut("[DEBUG]: uchime location using " + uchimeLocation + "\n");
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: uchime location using " + uchimeLocation + "\n"); }
             
             if (!abort) {
                 if ((namefile != "") || (groupfile != "")) { //convert to count
