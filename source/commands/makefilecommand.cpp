@@ -401,7 +401,8 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
             in >> junk; util.gobble(in);
             in >> filename; util.gobble(in);
             
-            out << filename << endl;
+            //ignore hidden files
+            if (filename[0] != '.') { out << filename << endl; }
         }
         in.close();
         out.close();

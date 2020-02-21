@@ -349,6 +349,245 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
         exit(1);
     }
 }
+//**********************************************************************************************************************
+//string outputFName, string filename, string accnos, string alns, int& numChimeras
+void driver(vsearchData* params){
+    try {
+        params->driverOutputFName = params->util.getFullPathName(params->driverOutputFName);
+        params->formattedFastaFilename = params->util.getFullPathName(params->formattedFastaFilename);
+        params->driverAlns = params->util.getFullPathName(params->driverAlns);
+        string outputFNamec = params->driverOutputFName+"vsearch_out";
+        
+        //to allow for spaces in the path
+        params->driverOutputFName = "\"" + params->driverOutputFName + "\"";
+        params->formattedFastaFilename = "\"" + params->formattedFastaFilename + "\"";
+        params->driverAlns = "\"" + params->driverAlns + "\"";
+        outputFNamec = "\"" + outputFNamec + "\"";
+        
+        vector<char*> cPara;
+        string vsearchCommand = "";
+
+        vsearchCommand += params->vsearchLocation;
+        vsearchCommand = "\"" + vsearchCommand + "\" ";
+        
+        char* tempVsearch;
+        tempVsearch= new char[vsearchCommand.length()+1];
+        *tempVsearch = '\0';
+        strncat(tempVsearch, vsearchCommand.c_str(), vsearchCommand.length());
+        cPara.push_back(tempVsearch);
+        
+        string fileToRemove = "";
+        //are you using a reference file
+        if (params->templatefile != "self") {
+            string rootFileName = params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2);
+            string outputFileName = rootFileName + ".vsearch_formatted";
+            fileToRemove = outputFileName;
+            
+            //vsearch cant handle some of the things allowed in mothurs fasta files so we remove them
+            ifstream in; params->util.openInputFile(rootFileName, in);
+            ofstream out; params->util.openOutputFile(outputFileName, out);
+            
+            while (!in.eof()) {
+                if (params->m->getControl_pressed()) { break;  }
+                
+                Sequence seq(in); params->util.gobble(in);
+                
+                if (seq.getName() != "") { seq.printUnAlignedSequence(out); }
+            }
+            in.close(); out.close();
+            
+            params->formattedFastaFilename = outputFileName;
+            params->formattedFastaFilename = "\"" + params->formattedFastaFilename + "\"";
+            //add reference file
+            char* tempRef = new char[5];
+            //strcpy(tempRef, "--db");
+            *tempRef = '\0'; strncat(tempRef, "--db", 4);
+            cPara.push_back(tempRef);
+            char* tempR = new char[params->templatefile.length()+1];
+            //strcpy(tempR, templatefile.c_str());
+            *tempR = '\0'; strncat(tempR, params->templatefile.c_str(), params->templatefile.length());
+            cPara.push_back(tempR);
+            
+            char* tempIn = new char[13];
+            *tempIn = '\0'; strncat(tempIn, "--uchime_ref", 12);
+            cPara.push_back(tempIn);
+            char* temp = new char[params->formattedFastaFilename.length()+1];
+            *temp = '\0'; strncat(temp, params->formattedFastaFilename.c_str(), params->formattedFastaFilename.length());
+            cPara.push_back(temp);
+
+        }else { //denovo
+            char* tempIn = new char[16];
+            *tempIn = '\0'; strncat(tempIn, "--uchime_denovo", 15);
+            cPara.push_back(tempIn);
+            char* temp = new char[params->formattedFastaFilename.length()+1];
+            *temp = '\0'; strncat(temp, params->formattedFastaFilename.c_str(), params->formattedFastaFilename.length());
+            cPara.push_back(temp);
+        }
+        
+        /*char* tempRandSeed = new char[11];
+        *tempRandSeed = '\0'; strncat(tempRandSeed, "--randseed", 10);
+        cPara.push_back(tempRandSeed);
+        string mothurSeed = toString(m->getRandomSeed());
+        char* tempRS = new char[mothurSeed.length()+1];
+        *tempRS = '\0'; strncat(tempRS, mothurSeed.c_str(), mothurSeed.length());
+        cPara.push_back(tempRS);*/
+        
+        char* tempO = new char[11];
+        *tempO = '\0'; strncat(tempO, "--chimeras", 10);
+        cPara.push_back(tempO);
+        char* tempout = new char[outputFNamec.length()+1];
+        *tempout = '\0'; strncat(tempout, outputFNamec.c_str(), outputFNamec.length());
+        cPara.push_back(tempout);
+        
+        char* tempchimeraout = new char[12];
+        *tempchimeraout = '\0'; strncat(tempchimeraout, "--uchimeout", 11);
+        cPara.push_back(tempchimeraout);
+        char* tempoutc = new char[params->driverOutputFName.length()+1];
+        *tempoutc = '\0'; strncat(tempoutc, params->driverOutputFName.c_str(), params->driverOutputFName.length());
+        cPara.push_back(tempoutc);
+        
+        char* tempxsize = new char[8];
+        *tempxsize = '\0'; strncat(tempxsize, "--xsize", 7);
+        cPara.push_back(tempxsize);
+        
+        if (params->vars->chimealns) {
+            char* tempA = new char[13];
+            *tempA = '\0'; strncat(tempA, "--uchimealns", 12);
+            //strcpy(tempA, "--uchimealns");
+            cPara.push_back(tempA);
+            char* tempa = new char[params->driverAlns.length()+1];
+            //strcpy(tempa, alns.c_str());
+            *tempa = '\0'; strncat(tempa, params->driverAlns.c_str(), params->driverAlns.length());
+            cPara.push_back(tempa);
+        }
+        
+        
+        if (params->vars->useAbskew) {
+            char* tempskew = new char[9];
+            *tempskew = '\0'; strncat(tempskew, "--abskew", 8);
+            //strcpy(tempskew, "--abskew");
+            cPara.push_back(tempskew);
+            char* tempSkew = new char[params->vars->abskew.length()+1];
+            //strcpy(tempSkew, abskew.c_str());
+            *tempSkew = '\0'; strncat(tempSkew, params->vars->abskew.c_str(), params->vars->abskew.length());
+            cPara.push_back(tempSkew);
+        }
+        
+        if (params->vars->useMinH) {
+            char* tempminh = new char[7];
+            *tempminh = '\0'; strncat(tempminh, "--minh", 6);
+            //strcpy(tempminh, "--minh");
+            cPara.push_back(tempminh);
+            char* tempMinH = new char[params->vars->minh.length()+1];
+            *tempMinH = '\0'; strncat(tempMinH, params->vars->minh.c_str(), params->vars->minh.length());
+            //strcpy(tempMinH, minh.c_str());
+            cPara.push_back(tempMinH);
+        }
+        
+        if (params->vars->useMindiv) {
+            char* tempmindiv = new char[9];
+            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", 8);
+            //strcpy(tempmindiv, "--mindiv");
+            cPara.push_back(tempmindiv);
+            char* tempMindiv = new char[params->vars->mindiv.length()+1];
+            *tempMindiv = '\0'; strncat(tempMindiv, params->vars->mindiv.c_str(), params->vars->mindiv.length());
+            //strcpy(tempMindiv, mindiv.c_str());
+            cPara.push_back(tempMindiv);
+        }
+        
+        if (params->vars->useMindiffs) {
+            char* tempmindiv = new char[9];
+            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiffs", 10);
+            cPara.push_back(tempmindiv);
+            char* tempMindiv = new char[params->vars->mindiffs.length()+1];
+            *tempMindiv = '\0'; strncat(tempMindiv, params->vars->mindiffs.c_str(), params->vars->mindiffs.length());
+            cPara.push_back(tempMindiv);
+        }
+        
+        if (params->vars->useXn) {
+            char* tempxn = new char[5];
+            //strcpy(tempxn, "--xn");
+            *tempxn = '\0'; strncat(tempxn, "--xn", 4);
+            cPara.push_back(tempxn);
+            char* tempXn = new char[params->vars->xn.length()+1];
+            //strcpy(tempXn, xn.c_str());
+            *tempXn = '\0'; strncat(tempXn, params->vars->xn.c_str(), params->vars->xn.length());
+            cPara.push_back(tempXn);
+        }
+        
+        if (params->vars->useDn) {
+            char* tempdn = new char[5];
+            //strcpy(tempdn, "--dn");
+            *tempdn = '\0'; strncat(tempdn, "--dn", 4);
+            cPara.push_back(tempdn);
+            char* tempDn = new char[params->vars->dn.length()+1];
+            *tempDn = '\0'; strncat(tempDn, params->vars->dn.c_str(), params->vars->dn.length());
+            //strcpy(tempDn, dn.c_str());
+            cPara.push_back(tempDn);
+        }
+        
+        //--threads=1
+        char* threads = new char[10];  threads[0] = '\0'; strncat(threads, "--threads", 9);
+        cPara.push_back(threads);
+        string numProcessors = toString(1);
+        char* tempThreads = new char[numProcessors.length()+1];
+        *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), numProcessors.length());
+        cPara.push_back(tempThreads);
+        
+        char** vsearchParameters;
+        vsearchParameters = new char*[cPara.size()];
+        string commandString = "";
+        for (int i = 0; i < cPara.size(); i++) {  vsearchParameters[i] = cPara[i];  commandString += toString(cPara[i]) + " "; }
+        //int numArgs = cPara.size();
+        
+#if defined NON_WINDOWS
+#else
+        commandString = "\"" + commandString + "\"";
+#endif
+        
+        if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
+        
+        system(commandString.c_str());
+        
+        //free memory
+        for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
+        delete[] vsearchParameters;
+        
+        if (fileToRemove != "") { params->util.mothurRemove(fileToRemove); }
+        
+        //remove "" from filenames
+        params->driverOutputFName = params->driverOutputFName.substr(1, params->driverOutputFName.length()-2);
+        outputFNamec = outputFNamec.substr(1, outputFNamec.length()-2);
+        params->formattedFastaFilename = params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2);
+        params->driverAlns = params->driverAlns.substr(1, params->driverAlns.length()-2);
+        
+        if (params->m->getControl_pressed()) { return; }
+        
+        //create accnos file from vsearch results
+        ifstream in; params->util.openInputFile(outputFNamec, in, "no error");
+        ofstream out; params->util.openOutputFile(params->driverAccnos, out);
+        
+        params->numChimeras = 0;
+        while(!in.eof()) {
+            
+            if (params->m->getControl_pressed()) { break; }
+            
+            Sequence seq(in); params->util.gobble(in);
+            
+            out << seq.getName() << endl; params->numChimeras++;
+        }
+        in.close();
+        out.close();
+        
+        params->util.mothurRemove(outputFNamec);
+                
+        return;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "ChimeraVsearchCommand", "driver");
+        exit(1);
+    }
+}
 //***************************************************************************************************************
 
 int ChimeraVsearchCommand::execute(){
@@ -379,6 +618,10 @@ int ChimeraVsearchCommand::execute(){
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
             newCountFile = getOutputFileName("count", variables);
         }
+        
+        vars = new vsearchVariables();
+        vars->setBooleans(dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useMindiffs, hasCount);
+        vars->setVariables(abskew, minh, mindiv, xn, dn, mindiffs);
         
         //setup fasta file if denovo and no groups
         if ((templatefile == "self") && (!hasGroups)) { //you want to run vsearch with a template=self and no groups
@@ -421,7 +664,6 @@ int ChimeraVsearchCommand::execute(){
                 current->setMothurCalling(false);
                 groups = cparser.getNamesOfGroups();
                 group2Files = cparser.getFiles();
-                
             }
             
             if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
@@ -433,23 +675,7 @@ int ChimeraVsearchCommand::execute(){
             if (chimealns) { util.openOutputFile(alnsFileName, out2); out2.close(); }
             
             //paralellized in vsearch
-            driverGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile);
-            if (hasCount && dups) {
-                CountTable c; c.readTable(countfile, true, false);
-                if (!util.isBlank(newCountFile)) {
-                    ifstream in2;
-                    util.openInputFile(newCountFile, in2);
-                    
-                    string name, group;
-                    while (!in2.eof()) {
-                        in2 >> name >> group; util.gobble(in2);
-                        c.setAbund(name, group, 0);
-                    }
-                    in2.close();
-                }
-                util.mothurRemove(newCountFile);
-                c.printTable(newCountFile);
-            }
+            int totalSeqs = createProcessesGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups);
             
             if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
             
@@ -486,10 +712,29 @@ int ChimeraVsearchCommand::execute(){
         }else{
             if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
             
-            int numChimeras = 0;
             
-            //paralellized in vsearch
-            driver(outputFileName, fastafile, accnosFileName, alnsFileName, numChimeras);
+            map<string, vector<string> > dummay;
+            vector<string> dummyGroups;
+           
+            //vsearch cant handle some of the things allowed in mothurs fasta files so we remove them
+            ifstream in; util.openInputFile(fastafile, in);
+            ofstream outT; util.openOutputFile(newFasta, outT);
+            
+            while (!in.eof()) {
+                if (m->getControl_pressed()) { break;  }
+                
+                Sequence seq(in); util.gobble(in);
+                
+                if (seq.getName() != "") { seq.printUnAlignedSequence(outT); }
+            }
+            in.close(); outT.close();
+            
+            vsearchData* dataBundle = new vsearchData(dummay, outputFileName, vsearchLocation, templatefile, newFasta, fastafile, countfile, accnosFileName, alnsFileName, "", dummyGroups, vars);
+
+            dataBundle->setDriverNames(outputFileName, alnsFileName, accnosFileName);
+            driver(dataBundle);
+            
+            int numChimeras = dataBundle->numChimeras;
             
             //add headings
             ofstream out;
@@ -802,11 +1047,11 @@ string ChimeraVsearchCommand::getCountFile(string& inputFile){
 
 //**********************************************************************************************************************
 
-int ChimeraVsearchCommand::getSeqs(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename, string tag, string tag2, long long& numSeqs, string thisGroupsFastaFile){
+int getSeqsVsearch(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename, string tag, string tag2, long long& numSeqs, string thisGroupsFastaFile, MothurOut* m){
     try {
         int error = 0;
         ifstream in;
-        util.openInputFile(thisGroupsFastaFile, in);
+        Utils util; util.openInputFile(thisGroupsFastaFile, in);
         
         vector<seqPriorityNode> nameVector;
         map<string, int>::iterator itNameMap;
@@ -838,55 +1083,58 @@ int ChimeraVsearchCommand::getSeqs(map<string, int>& nameMap, string thisGroupsF
         return error;
     }
     catch(exception& e) {
-        m->errorOut(e, "ChimeraVsearchCommand", "getSeqs");
+        m->errorOut(e, "ChimeraVsearchCommand", "getSeqsVsearch");
         exit(1);
     }
 }
 //**********************************************************************************************************************
 //out << ">" << nameMapCount[i].name  << tag << nameMapCount[i].numIdentical << tag2 << endl << nameMapCount[i].seq << endl;
-int ChimeraVsearchCommand::driverGroups(map<string, vector<string> > parsedFiles, string outputFName, string filename, string accnos, string alns, string countlist){
+//map<string, vector<string> > parsedFiles, string outputFName, string filename, string accnos, string alns, string countlist
+void driverGroups(vsearchData* params){
     try {
-        
         int totalSeqs = 0;
-        int numChimeras = 0;
         
         ofstream outCountList;
-        if (hasCount && dups) { util.openOutputFile(countlist, outCountList); }
+        Utils util;
+        if (params->vars->hasCount && params->vars->dups) { util.openOutputFile(params->countlist, outCountList); }
         
-        for (map<string, vector<string> >::iterator it = parsedFiles.begin(); it != parsedFiles.end(); it++) {
-            long start = time(NULL);	 if (m->getControl_pressed()) {  outCountList.close(); util.mothurRemove(countlist); return 0; }
+        for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
+            long start = time(NULL);
             
-            int error;
+            if (params->m->getControl_pressed()) {  outCountList.close(); util.mothurRemove(params->countlist); return; }
+            
             long long thisGroupsSeqs = 0;
             string thisGroup = it->first;
             
             map<string, int> nameMap;
-            if (hasCount) {
+            if (params->vars->hasCount) {
                 CountTable ct; ct.readTable(it->second[1], false, true);
                 nameMap = ct.getNameMap();
             }
             else { nameMap = util.readNames(it->second[1]); }
             
-            error = getSeqs(nameMap, filename, ";size=", ";", thisGroupsSeqs, it->second[0]);
-            if ((error == 1) || m->getControl_pressed()) {  return 0; }
+            int error = getSeqsVsearch(nameMap, params->formattedFastaFilename, ";size=", ";", thisGroupsSeqs, it->second[0], params->m);
+            if ((error == 1) || params->m->getControl_pressed()) {  return; }
             
             totalSeqs += thisGroupsSeqs;
-            driver((outputFName + thisGroup), filename, (accnos+thisGroup), (alns+thisGroup), numChimeras);
+            //driver((outputFName + thisGroup), filename, (accnos+thisGroup), (alns+thisGroup), numChimeras);
+            params->setDriverNames((params->outputFName + thisGroup), (params->alns+thisGroup), (params->accnos+thisGroup));
+            driver(params);
             
-            if (m->getControl_pressed()) { return 0; }
+            if (params->m->getControl_pressed()) { return; }
             
             //remove file made for vsearch
-            if (!m->getDebug()) {  util.mothurRemove(filename);  }
-            else { m->mothurOut("[DEBUG]: saving file: " + filename + ".\n"); }
+            if (!params->m->getDebug()) {  util.mothurRemove(params->formattedFastaFilename);  }
+            else { params->m->mothurOut("[DEBUG]: saving file: " + params->formattedFastaFilename + ".\n"); }
             
             //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
             //This table will zero out group counts for seqs determined to be chimeric by that group.
-            if (dups) {
-                if (!util.isBlank(accnos+thisGroup)) {
+            if (params->vars->dups) {
+                if (!util.isBlank(params->accnos+thisGroup)) {
                     ifstream in;
-                    util.openInputFile(accnos+thisGroup, in);
+                    util.openInputFile(params->accnos+thisGroup, in);
                     string name;
-                    if (hasCount) {
+                    if (params->vars->hasCount) {
                         while (!in.eof()) {
                             in >> name; util.gobble(in);
                             outCountList << name << '\t' << thisGroup << endl;
@@ -896,7 +1144,7 @@ int ChimeraVsearchCommand::driverGroups(map<string, vector<string> > parsedFiles
                         map<string, string> thisnamemap; util.readNames(it->second[1], thisnamemap);
                         map<string, string>::iterator itN;
                         ofstream out;
-                        util.openOutputFile(accnos+thisGroup+".temp", out);
+                        util.openOutputFile(params->accnos+thisGroup+".temp", out);
                         while (!in.eof()) {
                             in >> name; util.gobble(in);
                             itN = thisnamemap.find(name);
@@ -904,287 +1152,160 @@ int ChimeraVsearchCommand::driverGroups(map<string, vector<string> > parsedFiles
                                 vector<string> tempNames; util.splitAtComma(itN->second, tempNames);
                                 for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
                                 
-                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->setControl_pressed(true); }
+                            }else { params->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); params->m->setControl_pressed(true); }
                         }
                         out.close();
                         in.close();
-                        util.renameFile(accnos+thisGroup+".temp", accnos+thisGroup);
+                        util.renameFile(params->accnos+thisGroup+".temp", params->accnos+thisGroup);
                     }
                     
                 }
             }
             
             //append files
-            util.appendFiles((outputFName+thisGroup), outputFName); util.mothurRemove((outputFName+thisGroup));
-            util.appendFiles((accnos+thisGroup), accnos); util.mothurRemove((accnos+thisGroup));
-            if (chimealns) { util.appendFiles((alns+thisGroup), alns); util.mothurRemove((alns+thisGroup)); }
+            util.appendFiles((params->outputFName+thisGroup), params->outputFName); util.mothurRemove((params->outputFName+thisGroup));
+            util.appendFiles((params->accnos+thisGroup), params->accnos); util.mothurRemove((params->accnos+thisGroup));
+            if (params->vars->chimealns) { util.appendFiles((params->alns+thisGroup), params->alns); util.mothurRemove((params->alns+thisGroup)); }
             
-            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(thisGroupsSeqs) + " sequences from group " + thisGroup + ".\n");
+            params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(thisGroupsSeqs) + " sequences from group " + thisGroup + ".\n");
         }
         
-        if (hasCount && dups) { outCountList.close(); }
+        if (params->vars->hasCount && params->vars->dups) { outCountList.close(); }
         
-        return totalSeqs;
-        
+        params->count = totalSeqs;
     }
     catch(exception& e) {
-        m->errorOut(e, "ChimeraVsearchCommand", "driverGroups");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-
-int ChimeraVsearchCommand::driver(string outputFName, string filename, string accnos, string alns, int& numChimeras){
-    try {
-        outputFName = util.getFullPathName(outputFName);
-        string outputFNamec = util.getFullPathName(outputFName+"vsearch_out");
-        filename = util.getFullPathName(filename);
-        alns = util.getFullPathName(alns);
-        
-        //to allow for spaces in the path
-        outputFName = "\"" + outputFName + "\"";
-        outputFNamec = "\"" + outputFNamec + "\"";
-        filename = "\"" + filename + "\"";
-        alns = "\"" + alns + "\"";
-        
-        vector<char*> cPara;
-        string vsearchCommand = "";
-
-        vsearchCommand += vsearchLocation;
-        vsearchCommand = "\"" + vsearchCommand + "\" ";
-        
-        char* tempVsearch;
-        tempVsearch= new char[vsearchCommand.length()+1];
-        *tempVsearch = '\0';
-        strncat(tempVsearch, vsearchCommand.c_str(), vsearchCommand.length());
-        cPara.push_back(tempVsearch);
-        
-        string fileToRemove = "";
-        //are you using a reference file
-        if (templatefile != "self") {
-            string outputFileName = filename.substr(1, filename.length()-2) + ".vsearch_formatted";
-            fileToRemove = outputFileName;
-            prepFile(filename.substr(1, filename.length()-2), outputFileName);
-            filename = outputFileName;
-            filename = "\"" + filename + "\"";
-            //add reference file
-            char* tempRef = new char[5];
-            //strcpy(tempRef, "--db");
-            *tempRef = '\0'; strncat(tempRef, "--db", 4);
-            cPara.push_back(tempRef);
-            char* tempR = new char[templatefile.length()+1];
-            //strcpy(tempR, templatefile.c_str());
-            *tempR = '\0'; strncat(tempR, templatefile.c_str(), templatefile.length());
-            cPara.push_back(tempR);
-            
-            char* tempIn = new char[13];
-            *tempIn = '\0'; strncat(tempIn, "--uchime_ref", 12);
-            cPara.push_back(tempIn);
-            char* temp = new char[filename.length()+1];
-            *temp = '\0'; strncat(temp, filename.c_str(), filename.length());
-            cPara.push_back(temp);
-
-        }else { //denovo
-            char* tempIn = new char[16];
-            *tempIn = '\0'; strncat(tempIn, "--uchime_denovo", 15);
-            cPara.push_back(tempIn);
-            char* temp = new char[filename.length()+1];
-            *temp = '\0'; strncat(temp, filename.c_str(), filename.length());
-            cPara.push_back(temp);
-        }
-        
-        /*char* tempRandSeed = new char[11];
-        *tempRandSeed = '\0'; strncat(tempRandSeed, "--randseed", 10);
-        cPara.push_back(tempRandSeed);
-        string mothurSeed = toString(m->getRandomSeed());
-        char* tempRS = new char[mothurSeed.length()+1];
-        *tempRS = '\0'; strncat(tempRS, mothurSeed.c_str(), mothurSeed.length());
-        cPara.push_back(tempRS);*/
-        
-        char* tempO = new char[11];
-        *tempO = '\0'; strncat(tempO, "--chimeras", 10);
-        cPara.push_back(tempO);
-        char* tempout = new char[outputFNamec.length()+1];
-        *tempout = '\0'; strncat(tempout, outputFNamec.c_str(), outputFNamec.length());
-        cPara.push_back(tempout);
-        
-        char* tempchimeraout = new char[12];
-        *tempchimeraout = '\0'; strncat(tempchimeraout, "--uchimeout", 11);
-        cPara.push_back(tempchimeraout);
-        char* tempoutc = new char[outputFName.length()+1];
-        *tempoutc = '\0'; strncat(tempoutc, outputFName.c_str(), outputFName.length());
-        cPara.push_back(tempoutc);
-        
-        char* tempxsize = new char[8];
-        *tempxsize = '\0'; strncat(tempxsize, "--xsize", 7);
-        cPara.push_back(tempxsize);
-        
-        if (chimealns) {
-            char* tempA = new char[13];
-            *tempA = '\0'; strncat(tempA, "--uchimealns", 12);
-            //strcpy(tempA, "--uchimealns");
-            cPara.push_back(tempA);
-            char* tempa = new char[alns.length()+1];
-            //strcpy(tempa, alns.c_str());
-            *tempa = '\0'; strncat(tempa, alns.c_str(), alns.length());
-            cPara.push_back(tempa);
-        }
-        
-        
-        if (useAbskew) {
-            char* tempskew = new char[9];
-            *tempskew = '\0'; strncat(tempskew, "--abskew", 8);
-            //strcpy(tempskew, "--abskew");
-            cPara.push_back(tempskew);
-            char* tempSkew = new char[abskew.length()+1];
-            //strcpy(tempSkew, abskew.c_str());
-            *tempSkew = '\0'; strncat(tempSkew, abskew.c_str(), abskew.length());
-            cPara.push_back(tempSkew);
-        }
-        
-        if (useMinH) {
-            char* tempminh = new char[7];
-            *tempminh = '\0'; strncat(tempminh, "--minh", 6);
-            //strcpy(tempminh, "--minh");
-            cPara.push_back(tempminh);
-            char* tempMinH = new char[minh.length()+1];
-            *tempMinH = '\0'; strncat(tempMinH, minh.c_str(), minh.length());
-            //strcpy(tempMinH, minh.c_str());
-            cPara.push_back(tempMinH);
-        }
-        
-        if (useMindiv) {
-            char* tempmindiv = new char[9];
-            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", 8);
-            //strcpy(tempmindiv, "--mindiv");
-            cPara.push_back(tempmindiv);
-            char* tempMindiv = new char[mindiv.length()+1];
-            *tempMindiv = '\0'; strncat(tempMindiv, mindiv.c_str(), mindiv.length());
-            //strcpy(tempMindiv, mindiv.c_str());
-            cPara.push_back(tempMindiv);
-        }
-        
-        if (useMindiffs) {
-            char* tempmindiv = new char[9];
-            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiffs", 10);
-            cPara.push_back(tempmindiv);
-            char* tempMindiv = new char[mindiffs.length()+1];
-            *tempMindiv = '\0'; strncat(tempMindiv, mindiffs.c_str(), mindiffs.length());
-            cPara.push_back(tempMindiv);
-        }
-        
-        if (useXn) {
-            char* tempxn = new char[5];
-            //strcpy(tempxn, "--xn");
-            *tempxn = '\0'; strncat(tempxn, "--xn", 4);
-            cPara.push_back(tempxn);
-            char* tempXn = new char[xn.length()+1];
-            //strcpy(tempXn, xn.c_str());
-            *tempXn = '\0'; strncat(tempXn, xn.c_str(), xn.length());
-            cPara.push_back(tempXn);
-        }
-        
-        if (useDn) {
-            char* tempdn = new char[5];
-            //strcpy(tempdn, "--dn");
-            *tempdn = '\0'; strncat(tempdn, "--dn", 4);
-            cPara.push_back(tempdn);
-            char* tempDn = new char[dn.length()+1];
-            *tempDn = '\0'; strncat(tempDn, dn.c_str(), dn.length());
-            //strcpy(tempDn, dn.c_str());
-            cPara.push_back(tempDn);
-        }
-        
-        //--threads=1
-        char* threads = new char[10];  threads[0] = '\0'; strncat(threads, "--threads", 9);
-        cPara.push_back(threads);
-        string numProcessors = toString(processors);
-        char* tempThreads = new char[numProcessors.length()+1];
-        *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), numProcessors.length());
-        cPara.push_back(tempThreads);
-        
-        char** vsearchParameters;
-        vsearchParameters = new char*[cPara.size()];
-        string commandString = "";
-        for (int i = 0; i < cPara.size(); i++) {  vsearchParameters[i] = cPara[i];  commandString += toString(cPara[i]) + " "; }
-        //int numArgs = cPara.size();
-        
-#if defined NON_WINDOWS
-#else
-        commandString = "\"" + commandString + "\"";
-#endif
-        
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
-        
-        system(commandString.c_str());
-        
-        //free memory
-        for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
-        delete[] vsearchParameters;
-        
-        if (fileToRemove != "") { util.mothurRemove(fileToRemove); }
-        
-        //remove "" from filenames
-        outputFName = outputFName.substr(1, outputFName.length()-2);
-        outputFNamec = outputFNamec.substr(1, outputFNamec.length()-2);
-        filename = filename.substr(1, filename.length()-2);
-        alns = alns.substr(1, alns.length()-2);
-        
-        if (m->getControl_pressed()) { return 0; }
-        
-        //create accnos file from vsearch results
-        ifstream in;
-        util.openInputFile(outputFNamec, in, "no error");
-        
-        ofstream out;
-        util.openOutputFile(accnos, out);
-        
-        numChimeras = 0;
-        while(!in.eof()) {
-            
-            if (m->getControl_pressed()) { break; }
-            
-            Sequence seq(in); util.gobble(in);
-            
-            out << seq.getName() << endl; numChimeras++;
-        }
-        in.close();
-        out.close();
-        
-        util.mothurRemove(outputFNamec);
-                
-        return 0;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "ChimeraVsearchCommand", "driver");
+        params->m->errorOut(e, "ChimeraVsearchCommand", "driverGroups");
         exit(1);
     }
 }
 /**************************************************************************************************/
-//vsearch can't handle some of the things allowed in mothurs fasta files. This functions "cleans up" the file.
-int ChimeraVsearchCommand::prepFile(string filename, string output) {
+//driverGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile);
+int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& groups2Files, string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups) {
     try {
+        CountTable newCount;
+        if (hasCount && dups) { newCount.readTable(countfile, true, false);  }
         
-        ifstream in;
-        util.openInputFile(filename, in);
+        //sanity check
+        if (groups.size() < processors) { processors = groups.size(); m->mothurOut("Reducing processors to " + toString(groups.size()) + ".\n"); }
         
-        ofstream out;
-        util.openOutputFile(output, out);
-        
-        while (!in.eof()) {
-            if (m->getControl_pressed()) { break;  }
-            
-            Sequence seq(in); util.gobble(in);
-            
-            if (seq.getName() != "") { seq.printUnAlignedSequence(out); }
+        //divide the groups between the processors
+        vector<linePair> lines;
+        int remainingPairs = groups.size();
+        int startIndex = 0;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+            int numPairs = remainingPairs; //case for last processor
+            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+            lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
+            startIndex = startIndex + numPairs;
+            remainingPairs = remainingPairs - numPairs;
         }
-        in.close();
-        out.close();
         
-        return 0;
+        //create array of worker threads
+        vector<std::thread*> workerThreads;
+        vector<vsearchData*> data;
+        
+        long long num = 0;
+        time_t start, end;
+        time(&start);
+        
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            vector<string> thisGroups;
+            map<string, vector<string> > thisGroupsParsedFiles;
+            for (int j = lines[i+1].start; j < lines[i+1].end; j++) {
+                
+                map<string, vector<string> >::iterator it = groups2Files.find(groups[j]);
+                if (it != groups2Files.end()) {
+                    thisGroupsParsedFiles[groups[j]] = (it->second);
+                    thisGroups.push_back(groups[j]);
+                }
+                else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
+            }
+            vsearchData* dataBundle = new vsearchData(thisGroupsParsedFiles, outputFName+extension, vsearchLocation, templatefile, filename+extension, fastafile, countfile,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
+            data.push_back(dataBundle);
+            
+            workerThreads.push_back(new std::thread(driverGroups, dataBundle));
+        }
+        
+        vector<string> thisGroups;
+        map<string, vector<string> > thisGroupsParsedFiles;
+        for (int j = lines[0].start; j < lines[0].end; j++) {
+            map<string, vector<string> >::iterator it = groups2Files.find(groups[j]);
+            if (it != groups2Files.end()) {
+                thisGroupsParsedFiles[groups[j]] = (it->second);
+                thisGroups.push_back(groups[j]);
+            }
+            else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
+        }
+        vsearchData* dataBundle = new vsearchData(thisGroupsParsedFiles, outputFName, vsearchLocation, templatefile, filename, fastafile, countfile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
+        driverGroups(dataBundle);
+        num = dataBundle->count;
+        int numChimeras = dataBundle->numChimeras;
+
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            num += data[i]->count;
+            numChimeras += data[i]->numChimeras;
+            
+            delete data[i];
+            delete workerThreads[i];
+        }
+        delete dataBundle;
+        time(&end);
+        m->mothurOut("It took " + toString(difftime(end, start)) + " secs to check " + toString(num) + " sequences.\n\n");
+        
+        //read my own
+        if (hasCount && dups) {
+            string countlisttemp = accnos+".byCount.temp";
+            if (!util.isBlank(countlisttemp)) {
+                ifstream in2;
+                util.openInputFile(countlisttemp, in2);
+                
+                string name, group;
+                while (!in2.eof()) {
+                    in2 >> name >> group; util.gobble(in2);
+                    newCount.setAbund(name, group, 0);
+                }
+                in2.close();
+            }
+            util.mothurRemove(countlisttemp);
+        }
+        
+        //append output files
+        for (int i = 0; i < processors-1; i++) {
+            string extension = toString(i+1) + ".temp";
+            util.appendFiles((outputFName+extension), outputFName);
+            util.mothurRemove((outputFName+extension));
+            
+            util.appendFiles((accnos+extension), accnos);
+            util.mothurRemove((accnos+extension));
+            
+            if (hasCount && dups) {
+                if (!util.isBlank(accnos+".byCount."+extension)) {
+                    ifstream in2;
+                    util.openInputFile(accnos+".byCount."+extension, in2);
+                    
+                    string name, group;
+                    while (!in2.eof()) {
+                        in2 >> name >> group; util.gobble(in2);
+                        newCount.setAbund(name, group, 0);
+                    }
+                    in2.close();
+                }
+                util.mothurRemove(accnos+".byCount."+extension);
+            }
+            
+        }
+        
+        //print new *.pick.count_table
+        if (hasCount && dups) {  newCount.printTable(newCountFile);   }
+        
+        return num;
     }
     catch(exception& e) {
-        m->errorOut(e, "ChimeraVsearchCommand", "prepFile");
+        m->errorOut(e, "ChimeraUchimeCommand", "createProcessesGroups");
         exit(1);
     }
 }

@@ -142,4 +142,4 @@ endif
 
 clean :
 	@rm -f $(OBJECTS)
-	@rm -f uchime
+	
