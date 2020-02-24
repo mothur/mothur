@@ -39,8 +39,8 @@ string FilterSeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file.\n";
 		helpString += "The filter.seqs command parameters are fasta, trump, soft, hard, processors and vertical. \n";
-		helpString += "The fasta parameter is required, unless you have a valid current fasta file. You may enter several fasta files to build the filter from and filter, by separating their names with -'s.\n";
-		helpString += "For example: fasta=abrecovery.fasta-amazon.fasta \n";
+		helpString += "The fasta parameter is required, unless you have a valid current fasta file. You may enter several fasta files to build the filter from and filter, by separating their names with |'s.\n";
+		helpString += "For example: fasta=abrecovery.fasta|amazon.fasta \n";
 		helpString += "The trump option will remove a column if the trump character is found at that position in any sequence of the alignment. Default=*, meaning no trump. \n";
 		helpString += "A soft mask removes any column where the dominant base (i.e. A, T, G, C, or U) does not occur in at least a designated percentage of sequences. Default=0.\n";
 		helpString += "The hard parameter allows you to enter a file containing the filter you want to use.\n";
@@ -151,7 +151,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else { 
-				util.splitAtDash(fasta, fastafileNames);
+				util.splitAtChar(fasta, fastafileNames, '|');
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastafileNames.size(); i++) {
