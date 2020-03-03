@@ -867,6 +867,7 @@ int CorrAxesCommand::getMetadata(){
 			
 		//read rest of file
         lookupFloat = new SharedRAbundFloatVectors();
+        lookupFloat->setOTUNames(metadataLabels);
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
@@ -896,6 +897,7 @@ int CorrAxesCommand::getMetadata(){
 		
         lookupFloat->setLabels("1");
         lookupFloat->eliminateZeroOTUS();
+        metadataLabels = lookupFloat->getOTUNames();
         
 		return 0;
 	}

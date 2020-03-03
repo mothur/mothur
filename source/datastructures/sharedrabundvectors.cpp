@@ -655,6 +655,7 @@ SAbundVector SharedRAbundVectors::getSAbundVector(string group){
 /**********************************************************************************************************************/
 void SharedRAbundVectors::eliminateZeroOTUS() {
     try {
+        if (currentLabels.size() != numBins) { currentLabels = getOTUNames(); }
         if (lookup.size() > 1) {
             vector<int> otusToRemove;
             for (int i = 0; i < lookup[0]->getNumBins(); i++) {
