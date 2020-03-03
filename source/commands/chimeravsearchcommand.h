@@ -47,9 +47,10 @@ struct vsearchData {
     string fastafile;
     string dupsfile;
     string outputFName;
-    string accnos, alns, formattedFastaFilename, templatefile, vsearchLocation, countlist;
+    string accnos, alns, formattedFastaFilename, templatefile, vsearchLocation;
     string driverAccnos, driverAlns, driverOutputFName;
     map<string, vector<string> > parsedFiles;
+    map<string, vector<string> > seqs2RemoveByGroup;
     
     int count, numChimeras;
     vector<string> groups;
@@ -71,7 +72,6 @@ struct vsearchData {
         count = 0;
         numChimeras = 0;
         vsearchLocation = uloc;
-        countlist = nc;
         vars = vs;
         driverAccnos = ac;
         driverAlns = al;
@@ -118,7 +118,7 @@ private:
     int readFasta(string, map<string, string>&);
     int deconvoluteResults(string, string, string, long long&);
     int prepFile(string filename, string);
-    int createProcessesGroups(map<string, vector<string> >& groups2Files, string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups);
+    int createProcessesGroups(map<string, vector<string> >& groups2Files, string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups, map<string, vector<string> >&);
 };
 
 

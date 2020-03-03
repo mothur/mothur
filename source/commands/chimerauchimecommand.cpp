@@ -356,9 +356,10 @@ struct uchimeData {
     string fastafile;
     string dupsfile;
     string outputFName;
-    string accnos, alns, formattedFastaFilename, templatefile, uchimeLocation, countlist;
+    string accnos, alns, formattedFastaFilename, templatefile, uchimeLocation;
     string driverAccnos, driverAlns, driverOutputFName;
     map<string, vector<string> > parsedFiles;
+    map<string, vector<string> > seqs2RemoveByGroup;
     
     int count, numChimeras;
     vector<string> groups;
@@ -367,7 +368,7 @@ struct uchimeData {
     Utils util;
     
     uchimeData(){}
-    uchimeData(map<string, vector<string> > g2f, string o, string uloc, string t, string file, string f, string n, string ac,  string al, string nc, vector<string> gr, uchimeVariables* vs) {
+    uchimeData(map<string, vector<string> > g2f, string o, string uloc, string t, string file, string f, string n, string ac,  string al, vector<string> gr, uchimeVariables* vs) {
         fastafile = f;
         dupsfile = n;
         formattedFastaFilename = file;
@@ -380,7 +381,6 @@ struct uchimeData {
         count = 0;
         numChimeras = 0;
         uchimeLocation = uloc;
-        countlist = nc;
         vars = vs;
         driverAccnos = ac;
         driverAlns = al;
@@ -822,7 +822,20 @@ int ChimeraUchimeCommand::execute(){
             util.openOutputFile(accnosFileName, out1); out1.close();
             if (chimealns) { util.openOutputFile(alnsFileName, out2); out2.close(); }
             
-            int totalSeqs = createProcessesGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups);
+            map<string, vector<string> > seqs2RemoveByGroup;
+            int totalSeqs = createProcessesGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, groups, seqs2RemoveByGroup);
+            
+            if (hasCount && dups) {
+                CountTable newCount; newCount.readTable(countfile, true, false);
+                
+                for (map<string, vector<string> >::iterator it = seqs2RemoveByGroup.begin(); it != seqs2RemoveByGroup.end(); it++) {
+                    
+                    string group = it->first;
+                    for (int k = 0; k < it->second.size(); k++) { newCount.setAbund(it->second[k], group, 0); }
+                }
+                
+                newCount.printTable(newCountFile);
+            }
             
             if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars;  return 0;	}
             
@@ -856,7 +869,7 @@ int ChimeraUchimeCommand::execute(){
             int numChimeras = 0;
             map<string, vector<string> > dummy;
             
-            uchimeData* dataBundle = new uchimeData(dummy, outputFileName, uchimeLocation, templatefile, fastafile, fastafile, countfile, accnosFileName, alnsFileName, accnosFileName+".byCount.temp", nullVector, vars);
+            uchimeData* dataBundle = new uchimeData(dummy, outputFileName, uchimeLocation, templatefile, fastafile, fastafile, countfile, accnosFileName, alnsFileName, nullVector, vars);
             
             numSeqs = driver(dataBundle);
             numChimeras = dataBundle->numChimeras;
@@ -1251,14 +1264,11 @@ int getSeqs(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename,
 //**********************************************************************************************************************
 void driverGroups(uchimeData* params){
 	try {
-
 		int totalSeqs = 0;
-        ofstream outCountList;
-        if (params->vars->hasCount && params->vars->dups) { params->util.openOutputFile(params->countlist, outCountList); }
         
         for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
             long start = time(NULL);
-            if (params->m->getControl_pressed()) {  outCountList.close(); params->util.mothurRemove(params->countlist); break; }
+            if (params->m->getControl_pressed()) {  break; }
             
             int error;
             long long numSeqs = 0;
@@ -1292,11 +1302,13 @@ void driverGroups(uchimeData* params){
                     params->util.openInputFile(params->accnos+thisGroup, in);
                     string name;
                     if (params->vars->hasCount) {
+                        vector<string> namesOfChimeras;
                         while (!in.eof()) {
                             in >> name; params->util.gobble(in);
-                            outCountList << name << '\t' << thisGroup << endl;
+                            namesOfChimeras.push_back(name);
                         }
                         in.close();
+                        params->seqs2RemoveByGroup[thisGroup] = namesOfChimeras;
                     }else {
                         map<string, string> thisnamemap; params->util.readNames(it->second[1], thisnamemap);
                         map<string, string>::iterator itN;
@@ -1325,8 +1337,7 @@ void driverGroups(uchimeData* params){
 			
 			params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + thisGroup + ".\n");
 		}
-        
-        if (!params->m->getControl_pressed()) { if (params->vars->hasCount && params->vars->dups) { outCountList.close(); } }
+    
         params->count = totalSeqs;
 		
 	}
@@ -1337,12 +1348,8 @@ void driverGroups(uchimeData* params){
 }	
 /**************************************************************************************************/
 
-int ChimeraUchimeCommand::createProcessesGroups(map<string, vector<string> >& groups2Files, string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups) {
+int ChimeraUchimeCommand::createProcessesGroups(map<string, vector<string> >& groups2Files, string outputFName, string filename, string accnos, string alns, vector<string> groups, map<string, vector<string> >& seqs2RemoveByGroup) {
 	try {
-        CountTable newCount;
-        string dupsFileName = countfile;
-        if (hasCount && dups) { newCount.readTable(countfile, true, false); dupsFileName = countfile; }
-        
         //sanity check
         if (groups.size() < processors) { processors = groups.size(); m->mothurOut("Reducing processors to " + toString(groups.size()) + ".\n"); }
         
@@ -1380,7 +1387,7 @@ int ChimeraUchimeCommand::createProcessesGroups(map<string, vector<string> >& gr
                 }
                 else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
             }
-            uchimeData* dataBundle = new uchimeData(thisGroupsParsedFiles, outputFName+extension, uchimeLocation, templatefile, filename+extension, fastafile, dupsFileName,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
+            uchimeData* dataBundle = new uchimeData(thisGroupsParsedFiles, outputFName+extension, uchimeLocation, templatefile, filename+extension, fastafile, countfile,  accnos+extension, alns+extension, thisGroups, vars);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new std::thread(driverGroups, dataBundle));
@@ -1396,7 +1403,7 @@ int ChimeraUchimeCommand::createProcessesGroups(map<string, vector<string> >& gr
             }
             else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
         }
-        uchimeData* dataBundle = new uchimeData(thisGroupsParsedFiles, outputFName, uchimeLocation, templatefile, filename, fastafile, dupsFileName, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
+        uchimeData* dataBundle = new uchimeData(thisGroupsParsedFiles, outputFName, uchimeLocation, templatefile, filename, fastafile, countfile, accnos, alns, thisGroups, vars);
         driverGroups(dataBundle);
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;
@@ -1405,6 +1412,22 @@ int ChimeraUchimeCommand::createProcessesGroups(map<string, vector<string> >& gr
             workerThreads[i]->join();
             num += data[i]->count;
             numChimeras += data[i]->numChimeras;
+            seqs2RemoveByGroup = dataBundle->seqs2RemoveByGroup;
+            
+            for (map<string, vector<string> >::iterator it = data[i]->seqs2RemoveByGroup.begin(); it != data[i]->seqs2RemoveByGroup.end(); it++) {
+                           
+                map<string, vector<string> >::iterator itSanity = seqs2RemoveByGroup.find(it->first);
+                if (itSanity == seqs2RemoveByGroup.end()) { //we haven't seen this group, should always be true
+                    seqs2RemoveByGroup[it->first] = it->second;
+                }
+            }
+            
+            string extension = toString(i+1) + ".temp";
+            util.appendFiles((outputFName+extension), outputFName);
+            util.mothurRemove((outputFName+extension));
+            
+            util.appendFiles((accnos+extension), accnos);
+            util.mothurRemove((accnos+extension));
             
             delete data[i];
             delete workerThreads[i];
@@ -1413,51 +1436,6 @@ int ChimeraUchimeCommand::createProcessesGroups(map<string, vector<string> >& gr
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to check " + toString(num) + " sequences.\n\n");
         
-        //read my own
-        if (hasCount && dups) {
-            string countlisttemp = accnos+".byCount.temp";
-            if (!util.isBlank(countlisttemp)) {
-                ifstream in2;
-                util.openInputFile(countlisttemp, in2);
-                
-                string name, group;
-                while (!in2.eof()) {
-                    in2 >> name >> group; util.gobble(in2);
-                    newCount.setAbund(name, group, 0);
-                }
-                in2.close();
-            }
-            util.mothurRemove(countlisttemp);
-        }
-        
-        //append output files
-        for (int i = 0; i < processors-1; i++) {
-            string extension = toString(i+1) + ".temp";
-            util.appendFiles((outputFName+extension), outputFName);
-            util.mothurRemove((outputFName+extension));
-            
-            util.appendFiles((accnos+extension), accnos);
-            util.mothurRemove((accnos+extension));
-            
-            if (hasCount && dups) {
-                if (!util.isBlank(accnos+".byCount."+extension)) {
-                    ifstream in2;
-                    util.openInputFile(accnos+".byCount."+extension, in2);
-                    
-                    string name, group;
-                    while (!in2.eof()) {
-                        in2 >> name >> group; util.gobble(in2);
-                        newCount.setAbund(name, group, 0);
-                    }
-                    in2.close();
-                }
-                util.mothurRemove(accnos+".byCount."+extension);
-            }
-            
-        }
-        
-        //print new *.pick.count_table
-        if (hasCount && dups) {  newCount.printTable(newCountFile);   }
         
         return num;	
 	}

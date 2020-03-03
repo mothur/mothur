@@ -675,7 +675,21 @@ int ChimeraVsearchCommand::execute(){
             if (chimealns) { util.openOutputFile(alnsFileName, out2); out2.close(); }
             
             //paralellized in vsearch
-            int totalSeqs = createProcessesGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups);
+            map<string, vector<string> > seqs2RemoveByGroup;
+            int totalSeqs = createProcessesGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, seqs2RemoveByGroup);
+            
+            
+            if (hasCount && dups) {
+                CountTable newCount; newCount.readTable(countfile, true, false);
+                
+                for (map<string, vector<string> >::iterator it = seqs2RemoveByGroup.begin(); it != seqs2RemoveByGroup.end(); it++) {
+                    
+                    string group = it->first;
+                    for (int k = 0; k < it->second.size(); k++) { newCount.setAbund(it->second[k], group, 0); }
+                }
+                
+                newCount.printTable(newCountFile);
+            }
             
             if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
             
@@ -1094,14 +1108,11 @@ void driverGroups(vsearchData* params){
     try {
         int totalSeqs = 0;
         
-        ofstream outCountList;
         Utils util;
-        if (params->vars->hasCount && params->vars->dups) { util.openOutputFile(params->countlist, outCountList); }
-        
         for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
             long start = time(NULL);
             
-            if (params->m->getControl_pressed()) {  outCountList.close(); util.mothurRemove(params->countlist); return; }
+            if (params->m->getControl_pressed()) {  return; }
             
             long long thisGroupsSeqs = 0;
             string thisGroup = it->first;
@@ -1135,11 +1146,14 @@ void driverGroups(vsearchData* params){
                     util.openInputFile(params->accnos+thisGroup, in);
                     string name;
                     if (params->vars->hasCount) {
+                        //add group to seqs2
+                        vector<string> namesOfChimeras;
                         while (!in.eof()) {
                             in >> name; util.gobble(in);
-                            outCountList << name << '\t' << thisGroup << endl;
+                            namesOfChimeras.push_back(name);
                         }
                         in.close();
+                        params->seqs2RemoveByGroup[thisGroup] = namesOfChimeras;
                     }else {
                         map<string, string> thisnamemap; util.readNames(it->second[1], thisnamemap);
                         map<string, string>::iterator itN;
@@ -1169,9 +1183,6 @@ void driverGroups(vsearchData* params){
             
             params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(thisGroupsSeqs) + " sequences from group " + thisGroup + ".\n");
         }
-        
-        if (params->vars->hasCount && params->vars->dups) { outCountList.close(); }
-        
         params->count = totalSeqs;
     }
     catch(exception& e) {
@@ -1181,11 +1192,9 @@ void driverGroups(vsearchData* params){
 }
 /**************************************************************************************************/
 //driverGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile);
-int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& groups2Files, string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups) {
+int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& groups2Files, string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups, map<string, vector<string> >& seqs2RemoveByGroup) {
     try {
-        CountTable newCount;
-        if (hasCount && dups) { newCount.readTable(countfile, true, false);  }
-        
+              
         //sanity check
         if (groups.size() < processors) { processors = groups.size(); m->mothurOut("Reducing processors to " + toString(groups.size()) + ".\n"); }
         
@@ -1243,11 +1252,27 @@ int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& g
         driverGroups(dataBundle);
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;
-
+        seqs2RemoveByGroup = dataBundle->seqs2RemoveByGroup;
+        
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             numChimeras += data[i]->numChimeras;
+            
+            for (map<string, vector<string> >::iterator it = data[i]->seqs2RemoveByGroup.begin(); it != data[i]->seqs2RemoveByGroup.end(); it++) {
+                
+                map<string, vector<string> >::iterator itSanity = seqs2RemoveByGroup.find(it->first);
+                if (itSanity == seqs2RemoveByGroup.end()) { //we haven't seen this group, should always be true
+                    seqs2RemoveByGroup[it->first] = it->second;
+                }
+            }
+            
+            string extension = toString(i+1) + ".temp";
+            util.appendFiles((outputFName+extension), outputFName);
+            util.mothurRemove((outputFName+extension));
+                       
+            util.appendFiles((accnos+extension), accnos);
+            util.mothurRemove((accnos+extension));
             
             delete data[i];
             delete workerThreads[i];
@@ -1255,53 +1280,7 @@ int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& g
         delete dataBundle;
         time(&end);
         m->mothurOut("It took " + toString(difftime(end, start)) + " secs to check " + toString(num) + " sequences.\n\n");
-        
-        //read my own
-        if (hasCount && dups) {
-            string countlisttemp = accnos+".byCount.temp";
-            if (!util.isBlank(countlisttemp)) {
-                ifstream in2;
-                util.openInputFile(countlisttemp, in2);
-                
-                string name, group;
-                while (!in2.eof()) {
-                    in2 >> name >> group; util.gobble(in2);
-                    newCount.setAbund(name, group, 0);
-                }
-                in2.close();
-            }
-            util.mothurRemove(countlisttemp);
-        }
-        
-        //append output files
-        for (int i = 0; i < processors-1; i++) {
-            string extension = toString(i+1) + ".temp";
-            util.appendFiles((outputFName+extension), outputFName);
-            util.mothurRemove((outputFName+extension));
-            
-            util.appendFiles((accnos+extension), accnos);
-            util.mothurRemove((accnos+extension));
-            
-            if (hasCount && dups) {
-                if (!util.isBlank(accnos+".byCount."+extension)) {
-                    ifstream in2;
-                    util.openInputFile(accnos+".byCount."+extension, in2);
-                    
-                    string name, group;
-                    while (!in2.eof()) {
-                        in2 >> name >> group; util.gobble(in2);
-                        newCount.setAbund(name, group, 0);
-                    }
-                    in2.close();
-                }
-                util.mothurRemove(accnos+".byCount."+extension);
-            }
-            
-        }
-        
-        //print new *.pick.count_table
-        if (hasCount && dups) {  newCount.printTable(newCountFile);   }
-        
+
         return num;
     }
     catch(exception& e) {

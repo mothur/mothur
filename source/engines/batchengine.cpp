@@ -129,6 +129,7 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         string type = findType(nextcommand);
         
         if (type == "batch") {
+            m->mothurOutClearBuffer();
             m->mothurOut("/*****************************************************************************/\n");
             
             BatchEngine newBatchEngine(path, nextcommand, environmentalVariables);
@@ -138,6 +139,7 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
                 while(!bail)    {    bail = newBatchEngine.getInput();    }
                 numBatches++;
             }
+            m->mothurOutClearBuffer();
             m->mothurOut("/*****************************************************************************/\n");
             
             nextcommand = getNextCommand(inputBatchFile);

@@ -51,6 +51,7 @@ class MothurOut {
     
 		void mothurOut(string); //writes to cout and the logfile
 		void mothurOutEndLine(); //writes to cout and the logfile
+        void mothurOutClearBuffer();
 		void mothurOut(string, ofstream&); //writes to the ofstream, cout and the logfile
 		void mothurOutEndLine(ofstream&); //writes to the ofstream, cout and the logfile
         void mothurOutJustToScreen(string); //writes to cout

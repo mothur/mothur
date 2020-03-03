@@ -724,7 +724,7 @@ map<int, oligosPair> Oligos::getReorientedPairedBarcodes(){
             
             //check for repeat barcodes
             string temp = forward+reverse;
-            if (uniqueBarcodes.count(temp) != 0) { cout << "1 "<< it->first << '\t' << forward << '\t' << reverse << endl;} //already have this pair assigned to a sample, ignore reoriented version
+            if (uniqueBarcodes.count(temp) != 0) { } //already have this pair assigned to a sample, ignore reoriented version
             else {
                 uniqueBarcodes.insert(temp);
                 oligosPair tempPair(forward, reverse); //(reverse, forward) or if reversePairs (rc_reverse, rc_forward)

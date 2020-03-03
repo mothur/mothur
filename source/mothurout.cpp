@@ -103,7 +103,16 @@ void MothurOut::closeLog()  {
 		exit(1);
 	}
 }
-
+/*********************************************************************************************/
+void MothurOut::mothurOutClearBuffer() {
+    try {
+        if (buffer != "") { string output = buffer; buffer = ""; mothurOut(output);   }
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "mothurOutClearBuffer");
+        exit(1);
+    }
+}
 /*********************************************************************************************/
 MothurOut::~MothurOut() {
 	try {
