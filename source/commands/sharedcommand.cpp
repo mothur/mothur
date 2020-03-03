@@ -44,7 +44,7 @@ string SharedCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The make.shared command reads a list and group / count file or a biom file, or simply a count file and creates a shared file.\n";
 		helpString += "The make.shared command parameters are list, group, biom, groups, count and label. list and group or count are required unless a current file is available or you provide a biom file.\n";
-        helpString += "The count parameter allows you to provide a count file containing the group info for the list file.\n";
+        helpString += "The count parameter allows you to provide a count file containing the group info for the list file. When the count file is provided without the list file, mothur will create a list and shared file for you.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include, group names should be separated by dashes. ex. groups=A-B-C. Default is all groups in your groupfile.\n";
 		helpString += "The label parameter is only valid with the list and group option and allows you to indicate which labels you want to include, label names should be separated by dashes. Default is all labels in your list file.\n";
 		return helpString;
@@ -61,6 +61,7 @@ string SharedCommand::getOutputPattern(string type) {
 
         if (type == "shared") {  pattern = "[filename],shared-[filename],[distance],shared"; }
         else if (type == "group") {  pattern = "[filename],[group],groups"; }
+        else if (type == "list") {  pattern = "[filename],[distance],list"; }
         else if (type == "map") {  pattern = "[filename],map"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
 
@@ -80,6 +81,7 @@ SharedCommand::SharedCommand(){
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
         outputTypes["map"] = tempOutNames;
 	}
 	catch(exception& e) {
@@ -154,6 +156,7 @@ SharedCommand::SharedCommand(string option)  {
              outputTypes["shared"] = tempOutNames;
              outputTypes["group"] = tempOutNames;
              outputTypes["map"] = tempOutNames;
+             outputTypes["list"] = tempOutNames;
 
 			 //if the user changes the output directory command factory will send this info to us in the output parameter
 			 outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
@@ -258,9 +261,7 @@ SharedCommand::SharedCommand(string option)  {
 			 }
             
             if ((listfile == "") && (biomfile == "") && (countfile != "")) { //building a shared file from a count file, require label
-                if (labels.size() == 0) {
-                    m->mothurOut("[ERROR]: You must provide a label when converting a count file to a shared file, please correct.\n");  abort = true;
-                }
+                if (labels.size() == 0) { labels.insert("asv"); }
             }
 		}
 
@@ -293,6 +294,11 @@ int SharedCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSharedFile(currentName); }
 		}
+        
+        itTypes = outputTypes.find("list");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
+        }
 
 		itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
@@ -313,34 +319,37 @@ int SharedCommand::execute(){
 int SharedCommand::createSharedFromCount() {
     try {
         //getting output filename
-        string filename = countfile;
-        if (outputDir == "") { outputDir += util.hasPath(filename); }
+        if (outputDir == "") { outputDir += util.hasPath(countfile); }
+        string label = "asv";
+        if (labels.size() != 0) { label = *labels.begin(); }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
-        filename = getOutputFileName("shared",variables);
-        outputNames.push_back(filename); outputTypes["shared"].push_back(filename);
+        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[distance]"] = label;
+        string sharedFilename = getOutputFileName("shared",variables);
+        outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
         
         ofstream out; bool printHeaders = true;
-        util.openOutputFile(filename, out);
+        util.openOutputFile(sharedFilename, out);
         
         CountTable ct;  ct.readTable(countfile, true, false);
         
         map<string, string> seqNameToOtuName;
         SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);
-        lookup->setLabels(*labels.begin());
+        lookup->setLabels(label);
         lookup->print(out, printHeaders);
-        
         out.close();
         delete lookup;
         
-        string mapFilename = getOutputFileName("map",variables);
-        outputNames.push_back(mapFilename); outputTypes["map"].push_back(mapFilename);
-        ofstream outMap;
-        util.openOutputFile(mapFilename, outMap);
+        string listFilename = getOutputFileName("list",variables);
+        outputNames.push_back(listFilename); outputTypes["list"].push_back(listFilename);
+        ofstream outlist;
+        util.openOutputFile(listFilename, outlist);
         
-        for (map<string, string>::iterator it = seqNameToOtuName.begin(); it != seqNameToOtuName.end(); it++) { outMap << it->first << '\t' << it->second << endl; }
-        outMap.close();
+        ListVector list = ct.getListVector();
+        list.setLabel(label);
+        list.print(outlist);
+        outlist.close();
         
         return 0;
     }
