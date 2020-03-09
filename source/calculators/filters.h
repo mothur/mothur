@@ -89,7 +89,7 @@ public:
 	}
 
 	void doHard(string hard) {
-		ifstream fileHandle;
+        ifstream fileHandle; filter="";
         Utils util; util.openInputFile(hard, fileHandle);
 	
 		fileHandle >> filter;

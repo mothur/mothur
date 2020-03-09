@@ -60,9 +60,9 @@ public:
    
     virtual void replaceVariables(string& nextCommand) {
         for (map<string, string>::iterator it = environmentalVariables.begin(); it != environmentalVariables.end(); it++) {
-            int pos = nextCommand.find(it->first);
+            int pos = nextCommand.find("$"+it->first);
             while (pos != string::npos) { //allow for multiple uses of a environmental variable in a single command
-                nextCommand.replace(pos-1,it->first.length()+1,it->second); //-1 to grab $char
+                nextCommand.replace(pos,it->first.length()+1,it->second); //-1 to grab $char
                 pos = nextCommand.find(it->first);
             }
         }

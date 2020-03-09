@@ -107,9 +107,9 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         //allow user to omit the () on the help and quit commands
         if (nextcommand == "quit") { nextcommand = "quit()"; }
         if (nextcommand == "help") { nextcommand = "help()"; }
-        
+        cout << nextcommand << endl;
         string type = findType(nextcommand);
-        
+        cout << type << endl;
         if (type == "batch") {
             m->mothurOutClearBuffer();
             m->mothurOut("/*****************************************************************************/\n");
@@ -144,7 +144,7 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
             if (evPos == string::npos) { }//no '$' , nothing to do
             else { replaceVariables(nextcommand); }
         }
-        
+       
         return nextcommand;
     }
     catch(exception& e) {
