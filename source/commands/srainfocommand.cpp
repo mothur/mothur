@@ -390,12 +390,19 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
             splitFiles = new char[14];     splitFiles[0] = '\0'; strncat(splitFiles, "--split-files", 13);
         #endif
         cPara.push_back(splitFiles);
+       
+		char* splitSingleFiles;
+#if defined NON_WINDOWS
+		//-3|--split-3                     writes single reads in special file
+		splitSingleFiles = new char[3];     
+		splitSingleFiles[0] = '\0'; strncat(splitSingleFiles, "-3", 2);
+#else
+		splitSingleFiles = new char[10];
+		splitSingleFiles[0] = '\0'; strncat(splitSingleFiles, "--split-3", 9);
+#endif
+		cPara.push_back(splitSingleFiles);
         
-        
-        //-3|--split-3                     writes single reads in special file
-        char* splitSingleFiles = new char[3];     splitSingleFiles[0] = '\0'; strncat(splitSingleFiles, "-3", 2);
-        cPara.push_back(splitSingleFiles);
-        
+#if defined NON_WINDOWS
         //--threads=processors
         char* threads = new char[10];  threads[0] = '\0'; strncat(threads, "--threads", 9);
         cPara.push_back(threads);
@@ -403,24 +410,37 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         char* tempThreads = new char[numProcessors.length()+1];
         *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), numProcessors.length());
         cPara.push_back(tempThreads);
-        
+#endif       
         #if defined NON_WINDOWS
         #else
             if (compressGZ) {
-                char* gzip = new char[7];     splitFiles[0] = '\0'; strncat(splitFiles, "--gzip", 6);
+                char* gzip = new char[7];     gzip[0] = '\0'; strncat(gzip, "--gzip", 6);
                 cPara.push_back(gzip);
             }
         #endif
         
         //-o|--outfile                     output-file
-        char* outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", 2);
-        cPara.push_back(outputFile);
-        map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sampleFile));
-        string outputFileName = getOutputFileName("fastq",variables);
-        char* tempoutfile = new char[outputFileName.length()+1];
-        *tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
-        cPara.push_back(tempoutfile);
+			char* outputFile; char* tempoutfile;
+	#if defined NON_WINDOWS
+			outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", 2);
+			map<string, string> variables;
+			variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sampleFile));
+			string outputFileName = getOutputFileName("fastq", variables);
+			tempoutfile = new char[outputFileName.length() + 1];
+			*tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
+			cPara.push_back(outputFile);
+			cPara.push_back(tempoutfile);
+#else
+			if (outputDir != "") {
+				outputFile = new char[9];     outputFile[0] = '\0'; strncat(outputFile, "--outdir", 8);
+				string outputFileName = outputDir;
+				tempoutfile = new char[outputFileName.length() + 1];
+				*tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
+				cPara.push_back(outputFile);
+				cPara.push_back(tempoutfile);
+			}
+#endif
+        
         
         char** fasterQParameters;
         fasterQParameters = new char*[cPara.size()];
