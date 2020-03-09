@@ -57,6 +57,34 @@ public:
 	virtual string getLogFileName()	{	return m->getLogFileName();  }
 
 	vector<string> getOptions()		{	return options;		}
+   
+    virtual void replaceVariables(string& nextCommand) {
+        for (map<string, string>::iterator it = environmentalVariables.begin(); it != environmentalVariables.end(); it++) {
+            int pos = nextCommand.find(it->first);
+            while (pos != string::npos) { //allow for multiple uses of a environmental variable in a single command
+                nextCommand.replace(pos-1,it->first.length()+1,it->second); //-1 to grab $char
+                pos = nextCommand.find(it->first);
+            }
+        }
+    }
+    
+    virtual string findType(string nextCommand) {
+        string type = "command";
+           
+        //determine if this is a command or environmental variable
+        //we know commands must include '(' characters for search for that
+        int openParen = nextCommand.find_first_of('(');
+        if (openParen == string::npos) { //no '(' character -> assume not a command, treat as environmental variable if contains an equals
+            //if no '=' sign than not an environmental variable
+            int equalsSign = nextCommand.find_first_of('=');
+            if (equalsSign != string::npos) { //no '=' character -> assume not a environmental variable, treat as new batch
+                type = "environment";
+            }
+        }
+            
+        return type;
+    }
+    
     
 protected:
 	vector<string> options;
@@ -67,6 +95,7 @@ protected:
     time_t start;
     int numCommandsRun;
     string path;
+    map<string, string> environmentalVariables;
 };
 
 

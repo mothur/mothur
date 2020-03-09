@@ -32,7 +32,7 @@ void ctrlc_handler ( int sig ) {
 	}
 }
 /***********************************************************************/
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[], char *envp[]){
 	MothurOut* m = MothurOut::getInstance();
 	try {
         CurrentFile* current = CurrentFile::getInstance();
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]){
         #ifdef MOTHUR_TOOLS
             current->setToolsPath(toolsPath);
         #endif
-    
+        
 		if (argc>1) {
             if (argc > 2) { //is one of these -q for quiet mode?
                 if (argc > 3) { m->appendLogBuffer("[ERROR]: mothur only allows command inputs and the -q command line options.\n  i.e. ./mothur \"#summary.seqs(fasta=final.fasta);\" -q\n or ./mothur -q \"#summary.seqs(fasta=final.fasta);\"\n"); return 0; }
@@ -75,6 +75,19 @@ int main(int argc, char *argv[]){
             }
 		}
         
+        map<string, string> environmentalVariables;
+        for (char **env = envp; *env != 0; env++){
+            string thisEvn = *env;
+            string key, value; value = thisEvn;
+            util.splitAtEquals(key, value);
+            
+            map<string, string>::iterator it = environmentalVariables.find(key);
+            if (it == environmentalVariables.end())     { environmentalVariables[key] = value;  }
+            else                                        { it->second = value;                   }
+            //m->mothurOut("[DEBUG]: Setting environment variable " + key + " to " + value + "\n"); 
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: Setting environment variable " + key + " to " + value + "\n"); }
+        }
+        
 		Engine* mothur = NULL;
 		bool bail = false;
 		string input;
@@ -83,7 +96,7 @@ int main(int argc, char *argv[]){
 			input = argv[1];
 			if (input[0] == '#') {
 				m->appendLogBuffer("Script Mode\n\n");
-				mothur = new ScriptEngine(argv[0], argv[1]);
+				mothur = new ScriptEngine(argv[0], argv[1], environmentalVariables);
 			}else if ((input == "--version") || (input == "-v")) {
 				cout << (OS + "\nMothur version=" + mothurVersion + "\nRelease Date=" + releaseDate + "\n\n"); return 0;
             }else if ((input == "--help") || (input == "-h")) {
@@ -94,14 +107,14 @@ int main(int argc, char *argv[]){
                 *temp = '\0'; strncat(temp, "#help();quit();", 15);
                 
                 argv[1] = temp;
-                mothur = new ScriptEngine(argv[0], argv[1]);
+                mothur = new ScriptEngine(argv[0], argv[1], environmentalVariables);
 			}else{
 				m->appendLogBuffer("Batch Mode\n\n");
-                mothur = new BatchEngine(argv[0], argv[1]);
+                mothur = new BatchEngine(argv[0], argv[1], environmentalVariables);
 			}
 		}else{
 			m->appendLogBuffer("Interactive Mode\n\n");
-            mothur = new InteractEngine(argv[0]);
+            mothur = new InteractEngine(argv[0], environmentalVariables);
 		}
 		
 		while(!bail)	{   bail = mothur->getInput();	}

@@ -10,7 +10,7 @@
 
 /***********************************************************************/
 
-InteractEngine::InteractEngine(string tpath) : Engine(tpath) {
+InteractEngine::InteractEngine(string tpath, map<string, string> ev) : Engine(tpath) {
     
     if (m->getLogFileName() == "") {
         time_t ltime = time(NULL); /* calendar time */
@@ -20,6 +20,7 @@ InteractEngine::InteractEngine(string tpath) : Engine(tpath) {
         m->setLogFileName(logFileName, false);
         m->mothurOut("\n");
     }
+    environmentalVariables = ev;
 }
 
 /***********************************************************************/
@@ -81,7 +82,7 @@ bool InteractEngine::getInput(){
 /***********************************************************************/
 string InteractEngine::getCommand()  {
     try {
-    
+        string returnCommand = "";
         #if defined NON_WINDOWS
             #ifdef USE_READLINE
                 char* nextCommand = NULL;
@@ -93,30 +94,45 @@ string InteractEngine::getCommand()  {
                 }
                 
                 m->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
-                string returnCommand = nextCommand;
+                returnCommand = nextCommand;
                 free(nextCommand);
-                return returnCommand;
-            #else
-                string nextCommand = "";
-                m->mothurOut("\nmothur > ");
-                getline(cin, nextCommand);
-                m->mothurOut("\n");
-                m->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
                 
-                return nextCommand;
+            #else
+                m->mothurOut("\nmothur > ");
+                getline(cin, returnCommand);
+                m->mothurOut("\n");
+                m->mothurOutJustToLog("\nmothur > " + toString(returnCommand) + "\n");
             #endif
         #else
-                string nextCommand = "";
-                
                 m->mothurOut("\nmothur > ");
-                getline(cin, nextCommand);
+                getline(cin, returnCommand);
                 m->mothurOut("\n");
-                m->mothurOutJustToLog(toString(nextCommand) + "\n");
-                
-                return nextCommand;
+                m->mothurOutJustToLog(toString(returnCommand) + "\n");
         #endif
     
-                        
+        string type = findType(returnCommand);
+        
+        if (type == "environment") {
+            //set environmental variables
+            string key, value; value = returnCommand;
+            util.splitAtEquals(key, value);
+            
+            map<string, string>::iterator it = environmentalVariables.find(key);
+            if (it == environmentalVariables.end())     { environmentalVariables[key] = value;  }
+            else                                        { it->second = value;                   }
+            
+            m->mothurOut("Setting environment variable " + key + " to " + value + "\n");
+            
+            returnCommand = getCommand();
+            
+        }else { //assume command, look for environmental variables to replace
+            
+            int evPos = returnCommand.find_first_of('$');
+            if (evPos == string::npos) { }//no '$' , nothing to do
+            else { replaceVariables(returnCommand); }
+        }
+             
+        return returnCommand;
     }
     catch(exception& e) {
         m->errorOut(e, "InteractEngine", "getCommand");

@@ -9,10 +9,11 @@
 #include "scriptengine.hpp"
 
 /***********************************************************************/
-ScriptEngine::ScriptEngine(string tpath, string commandString) : Engine(tpath){
+ScriptEngine::ScriptEngine(string tpath, string commandString, map<string, string> ev) : Engine(tpath){
     try {
         //remove quotes
         listOfCommands = commandString.substr(1, (commandString.length()-1));
+        environmentalVariables = ev;
     }
     catch(exception& e) {
         m->errorOut(e, "ScriptEngine", "ScriptEngine");
@@ -118,6 +119,27 @@ string ScriptEngine::getNextCommand(string& commandString) {
             }
         }
         
+        string type = findType(nextcommand);
+        
+        if (type == "environment") {
+            //set environmental variables
+            string key, value; value = nextcommand;
+            util.splitAtEquals(key, value);
+            
+            map<string, string>::iterator it = environmentalVariables.find(key);
+            if (it == environmentalVariables.end())     { environmentalVariables[key] = value;  }
+            else                                        { it->second = value;                   }
+            
+            m->mothurOut("Setting environment variable " + key + " to " + value + "\n");
+            
+            nextcommand = getNextCommand(commandString);
+            
+        }else { //assume command, look for environmental variables to replace
+            
+            int evPos = nextcommand.find_first_of('$');
+            if (evPos == string::npos) { }//no '$' , nothing to do
+            else { replaceVariables(nextcommand); }
+        }
         return nextcommand;
     }
     catch(exception& e) {

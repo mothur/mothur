@@ -13,7 +13,7 @@
 
 class ScriptEngine : public Engine {
 public:
-    ScriptEngine(string, string);
+    ScriptEngine(string, string, map<string, string>);
     ~ScriptEngine();
     virtual bool getInput();
     bool openedBatch;

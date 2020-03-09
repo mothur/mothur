@@ -14,7 +14,6 @@
 class BatchEngine : public Engine {
 public:
     
-    BatchEngine(string, string);
     BatchEngine(string, string, map<string, string>);
     ~BatchEngine();
     
@@ -25,12 +24,11 @@ private:
     ifstream inputBatchFile;
     string getNextCommand(ifstream&);
     string findType(string);
-    void replaceVariables(string&);
     string batchFileName;
     bool openedBatch;
     time_t bstart;
     int numBatches;
-    map<string, string> environmentalVariables;
+    
 
 };
 

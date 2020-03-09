@@ -8,25 +8,6 @@
 
 #include "batchengine.hpp"
 
-/***********************************************************************/
-//This function opens the batchfile to be used by BatchEngine::getInput.
-BatchEngine::BatchEngine(string tpath, string batchFile) : Engine(tpath) {
-    try {
-        openedBatch = util.openInputFile(batchFile, inputBatchFile, "no error");
-        if (!openedBatch) {
-            if (util.checkLocations(batchFile, current->getLocations())) { openedBatch = util.openInputFile(batchFile, inputBatchFile); }
-            else {  m->mothurOut("[ERROR]: unable to open " + batchFile + " batch file, please correct.\n");  }
-        }
-        
-        batchFileName = batchFile;
-        bstart = time(NULL);
-        numBatches = 0;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BatchEngine", "BatchEngine");
-        exit(1);
-    }
-}
 
 /***********************************************************************/
 //This function opens the batchfile to be used by BatchEngine::getInput.
@@ -40,6 +21,7 @@ BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev)
         
         batchFileName = batchFile;
         environmentalVariables = ev; //inherit environmental variables from nested batch files
+        
         bstart = time(NULL);
         numBatches = 0;
     }
@@ -196,21 +178,6 @@ string BatchEngine::findType(string nextCommand) {
         exit(1);
     }
 }
+
 /***********************************************************************/
-void BatchEngine::replaceVariables(string& nextCommand) {
-    try {
-        
-        for (map<string, string>::iterator it = environmentalVariables.begin(); it != environmentalVariables.end(); it++) {
-            int pos = nextCommand.find(it->first);
-            while (pos != string::npos) { //allow for multiple uses of a environmental variable in a single command
-                nextCommand.replace(pos-1,it->first.length()+1,it->second); //-1 to grab $char
-                pos = nextCommand.find(it->first);
-            }
-        }
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BatchEngine", "replaceVariables");
-        exit(1);
-    }
-}
-/***********************************************************************/
+

@@ -13,7 +13,7 @@
 
 class InteractEngine : public Engine {
 public:
-    InteractEngine(string);
+    InteractEngine(string, map<string, string>);
     ~InteractEngine();
     virtual bool getInput();
     
