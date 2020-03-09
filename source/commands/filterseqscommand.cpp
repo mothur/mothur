@@ -258,7 +258,7 @@ int FilterSeqsCommand::execute() {
 				
 		////////////run filter/////////////////
 		
-		m->mothurOut("Running Filter... "); m->mothurOutEndLine();
+		m->mothurOut("Running Filter...\n"); 
 		
 		filterSequences();
 		

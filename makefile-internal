@@ -4,7 +4,7 @@ USEBOOST ?= yes
 USEHDF5 ?= yes
 USEGSL ?= yes
 LOGFILE_NAME ?= yes
-VERSION = "\"1.43.0\""
+VERSION = "\"1.44.0\""
 
 # Optimize to level 3:
     CXXFLAGS += -O3 -std=c++11
@@ -113,17 +113,9 @@ endif
     OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
-mothur : $(OBJECTS) uchime
+mothur : $(OBJECTS)
     $(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
     strip mothur
-
-
-uchime:
-    cd source/uchime_src && ./mk && mv uchime ../../ && cd ..
-
-
-install : mothur
-
 
 %.o : %.c %.h
     $(COMPILE.c) $(OUTPUT_OPTION) $<
@@ -133,7 +125,5 @@ install : mothur
     $(COMPILE.cpp) $(OUTPUT_OPTION) $<
 
 
-
 clean :
     @rm -f $(OBJECTS)
-    @rm -f uchime
