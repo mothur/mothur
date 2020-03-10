@@ -84,7 +84,7 @@ int main(int argc, char *argv[], char *envp[]){
             map<string, string>::iterator it = environmentalVariables.find(key);
             if (it == environmentalVariables.end())     { environmentalVariables[key] = value;  }
             else                                        { it->second = value;                   }
-            m->mothurOut("[DEBUG]: Setting environment variable " + key + " to " + value + "\n"); 
+            //m->mothurOut("[DEBUG]: Setting environment variable " + key + " to " + value + "\n"); 
             if (m->getDebug()) { m->mothurOut("[DEBUG]: Setting environment variable " + key + " to " + value + "\n"); }
         }
         
