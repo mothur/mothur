@@ -291,6 +291,48 @@ void CurrentFile::setBlastPath(string pathname)  {
     }
 }
 /*********************************************************************************************/
+void CurrentFile::setHomePath(string pathname)  {
+    try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
+        if (pathname != "") {
+            //add / to name if needed
+            string lastChar = pathname.substr(pathname.length()-1);
+            if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+        }
+        homePath = util.getFullPathName(pathname);
+        m->setHomePath(homePath);
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CurrentFile", "setHomePath");
+        exit(1);
+    }
+}
+/*********************************************************************************************/
+void CurrentFile::setPaths(vector<string> pathVariables)  {
+    try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
+        for (int i = 0; i < pathVariables.size(); i++) {
+            string pathname = pathVariables[i];
+            if (pathname != "") {
+                //add / to name if needed
+                string lastChar = pathname.substr(pathname.length()-1);
+                if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+            }
+            pathVariables[i] = util.getFullPathName(pathname);
+        }
+        
+        paths = pathVariables;
+        m->setPaths(paths);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CurrentFile", "setPaths");
+        exit(1);
+    }
+}
+/*********************************************************************************************/
 void CurrentFile::setToolsPath(string pathname)  {
     try {
         lock_guard<std::mutex> guard(currentProtector);

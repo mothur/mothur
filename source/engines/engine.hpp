@@ -85,6 +85,42 @@ public:
         return type;
     }
     
+    virtual void setEnvironmentVariables(map<string, string> ev) {
+        environmentalVariables = ev;
+        
+        //set HOME path is present in environment variables
+        string homeEnvironmentTag = "HOMEPATH";
+        string homeEnvironmentValue = "";
+        #if defined NON_WINDOWS
+             homeEnvironmentTag = "HOME";
+        #endif
+        
+        map<string, string>::iterator it = environmentalVariables.find(homeEnvironmentTag);
+        if (it != environmentalVariables.end()) { homeEnvironmentValue = it->second; }
+        
+        //parse PATH to set search locations for mothur tools
+        //set HOME path is present in environment variables
+        string pathEnvironmentTag = "PATH";
+        string pathEnvironmentValue = "";
+        char delim = ';';
+        #if defined NON_WINDOWS
+             delim = ':';
+        #endif
+        
+        it = environmentalVariables.find(pathEnvironmentTag);
+        if (it != environmentalVariables.end()) { pathEnvironmentValue = it->second; }
+
+        vector<string> pathDirs;
+        util.splitAtChar(pathEnvironmentValue, pathDirs, delim);
+
+        if (m->getDebug()) {
+            m->mothurOut("[DEBUG]: dir's in path:\n");
+            for (int i = 0; i < pathDirs.size(); i++) { m->mothurOut("[DEBUG]: " + pathDirs[i] + "\n"); }
+        }
+        
+        current->setPaths(pathDirs);
+        current->setHomePath(homeEnvironmentValue);
+    }
     
 protected:
 	vector<string> options;

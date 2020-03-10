@@ -13,7 +13,7 @@ ScriptEngine::ScriptEngine(string tpath, string commandString, map<string, strin
     try {
         //remove quotes
         listOfCommands = commandString.substr(1, (commandString.length()-1));
-        environmentalVariables = ev;
+        setEnvironmentVariables(ev);
     }
     catch(exception& e) {
         m->errorOut(e, "ScriptEngine", "ScriptEngine");

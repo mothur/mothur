@@ -20,7 +20,7 @@ InteractEngine::InteractEngine(string tpath, map<string, string> ev) : Engine(tp
         m->setLogFileName(logFileName, false);
         m->mothurOut("\n");
     }
-    environmentalVariables = ev;
+    setEnvironmentVariables(ev); 
 }
 
 /***********************************************************************/

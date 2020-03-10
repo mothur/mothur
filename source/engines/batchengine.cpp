@@ -20,7 +20,7 @@ BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev)
         }
         
         batchFileName = batchFile;
-        environmentalVariables = ev; //inherit environmental variables from nested batch files
+        setEnvironmentVariables(ev); //inherit environmental variables from nested batch files
         
         bstart = time(NULL);
         numBatches = 0;

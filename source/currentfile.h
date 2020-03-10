@@ -100,6 +100,10 @@ class CurrentFile {
         void setBlastPath(string);
         string getToolsPath() { lock_guard<std::mutex> guard(currentProtector); return toolsPath; }
         void setToolsPath(string);
+        string getHomePath() { lock_guard<std::mutex> guard(currentProtector); return homePath; }
+        void setHomePath(string);
+        vector<string> getPaths() { lock_guard<std::mutex> guard(currentProtector); return paths; } //environment variable 'PATH' values
+        void setPaths(vector<string>);
         string getOutputDir() { lock_guard<std::mutex> guard(currentProtector); return outputDir; }
         void setOutputDir(string f) { lock_guard<std::mutex> guard(currentProtector); outputDir = util.getFullPathName(f); }
         string getInputDir() { lock_guard<std::mutex> guard(currentProtector); return inputDir; }
@@ -128,7 +132,9 @@ class CurrentFile {
 	private:
 		MothurOut* m;
         Utils util;
-        string logFileName, mothurProgramPath;
+        
+        vector<string> paths; //paths stored in PATH environment variables
+        string logFileName, mothurProgramPath, homePath;
         string defaultPath, outputDir, blastPath, inputDir;
         string releaseDate, version;
     

@@ -48,6 +48,10 @@ class MothurOut {
         void resetCommandErrors()                       { numCommandErrors = 0; numCommandWarnings = 0; silenceWarnings = false;}
         string getLogFileName()                         { return logFileName;                           }
 		void setLogFileName(string f, bool append);
+        void setHomePath(string);
+        string getHomePath()  { return homePath; }
+        void setPaths(vector<string>); //environment variable 'PATH' values
+        vector<string> getPaths() { return paths; }
     
 		void mothurOut(string); //writes to cout and the logfile
 		void mothurOutEndLine(); //writes to cout and the logfile
@@ -85,6 +89,7 @@ class MothurOut {
             maxCommandErrors = 10; maxCommandWarnings = 10;
             logFileName = "";
             buffer = "";
+            homePath = "";
             seed = std::chrono::system_clock::now().time_since_epoch().count();
 		}
 		~MothurOut();
@@ -92,7 +97,8 @@ class MothurOut {
 		ofstream out;
         unsigned seed;
         int numErrors, numWarnings, numCommandErrors, numCommandWarnings, maxCommandErrors, maxCommandWarnings;
-        string logFileName, buffer;
+        string logFileName, buffer, homePath;
+        vector<string> paths;
         bool changedSeqNames, silenceLog, silenceWarnings, control_pressed, executing, debug, quietMode;
 };
 /***********************************************/

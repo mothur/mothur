@@ -276,6 +276,7 @@ private:
     bool modifyNames;
     string homePath, currentWorkingDirectory;
     mt19937_64 mersenne_twister_engine;
+    vector<string> paths; //paths stored in environment varaibale PATH
     
     vector<string> readTreeString(ifstream& filehandle);
 };

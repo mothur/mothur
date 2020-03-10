@@ -346,6 +346,40 @@ void MothurOut::errorOut(exception& e, string object, string function) {
         }
     }
 }
+/*********************************************************************************************/
+void MothurOut::setHomePath(string pathname)  {
+    try {
+        if (pathname != "") {
+            //add / to name if needed
+            string lastChar = pathname.substr(pathname.length()-1);
+            if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+        }
+        homePath = pathname;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setHomePath");
+        exit(1);
+    }
+}
+/*********************************************************************************************/
+void MothurOut::setPaths(vector<string> pathVariables)  {
+    try {
+        for (int i = 0; i < pathVariables.size(); i++) {
+            string pathname = pathVariables[i];
+            if (pathname != "") {
+                //add / to name if needed
+                string lastChar = pathname.substr(pathname.length()-1);
+                if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+            }
+        }
+        
+        paths = pathVariables;
+    }
+    catch(exception& e) {
+        errorOut(e, "MothurOut", "setPaths");
+        exit(1);
+    }
+}
 /********************************************************************/
 
 

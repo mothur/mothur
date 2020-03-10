@@ -36,7 +36,8 @@ Utils::Utils(){
         m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames();
         long long s = m->getRandomSeed();
         mersenne_twister_engine.seed(s); srand(s);
-        homePath = ""; currentWorkingDirectory = "";
+        homePath = m->getHomePath(); currentWorkingDirectory = "";
+        paths = m->getPaths();
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "mothurRandomShuffle");
@@ -449,21 +450,7 @@ string Utils::getFullPathName(string fileName){
             string cwd = currentWorkingDirectory;
             
             if (path.find("~") != string::npos) { //go to home directory
-                string homeDir = homePath;
-                
-                if (homeDir == "") { //if we haven't found this already
-                    #if defined NON_WINDOWS
-
-                    char *homepath = NULL; homepath = getenv ("HOME");
-                    if ( homepath != NULL) { homeDir = homepath; }
-                    else { homeDir = "";  }
-    
-                    #else
-                    homeDir = getenv ("HOMEPATH");
-                    #endif
-                    homePath = homeDir; //set home directory path
-                }
-                newFileName = homeDir + fileName.substr(fileName.find("~")+1);
+                newFileName = homePath + fileName.substr(fileName.find("~")+1);
                 return newFileName;
             }else { //find path
                 string pattern = ".";  pattern += PATH_SEPARATOR;
@@ -521,44 +508,28 @@ string Utils::getFullPathName(string fileName){
 /********************************************************************/
 string Utils::findProgramPath(string programName){
     try {
-        string pPath = "";
-
         //look in ./
         //is this the programs path?
         string tempIn = ".";
         tempIn += PATH_SEPARATOR;
 
         //if this file exists
+        string pPath = "";
         if (fileExists(tempIn+programName)) { pPath = getFullPathName(tempIn); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } return pPath;   }
-
-        string envPath = getenv("PATH");
-
-        //delimiting path char
-        char delim;
-#if defined NON_WINDOWS
-        delim = ':';
-#else
-        delim = ';';
-#endif
-
-        //break apart path variable by ':'
-        vector<string> dirs;
-        splitAtChar(envPath, dirs, delim);
 
         if (m->getDebug()) { m->mothurOut("[DEBUG]: dir's in path: \n"); }
 
         //get path related to mothur
-        pPath = "";
-        for (int i = 0; i < dirs.size(); i++) {
+        for (int i = 0; i < paths.size(); i++) {
 
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + dirs[i] + "\n"); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + paths[i] + "\n"); }
 
             //to lower so we can find it
             string tempLower = "";
-            for (int j = 0; j < dirs[i].length(); j++) {  tempLower += tolower(dirs[i][j]);  }
+            for (int j = 0; j < paths[i].length(); j++) {  tempLower += tolower(paths[i][j]);  }
 
             //is this mothurs path?
-            if (tempLower.find(programName) != -1) {  pPath = dirs[i]; break;  }
+            if (tempLower.find(programName) != -1) {  pPath = paths[i]; break;  }
         }
 
         if (m->getDebug()) { m->mothurOut("[DEBUG]: programPath = " + pPath + "\n"); }
@@ -570,12 +541,12 @@ string Utils::findProgramPath(string programName){
             //lets find out which one
 
             //get path related to the program
-            for (int i = 0; i < dirs.size(); i++) {
+            for (int i = 0; i < paths.size(); i++) {
 
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: looking in " + dirs[i] + " for " + programName + " \n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: looking in " + paths[i] + " for " + programName + " \n"); }
 
                 //is this the programs path?
-                string tempIn = dirs[i] + PATH_SEPARATOR;
+                string tempIn = paths[i] + PATH_SEPARATOR;
 
                 //if this file exists
                 if (fileExists(tempIn + programName)) { pPath = getFullPathName(tempIn); if (m->getDebug()) { m->mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } break;   }
