@@ -326,6 +326,8 @@ int SplitAbundCommand::splitList() {
             else if (namefile != "") { total = util.scanNames(namefile); }
             float percentage = cutoff;
             cutoff = int(percentage * total);
+            
+            m->mothurOut("\nSetting cutoff to " + toString(cutoff) + "\n");
         }
         
         if (m->getControl_pressed()) { delete list; return 0; }
@@ -543,6 +545,8 @@ int SplitAbundCommand::splitCount() { //countfile
             int totalSeqs = ct.getNumSeqs();
             
             cutoff = int(totalSeqs * percentage);
+            
+            m->mothurOut("\nSetting cutoff to " + toString(cutoff) + "\n");
         }
         
 		vector<string> allNames = ct.getNamesOfSeqs();
@@ -635,6 +639,8 @@ int SplitAbundCommand::splitNames() { //namefile
             int totalSeqs = util.scanNames(namefile);
             
             cutoff = int(totalSeqs * percentage);
+            
+            m->mothurOut("\nSetting cutoff to " + toString(cutoff) + "\n");
         }
 			
 		//open input file
