@@ -156,81 +156,25 @@ GetListCountCommand::GetListCountCommand(string option)  {
 int GetListCountCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-		input = new InputData(listfile, "list", nullVector);
-		list = input->getListVector();
-		string lastLabel = list->getLabel();
-
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
-		
-		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if(allLines == 1 || labels.count(list->getLabel()) == 1){
-			
-				process(list);
-				
-				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
-							
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = list->getLabel();
-				
-				delete list;
-				list = input->getListVector(lastLabel);
-				
-				process(list);
-				
-				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
-
-													
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				
-				//restore real lastlabel to save below
-				list->setLabel(saveLabel);
-			}
-			
-			lastLabel = list->getLabel();			
-			
-			delete list;
-			list = input->getListVector();
-		}
-		
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + ".");  m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (list != NULL) {		delete list;	}
-			list = input->getListVector(lastLabel);
-				
-			process(list);	
-			
-			if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
-			
-			delete list;  
-		}
-		
-		delete input;
-		
+        
+        InputData input(listfile, "list", nullVector);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+               
+        while (list != NULL) {
+                   
+            if (m->getControl_pressed()) { delete list; break; }
+                   
+            process(list); delete list;
+                  
+            list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        
+		if (m->getControl_pressed()) { return 0; }
+        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
