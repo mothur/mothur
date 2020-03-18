@@ -37,10 +37,10 @@ public:
 	
 	
 private:
-	InputData* input;
+	
 	vector<Calculator*> heatCalculators;
 	HeatMapSim* heatmap;
-	OptionParser* parser;
+	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string format, groups, label, calc, sharedfile, phylipfile, columnfile, countfile, namefile, outputDir, inputfile;

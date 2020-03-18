@@ -328,9 +328,8 @@ int HeatMapSimCommand::execute(){
 		
 		heatmap = new HeatMapSim(outputDir, inputfile, fontsize);
 		
-		if (format == "shared") {
-			runCommandShared();
-		}else{	runCommandDist();	}
+		if (format == "shared") { runCommandShared();   }
+		else                    {	runCommandDist();	}
 		
 		delete heatmap;
 		
@@ -351,98 +350,28 @@ int HeatMapSimCommand::execute(){
 int HeatMapSimCommand::runCommandShared() {
 	try {
 		//if the users entered no valid calculators don't execute command
-		if (heatCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine(); return 0; }
+		if (heatCalculators.size() == 0) { m->mothurOut("No valid calculators.\n");  return 0; }
 		
-		input = new InputData(sharedfile, "sharedfile", Groups);
-		SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
-        Groups = lookup->getNamesGroups();
-		string lastLabel = lookup->getLabel();
+        InputData input(sharedfile, "sharedfile", Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+		SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
 			
-		if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0;}
-				
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-        if (m->getControl_pressed()) {  delete input;  delete lookup;   return 0; }
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if (m->getControl_pressed()) { delete input;  delete lookup;  return 0; }
-
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-	
-				m->mothurOut(lookup->getLabel()+"\n"); 
-                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-				vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
-                for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }
-					
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-				
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup->getLabel();
-			
-				delete lookup;
-				lookup = input->getSharedRAbundVectors(lastLabel);				
-
-				m->mothurOut(lookup->getLabel()+"\n"); 
-                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
-                for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }
-					
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup->setLabels(saveLabel);
-			}
-				
-			//prevent memory leak
-			 
-			lastLabel = lookup->getLabel();
-
-			//get next line to process
-			delete lookup;
-			lookup = input->getSharedRAbundVectors();
-
-		}
-		
-			
-		if (m->getControl_pressed()) {  delete input;    return 0; }
-
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		if (m->getControl_pressed()) {  delete input;   return 0; }
-		
-		//run last label if you need to
-		if (needToRun )  {
-            delete lookup;
-            lookup = input->getSharedRAbundVectors(lastLabel);
+		if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command, quitting\n"); return 0;}
+        
+        while (lookup != NULL) {
             
-            m->mothurOut(lookup->getLabel()+"\n"); 
-            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-            vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
-            for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-			for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }
-			delete lookup;
-		}
+            if (m->getControl_pressed()) { delete lookup; break; }
+            
+            vector<string> outfilenames = heatmap->getPic(lookup, heatCalculators, lookup->getNamesGroups()); delete lookup;
+            
+            for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
 		
-		if (m->getControl_pressed()) {  delete input;   return 0; }
-			
-		//reset groups parameter
-		  
-			
-		delete input;  
-	
 		return 0;
 	}
 	catch(exception& e) {
