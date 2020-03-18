@@ -222,16 +222,13 @@ int ConsensusSeqsCommand::execute(){
 		
         long start = time(NULL);
         
-		readFasta();
-		
-		if (m->getControl_pressed()) { return 0; }
+		readFasta(); if (m->getControl_pressed()) { return 0; }
 		
 		if (namefile != "") { readNames(); }
         if (countfile != "") { ct.readTable(countfile, true, false);  }
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-				
 		if (listfile == "") {
 			
 			ofstream outSummary;
@@ -313,96 +310,30 @@ int ConsensusSeqsCommand::execute(){
 		
 		}else {
 			
+            InputData input(listfile, "list", nullVector);
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
             
-			InputData* input = new InputData(listfile, "list", nullVector);
-			ListVector* list = input->getListVector();
-			
-			string lastLabel = list->getLabel();
-			set<string> processedLabels;
-			set<string> userLabels = labels;
-
-			//as long as you are not at the end of the file or done wih the lines you want
-			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				
-				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } delete list; delete input;  return 0;  }
-				
-				if(allLines == 1 || labels.count(list->getLabel()) == 1){			
-					
-					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-					
-					processList(list);
-					
-					processedLabels.insert(list->getLabel());
-					userLabels.erase(list->getLabel());
-				}
-				
-				if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = list->getLabel();
-					
-					delete list; 
-					
-					list = input->getListVector(lastLabel);
-					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-					
-					processList(list);
-					
-					processedLabels.insert(list->getLabel());
-					userLabels.erase(list->getLabel());
-					
-					//restore real lastlabel to save below
-					list->setLabel(saveLabel);
-				}
-				
-				lastLabel = list->getLabel();
-				
-				delete list; list = NULL;
-				
-				//get next line to process
-				list = input->getListVector();				
-			}
-			
-			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } if (list != NULL) { delete list; } delete input; return 0;  }
-			
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
-			}
-			
-			//run last label if you need to
-			if (needToRun )  {
-				if (list != NULL) { delete list; }
-				
-				list = input->getListVector(lastLabel);
-				
-				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-				
-				processList(list);
-				
-				delete list; list = NULL;
-			}
-			
-			if (list != NULL) { delete list; }
-			delete input;
+            ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+                   
+            while (list != NULL) {
+                       
+                if (m->getControl_pressed()) { delete list; break; }
+                       
+                processList(list); delete list;
+                      
+                list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+            }
 		}
 		
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to find the consensus sequences.");
         
-		m->mothurOut("\nOutput File Names: \n"); 
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
+		m->mothurOut("\nOutput File Names:\n");
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	}
 		m->mothurOutEndLine();
 		
-		
 		return 0;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ConsensusSeqsCommand", "execute");
