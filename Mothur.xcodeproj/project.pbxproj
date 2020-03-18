@@ -410,6 +410,8 @@
 		488841651CC6C34900C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
 		488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488841631CC6C34900C5E972 /* renamefilecommand.cpp */; };
 		4889EA221E8962D50054E0BB /* summary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4889EA201E8962D50054E0BB /* summary.cpp */; };
+		488C1DE6241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488C1DE4241AD20D00BDCCB4 /* opticlassifier.cpp */; };
+		488C1DE7241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488C1DE4241AD20D00BDCCB4 /* opticlassifier.cpp */; };
 		48910D431D5243E500F60EDB /* mergecountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D411D5243E500F60EDB /* mergecountcommand.cpp */; };
 		48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D411D5243E500F60EDB /* mergecountcommand.cpp */; };
 		48910D461D58CAD700F60EDB /* opticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D451D58CAD700F60EDB /* opticluster.cpp */; };
@@ -1001,6 +1003,8 @@
 		488841641CC6C34900C5E972 /* renamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renamefilecommand.h; path = source/commands/renamefilecommand.h; sourceTree = SOURCE_ROOT; };
 		4889EA201E8962D50054E0BB /* summary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = summary.cpp; path = source/summary.cpp; sourceTree = SOURCE_ROOT; };
 		4889EA211E8962D50054E0BB /* summary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = summary.hpp; path = source/summary.hpp; sourceTree = SOURCE_ROOT; };
+		488C1DE4241AD20D00BDCCB4 /* opticlassifier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = opticlassifier.cpp; path = source/classifier/opticlassifier.cpp; sourceTree = SOURCE_ROOT; };
+		488C1DE5241AD20D00BDCCB4 /* opticlassifier.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = opticlassifier.hpp; path = source/classifier/opticlassifier.hpp; sourceTree = SOURCE_ROOT; };
 		48910D411D5243E500F60EDB /* mergecountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergecountcommand.cpp; path = source/commands/mergecountcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48910D421D5243E500F60EDB /* mergecountcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergecountcommand.hpp; path = source/commands/mergecountcommand.hpp; sourceTree = SOURCE_ROOT; };
 		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = SOURCE_ROOT; };
@@ -2885,6 +2889,8 @@
 				A721AB6F161C572A009860A1 /* kmertree.cpp */,
 				A7E9B73812D37EC400DA6239 /* knn.h */,
 				A7E9B73712D37EC400DA6239 /* knn.cpp */,
+				488C1DE4241AD20D00BDCCB4 /* opticlassifier.cpp */,
+				488C1DE5241AD20D00BDCCB4 /* opticlassifier.hpp */,
 				A7E9B78D12D37EC400DA6239 /* phylosummary.cpp */,
 				A7E9B78E12D37EC400DA6239 /* phylosummary.h */,
 				A7E9B78F12D37EC400DA6239 /* phylotree.cpp */,
@@ -3359,6 +3365,7 @@
 				481FB63D1AC1B7EA0076CFF3 /* reportfile.cpp in Sources */,
 				481FB5F11AC1B77E0076CFF3 /* phylodiversitycommand.cpp in Sources */,
 				481FB5501AC1B63D0076CFF3 /* mempearson.cpp in Sources */,
+				488C1DE7241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */,
 				481FB5B51AC1B7300076CFF3 /* filterseqscommand.cpp in Sources */,
 				481FB6621AC1B8450076CFF3 /* noalign.cpp in Sources */,
 				481FB5E31AC1B77E0076CFF3 /* mgclustercommand.cpp in Sources */,
@@ -3505,6 +3512,7 @@
 				48910D461D58CAD700F60EDB /* opticluster.cpp in Sources */,
 				A7E9B8A212D37EC400DA6239 /* classifyotucommand.cpp in Sources */,
 				A7E9B8A312D37EC400DA6239 /* classifyseqscommand.cpp in Sources */,
+				488C1DE6241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */,
 				A7E9B8A412D37EC400DA6239 /* clearcut.cpp in Sources */,
 				48ED1E79235E1ACA003E66F7 /* scriptengine.cpp in Sources */,
 				A7E9B8A512D37EC400DA6239 /* clearcutcommand.cpp in Sources */,
@@ -3895,7 +3903,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.43.0\\\"\"",
+					"VERSION=\"\\\"1.44.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"silent\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
 				);
@@ -3945,7 +3953,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.43.0\\\"\"",
+					"VERSION=\"\\\"1.44.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
 				);
@@ -4010,7 +4018,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
-					"VERSION=\"\\\"1.43.0\\\"\"",
+					"VERSION=\"\\\"1.44.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
 				);
@@ -4095,7 +4103,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.43.0\\\"\"",
+					"VERSION=\"\\\"1.44.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
