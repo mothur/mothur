@@ -500,103 +500,34 @@ int CollectSharedCommand::execute(){
 		
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }
-		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}	
-	
-		InputData input(sharedfile, "sharedfile", Groups);
-		SharedOrderVector* order = input.getSharedOrderVector();
-		string lastLabel = order->getLabel();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-        Groups = order->getGroups();
+		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}
         
-		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) { 
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  outputTypes.clear();
-					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					delete order; return 0;
-			}
-
-			if(allLines == 1 || labels.count(order->getLabel()) == 1){
-			
-				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				//create collectors curve
-                util.mothurRandomShuffle(*order);
-				Collect cCurve(order, cDisplays);
-				cCurve.getSharedCurve(freq);
-			
-				processedLabels.insert(order->getLabel());
-				userLabels.erase(order->getLabel());
-			}
-			
-			//you have a label the user want that is smaller than this label and the last label has not already been processed
-			if ((util.anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = order->getLabel();
-				
-				delete order;
-				order = input.getSharedOrderVector(lastLabel);
-                util.mothurRandomShuffle(*order);
-				
-				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				//create collectors curve
-                Collect cCurve(order, cDisplays);
-                cCurve.getSharedCurve(freq);
-				
-				processedLabels.insert(order->getLabel());
-				userLabels.erase(order->getLabel());
-				
-				//restore real lastlabel to save below
-				order->setLabel(saveLabel);
-			}
-			
-			
-			lastLabel = order->getLabel();			
-			
-			//get next line to process
-			delete order;
-			order = input.getSharedOrderVector();
-		}
-		
-		if (m->getControl_pressed()) { 
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}   outputTypes.clear();
-					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					return 0;
-		}
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (order != NULL) {  delete order;  }
-			order = input.getSharedOrderVector(lastLabel);
+        InputData input(sharedfile, "sharedfile", Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedOrderVector* order = util.getNextSharedOrder(input, allLines, userLabels, processedLabels, lastLabel);
+        
+        while (order != NULL) {
+            
+            if (m->getControl_pressed()) { delete order; break; }
+            
             util.mothurRandomShuffle(*order);
-			
-			m->mothurOut(order->getLabel()); m->mothurOutEndLine();
             Collect cCurve(order, cDisplays);
             cCurve.getSharedCurve(freq);
-			
-			if (m->getControl_pressed()) { 
-				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  outputTypes.clear();
-				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-				delete order; 	return 0;
-			}
-
-			delete order;
-		}
-		
-		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
+            delete order;
+            
+            order = util.getNextSharedOrder(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        
+		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+        
+         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); }  return 0; } 
 		
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
-		
 		return 0;
 	}
 	catch(exception& e) {
