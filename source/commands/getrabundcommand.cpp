@@ -230,7 +230,7 @@ int GetRAbundCommand::execute(){
         if (countfile != "") {
             processList(out);
         }else {
-            InputData input(inputfile, format, Groups);
+            InputData input(inputfile, format, nullVector);
             set<string> processedLabels;
             set<string> userLabels = labels;
             string lastLabel = "";
