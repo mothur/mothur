@@ -375,6 +375,18 @@ int NewCommand::execute(){
                  list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
              }
              
+         }else if (format == "rabund") {
+             RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+                    
+             while (rabund != NULL) {
+                        
+                 if (m->getControl_pressed()) { delete rabund; break; }
+                        
+                 //////// myfunction(rabund); - call your function to process list data //////////////////// delete rabund;
+                       
+                 rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+             }
+             
          }
         */
         
