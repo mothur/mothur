@@ -52,6 +52,12 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups
                 }
                 
                 f >> label >> groupN >> num;
+                
+                if (currentLabels.size() != 0) {
+                    if (currentLabels.size() != num) {
+                        m->mothurOut("[ERROR]: your shared file contains " + toString(currentLabels.size()) + " OTU labels, but your numOtus column indicates " + toString(num) + ". Cannot continue, please correct. This can be caused by editing your file incorrectly outside of mothur.\n"); m->setControl_pressed(true);
+                    }
+                }
             }else {
                 //read in first row since you know there is at least 1 group.
                 f >> groupN >> num;
@@ -101,7 +107,9 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups
         util.gobble(f);
 
         
-        if (!(f.eof())) { f >> nextLabel; }
+        if (!(f.eof())) {
+            f >> nextLabel;
+        }
         
         //read the rest of the groups info in
         while ((nextLabel == holdLabel) && (f.eof() != true)) {
