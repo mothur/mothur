@@ -5247,7 +5247,155 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
         return list;
         
     }catch(exception& e) {
-            m->errorOut(e, "Utils", "getNextShared");
+            m->errorOut(e, "Utils", "getNextList");
+            exit(1);
+    }
+}
+/***********************************************************************/
+RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        RAbundVector* rabund = input.getRAbundVector();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete rabund;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = rabund->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(rabund->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(rabund->getLabel()+"\n");
+                
+                processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
+                
+                return rabund;
+            }
+            
+            if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = rabund->getLabel();
+                
+                delete rabund;
+                rabund = input.getRAbundVector(lastLabel);
+                m->mothurOut(rabund->getLabel()+"\n");
+                
+                processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return rabund;
+            }
+            
+            lastLabel = rabund->getLabel();
+            //prevent memory leak
+            delete rabund;
+            
+            if (m->getControl_pressed()) {  delete rabund;  return NULL; }
+            
+            //get next line to process
+            rabund = input.getRAbundVector();
+        }
+        
+        if (m->getControl_pressed()) { delete rabund;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete rabund;
+            rabund = input.getRAbundVector(lastLabel);
+            m->mothurOut(rabund->getLabel()+"\n");
+            processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
+            return rabund;
+        }
+        
+        return rabund;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextRAbund");
+            exit(1);
+    }
+}
+/***********************************************************************/
+SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        RAbundVector* sabund = input.getSAbundVector();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete sabund;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = sabund->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(sabund->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(sabund->getLabel()+"\n");
+                
+                processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+                
+                return sabund;
+            }
+            
+            if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = sabund->getLabel();
+                
+                delete sabund;
+                sabund = input.getSAbundVector(lastLabel);
+                m->mothurOut(sabund->getLabel()+"\n");
+                
+                processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return sabund;
+            }
+            
+            lastLabel = sabund->getLabel();
+            //prevent memory leak
+            delete sabund;
+            
+            if (m->getControl_pressed()) {  delete sabund;  return NULL; }
+            
+            //get next line to process
+            sabund = input.getSAbundVector();
+        }
+        
+        if (m->getControl_pressed()) { delete sabund;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete sabund;
+            sabund = input.getSAbundVector(lastLabel);
+            m->mothurOut(sabund->getLabel()+"\n");
+            processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+            return sabund;
+        }
+        
+        return sabund;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextSAbund");
             exit(1);
     }
 }
