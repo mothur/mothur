@@ -10,7 +10,7 @@
 #include "heatmap.h"
 
 //**********************************************************************************************************************
-HeatMap::HeatMap(string sort, string scale, int num, int fsize, string dir, string i, vector<string> cl){
+HeatMap::HeatMap(string sort, string scale, int num, int fsize, string dir, string i){
 	try {
 		m = MothurOut::getInstance();
 		sorted = sort;
@@ -19,7 +19,6 @@ HeatMap::HeatMap(string sort, string scale, int num, int fsize, string dir, stri
 		numOTU = num;
 		fontSize = fsize;
 		inputfile = i;
-        currentLabels = cl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HeatMap", "HeatMap");
@@ -109,9 +108,11 @@ string HeatMap::getPic(RAbundVector* rabund) {
 
 //**********************************************************************************************************************
 
-string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups) {
+string HeatMap::getPic(SharedRAbundVectors*& data) {
 	try {
-	
+        vector<SharedRAbundVector*> lookup = data->getSharedRAbundVectors();
+        vector<string> groups = data->getNamesGroups();
+        
 		int numBinsToDisplay = lookup[0]->getNumBins();
 		
 		if (numOTU != 0) { //user want to display a portion of the otus
@@ -119,8 +120,8 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 		}
 		
 		//sort lookup so shared bins are on top
-        vector<string> sortedLabels = currentLabels;
-		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
+        vector<string> sortedLabels = data->getOTUNames();
+		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup, sortedLabels);  }
 		
 		vector<vector<string> > scaleRelAbund;
 		vector<float> maxRelAbund(lookup.size(), 0.0);
@@ -139,7 +140,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 		for(int i=0;i<lookup.size();i++){
 			scaleRelAbund[i].assign(numBinsToDisplay, "");
 			for(int j=0;j<numBinsToDisplay;j++){
-				if (m->getControl_pressed()) {  return "control"; }
+				if (m->getControl_pressed()) {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return "control"; }
 				float relAbund = lookup[i]->get(j) / (float)lookup[i]->getNumSeqs();
 				
 				if (lookup[i]->get(j) != 0) { //don't want log value of 0.
@@ -209,6 +210,8 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 		outsvg << "</g>\n</svg>\n";
 		outsvg.close();
 		
+        for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+        
 		return filenamesvg;
 
 	}
@@ -217,9 +220,8 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup, vector<string> groups
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
-vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup){
+vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup, vector<string> currentLabels){
 	try {
         vector<string> sortedLabels; sortedLabels.resize(currentLabels.size(), "");
 		vector<SharedRAbundVector*> looktemp;
@@ -412,9 +414,12 @@ void HeatMap::printLegend(int y, float maxbin) {
 }
 //**********************************************************************************************************************
 
-string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> groups) {
+string HeatMap::getPic(SharedRAbundFloatVectors*& data) {
 	try {
-	
+        
+        vector<SharedRAbundFloatVector*> lookup = data->getSharedRAbundFloatVectors();
+        vector<string> groups = data->getNamesGroups();
+        
 		int numBinsToDisplay = lookup[0]->getNumBins();
 		
 		if (numOTU != 0) { //user want to display a portion of the otus
@@ -422,8 +427,8 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 		}
 		
 		//sort lookup so shared bins are on top
-        vector<string> sortedLabels = currentLabels;
-		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
+        vector<string> sortedLabels = data->getOTUNames();
+		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup, sortedLabels);  }
 		
 		vector<vector<string> > scaleRelAbund;
 		vector<float> maxRelAbund(lookup.size(), 0.0);		
@@ -442,7 +447,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 		for(int i=0;i<lookup.size();i++){
 			scaleRelAbund[i].assign(numBinsToDisplay, "");
 			for(int j=0;j<numBinsToDisplay;j++){
-				if (m->getControl_pressed()) {  return "control"; }
+				if (m->getControl_pressed()) {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return "control"; }
 				float relAbund = lookup[i]->get(j);
 				
 				if (!util.isEqual(relAbund, 0)) { //don't want log value of 0.
@@ -511,6 +516,8 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 		
 		outsvg << "</g>\n</svg>\n";
 		outsvg.close();
+        
+        for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 		
 		return filenamesvg;
 
@@ -521,7 +528,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup, vector<string> g
 	}
 }
 //**********************************************************************************************************************
-vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*> lookup){
+vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*> lookup, vector<string> currentLabels){
 	try {
 				
 		vector<SharedRAbundFloatVector*> looktemp;

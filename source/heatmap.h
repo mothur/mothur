@@ -9,9 +9,9 @@
  *
  */
 
-#include "sharedrabundvector.hpp"
+#include "sharedrabundvectors.hpp"
 #include "rabundvector.hpp"
-#include "sharedrabundfloatvector.hpp"
+#include "sharedrabundfloatvectors.hpp"
 #include "utils.hpp"
 
 /***********************************************************************/
@@ -42,16 +42,16 @@ inline bool comparebinFloatCounts(binCountFloat left, binCountFloat right){
 class HeatMap {
 	
 	public:
-		HeatMap(string, string, int, int, string, string, vector<string>);
+		HeatMap(string, string, int, int, string, string);
 		~HeatMap(){};
 	
 		string getPic(RAbundVector*);
-		string getPic(vector<SharedRAbundVector*>, vector<string>);
-		string getPic(vector<SharedRAbundFloatVector*>, vector<string>);
+		string getPic(SharedRAbundVectors*&);
+		string getPic(SharedRAbundFloatVectors*&);
 
 	private:
-		vector<string> sortSharedVectors(vector<SharedRAbundVector*>);
-		vector<string> sortSharedVectors(vector<SharedRAbundFloatVector*>);
+		vector<string> sortSharedVectors(vector<SharedRAbundVector*>, vector<string>);
+		vector<string> sortSharedVectors(vector<SharedRAbundFloatVector*>, vector<string>);
 		int sortRabund(RAbundVector*);
 		void printLegend(int, float);
 
@@ -60,7 +60,6 @@ class HeatMap {
 		MothurOut* m;
         Utils util;
 		int numOTU, fontSize;
-        vector<string> currentLabels;
 		
 		map<int, int> orderTopGroup(vector<SharedRAbundVector*>);
 		map<int, int> orderTopOtu(vector<SharedRAbundVector*>);
