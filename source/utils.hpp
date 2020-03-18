@@ -241,10 +241,12 @@ public:
     //file reading
     SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     SharedRAbundFloatVectors* getNextRelabund(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
-    ListVector* getNextList(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     SharedCLRVectors* getNextCLR(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+    SharedOrderVector* getNextSharedOrder(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+    ListVector* getNextList(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     RAbundVector* getNextRAbund(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     SAbundVector* getNextSAbund(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+    OrderVector* getNextOrder(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
 
     
     void splitAtComma(string&, string&);
