@@ -47,7 +47,6 @@ public:
 	
 	
 private:
-	OrderVector* order;
 	vector<Display*> cDisplays;
 	int abund, size, alpha;
 	float freq;
@@ -61,6 +60,7 @@ private:
     
 	
 	vector<string> parseSharedFile(string);
+    int fillCDisplays(map<string, string>);
 
 
 };
