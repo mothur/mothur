@@ -344,144 +344,46 @@ int MakeBiomCommand::execute(){
         
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        SharedRAbundVectors* lookup = NULL;
-        SharedRAbundFloatVectors* lookupRel = NULL;
-        string lastLabel;
+        SharedRAbundVectors* lookup = NULL; SharedRAbundFloatVectors* lookupRel = NULL;
         
 		InputData input(inputFileName, fileFormat, Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
         if (fileFormat == "sharedfile") {
-            lookup = input.getSharedRAbundVectors();
-            Groups = lookup->getNamesGroups();
-            lastLabel = lookup->getLabel();
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             getSampleMetaData(lookup);
         }else                        {
-            lookupRel = input.getSharedRAbundFloatVectors();
-            Groups = lookupRel->getNamesGroups();
-            lastLabel = lookupRel->getLabel();
+            lookupRel = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
             getSampleMetaData(lookupRel);
         }
         
         //if user did not specify a label, then use first one
-        if ((contaxonomyfile != "") && (labels.size() == 0)) {
-            allLines = false;
-            labels.insert(lastLabel);
-        }
-        
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
+        if ((contaxonomyfile != "") && (labels.size() == 0)) { allLines = false; labels.insert(lastLabel); }
         
         if (fileFormat == "sharedfile") {
-            
-            //as long as you are not at the end of the file or done wih the lines you want
-            while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while (lookup != NULL) {
                 
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } delete lookup;  return 0; }
+                if (m->getControl_pressed()) { delete lookup; break; }
                 
-                if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-                    
-                    m->mothurOut(lookup->getLabel()+"\n"); 
-                    getBiom(lookup);
-                    
-                    processedLabels.insert(lookup->getLabel());
-                    userLabels.erase(lookup->getLabel());
-                }
+                getBiom(lookup); delete lookup;
                 
-                if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookup->getLabel();
-                    
-                    delete lookup;
-                    lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()+"\n"); 
-                    
-                    getBiom(lookup);
-                    
-                    processedLabels.insert(lookup->getLabel());
-                    userLabels.erase(lookup->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    lookup->setLabels(saveLabel);
-                }
-                
-                lastLabel = lookup->getLabel();
-                
-                //prevent memory leak and get next set
-                delete lookup;
-                lookup = input.getSharedRAbundVectors();				
+                lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             }
         }else {
-            
-            //as long as you are not at the end of the file or done wih the lines you want
-            while((lookupRel != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-               
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } delete lookupRel; return 0; }
+            while (lookupRel != NULL) {
+                            
+                if (m->getControl_pressed()) { delete lookupRel; break; }
                 
-                if(allLines == 1 || labels.count(lookupRel->getLabel()) == 1){
-                    
-                    m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
-                    getBiom(lookupRel);
-                    
-                    processedLabels.insert(lookupRel->getLabel());
-                    userLabels.erase(lookupRel->getLabel());
-                }
-                
-                if ((util.anyLabelsToProcess(lookupRel->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookupRel->getLabel();
-                    
-                    delete lookupRel;
-                    lookupRel = input.getSharedRAbundFloatVectors(lastLabel);
-                    m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
-                    
-                    getBiom(lookupRel);
-                    
-                    processedLabels.insert(lookupRel->getLabel());
-                    userLabels.erase(lookupRel->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    lookupRel->setLabels(saveLabel);
-                }
-                
-                lastLabel = lookupRel->getLabel();
-                
-                //prevent memory leak and get next set
-                delete lookupRel;
-                lookupRel = input.getSharedRAbundFloatVectors();
+                getBiom(lookupRel); delete lookupRel;
+                            
+                lookupRel = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
             }
         }
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }     
         
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-        
-		//run last label if you need to
-		if (needToRun )  {
-            if (fileFormat == "sharedfile") {
-                delete lookup;
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                
-                m->mothurOut(lookup->getLabel()+"\n"); 
-                getBiom(lookup);
-                
-                delete lookup;
-            }else {
-                delete lookupRel;
-                lookupRel = input.getSharedRAbundFloatVectors(lastLabel);
-                
-                m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
-                getBiom(lookupRel);
-                
-                delete lookupRel;
-            }
-		}
-		
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }     
-		
         //set sabund file as new current sabundfile
         string currentName = "";
 		itTypes = outputTypes.find("biom");
@@ -489,7 +391,6 @@ int MakeBiomCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setBiomFile(currentName); }
 		}
 
-        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
@@ -1340,7 +1241,6 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors*& lookup, map<
     }
     
 }
-
 //**********************************************************************************************************************
 map<string, string> MakeBiomCommand::readGGOtuMap(){
 	try {
