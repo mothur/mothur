@@ -222,7 +222,6 @@ int GetCoreMicroBiomeCommand::execute(){
             string options = "shared=" + sharedfile;
             if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
             
-            //calc dists for fastafile
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: get.relabund(" + options + ")\n");
             Command* relabundCommand = new GetRelAbundCommand(options);
@@ -238,89 +237,25 @@ int GetCoreMicroBiomeCommand::execute(){
         }
         
         InputData input(inputFileName, format, Groups);
-        SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
-        Groups = lookup->getNamesGroups();
-        string lastLabel = lookup->getLabel();
-        
-        if (samples != -1) { 
-            if ((samples < 1) || (samples > lookup->size())) { m->mothurOut(toString(samples) + " is not a valid number for samples. Must be an integer between 1 and the number of samples in your file. Your file contains " + toString(lookup->size()) + " samples, so I will use that.\n"); samples = lookup->size(); }
-        }
-
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
+        string lastLabel = "";
         
-        //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            
-            if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
-            
-            if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-                
-                m->mothurOut(lookup->getLabel()+"\n"); 
-                
-                createTable(lookup);
-                
-                processedLabels.insert(lookup->getLabel());
-                userLabels.erase(lookup->getLabel());
-            }
-            
-            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup->getLabel();
-                
-                delete lookup;
-                lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                m->mothurOut(lookup->getLabel()+"\n"); 
-                
-                createTable(lookup);
-                
-                processedLabels.insert(lookup->getLabel());
-                userLabels.erase(lookup->getLabel());
-                
-                //restore real lastlabel to save below
-                lookup->setLabels(saveLabel);
-            }
-            
-            lastLabel = lookup->getLabel();
-            //prevent memory leak
-            delete lookup;
-            
-            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-            
-            //get next line to process
-            lookup = input.getSharedRAbundFloatVectors();				
+        SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+        
+        if (samples != -1) {
+            if ((samples < 1) || (samples > lookup->size())) { m->mothurOut(toString(samples) + " is not a valid number for samples. Must be an integer between 1 and the number of samples in your file. Your file contains " + toString(lookup->size()) + " samples, so I will use that.\n"); samples = lookup->size(); }
         }
-        
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-            m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                needToRun = true;
-            }else {
-                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-            }
+            
+        while (lookup != NULL) {
+                
+            if (m->getControl_pressed()) { delete lookup; break; }
+                
+            createTable(lookup); delete lookup;
+                
+            lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
         }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            delete lookup;
- 
-            lookup = input.getSharedRAbundFloatVectors(lastLabel);
-            
-            m->mothurOut(lookup->getLabel()+"\n"); 
-            
-            createTable(lookup);
-            
-            delete lookup;
 
-        }
-        
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
         
         //output files created by command
