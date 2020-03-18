@@ -43,9 +43,7 @@ private:
     vector<string> Groups;
     set<string> labels;
     
-    int createList(SharedRAbundFloatVectors*&);
-    int createList(SharedRAbundVectors*&);
-    int createList(ListVector*&);
+    int printList(vector<string> currentLabels, string distance);
     int createList(string);
 
 };

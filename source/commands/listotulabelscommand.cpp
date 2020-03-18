@@ -12,10 +12,10 @@
 //**********************************************************************************************************************
 vector<string> ListOtuLabelsCommand::setParameters(){	
 	try {
-        CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false,true); parameters.push_back(pshared);
-		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false); parameters.push_back(prelabund);
-        CommandParameter plist("list", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false); parameters.push_back(plist);
-        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false); parameters.push_back(pconstaxonomy);
+        CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none","accnos",false,false,true); parameters.push_back(pshared);
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none","accnos",false,false); parameters.push_back(prelabund);
+        CommandParameter plist("list", "InputTypes", "", "", "SharedRel", "SharedRel", "none","accnos",false,false); parameters.push_back(plist);
+        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "SharedRel", "SharedRel", "none","accnos",false,false); parameters.push_back(pconstaxonomy);
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
@@ -35,7 +35,7 @@ vector<string> ListOtuLabelsCommand::setParameters(){
 string ListOtuLabelsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The list.otulabels lists otu labels from shared, relabund, list or constaxonomy file. The results can be used by the get.otulabels to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
+		helpString += "The list.otus lists otu labels from shared, relabund, list or constaxonomy file. The results can be used by the get.otus to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
 		helpString += "The list.otulabels parameters are: shared, relabund, label and groups.\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.\n";
@@ -53,7 +53,7 @@ string ListOtuLabelsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "otulabels") {  pattern = "[filename],[distance],otulabels-[filename],otulabels"; }
+        if (type == "accnos") {  pattern = "[filename],[distance],accnos-[filename],accnos"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -69,7 +69,7 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(){
 		abort = true; calledHelp = true;
 		setParameters();
         vector<string> tempOutNames;
-		outputTypes["otulabels"] = tempOutNames; 
+		outputTypes["accnos"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListOtuLabelsCommand", "ListOtuLabelsCommand");
@@ -143,7 +143,7 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
             }
             
             vector<string> tempOutNames;
-            outputTypes["otulabels"] = tempOutNames; 
+            outputTypes["accnos"] = tempOutNames;
             
  			//check for parameters
             sharedfile = validParameter.validFile(parameters, "shared");
@@ -220,241 +220,58 @@ int ListOtuLabelsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
+        InputData input(inputFileName, format, Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
         if (format == "relabund") {
-            InputData input(inputFileName, format, Groups);
+            SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
             
-            SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
-            Groups = lookup->getNamesGroups();
-            string lastLabel = lookup->getLabel();
-            
-            //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-            set<string> processedLabels;
-            set<string> userLabels = labels;
-            
-            //as long as you are not at the end of the file or done wih the lines you want
-            while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while (lookup != NULL) {
                 
-                if (m->getControl_pressed()) { delete lookup; for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
+                if (m->getControl_pressed()) { delete lookup; break; }
                 
-                if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-                    
-                    m->mothurOut(lookup->getLabel()+"\n"); 
-                    
-                    createList(lookup);
-                    
-                    processedLabels.insert(lookup->getLabel());
-                    userLabels.erase(lookup->getLabel());
-                }
+                printList(lookup->getOTUNames(), lookup->getLabel()); delete lookup;
                 
-                if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookup->getLabel();
-                    
-                    delete lookup;
-                    lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()+"\n"); 
-                    
-                    createList(lookup);
-                    
-                    processedLabels.insert(lookup->getLabel());
-                    userLabels.erase(lookup->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    lookup->setLabels(saveLabel);
-                }
-                
-                lastLabel = lookup->getLabel();
-                //prevent memory leak
-                delete lookup;
-                
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-                
-                //get next line to process
-                lookup = input.getSharedRAbundFloatVectors();				
+                lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
             }
-            
-            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-            
-            //output error messages about any remaining user labels
-            set<string>::iterator it;
-            bool needToRun = false;
-            for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-                m->mothurOut("Your file does not include the label " + *it); 
-                if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + ".\n");
-                    needToRun = true;
-                }else {
-                    m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
-                }
-            }
-            
-            //run last label if you need to
-            if (needToRun )  {
-                delete lookup;
-                lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                
-                m->mothurOut(lookup->getLabel()+"\n"); 
-                
-                createList(lookup);
-                
-                delete lookup;
-            }
+
         }else if (format == "sharedfile") {
-            InputData input(inputFileName, format, Groups);
+        
+            SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             
-            SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-            Groups = lookup->getNamesGroups();
-            string lastLabel = lookup->getLabel();
-            
-            //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-            set<string> processedLabels;
-            set<string> userLabels = labels;
-            
-            //as long as you are not at the end of the file or done wih the lines you want
-            while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while (lookup != NULL) {
                 
-                if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
+                if (m->getControl_pressed()) { delete lookup; break; }
                 
-                if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-                    
-                    m->mothurOut(lookup->getLabel()+"\n"); 
-                    
-                    createList(lookup);
-                    
-                    processedLabels.insert(lookup->getLabel());
-                    userLabels.erase(lookup->getLabel());
-                }
+                printList(lookup->getOTUNames(), lookup->getLabel()); delete lookup;
                 
-                if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookup->getLabel();
-                    
-                    delete lookup;
-                    lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()+"\n"); 
-                    
-                    createList(lookup);
-                    
-                    processedLabels.insert(lookup->getLabel());
-                    userLabels.erase(lookup->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    lookup->setLabels(saveLabel);
-                }
-                
-                lastLabel = lookup->getLabel();
-                //prevent memory leak
-                delete lookup;
-                
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-                
-                //get next line to process
-                lookup = input.getSharedRAbundVectors();				
+                lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             }
             
-            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-            
-            //output error messages about any remaining user labels
-            set<string>::iterator it;
-            bool needToRun = false;
-            for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-                m->mothurOut("Your file does not include the label " + *it); 
-                if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + ".\n");
-                    needToRun = true;
-                }else {
-                    m->mothurOut(". Please refer to " + lastLabel + ".\n");
-                }
-            }
-            
-            //run last label if you need to
-            if (needToRun )  {
-                delete lookup;
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                
-                m->mothurOut(lookup->getLabel()+"\n"); 
-                
-                createList(lookup);
-                
-                delete lookup;
-            }
         }else if (format == "list") {
-            InputData input(inputFileName, format, Groups);
-            ListVector* list = input.getListVector();
-            string lastLabel = list->getLabel();
-            
-            //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-            set<string> processedLabels;
-            set<string> userLabels = labels;
-            
-            //as long as you are not at the end of the file or done wih the lines you want
-            while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-                
-                if (m->getControl_pressed()) { delete list;  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
-                
-                if(allLines == 1 || labels.count(list->getLabel()) == 1){			
-                    
-                    m->mothurOut(list->getLabel()+"\n");
-                    
-                    createList(list);
-                    
-                    processedLabels.insert(list->getLabel());
-                    userLabels.erase(list->getLabel());
-                }
-                
-                if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = list->getLabel();
-                    
-                    delete list; 
-                    list = input.getListVector(lastLabel);
-                    m->mothurOut(list->getLabel()+"\n");
-                    
-                    createList(list);
-                    
-                    processedLabels.insert(list->getLabel());
-                    userLabels.erase(list->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    list->setLabel(saveLabel);
-                }
-                
-                lastLabel = list->getLabel();
-                //prevent memory leak
-                delete list; list = NULL;
-                
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-                
-                //get next line to process
-                list = input.getListVector();				
+            ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+                   
+            while (list != NULL) {
+                       
+                if (m->getControl_pressed()) { delete list; break; }
+                       
+                printList(list->getLabels(), list->getLabel()); delete list;
+                      
+                list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
             }
             
-            if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-            
-            //output error messages about any remaining user labels
-            set<string>::iterator it;
-            bool needToRun = false;
-            for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-                m->mothurOut("Your file does not include the label " + *it); 
-                if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + ".\n");
-                    needToRun = true;
-                }else {
-                    m->mothurOut(". Please refer to " + lastLabel + ".\n");
-                }
-            }
-            
-            //run last label if you need to
-            if (needToRun )  {
-                delete list;  
-                list = input.getListVector(lastLabel);
-                
-                m->mothurOut(list->getLabel() +"\n");
-                
-                createList(list);
-                
-                delete list;
-            }
         }else if (format == "constaxonomy") { createList(constaxonomy); }
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
+        
+        //set relabund file as new current relabundfile
+        string currentName = "";
+        itTypes = outputTypes.find("accnos");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
+        }
         
         //output files created by command
 		m->mothurOut("\nOutput File Names: \n"); 
@@ -469,18 +286,17 @@ int ListOtuLabelsCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int ListOtuLabelsCommand::createList(SharedRAbundVectors*& lookup){
+int ListOtuLabelsCommand::printList(vector<string> currentLabels, string distance){
 	try {
         
         map<string, string> variables; 
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
-        variables["[distance]"] = lookup->getLabel();
-        string outputFileName = getOutputFileName("otulabels",variables);
-        outputNames.push_back(outputFileName);  outputTypes["otulabels"].push_back(outputFileName);
+        variables["[distance]"] = distance;
+        string outputFileName = getOutputFileName("accnos",variables);
+        outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
         
-        vector<string> currentLabels = lookup->getOTUNames();
         for (int i = 0; i < currentLabels.size(); i++) {  out << currentLabels[i] << endl;  }
         
         out.close();
@@ -488,55 +304,7 @@ int ListOtuLabelsCommand::createList(SharedRAbundVectors*& lookup){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "createList");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-int ListOtuLabelsCommand::createList(SharedRAbundFloatVectors*& lookup){
-	try {
-        map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
-        variables["[distance]"] = lookup->getLabel();
-        string outputFileName = getOutputFileName("otulabels",variables);
-        outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-        
-        vector<string> currentLabels = lookup->getOTUNames();
-        for (int i = 0; i < currentLabels.size(); i++) {  out << currentLabels[i] << endl;  }
-        
-        out.close();
-        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "createList");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int ListOtuLabelsCommand::createList(ListVector*& list){
-	try {
-        map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
-        variables["[distance]"] = list->getLabel();
-        string outputFileName = getOutputFileName("otulabels",variables);
-        outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-        
-        vector<string> binLabels = list->getLabels();
-        for (int i = 0; i < binLabels.size(); i++) {  out << binLabels[i] << endl;  }
-
-        out.close();
-        
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "createList");
+		m->errorOut(e, "ListOtuLabelsCommand", "printList");
 		exit(1);
 	}
 }
@@ -547,15 +315,14 @@ int ListOtuLabelsCommand::createList(string constaxFile){
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
-        string outputFileName = getOutputFileName("otulabels",variables);
-        outputNames.push_back(outputFileName);  outputTypes["otulabels"].push_back(outputFileName);
+        string outputFileName = getOutputFileName("accnos",variables);
+        outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
         ofstream out;
         util.openOutputFile(outputFileName, out);
         
         ifstream in;
         util.openInputFile(constaxFile, in);
-        string otuLabel, tax;
-        int numReps;
+        string otuLabel;
         
         //read headers
         string headers = util.getline(in);
@@ -564,9 +331,8 @@ int ListOtuLabelsCommand::createList(string constaxFile){
             
             if (m->getControl_pressed()) { break; }
             
-            in >> otuLabel;	 		util.gobble(in);
-            in >> numReps;          util.gobble(in);
-            tax = util.getline(in);   util.gobble(in);
+            in >> otuLabel;
+            string junk = util.getline(in); util.gobble(in);
             
             out << otuLabel << endl;
         }
@@ -580,6 +346,5 @@ int ListOtuLabelsCommand::createList(string constaxFile){
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
 
