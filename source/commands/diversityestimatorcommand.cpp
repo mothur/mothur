@@ -457,8 +457,11 @@ int EstimatorSingleCommand::processSharedFile() {
     try {
         vector<string> Groups;
         InputData input(inputfile, format, Groups);
-        SharedRAbundVectors* shared = input.getSharedRAbundVectors();
-        string lastLabel = shared->getLabel();
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* shared = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         
         if (outputDir == "") { outputDir += util.hasPath(inputfile); }
         string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));
@@ -514,64 +517,14 @@ int EstimatorSingleCommand::processSharedFile() {
             *out[0] << "label\tgroup\tnum\t" << calc << "\n";
         }
         
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-        
-        while((shared != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while (shared != NULL) {
             
             if (m->getControl_pressed()) { delete shared; break; }
             
-            if(allLines == 1 || labels.count(shared->getLabel()) == 1){
-                
-                m->mothurOut(shared->getLabel() + "\n"); processedLabels.insert(shared->getLabel()); userLabels.erase(shared->getLabel());
-                
-                processShared(shared, out, fileNameRoot);
-            }
-            //you have a label the user want that is smaller than this label and the last label has not already been processed
-            if ((util.anyLabelsToProcess(shared->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = shared->getLabel();
-                
-                delete shared;
-                shared = (input.getSharedRAbundVectors(lastLabel));
-                
-                m->mothurOut(shared->getLabel() + "\n"); processedLabels.insert(shared->getLabel()); userLabels.erase(shared->getLabel());
-                
-                processShared(shared, out, fileNameRoot);
-                
-                //restore real lastlabel to save below
-                shared->setLabel(saveLabel);
-            }
-            
-            lastLabel = shared->getLabel();
-            
-            delete shared;
-            shared = input.getSharedRAbundVectors();
-        }
-        
-        
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0; }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        {  m->mothurOut(". Please refer to " + lastLabel + ".\n");              }
-        }
-        
-        //run last label if you need to
-        if (needToRun)  {
-            if (shared != NULL) {	delete shared;	}
-            shared = input.getSharedRAbundVectors(lastLabel);
-            
-            m->mothurOut(shared->getLabel() + "\n");
-            
             processShared(shared, out, fileNameRoot); delete shared;
+            
+            shared = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         }
-        
         out[0]->close(); delete out[0];
         if (util.inUsersGroups(calc, samplingCalcs)) { out[1]->close(); out[2]->close(); delete out[1]; delete out[2]; }
         
@@ -586,8 +539,11 @@ int EstimatorSingleCommand::processSharedFile() {
 int EstimatorSingleCommand::processSingleSample() {
     try {
         InputData input(inputfile, format, nullVector);
-        SAbundVector* sabund = input.getSAbundVector();
-        string lastLabel = sabund->getLabel();
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SAbundVector* sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
         
         if (outputDir == "") { outputDir += util.hasPath(inputfile); }
         string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));
@@ -643,63 +599,15 @@ int EstimatorSingleCommand::processSingleSample() {
             *out[0] << "label\tnum\t" << calc << "\n";
         }
          
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-        
-        while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            
+        while (sabund != NULL) {
+                   
             if (m->getControl_pressed()) { delete sabund; break; }
-            
-            if(allLines == 1 || labels.count(sabund->getLabel()) == 1){
-                
-                m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
-                
-                processSingle(sabund, sabund->getLabel(), out, fileNameRoot);
-            }
-            //you have a label the user want that is smaller than this label and the last label has not already been processed
-            if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = sabund->getLabel();
-                
-                delete sabund;
-                sabund = (input.getSAbundVector(lastLabel));
-                
-                m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
-                
-                processSingle(sabund, sabund->getLabel(), out, fileNameRoot);
-                
-                //restore real lastlabel to save below
-                sabund->setLabel(saveLabel);
-            }
-            
-            lastLabel = sabund->getLabel();
-            
-            delete sabund;
-            sabund = input.getSAbundVector();
-        }
-        
-        
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0; }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        {  m->mothurOut(". Please refer to " + lastLabel + ".\n");              }
-        }
-        
-        //run last label if you need to
-        if (needToRun)  {
-            if (sabund != NULL) {	delete sabund;	}
-            sabund = input.getSAbundVector(lastLabel);
-            
-            m->mothurOut(sabund->getLabel() + "\n");
-            
+                   
             processSingle(sabund, sabund->getLabel(), out, fileNameRoot); delete sabund;
+                  
+            sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
         }
-
+        
         out[0]->close(); delete out[0];
         if (util.inUsersGroups(calc, samplingCalcs)) { out[1]->close(); out[2]->close(); delete out[1]; delete out[2]; }
         
