@@ -212,193 +212,61 @@ int NormalizeSharedCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		InputData input(inputfile, format, Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
         
 		//you are reading a sharedfile and you do not want to make relabund
 		if ((format == "sharedfile") && (!makeRelabund)) {
-			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-			string lastLabel = lookup->getLabel();
+			SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
-			if (norm != 0) {
-                lookup->removeGroups(norm);
-                Groups = lookup->getNamesGroups();
-			}
-			
-			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-			set<string> processedLabels;
-			set<string> userLabels = labels;
+			if (norm != 0) { lookup->removeGroups(norm); Groups = lookup->getNamesGroups(); }
 			
 			if (method == "totalgroup") {
 				//set norm to smallest group number
 				if (norm == 0) { norm = lookup->getNumSeqsSmallestGroup(); }
 				
-				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
+				m->mothurOut("Normalizing to " + toString(norm) + ".\n");
 			}
 			
 			bool printHeaders = true;
-			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookup;    return 0; }
-				
-				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-					
-					m->mothurOut(lookup->getLabel()+"\n"); 
-					normalize(lookup, printHeaders);
-					
-					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				}
-				
-				if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookup->getLabel();
-					
-					delete lookup;
-					lookup = input.getSharedRAbundVectors(lastLabel);
-					m->mothurOut(lookup->getLabel()+"\n"); 
-					
-					normalize(lookup, printHeaders);
-					
-					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-					
-					//restore real lastlabel to save below
-					lookup->setLabels(saveLabel);
-				}
-				
-				lastLabel = lookup->getLabel();
-				//prevent memory leak
-				delete lookup;
-				
-				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();   return 0; }
-				
-				//get next line to process
-				lookup = input.getSharedRAbundVectors();
-			}
-			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
-			
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
-			}
-			
-			//run last label if you need to
-			if (needToRun )  {
-				delete lookup;
-				lookup = input.getSharedRAbundVectors(lastLabel);
-				m->mothurOut(lookup->getLabel()+"\n"); 
-				normalize(lookup, printHeaders);
-				delete lookup;
-			}
+            while (lookup != NULL) {
+                
+                if (m->getControl_pressed()) { delete lookup; break; }
+                
+                normalize(lookup, printHeaders); delete lookup;
+                
+                lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            }
 			
 		}else{ //relabund values
-			SharedRAbundFloatVectors* lookupFloat = input.getSharedRAbundFloatVectors();
-			string lastLabel = lookupFloat->getLabel();
-			
-			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-			set<string> processedLabels;
-			set<string> userLabels = labels;
+			SharedRAbundFloatVectors* lookupFloat = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
-			if (norm != 0) { 
-                lookupFloat->removeGroups(norm);
-                Groups = lookupFloat->getNamesGroups();
-			}
+			if (norm != 0) {  lookupFloat->removeGroups(norm); Groups = lookupFloat->getNamesGroups(); }
 			
 			//set norm to smallest group number
 			if (method == "totalgroup") {
                 if (norm == 0) {
-                    vector<string> lookupGroups = lookupFloat->getNamesGroups();
-                    norm = lookupFloat->getNumSeqs(lookupGroups[0]);
-                    for (int i = 1; i < lookupGroups.size(); i++) {
-                        if (lookupFloat->getNumSeqs(lookupGroups[i]) < norm) { norm = lookupFloat->getNumSeqs(lookupGroups[i]);  }
-                    }  
+                    norm = lookupFloat->getNumSeqsSmallestGroup();
+                    Groups = lookupFloat->getNamesGroups();
                 }
 				
-				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
+				m->mothurOut("Normalizing to " + toString(norm) + ".\n");
 			}
 			
             bool printHeaders = true;
-			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();  delete lookupFloat;   return 0; }
-				
-				if(allLines == 1 || labels.count(lookupFloat->getLabel()) == 1){
-					
-					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
-					
-					normalize(lookupFloat, printHeaders);
-					
-					processedLabels.insert(lookupFloat->getLabel());
-					userLabels.erase(lookupFloat->getLabel());
-				}
-				
-				if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookupFloat->getLabel();
-					
-					delete lookupFloat;
-					lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
-					
-					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
-		
-					normalize(lookupFloat, printHeaders);
-					
-					processedLabels.insert(lookupFloat->getLabel());
-					userLabels.erase(lookupFloat->getLabel());
-					
-					//restore real lastlabel to save below
-					lookupFloat->setLabels(saveLabel);
-				}
-				
-				lastLabel = lookupFloat->getLabel();
-				//prevent memory leak
-				delete lookupFloat;
-				
-				if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
-				
-				//get next line to process
-				lookupFloat = input.getSharedRAbundFloatVectors();
-			}
-			
-			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear();    return 0; }
-			
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
-			}
-			
-			//run last label if you need to
-			if (needToRun )  {
-				delete lookupFloat;
-				lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
-				
-				m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
-				
-				normalize(lookupFloat, printHeaders);
-				
-				delete lookupFloat;
-			}
-			
-		}
-		//reset groups parameter
-		
-		
+            while (lookupFloat != NULL) {
+                    
+                if (m->getControl_pressed()) { delete lookupFloat; break; }
+
+                normalize(lookupFloat, printHeaders); delete lookupFloat;
+                    
+                lookupFloat = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+        }
+        
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;}
 		
 		m->mothurOut("\nOutput File Names: \n"); 
