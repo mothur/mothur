@@ -219,6 +219,7 @@ int NormalizeSharedCommand::execute(){
 		//you are reading a sharedfile and you do not want to make relabund
 		if ((format == "sharedfile") && (!makeRelabund)) {
 			SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookup->getNamesGroups();
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
 			if (norm != 0) { lookup->removeGroups(norm); Groups = lookup->getNamesGroups(); }
@@ -242,6 +243,7 @@ int NormalizeSharedCommand::execute(){
 			
 		}else{ //relabund values
 			SharedRAbundFloatVectors* lookupFloat = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookupFloat->getNamesGroups();
 			
 			//look for groups whose numseqs is below norm and remove them, warning the user
 			if (norm != 0) {  lookupFloat->removeGroups(norm); Groups = lookupFloat->getNamesGroups(); }
