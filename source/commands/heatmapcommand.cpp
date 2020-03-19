@@ -279,6 +279,7 @@ int HeatMapCommand::execute(){
 		
 		if (format == "sharedfile") {
             SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookup->getNamesGroups();
         
             while (lookup != NULL) {
                 
@@ -305,6 +306,7 @@ int HeatMapCommand::execute(){
             
 		}else if (format == "relabund") {
             SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookup->getNamesGroups();
             
             while (lookup != NULL) {
                 

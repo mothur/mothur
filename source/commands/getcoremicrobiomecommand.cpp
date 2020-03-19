@@ -242,6 +242,7 @@ int GetCoreMicroBiomeCommand::execute(){
         string lastLabel = "";
         
         SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
         
         if (samples != -1) {
             if ((samples < 1) || (samples > lookup->size())) { m->mothurOut(toString(samples) + " is not a valid number for samples. Must be an integer between 1 and the number of samples in your file. Your file contains " + toString(lookup->size()) + " samples, so I will use that.\n"); samples = lookup->size(); }

@@ -353,9 +353,11 @@ int MakeBiomCommand::execute(){
         
         if (fileFormat == "sharedfile") {
             lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookup->getNamesGroups();
             getSampleMetaData(lookup);
         }else                        {
             lookupRel = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookupRel->getNamesGroups();
             getSampleMetaData(lookupRel);
         }
         

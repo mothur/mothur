@@ -358,6 +358,7 @@ int HeatMapSimCommand::runCommandShared() {
         string lastLabel = "";
         
 		SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
 			
 		if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command, quitting\n"); return 0;}
         

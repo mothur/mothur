@@ -462,6 +462,7 @@ int EstimatorSingleCommand::processSharedFile() {
         string lastLabel = "";
         
         SharedRAbundVectors* shared = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = shared->getNamesGroups();
         
         if (outputDir == "") { outputDir += util.hasPath(inputfile); }
         string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));

@@ -248,6 +248,7 @@ int CountSeqsCommand::execute(){
             
             SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             vector<string> currentLabels = lookup->getOTUNames();
+            Groups = lookup->getNamesGroups();
             
             while (lookup != NULL) {
                 

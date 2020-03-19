@@ -168,6 +168,7 @@ int MakeCLRCommand::execute(){
         string lastLabel = "";
         
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
