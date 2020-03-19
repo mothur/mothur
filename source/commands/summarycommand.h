@@ -37,7 +37,6 @@ public:
 	
 private:
 	vector<Calculator*> sumCalculators;	
-	SAbundVector* sabund;
 	int abund, size, iters, subsampleSize, alpha;
 
 	bool abort, allLines, groupMode, subsample, withReplacement;
@@ -50,6 +49,7 @@ private:
 	vector<string> parseSharedFile(string);
 	vector<string> createGroupSummaryFile(int, int, vector<string>&, map<string, string>);
     int process(SAbundVector*&, ofstream&, ofstream&);
+    void fillEstimators();
 
 
 };
