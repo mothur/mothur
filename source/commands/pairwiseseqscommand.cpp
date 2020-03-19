@@ -130,40 +130,6 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
-
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			
-			if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                map<string, string>::iterator it2;
-                string path;
-                it2 = parameters.find("fasta");
-                //user has given a template file
-                if(it2 != parameters.end()){
-                    path = util.hasPath(it2->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it2->second;		}
-                }
-                
-                it2 = parameters.find("oldfasta");
-                //user has given a template file
-                if(it2 != parameters.end()){
-                    path = util.hasPath(it2->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["oldfasta"] = inputDir + it2->second;		}
-                }
-                
-                it2 = parameters.find("column");
-                //user has given a template file
-                if(it2 != parameters.end()){
-                    path = util.hasPath(it2->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["column"] = inputDir + it2->second;		}
-                }
-            }
-
-            
 			fastaFileName = validParameter.validFile(parameters, "fasta");
 			if (fastaFileName == "not found") {
 				fastaFileName = current->getFastaFile();

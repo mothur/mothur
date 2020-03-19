@@ -99,23 +99,10 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
-			
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
 		
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-            }
-            
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
                 fastafile = current->getFastaFile();

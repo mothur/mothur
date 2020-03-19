@@ -146,45 +146,9 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            map<string,string>::iterator it;
+            
             string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("sff");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["sff"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("accnos");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("oligos");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("group");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["group"] = inputDir + it->second;		}
-                }
-            }
+            if (inputDir == "not found"){    inputDir = "";        }
 
             sffFilename = validParameter.validFile(parameters, "sff");
             if (sffFilename == "not found") {

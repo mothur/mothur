@@ -123,27 +123,6 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			outputTypes["coverage"] = tempOutNames;
 			outputTypes["libshuffsummary"] = tempOutNames;
 			
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-			}
-			
 			//check for required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }

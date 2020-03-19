@@ -138,61 +138,6 @@ SRACommand::SRACommand(string option)  {
 			
             vector<string> tempOutNames;
             outputTypes["xml"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-            
-                string path;
-				it = parameters.find("sff");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["sff"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("fastq");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("file");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["file"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("oligos");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("project");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["project"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("mimark");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["mimark"] = inputDir + it->second;		}
-				}
-            }
             
 			//check for parameters
             fastqfile = validParameter.validFile(parameters, "fastq");

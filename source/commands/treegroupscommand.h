@@ -105,7 +105,6 @@ private:
 	
     int createProcesses(SharedRAbundVectors*& thisLookup, CountTable&);
     void printSims(ostream&, vector< vector<double> >&, vector<string>);
-    int makeSimsShared(InputData&, SharedRAbundVectors*&, CountTable& );
     vector< vector<double> > makeSimsDist(SparseDistanceMatrix*, int);
 };
 

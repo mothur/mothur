@@ -106,19 +106,10 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.valid(parameters, "inputdir");	  if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                it = parameters.find("file");
-				//user has given a template file
-				if(it != parameters.end()){
-					string path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["file"] = inputDir + it->second;		}
-				}
-            }
             
+            string inputDir = validParameter.valid(parameters, "inputdir");
+                       if (inputDir == "not found"){    inputDir = "";        }
+			
 			sffFilename = validParameter.valid(parameters, "sff");
 			if (sffFilename == "not found") { sffFilename = "";  }
 			else {

@@ -165,29 +165,6 @@ AlignCommand::AlignCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-
-				//user has given a template file
-                it = parameters.find("reference");
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-			}
-
             templateFileName = validParameter.validFile(parameters, "reference");
             if (templateFileName == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required for the align.seqs command, aborting.\n"); abort = true;
             }else if (templateFileName == "not open") { abort = true; }
@@ -200,7 +177,6 @@ AlignCommand::AlignCommand(string option)  {
             }
             else if (fastafile == "not open") { abort = true; }
             else { current->setFastaFile(fastafile); }
-
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...

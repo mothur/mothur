@@ -132,18 +132,6 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
             outputTypes["parameters"] = tempOutNames;
 			outputTypes["summary"] = tempOutNames;
             
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                string path;
-                it = parameters.find("shared");
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-            }
-                       
             //get shared file, it is required
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }

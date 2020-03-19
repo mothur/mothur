@@ -117,36 +117,6 @@ DistanceCommand::DistanceCommand(string option) {
 			outputTypes["phylip"] = tempOutNames;
 			outputTypes["column"] = tempOutNames;
 		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it2 = parameters.find("fasta");
-				//user has given a template file
-				if(it2 != parameters.end()){ 
-					path = util.hasPath(it2->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it2->second;		}
-				}
-				
-				it2 = parameters.find("oldfasta");
-				//user has given a template file
-				if(it2 != parameters.end()){ 
-					path = util.hasPath(it2->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["oldfasta"] = inputDir + it2->second;		}
-				}
-				
-				it2 = parameters.find("column");
-				//user has given a template file
-				if(it2 != parameters.end()){ 
-					path = util.hasPath(it2->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it2->second;		}
-				}
-			}
-
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				

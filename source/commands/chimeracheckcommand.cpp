@@ -108,34 +108,6 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			
 			vector<string> tempOutNames;
 			outputTypes["chimera"] = tempOutNames;
-		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                string path;
-				it = parameters.find("reference");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("name");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
-                }
-			}
 			
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {

@@ -107,38 +107,6 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
             vector<string> tempOutNames;
 			outputTypes["tsv"] = tempOutNames;
             
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                
-				string path;
-				it = parameters.find("oligos");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("file");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["file"] = inputDir + it->second;		}
-                }
-				
-            }
-            
 			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") {  groupfile = "";  abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }

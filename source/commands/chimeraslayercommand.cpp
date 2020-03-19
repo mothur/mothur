@@ -157,41 +157,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			outputTypes["accnos"] = tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
-		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("count");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("name");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("group");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["group"] = inputDir + it->second;		}
-                }
-            }
 						
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
@@ -236,10 +201,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			if(it != parameters.end()){ 
 				if (it->second == "self") {  templatefile = "self";  }
 				else {
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-					
 					templatefile = validParameter.validFile(parameters, "reference");
 					if (templatefile == "not open") { abort = true; }
 					else if (templatefile == "not found") { //check for saved reference sequences

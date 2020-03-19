@@ -116,28 +116,6 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["filter"] = tempOutNames;
 		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("hard");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["hard"] = inputDir + it->second;		}
-				}
-			}
-			
 			//check for required parameters
 			fasta = validParameter.valid(parameters, "fasta");
 			if (fasta == "not found") { 				

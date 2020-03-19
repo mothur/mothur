@@ -110,27 +110,6 @@ NMDSCommand::NMDSCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("axes");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["axes"] = inputDir + it->second;		}
-				}
-			}
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;

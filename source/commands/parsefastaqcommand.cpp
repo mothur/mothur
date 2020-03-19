@@ -131,44 +131,6 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
             outputTypes["fastq"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
 			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fastq");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("file");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["file"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("oligos");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-			}
-			
 			//check for required parameters
 			fastaQFile = validParameter.validFile(parameters, "fastq");
 			if (fastaQFile == "not found") {	fastaQFile= "";	}

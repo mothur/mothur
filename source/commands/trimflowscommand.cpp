@@ -136,30 +136,6 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
             outputTypes["file"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
 			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("flow");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("oligos");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-				}
-				
-			}
-			
-			
 			//check for required parameters
 			flowFileName = validParameter.validFile(parameters, "flow");
 			if (flowFileName == "not found") { 

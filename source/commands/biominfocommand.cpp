@@ -137,20 +137,6 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
                 if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
             }
             
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("biom");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["biom"] = inputDir + it->second;		}
-                }
-            }
-            
             vector<string> tempOutNames;
             outputTypes["taxonomy"] = tempOutNames;
             outputTypes["shared"] = tempOutNames;

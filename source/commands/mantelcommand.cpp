@@ -103,29 +103,6 @@ MantelCommand::MantelCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["mantel"] = tempOutNames;
 			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip1");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip1"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("phylip2");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip2"] = inputDir + it->second;		}
-				}
-			}
-			
-			
 			//check for required parameters
 			phylipfile1 = validParameter.validFile(parameters, "phylip1");
 			if (phylipfile1 == "not open") { phylipfile1 = ""; abort = true; }

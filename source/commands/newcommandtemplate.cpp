@@ -123,65 +123,6 @@ NewCommand::NewCommand(string option)  {
 				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
 			}
 			
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                
-///////////////////////////////////////////////////////////////
-//////////////// stop leave alone block ///////////////////////
-///////////////////////////////////////////////////////////////
-                
-//edit file types below to include only the types you added as parameters
-                
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("column");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-								
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-            }
-///////////////////////////////////////////////////////////////////////////////
-/////////// example of getting filenames and checking dependancies ////////////
-// the validParameter class will make sure file exists, fill with correct    //
-// and name is current is given ///////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-            
             
             ///variables for examples below that you will most likely want to put in the header for 
             //use by the other class functions.

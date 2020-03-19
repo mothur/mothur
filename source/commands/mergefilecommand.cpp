@@ -104,49 +104,12 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			outputTypes["merge"] = tempOutNames;
             outputTypes["fasta"] = tempOutNames;
 			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                map<string, string>::iterator it;
-                
-                it = parameters.find("taxonomy");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("fasta");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("name");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
-                }
-
-                it = parameters.find("count");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
-                }
-            }
-            
             //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found")	{	outputDir = "";		}
 
+            string inputDir = validParameter.valid(parameters, "inputdir");
+            if (inputDir == "not found"){    inputDir = "";        }
+            
 			string fileList = validParameter.valid(parameters, "input");
             if(fileList == "not found") { appendMode = false; fileList = "";  }
 			else{ 	util.splitAtDash(fileList, fileNames);	}

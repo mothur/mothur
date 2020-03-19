@@ -159,34 +159,6 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             vector<string> tempOutNames;
             outputTypes["summary"] = tempOutNames;
 
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found") {
-                inputDir = "";
-            }
-            else {
-                string path;
-                it = parameters.find("shared");
-                //user has given a shared file
-                if (it != parameters.end()) {
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {
-                        parameters["shared"] = inputDir + it->second;
-                    }
-                }
-
-                it = parameters.find("design");
-                //user has given a design file
-                if (it != parameters.end()) {
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {
-                        parameters["design"] = inputDir + it->second;
-                    }
-                }
-
-            }
             //check for parameters
             //get shared file, it is required
             sharedfile = validParameter.validFile(parameters, "shared");

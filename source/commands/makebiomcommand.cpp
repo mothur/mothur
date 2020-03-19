@@ -202,60 +202,6 @@ MakeBiomCommand::MakeBiomCommand(string option) {
             outputTypes["shared"] = tempOutNames;
             outputTypes["relabund"] = tempOutNames;
 			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("relabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("constaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("reftaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reftaxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("picrust");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["picrust"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("metadata");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["metadata"] = inputDir + it->second;		}
-				}
-			}
-            
             relabundfile = validParameter.validFile(parameters, "relabund");
             if (relabundfile == "not open") { abort = true; }
             else if (relabundfile == "not found") { relabundfile = ""; }
