@@ -431,106 +431,45 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
 
 //**********************************************************************************************************************
 int ClassifySvmSharedCommand::execute() {
-  try {
-
-    if (abort) { if (calledHelp) { return 0; }  return 2;   }
-
-    InputData input(sharedfile, "sharedfile", Groups);
-    SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-    vector<string> currentLabels = lookup->getOTUNames();
-      Groups = lookup->getNamesGroups();
-    //read design file
-    designMap.read(designfile);
-
-    string lastLabel = lookup->getLabel();
-    set<string> processedLabels;
-    set<string> userLabels = labels;
-
-      //as long as you are not at the end of the file or done wih the lines you want
-    while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-
-        if (m->getControl_pressed()) { delete lookup;  return 0; }
-
-      if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-
-        m->mothurOut(lookup->getLabel()+"\n"); 
-          vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-        processSharedAndDesignData(data, currentLabels);
-          for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
-
-        processedLabels.insert(lookup->getLabel());
-        userLabels.erase(lookup->getLabel());
-      }
-
-      if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-        string saveLabel = lookup->getLabel();
-
-        delete lookup;
-        lookup = input.getSharedRAbundVectors(lastLabel);
-        m->mothurOut(lookup->getLabel()+"\n"); 
-          vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-          processSharedAndDesignData(data, currentLabels);
-          for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
-
-        processedLabels.insert(lookup->getLabel());
-        userLabels.erase(lookup->getLabel());
-
-          //restore real lastlabel to save below
-        lookup->setLabels(saveLabel);
-      }
-
-      lastLabel = lookup->getLabel();
-        //prevent memory leak
-      delete lookup;
-
-      if (m->getControl_pressed()) { return 0; }
-
-        //get next line to process
-      lookup = input.getSharedRAbundVectors();
+    try {
+        
+        if (abort) { if (calledHelp) { return 0; }  return 2;   }
+        
+        InputData input(sharedfile, "sharedfile", Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
+        vector<string> currentLabels = lookup->getOTUNames();
+        
+        //read design file
+        designMap.read(designfile);
+        
+        while (lookup != NULL) {
+            
+            if (m->getControl_pressed()) { delete lookup; break; }
+            
+            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
+            processSharedAndDesignData(data, currentLabels);
+            for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
+            delete lookup;
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        
+        m->mothurOutEndLine();
+        m->mothurOut("Output File Names:\n");
+        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]+"\n");    } m->mothurOutEndLine();
+        
+        return 0;
+        
     }
-
-    if (m->getControl_pressed()) {  return 0; }
-
-      //output error messages about any remaining user labels
-    set<string>::iterator it;
-    bool needToRun = false;
-    for (it = userLabels.begin(); it != userLabels.end(); it++) {
-      m->mothurOut("Your file does not include the label " + *it);
-      if (processedLabels.count(lastLabel) != 1) {
-        m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-        needToRun = true;
-      }else {
-        m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-      }
+    catch(exception& e) {
+        m->errorOut(e, "ClassifySharedCommand", "execute");
+        exit(1);
     }
-
-      //run last label if you need to
-    if (needToRun )  {
-      delete lookup;
-      lookup = input.getSharedRAbundVectors(lastLabel);
-
-      m->mothurOut(lookup->getLabel()+"\n"); 
-
-        vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-        processSharedAndDesignData(data, currentLabels);
-        for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
-
-      delete lookup;
-
-    }
-
-      m->mothurOutEndLine();
-      m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-      for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]); m->mothurOutEndLine();    }
-      m->mothurOutEndLine();
-
-    return 0;
-
-  }
-  catch(exception& e) {
-    m->errorOut(e, "ClassifySharedCommand", "execute");
-    exit(1);
-  }
 }
 //**********************************************************************************************************************
 // This static function is intended to read all the necessary information from
