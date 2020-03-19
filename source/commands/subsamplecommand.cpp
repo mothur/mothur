@@ -1295,99 +1295,40 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 	}
 }
 //**********************************************************************************************************************
-int SubSampleCommand::getSubSampleRabund() {
+void SubSampleCommand::getSubSampleRabund() {
 	try {
 		InputData input(rabundfile, "rabund", nullVector);
-		RAbundVector* rabund = input.getRAbundVector();
-		string lastLabel = rabund->getLabel();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		if (size == 0) { //user has not set size, set size = 10%
-			size = int((rabund->getNumSeqs()) * 0.10);
-		}else if (size > rabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping rabund file.\n"); delete rabund; return 0; }
-		
-		m->mothurOut("Sampling " + toString(size) + " from " + toString(rabund->getNumSeqs()) + ".\n");
-		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
-        map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(rabundfile));
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+        
+        if (size == 0) { //user has not set size, set size = 10%
+            size = int((rabund->getNumSeqs()) * 0.10);
+        }else if (size > rabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping rabund file.\n"); delete rabund; return; }
+        
+        m->mothurOut("Sampling " + toString(size) + " from " + toString(rabund->getNumSeqs()) + ".\n");
+        
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(rabundfile));
         variables["[extension]"] = util.getExtension(rabundfile);
-		string outputFileName = getOutputFileName("rabund", variables);		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) {  delete rabund; out.close(); return 0;  }
-			
-			if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
-				
-				m->mothurOut(rabund->getLabel()+"\n");
-				
-				processRabund(rabund, out);
-				
-				processedLabels.insert(rabund->getLabel());
-				userLabels.erase(rabund->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = rabund->getLabel();
-				
-				delete rabund; 
-				
-				rabund = input.getRAbundVector(lastLabel);
-				m->mothurOut(rabund->getLabel()+"\n");
-				
-				processRabund(rabund, out);
-				
-				processedLabels.insert(rabund->getLabel());
-				userLabels.erase(rabund->getLabel());
-				
-				//restore real lastlabel to save below
-				rabund->setLabel(saveLabel);
-			}
-			
-			lastLabel = rabund->getLabel();
-			
-			//prevent memory leak
-			delete rabund; rabund = NULL;
-			
-			//get next line to process
-			rabund = input.getRAbundVector();
-		}
-		
-		
-		if (m->getControl_pressed()) {  out.close(); return 0;  }
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (rabund != NULL) { delete rabund; }
-			
-			rabund = input.getRAbundVector(lastLabel);
-			
-			m->mothurOut(rabund->getLabel()+"\n");
-			
-			processRabund(rabund, out);
-			
-			delete rabund;
-		}
-		out.close();  
-		
-		return 0;
-		
+        string outputFileName = getOutputFileName("rabund", variables);
+        
+        ofstream out; util.openOutputFile(outputFileName, out);
+        outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+               
+        while (rabund != NULL) {
+                   
+            if (m->getControl_pressed()) { delete rabund; break; }
+                   
+            processRabund(rabund, out); delete rabund;
+                  
+            rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+		out.close();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "getSubSampleRabund");
@@ -1417,102 +1358,40 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 	}
 }	
 //**********************************************************************************************************************
-int SubSampleCommand::getSubSampleSabund() {
+void SubSampleCommand::getSubSampleSabund() {
 	try {
-				
 		InputData input(sabundfile, "sabund", nullVector);
-		SAbundVector* sabund = input.getSAbundVector();
-		string lastLabel = sabund->getLabel();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		if (size == 0) { //user has not set size, set size = 10%
-			size = int((sabund->getNumSeqs()) * 0.10);
-		}else if (size > sabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping sabund file.\n"); delete sabund; return 0; }
-		
-		
-		m->mothurOut("Sampling " + toString(size) + " from " + toString(sabund->getNumSeqs()) + ".\n");
-		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
-        map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sabundfile));
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SAbundVector* sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
+        
+        if (size == 0) { //user has not set size, set size = 10%
+            size = int((sabund->getNumSeqs()) * 0.10);
+        }else if (size > sabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping sabund file.\n"); delete sabund; return; }
+        
+        m->mothurOut("Sampling " + toString(size) + " from " + toString(sabund->getNumSeqs()) + ".\n");
+        
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sabundfile));
         variables["[extension]"] = util.getExtension(sabundfile);
-		string outputFileName = getOutputFileName("sabund", variables);		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) {  delete sabund; out.close(); return 0;  }
-			
-			if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
-				
-				m->mothurOut(sabund->getLabel()+"\n");
-				
-				processSabund(sabund, out);
-				
-				processedLabels.insert(sabund->getLabel());
-				userLabels.erase(sabund->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = sabund->getLabel();
-				
-				delete sabund; 
-				
-				sabund = input.getSAbundVector(lastLabel);
-				m->mothurOut(sabund->getLabel()+"\n");
-				
-				processSabund(sabund, out);
-				
-				processedLabels.insert(sabund->getLabel());
-				userLabels.erase(sabund->getLabel());
-				
-				//restore real lastlabel to save below
-				sabund->setLabel(saveLabel);
-			}
-			
-			lastLabel = sabund->getLabel();
-			
-			//prevent memory leak
-			delete sabund; sabund = NULL;
-			
-			//get next line to process
-			sabund = input.getSAbundVector();
-		}
-		
-		
-		if (m->getControl_pressed()) {  out.close(); return 0;  }
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (sabund != NULL) { delete sabund; }
-			
-			sabund = input.getSAbundVector(lastLabel);
-			
-			m->mothurOut(sabund->getLabel()+"\n");
-			
-			processSabund(sabund, out);
-			
-			delete sabund;
-		}
-		out.close();  
-		
-		return 0;
-		
+        string outputFileName = getOutputFileName("sabund", variables);
+        
+        ofstream out; util.openOutputFile(outputFileName, out);
+        outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+               
+        while (sabund != NULL) {
+                   
+            if (m->getControl_pressed()) { delete sabund; break; }
+                   
+            processSabund(sabund, out); delete sabund;
+                  
+            sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+		out.close();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "getSubSampleSabund");

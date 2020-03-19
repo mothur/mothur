@@ -52,8 +52,8 @@ private:
 	
 	int getSubSampleShared();
 	int getSubSampleList();
-	int getSubSampleRabund();
-	int getSubSampleSabund();
+	void getSubSampleRabund();
+	void getSubSampleSabund();
 	int getSubSampleFasta();
     int getSubSampleTree();
 	int processShared(SharedRAbundVectors*&);
