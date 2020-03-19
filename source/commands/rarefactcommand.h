@@ -38,7 +38,6 @@ public:
 private:
 	
 	vector<Display*> rDisplays;
-	Rarefact* rCurve;
 	int nIters, abund, processors, alpha;
 	float freq;
 	
@@ -52,6 +51,7 @@ private:
 	
 	vector<string> parseSharedFile(string, map<string, set<int> >&);
 	vector<string> createGroupFile(vector<string>&, map<int, string>);
+    int fillRDisplays(map<string, string>, map<int, string>&, int);
 };
 
 #endif

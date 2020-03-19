@@ -290,12 +290,13 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         vector<Display*> rDisplays;
         
         InputData input(sharedfile, "sharedfile", Groups);
-		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-        if (lookup->size() < 2) {
-			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
-            delete lookup;
-            return 0;
-        }
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+		SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
+        if (lookup->size() < 2) { m->mothurOut("[ERROR]: I cannot run the command without at least 2 valid groups.");  delete lookup; return 0; }
         
         string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(sharedfile));
         
@@ -315,7 +316,6 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             subset->eliminateZeroOTUS();
         }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
         
-
         /******************************************************/
         if (subsample) {
             //user has not set size, set size = smallest samples size
@@ -353,131 +353,35 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		if (m->getControl_pressed()) { 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}
-			delete lookup; delete subset;
-			return 0;
+			delete lookup; delete subset; return 0;
 		}
         
-        
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        string lastLabel = subset->getLabel();
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-        
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((subset != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) { 
-				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}
-                delete lookup; delete subset;
-				return 0;
-			}
-			
-			if(allLines == 1 || labels.count(subset->getLabel()) == 1){
-				m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-                
-				rCurve = new Rarefact(subset, rDisplays, jumble, processors);
-				rCurve->getSharedCurve(freq, nIters);
-				delete rCurve;
-                
-                if (subsample) { subsampleLookup(subset, fileNameRoot);  }
-                    
-				processedLabels.insert(subset->getLabel());
-				userLabels.erase(subset->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(subset->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = subset->getLabel();
-                
-                delete subset;
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                
-                subset = new SharedRAbundVectors();
-                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
-                    subset->eliminateZeroOTUS();
-                }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
-                
-                m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-                
-                rCurve = new Rarefact(subset, rDisplays, jumble, processors);
-                rCurve->getSharedCurve(freq, nIters);
-                delete rCurve;
-                
-                if (subsample) { subsampleLookup(subset, fileNameRoot);  }
-                
-                processedLabels.insert(subset->getLabel());
-                userLabels.erase(subset->getLabel());
-                
-                //restore real lastlabel to save below
-                subset->setLabels(saveLabel);
-			}
+        while (subset != NULL) {
             
-			
-			lastLabel = subset->getLabel();
-			
-			//get next line to process
-            delete lookup; delete subset;
-			lookup = input.getSharedRAbundVectors();
-            subset = new SharedRAbundVectors();
+            if (m->getControl_pressed()) { delete subset; delete lookup; break; }
             
-            if (lookup != NULL) {
-                data = lookup->getSharedRAbundVectors();
-                if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
-                    subset->eliminateZeroOTUS();
-                }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
-            }else {  delete subset; subset = NULL; }
-
-		}
-		
-		if (m->getControl_pressed()) { 
-			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}
-			return 0;
-		}
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		if (m->getControl_pressed()) { 
-			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-			for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}
-			return 0;
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-            delete lookup; delete subset;
-            lookup = input.getSharedRAbundVectors();
-            subset = new SharedRAbundVectors();
-            
-            if (lookup != NULL) {
-                data = lookup->getSharedRAbundVectors();
-                if (thisSet != "") {//remove unwanted groups
-                    for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
-                    subset->eliminateZeroOTUS();
-                }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
-            }else {  delete subset; subset = NULL; }
-            
-			m->mothurOut(subset->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
-            
-			rCurve = new Rarefact(subset, rDisplays, jumble, processors);
-			rCurve->getSharedCurve(freq, nIters);
-			delete rCurve;
+            rCurve = new Rarefact(subset, rDisplays, jumble, processors);
+            rCurve->getSharedCurve(freq, nIters);
+            delete rCurve;
             
             if (subsample) { subsampleLookup(subset, fileNameRoot);  }
-                
-			delete lookup; delete subset;
-		}
-		
-		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
-
+            
+           delete lookup; delete subset;
+           lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+           
+           if (lookup != NULL) {
+               subset = new SharedRAbundVectors();
+               data = lookup->getSharedRAbundVectors();
+               if (thisSet != "") {//remove unwanted groups
+                   for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
+                   subset->eliminateZeroOTUS();
+               }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
+           }else {  subset = NULL; }
+        }
+        
+		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+        
+        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]);     } }
         
         return 0;
     }

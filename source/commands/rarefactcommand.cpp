@@ -337,178 +337,44 @@ int RareFactCommand::execute(){
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
 			string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
+            map<string, string> variables;
+            variables["[filename]"] = fileNameRoot;
 						
 			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}    return 0; }
 			
-			if (inputFileNames.size() > 1) {
-				m->mothurOutEndLine(); m->mothurOut("Processing group " + Groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
-			}
-			int i;
-			ValidCalculators validCalculator;
+			if (inputFileNames.size() > 1) { m->mothurOut("\nProcessing group " + Groups[p] + "\n\n");  }
 			
-            map<string, string> variables; 
-            variables["[filename]"] = fileNameRoot;
-			  
-			for (i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("rarefaction", Estimators[i]) ) { 
-					if (Estimators[i] == "sobs") { 
-						rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(getOutputFileName("rarefaction",variables))));
-						outputNames.push_back(getOutputFileName("rarefaction",variables)); outputTypes["rarefaction"].push_back(getOutputFileName("rarefaction",variables));
-					}else if (Estimators[i] == "chao") { 
-						rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(getOutputFileName("r_chao",variables))));
-						outputNames.push_back(getOutputFileName("r_chao",variables)); outputTypes["r_chao"].push_back(getOutputFileName("r_chao",variables));
-					}else if (Estimators[i] == "ace") { 
-						if(abund < 5)
-							abund = 10;
-						rDisplays.push_back(new RareDisplay(new Ace(abund), new ThreeColumnFile(getOutputFileName("r_ace",variables))));
-						outputNames.push_back(getOutputFileName("r_ace",variables)); outputTypes["r_ace"].push_back(getOutputFileName("r_ace",variables));
-					}else if (Estimators[i] == "jack") { 
-						rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(getOutputFileName("r_jack",variables))));
-						outputNames.push_back(getOutputFileName("r_jack",variables)); outputTypes["r_jack"].push_back(getOutputFileName("r_jack",variables));
-					}else if (Estimators[i] == "shannon") { 
-						rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(getOutputFileName("r_shannon",variables))));
-						outputNames.push_back(getOutputFileName("r_shannon",variables)); outputTypes["r_shannon"].push_back(getOutputFileName("r_shannon",variables));
-					}else if (Estimators[i] == "shannoneven") { 
-						rDisplays.push_back(new RareDisplay(new ShannonEven(), new ThreeColumnFile(getOutputFileName("r_shannoneven",variables))));
-						outputNames.push_back(getOutputFileName("r_shannoneven",variables)); outputTypes["r_shannoneven"].push_back(getOutputFileName("r_shannoneven",variables));
-					}else if (Estimators[i] == "heip") { 
-						rDisplays.push_back(new RareDisplay(new Heip(), new ThreeColumnFile(getOutputFileName("r_heip",variables))));
-						outputNames.push_back(getOutputFileName("r_heip",variables)); outputTypes["r_heip"].push_back(getOutputFileName("r_heip",variables));
-                    }else if (Estimators[i] == "r_shannonrange") {
-                        rDisplays.push_back(new RareDisplay(new RangeShannon(alpha), new ThreeColumnFile(getOutputFileName("r_shannonrange", variables))));
-                        outputNames.push_back(getOutputFileName("r_shannonrange", variables)); outputTypes["r_shannoneven"].push_back(getOutputFileName("r_shannonrange", variables));
-					}else if (Estimators[i] == "smithwilson") {
-						rDisplays.push_back(new RareDisplay(new SmithWilson(), new ThreeColumnFile(getOutputFileName("r_smithwilson",variables))));
-						outputNames.push_back(getOutputFileName("r_smithwilson",variables)); outputTypes["r_smithwilson"].push_back(getOutputFileName("r_smithwilson",variables));
-					}else if (Estimators[i] == "npshannon") { 
-						rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(getOutputFileName("r_npshannon",variables))));
-						outputNames.push_back(getOutputFileName("r_npshannon",variables)); outputTypes["r_npshannon"].push_back(getOutputFileName("r_npshannon",variables));
-					}else if (Estimators[i] == "simpson") { 
-						rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(getOutputFileName("r_simpson",variables))));
-						outputNames.push_back(getOutputFileName("r_simpson",variables)); outputTypes["r_simpson"].push_back(getOutputFileName("r_simpson",variables));
-					}else if (Estimators[i] == "simpsoneven") { 
-						rDisplays.push_back(new RareDisplay(new SimpsonEven(), new ThreeColumnFile(getOutputFileName("r_simpsoneven",variables))));
-						outputNames.push_back(getOutputFileName("r_simpsoneven",variables)); outputTypes["r_simpsoneven"].push_back(getOutputFileName("r_simpsoneven",variables));
-					}else if (Estimators[i] == "invsimpson") { 
-						rDisplays.push_back(new RareDisplay(new InvSimpson(), new ThreeColumnFile(getOutputFileName("r_invsimpson",variables))));
-						outputNames.push_back(getOutputFileName("r_invsimpson",variables)); outputTypes["r_invsimpson"].push_back(getOutputFileName("r_invsimpson",variables));
-					}else if (Estimators[i] == "bootstrap") { 
-						rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(getOutputFileName("r_bootstrap",variables))));
-						outputNames.push_back(getOutputFileName("r_bootstrap",variables)); outputTypes["r_bootstrap"].push_back(getOutputFileName("r_bootstrap",variables));
-					}else if (Estimators[i] == "coverage") { 
-						rDisplays.push_back(new RareDisplay(new Coverage(), new ThreeColumnFile(getOutputFileName("r_coverage",variables))));
-						outputNames.push_back(getOutputFileName("r_coverage",variables)); outputTypes["r_coverage"].push_back(getOutputFileName("r_coverage",variables));
-					}else if (Estimators[i] == "nseqs") { 
-						rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(getOutputFileName("r_nseqs",variables))));
-						outputNames.push_back(getOutputFileName("r_nseqs",variables)); outputTypes["r_nseqs"].push_back(getOutputFileName("r_nseqs",variables));
-					}
-                    if (inputFileNames.size() > 1) { file2Group[outputNames.size()-1] = Groups[p]; }
-				}
-			}
-			
+            fillRDisplays(variables, file2Group, p);
 			
 			//if the users entered no valid calculators don't execute command
 			if (rDisplays.size() == 0) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}  return 0; }
 			
-			InputData input(inputFileNames[p], format, nullVector);
-			OrderVector* order = input.getOrderVector();
-			string lastLabel = order->getLabel();
-			
-			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-			set<string> processedLabels;
-			set<string> userLabels = labels;
-			
-			if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    delete order;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
-			
-			//as long as you are not at the end of the file or done wih the lines you want
-			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				
-				if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    delete order;  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
-
-				
-				if(allLines == 1 || labels.count(order->getLabel()) == 1){
-					
-					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-                    map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
-                    set<int> ends;
-                    if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-					rCurve = new Rarefact(*order, rDisplays, ends, processors);
-					rCurve->getCurve(freq, nIters);
-					delete rCurve;
-					
-					processedLabels.insert(order->getLabel());
-					userLabels.erase(order->getLabel());
-				}
-				
-				if ((util.anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = order->getLabel();
-					
-					delete order;
-					order = (input.getOrderVector(lastLabel));
-					
-					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
-                    set<int> ends;
-                    if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-					rCurve = new Rarefact(*order, rDisplays, ends, processors);
-
-					rCurve->getCurve(freq, nIters);
-					delete rCurve;
-					
-					processedLabels.insert(order->getLabel());
-					userLabels.erase(order->getLabel());
-					
-					//restore real lastlabel to save below
-					order->setLabel(saveLabel);
-				}
-				
-				lastLabel = order->getLabel();		
-				
-				delete order;
-				order = (input.getOrderVector());
-			}
-			
-			if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
-
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it);
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
-			}
-			
-			if (m->getControl_pressed()) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}    for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
-
-			//run last label if you need to
-			if (needToRun )  {
-				if (order != NULL) {	delete order;	}
-				order = (input.getOrderVector(lastLabel));
-				
-				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
+            InputData input(inputFileNames[p], format, nullVector);
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
+            
+            OrderVector* order = util.getNextOrder(input, allLines, userLabels, processedLabels, lastLabel);
+                   
+            while (order != NULL) {
+                
+                if (m->getControl_pressed()) { delete order; break; }
+                
+                map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
                 set<int> ends;
                 if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
-                rCurve = new Rarefact(*order, rDisplays, ends, processors);
-
-				rCurve->getCurve(freq, nIters);
-				delete rCurve;
-				
-				delete order;
-			}
-			
-			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
-			rDisplays.clear();
+                Rarefact* rCurve = new Rarefact(*order, rDisplays, ends, processors);
+                rCurve->getCurve(freq, nIters);
+                delete rCurve; delete order;
+                
+                order = util.getNextOrder(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+            
+            //delete displays
+            for(int i=0;i<rDisplays.size();i++){    delete rDisplays[i];    } rDisplays.clear();
 		}
-		
-        if (inputFileNames.size() > 1) {
-            for (int p = 0; p < inputFileNames.size(); p++) { util.mothurRemove(inputFileNames[p]); }
-        }
+    
+        if (inputFileNames.size() > 1) { for (int p = 0; p < inputFileNames.size(); p++) { util.mothurRemove(inputFileNames[p]); } }
 		
 		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 
@@ -528,6 +394,75 @@ int RareFactCommand::execute(){
 		m->errorOut(e, "RareFactCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int RareFactCommand::fillRDisplays(map<string, string> variables, map<int, string>& file2Group, int thisGroup) {
+    try {
+        
+        ValidCalculators validCalculator;
+        
+        for (int i=0; i<Estimators.size(); i++) {
+            if (validCalculator.isValidCalculator("rarefaction", Estimators[i]) ) {
+                if (Estimators[i] == "sobs") {
+                    rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(getOutputFileName("rarefaction",variables))));
+                    outputNames.push_back(getOutputFileName("rarefaction",variables)); outputTypes["rarefaction"].push_back(getOutputFileName("rarefaction",variables));
+                }else if (Estimators[i] == "chao") {
+                    rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(getOutputFileName("r_chao",variables))));
+                    outputNames.push_back(getOutputFileName("r_chao",variables)); outputTypes["r_chao"].push_back(getOutputFileName("r_chao",variables));
+                }else if (Estimators[i] == "ace") {
+                    if(abund < 5)
+                        abund = 10;
+                    rDisplays.push_back(new RareDisplay(new Ace(abund), new ThreeColumnFile(getOutputFileName("r_ace",variables))));
+                    outputNames.push_back(getOutputFileName("r_ace",variables)); outputTypes["r_ace"].push_back(getOutputFileName("r_ace",variables));
+                }else if (Estimators[i] == "jack") {
+                    rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(getOutputFileName("r_jack",variables))));
+                    outputNames.push_back(getOutputFileName("r_jack",variables)); outputTypes["r_jack"].push_back(getOutputFileName("r_jack",variables));
+                }else if (Estimators[i] == "shannon") {
+                    rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(getOutputFileName("r_shannon",variables))));
+                    outputNames.push_back(getOutputFileName("r_shannon",variables)); outputTypes["r_shannon"].push_back(getOutputFileName("r_shannon",variables));
+                }else if (Estimators[i] == "shannoneven") {
+                    rDisplays.push_back(new RareDisplay(new ShannonEven(), new ThreeColumnFile(getOutputFileName("r_shannoneven",variables))));
+                    outputNames.push_back(getOutputFileName("r_shannoneven",variables)); outputTypes["r_shannoneven"].push_back(getOutputFileName("r_shannoneven",variables));
+                }else if (Estimators[i] == "heip") {
+                    rDisplays.push_back(new RareDisplay(new Heip(), new ThreeColumnFile(getOutputFileName("r_heip",variables))));
+                    outputNames.push_back(getOutputFileName("r_heip",variables)); outputTypes["r_heip"].push_back(getOutputFileName("r_heip",variables));
+                }else if (Estimators[i] == "r_shannonrange") {
+                    rDisplays.push_back(new RareDisplay(new RangeShannon(alpha), new ThreeColumnFile(getOutputFileName("r_shannonrange", variables))));
+                    outputNames.push_back(getOutputFileName("r_shannonrange", variables)); outputTypes["r_shannoneven"].push_back(getOutputFileName("r_shannonrange", variables));
+                }else if (Estimators[i] == "smithwilson") {
+                    rDisplays.push_back(new RareDisplay(new SmithWilson(), new ThreeColumnFile(getOutputFileName("r_smithwilson",variables))));
+                    outputNames.push_back(getOutputFileName("r_smithwilson",variables)); outputTypes["r_smithwilson"].push_back(getOutputFileName("r_smithwilson",variables));
+                }else if (Estimators[i] == "npshannon") {
+                    rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(getOutputFileName("r_npshannon",variables))));
+                    outputNames.push_back(getOutputFileName("r_npshannon",variables)); outputTypes["r_npshannon"].push_back(getOutputFileName("r_npshannon",variables));
+                }else if (Estimators[i] == "simpson") {
+                    rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(getOutputFileName("r_simpson",variables))));
+                    outputNames.push_back(getOutputFileName("r_simpson",variables)); outputTypes["r_simpson"].push_back(getOutputFileName("r_simpson",variables));
+                }else if (Estimators[i] == "simpsoneven") {
+                    rDisplays.push_back(new RareDisplay(new SimpsonEven(), new ThreeColumnFile(getOutputFileName("r_simpsoneven",variables))));
+                    outputNames.push_back(getOutputFileName("r_simpsoneven",variables)); outputTypes["r_simpsoneven"].push_back(getOutputFileName("r_simpsoneven",variables));
+                }else if (Estimators[i] == "invsimpson") {
+                    rDisplays.push_back(new RareDisplay(new InvSimpson(), new ThreeColumnFile(getOutputFileName("r_invsimpson",variables))));
+                    outputNames.push_back(getOutputFileName("r_invsimpson",variables)); outputTypes["r_invsimpson"].push_back(getOutputFileName("r_invsimpson",variables));
+                }else if (Estimators[i] == "bootstrap") {
+                    rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(getOutputFileName("r_bootstrap",variables))));
+                    outputNames.push_back(getOutputFileName("r_bootstrap",variables)); outputTypes["r_bootstrap"].push_back(getOutputFileName("r_bootstrap",variables));
+                }else if (Estimators[i] == "coverage") {
+                    rDisplays.push_back(new RareDisplay(new Coverage(), new ThreeColumnFile(getOutputFileName("r_coverage",variables))));
+                    outputNames.push_back(getOutputFileName("r_coverage",variables)); outputTypes["r_coverage"].push_back(getOutputFileName("r_coverage",variables));
+                }else if (Estimators[i] == "nseqs") {
+                    rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(getOutputFileName("r_nseqs",variables))));
+                    outputNames.push_back(getOutputFileName("r_nseqs",variables)); outputTypes["r_nseqs"].push_back(getOutputFileName("r_nseqs",variables));
+                }
+                if (inputFileNames.size() > 1) { file2Group[outputNames.size()-1] = Groups[thisGroup]; }
+            }
+        }
+        
+        
+    }catch(exception& e) {
+        m->errorOut(e, "RareFactCommand", "fillCDisplays");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map<int, string> file2Group) {
