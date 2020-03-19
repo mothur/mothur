@@ -220,7 +220,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			else { current->setCountFile(countfile); }
             			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n"); abort=true;
             }
 			
 			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
@@ -228,19 +228,18 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					listfile = current->getListFile(); 
-					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else { 
 						rabundfile = current->getRabundFile(); 
-						if (rabundfile != "") {  m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						if (rabundfile != "") {  m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter.\n");  }
 						else { 
 							sabundfile = current->getSabundFile(); 
-							if (sabundfile != "") {  m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							if (sabundfile != "") {  m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter.\n");  }
 							else { 
-								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file."); m->mothurOutEndLine(); 
-								abort = true;
+								m->mothurOut("[ERROR]: No valid current files. You must provide a list, sabund, rabund or shared file.\n");  abort = true;
 							}
 						}
 					}
@@ -260,7 +259,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			}
 			
 			string temp = validParameter.valid(parameters, "nseqs");
-			if (temp == "not found") { m->mothurOut("nseqs is a required parameter."); m->mothurOutEndLine(); abort = true; }
+			if (temp == "not found") { m->mothurOut("[ERROR]: nseqs is a required parameter, quitting.\n");  abort = true; }
 			else { util.mothurConvert(temp, nseqs); }
 			
 			temp = validParameter.valid(parameters, "bygroup");	 if (temp == "not found") { temp = "f"; }
@@ -295,9 +294,8 @@ int RemoveRareCommand::execute(){
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
 			
 		if (outputNames.size() != 0) {
-			m->mothurOutEndLine();
-			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+			m->mothurOut("\nOutput File Names:\n");
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	}
 			m->mothurOutEndLine();
 			
 			//set rabund file as new current rabundfile
@@ -348,8 +346,8 @@ int RemoveRareCommand::processList(){
 				
 		//you must provide a label because the names in the listfile need to be consistent
 		string thisLabel = "";
-		if (allLines) { m->mothurOut("For the listfile you must select one label, using first label in your listfile."); m->mothurOutEndLine(); }
-		else if (labels.size() > 1) { m->mothurOut("For the listfile you must select one label, using " + (*labels.begin()) + "."); m->mothurOutEndLine(); thisLabel = *labels.begin(); }
+		if (allLines) { m->mothurOut("For the listfile you must select one label, using first label in your listfile.\n"); }
+		else if (labels.size() > 1) { m->mothurOut("For the listfile you must select one label, using " + (*labels.begin()) + ".\n");  thisLabel = *labels.begin(); }
 		else { thisLabel = *labels.begin(); }
 		
 		InputData input(listfile, "list", nullVector);
@@ -486,7 +484,7 @@ int RemoveRareCommand::processList(){
                             newNames.push_back(names[k]);
                         }
 					}
-                }
+                }else { newNames = names; }
 
 				if (binsize > nseqs) { //keep bin
                     string saveBinNames = util.getStringFromVector(newNames, ",");
@@ -539,7 +537,7 @@ int RemoveRareCommand::processList(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveRareCommand::processSabund(){
+void RemoveRareCommand::processSabund(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
@@ -554,81 +552,26 @@ int RemoveRareCommand::processSabund(){
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		InputData input(sabundfile, "sabund", nullVector);
-		SAbundVector* sabund = input.getSAbundVector();
-		string lastLabel = sabund->getLabel();
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if (m->getControl_pressed()) { delete sabund; out.close(); return 0; }
-			
-			if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
-				
-				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
-				processedLabels.insert(sabund->getLabel());
-				userLabels.erase(sabund->getLabel());
-				
-				if (sabund->getMaxRank() > nseqs) {
-					for(int i = 1; i <=nseqs; i++) {  sabund->set(i, 0); }
-				}else {	sabund->clear(); }
-				
-				if (sabund->getNumBins() > 0) { sabund->print(out); }
-			}
-			
-			if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = sabund->getLabel();
-				
-				delete sabund;
-				sabund = input.getSAbundVector(lastLabel);
-				
-				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
-				processedLabels.insert(sabund->getLabel());
-				userLabels.erase(sabund->getLabel());
-				
-				if (sabund->getMaxRank() > nseqs) {
-					for(int i = 1; i <=nseqs; i++) {  sabund->set(i, 0); }
-				}else {	sabund->clear(); }
-				
-				if (sabund->getNumBins() > 0) { sabund->print(out); }
-								
-				//restore real lastlabel to save below
-				sabund->setLabel(saveLabel);
-			}		
-			
-			lastLabel = sabund->getLabel();			
-			
-			delete sabund;
-			sabund = input.getSAbundVector();
-		}
-		
-		if (m->getControl_pressed()) {  out.close(); return 0; }	
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (sabund != NULL) {	delete sabund;	}
-			sabund = input.getSAbundVector(lastLabel);
-			
-			m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
-			
-			if (sabund->getMaxRank() > nseqs) {
-				for(int i = 1; i <=nseqs; i++) {  sabund->set(i, 0); }
-			}else {	sabund->clear(); }
-			
-			if (sabund->getNumBins() > 0) { sabund->print(out); }
-			
-			delete sabund;
-		}
-		
-		return 0;
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SAbundVector* sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
+        
+        while (sabund != NULL) {
+                   
+            if (m->getControl_pressed()) { delete sabund; break; }
+                   
+            if (sabund->getMaxRank() > nseqs) {
+                for(int i = 1; i <=nseqs; i++) {  sabund->set(i, 0); }
+            }else {    sabund->clear(); }
+            
+            if (sabund->getNumBins() > 0) { sabund->print(out); }
+            delete sabund;
+                  
+            sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        out.close();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveRareCommand", "processSabund");
@@ -636,7 +579,7 @@ int RemoveRareCommand::processSabund(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveRareCommand::processRabund(){
+void RemoveRareCommand::processRabund(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
@@ -651,87 +594,29 @@ int RemoveRareCommand::processRabund(){
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		InputData input(rabundfile, "rabund", nullVector);
-		RAbundVector* rabund = input.getRAbundVector();
-		string lastLabel = rabund->getLabel();
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if (m->getControl_pressed()) { delete rabund; out.close(); return 0; }
-			
-			if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
-				
-				m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-				processedLabels.insert(rabund->getLabel());
-				userLabels.erase(rabund->getLabel());
-				
-				RAbundVector newRabund; newRabund.setLabel(rabund->getLabel());
-				for (int i = 0; i < rabund->getNumBins(); i++) {
-					if (rabund->get(i) > nseqs) {
-						newRabund.push_back(rabund->get(i));
-					}
-				}
-				if (newRabund.getNumBins() > 0) { newRabund.print(out); }
-			}
-			
-			if ((util.anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = rabund->getLabel();
-				
-				delete rabund;
-				rabund = input.getRAbundVector(lastLabel);
-				
-				m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-				processedLabels.insert(rabund->getLabel());
-				userLabels.erase(rabund->getLabel());
-				
-				RAbundVector newRabund; newRabund.setLabel(rabund->getLabel());
-				for (int i = 0; i < rabund->getNumBins(); i++) {
-					if (rabund->get(i) > nseqs) {
-						newRabund.push_back(rabund->get(i));
-					}
-				}
-				if (newRabund.getNumBins() > 0) { newRabund.print(out); }				
-				
-				//restore real lastlabel to save below
-				rabund->setLabel(saveLabel);
-			}		
-			
-			lastLabel = rabund->getLabel();			
-			
-			delete rabund;
-			rabund = input.getRAbundVector();
-		}
-		
-		if (m->getControl_pressed()) {  out.close(); return 0; }	
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (rabund != NULL) {	delete rabund;	}
-			rabund = input.getRAbundVector(lastLabel);
-			
-			m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-			
-			RAbundVector newRabund; newRabund.setLabel(rabund->getLabel());
-			for (int i = 0; i < rabund->getNumBins(); i++) {
-				if (rabund->get(i) > nseqs) {
-					newRabund.push_back(rabund->get(i));
-				}
-			}
-			if (newRabund.getNumBins() > 0) { newRabund.print(out); }	
-			
-			delete rabund;
-		}
-		
-		return 0;
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+        
+        while (rabund != NULL) {
+            
+            if (m->getControl_pressed()) { delete rabund; break; }
+            
+            RAbundVector newRabund; newRabund.setLabel(rabund->getLabel());
+            for (int i = 0; i < rabund->getNumBins(); i++) {
+                if (rabund->get(i) > nseqs) {
+                    newRabund.push_back(rabund->get(i));
+                }
+            }
+            if (newRabund.getNumBins() > 0) { newRabund.print(out); }
+            delete rabund;
+            
+            rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        out.close();
+       
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveRareCommand", "processRabund");
@@ -739,7 +624,7 @@ int RemoveRareCommand::processRabund(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveRareCommand::processShared(){
+void RemoveRareCommand::processShared(){
 	try {
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		InputData input(sharedfile, "sharedfile", Groups);
@@ -758,8 +643,6 @@ int RemoveRareCommand::processShared(){
             
             lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         }
-		
-		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveRareCommand", "processShared");
@@ -767,7 +650,7 @@ int RemoveRareCommand::processShared(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
+void RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 	try {
 		
         string thisOutputDir = outputDir;
@@ -779,8 +662,7 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 		string outputFileName = getOutputFileName("shared", variables);
 		outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
+		ofstream out; util.openOutputFile(outputFileName, out);
         
 		vector<SharedRAbundVector> newRabunds;  newRabunds.resize(lookup->size());
         vector<string> headers;
@@ -798,7 +680,7 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 			for (int i = 0; i < lookup->getNumBins(); i++) {
 				bool allZero = true;
 				
-				if (m->getControl_pressed()) { out.close(); return 0; }
+				if (m->getControl_pressed()) { out.close(); return; }
 				
 				//for each group
                 vector<int> abunds = lookup->getOTU(i);
@@ -820,7 +702,7 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 			//for each otu
 			for (int i = 0; i < lookup->getNumBins(); i++) {
 				
-				if (m->getControl_pressed()) { out.close(); return 0; }
+				if (m->getControl_pressed()) { out.close(); return; }
 				
                 int totalAbund = lookup->getOTUTotal(i);
 				
@@ -842,8 +724,6 @@ int RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 		}
 		
         out.close();
-        
-		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveRareCommand", "processLookup");

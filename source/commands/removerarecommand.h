@@ -44,11 +44,11 @@ private:
 	vector<string> outputNames, Groups;
 	set<string> labels;
 	
-	int processSabund();
-	int processRabund();
+	void processSabund();
+	void processRabund();
 	int processList();
-	int processShared();
-	int processLookup(SharedRAbundVectors*&);
+	void processShared();
+	void processLookup(SharedRAbundVectors*&);
 	
 };
 
