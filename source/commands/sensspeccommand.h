@@ -39,7 +39,7 @@ public:
 
 private:
 	vector< vector< int> > preProcessList(OptiMatrix& matrix, ListVector*);
-	int processListFile();
+	void processListFile();
 	void setUpOutput();
 	void outputStatistics(string, string, int);
 
